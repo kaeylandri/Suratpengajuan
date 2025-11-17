@@ -1838,64 +1838,249 @@ document.addEventListener("DOMContentLoaded", function () {
         <?php endif; ?>
 
 <!-- ===== STYLE ===== -->
+<!-- ===== IMPORT FONT ===== -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-.custom-search-container{display:flex;gap:10px;margin-bottom:15px;max-width:800px;align-items:center}
-.input-icon-wrapper{position:relative;flex:1}
-.filter-category{position:relative;min-width:200px}
-.input-icon-wrapper input,.input-icon-wrapper select,.filter-category select{width:100%;border:1.5px solid #FB8C00;border-radius:25px;padding:10px 40px 10px 15px;outline:none;font-size:14px;background:white;height:42px}
-input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer;position:absolute;right:0;width:100%;height:100%}
-.input-icon-wrapper i,.filter-category i{position:absolute;right:15px;top:50%;transform:translateY(-50%);font-size:16px;color:#FB8C00;pointer-events:none}
-.input-icon-wrapper input:focus,.input-icon-wrapper select:focus,.filter-category select:focus{box-shadow:0 0 8px #FB8C00}
-#tabelSurat{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-#tabelSurat thead{background:#FB8C00;color:white}
-#tabelSurat td,#tabelSurat th{padding:12px;border:1px solid #ddd;vertical-align:middle}
-#tabelSurat td:nth-child(4),#tabelSurat td:nth-child(5){min-width:180px;max-width:280px}
-.dosen-container,.divisi-container{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
-.nama-dosen-badge{display:inline-block;background:#fff4e6;color:#663c00;padding:6px 12px;border-radius:15px;font-size:12px;border:1px solid #FB8C00;white-space:nowrap;max-width:250px;overflow:hidden;text-overflow:ellipsis}
-.nama-dosen-more{display:inline-block;background:#FB8C00;color:white;padding:6px 12px;border-radius:15px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.3s}
-.nama-dosen-more:hover{background:#e67e00;transform:scale(1.05)}
-.divisi-badge{display:inline-block;background:#e3f2fd;color:#0d47a1;padding:6px 12px;border-radius:15px;font-size:12px;border:1px solid #2196F3;white-space:nowrap}
-.modal-detail{display:none !important;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;justify-content:center;align-items:center;padding-top:40px}
-.modal-detail.show{display:flex !important}
-.modal-content-detail{width:85%;max-width:850px;background:white;border-radius:12px;overflow:hidden}
-.modal-header-detail{background:#FB8C00;padding:14px 18px;color:white;display:flex;justify-content:space-between}
-.modal-body-detail{max-height:60vh;overflow-y:auto;padding:18px}
-.detail-table{width:100%;border-collapse:collapse}
-.detail-table td{padding:10px 12px;border-bottom:1px solid #eee}
-.detail-key{width:35%;font-weight:600;background:#fff4e6;color:#663c00}
-.dataTables_wrapper .dataTables_paginate .paginate_button{background:#FB8C00;color:white !important;border-radius:5px;padding:5px 10px}
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover{background:#e67e00}
-.btn-reset{background:#FB8C00;color:white;border:none;border-radius:25px;padding:10px 20px;cursor:pointer;font-size:14px;height:42px;white-space:nowrap}
-.btn-reset:hover{background:#e67e00}
+/* ---------- Font & base ---------- */
+body, input, select, button, table {
+    font-family: 'Montserrat', sans-serif;
+    box-sizing: border-box;
+}
+
+/* ======= TOP BAR / FILTER (B2: Minimalis Premium) ======= */
+.filter-bar {
+    width: 100%;
+    background: #ffffff;
+    padding: 12px 14px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+    border: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+}
+
+/* search input */
+.filter-search {
+    flex: 1 1 360px;
+    min-width: 220px;
+    display:flex;
+    position:relative;
+}
+.filter-search input{
+    width:100%;
+    padding:10px 40px 10px 14px;
+    height:44px;
+    border-radius:10px;
+    border:1.5px solid #FB8C00;
+    outline:none;
+    font-size:14px;
+}
+.filter-search i{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#FB8C00;
+    pointer-events:none;
+}
+
+/* group buttons on right */
+.filter-actions {
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+/* small rounded buttons */
+.btn-small {
+    height:40px;
+    min-width:40px;
+    border-radius:10px;
+    border:none;
+    padding:0 12px;
+    cursor:pointer;
+    font-size:14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+
+/* add filter btn */
+.btn-add {
+    background:#FB8C00;
+    color:white;
+    border-radius:10px;
+    padding:8px 12px;
+}
+.btn-reset {
+    background:#FB8C00;
+    color:white;
+    border:none;
+    border-radius:10px;
+    padding:8px 12px;
+    height:40px;
+    font-size:14px;
+    cursor:pointer;
+}
+.btn-reset[hidden] { display:none; }
+
+/* ====== FILTER BUILDER ROWS (compact, horizontal) ====== */
+.filter-builder {
+    display:flex;
+    gap:10px;
+    align-items:center;
+    width:100%;
+    flex-wrap:wrap;
+    margin-bottom:8px;
+}
+.filter-item {
+    display:flex;
+    gap:8px;
+    align-items:center;
+    background:#fffaf5;
+    border:1px solid #FB8C00;
+    padding:8px;
+    border-radius:10px;
+    min-height:44px;
+}
+
+/* selects & date inputs in builder */
+.filter-item select,
+.filter-item input[type="date"]{
+    height:36px;
+    padding:6px 10px;
+    border-radius:8px;
+    border:1px solid rgba(0,0,0,0.08);
+    background:white;
+    font-size:13px;
+}
+.filter-item select.multiple {
+    min-width:220px;
+    max-width:320px;
+}
+
+/* remove filter small button */
+.filter-item .remove {
+    background:transparent;
+    border:none;
+    color:#d32f2f;
+    font-weight:700;
+    font-size:18px;
+    cursor:pointer;
+    padding:4px 6px;
+}
+
+/* small note */
+.small-note { font-size:12px; color:#666; margin-top:6px; }
+
+/* ===== existing table / badges (kept from original, with slight tweaks) ===== */
+#tabelSurat{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:8px;
+    overflow:hidden;
+    font-size:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1)
+}
+#tabelSurat thead{
+    background:#FB8C00;
+    color:white
+}
+#tabelSurat td,#tabelSurat th{
+    padding:12px;
+    border:1px solid #eee;
+    vertical-align:middle
+}
+#tabelSurat td:nth-child(4),#tabelSurat td:nth-child(5){
+    min-width:180px;
+    max-width:280px
+}
+.dosen-container,.divisi-container{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    align-items:center
+}
+.nama-dosen-badge{
+    display:inline-block;
+    background:#fff4e6;
+    color:#663c00;
+    padding:6px 12px;
+    border-radius:15px;
+    font-size:12px;
+    border:1px solid #FB8C00;
+    white-space:nowrap;
+    max-width:250px;
+    overflow:hidden;
+    text-overflow:ellipsis
+}
+.nama-dosen-more{
+    display:inline-block;
+    background:#FB8C00;
+    color:white;
+    padding:6px 12px;
+    border-radius:15px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all 0.2s
+}
+.nama-dosen-more:hover{ transform:scale(1.03); background:#e67e00; }
+.divisi-badge{
+    display:inline-block;
+    background:#e3f2fd;
+    color:#0d47a1;
+    padding:6px 12px;
+    border-radius:15px;
+    font-size:12px;
+    border:1px solid #2196F3;
+    white-space:nowrap
+}
+
+/* modal (unchanged visually) */
+.modal-detail{ display:none !important; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; justify-content:center; align-items:center; padding-top:40px }
+.modal-detail.show{ display:flex !important }
+.modal-content-detail{ width:85%; max-width:850px; background:white; border-radius:12px; overflow:hidden }
+.modal-header-detail{ background:#FB8C00; padding:14px 18px; color:white; display:flex; justify-content:space-between }
+.modal-body-detail{ max-height:60vh; overflow-y:auto; padding:18px }
+.detail-table{ width:100%; border-collapse:collapse }
+.detail-table td{ padding:10px 12px; border-bottom:1px solid #eee }
+.detail-key{ width:35%; font-weight:600; background:#fff4e6; color:#663c00 }
+
+/* responsive tweaks */
+@media (max-width:880px){
+    .filter-bar{ padding:10px; gap:8px; }
+    .filter-search{ flex-basis: 100%; }
+    .filter-builder{ gap:8px; }
+    .filter-item{ width:100%; justify-content:space-between; }
+    .filter-item select.multiple { max-width:100%; min-width:120px; }
+}
 </style>
 
-<!-- ===== SEARCH + FILTER ===== -->
-<div class="custom-search-container">
-    <div class="input-icon-wrapper">
+<!-- ===== SEARCH + FILTER (B2 look, integrated with old logic) ===== -->
+<div class="filter-bar">
+
+    <!-- search input -->
+    <div class="filter-search">
         <input type="text" id="tableSearch" placeholder="Search...">
         <i class="fa fa-search"></i>
     </div>
 
-    <div class="filter-category">
-        <select id="filterCategory">
-            <option value="">Pilih Kategori Filter</option>
-            <option value="jenis">Jenis Pengajuan</option>
-            <option value="dosen">Nama Dosen</option>
-            <option value="divisi">Divisi</option>
-            <option value="tanggal">Tanggal Pengajuan</option>
-        </select>
-        <i class="fa fa-filter"></i>
+    <!-- actions -->
+    <div class="filter-actions">
+        <button id="btnAddFilter" class="btn-small btn-add" title="Tambah filter"><i class="fa fa-plus"></i></button>
+        <button id="btnResetAll" class="btn-small btn-reset" hidden title="Reset semua filter & pencarian"><i class="fa fa-times"></i>&nbsp;Reset</button>
     </div>
-
-    <div class="input-icon-wrapper" id="filterValueContainer" style="display:none;">
-        <select id="filterValue" style="display:none;"><option value="">Pilih...</option></select>
-        <input type="date" id="filterTanggalMulai" style="display:none;">
-        <input type="date" id="filterTanggalSelesai" style="display:none;">
-        <i class="fa fa-check-circle"></i>
-    </div>
-
-    <button class="btn-reset" id="btnReset" style="display:none;"><i class="fa fa-times"></i> Reset</button>
 </div>
+
+<!-- dynamic filter builder (rows appear under the bar) -->
+<div id="filterBuilder" class="filter-builder"></div>
+
 
 <!-- ===== MODAL DETAIL ===== -->
 <div id="modalDetail" class="modal-detail">
@@ -1925,26 +2110,16 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer;p
     </thead>
     <tbody>
         <?php foreach ($surat_list as $s): ?>
-            <?php
-            // Prepare a detail array with decoded JSON fields to ensure JS receives proper types
-            $detail = (array) $s;
-
-            // decode fields that might be stored as JSON strings
-            foreach (['nip','nama_dosen','jabatan','divisi','eviden'] as $jf) {
-                if (isset($detail[$jf]) && is_string($detail[$jf])) {
-                    $decoded = json_decode($detail[$jf], true);
-                    if (json_last_error() === JSON_ERROR_NONE) {
-                        $detail[$jf] = $decoded;
-                    } else {
-                        // leave as original string (fallback)
-                        $detail[$jf] = $detail[$jf];
-                    }
-                }
+        <?php
+        $detail = (array) $s;
+        foreach (['nip','nama_dosen','jabatan','divisi','eviden'] as $jf) {
+            if (isset($detail[$jf]) && is_string($detail[$jf])) {
+                $decoded = json_decode($detail[$jf], true);
+                if (json_last_error() === JSON_ERROR_NONE) $detail[$jf] = $decoded;
             }
-
-            // json_encode and escape for data-detail attribute
-            $data_detail_attr = htmlspecialchars(json_encode($detail, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8');
-            ?>
+        }
+        $data_detail_attr = htmlspecialchars(json_encode($detail, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), ENT_QUOTES,'UTF-8');
+        ?>
         <tr class="row-detail" data-detail='<?= $data_detail_attr; ?>'>
             <td><?= $s->id; ?></td>
             <td><?= htmlspecialchars($s->nama_kegiatan); ?></td>
@@ -1953,48 +2128,31 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer;p
                 <div class="dosen-container">
                     <?php
                     $nd = $s->nama_dosen;
-                    if (is_string($nd)) {
-                        $maybe = json_decode($nd, true);
-                        if (json_last_error() === JSON_ERROR_NONE) $nd = $maybe;
-                    }
-                    if (!empty($nd)) {
-                        if (is_array($nd)) {
-                            $nama = $nd[0] ?? '-';
-                            $short = strlen($nama) > 30 ? substr($nama,0,30).'...' : $nama;
+                    if(is_string($nd)){ $maybe=json_decode($nd,true); if(json_last_error()===JSON_ERROR_NONE) $nd=$maybe; }
+                    if(!empty($nd)){
+                        if(is_array($nd)){
+                            $nama=$nd[0]??'-';
+                            $short= strlen($nama)>30 ? substr($nama,0,30).'...' : $nama;
                             echo '<span class="nama-dosen-badge" title="'.htmlspecialchars($nama).'">'.htmlspecialchars($short).'</span>';
-                            if (count($nd) > 1) {
-                                echo '<span class="nama-dosen-more" title="Klik row untuk lihat semua dosen">+'.(count($nd)-1).'</span>';
-                            }
-                        } else {
-                            $nama = $nd;
-                            $short = strlen($nama) > 30 ? substr($nama,0,30).'...' : $nama;
+                            if(count($nd)>1) echo '<span class="nama-dosen-more" title="Klik row untuk lihat semua dosen">+'.(count($nd)-1).'</span>';
+                        }else{
+                            $nama=$nd;
+                            $short= strlen($nama)>30 ? substr($nama,0,30).'...' : $nama;
                             echo '<span class="nama-dosen-badge" title="'.htmlspecialchars($nama).'">'.htmlspecialchars($short).'</span>';
                         }
-                    } else {
-                        echo '-';
-                    }
+                    }else echo '-';
                     ?>
                 </div>
             </td>
             <td>
                 <div class="divisi-container">
                     <?php
-                    $dv = $s->divisi;
-                    if (is_string($dv)) {
-                        $maybe2 = json_decode($dv, true);
-                        if (json_last_error() === JSON_ERROR_NONE) $dv = $maybe2;
-                    }
-                    if (!empty($dv)) {
-                        if (is_array($dv)) {
-                            foreach ($dv as $div) {
-                                echo '<span class="divisi-badge">'.htmlspecialchars($div).'</span>';
-                            }
-                        } else {
-                            echo '<span class="divisi-badge">'.htmlspecialchars($dv).'</span>';
-                        }
-                    } else {
-                        echo '-';
-                    }
+                    $dv=$s->divisi;
+                    if(is_string($dv)){ $maybe2=json_decode($dv,true); if(json_last_error()===JSON_ERROR_NONE) $dv=$maybe2; }
+                    if(!empty($dv)){
+                        if(is_array($dv)){ foreach($dv as $div) echo '<span class="divisi-badge">'.htmlspecialchars($div).'</span>'; }
+                        else echo '<span class="divisi-badge">'.htmlspecialchars($dv).'</span>';
+                    }else echo '-';
                     ?>
                 </div>
             </td>
@@ -2007,228 +2165,306 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer;p
         <?php endforeach; ?>
     </tbody>
 </table>
+
 <script>
 $(document).ready(function () {
-
-    let table = $('#tabelSurat').DataTable({
-        responsive: true,
-        pageLength: 5,
-        dom: 'rtp',
-        columnDefs: [{ orderable: false, targets: -1 }]
-    });
-
-    // ==== FILTER DATA PREP ====
-    const filterData = {
-        jenis: <?= json_encode(array_values(array_unique(array_map(function($s){ return $s->jenis_pengajuan; }, $surat_list)))); ?>,
-        dosen: <?= json_encode(array_values(array_unique(array_reduce($surat_list, function($carry, $s){
-            if(isset($s->nama_dosen) && !empty($s->nama_dosen)) {
-                $nd = $s->nama_dosen;
-                if (is_string($nd)) {
-                    $maybe = json_decode($nd, true);
-                    if (json_last_error() === JSON_ERROR_NONE) $nd = $maybe;
-                }
-                if(is_array($nd)) foreach($nd as $d) $carry[] = trim($d);
-                else $carry[] = trim($nd);
-            }
-            return $carry;
-        }, [])))); ?>,
-        divisi: <?= json_encode(array_values(array_unique(array_reduce($surat_list, function($carry, $s){
-            if(isset($s->divisi) && !empty($s->divisi)) {
-                $dv = $s->divisi;
-                if (is_string($dv)) {
-                    $maybe2 = json_decode($dv, true);
-                    if (json_last_error() === JSON_ERROR_NONE) $dv = $maybe2;
-                }
-                if(is_array($dv)) foreach($dv as $d) $carry[] = trim($d);
-                else $carry[] = trim($dv);
-            }
-            return $carry;
-        }, [])))); ?>
-    };
-
-    $('#tableSearch').keyup(() => table.search($('#tableSearch').val()).draw());
-
-    $('#filterCategory').change(function() {
-        const category = $(this).val();
-        $('#filterValue, #filterTanggalMulai, #filterTanggalSelesai').hide().val('');
-
-        if (category === '') {
-            $('#filterValueContainer, #btnReset').hide();
-            table.columns([2,3,4]).search('').draw();
-            if ($.fn.dataTable.ext.search.length > 0) $.fn.dataTable.ext.search.pop();
-            table.draw();
-            return;
-        }
-
-        $('#filterValueContainer, #btnReset').show();
-
-        if (category === 'tanggal') {
-            $('#filterTanggalMulai, #filterTanggalSelesai').show();
-
-            if ($.fn.dataTable.ext.search.length === 0) {
-                $.fn.dataTable.ext.search.push(function(settings, data) {
-                    let start = $('#filterTanggalMulai').val();
-                    let end = $('#filterTanggalSelesai').val();
-                    let tgl = data[5] || '';
-                    if (!start && !end) return true;
-                    if (start && tgl < start) return false;
-                    if (end && tgl > end) return false;
-                    return true;
-                });
-            }
-        } else {
-            if ($.fn.dataTable.ext.search.length > 0) $.fn.dataTable.ext.search.pop();
-
-            $('#filterValue').show().empty().append('<option value="">Pilih...</option>');
-            const data = filterData[category] || [];
-            data.sort().forEach(item => {
-                const short = item.length > 50 ? item.substring(0,50) + '...' : item;
-                $('#filterValue').append(`<option value="${item}" title="${item}">${short}</option>`);
-            });
-        }
-    });
-
-    $('#filterValue').change(function() {
-        const category = $('#filterCategory').val();
-        const value = $(this).val();
-
-        let columnIndex = 2;
-        if (category === 'dosen') columnIndex = 3;
-        else if (category === 'divisi') columnIndex = 4;
-
-        table.columns([2,3,4]).search('');
-        table.column(columnIndex).search(value).draw();
-    });
-
-    $('#filterTanggalMulai, #filterTanggalSelesai').change(() => table.draw());
-
-    $('#btnReset').click(function() {
-        $('#filterCategory, #filterValue, #filterTanggalMulai, #filterTanggalSelesai').val('');
-        $('#filterValueContainer, #btnReset').hide();
-        $('#filterValue, #filterTanggalMulai, #filterTanggalSelesai').hide();
-        table.columns([2,3,4]).search('').draw();
-        if ($.fn.dataTable.ext.search.length > 0) $.fn.dataTable.ext.search.pop();
-        table.draw();
-    });
-
-    // ===== POPUP DETAIL WITH ROBUST EVIDEN HANDLING =====
     const BASE_URL = '<?= rtrim(base_url(), "/"); ?>';
 
-    $('#tabelSurat tbody').on('click', 'tr.row-detail', function(e) {
-        if ($(e.target).closest('a').length) return;
+    let table = $('#tabelSurat').DataTable({
+        responsive:true,
+        pageLength:5,
+        dom:'rtp',
+        columnDefs:[{orderable:false, targets:-1}]
+    });
 
-        let raw = $(this).attr('data-detail') || '{}';
-        let data;
-        try {
-            data = JSON.parse(raw);
-        } catch (err) {
-            console.error('Invalid data-detail JSON', err, raw);
-            data = {};
+    // prepare filterData from PHP (same as original logic)
+    const filterData = {
+        jenis: <?= json_encode(array_values(array_unique(array_map(function($s){ return $s->jenis_pengajuan; }, $surat_list)))); ?>,
+        dosen: <?= json_encode(array_values(array_unique(array_reduce($surat_list, function($carry,$s){
+            if(isset($s->nama_dosen) && !empty($s->nama_dosen)){
+                $nd=$s->nama_dosen;
+                if(is_string($nd)){ $maybe=json_decode($nd,true); if(json_last_error()===JSON_ERROR_NONE) $nd=$maybe; }
+                if(is_array($nd)) foreach($nd as $d) $carry[]=trim($d); else $carry[]=trim($nd);
+            }
+            return $carry;
+        },[])))); ?>,
+        divisi: <?= json_encode(array_values(array_unique(array_reduce($surat_list,function($carry,$s){
+            if(isset($s->divisi)&&!empty($s->divisi)){
+                $dv=$s->divisi;
+                if(is_string($dv)){ $maybe2=json_decode($dv,true); if(json_last_error()===JSON_ERROR_NONE) $dv=$maybe2; }
+                if(is_array($dv)) foreach($dv as $d) $carry[]=trim($d); else $carry[]=trim($dv);
+            }
+            return $carry;
+        },[])))); ?>
+    };
+
+    // normalize values (trim, unique, sort)
+    Object.keys(filterData).forEach(k=>{
+        filterData[k] = (filterData[k]||[]).map(x=>String(x||'').trim()).filter(x=>x!=='');
+        filterData[k] = Array.from(new Set(filterData[k])).sort((a,b)=>a.localeCompare(b));
+    });
+
+    // ---------- FILTER STATE ----------
+    let filters = []; // {id, category, values:[], dateStart, dateEnd}
+    let uid = 0;
+    function nextId(){ return 'f'+(++uid); }
+
+    // render a filter item DOM
+    function makeFilterDOM(f){
+        const $wr = $(`<div class="filter-item" data-id="${f.id}"></div>`);
+        const $cat = $(`<select class="filter-cat"><option value="">Pilih Kategori</option>
+            <option value="jenis">Jenis Pengajuan</option>
+            <option value="dosen">Nama Dosen</option>
+            <option value="divisi">Divisi</option>
+            <option value="tanggal">Tanggal Pengajuan</option>
+        </select>`);
+        const $multi = $(`<select class="filter-values multiple" multiple style="display:none"></select>`);
+        const $dateStart = $(`<input type="date" class="date-start" style="display:none" />`);
+        const $dateEnd = $(`<input type="date" class="date-end" style="display:none" />`);
+        const $remove = $(`<button class="remove" title="Hapus filter">&times;</button>`);
+
+        $wr.append($cat).append($multi).append($dateStart).append($dateEnd).append($remove);
+
+        // set current category value
+        if(f.category) $cat.val(f.category);
+
+        // helper to populate multi select depending on category
+        function populateMulti(cat){
+            $multi.empty();
+            const list = filterData[cat] || [];
+            list.forEach(v=>{
+                const esc = $('<div/>').text(v).html();
+                $multi.append(`<option value="${esc}">${esc}</option>`);
+            });
+            if(Array.isArray(f.values) && f.values.length) $multi.val(f.values);
         }
 
-        let html = '';
+        // initial show/hide
+        if(f.category === 'tanggal'){
+            $multi.hide(); $dateStart.show(); $dateEnd.show();
+            if(f.dateStart) $dateStart.val(f.dateStart);
+            if(f.dateEnd) $dateEnd.val(f.dateEnd);
+        } else if(f.category){
+            $multi.show(); $dateStart.hide(); $dateEnd.hide();
+            populateMulti(f.category);
+        } else {
+            // default category blank: show multi hidden
+            $multi.hide(); $dateStart.hide(); $dateEnd.hide();
+        }
 
-        Object.entries(data).forEach(([k, v]) => {
-            let display = v;
-
-            if (display === null || display === undefined || (typeof display === 'string' && display.trim() === '')) {
-                display = '-';
-            }
-
-            // ======== FIX: FORCE DOWNLOAD EVIDEN ========
-            if (k === 'eviden') {
-
-                if (typeof display === 'string') {
-                    try { display = JSON.parse(display); } catch (e) {}
-                }
-
-                if (Array.isArray(display) && display.length > 0) {
-                    let list = '<ul style="margin:0;padding-left:18px;">';
-
-                    display.forEach(item => {
-
-                        let url = '';
-                        let name = '';
-
-                        if (typeof item === 'string') {
-                            url = item;
-                            name = item.split('/').pop().split('?')[0];
-                        } else if (typeof item === 'object' && item !== null) {
-                            if (item.cdnUrl) url = item.cdnUrl;
-                            else if (item.path) {
-                                url = item.path.charAt(0) === '/' || item.path.startsWith('http') ? item.path : '/' + item.path;
-                                if (!url.startsWith('http')) url = BASE_URL + url;
-                            } else if (item.url) url = item.url;
-                            name = item.nama_asli || item.name || (url ? url.split('/').pop().split('?')[0] : 'file');
-                        }
-
-                        if (url && !url.match(/^https?:\/\//i)) {
-                            if (!url.startsWith('/')) url = '/' + url;
-                            url = BASE_URL + url;
-                        }
-
-                        const escName = $('<div/>').text(name).html();
-                        const escUrl = $('<div/>').text(url).html();
-
-                        list += `
-                            <li style="margin-bottom:6px;">
-                                <a href="#" class="force-download"
-                                   data-url="${escUrl}"
-                                   data-name="${escName}"
-                                   style="color:#FB8C00;font-weight:600;text-decoration:none;">
-                                   📄 ${escName}
-                                </a>
-                            </li>`;
-                    });
-
-                    list += '</ul>';
-                    display = list;
-
-                } else {
-                    display = '-';
-                }
-            }
-            // ========= END FIX =========
-
-            else if (Array.isArray(display)) {
-                display = display.map(x => $('<div/>').text(String(x)).html()).join('<br>');
-            } else {
-                if (typeof display === 'string') display = $('<div/>').text(display).html();
-            }
-
-            html += `
-            <tr>
-                <td class="detail-key">${k.replace(/_/g,' ')}</td>
-                <td>${display}</td>
-            </tr>`;
+        // events
+        $cat.on('change', function(){
+            const id = $wr.data('id');
+            const ff = filters.find(x=>x.id===id);
+            if(!ff) return;
+            ff.category = $(this).val();
+            ff.values = [];
+            ff.dateStart = '';
+            ff.dateEnd = '';
+            // re-render this item (easiest approach: rebuild all)
+            renderFilters();
+            applyFilters();
         });
 
+        $multi.on('change', function(){
+            const id = $wr.data('id');
+            const ff = filters.find(x=>x.id===id);
+            if(!ff) return;
+            ff.values = $(this).val() || [];
+            applyFilters();
+        });
+
+        $dateStart.on('change', function(){
+            const id = $wr.data('id');
+            const ff = filters.find(x=>x.id===id);
+            if(!ff) return;
+            ff.dateStart = $(this).val() || '';
+            applyFilters();
+        });
+        $dateEnd.on('change', function(){
+            const id = $wr.data('id');
+            const ff = filters.find(x=>x.id===id);
+            if(!ff) return;
+            ff.dateEnd = $(this).val() || '';
+            applyFilters();
+        });
+
+        $remove.on('click', function(){
+            const id = $wr.data('id');
+            filters = filters.filter(x=>x.id !== id);
+            renderFilters();
+            applyFilters();
+        });
+
+        return $wr;
+    }
+
+    // render all filters into DOM
+    function renderFilters(){
+        const $b = $('#filterBuilder');
+        $b.empty();
+        filters.forEach(f=>{
+            // ensure category exists in f for UI
+            const $dom = makeFilterDOM(f);
+            $b.append($dom);
+            // if category is non-empty and not tanggal, populate options (after append)
+            if(f.category && f.category !== 'tanggal'){
+                const $sel = $dom.find('.filter-values');
+                $sel.show();
+                const list = filterData[f.category] || [];
+                // already populated inside makeFilterDOM via populateMulti when created
+            }
+        });
+        // toggle reset button visibility
+        $('#btnResetAll').prop('hidden', filters.length === 0 && $('#tableSearch').val().trim()==='');
+    }
+
+    // add initial blank filter? We'll start empty. If you prefer an initial row, uncomment:
+    // filters.push({id: nextId(), category:'jenis', values: [], dateStart:'', dateEnd:''});
+
+    // add new filter
+    $('#btnAddFilter').click(function(){
+        filters.push({ id: nextId(), category:'jenis', values: [], dateStart:'', dateEnd:'' });
+        renderFilters();
+        applyFilters();
+    });
+
+    // ---------- DataTables custom filter integration ----------
+    // ensure no duplicate custom filter
+    $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(fn => fn.name !== 'customMultiFilter');
+
+    const customMultiFilter = function(settings, data){
+
+        // multi-keyword text search (AND across keywords)
+        const q = $('#tableSearch').val().trim().toLowerCase();
+        if(q){
+            const keywords = q.split(/\s+/).filter(x=>x);
+            const rowText = data.join(' ').toLowerCase();
+            const okText = keywords.every(k => rowText.indexOf(k) >= 0);
+            if(!okText) return false;
+        }
+
+        // evaluate each filter item (AND between items)
+        for(const f of filters){
+            if(!f || !f.category) continue;
+
+            if(f.category === 'tanggal'){
+                const cell = (data[5] || '').trim(); // tanggal_pengajuan
+                const start = f.dateStart || '';
+                const end = f.dateEnd || '';
+                if(!start && !end) continue;
+                if(!cell) return false;
+                if(start && cell < start) return false;
+                if(end && cell > end) return false;
+                continue;
+            }
+
+            const colIndex = (f.category === 'jenis') ? 2 : (f.category === 'dosen' ? 3 : 4);
+            const cellRaw = (data[colIndex] || '').toLowerCase();
+
+            if(!Array.isArray(f.values) || f.values.length === 0) continue;
+
+            // OR inside values: any selected value matches cell
+            const anyMatch = f.values.some(v => {
+                if(!v) return false;
+                return cellRaw.indexOf(String(v).toLowerCase()) >= 0;
+            });
+
+            if(!anyMatch) return false;
+        }
+
+        return true;
+    };
+    Object.defineProperty(customMultiFilter, 'name', { value: 'customMultiFilter' });
+    $.fn.dataTable.ext.search.push(customMultiFilter);
+
+    // apply filters (redraw)
+    function applyFilters(){
+        table.draw();
+        // show reset if any active
+        const anyFilterActive = filters.length>0 || $('#tableSearch').val().trim()!=='';
+        $('#btnResetAll').prop('hidden', !anyFilterActive);
+    }
+
+    // search input debounce
+    let debounce = null;
+    $('#tableSearch').on('input', function(){
+        if(debounce) clearTimeout(debounce);
+        debounce = setTimeout(()=> applyFilters(), 180);
+    });
+
+    // reset all
+    $('#btnResetAll').click(function(){
+        filters = [];
+        $('#tableSearch').val('');
+        renderFilters();
+        applyFilters();
+    });
+
+    // initial render (empty)
+    renderFilters();
+
+    // ===== POPUP DETAIL (unchanged logic from original) =====
+    $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
+        if($(e.target).closest('a').length) return;
+        let raw=$(this).attr('data-detail')||'{}';
+        let data={};
+        try{ data=JSON.parse(raw);}catch(err){ console.error(err);}
+        let html='';
+        Object.entries(data).forEach(([k,v])=>{
+            let display=v;
+            if(display===null||display===undefined||(typeof display==='string'&&display.trim()==='')) display='-';
+            if(k==='eviden'){
+                if(typeof display==='string'){ try{display=JSON.parse(display);}catch(e){} }
+                if(Array.isArray(display)&&display.length>0){
+                    let list='<ul style="margin:0;padding-left:18px;">';
+                    display.forEach(item=>{
+                        let url='', name='';
+                        if(typeof item==='string'){ url=item; name=item.split('/').pop().split('?')[0]; }
+                        else if(typeof item==='object'&&item!==null){
+                            url=item.cdnUrl||item.path||item.url||'';
+                            if(item.nama_asli) name=item.nama_asli;
+                            else if(item.name) name=item.name;
+                            else name=url.split('/').pop().split('?')[0];
+                            if(url && !url.match(/^https?:\/\//i)) url=BASE_URL + (url.startsWith('/')?'':'/')+url;
+                        }
+                        const escName=$('<div/>').text(name).html();
+                        const escUrl=$('<div/>').text(url).html();
+                        list+=`<li style="margin-bottom:6px;"><a href="#" class="force-download" data-url="${escUrl}" data-name="${escName}" style="color:#FB8C00;font-weight:600;text-decoration:none;">📄 ${escName}</a></li>`;
+                    });
+                    list+='</ul>';
+                    display=list;
+                } else display='-';
+            } else if(Array.isArray(display)){
+                display=display.map(x=>$('<div/>').text(String(x)).html()).join('<br>');
+            } else { if(typeof display==='string') display=$('<div/>').text(display).html(); }
+            html+=`<tr><td class="detail-key">${k.replace(/_/g,' ')}</td><td>${display}</td></tr>`;
+        });
         $('#detailContent').html(html);
         $('#modalDetail').addClass('show');
     });
 
-    // ===== FORCE DOWNLOAD HANDLER =====
-    $(document).on("click", ".force-download", function(e){
+    // force-download
+    $(document).on("click",".force-download",function(e){
         e.preventDefault();
-
-        const url = $(this).data("url");
-        const name = $(this).data("name");
-
-        const link = document.createElement("a");
-        link.href = url + "?download=1";
-        link.download = name || "file";
-
+        const url=$(this).data("url");
+        const name=$(this).data("name");
+        const link=document.createElement("a");
+        link.href=url+"?download=1";
+        link.download=name||"file";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     });
 
-    $('.close-modal').click(() => $('#modalDetail').removeClass('show'));
-    $(window).click(e => { 
-        if (e.target.id === 'modalDetail') $('#modalDetail').removeClass('show'); 
-    });
+    $('.close-modal').click(()=>$('#modalDetail').removeClass('show'));
+    $(window).click(e=>{ if(e.target.id==='modalDetail') $('#modalDetail').removeClass('show'); });
+
 });
 </script>
+
+
+
 
 <!-- FONT AWESOME ICON -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

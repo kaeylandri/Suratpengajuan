@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -54,92 +54,129 @@
             font-weight:bold;
         }
 
-        /* STYLE UNTUK EVIDEN */
+        /* STYLE UNTUK EVIDEN - IMPROVED */
         .existing-file-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px;
+            padding: 12px 15px;
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             margin-bottom: 10px;
             transition: all 0.3s;
+            position: relative;
         }
 
         .existing-file-item:hover {
             background: #e9ecef;
             border-color: #ff8c00;
+            box-shadow: 0 2px 8px rgba(255, 140, 0, 0.1);
         }
 
         .file-icon {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #ff8c00;
+            background: linear-gradient(135deg, #ff8c00 0%, #ff6b00 100%);
             color: white;
-            border-radius: 8px;
-            font-size: 20px;
+            border-radius: 10px;
+            font-size: 22px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(255, 140, 0, 0.2);
         }
 
         .file-info {
             flex: 1;
+            min-width: 0;
         }
 
         .file-name {
             font-weight: 600;
             color: #333;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 14px;
         }
 
         .file-size {
             font-size: 12px;
             color: #6c757d;
+            font-weight: 500;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-delete-existing,
+        .btn-view-file,
+        .btn-download-file {
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
         }
 
         .btn-delete-existing {
             background: #dc3545;
             color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
         }
 
         .btn-delete-existing:hover {
             background: #c82333;
             transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
         }
 
         .btn-view-file {
             background: #17a2b8;
             color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-            margin-right: 5px;
         }
 
         .btn-view-file:hover {
             background: #138496;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
         }
 
+        .btn-download-file {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-download-file:hover {
+            background: #218838;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        /* New Upload Container */
         #newEvidenContainer .upload-item-wrapper {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 12px;
-            padding: 10px;
+            padding: 12px;
             background: #f9f9f9;
             border-radius: 8px;
-            border: 1px solid #e0e0e0;
+            border: 2px dashed #e0e0e0;
             transition: all 0.3s;
         }
 
@@ -154,11 +191,12 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
+            background: white;
         }
 
         #newEvidenContainer .btn-icon-action {
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             border: none;
             border-radius: 50%;
             cursor: pointer;
@@ -177,7 +215,8 @@
 
         #newEvidenContainer .btn-add-file:hover {
             background: #e67e00;
-            transform: scale(1.1);
+            transform: scale(1.15) rotate(90deg);
+            box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
         }
 
         #newEvidenContainer .btn-remove-file {
@@ -187,24 +226,69 @@
 
         #newEvidenContainer .btn-remove-file:hover {
             background: #d32f2f;
-            transform: scale(1.1);
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
         }
 
+        /* File Deleted State */
         .file-deleted {
-            opacity: 0.5;
+            opacity: 0.4;
             text-decoration: line-through;
+            pointer-events: none;
+            background: #f8d7da !important;
+            border-color: #dc3545 !important;
         }
 
+        .file-deleted .file-icon {
+            background: #dc3545 !important;
+        }
+
+        /* Error Message */
         #chk-error {
             color: #dc3545;
-            font-size: 12px;
+            font-size: 13px;
             display: block;
             margin-top: 8px;
+            font-weight: 600;
         }
 
-        @media(max-width:768px){
-            .form-section { padding: 15px; }
-            .existing-file-item { flex-direction: column; }
+        /* Alert Info */
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        /* Responsive */
+        @media(max-width: 768px) {
+            .form-section { 
+                padding: 15px; 
+            }
+            
+            .existing-file-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .file-actions {
+                width: 100%;
+                flex-wrap: wrap;
+            }
+            
+            .btn-view-file,
+            .btn-download-file,
+            .btn-delete-existing {
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .file-name {
+                white-space: normal;
+                word-break: break-all;
+            }
         }
     </style>
 </head>
@@ -368,15 +452,17 @@
                     </thead>
 
                     <tbody>
-                    <?php foreach ($surat['nip'] as $i => $nip): ?>
-                        <tr>
-                            <td><input type="text" name="nip[]" class="form-control" value="<?= $nip ?>"></td>
-                            <td><input type="text" name="nama_dosen[]" class="form-control" value="<?= $surat['nama_dosen'][$i] ?>"></td>
-                            <td><input type="text" name="jabatan[]" class="form-control" value="<?= $surat['jabatan'][$i] ?>"></td>
-                            <td><input type="text" name="divisi[]" class="form-control" value="<?= $surat['divisi'][$i] ?>"></td>
-                            <td><span class="remove-row">X</span></td>
-                        </tr>
-                    <?php endforeach; ?>
+                    <?php if (!empty($surat['nip']) && is_array($surat['nip'])): ?>
+                        <?php foreach ($surat['nip'] as $i => $nip): ?>
+                            <tr>
+                                <td><input type="text" name="nip[]" class="form-control" value="<?= htmlspecialchars($nip) ?>"></td>
+                                <td><input type="text" name="nama_dosen[]" class="form-control" value="<?= htmlspecialchars($surat['nama_dosen'][$i] ?? '') ?>"></td>
+                                <td><input type="text" name="jabatan[]" class="form-control" value="<?= htmlspecialchars($surat['jabatan'][$i] ?? '') ?>"></td>
+                                <td><input type="text" name="divisi[]" class="form-control" value="<?= htmlspecialchars($surat['divisi'][$i] ?? '') ?>"></td>
+                                <td><span class="remove-row">X</span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -393,38 +479,100 @@
                 <label class="font-weight-bold mb-3">File yang Sudah Diupload:</label>
                 <div id="existingFilesContainer">
                     <?php 
-                    // Contoh: Asumsikan $surat['eviden'] adalah array file yang sudah ada
-                    // Format: ['file1.pdf', 'file2.jpg', 'file3.docx']
-                    if (!empty($surat['eviden']) && is_array($surat['eviden'])): 
-                        foreach ($surat['eviden'] as $idx => $file): 
+                    // Debug: uncomment untuk cek isi eviden
+                    // echo '<pre>Eviden Data: '; print_r($eviden); echo '</pre>';
+                    
+                    if (!empty($eviden) && is_array($eviden) && count($eviden) > 0): 
+                        foreach ($eviden as $idx => $file): 
+                            // Pastikan $file tidak kosong
+                            if (empty($file) || trim($file) === '') continue;
+                            
+                            // Cek apakah file adalah URL atau nama file lokal
+                            $is_url = filter_var($file, FILTER_VALIDATE_URL);
+                            
+                            // Jika UploadCare, buat URL lengkap
+                            if (!$is_url && strpos($file, 'ucarecdn.com') === false && strpos($file, '~') !== false) {
+                                // Kemungkinan ini adalah UUID UploadCare tanpa full URL
+                                // Cek di database apakah ada full URL
+                                $is_url = false;
+                                $is_uploadcare_uuid = true;
+                            } else {
+                                $is_uploadcare_uuid = false;
+                            }
+                            
                             // Get file extension
                             $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
                             $icon = 'fa-file';
-                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) $icon = 'fa-file-image';
-                            elseif ($ext == 'pdf') $icon = 'fa-file-pdf';
-                            elseif (in_array($ext, ['doc', 'docx'])) $icon = 'fa-file-word';
                             
-                            // Get file size (you need to adjust path)
-                            $filepath = './uploads/eviden/' . $file;
-                            $filesize = file_exists($filepath) ? round(filesize($filepath) / 1024, 2) . ' KB' : 'N/A';
+                            if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'])) {
+                                $icon = 'fa-file-image';
+                            } elseif ($ext == 'pdf') {
+                                $icon = 'fa-file-pdf';
+                            } elseif (in_array($ext, ['doc', 'docx'])) {
+                                $icon = 'fa-file-word';
+                            } elseif (in_array($ext, ['xls', 'xlsx'])) {
+                                $icon = 'fa-file-excel';
+                            }
+                            
+                            // Get file path dan ukuran
+                            if ($is_url) {
+                                // Jika file adalah URL (UploadCare)
+                                $filepath = $file;
+                                $filesize = 'External';
+                                $file_url = $file;
+                                $display_name = basename(parse_url($file, PHP_URL_PATH));
+                            } elseif ($is_uploadcare_uuid) {
+                                // UUID UploadCare tanpa full URL
+                                $filepath = null;
+                                $filesize = 'UploadCare';
+                                $file_url = '#'; // Tidak bisa diakses langsung
+                                $display_name = $file;
+                            } else {
+                                // Jika file lokal
+                                $filepath = './uploads/eviden/' . $file;
+                                $filesize = 'N/A';
+                                
+                                if (file_exists($filepath)) {
+                                    $size_bytes = filesize($filepath);
+                                    if ($size_bytes < 1024) {
+                                        $filesize = $size_bytes . ' B';
+                                    } elseif ($size_bytes < 1048576) {
+                                        $filesize = round($size_bytes / 1024, 2) . ' KB';
+                                    } else {
+                                        $filesize = round($size_bytes / 1048576, 2) . ' MB';
+                                    }
+                                }
+                                
+                                $file_url = base_url('uploads/eviden/' . $file);
+                                $display_name = basename($file);
+                            }
                     ?>
-                    <div class="existing-file-item" data-file-index="<?= $idx ?>">
+                    <div class="existing-file-item" data-file-index="<?= $idx ?>" data-filename="<?= htmlspecialchars($file) ?>">
                         <div class="file-icon">
                             <i class="fas <?= $icon ?>"></i>
                         </div>
                         <div class="file-info">
-                            <div class="file-name"><?= basename($file) ?></div>
+                            <div class="file-name" title="<?= htmlspecialchars($display_name) ?>">
+                                <?= htmlspecialchars($display_name) ?>
+                            </div>
                             <div class="file-size"><?= $filesize ?></div>
                         </div>
                         <div class="file-actions">
-                            <a href="<?= base_url('uploads/eviden/' . $file) ?>" target="_blank" class="btn-view-file">
-                                <i class="fas fa-eye"></i> Lihat
-                            </a>
-                            <button type="button" class="btn-delete-existing" onclick="deleteExistingFile(<?= $idx ?>, '<?= $file ?>')">
+                            <?php if ($is_url || file_exists($filepath)): ?>
+                                <a href="<?= $file_url ?>" target="_blank" class="btn-view-file">
+                                    <i class="fas fa-eye"></i> Lihat
+                                </a>
+                                <a href="<?= site_url('surat/download_eviden/' . urlencode($file)) ?>" class="btn-download-file">
+                                    <i class="fas fa-download"></i> Download
+                                </a>
+                            <?php endif; ?>
+                            <button type="button" class="btn-delete-existing" onclick="deleteExistingFile(<?= $idx ?>, '<?= htmlspecialchars($file, ENT_QUOTES) ?>')">
                                 <i class="fas fa-trash"></i> Hapus
                             </button>
                         </div>
-                        <input type="hidden" name="existing_eviden[]" value="<?= $file ?>">
+                        <!-- Hidden input untuk tracking file yang masih ada -->
+                        <input type="hidden" name="existing_eviden[]" value="<?= htmlspecialchars($file) ?>" class="existing-file-input">
+                        <!-- Hidden input untuk flag file yang akan dihapus -->
                         <input type="hidden" name="delete_eviden[]" value="" class="delete-flag">
                     </div>
                     <?php 
@@ -445,7 +593,7 @@
                 <label class="font-weight-bold mb-3">Upload File Baru (Opsional):</label>
                 <div id="newEvidenContainer">
                     <div class="upload-item-wrapper" data-index="0">
-                        <input type="file" name="new_eviden[]" class="form-control eviden-input" accept="image/*,.pdf,.doc,.docx">
+                        <input type="file" name="new_eviden[]" class="form-control eviden-input" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
                         <button type="button" class="btn-icon-action btn-add-file" title="Tambah File">
                             <i class="fas fa-plus"></i>
                         </button>
@@ -453,7 +601,7 @@
                 </div>
                 <span id="chk-error"></span>
                 <small class="form-text text-muted">
-                    <i class="fas fa-info-circle"></i> Tipe file: JPG, PNG, PDF, DOC, DOCX. Maksimal 10MB per file
+                    <i class="fas fa-info-circle"></i> Tipe file: JPG, PNG, PDF, DOC, DOCX, XLS, XLSX. Maksimal 10MB per file
                 </small>
             </div>
         </div>
@@ -469,6 +617,33 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    /**
+     * Download Helper Function
+     */
+    function downloadFile(url, filename) {
+        // Create invisible iframe untuk download
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        
+        // Remove iframe after 1 minute
+        setTimeout(() => {
+            document.body.removeChild(iframe);
+        }, 60000);
+        
+        // Show notification
+        const errorSpan = document.getElementById('chk-error');
+        if (errorSpan) {
+            errorSpan.style.color = '#28a745';
+            errorSpan.textContent = '✓ Download dimulai...';
+            setTimeout(() => {
+                errorSpan.textContent = '';
+                errorSpan.style.color = '#dc3545';
+            }, 3000);
+        }
+    }
+
     // ===== Delete Existing File =====
     function deleteExistingFile(index, filename) {
         if (!confirm('Yakin ingin menghapus file "' + filename + '"?')) {
@@ -476,13 +651,21 @@
         }
 
         const fileItem = document.querySelector(`.existing-file-item[data-file-index="${index}"]`);
+        if (!fileItem) return;
+        
         const deleteFlag = fileItem.querySelector('.delete-flag');
+        const existingInput = fileItem.querySelector('.existing-file-input');
         
         // Mark for deletion
         deleteFlag.value = filename;
-        fileItem.classList.add('file-deleted');
         
-        // Animate removal
+        // Remove dari existing list (agar tidak disubmit sebagai file yang masih ada)
+        if (existingInput) {
+            existingInput.remove();
+        }
+        
+        // Visual feedback
+        fileItem.classList.add('file-deleted');
         fileItem.style.opacity = '0';
         fileItem.style.transform = 'translateX(-20px)';
         
@@ -492,6 +675,15 @@
     }
 
     $(document).ready(function() {
+
+        // ===== Handle Download Button Click =====
+        $(document).on('click', '.btn-download-file', function(e) {
+            e.preventDefault();
+            const downloadUrl = $(this).attr('href');
+            const filename = $(this).closest('.existing-file-item').find('.file-name').text().trim();
+            
+            downloadFile(downloadUrl, filename);
+        });
 
         // ===== Jenis tanggal =====
         $("#jenis_date").change(function() {
@@ -583,7 +775,7 @@
                     newUploadItem.className = 'upload-item-wrapper';
                     newUploadItem.setAttribute('data-index', evidenIndex);
                     newUploadItem.innerHTML = `
-                        <input type="file" name="new_eviden[]" class="form-control eviden-input" accept="image/*,.pdf,.doc,.docx">
+                        <input type="file" name="new_eviden[]" class="form-control eviden-input" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
                         <button type="button" class="btn-icon-action btn-remove-file" title="Hapus File">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -612,13 +804,14 @@
                     setTimeout(() => {
                         uploadItem.remove();
                         
+                        // Jika semua item dihapus, buat item pertama kembali
                         if (newEvidenContainer.children.length === 0) {
                             evidenIndex = 0;
                             const firstItem = document.createElement('div');
                             firstItem.className = 'upload-item-wrapper';
                             firstItem.setAttribute('data-index', 0);
                             firstItem.innerHTML = `
-                                <input type="file" name="new_eviden[]" class="form-control eviden-input" accept="image/*,.pdf,.doc,.docx">
+                                <input type="file" name="new_eviden[]" class="form-control eviden-input" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
                                 <button type="button" class="btn-icon-action btn-add-file" title="Tambah File">
                                     <i class="fas fa-plus"></i>
                                 </button>
@@ -638,21 +831,43 @@
                     if (file) {
                         const fileSize = (file.size / 1024 / 1024).toFixed(2);
                         
+                        // Cek ukuran file (maksimal 10MB)
                         if (fileSize > 10) {
-                            errorSpan.textContent = 'File terlalu besar! Maksimal 10MB';
+                            errorSpan.textContent = '⚠️ File terlalu besar! Maksimal 10MB';
                             e.target.value = '';
                             return;
                         }
                         
-                        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                        // Cek tipe file
+                        const allowedTypes = [
+                            'image/jpeg', 
+                            'image/jpg', 
+                            'image/png', 
+                            'image/gif',
+                            'application/pdf', 
+                            'application/msword', 
+                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            'application/vnd.ms-excel',
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        ];
                         
                         if (!allowedTypes.includes(file.type)) {
-                            errorSpan.textContent = 'Tipe file tidak diizinkan! Hanya JPG, PNG, PDF, DOC, DOCX';
+                            errorSpan.textContent = '⚠️ Tipe file tidak diizinkan! Hanya JPG, PNG, PDF, DOC, DOCX, XLS, XLSX';
                             e.target.value = '';
                             return;
                         }
                         
+                        // Clear error dan tampilkan info file
                         errorSpan.textContent = '';
+                        errorSpan.style.color = '#28a745';
+                        errorSpan.textContent = `✓ File "${file.name}" siap diupload (${fileSize} MB)`;
+                        
+                        // Reset warna error setelah 3 detik
+                        setTimeout(() => {
+                            errorSpan.textContent = '';
+                            errorSpan.style.color = '#dc3545';
+                        }, 3000);
+                        
                         console.log(`File selected: ${file.name} (${fileSize} MB)`);
                     }
                 }
