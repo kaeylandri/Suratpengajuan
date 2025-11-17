@@ -1840,7 +1840,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <!-- ===== STYLE ===== -->
 <!-- ===== IMPORT FONT ===== -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
+ <style>
 /* ---------- Font & base ---------- */
 body, input, select, button, table {
     font-family: 'Montserrat', sans-serif;
@@ -1896,87 +1896,142 @@ body, input, select, button, table {
 
 /* small rounded buttons */
 .btn-small {
-    height:40px;
-    min-width:40px;
+    height:44px;
+    min-width:44px;
     border-radius:10px;
-    border:none;
+    border:1.5px solid #FB8C00;
     padding:0 12px;
     cursor:pointer;
     font-size:14px;
     display:inline-flex;
     align-items:center;
     justify-content:center;
+    background:white;
 }
 
 /* add filter btn */
 .btn-add {
     background:#FB8C00;
     color:white;
-    border-radius:10px;
-    padding:8px 12px;
 }
 .btn-reset {
     background:#FB8C00;
     color:white;
-    border:none;
+    border:1.5px solid #FB8C00;
     border-radius:10px;
-    padding:8px 12px;
-    height:40px;
+    padding:0 14px;
+    height:44px;
     font-size:14px;
     cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
 }
 .btn-reset[hidden] { display:none; }
 
-/* ====== FILTER BUILDER ROWS (compact, horizontal) ====== */
+/* ====== FILTER BUILDER ROWS (sama dengan filter-bar) ====== */
 .filter-builder {
     display:flex;
     gap:10px;
     align-items:center;
     width:100%;
     flex-wrap:wrap;
-    margin-bottom:8px;
+    margin-bottom:14px;
 }
-.filter-item {
+.filter-row {
+    width: 100%;
+    background: #ffffff;
+    padding: 12px 14px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border: 1px solid #f0f0f0;
+    flex-wrap: wrap;
+}
+
+/* search input in row (same as filter-search) */
+.filter-row .row-search-wrapper {
+    flex: 1 1 360px;
+    min-width: 220px;
     display:flex;
-    gap:8px;
-    align-items:center;
-    background:#fffaf5;
-    border:1px solid #FB8C00;
-    padding:8px;
+    position:relative;
+}
+.filter-row .row-search {
+    width:100%;
+    padding:10px 40px 10px 14px;
+    height:44px;
     border-radius:10px;
-    min-height:44px;
-}
-
-/* selects & date inputs in builder */
-.filter-item select,
-.filter-item input[type="date"]{
-    height:36px;
-    padding:6px 10px;
-    border-radius:8px;
-    border:1px solid rgba(0,0,0,0.08);
+    border:1.5px solid #FB8C00;
+    outline:none;
+    font-size:14px;
     background:white;
-    font-size:13px;
 }
-.filter-item select.multiple {
-    min-width:220px;
-    max-width:320px;
+.filter-row .row-search-wrapper i{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#FB8C00;
+    pointer-events:none;
 }
-
-/* remove filter small button */
-.filter-item .remove {
-    background:transparent;
-    border:none;
-    color:#d32f2f;
-    font-weight:700;
-    font-size:18px;
+.filter-row select.row-cat {
+    height:44px;
+    min-width:44px;
+    border-radius:10px;
+    border:1.5px solid #FB8C00;
+    padding:0 14px;
     cursor:pointer;
-    padding:4px 6px;
+    font-size:14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:white;
+    outline:none;
+}
+.filter-row input[type="date"]{
+    height:44px;
+    padding:0 14px;
+    border-radius:10px;
+    border:1.5px solid #FB8C00;
+    background:white;
+    font-size:14px;
+    min-width:160px;
+    outline:none;
 }
 
-/* small note */
-.small-note { font-size:12px; color:#666; margin-top:6px; }
+/* buttons inside row (same style as top buttons) */
+.filter-row .row-btn {
+    height:44px;
+    min-width:44px;
+    border-radius:10px;
+    border:1.5px solid #FB8C00;
+    padding:0 14px;
+    cursor:pointer;
+    font-size:14px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    background:white;
+}
+.filter-row .row-btn.add {
+    background:#FB8C00;
+    color:#fff;
+}
+.filter-row .row-btn.add:hover {
+    background:#e67e00;
+}
+.filter-row .row-btn.remove {
+    background:#FB8C00;
+    color:white;
+}
+.filter-row .row-btn.remove:hover {
+    background:#e67e00;
+}
 
-/* ===== existing table / badges (kept from original, with slight tweaks) ===== */
+/* existing table / badges */
 #tabelSurat{
     width:100%;
     border-collapse:collapse;
@@ -1998,6 +2053,13 @@ body, input, select, button, table {
 #tabelSurat td:nth-child(4),#tabelSurat td:nth-child(5){
     min-width:180px;
     max-width:280px
+}
+#tabelSurat tbody tr.row-detail {
+    cursor:pointer;
+    transition: background 0.2s;
+}
+#tabelSurat tbody tr.row-detail:hover {
+    background:#fffaf5;
 }
 .dosen-container,.divisi-container{
     display:flex;
@@ -2042,7 +2104,7 @@ body, input, select, button, table {
     white-space:nowrap
 }
 
-/* modal (unchanged visually) */
+/* modal */
 .modal-detail{ display:none !important; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:9999; justify-content:center; align-items:center; padding-top:40px }
 .modal-detail.show{ display:flex !important }
 .modal-content-detail{ width:85%; max-width:850px; background:white; border-radius:12px; overflow:hidden }
@@ -2052,35 +2114,69 @@ body, input, select, button, table {
 .detail-table td{ padding:10px 12px; border-bottom:1px solid #eee }
 .detail-key{ width:35%; font-weight:600; background:#fff4e6; color:#663c00 }
 
+.btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 13px;
+    display: inline-block;
+    margin: 0 2px;
+}
+.btn-warning {
+    background: #ffa726;
+    color: white;
+}
+.btn-warning:hover {
+    background: #fb8c00;
+}
+.btn-danger {
+    background: #ef5350;
+    color: white;
+}
+.btn-danger:hover {
+    background: #e53935;
+}
+
 /* responsive tweaks */
 @media (max-width:880px){
     .filter-bar{ padding:10px; gap:8px; }
     .filter-search{ flex-basis: 100%; }
     .filter-builder{ gap:8px; }
-    .filter-item{ width:100%; justify-content:space-between; }
-    .filter-item select.multiple { max-width:100%; min-width:120px; }
+    .filter-row{ padding:10px; gap:8px; }
+    .filter-row .row-search-wrapper { flex-basis: 100%; }
+    .filter-row select.row-cat { min-width:140px; }
+    .filter-row input[type="date"] { min-width:140px; }
 }
 </style>
+</head>
+<body>
 
-<!-- ===== SEARCH + FILTER (B2 look, integrated with old logic) ===== -->
+<!-- ===== SEARCH + FILTER ===== -->
 <div class="filter-bar">
-
-    <!-- search input -->
     <div class="filter-search">
-        <input type="text" id="tableSearch" placeholder="Search...">
+        <input type="text" id="tableSearch" placeholder="Search global...">
         <i class="fa fa-search"></i>
     </div>
 
-    <!-- actions -->
     <div class="filter-actions">
-        <button id="btnAddFilter" class="btn-small btn-add" title="Tambah filter"><i class="fa fa-plus"></i></button>
-        <button id="btnResetAll" class="btn-small btn-reset" hidden title="Reset semua filter & pencarian"><i class="fa fa-times"></i>&nbsp;Reset</button>
+        <select id="filterCategory" class="btn-small">
+            <option value="jenis" selected>Jenis Pengajuan</option>
+            <option value="dosen">Nama Dosen</option>
+            <option value="divisi">Divisi</option>
+            <option value="tanggal">Tanggal Pengajuan</option>
+        </select>
+
+        <button id="btnAddFilterRow" class="btn-small btn-add" title="Tambah baris filter">
+            <i class="fa fa-plus"></i>
+        </button>
+
+        <button id="btnResetAll" class="btn-small btn-reset" hidden title="Reset semua filter & pencarian">
+            <i class="fa fa-times"></i>&nbsp;Reset
+        </button>
     </div>
 </div>
 
-<!-- dynamic filter builder (rows appear under the bar) -->
 <div id="filterBuilder" class="filter-builder"></div>
-
 
 <!-- ===== MODAL DETAIL ===== -->
 <div id="modalDetail" class="modal-detail">
@@ -2158,13 +2254,16 @@ body, input, select, button, table {
             </td>
             <td><?= isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? htmlspecialchars($s->tanggal_pengajuan) : '-'; ?></td>
             <td>
-                <a href="<?= site_url('surat/edit/'.$s->id); ?>" class="btn btn-sm btn-warning">Edit</a>
-                <a href="<?= site_url('surat/delete/'.$s->id); ?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus data ini?')">Hapus</a>
+                <a href="<?= site_url('surat/edit/'.$s->id); ?>" class="btn btn-warning">Edit</a>
+                <a href="<?= site_url('surat/delete/'.$s->id); ?>" class="btn btn-danger" onclick="return confirm('Hapus data ini?')">Hapus</a>
             </td>
         </tr>
         <?php endforeach; ?>
     </tbody>
 </table>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <script>
 $(document).ready(function () {
@@ -2177,7 +2276,7 @@ $(document).ready(function () {
         columnDefs:[{orderable:false, targets:-1}]
     });
 
-    // prepare filterData from PHP (same as original logic)
+    // prepare filterData from PHP
     const filterData = {
         jenis: <?= json_encode(array_values(array_unique(array_map(function($s){ return $s->jenis_pengajuan; }, $surat_list)))); ?>,
         dosen: <?= json_encode(array_values(array_unique(array_reduce($surat_list, function($carry,$s){
@@ -2198,144 +2297,138 @@ $(document).ready(function () {
         },[])))); ?>
     };
 
-    // normalize values (trim, unique, sort)
     Object.keys(filterData).forEach(k=>{
         filterData[k] = (filterData[k]||[]).map(x=>String(x||'').trim()).filter(x=>x!=='');
         filterData[k] = Array.from(new Set(filterData[k])).sort((a,b)=>a.localeCompare(b));
     });
 
-    // ---------- FILTER STATE ----------
-    let filters = []; // {id, category, values:[], dateStart, dateEnd}
+    let rows = [];
     let uid = 0;
-    function nextId(){ return 'f'+(++uid); }
+    function nextId(){ return 'r'+(++uid); }
 
-    // render a filter item DOM
-    function makeFilterDOM(f){
-        const $wr = $(`<div class="filter-item" data-id="${f.id}"></div>`);
-        const $cat = $(`<select class="filter-cat"><option value="">Pilih Kategori</option>
+    function makeRowDOM(r){
+        const $wr = $(`<div class="filter-row" data-id="${r.id}"></div>`);
+
+        const $searchWrapper = $(`<div class="row-search-wrapper"></div>`);
+        const $search = $(`<input type="text" class="row-search" placeholder="Search..." />`);
+        const $searchIcon = $(`<i class="fa fa-search"></i>`);
+        
+        const $dateStart = $(`<input type="date" class="row-date-start" style="display:none" />`);
+        const $dateEnd = $(`<input type="date" class="row-date-end" style="display:none" />`);
+
+        $searchWrapper.append($search).append($searchIcon);
+
+        const $cat = $(`<select class="row-cat">
             <option value="jenis">Jenis Pengajuan</option>
             <option value="dosen">Nama Dosen</option>
             <option value="divisi">Divisi</option>
             <option value="tanggal">Tanggal Pengajuan</option>
         </select>`);
-        const $multi = $(`<select class="filter-values multiple" multiple style="display:none"></select>`);
-        const $dateStart = $(`<input type="date" class="date-start" style="display:none" />`);
-        const $dateEnd = $(`<input type="date" class="date-end" style="display:none" />`);
-        const $remove = $(`<button class="remove" title="Hapus filter">&times;</button>`);
 
-        $wr.append($cat).append($multi).append($dateStart).append($dateEnd).append($remove);
+        const $btnAdd = $(`<button class="row-btn add" title="Tambah baris"><i class="fa fa-plus"></i></button>`);
+        const $btnRemove = $(`<button class="row-btn remove" title="Hapus baris"><i class="fa fa-times"></i></button>`);
 
-        // set current category value
-        if(f.category) $cat.val(f.category);
+        if(r.category) $cat.val(r.category);
+        if(r.text) $search.val(r.text);
+        if(r.dateStart) $dateStart.val(r.dateStart);
+        if(r.dateEnd) $dateEnd.val(r.dateEnd);
 
-        // helper to populate multi select depending on category
-        function populateMulti(cat){
-            $multi.empty();
-            const list = filterData[cat] || [];
-            list.forEach(v=>{
-                const esc = $('<div/>').text(v).html();
-                $multi.append(`<option value="${esc}">${esc}</option>`);
-            });
-            if(Array.isArray(f.values) && f.values.length) $multi.val(f.values);
+        function refreshInputs(){
+            const catVal = $cat.val();
+            if(catVal === 'tanggal'){
+                $searchWrapper.hide();
+                $dateStart.show();
+                $dateEnd.show();
+            } else {
+                $searchWrapper.show();
+                $dateStart.hide();
+                $dateEnd.hide();
+            }
         }
+        refreshInputs();
 
-        // initial show/hide
-        if(f.category === 'tanggal'){
-            $multi.hide(); $dateStart.show(); $dateEnd.show();
-            if(f.dateStart) $dateStart.val(f.dateStart);
-            if(f.dateEnd) $dateEnd.val(f.dateEnd);
-        } else if(f.category){
-            $multi.show(); $dateStart.hide(); $dateEnd.hide();
-            populateMulti(f.category);
-        } else {
-            // default category blank: show multi hidden
-            $multi.hide(); $dateStart.hide(); $dateEnd.hide();
-        }
-
-        // events
-        $cat.on('change', function(){
+        $search.on('input', function(){
             const id = $wr.data('id');
-            const ff = filters.find(x=>x.id===id);
-            if(!ff) return;
-            ff.category = $(this).val();
-            ff.values = [];
-            ff.dateStart = '';
-            ff.dateEnd = '';
-            // re-render this item (easiest approach: rebuild all)
-            renderFilters();
-            applyFilters();
-        });
-
-        $multi.on('change', function(){
-            const id = $wr.data('id');
-            const ff = filters.find(x=>x.id===id);
-            if(!ff) return;
-            ff.values = $(this).val() || [];
+            const obj = rows.find(x=>x.id===id);
+            if(!obj) return;
+            obj.text = $(this).val() || '';
             applyFilters();
         });
 
         $dateStart.on('change', function(){
             const id = $wr.data('id');
-            const ff = filters.find(x=>x.id===id);
-            if(!ff) return;
-            ff.dateStart = $(this).val() || '';
+            const obj = rows.find(x=>x.id===id);
+            if(!obj) return;
+            obj.dateStart = $(this).val() || '';
             applyFilters();
         });
         $dateEnd.on('change', function(){
             const id = $wr.data('id');
-            const ff = filters.find(x=>x.id===id);
-            if(!ff) return;
-            ff.dateEnd = $(this).val() || '';
+            const obj = rows.find(x=>x.id===id);
+            if(!obj) return;
+            obj.dateEnd = $(this).val() || '';
             applyFilters();
         });
 
-        $remove.on('click', function(){
+        $cat.on('change', function(){
             const id = $wr.data('id');
-            filters = filters.filter(x=>x.id !== id);
-            renderFilters();
+            const obj = rows.find(x=>x.id===id);
+            if(!obj) return;
+            obj.category = $(this).val();
+            obj.text = '';
+            obj.dateStart = '';
+            obj.dateEnd = '';
+            $search.val('');
+            $dateStart.val('');
+            $dateEnd.val('');
+            refreshInputs();
             applyFilters();
         });
 
+        $btnAdd.on('click', function(){
+            const id = $wr.data('id');
+            const idx = rows.findIndex(x=>x.id===id);
+            const cur = rows[idx] || {};
+            const newRow = { id: nextId(), category: cur.category || 'jenis', text:'', dateStart:'', dateEnd:'' };
+            if(idx >= 0 && idx < rows.length-1){
+                rows.splice(idx+1, 0, newRow);
+            } else {
+                rows.push(newRow);
+            }
+            renderRows();
+            applyFilters();
+        });
+
+        $btnRemove.on('click', function(){
+            const id = $wr.data('id');
+            rows = rows.filter(x=>x.id !== id);
+            renderRows();
+            applyFilters();
+        });
+
+        $wr.append($searchWrapper).append($dateStart).append($dateEnd).append($cat).append($btnAdd).append($btnRemove);
         return $wr;
     }
 
-    // render all filters into DOM
-    function renderFilters(){
+    function renderRows(){
         const $b = $('#filterBuilder');
         $b.empty();
-        filters.forEach(f=>{
-            // ensure category exists in f for UI
-            const $dom = makeFilterDOM(f);
-            $b.append($dom);
-            // if category is non-empty and not tanggal, populate options (after append)
-            if(f.category && f.category !== 'tanggal'){
-                const $sel = $dom.find('.filter-values');
-                $sel.show();
-                const list = filterData[f.category] || [];
-                // already populated inside makeFilterDOM via populateMulti when created
-            }
+        rows.forEach(r=>{
+            $b.append(makeRowDOM(r));
         });
-        // toggle reset button visibility
-        $('#btnResetAll').prop('hidden', filters.length === 0 && $('#tableSearch').val().trim()==='');
+        $('#btnResetAll').prop('hidden', rows.length === 0 && $('#tableSearch').val().trim()==='');
     }
 
-    // add initial blank filter? We'll start empty. If you prefer an initial row, uncomment:
-    // filters.push({id: nextId(), category:'jenis', values: [], dateStart:'', dateEnd:''});
-
-    // add new filter
-    $('#btnAddFilter').click(function(){
-        filters.push({ id: nextId(), category:'jenis', values: [], dateStart:'', dateEnd:'' });
-        renderFilters();
+    $('#btnAddFilterRow').click(function(){
+        const cat = $('#filterCategory').val() || 'jenis';
+        rows.push({ id: nextId(), category: cat, text:'', dateStart:'', dateEnd:'' });
+        renderRows();
         applyFilters();
     });
 
-    // ---------- DataTables custom filter integration ----------
-    // ensure no duplicate custom filter
-    $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(fn => fn.name !== 'customMultiFilter');
+    $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(fn => fn.name !== 'customRowsFilter');
 
-    const customMultiFilter = function(settings, data){
-
-        // multi-keyword text search (AND across keywords)
+    const customRowsFilter = function(settings, data){
         const q = $('#tableSearch').val().trim().toLowerCase();
         if(q){
             const keywords = q.split(/\s+/).filter(x=>x);
@@ -2344,67 +2437,56 @@ $(document).ready(function () {
             if(!okText) return false;
         }
 
-        // evaluate each filter item (AND between items)
-        for(const f of filters){
-            if(!f || !f.category) continue;
+        for(const r of rows){
+            if(!r || !r.category) continue;
 
-            if(f.category === 'tanggal'){
-                const cell = (data[5] || '').trim(); // tanggal_pengajuan
-                const start = f.dateStart || '';
-                const end = f.dateEnd || '';
+            if(r.category === 'tanggal'){
+                const cell = (data[5] || '').trim();
+                const start = r.dateStart || '';
+                const end = r.dateEnd || '';
                 if(!start && !end) continue;
-                if(!cell) return false;
+                if(!cell || cell === '-') return false;
                 if(start && cell < start) return false;
                 if(end && cell > end) return false;
                 continue;
             }
 
-            const colIndex = (f.category === 'jenis') ? 2 : (f.category === 'dosen' ? 3 : 4);
+            const colIndex = (r.category === 'jenis') ? 2 : (r.category === 'dosen' ? 3 : 4);
             const cellRaw = (data[colIndex] || '').toLowerCase();
 
-            if(!Array.isArray(f.values) || f.values.length === 0) continue;
+            if(!r.text || String(r.text).trim() === '') continue;
 
-            // OR inside values: any selected value matches cell
-            const anyMatch = f.values.some(v => {
-                if(!v) return false;
-                return cellRaw.indexOf(String(v).toLowerCase()) >= 0;
-            });
-
-            if(!anyMatch) return false;
+            const needle = String(r.text).toLowerCase().trim();
+            if(cellRaw.indexOf(needle) === -1) return false;
         }
 
         return true;
     };
-    Object.defineProperty(customMultiFilter, 'name', { value: 'customMultiFilter' });
-    $.fn.dataTable.ext.search.push(customMultiFilter);
+    Object.defineProperty(customRowsFilter, 'name', { value: 'customRowsFilter' });
+    $.fn.dataTable.ext.search.push(customRowsFilter);
 
-    // apply filters (redraw)
     function applyFilters(){
         table.draw();
-        // show reset if any active
-        const anyFilterActive = filters.length>0 || $('#tableSearch').val().trim()!=='';
+        const anyFilterActive = rows.length>0 || $('#tableSearch').val().trim()!=='';
         $('#btnResetAll').prop('hidden', !anyFilterActive);
     }
 
-    // search input debounce
     let debounce = null;
     $('#tableSearch').on('input', function(){
         if(debounce) clearTimeout(debounce);
         debounce = setTimeout(()=> applyFilters(), 180);
     });
 
-    // reset all
     $('#btnResetAll').click(function(){
-        filters = [];
+        rows = [];
         $('#tableSearch').val('');
-        renderFilters();
+        renderRows();
         applyFilters();
     });
 
-    // initial render (empty)
-    renderFilters();
+    rows.push({ id: nextId(), category: 'jenis', text:'', dateStart:'', dateEnd:'' });
+    renderRows();
 
-    // ===== POPUP DETAIL (unchanged logic from original) =====
     $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
         if($(e.target).closest('a').length) return;
         let raw=$(this).attr('data-detail')||'{}';
@@ -2444,7 +2526,6 @@ $(document).ready(function () {
         $('#modalDetail').addClass('show');
     });
 
-    // force-download
     $(document).on("click",".force-download",function(e){
         e.preventDefault();
         const url=$(this).data("url");
