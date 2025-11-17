@@ -2002,6 +2002,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{opacity:0;cursor:pointer;p
             <td>
                 <a href="<?= site_url('surat/edit/'.$s->id); ?>" class="btn btn-sm btn-warning">Edit</a>
                 <a href="<?= site_url('surat/delete/'.$s->id); ?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus data ini?')">Hapus</a>
+                <a href="<?= base_url('surat/cetak/' . $s->id) ?>"target="_blank"class="btn btn-info btn-sm">Cetak</a>
+
             </td>
         </tr>
         <?php endforeach; ?>
