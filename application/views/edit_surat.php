@@ -200,13 +200,18 @@ foreach($opsi_kel as $o) echo '<option value="'.$o.'" '.($surat['jenis_penugasan
 
 <!-- Eviden -->
 <div class="form-section">
-<h5><i class="fas fa-file-alt"></i> File Eviden</h5>
+<h4><i class="fas fa-file-alt"></i> File Eviden</h4>
 <div class="mb-4">
 <label class="font-weight-bold mb-3">File yang Sudah Diupload:</label>
 <div id="existingFilesContainer">
 <?php if(!empty($eviden) && is_array($eviden) && count($eviden) > 0): ?>
 <?php foreach($eviden as $idx=>$file):
+    // NORMALISASI
+    if (is_array($file)) {
+        $file = $file[0] ?? '';
+    }
     if(empty($file)) continue;
+
     $is_external = filter_var($file, FILTER_VALIDATE_URL) ? true : false;
     $download_link = $is_external ? site_url('surat/download_eviden_url?url=' . urlencode($file)) : base_url('uploads/eviden/' . $file);
     $label = $is_external ? basename($file) : $file;

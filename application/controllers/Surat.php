@@ -46,6 +46,15 @@ class Surat extends CI_Controller
     // Jika gagal decode → return array kosong
     return json_last_error() === JSON_ERROR_NONE ? $decode : [];
 }
+    public function list_surat_tugas()
+{
+    $data['surat_list'] = $this->Surat_model->get_all_surat();
+
+    $this->load->view('list_surat_tugas', $data);
+}
+
+
+
 
 
     /* ===========================================

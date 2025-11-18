@@ -40,6 +40,7 @@ class Surat_model extends CI_Model
     {
         $this->db->order_by('id', 'DESC');
         $result = $this->db->get('surat')->result();
+        return $this->db->order_by('id', 'DESC')->get('surat')->result();
 
         // Decode JSON biar enak dipakai di view
         foreach ($result as &$row) {

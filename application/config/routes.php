@@ -26,6 +26,7 @@ $route['surat/dl/(.+)'] = 'surat/dl/$1'; // Backup download method
 $route['surat'] = 'surat/index';
 $route['surat/index'] = 'surat/index';
 $route['surat/submit'] = 'surat/submit';
+$route['list-surat-tugas'] = 'surat/list_surat_tugas';
 $route['surat/edit/(:num)'] = 'surat/edit/$1';
 $route['surat/delete/(:num)'] = 'surat/delete/$1';
 
