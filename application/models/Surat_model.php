@@ -85,4 +85,12 @@ class Surat_model extends CI_Model
     {
         return $this->db->where('id', $id)->delete('surat');
     }
+    public function get_by_status($status)
+{
+    return $this->db->where('status', $status)
+                    ->order_by('created_at', 'DESC')
+                    ->get('surat')
+                    ->result();
+}
+
 }

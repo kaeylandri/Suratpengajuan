@@ -29,6 +29,8 @@ $route['surat/index'] = 'surat/index';
 $route['surat/submit'] = 'surat/submit';
 $route['surat/edit/(:num)'] = 'surat/edit/$1';
 $route['surat/delete/(:num)'] = 'surat/delete/$1';
+$route['list-surat-tugas'] = 'surat/list_surat_tugas';
+
 
 // Legacy download URL
 $route['surat/download_eviden_url'] = 'surat/download_eviden_url';
@@ -41,6 +43,12 @@ $route['surat/autocomplete_nip'] = 'surat/autocomplete_nip';
 $route['surat/test_path'] = 'surat/test_path';
 $route['surat/debug_eviden/(:num)'] = 'surat/debug_eviden/$1';
 
+
 $route['dekan'] = 'dekan/index';
 $route['dekan/dashboard'] = 'dekan/index';
 $route['dekan/test'] = 'dekan/test';
+
+// DASHBOARD
+$route['kaprodi'] = 'Kaprodi';
+$route['sekretariat'] = 'sekretariat';
+

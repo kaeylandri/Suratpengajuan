@@ -251,7 +251,7 @@
             </div>
             <div class="divider show-mobile" style="margin-top:20px"></div>
             <div class="card">
-            <a href="<?= base_url('list-surat-tugas') ?>" class="btn"><span class="fas fa-palette"></span> List Surat Tugas</a>
+                <a href="<?= base_url('list-surat-tugas') ?>" class="btn"><span class="fas fa-palette"></span> List Surat Tugas</a>
             </div>
             <div class="card">
                 <a href="https://ifik.telkomuniversity.ac.id/Pic_kk/input_surat" class="btn"><span class="fas fa-envelope-open-text"></span> Surat Tugas</a>
@@ -1836,6 +1836,11 @@ document.addEventListener("DOMContentLoaded", function () {
         <?php elseif ($this->session->flashdata('error')): ?>
             <p style="color:red;"><?php echo $this->session->flashdata('error'); ?></p>
         <?php endif; ?>
+
+<!-- ===== STYLE ===== -->
+<!-- ===== IMPORT FONT ===== -->
+
+
 <!-- FONT AWESOME ICON -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 

@@ -19,7 +19,7 @@ class Surat extends CI_Controller
     {
         if (!$val || trim($val) === "" || $val === "-") return "-";
         $ts = strtotime($val);
-        return $ts ? date('Y-m-d', $ts) : "-";
+        return $ts ? date('Y-m-d', $ts) : "";
     }
 
     /* ===========================================
@@ -73,32 +73,37 @@ class Surat extends CI_Controller
         $arr = array_values(array_filter($arr, fn($x) => trim($x) !== ""));
 
         $data = [
-            'user_id' => $post['user_id'] ?? '-',
-            'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
-            'jenis_date' => $post['jenis_date'] ?? '-',
-            'tanggal_pengajuan' => $tanggal_pengajuan,
-            'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
-            'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
-            'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
-            'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
-            'periode_value' => $post['periode_value'] ?? '-',
-            'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
-            'penyelenggara' => $post['penyelenggara'] ?? '-',
-            'jenis_pengajuan' => $post['jenis_pengajuan'] ?? '-',
-            'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
-            'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? '-',
-            'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
-            'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
-            'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
-            'format' => $post['format'] ?? '-',
+    'user_id' => $post['user_id'] ?? '-',
+    'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
+    'jenis_date' => $post['jenis_date'] ?? '-',
+    'tanggal_pengajuan' => $tanggal_pengajuan,
+    'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
+    'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
+    'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
+    'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
+    'periode_value' => $post['periode_value'] ?? '-',
+    'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
+    'penyelenggara' => $post['penyelenggara'] ?? '-',
+    'jenis_pengajuan' => $post['jenis_pengajuan'] ?? '-',
+    'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
+    'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? '-',
+    'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
+    'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
+    'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
+    'format' => $post['format'] ?? '-',
 
-            'nip' => json_encode($post['nip'] ?? []),
-            'nama_dosen' => json_encode($post['nama_dosen'] ?? []),
-            'jabatan' => json_encode($post['jabatan'] ?? []),
-            'divisi' => json_encode($post['divisi'] ?? []),
+    'nip' => json_encode($post['nip'] ?? []),
+    'nama_dosen' => json_encode($post['nama_dosen'] ?? []),
+    'jabatan' => json_encode($post['jabatan'] ?? []),
+    'divisi' => json_encode($post['divisi'] ?? []),
 
-            'eviden' => json_encode($arr)
-        ];
+    'eviden' => json_encode($arr),
+
+    // ❗ WAJIB supaya muncul di dashboard Kaprodi
+    'status' => 'pengajuan',
+    'created_at' => date('Y-m-d H:i:s')
+];
+
 
         $this->Surat_model->insert_surat($data);
 
@@ -742,4 +747,23 @@ private function _download_from_url($url)
 
         echo json_encode($out);
     }
+    public function generate_qr($id)
+{
+    $this->load->library('qr');
+
+    // Link yang akan disimpan di QR
+    $url = base_url('regulation/validate/' . $id);
+
+    // Lokasi simpan file
+    $path = FCPATH . 'uploads/qr/surat_' . $id . '.png';
+    if (!is_dir(FCPATH . 'uploads/qr')) {
+        mkdir(FCPATH . 'uploads/qr', 0777, TRUE);
+    }
+
+    // Generate & simpan
+    $this->qr->generate($url, $path, 6);
+
+    echo "QR berhasil dibuat di: " . $path;
+}
+
 }

@@ -344,7 +344,7 @@ else:
 </div>
 
 <button type="submit" class="btn btn-success px-4"><i class="fas fa-save"></i> Simpan Perubahan</button>
-<a href="<?= site_url('surat'); ?>" class="btn btn-secondary px-4"><i class="fas fa-arrow-left"></i> Kembali</a>
+<a href="<?= base_url('list-surat-tugas') ?>" class="btn btn-secondary px-4"><i class="fas fa-arrow-left"></i> Kembali</a>
 
 </form>
 </div>
