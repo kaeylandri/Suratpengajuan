@@ -105,125 +105,123 @@ class Surat extends CI_Controller
         $this->session->set_flashdata('success', 'Data berhasil disimpan!');
         redirect('surat');
     }
+/* ===========================================
+   DOWNLOAD VIA URL (LEGACY - UploadCare)
+===========================================*/
+public function download_eviden_url()
+{
+    $url = $this->input->get('url');
+    $name = $this->input->get('name') ?? "eviden";
 
-    /* ===========================================
-       DOWNLOAD VIA URL (Legacy - untuk UploadCare)
-    ============================================*/
-    public function download_eviden_url()
-    {
-        $url = $this->input->get('url');
-        $name = $this->input->get('name') ?? "eviden";
+    if (!$url) show_404();
 
-        if (!$url) show_404();
+    header("Content-Disposition: attachment; filename=\"$name\"");
+    readfile($url);
+}
 
-        header("Content-Disposition: attachment; filename=\"$name\"");
-        readfile($url);
+/* ===========================================
+   DOWNLOAD EVIDEN FILE - NEW METHOD (REVISION)
+===========================================*/
+public function download_eviden()
+{
+    $file = $this->input->get('file');
+
+    if (!$file) {
+        show_404();
+        return;
     }
 
-    /* ===========================================
-       DOWNLOAD EVIDEN FILE - NEW METHOD
-    ============================================*/
-    public function download_eviden($filename = null)
-    {
-        if (!$filename) {
-            show_404();
-            return;
-        }
+    // Decode input filename/url
+    $file = urldecode($file);
 
-        // Decode filename jika di-encode
-        $filename = urldecode($filename);
-
-        // Cek apakah file adalah URL (UploadCare atau external)
-        if (filter_var($filename, FILTER_VALIDATE_URL)) {
-            // Download dari URL external
-            $this->_download_from_url($filename);
-            return;
-        }
-
-        // File lokal - cek keamanan path
-        $safe_filename = basename($filename);
-        $filepath = './uploads/eviden/' . $safe_filename;
-
-        if (!file_exists($filepath)) {
-            show_404();
-            return;
-        }
-
-        // Get mime type
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mime_type = finfo_file($finfo, $filepath);
-        finfo_close($finfo);
-
-        // Clear any previous output
-        if (ob_get_level()) {
-            ob_end_clean();
-        }
-
-        // Set headers untuk force download
-        header('Content-Description: File Transfer');
-        header('Content-Type: ' . $mime_type);
-        header('Content-Disposition: attachment; filename="' . $safe_filename . '"');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($filepath));
-        
-        // Flush output
-        flush();
-        
-        // Read and output file
-        readfile($filepath);
-        exit;
+    // Jika file adalah URL → download via URL
+    if (filter_var($file, FILTER_VALIDATE_URL)) {
+        $this->_download_from_url($file);
+        return;
     }
 
-    /* ===========================================
-       HELPER: DOWNLOAD FROM EXTERNAL URL
-    ============================================*/
-    private function _download_from_url($url)
-    {
-        // Get filename dari URL
-        $filename = basename(parse_url($url, PHP_URL_PATH));
-        
-        if (empty($filename)) {
-            $filename = 'download_' . time();
-        }
+    // ↓↓↓ FILE LOKAL ↓↓↓
 
-        // Get file content
-        $file_content = @file_get_contents($url);
-        
-        if ($file_content === false) {
-            show_404();
-            return;
-        }
+    // Aman-kan input (hindari path traversal)
+    $safe_filename = basename($file);
 
-        // Detect mime type from content
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mime_type = finfo_buffer($finfo, $file_content);
-        finfo_close($finfo);
+    // Path default folder eviden
+    $filepath = FCPATH . 'uploads/eviden/' . $safe_filename;
 
-        // Clear any previous output
-        if (ob_get_level()) {
-            ob_end_clean();
-        }
-
-        // Set headers untuk force download
-        header('Content-Description: File Transfer');
-        header('Content-Type: ' . $mime_type);
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        header('Content-Length: ' . strlen($file_content));
-        
-        // Flush output
-        flush();
-        
-        // Output file content
-        echo $file_content;
-        exit;
+    if (!file_exists($filepath)) {
+        show_404();
+        return;
     }
+
+    // Ambil mime type
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime_type = finfo_file($finfo, $filepath);
+    finfo_close($finfo);
+
+    // Bersihkan output buffer
+    if (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    // Set header download
+    header('Content-Description: File Transfer');
+    header('Content-Type: ' . $mime_type);
+    header('Content-Disposition: attachment; filename="' . $safe_filename . '"');
+    header('Content-Transfer-Encoding: binary');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: ' . filesize($filepath));
+
+    flush();
+    readfile($filepath);
+    exit;
+}
+
+/* ===========================================
+   HELPER: DOWNLOAD FROM EXTERNAL URL (REVISION)
+===========================================*/
+private function _download_from_url($url)
+{
+    // Ambil nama file dari URL
+    $filename = basename(parse_url($url, PHP_URL_PATH));
+
+    if (empty($filename)) {
+        $filename = 'download_' . time();
+    }
+
+    // Ambil konten dari URL
+    $file_content = @file_get_contents($url);
+
+    if ($file_content === false) {
+        show_404();
+        return;
+    }
+
+    // Tentukan mime type
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime_type = finfo_buffer($finfo, $file_content);
+    finfo_close($finfo);
+
+    // Bersihkan output buffer
+    if (ob_get_level()) {
+        ob_end_clean();
+    }
+
+    // Set header download
+    header('Content-Description: File Transfer');
+    header('Content-Type: ' . $mime_type);
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Content-Transfer-Encoding: binary');
+    header('Expires: 0');
+    header('Cache-Control: must-revalidate');
+    header('Pragma: public');
+    header('Content-Length: ' . strlen($file_content));
+
+    flush();
+    echo $file_content;
+    exit;
+}
 
     /* ===========================================
        EDIT DATA — FIX EVIDEN DENGAN UPLOAD FILE

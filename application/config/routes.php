@@ -40,3 +40,7 @@ $route['surat/autocomplete_nip'] = 'surat/autocomplete_nip';
 // DEBUG - HAPUS SETELAH SELESAI
 $route['surat/test_path'] = 'surat/test_path';
 $route['surat/debug_eviden/(:num)'] = 'surat/debug_eviden/$1';
+
+$route['dekan'] = 'dekan/index';
+$route['dekan/dashboard'] = 'dekan/index';
+$route['dekan/test'] = 'dekan/test';
