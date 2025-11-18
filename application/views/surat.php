@@ -1836,7 +1836,6 @@ document.addEventListener("DOMContentLoaded", function () {
         <?php elseif ($this->session->flashdata('error')): ?>
             <p style="color:red;"><?php echo $this->session->flashdata('error'); ?></p>
         <?php endif; ?>
-        
 <!-- FONT AWESOME ICON -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
