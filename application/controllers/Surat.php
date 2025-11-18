@@ -719,6 +719,53 @@ class Surat extends CI_Controller
         }
     }
 
+    public function download($id)
+{
+    // Load model
+    $this->load->model('Surat_model');
+    $surat = $this->Surat_model->getById($id);
+
+    // Load dompdf
+    $this->load->library('dompdf_lib');
+    $dompdf = $this->dompdf_lib->load();
+
+    // Render view
+    $html = $this->load->view('surat/surat_tugas_pdf', ['surat' => $surat], true);
+
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+
+    // Output PDF
+    $dompdf->stream("surat_tugas_$id.pdf", array("Attachment" => 1));
+}
+public function cetak_pdf($id)
+{
+    $this->load->library('pdf'); // DOMPDF loader CI3
+    $this->load->model('Surat_model');
+
+    $data['surat'] = $this->Surat_model->getById($id);
+
+    $html = $this->load->view('surat/surat_tugas_pdf', $data, TRUE);
+
+    $this->pdf->loadHtml($html);
+    $this->pdf->setPaper('A4', 'portrait');
+    $this->pdf->render();
+
+    $this->pdf->stream("Surat_Tugas_$id.pdf", array("Attachment" => 1));
+}
+public function test_pdf()
+{
+    $this->load->library('pdf');
+
+    $this->pdf->loadHtml('<h1>Test PDF Working!</h1>');
+    $this->pdf->setPaper('A4', 'portrait');
+    $this->pdf->render();
+    $this->pdf->stream("test.pdf", ["Attachment" => false]);
+}
+
+
+
     /* ===========================================
        AUTOCOMPLETE NIP
     ============================================*/
