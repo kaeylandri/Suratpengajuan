@@ -135,13 +135,7 @@
         <p class="nama">Dandi Yunidar, S.Sn., M.Ds., Ph.D.<br>
         Dekan Fakultas Industri Kreatif</p>
     </div>
-    <a href="<?= base_url('surat/cetak_pdf/'.$surat->id) ?>" class="btn btn-success">
-    Download PDF
-</a>
-
-<a href="<?= base_url('surat/cetak_print/'.$surat->id) ?>" target="_blank" class="btn btn-primary">
-    Print
-</a>
+        <img src="<?= base_url('uploads/qr/surat_'.$id.'.png') ?>" width="150">
 
 </body>
 </html>

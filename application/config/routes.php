@@ -11,6 +11,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'surat';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+$route['list-surat-tugas'] = 'surat/list_surat_tugas';
 
 /*
 | -------------------------------------------------------------------------
@@ -41,3 +42,8 @@ $route['surat/autocomplete_nip'] = 'surat/autocomplete_nip';
 // DEBUG - HAPUS SETELAH SELESAI
 $route['surat/test_path'] = 'surat/test_path';
 $route['surat/debug_eviden/(:num)'] = 'surat/debug_eviden/$1';
+
+// DASHBOARD
+$route['kaprodi'] = 'Kaprodi';
+$route['sekretariat'] = 'sekretariat';
+

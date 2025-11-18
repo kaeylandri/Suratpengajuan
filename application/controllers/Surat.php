@@ -1,14 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-/**
- * @property Surat_model $Surat_model
- * @property Dosen_model $Dosen_model
- * @property CI_Input $input
- * @property CI_Session $session
- * @property CI_DB_query_builder $db
- */
-
 class Surat extends CI_Controller
 {
     public function __construct()
@@ -27,8 +19,9 @@ class Surat extends CI_Controller
     {
         if (!$val || trim($val) === "" || $val === "-") return "-";
         $ts = strtotime($val);
-        return $ts ? date('Y-m-d', $ts) : "-";
+        return $ts ? date('Y-m-d', $ts) : "";
     }
+
     /* ===========================================
        SAFE JSON DECODE
     ============================================*/
@@ -39,13 +32,6 @@ class Surat extends CI_Controller
         $decoded = json_decode($json, true);
         return (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
     }
-    public function list_surat_tugas()
-{
-    $data['surat_list'] = $this->Surat_model->get_all_surat();
-
-    $this->load->view('list_surat_tugas', $data);
-}
-
 
     /* ===========================================
        LIST DATA
@@ -87,32 +73,37 @@ class Surat extends CI_Controller
         $arr = array_values(array_filter($arr, fn($x) => trim($x) !== ""));
 
         $data = [
-            'user_id' => $post['user_id'] ?? '-',
-            'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
-            'jenis_date' => $post['jenis_date'] ?? '-',
-            'tanggal_pengajuan' => $tanggal_pengajuan,
-            'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
-            'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
-            'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
-            'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
-            'periode_value' => $post['periode_value'] ?? '-',
-            'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
-            'penyelenggara' => $post['penyelenggara'] ?? '-',
-            'jenis_pengajuan' => $post['jenis_pengajuan'] ?? '-',
-            'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
-            'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? '-',
-            'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
-            'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
-            'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
-            'format' => $post['format'] ?? '-',
+    'user_id' => $post['user_id'] ?? '-',
+    'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
+    'jenis_date' => $post['jenis_date'] ?? '-',
+    'tanggal_pengajuan' => $tanggal_pengajuan,
+    'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
+    'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
+    'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
+    'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
+    'periode_value' => $post['periode_value'] ?? '-',
+    'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
+    'penyelenggara' => $post['penyelenggara'] ?? '-',
+    'jenis_pengajuan' => $post['jenis_pengajuan'] ?? '-',
+    'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
+    'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? '-',
+    'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
+    'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
+    'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
+    'format' => $post['format'] ?? '-',
 
-            'nip' => json_encode($post['nip'] ?? []),
-            'nama_dosen' => json_encode($post['nama_dosen'] ?? []),
-            'jabatan' => json_encode($post['jabatan'] ?? []),
-            'divisi' => json_encode($post['divisi'] ?? []),
+    'nip' => json_encode($post['nip'] ?? []),
+    'nama_dosen' => json_encode($post['nama_dosen'] ?? []),
+    'jabatan' => json_encode($post['jabatan'] ?? []),
+    'divisi' => json_encode($post['divisi'] ?? []),
 
-            'eviden' => json_encode($arr)
-        ];
+    'eviden' => json_encode($arr),
+
+    // ❗ WAJIB supaya muncul di dashboard Kaprodi
+    'status' => 'pengajuan',
+    'created_at' => date('Y-m-d H:i:s')
+];
+
 
         $this->Surat_model->insert_surat($data);
 
@@ -638,6 +629,12 @@ class Surat extends CI_Controller
         // load halaman cetak
         $this->load->view('surat_print', $data);
     }
+    public function list_surat_tugas()
+{
+    $data['surat_list'] = $this->Surat_model->get_all_surat();
+
+    $this->load->view('list_surat_tugas', $data);
+}
 
     /* ===========================================
        GET DOSEN BY NIP
@@ -719,53 +716,6 @@ class Surat extends CI_Controller
         }
     }
 
-    public function download($id)
-{
-    // Load model
-    $this->load->model('Surat_model');
-    $surat = $this->Surat_model->getById($id);
-
-    // Load dompdf
-    $this->load->library('dompdf_lib');
-    $dompdf = $this->dompdf_lib->load();
-
-    // Render view
-    $html = $this->load->view('surat/surat_tugas_pdf', ['surat' => $surat], true);
-
-    $dompdf->loadHtml($html);
-    $dompdf->setPaper('A4', 'portrait');
-    $dompdf->render();
-
-    // Output PDF
-    $dompdf->stream("surat_tugas_$id.pdf", array("Attachment" => 1));
-}
-public function cetak_pdf($id)
-{
-    $this->load->library('pdf'); // DOMPDF loader CI3
-    $this->load->model('Surat_model');
-
-    $data['surat'] = $this->Surat_model->getById($id);
-
-    $html = $this->load->view('surat/surat_tugas_pdf', $data, TRUE);
-
-    $this->pdf->loadHtml($html);
-    $this->pdf->setPaper('A4', 'portrait');
-    $this->pdf->render();
-
-    $this->pdf->stream("Surat_Tugas_$id.pdf", array("Attachment" => 1));
-}
-public function test_pdf()
-{
-    $this->load->library('pdf');
-
-    $this->pdf->loadHtml('<h1>Test PDF Working!</h1>');
-    $this->pdf->setPaper('A4', 'portrait');
-    $this->pdf->render();
-    $this->pdf->stream("test.pdf", ["Attachment" => false]);
-}
-
-
-
     /* ===========================================
        AUTOCOMPLETE NIP
     ============================================*/
@@ -799,5 +749,23 @@ public function test_pdf()
 
         echo json_encode($out);
     }
+    public function generate_qr($id)
+{
+    $this->load->library('qr');
+
+    // Link yang akan disimpan di QR
+    $url = base_url('regulation/validate/' . $id);
+
+    // Lokasi simpan file
+    $path = FCPATH . 'uploads/qr/surat_' . $id . '.png';
+    if (!is_dir(FCPATH . 'uploads/qr')) {
+        mkdir(FCPATH . 'uploads/qr', 0777, TRUE);
+    }
+
+    // Generate & simpan
+    $this->qr->generate($url, $path, 6);
+
+    echo "QR berhasil dibuat di: " . $path;
+}
 
 }
