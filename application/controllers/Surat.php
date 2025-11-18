@@ -23,6 +23,17 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
+       SAFE JSON DECODE
+    ============================================*/
+    private function safe_json_decode($json)
+    {
+        if (is_array($json)) return $json;
+        if (!is_string($json)) return [];
+        $decoded = json_decode($json, true);
+        return (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
+    }
+
+    /* ===========================================
        LIST DATA
     ============================================*/
     public function index()
@@ -393,6 +404,228 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
+       MULTI DELETE - HAPUS BANYAK DATA SEKALIGUS
+    ============================================*/
+    public function multi_delete()
+    {
+        // Ambil IDs dari POST request
+        $ids = $this->input->post('ids');
+        
+        // Validasi: pastikan IDs adalah array dan tidak kosong
+        if (!$ids || !is_array($ids) || empty($ids)) {
+            $this->session->set_flashdata('error', 'Tidak ada data yang dipilih untuk dihapus.');
+            redirect('surat');
+            return;
+        }
+
+        // Counter untuk tracking berapa data yang berhasil dihapus
+        $deleted_count = 0;
+        $failed_ids = [];
+
+        // Loop setiap ID dan hapus satu per satu
+        foreach ($ids as $id) {
+            // Sanitize ID
+            $id = intval($id);
+            
+            if ($id <= 0) {
+                $failed_ids[] = $id;
+                continue;
+            }
+
+            // Ambil data surat untuk hapus file eviden
+            $surat = $this->Surat_model->get_by_id($id);
+            
+            if ($surat) {
+                // Hapus semua file eviden yang terkait
+                $eviden = json_decode($surat->eviden, true) ?: [];
+                foreach ($eviden as $file) {
+                    if ($file && !filter_var($file, FILTER_VALIDATE_URL)) {
+                        $file_path = './uploads/eviden/' . $file;
+                        if (file_exists($file_path)) {
+                            @unlink($file_path);
+                        }
+                    }
+                }
+
+                // Hapus data dari database
+                $result = $this->Surat_model->delete_surat($id);
+                
+                if ($result) {
+                    $deleted_count++;
+                } else {
+                    $failed_ids[] = $id;
+                }
+            } else {
+                $failed_ids[] = $id;
+            }
+        }
+
+        // Set flashdata berdasarkan hasil
+        if ($deleted_count > 0) {
+            $message = "Berhasil menghapus {$deleted_count} data.";
+            
+            if (!empty($failed_ids)) {
+                $message .= " Gagal menghapus ID: " . implode(', ', $failed_ids);
+            }
+            
+            $this->session->set_flashdata('success', $message);
+        } else {
+            $this->session->set_flashdata('error', 'Tidak ada data yang berhasil dihapus.');
+        }
+
+        redirect('surat');
+    }
+
+    /* ===========================================
+       MULTI EDIT - EDIT BANYAK DATA SEKALIGUS
+    ============================================*/
+    public function multi_edit()
+    {
+        // Ambil IDs dari GET request
+        $ids_param = $this->input->get('ids');
+        
+        if (!$ids_param) {
+            $this->session->set_flashdata('error', 'Tidak ada data yang dipilih untuk di-edit.');
+            redirect('surat');
+            return;
+        }
+
+        // Parse IDs
+        $ids = array_map('intval', explode(',', $ids_param));
+        $ids = array_filter($ids, fn($id) => $id > 0);
+
+        if (empty($ids)) {
+            $this->session->set_flashdata('error', 'ID tidak valid.');
+            redirect('surat');
+            return;
+        }
+
+        // Ambil data surat berdasarkan IDs
+        $data['surat_list'] = [];
+        foreach ($ids as $id) {
+            $surat = $this->Surat_model->get_by_id($id);
+            if ($surat) {
+                $data['surat_list'][] = $surat;
+            }
+        }
+
+        if (empty($data['surat_list'])) {
+            $this->session->set_flashdata('error', 'Data tidak ditemukan.');
+            redirect('surat');
+            return;
+        }
+
+        // Tampilkan view multi-edit
+        $this->load->view('multi_edit_surat', $data);
+    }
+
+    /* ===========================================
+       SAVE MULTI EDIT - SIMPAN PERUBAHAN MULTI EDIT
+    ============================================*/
+    public function save_multi_edit()
+    {
+        $post = $this->input->post();
+        
+        if (!isset($post['items']) || !is_array($post['items'])) {
+            $this->session->set_flashdata('error', 'Data tidak valid.');
+            redirect('surat');
+            return;
+        }
+
+        $success_count = 0;
+        $failed_count = 0;
+
+        foreach ($post['items'] as $item) {
+            if (!isset($item['id'])) continue;
+
+            $id = intval($item['id']);
+            if ($id <= 0) continue;
+
+            // Ambil data existing
+            $existing = $this->Surat_model->get_by_id($id);
+            if (!$existing) {
+                $failed_count++;
+                continue;
+            }
+
+            // Prepare update data (LENGKAP dengan semua field)
+            $update_data = [
+                'nama_kegiatan' => $item['nama_kegiatan'] ?? $existing->nama_kegiatan,
+                'jenis_date' => $item['jenis_date'] ?? $existing->jenis_date,
+                'tanggal_kegiatan' => $this->safe_date($item['tanggal_kegiatan'] ?? null),
+                'akhir_kegiatan' => $this->safe_date($item['akhir_kegiatan'] ?? null),
+                'periode_penugasan' => $this->safe_date($item['periode_penugasan'] ?? null),
+                'akhir_periode_penugasan' => $this->safe_date($item['akhir_periode_penugasan'] ?? null),
+                'periode_value' => $item['periode_value'] ?? $existing->periode_value,
+                'tempat_kegiatan' => $item['tempat_kegiatan'] ?? $existing->tempat_kegiatan,
+                'penyelenggara' => $item['penyelenggara'] ?? $existing->penyelenggara,
+                'jenis_pengajuan' => $item['jenis_pengajuan'] ?? $existing->jenis_pengajuan,
+                'lingkup_penugasan' => $item['lingkup_penugasan'] ?? $existing->lingkup_penugasan,
+                'format' => $item['format'] ?? $existing->format,
+                'jenis_penugasan_perorangan' => $item['jenis_penugasan_perorangan'] ?? $existing->jenis_penugasan_perorangan,
+                'penugasan_lainnya_perorangan' => $item['penugasan_lainnya_perorangan'] ?? $existing->penugasan_lainnya_perorangan,
+                'jenis_penugasan_kelompok' => $item['jenis_penugasan_kelompok'] ?? $existing->jenis_penugasan_kelompok,
+                'penugasan_lainnya_kelompok' => $item['penugasan_lainnya_kelompok'] ?? $existing->penugasan_lainnya_kelompok,
+                
+                // Encode data dosen sebagai JSON
+                'nip' => json_encode($item['nip'] ?? []),
+                'nama_dosen' => json_encode($item['nama_dosen'] ?? []),
+                'jabatan' => json_encode($item['jabatan'] ?? []),
+                'divisi' => json_encode($item['divisi'] ?? []),
+            ];
+
+            // Update database
+            $result = $this->Surat_model->update_surat($id, $update_data);
+            
+            if ($result) {
+                $success_count++;
+            } else {
+                $failed_count++;
+            }
+        }
+
+        // Set flashdata
+        if ($success_count > 0) {
+            $message = "Berhasil mengupdate {$success_count} data.";
+            if ($failed_count > 0) {
+                $message .= " Gagal update {$failed_count} data.";
+            }
+            $this->session->set_flashdata('success', $message);
+        } else {
+            $this->session->set_flashdata('error', 'Tidak ada data yang berhasil diupdate.');
+        }
+
+        redirect('surat');
+    }
+
+    /* ===========================================
+       CETAK SURAT
+    ============================================*/
+    public function cetak($id)
+    {
+        // ambil data surat menggunakan model Surat
+        $surat = $this->Surat_model->get_by_id($id);
+        if (!$surat) show_404();
+        
+        // decode array id dosen dari field json
+        $dosen_ids = $this->safe_json_decode($surat->nama_dosen);
+        
+        // load model dosen
+        $this->load->model('Dosen_model');
+        
+        // ambil semua data dosen berdasarkan ID
+        $list_dosen = $this->Dosen_model->get_dosen_by_ids($dosen_ids);
+        
+        $data = [
+            'surat' => $surat,
+            'list_dosen' => $list_dosen
+        ];
+        
+        // load halaman cetak
+        $this->load->view('surat_print', $data);
+    }
+
+    /* ===========================================
        GET DOSEN BY NIP
     ============================================*/
     public function get_dosen_by_nip()
@@ -412,65 +645,66 @@ class Surat extends CI_Controller
             ] : ['status' => false]
         );
     }
-/* ===========================================
-   DEBUG EVIDEN - TAMBAHKAN DI CONTROLLER
-   Method untuk cek data eviden di database
-============================================*/
 
-public function debug_eviden($id)
-{
-    $surat = $this->Surat_model->get_by_id($id);
-    
-    if (!$surat) {
-        die('Data tidak ditemukan');
-    }
-    
-    echo "<h2>Debug Eviden - ID: $id</h2>";
-    echo "<hr>";
-    
-    echo "<h3>Raw Data dari Database:</h3>";
-    echo "<pre>";
-    print_r($surat);
-    echo "</pre>";
-    
-    echo "<hr>";
-    
-    echo "<h3>Eviden Field (Raw):</h3>";
-    echo "<code>" . htmlspecialchars($surat->eviden ?? 'NULL') . "</code>";
-    
-    echo "<hr>";
-    
-    echo "<h3>Eviden Decoded:</h3>";
-    $eviden = json_decode($surat->eviden ?? '[]', true);
-    echo "<pre>";
-    print_r($eviden);
-    echo "</pre>";
-    
-    echo "<hr>";
-    
-    echo "<h3>Analisis Eviden:</h3>";
-    if (is_array($eviden)) {
-        foreach ($eviden as $idx => $file) {
-            echo "<strong>[$idx]</strong> $file<br>";
-            echo "- Is URL: " . (filter_var($file, FILTER_VALIDATE_URL) ? 'YES' : 'NO') . "<br>";
-            echo "- Contains ucarecdn: " . (strpos($file, 'ucarecdn.com') !== false ? 'YES' : 'NO') . "<br>";
-            echo "- Contains tilde (~): " . (strpos($file, '~') !== false ? 'YES' : 'NO') . "<br>";
-            
-            if (filter_var($file, FILTER_VALIDATE_URL)) {
-                echo "- <strong style='color: green;'>Ini adalah URL UploadCare yang valid</strong><br>";
-                echo "- Download URL: <a href='" . site_url('surat/download_eviden_url?url=' . urlencode($file)) . "' target='_blank'>Test Download</a><br>";
-            } else {
-                $local_path = './uploads/eviden/' . basename($file);
-                echo "- File lokal path: $local_path<br>";
-                echo "- File exists: " . (file_exists($local_path) ? 'YES' : 'NO') . "<br>";
-            }
-            
-            echo "<br>";
+    /* ===========================================
+       DEBUG EVIDEN - TAMBAHKAN DI CONTROLLER
+       Method untuk cek data eviden di database
+    ============================================*/
+    public function debug_eviden($id)
+    {
+        $surat = $this->Surat_model->get_by_id($id);
+        
+        if (!$surat) {
+            die('Data tidak ditemukan');
         }
-    } else {
-        echo "<em>Eviden bukan array atau kosong</em>";
+        
+        echo "<h2>Debug Eviden - ID: $id</h2>";
+        echo "<hr>";
+        
+        echo "<h3>Raw Data dari Database:</h3>";
+        echo "<pre>";
+        print_r($surat);
+        echo "</pre>";
+        
+        echo "<hr>";
+        
+        echo "<h3>Eviden Field (Raw):</h3>";
+        echo "<code>" . htmlspecialchars($surat->eviden ?? 'NULL') . "</code>";
+        
+        echo "<hr>";
+        
+        echo "<h3>Eviden Decoded:</h3>";
+        $eviden = json_decode($surat->eviden ?? '[]', true);
+        echo "<pre>";
+        print_r($eviden);
+        echo "</pre>";
+        
+        echo "<hr>";
+        
+        echo "<h3>Analisis Eviden:</h3>";
+        if (is_array($eviden)) {
+            foreach ($eviden as $idx => $file) {
+                echo "<strong>[$idx]</strong> $file<br>";
+                echo "- Is URL: " . (filter_var($file, FILTER_VALIDATE_URL) ? 'YES' : 'NO') . "<br>";
+                echo "- Contains ucarecdn: " . (strpos($file, 'ucarecdn.com') !== false ? 'YES' : 'NO') . "<br>";
+                echo "- Contains tilde (~): " . (strpos($file, '~') !== false ? 'YES' : 'NO') . "<br>";
+                
+                if (filter_var($file, FILTER_VALIDATE_URL)) {
+                    echo "- <strong style='color: green;'>Ini adalah URL UploadCare yang valid</strong><br>";
+                    echo "- Download URL: <a href='" . site_url('surat/download_eviden_url?url=' . urlencode($file)) . "' target='_blank'>Test Download</a><br>";
+                } else {
+                    $local_path = './uploads/eviden/' . basename($file);
+                    echo "- File lokal path: $local_path<br>";
+                    echo "- File exists: " . (file_exists($local_path) ? 'YES' : 'NO') . "<br>";
+                }
+                
+                echo "<br>";
+            }
+        } else {
+            echo "<em>Eviden bukan array atau kosong</em>";
+        }
     }
-}
+
     /* ===========================================
        AUTOCOMPLETE NIP
     ============================================*/

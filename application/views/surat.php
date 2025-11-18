@@ -1840,7 +1840,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <!-- ===== STYLE ===== -->
 <!-- ===== IMPORT FONT ===== -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
- <style>
+  <style>
 /* ---------- Font & base ---------- */
 body, input, select, button, table {
     font-family: 'Montserrat', sans-serif;
@@ -2031,6 +2031,55 @@ body, input, select, button, table {
     background:#e67e00;
 }
 
+/* Multi-action buttons */
+.multi-actions {
+    display:none;
+    background:#ffffff;
+    padding:12px 14px;
+    border-radius:12px;
+    box-shadow:0 4px 14px rgba(0,0,0,0.06);
+    gap:8px;
+    align-items:center;
+    margin-bottom:14px;
+    border:1px solid #f0f0f0;
+}
+.multi-actions.show {
+    display:flex;
+}
+.multi-actions .selected-count {
+    font-size:14px;
+    font-weight:600;
+    color:#333;
+    margin-right:8px;
+}
+.btn-multi {
+    height:40px;
+    padding:0 16px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-size:14px;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-weight:600;
+    transition:all 0.2s;
+}
+.btn-multi-edit {
+    background:#ffa726;
+    color:white;
+}
+.btn-multi-edit:hover {
+    background:#fb8c00;
+}
+.btn-multi-delete {
+    background:#ef5350;
+    color:white;
+}
+.btn-multi-delete:hover {
+    background:#e53935;
+}
+
 /* existing table / badges */
 #tabelSurat{
     width:100%;
@@ -2050,7 +2099,7 @@ body, input, select, button, table {
     border:1px solid #eee;
     vertical-align:middle
 }
-#tabelSurat td:nth-child(4),#tabelSurat td:nth-child(5){
+#tabelSurat td:nth-child(5),#tabelSurat td:nth-child(6){
     min-width:180px;
     max-width:280px
 }
@@ -2061,6 +2110,24 @@ body, input, select, button, table {
 #tabelSurat tbody tr.row-detail:hover {
     background:#fffaf5;
 }
+#tabelSurat tbody tr.row-detail.selected {
+    background:#fff4e6;
+}
+
+/* Checkbox styling */
+.row-checkbox {
+    width:18px;
+    height:18px;
+    cursor:pointer;
+    accent-color:#FB8C00;
+}
+#checkAll {
+    width:18px;
+    height:18px;
+    cursor:pointer;
+    accent-color:#FB8C00;
+}
+
 .dosen-container,.divisi-container{
     display:flex;
     flex-wrap:wrap;
@@ -2178,6 +2245,17 @@ body, input, select, button, table {
 
 <div id="filterBuilder" class="filter-builder"></div>
 
+<!-- ===== MULTI-ACTION BAR ===== -->
+<div id="multiActions" class="multi-actions">
+    <span class="selected-count"><span id="selectedCount">0</span> item terpilih</span>
+    <button id="btnMultiEdit" class="btn-multi btn-multi-edit">
+        <i class="fa fa-edit"></i> Multi Edit
+    </button>
+    <button id="btnMultiDelete" class="btn-multi btn-multi-delete">
+        <i class="fa fa-trash"></i> Multi Hapus
+    </button>
+</div>
+
 <!-- ===== MODAL DETAIL ===== -->
 <div id="modalDetail" class="modal-detail">
     <div class="modal-content-detail">
@@ -2195,7 +2273,8 @@ body, input, select, button, table {
 <table id="tabelSurat" class="display nowrap">
     <thead>
         <tr>
-            <th>ID</th>
+            <th><input type="checkbox" id="checkAll"></th>
+            <th>No</th>
             <th>Nama Kegiatan</th>
             <th>Jenis Pengajuan</th>
             <th>Nama Dosen</th>
@@ -2205,7 +2284,9 @@ body, input, select, button, table {
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($surat_list as $s): ?>
+        <?php 
+        $no = 1;
+        foreach ($surat_list as $s): ?>
         <?php
         $detail = (array) $s;
         foreach (['nip','nama_dosen','jabatan','divisi','eviden'] as $jf) {
@@ -2216,8 +2297,9 @@ body, input, select, button, table {
         }
         $data_detail_attr = htmlspecialchars(json_encode($detail, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), ENT_QUOTES,'UTF-8');
         ?>
-        <tr class="row-detail" data-detail='<?= $data_detail_attr; ?>'>
-            <td><?= $s->id; ?></td>
+        <tr class="row-detail" data-detail='<?= $data_detail_attr; ?>' data-id="<?= $s->id; ?>">
+            <td><input type="checkbox" class="row-checkbox" data-id="<?= $s->id; ?>"></td>
+            <td><?= $no++; ?></td>
             <td><?= htmlspecialchars($s->nama_kegiatan); ?></td>
             <td><?= htmlspecialchars($s->jenis_pengajuan); ?></td>
             <td>
@@ -2273,10 +2355,105 @@ $(document).ready(function () {
         responsive:true,
         pageLength:5,
         dom:'rtp',
-        columnDefs:[{orderable:false, targets:-1}]
+        columnDefs:[
+            {orderable:false, targets:[0, -1]}, // disable sorting for checkbox and action columns
+            {className: 'dt-center', targets: [0, 1]} // center align checkbox and number
+        ],
+        order: [[1, 'asc']] // default sort by number column
     });
 
-    // prepare filterData from PHP
+    // ===== MULTI-SELECT FUNCTIONALITY =====
+    let selectedIds = [];
+
+    function updateMultiActions() {
+        selectedIds = [];
+        $('.row-checkbox:checked').each(function(){
+            selectedIds.push($(this).data('id'));
+        });
+        
+        $('#selectedCount').text(selectedIds.length);
+        
+        if(selectedIds.length > 0) {
+            $('#multiActions').addClass('show');
+        } else {
+            $('#multiActions').removeClass('show');
+        }
+        
+        // Update checkAll state
+        const totalCheckboxes = $('.row-checkbox').length;
+        const checkedCheckboxes = $('.row-checkbox:checked').length;
+        $('#checkAll').prop('checked', totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0);
+    }
+
+    // Check All functionality
+    $('#checkAll').on('change', function(){
+        const isChecked = $(this).is(':checked');
+        $('.row-checkbox').prop('checked', isChecked);
+        if(isChecked) {
+            $('tr.row-detail').addClass('selected');
+        } else {
+            $('tr.row-detail').removeClass('selected');
+        }
+        updateMultiActions();
+    });
+
+    // Individual checkbox
+    $(document).on('change', '.row-checkbox', function(e){
+        e.stopPropagation();
+        const $row = $(this).closest('tr');
+        if($(this).is(':checked')) {
+            $row.addClass('selected');
+        } else {
+            $row.removeClass('selected');
+        }
+        updateMultiActions();
+    });
+
+    // Prevent row click when clicking checkbox
+    $(document).on('click', '.row-checkbox', function(e){
+        e.stopPropagation();
+    });
+
+    // Multi Edit button
+    $('#btnMultiEdit').click(function(){
+        if(selectedIds.length === 0) {
+            alert('Pilih minimal 1 item untuk di-edit');
+            return;
+        }
+        
+        // Langsung redirect ke halaman multi-edit
+        window.location.href = '<?= site_url("surat/multi_edit"); ?>?ids=' + selectedIds.join(',');
+    });
+
+    // Multi Delete button
+    $('#btnMultiDelete').click(function(){
+        if(selectedIds.length === 0) {
+            alert('Pilih minimal 1 item untuk dihapus');
+            return;
+        }
+        
+        const confirmed = confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' item yang dipilih?');
+        if(!confirmed) return;
+        
+        // Submit to multi_delete for any number of items
+        const form = $('<form>', {
+            method: 'POST',
+            action: '<?= site_url("surat/multi_delete"); ?>'
+        });
+        
+        selectedIds.forEach(id => {
+            form.append($('<input>', {
+                type: 'hidden',
+                name: 'ids[]',
+                value: id
+            }));
+        });
+        
+        $('body').append(form);
+        form.submit();
+    });
+
+    // ===== FILTER FUNCTIONALITY =====
     const filterData = {
         jenis: <?= json_encode(array_values(array_unique(array_map(function($s){ return $s->jenis_pengajuan; }, $surat_list)))); ?>,
         dosen: <?= json_encode(array_values(array_unique(array_reduce($surat_list, function($carry,$s){
@@ -2441,7 +2618,7 @@ $(document).ready(function () {
             if(!r || !r.category) continue;
 
             if(r.category === 'tanggal'){
-                const cell = (data[5] || '').trim();
+                const cell = (data[6] || '').trim(); // tanggal_pengajuan column (shifted by +1 due to checkbox and number)
                 const start = r.dateStart || '';
                 const end = r.dateEnd || '';
                 if(!start && !end) continue;
@@ -2451,7 +2628,8 @@ $(document).ready(function () {
                 continue;
             }
 
-            const colIndex = (r.category === 'jenis') ? 2 : (r.category === 'dosen' ? 3 : 4);
+            // column indices shifted: checkbox(0), no(1), kegiatan(2), jenis(3), dosen(4), divisi(5), tanggal(6), aksi(7)
+            const colIndex = (r.category === 'jenis') ? 3 : (r.category === 'dosen' ? 4 : 5);
             const cellRaw = (data[colIndex] || '').toLowerCase();
 
             if(!r.text || String(r.text).trim() === '') continue;
@@ -2484,11 +2662,15 @@ $(document).ready(function () {
         applyFilters();
     });
 
-    rows.push({ id: nextId(), category: 'jenis', text:'', dateStart:'', dateEnd:'' });
-    renderRows();
+    // DON'T create initial row - wait for user to click add button
+    // rows.push({ id: nextId(), category: 'jenis', text:'', dateStart:'', dateEnd:'' });
+    // renderRows();
 
+    // ===== POPUP DETAIL =====
     $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
-        if($(e.target).closest('a').length) return;
+        // Don't open modal if clicking on checkbox, button, or link
+        if($(e.target).closest('input, a, button').length) return;
+        
         let raw=$(this).attr('data-detail')||'{}';
         let data={};
         try{ data=JSON.parse(raw);}catch(err){ console.error(err);}
@@ -2543,10 +2725,6 @@ $(document).ready(function () {
 
 });
 </script>
-
-
-
-
 <!-- FONT AWESOME ICON -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
