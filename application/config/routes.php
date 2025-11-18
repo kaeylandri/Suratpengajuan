@@ -28,6 +28,8 @@ $route['surat/index'] = 'surat/index';
 $route['surat/submit'] = 'surat/submit';
 $route['surat/edit/(:num)'] = 'surat/edit/$1';
 $route['surat/delete/(:num)'] = 'surat/delete/$1';
+$route['list-surat-tugas'] = 'surat/list_surat_tugas';
+
 
 // Legacy download URL
 $route['surat/download_eviden_url'] = 'surat/download_eviden_url';

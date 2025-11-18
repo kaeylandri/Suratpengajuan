@@ -206,11 +206,17 @@ foreach($opsi_kel as $o) echo '<option value="'.$o.'" '.($surat['jenis_penugasan
 <div id="existingFilesContainer">
 <?php if(!empty($eviden) && is_array($eviden) && count($eviden) > 0): ?>
 <?php foreach($eviden as $idx=>$file):
+    // NORMALISASI
+    if (is_array($file)) {
+        $file = $file[0] ?? '';
+    }
     if(empty($file)) continue;
+
     $is_external = filter_var($file, FILTER_VALIDATE_URL) ? true : false;
     $download_link = $is_external ? site_url('surat/download_eviden_url?url=' . urlencode($file)) : base_url('uploads/eviden/' . $file);
     $label = $is_external ? basename($file) : $file;
     $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
     $icon='fa-file';
     if(in_array($ext,['jpg','jpeg','png','gif','bmp','webp'])) $icon='fa-file-image';
     elseif($ext=='pdf') $icon='fa-file-pdf';
