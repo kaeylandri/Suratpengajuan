@@ -1,6 +1,14 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+/**
+ * @property Surat_model $Surat_model
+ * @property Dosen_model $Dosen_model
+ * @property CI_Input $input
+ * @property CI_Session $session
+ * @property CI_DB_query_builder $db
+ */
+
 class Surat extends CI_Controller
 {
     public function __construct()
@@ -21,6 +29,24 @@ class Surat extends CI_Controller
         $ts = strtotime($val);
         return $ts ? date('Y-m-d', $ts) : "-";
     }
+    private function safe_json_decode($value)
+{
+    // Jika null atau kosong → return array kosong
+    if (!$value) return [];
+
+    // Jika sudah array → langsung return
+    if (is_array($value)) return $value;
+
+    // Jika bukan string → return array kosong
+    if (!is_string($value)) return [];
+
+    // Decode string JSON
+    $decode = json_decode($value, true);
+
+    // Jika gagal decode → return array kosong
+    return json_last_error() === JSON_ERROR_NONE ? $decode : [];
+}
+
 
     /* ===========================================
        SAFE JSON DECODE
@@ -738,4 +764,31 @@ class Surat extends CI_Controller
 
         echo json_encode($out);
     }
+    public function cetak($id)
+{
+    // ambil data surat menggunakan model Surat
+    $surat = $this->Surat_model->get_by_id($id);
+
+    if (!$surat) show_404();
+
+    // decode array id dosen dari field json
+    $dosen_ids = $this->safe_json_decode($surat->nama_dosen);
+
+
+    // load model dosen
+    $this->load->model('Dosen_model');
+
+    // ambil semua data dosen berdasarkan ID
+    $list_dosen = $this->Dosen_model->get_dosen_by_ids($dosen_ids);
+
+    $data = [
+        'surat' => $surat,
+        'list_dosen' => $list_dosen
+    ];
+
+    // load halaman cetak
+    $this->load->view('surat_print', $data);
+}
+
+
 }

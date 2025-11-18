@@ -2336,8 +2336,8 @@ body, input, select, button, table {
             </td>
             <td><?= isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? htmlspecialchars($s->tanggal_pengajuan) : '-'; ?></td>
             <td>
-                <a href="<?= site_url('surat/edit/'.$s->id); ?>" class="btn btn-warning">Edit</a>
-                <a href="<?= site_url('surat/delete/'.$s->id); ?>" class="btn btn-danger" onclick="return confirm('Hapus data ini?')">Hapus</a>
+                <a href="<?= site_url('surat/edit/'.$s->id); ?>" class="btn btn-sm btn-warning">Edit</a>
+                <a href="<?= site_url('surat/delete/'.$s->id); ?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus data ini?')">Hapus</a>
             </td>
         </tr>
         <?php endforeach; ?>
