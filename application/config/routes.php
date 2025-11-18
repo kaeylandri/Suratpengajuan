@@ -1,22 +1,41 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/*
+| -------------------------------------------------------------------------
+| URI ROUTING
+| -------------------------------------------------------------------------
+| Letakkan file ini di: application/config/routes.php
+*/
+
 $route['default_controller'] = 'surat';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
-// ROUTES SURAT
-$route['surat']                  = 'surat/index';
-$route['surat/tambah']           = 'surat/tambah';
-$route['surat/submit']           = 'surat/submit';
-$route['surat/edit/(:num)']      = 'surat/edit/$1';
-$route['surat/update/(:num)']    = 'surat/update/$1';
-$route['surat/delete/(:num)']    = 'surat/delete/$1';
-$route['surat/download_eviden/(:any)'] = 'surat/download_eviden/$1';
+/*
+| -------------------------------------------------------------------------
+| SURAT ROUTES
+| -------------------------------------------------------------------------
+*/
 
+// Download eviden - PENTING: Harus di atas route lain
+$route['surat/download_eviden/(.+)'] = 'surat/download_eviden/$1';
+$route['surat/dl/(.+)'] = 'surat/dl/$1'; // Backup download method
 
-// ROUTE AUTOCOMPLETE NIP
-$route['surat/autocomplete-nip'] = 'surat/autocomplete_nip';
-$route['get-dosen'] = 'Surat/get_dosen_by_nip';
+// CRUD routes
+$route['surat'] = 'surat/index';
+$route['surat/index'] = 'surat/index';
+$route['surat/submit'] = 'surat/submit';
+$route['surat/edit/(:num)'] = 'surat/edit/$1';
+$route['surat/delete/(:num)'] = 'surat/delete/$1';
 
+// Legacy download URL
+$route['surat/download_eviden_url'] = 'surat/download_eviden_url';
 
+// AJAX routes
+$route['surat/get_dosen_by_nip'] = 'surat/get_dosen_by_nip';
+$route['surat/autocomplete_nip'] = 'surat/autocomplete_nip';
+
+// DEBUG - HAPUS SETELAH SELESAI
+$route['surat/test_path'] = 'surat/test_path';
+$route['surat/debug_eviden/(:num)'] = 'surat/debug_eviden/$1';

@@ -122,7 +122,7 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       DOWNLOAD VIA URL
+       DOWNLOAD VIA URL (Legacy - untuk UploadCare)
     ============================================*/
     public function download_eviden_url()
     {
@@ -136,7 +136,112 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       EDIT DATA — FIX EVIDEN
+       DOWNLOAD EVIDEN FILE - NEW METHOD
+    ============================================*/
+    public function download_eviden($filename = null)
+    {
+        if (!$filename) {
+            show_404();
+            return;
+        }
+
+        // Decode filename jika di-encode
+        $filename = urldecode($filename);
+
+        // Cek apakah file adalah URL (UploadCare atau external)
+        if (filter_var($filename, FILTER_VALIDATE_URL)) {
+            // Download dari URL external
+            $this->_download_from_url($filename);
+            return;
+        }
+
+        // File lokal - cek keamanan path
+        $safe_filename = basename($filename);
+        $filepath = './uploads/eviden/' . $safe_filename;
+
+        if (!file_exists($filepath)) {
+            show_404();
+            return;
+        }
+
+        // Get mime type
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $filepath);
+        finfo_close($finfo);
+
+        // Clear any previous output
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        // Set headers untuk force download
+        header('Content-Description: File Transfer');
+        header('Content-Type: ' . $mime_type);
+        header('Content-Disposition: attachment; filename="' . $safe_filename . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($filepath));
+        
+        // Flush output
+        flush();
+        
+        // Read and output file
+        readfile($filepath);
+        exit;
+    }
+
+    /* ===========================================
+       HELPER: DOWNLOAD FROM EXTERNAL URL
+    ============================================*/
+    private function _download_from_url($url)
+    {
+        // Get filename dari URL
+        $filename = basename(parse_url($url, PHP_URL_PATH));
+        
+        if (empty($filename)) {
+            $filename = 'download_' . time();
+        }
+
+        // Get file content
+        $file_content = @file_get_contents($url);
+        
+        if ($file_content === false) {
+            show_404();
+            return;
+        }
+
+        // Detect mime type from content
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_buffer($finfo, $file_content);
+        finfo_close($finfo);
+
+        // Clear any previous output
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        // Set headers untuk force download
+        header('Content-Description: File Transfer');
+        header('Content-Type: ' . $mime_type);
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . strlen($file_content));
+        
+        // Flush output
+        flush();
+        
+        // Output file content
+        echo $file_content;
+        exit;
+    }
+
+    /* ===========================================
+       EDIT DATA — FIX EVIDEN DENGAN UPLOAD FILE
     ============================================*/
     public function edit($id)
     {
@@ -144,8 +249,22 @@ class Surat extends CI_Controller
 
         if (!$surat) show_404();
 
+        // Convert object to array
         $data['surat'] = (array)$surat;
-        $data['eviden'] = json_decode($surat->eviden ?? "[]", true);
+        
+        // PERBAIKAN: Decode eviden dengan benar
+        $eviden_raw = $surat->eviden ?? "[]";
+        
+        // Jika masih string JSON, decode
+        if (is_string($eviden_raw)) {
+            $eviden_decoded = json_decode($eviden_raw, true);
+            $data['eviden'] = is_array($eviden_decoded) ? $eviden_decoded : [];
+        } else {
+            $data['eviden'] = is_array($eviden_raw) ? $eviden_raw : [];
+        }
+
+        // Debug: uncomment untuk cek isi eviden
+        // echo '<pre>'; print_r($data['eviden']); die();
 
         // Jika belum submit → tampilkan view edit
         if (!$this->input->post()) {
@@ -165,27 +284,74 @@ class Surat extends CI_Controller
         }
 
         /* ===================================================
-           FIX EVIDEN TANPA ERROR json_decode ARRAY
+           FIX EVIDEN UPDATE LOGIC - SUPPORT UPLOAD FILE
         ====================================================*/
-        $eviden_raw = $post['eviden'] ?? null;
-
-        if (is_array($eviden_raw)) {
-            // Sudah array → langsung encode
-            $update_eviden = json_encode($eviden_raw);
-
-        } elseif (is_string($eviden_raw) && trim($eviden_raw) !== "") {
-
-            $decode = json_decode($eviden_raw, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $update_eviden = json_encode($decode);
-            } else {
-                $update_eviden = $surat->eviden;
+        
+        // 1. Ambil existing eviden dari database
+        $existing_eviden = json_decode($surat->eviden, true) ?: [];
+        
+        // 2. Handle file yang dihapus
+        $deleted_files = $post['delete_eviden'] ?? [];
+        foreach ($deleted_files as $del_file) {
+            if ($del_file && trim($del_file) !== '') {
+                // Hapus dari array
+                $existing_eviden = array_filter($existing_eviden, fn($f) => $f !== $del_file);
+                
+                // Hapus file fisik dari server (jika bukan URL external)
+                if (!filter_var($del_file, FILTER_VALIDATE_URL)) {
+                    $file_path = './uploads/eviden/' . $del_file;
+                    if (file_exists($file_path)) {
+                        @unlink($file_path);
+                    }
+                }
             }
-
-        } else {
-            // Tidak dikirim → pakai data lama
-            $update_eviden = $surat->eviden;
         }
+        
+        // 3. Handle upload file baru
+        $new_files = [];
+        if (!empty($_FILES['new_eviden']['name'][0])) {
+            
+            $upload_path = './uploads/eviden/';
+            
+            // Buat folder jika belum ada
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0755, true);
+            }
+            
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx';
+            $config['max_size'] = 10240; // 10MB
+            $config['encrypt_name'] = TRUE;
+            
+            $this->load->library('upload', $config);
+            
+            $files_count = count($_FILES['new_eviden']['name']);
+            
+            for ($i = 0; $i < $files_count; $i++) {
+                if (!empty($_FILES['new_eviden']['name'][$i])) {
+                    
+                    $_FILES['file']['name'] = $_FILES['new_eviden']['name'][$i];
+                    $_FILES['file']['type'] = $_FILES['new_eviden']['type'][$i];
+                    $_FILES['file']['tmp_name'] = $_FILES['new_eviden']['tmp_name'][$i];
+                    $_FILES['file']['error'] = $_FILES['new_eviden']['error'][$i];
+                    $_FILES['file']['size'] = $_FILES['new_eviden']['size'][$i];
+                    
+                    if ($this->upload->do_upload('file')) {
+                        $upload_data = $this->upload->data();
+                        $new_files[] = $upload_data['file_name'];
+                    } else {
+                        // Log error jika upload gagal
+                        log_message('error', 'Upload failed: ' . $this->upload->display_errors());
+                    }
+                }
+            }
+        }
+        
+        // 4. Gabungkan existing files (yang tidak dihapus) dengan file baru
+        $final_eviden = array_merge(array_values($existing_eviden), $new_files);
+        
+        // 5. Encode ke JSON
+        $update_eviden = json_encode($final_eviden);
 
         // ---------------- UPDATE DATA ----------------
         $update = [
@@ -231,6 +397,22 @@ class Surat extends CI_Controller
     ============================================*/
     public function delete($id)
     {
+        // Ambil data surat untuk hapus file eviden
+        $surat = $this->Surat_model->get_by_id($id);
+        
+        if ($surat) {
+            // Hapus semua file eviden yang terkait
+            $eviden = json_decode($surat->eviden, true) ?: [];
+            foreach ($eviden as $file) {
+                if ($file && !filter_var($file, FILTER_VALIDATE_URL)) {
+                    $file_path = './uploads/eviden/' . $file;
+                    if (file_exists($file_path)) {
+                        @unlink($file_path);
+                    }
+                }
+            }
+        }
+        
         $this->Surat_model->delete_surat($id);
         $this->session->set_flashdata('success', 'Data berhasil dihapus!');
         redirect('surat');
@@ -256,7 +438,65 @@ class Surat extends CI_Controller
             ] : ['status' => false]
         );
     }
+/* ===========================================
+   DEBUG EVIDEN - TAMBAHKAN DI CONTROLLER
+   Method untuk cek data eviden di database
+============================================*/
 
+public function debug_eviden($id)
+{
+    $surat = $this->Surat_model->get_by_id($id);
+    
+    if (!$surat) {
+        die('Data tidak ditemukan');
+    }
+    
+    echo "<h2>Debug Eviden - ID: $id</h2>";
+    echo "<hr>";
+    
+    echo "<h3>Raw Data dari Database:</h3>";
+    echo "<pre>";
+    print_r($surat);
+    echo "</pre>";
+    
+    echo "<hr>";
+    
+    echo "<h3>Eviden Field (Raw):</h3>";
+    echo "<code>" . htmlspecialchars($surat->eviden ?? 'NULL') . "</code>";
+    
+    echo "<hr>";
+    
+    echo "<h3>Eviden Decoded:</h3>";
+    $eviden = json_decode($surat->eviden ?? '[]', true);
+    echo "<pre>";
+    print_r($eviden);
+    echo "</pre>";
+    
+    echo "<hr>";
+    
+    echo "<h3>Analisis Eviden:</h3>";
+    if (is_array($eviden)) {
+        foreach ($eviden as $idx => $file) {
+            echo "<strong>[$idx]</strong> $file<br>";
+            echo "- Is URL: " . (filter_var($file, FILTER_VALIDATE_URL) ? 'YES' : 'NO') . "<br>";
+            echo "- Contains ucarecdn: " . (strpos($file, 'ucarecdn.com') !== false ? 'YES' : 'NO') . "<br>";
+            echo "- Contains tilde (~): " . (strpos($file, '~') !== false ? 'YES' : 'NO') . "<br>";
+            
+            if (filter_var($file, FILTER_VALIDATE_URL)) {
+                echo "- <strong style='color: green;'>Ini adalah URL UploadCare yang valid</strong><br>";
+                echo "- Download URL: <a href='" . site_url('surat/download_eviden_url?url=' . urlencode($file)) . "' target='_blank'>Test Download</a><br>";
+            } else {
+                $local_path = './uploads/eviden/' . basename($file);
+                echo "- File lokal path: $local_path<br>";
+                echo "- File exists: " . (file_exists($local_path) ? 'YES' : 'NO') . "<br>";
+            }
+            
+            echo "<br>";
+        }
+    } else {
+        echo "<em>Eviden bukan array atau kosong</em>";
+    }
+}
     /* ===========================================
        AUTOCOMPLETE NIP
     ============================================*/
