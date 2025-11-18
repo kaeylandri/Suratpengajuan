@@ -624,6 +624,12 @@ class Surat extends CI_Controller
         // load halaman cetak
         $this->load->view('surat_print', $data);
     }
+    public function list_surat_tugas()
+{
+    $data['surat_list'] = $this->Surat_model->get_all_surat();
+
+    $this->load->view('list_surat_tugas', $data);
+}
 
     /* ===========================================
        GET DOSEN BY NIP
