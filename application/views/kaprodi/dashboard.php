@@ -385,7 +385,7 @@ new Chart(ctx, {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {legend: {position: 'top', labels: {padding: 20, font: {size: 14, weight: '700'}, color: '#000000ff'}}, tooltip: {backgroundColor: 'rgba(44, 62, 80, 0.95)', padding: 16}},
-        scales: {x: {grid: {display: false}, ticks: {color: '#ffffff'}}, y: {beginAtZero: true, grid: {color: 'rgba(12, 7, 7, 0.08)'}, ticks: {color: '#95a5a6'}}},
+        scales: {x: {grid: {display: false}, ticks: {color: '#000000ff'}}, y: {beginAtZero: true, grid: {color: 'rgba(12, 7, 7, 0.08)'}, ticks: {color: '#95a5a6'}}},
         animation: {duration: 1800, easing: 'easeInOutQuart'}
     },
     plugins: [fusionStyle3DPlugin]
