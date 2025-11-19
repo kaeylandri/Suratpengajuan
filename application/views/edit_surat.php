@@ -1,5 +1,5 @@
 <?php
-// edit_surat.php - Revisi lengkap
+// edit_surat.php - Revisi lengkap dengan preview eviden
 // Pastikan controller mengirim $surat (array) dan $eviden (array) ke view.
 ?>
 <!DOCTYPE html>
@@ -35,7 +35,7 @@ label { font-weight: 600; }
 .file-name { font-weight: 600; color: #333; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
 .file-size { font-size: 12px; color: #6c757d; font-weight: 500; }
 .file-actions { display: flex; gap: 8px; flex-shrink: 0; }
-.btn-delete-existing, .btn-view-file, .btn-download-file {
+.btn-delete-existing, .btn-view-file {
     border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600;
     display: inline-flex; align-items: center; gap: 5px; text-decoration: none; transition: all 0.3s;
 }
@@ -43,8 +43,6 @@ label { font-weight: 600; }
 .btn-delete-existing:hover { background: #c82333; transform: scale(1.05); box-shadow: 0 2px 8px rgba(220,53,69,0.3); }
 .btn-view-file { background: #17a2b8; color: #fff; }
 .btn-view-file:hover { background: #138496; transform: scale(1.05); box-shadow: 0 2px 8px rgba(23,162,184,0.3); }
-.btn-download-file { background: #28a745; color: #fff; }
-.btn-download-file:hover { background: #218838; transform: scale(1.05); box-shadow: 0 2px 8px rgba(40,167,69,0.3); }
 
 #newEvidenContainer .upload-item-wrapper input[type="file"] { flex: 1; padding: 10px 15px; border-radius: 6px; border: 1px solid #ddd; font-size: 14px; background: #fff; }
 #newEvidenContainer .btn-icon-action { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: all 0.3s; flex-shrink: 0; }
@@ -57,11 +55,18 @@ label { font-weight: 600; }
 .file-deleted .file-icon { background: #dc3545 !important; }
 #chk-error { color: #dc3545; font-size: 13px; margin-top: 8px; font-weight: 600; display:block; }
 
+/* Modal Preview */
+#previewModal .modal-body { max-height: 80vh; overflow: auto; }
+#previewModal .modal-body img { max-width: 100%; }
+#previewModal .modal-body iframe { width: 100%; height: 70vh; border: none; }
+#previewModal .modal-body .unsupported-file { padding: 40px; text-align: center; background: #f8f9fa; border-radius: 8px; }
+#previewModal .modal-body .unsupported-file i { font-size: 48px; color: #6c757d; margin-bottom: 15px; }
+
 @media(max-width:768px){
     .form-section { padding: 15px; }
     .existing-file-item { flex-direction: column; align-items: flex-start; }
     .file-actions { width: 100%; flex-wrap: wrap; }
-    .btn-view-file,.btn-download-file,.btn-delete-existing { flex:1; justify-content:center; }
+    .btn-view-file,.btn-delete-existing { flex:1; justify-content:center; }
     .file-name { white-space: normal; word-break: break-all; }
 }
 </style>
@@ -255,25 +260,16 @@ if (!empty($eviden) && is_array($eviden) && count($eviden) > 0):
         if ($is_external) {
             $label = basename($file);
             $view_link = $file; // external dapat ditampilkan langsung
-            // untuk download external, gunakan controller download_eviden_url (legacy)
-            $download_link = site_url('surat/download_eviden_url?url=' . urlencode($file));
         } else {
             if ($contains_uploads) {
                 // bersihkan leading slash
                 $clean_path = ltrim($file, '/');
                 $label = basename($clean_path);
                 $view_link = base_url($clean_path);
-                $filepath = './' . $clean_path;
-                // untuk download via controller gunakan nama file terakhir sebagai param
-                $safeName = basename($clean_path);
-                $download_link = site_url('surat/download_eviden/' . urlencode($safeName));
             } else {
                 // default: file dianggap nama file di folder uploads/eviden/
                 $label = basename($file);
                 $view_link = base_url('uploads/eviden/' . $file);
-                $filepath = './uploads/eviden/' . $file;
-                $safeName = basename($file);
-                $download_link = site_url('surat/download_eviden/' . urlencode($safeName));
             }
         }
 
@@ -302,19 +298,20 @@ if (!empty($eviden) && is_array($eviden) && count($eviden) > 0):
         }
 ?>
 <div class="existing-file-item" data-file-index="<?= htmlspecialchars($idx) ?>" data-filename="<?= htmlspecialchars($file) ?>">
-    <div class="file-icon"><i class="fas <?= htmlspecialchars($icon) ?>"></i></div>
+    <div class="file-icon">
+        <i class="fas <?= htmlspecialchars($icon) ?>"></i>
+    </div>
     <div class="file-info">
         <div class="file-name" title="<?= htmlspecialchars($file) ?>"><?= htmlspecialchars($label) ?></div>
         <div class="file-size"><?= htmlspecialchars($filesize) ?></div>
     </div>
     <div class="file-actions">
-        <?php if (in_array($ext, ['jpg','jpeg','png','gif','bmp','webp'])): ?>
-            <button type="button" class="btn-view-file btn btn-info btn-sm" data-src="<?= htmlspecialchars($view_link) ?>" data-toggle="modal" data-target="#previewModal"><i class="fas fa-eye"></i> Lihat</button>
-        <?php else: ?>
-            <a href="<?= htmlspecialchars($view_link) ?>" target="_blank" class="btn-view-file btn btn-info btn-sm"><i class="fas fa-eye"></i> Lihat</a>
-        <?php endif; ?>
-
-        <button type="button" class="btn-delete-existing btn btn-danger btn-sm" onclick="deleteExistingFile(<?= htmlspecialchars($idx) ?>,'<?= htmlspecialchars($file, ENT_QUOTES) ?>')"><i class="fas fa-trash"></i> Hapus</button>
+        <button type="button" class="btn-view-file btn btn-info btn-sm" data-src="<?= htmlspecialchars($view_link) ?>" data-type="<?= htmlspecialchars($ext) ?>" data-toggle="modal" data-target="#previewModal">
+            <i class="fas fa-eye"></i> Lihat
+        </button>
+        <button type="button" class="btn-delete-existing btn btn-danger btn-sm" onclick="deleteExistingFile(<?= htmlspecialchars($idx) ?>,'<?= htmlspecialchars($file, ENT_QUOTES) ?>')">
+            <i class="fas fa-trash"></i> Hapus
+        </button>
     </div>
 
     <input type="hidden" name="existing_eviden[]" value="<?= htmlspecialchars($file) ?>" class="existing-file-input">
@@ -349,16 +346,19 @@ else:
 </form>
 </div>
 
-<!-- Modal Preview Gambar -->
+<!-- Modal Preview File -->
 <div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
 <div class="modal-content">
 <div class="modal-header">
-<h5 class="modal-title">Preview File</h5>
+<h5 class="modal-title" id="previewModalLabel">Preview File</h5>
 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 </div>
-<div class="modal-body text-center">
-<img src="" id="previewImage" class="img-fluid" alt="Preview" style="max-height:70vh;">
+<div class="modal-body text-center" id="previewContent">
+<!-- Konten preview akan diisi secara dinamis -->
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
 </div>
 </div>
 </div>
@@ -384,6 +384,42 @@ function deleteExistingFile(index, filename) {
     fileItem.style.opacity = '0';
     fileItem.style.transform = 'translateX(-20px)';
     setTimeout(()=>fileItem.style.display='none', 300);
+}
+
+function previewFile(fileSrc, fileType, fileName) {
+    const previewContent = document.getElementById('previewContent');
+    
+    // Clear previous content
+    previewContent.innerHTML = '';
+    
+    // Determine file type and show appropriate preview
+    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(fileType.toLowerCase())) {
+        // Image preview
+        const img = document.createElement('img');
+        img.src = fileSrc;
+        img.alt = 'Preview ' + fileName;
+        img.className = 'img-fluid';
+        img.style.maxHeight = '70vh';
+        previewContent.appendChild(img);
+    } else if (fileType.toLowerCase() === 'pdf') {
+        // PDF preview using iframe
+        const iframe = document.createElement('iframe');
+        iframe.src = fileSrc;
+        iframe.width = '100%';
+        iframe.height = '600';
+        previewContent.appendChild(iframe);
+    } else {
+        // Unsupported file type
+        const unsupportedDiv = document.createElement('div');
+        unsupportedDiv.className = 'unsupported-file';
+        unsupportedDiv.innerHTML = `
+            <i class="fas fa-file"></i>
+            <h5>Preview tidak tersedia</h5>
+            <p>File ${fileType.toUpperCase()} tidak dapat ditampilkan preview-nya.</p>
+            <p>Silakan gunakan aplikasi yang sesuai untuk membuka file ini.</p>
+        `;
+        previewContent.appendChild(unsupportedDiv);
+    }
 }
 
 $(document).ready(function(){
@@ -437,22 +473,34 @@ $(document).ready(function(){
         }
     });
 
-    // Preview modal: pastikan src jadi URL lengkap
-    $(document).on('click', '.btn-view-file[data-toggle="modal"]', function(){
+    // Preview modal: ketika tombol "Lihat" diklik
+    $(document).on('click', '.btn-view-file', function(){
         let src = $(this).data('src') || '';
-        if (!src) { $('#previewImage').attr('src',''); return; }
+        const fileType = $(this).data('type') || '';
+        let fileName = $(this).closest('.existing-file-item').find('.file-name').text().trim() || 'file';
+        
+        if (!src) { 
+            $('#previewContent').html('<div class="alert alert-danger">File tidak ditemukan</div>');
+            return; 
+        }
 
         // jika bukan absolute URL, jadikan absolute berdasarkan base_url
         if (!/^https?:\/\//i.test(src)) {
             src = src.replace(/^\/+/, ''); // remove leading slashes
             src = BASE_URL + '/' + src;
         }
-        $('#previewImage').attr('src', src);
+        
+        // Update modal title
+        $('#previewModalLabel').text('Preview: ' + fileName);
+        
+        // Show preview
+        previewFile(src, fileType, fileName);
     });
 
     // Clear preview when modal closes
     $('#previewModal').on('hidden.bs.modal', function () {
-        $('#previewImage').attr('src','');
+        $('#previewContent').empty();
+        $('#previewModalLabel').text('Preview File');
     });
 });
 </script>

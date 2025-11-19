@@ -256,6 +256,65 @@
         min-height: 100vh;
     }
 
+    /* Header Action Buttons */
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 0 10px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+    }
+
+    .action-buttons-group {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn-action {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .btn-back {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-back:hover {
+        background: #5a6268;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .btn-add {
+        background: #FB8C00;
+        color: white;
+    }
+
+    .btn-add:hover {
+        background: #e67e00;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
     /* ===== TABLE FILTER STYLES ===== */
     .filter-bar {
         width: 100%;
@@ -317,7 +376,7 @@
         background:white;
     }
 
-    .btn-add {
+    .btn-small-add {
         background:#FB8C00;
         color:white;
     }
@@ -882,7 +941,7 @@
     }
 
     .modal-body-detail{ 
-        max-height:60vh; 
+        max-height:70vh; 
         overflow-y:auto; 
         padding:18px;
     }
@@ -902,6 +961,57 @@
         font-weight:600; 
         background:#fff4e6; 
         color:#663c00;
+    }
+
+    /* Eviden file styles */
+    .eviden-files {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .eviden-file-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+
+    .eviden-file-item:hover {
+        background: #f5f5f5;
+    }
+
+    .file-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #FB8C00;
+    }
+
+    .file-name {
+        flex: 1;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .download-btn {
+        background: #FB8C00;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background 0.2s;
+    }
+
+    .download-btn:hover {
+        background: #e67e00;
     }
 
     .hide-mobile {
@@ -977,6 +1087,17 @@
             width: 32px;
             height: 32px;
             font-size: 12px;
+        }
+
+        .header-actions {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .action-buttons-group {
+            width: 100%;
+            justify-content: flex-start;
         }
     }
 
@@ -1124,6 +1245,19 @@
 
     <!-- Main Content -->
     <div class="main-content">
+        <!-- Header Actions -->
+        <div class="header-actions">
+            <h1 class="page-title">List Surat Tugas</h1>
+            <div class="action-buttons-group">
+                <button class="btn-action btn-back" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </button>
+                <a href="<?= site_url('surat/') ?>" class="btn-action btn-add">
+                    <i class="fas fa-plus"></i> Tambah Surat
+                </a>
+            </div>
+        </div>
+
         <!-- Search + Filter -->
         <div class="filter-bar">
             <div class="filter-search">
@@ -1139,7 +1273,7 @@
                     <option value="tanggal">Tanggal Pengajuan</option>
                 </select>
 
-                <button id="btnAddFilterRow" class="btn-small btn-add" title="Tambah baris filter">
+                <button id="btnAddFilterRow" class="btn-small btn-small-add" title="Tambah baris filter">
                     <i class="fa fa-plus"></i>
                 </button>
 
@@ -1371,7 +1505,13 @@
         }
     });
 
-    // Status Modal Functions dengan Data Real-Time
+    // Fungsi untuk tombol Kembali
+    function goBack() {
+        // Redirect ke halaman sebelumnya atau halaman default
+        window.location.href = '<?= base_url() ?>'; // Ganti dengan URL yang sesuai
+    }
+
+    // Status Modal Functions
     let currentSuratId = null;
     let statusRefreshInterval = null;
 
@@ -1616,20 +1756,6 @@
         return statusVariations[variationIndex];
     }
 
-    // Close modal when clicking outside or on close button
-    document.addEventListener('DOMContentLoaded', function() {
-        const statusModal = document.getElementById('statusModal');
-        const closeBtn = document.querySelector('.close-status');
-        
-        closeBtn.addEventListener('click', closeStatusModal);
-        
-        statusModal.addEventListener('click', function(e) {
-            if (e.target === statusModal) {
-                closeStatusModal();
-            }
-        });
-    });
-
     $(document).ready(function () {
         const BASE_URL = '<?= rtrim(base_url(), "/"); ?>';
 
@@ -1688,12 +1814,357 @@
             updateMultiActions();
         });
 
-        // ... (kode filter dan fungsi lainnya tetap sama) ...
+        $(document).on('click', '.row-checkbox', function(e){
+            e.stopPropagation();
+        });
+
+        $('#btnMultiEdit').click(function(){
+            if(selectedIds.length === 0) {
+                alert('Pilih minimal 1 item untuk di-edit');
+                return;
+            }
+            window.location.href = '<?= site_url("surat/multi_edit"); ?>?ids=' + selectedIds.join(',');
+        });
+
+        $('#btnMultiDelete').click(function(){
+            if(selectedIds.length === 0) {
+                alert('Pilih minimal 1 item untuk dihapus');
+                return;
+            }
+            
+            const confirmed = confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' item yang dipilih?');
+            if(!confirmed) return;
+            
+            // Solusi langsung dengan delete individual
+            deleteMultipleSurat(selectedIds);
+        });
+
+        // Fungsi untuk menghapus multiple surat dengan sequential requests
+        function deleteMultipleSurat(ids) {
+            let successCount = 0;
+            let errorCount = 0;
+            const total = ids.length;
+            
+            // Tampilkan loading
+            const originalText = $('#btnMultiDelete').html();
+            $('#btnMultiDelete').html('<i class="fa fa-spinner fa-spin"></i> Menghapus...').prop('disabled', true);
+            
+            // Hapus satu per satu
+            ids.forEach((id, index) => {
+                setTimeout(() => {
+                    $.ajax({
+                        url: '<?= site_url("surat/delete/") ?>' + id,
+                        method: 'GET',
+                        success: function(response) {
+                            successCount++;
+                            // Hapus row dari tabel setelah berhasil
+                            $(`tr[data-id="${id}"]`).fadeOut(300, function(){
+                                $(this).remove();
+                            });
+                            
+                            if (successCount + errorCount === total) {
+                                // Semua request selesai
+                                $('#btnMultiDelete').html(originalText).prop('disabled', false);
+                                
+                                if (successCount > 0) {
+                                    alert(successCount + ' data berhasil dihapus' + (errorCount > 0 ? ', ' + errorCount + ' gagal' : ''));
+                                    // Refresh multi actions
+                                    updateMultiActions();
+                                }
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            errorCount++;
+                            console.error('Error deleting ID ' + id + ':', error);
+                            
+                            if (successCount + errorCount === total) {
+                                $('#btnMultiDelete').html(originalText).prop('disabled', false);
+                                alert(successCount + ' data berhasil dihapus, ' + errorCount + ' gagal');
+                                updateMultiActions();
+                            }
+                        }
+                    });
+                }, index * 200); // Delay 200ms antara setiap request
+            });
+        }
+
+        // ===== FILTER FUNCTIONALITY =====
+        const filterData = {
+            jenis: <?= json_encode(array_values(array_unique(array_map(function($s){ return $s->jenis_pengajuan; }, $surat_list)))); ?>,
+            dosen: <?= json_encode(array_values(array_unique(array_reduce($surat_list, function($carry,$s){
+                if(isset($s->nama_dosen) && !empty($s->nama_dosen)){
+                    $nd=$s->nama_dosen;
+                    if(is_string($nd)){ $maybe=json_decode($nd,true); if(json_last_error()===JSON_ERROR_NONE) $nd=$maybe; }
+                    if(is_array($nd)) foreach($nd as $d) $carry[]=trim($d); else $carry[]=trim($nd);
+                }
+                return $carry;
+            },[])))); ?>,
+            divisi: <?= json_encode(array_values(array_unique(array_reduce($surat_list,function($carry,$s){
+                if(isset($s->divisi)&&!empty($s->divisi)){
+                    $dv=$s->divisi;
+                    if(is_string($dv)){ $maybe2=json_decode($dv,true); if(json_last_error()===JSON_ERROR_NONE) $dv=$maybe2; }
+                    if(is_array($dv)) foreach($dv as $d) $carry[]=trim($d); else $carry[]=trim($dv);
+                }
+                return $carry;
+            },[])))); ?>
+        };
+
+        Object.keys(filterData).forEach(k=>{
+            filterData[k] = (filterData[k]||[]).map(x=>String(x||'').trim()).filter(x=>x!=='');
+            filterData[k] = Array.from(new Set(filterData[k])).sort((a,b)=>a.localeCompare(b));
+        });
+
+        let rows = [];
+        let uid = 0;
+        function nextId(){ return 'r'+(++uid); }
+
+        function makeRowDOM(r){
+            const $wr = $(`<div class="filter-row" data-id="${r.id}"></div>`);
+
+            const $searchWrapper = $(`<div class="row-search-wrapper"></div>`);
+            const $search = $(`<input type="text" class="row-search" placeholder="Search..." />`);
+            const $searchIcon = $(`<i class="fa fa-search"></i>`);
+            
+            const $dateStart = $(`<input type="date" class="row-date-start" style="display:none" />`);
+            const $dateEnd = $(`<input type="date" class="row-date-end" style="display:none" />`);
+
+            $searchWrapper.append($search).append($searchIcon);
+
+            const $cat = $(`<select class="row-cat">
+                <option value="jenis">Jenis Pengajuan</option>
+                <option value="dosen">Nama Dosen</option>
+                <option value="divisi">Divisi</option>
+                <option value="tanggal">Tanggal Pengajuan</option>
+            </select>`);
+
+            const $btnAdd = $(`<button class="row-btn add" title="Tambah baris"><i class="fa fa-plus"></i></button>`);
+            const $btnRemove = $(`<button class="row-btn remove" title="Hapus baris"><i class="fa fa-times"></i></button>`);
+
+            if(r.category) $cat.val(r.category);
+            if(r.text) $search.val(r.text);
+            if(r.dateStart) $dateStart.val(r.dateStart);
+            if(r.dateEnd) $dateEnd.val(r.dateEnd);
+
+            function refreshInputs(){
+                const catVal = $cat.val();
+                if(catVal === 'tanggal'){
+                    $searchWrapper.hide();
+                    $dateStart.show();
+                    $dateEnd.show();
+                } else {
+                    $searchWrapper.show();
+                    $dateStart.hide();
+                    $dateEnd.hide();
+                }
+            }
+            refreshInputs();
+
+            $search.on('input', function(){
+                const id = $wr.data('id');
+                const obj = rows.find(x=>x.id===id);
+                if(!obj) return;
+                obj.text = $(this).val() || '';
+                applyFilters();
+            });
+
+            $dateStart.on('change', function(){
+                const id = $wr.data('id');
+                const obj = rows.find(x=>x.id===id);
+                if(!obj) return;
+                obj.dateStart = $(this).val() || '';
+                applyFilters();
+            });
+            $dateEnd.on('change', function(){
+                const id = $wr.data('id');
+                const obj = rows.find(x=>x.id===id);
+                if(!obj) return;
+                obj.dateEnd = $(this).val() || '';
+                applyFilters();
+            });
+
+            $cat.on('change', function(){
+                const id = $wr.data('id');
+                const obj = rows.find(x=>x.id===id);
+                if(!obj) return;
+                obj.category = $(this).val();
+                obj.text = '';
+                obj.dateStart = '';
+                obj.dateEnd = '';
+                $search.val('');
+                $dateStart.val('');
+                $dateEnd.val('');
+                refreshInputs();
+                applyFilters();
+            });
+
+            $btnAdd.on('click', function(){
+                const id = $wr.data('id');
+                const idx = rows.findIndex(x=>x.id===id);
+                const cur = rows[idx] || {};
+                const newRow = { id: nextId(), category: cur.category || 'jenis', text:'', dateStart:'', dateEnd:'' };
+                if(idx >= 0 && idx < rows.length-1){
+                    rows.splice(idx+1, 0, newRow);
+                } else {
+                    rows.push(newRow);
+                }
+                renderRows();
+                applyFilters();
+            });
+
+            $btnRemove.on('click', function(){
+                const id = $wr.data('id');
+                rows = rows.filter(x=>x.id !== id);
+                renderRows();
+                applyFilters();
+            });
+
+            $wr.append($searchWrapper).append($dateStart).append($dateEnd).append($cat).append($btnAdd).append($btnRemove);
+            return $wr;
+        }
+
+        function renderRows(){
+            const $b = $('#filterBuilder');
+            $b.empty();
+            rows.forEach(r=>{
+                $b.append(makeRowDOM(r));
+            });
+            $('#btnResetAll').prop('hidden', rows.length === 0 && $('#tableSearch').val().trim()==='');
+        }
+
+        $('#btnAddFilterRow').click(function(){
+            const cat = $('#filterCategory').val() || 'jenis';
+            rows.push({ id: nextId(), category: cat, text:'', dateStart:'', dateEnd:'' });
+            renderRows();
+            applyFilters();
+        });
+
+        $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(fn => fn.name !== 'customRowsFilter');
+
+        const customRowsFilter = function(settings, data){
+            const q = $('#tableSearch').val().trim().toLowerCase();
+            if(q){
+                const keywords = q.split(/\s+/).filter(x=>x);
+                const rowText = data.join(' ').toLowerCase();
+                const okText = keywords.every(k => rowText.indexOf(k) >= 0);
+                if(!okText) return false;
+            }
+
+            for(const r of rows){
+                if(!r || !r.category) continue;
+
+                if(r.category === 'tanggal'){
+                    const cell = (data[6] || '').trim();
+                    const start = r.dateStart || '';
+                    const end = r.dateEnd || '';
+                    if(!start && !end) continue;
+                    if(!cell || cell === '-') return false;
+                    if(start && cell < start) return false;
+                    if(end && cell > end) return false;
+                    continue;
+                }
+
+                const colIndex = (r.category === 'jenis') ? 3 : (r.category === 'dosen' ? 4 : 5);
+                const cellRaw = (data[colIndex] || '').toLowerCase();
+
+                if(!r.text || String(r.text).trim() === '') continue;
+
+                const needle = String(r.text).toLowerCase().trim();
+                if(cellRaw.indexOf(needle) === -1) return false;
+            }
+
+            return true;
+        };
+        Object.defineProperty(customRowsFilter, 'name', { value: 'customRowsFilter' });
+        $.fn.dataTable.ext.search.push(customRowsFilter);
+
+        function applyFilters(){
+            table.draw();
+            const anyFilterActive = rows.length>0 || $('#tableSearch').val().trim()!=='';
+            $('#btnResetAll').prop('hidden', !anyFilterActive);
+        }
+
+        let debounce = null;
+        $('#tableSearch').on('input', function(){
+            if(debounce) clearTimeout(debounce);
+            debounce = setTimeout(()=> applyFilters(), 180);
+        });
+
+        $('#btnResetAll').click(function(){
+            rows = [];
+            $('#tableSearch').val('');
+            renderRows();
+            applyFilters();
+        });
+
+        // ===== POPUP DETAIL =====
+        $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
+            if($(e.target).closest('input, a, button').length) return;
+            
+            let raw=$(this).attr('data-detail')||'{}';
+            let data={};
+            try{ data=JSON.parse(raw);}catch(err){ console.error(err);}
+            let html='';
+            Object.entries(data).forEach(([k,v])=>{
+                let display=v;
+                if(display===null||display===undefined||(typeof display==='string'&&display.trim()==='')) display='-';
+                if(k==='eviden'){
+                    if(typeof display==='string'){ try{display=JSON.parse(display);}catch(e){} }
+                    if(Array.isArray(display)&&display.length>0){
+                        let list='<ul style="margin:0;padding-left:18px;">';
+                        display.forEach(item=>{
+                            let url='', name='';
+                            if(typeof item==='string'){ url=item; name=item.split('/').pop().split('?')[0]; }
+                            else if(typeof item==='object'&&item!==null){
+                                url=item.cdnUrl||item.path||item.url||'';
+                                if(item.nama_asli) name=item.nama_asli;
+                                else if(item.name) name=item.name;
+                                else name=url.split('/').pop().split('?')[0];
+                                if(url && !url.match(/^https?:\/\//i)) url=BASE_URL + (url.startsWith('/')?'':'/')+url;
+                            }
+                            const escName=$('<div/>').text(name).html();
+                            const escUrl=$('<div/>').text(url).html();
+                            list+=`<li style="margin-bottom:6px;"><a href="#" class="force-download" data-url="${escUrl}" data-name="${escName}" style="color:#FB8C00;font-weight:600;text-decoration:none;">📄 ${escName}</a></li>`;
+                        });
+                        list+='</ul>';
+                        display=list;
+                    } else display='-';
+                } else if(Array.isArray(display)){
+                    display=display.map(x=>$('<div/>').text(String(x)).html()).join('<br>');
+                } else { if(typeof display==='string') display=$('<div/>').text(display).html(); }
+                html+=`<tr><td class="detail-key">${k.replace(/_/g,' ')}</td><td>${display}</td></tr>`;
+            });
+            $('#detailContent').html(html);
+            $('#modalDetail').addClass('show');
+        });
+
+        $(document).on("click",".force-download",function(e){
+            e.preventDefault();
+            const url=$(this).data("url");
+            const name=$(this).data("name");
+            const link=document.createElement("a");
+            link.href=url+"?download=1";
+            link.download=name||"file";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Close modals
+        $('.close-modal').click(function(){
+            $('#modalDetail').removeClass('show');
+        });
         
-        // Sisa kode filter dan DataTables configuration tetap sama seperti sebelumnya
-        // ... (kode filter lengkap) ...
+        $('.close-status').click(function(){
+            closeStatusModal();
+        });
+        
+        $(window).click(function(e){
+            if(e.target.id==='modalDetail') $('#modalDetail').removeClass('show');
+            if(e.target.id==='statusModal') closeStatusModal();
+        });
 
     });
+    
     </script>
 </body>
 </html>

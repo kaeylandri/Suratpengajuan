@@ -1038,7 +1038,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     <input type="text" name="divisi[]" class="form-control divisi" autocomplete="off" required>
                 </div>
 
-                <!-- TOMBOL (+) / (-) -->
                 <div class="col-md-1 text-center button-cell">
                     <button type="button" class="btn btn-success addRow" title="Tambah Baris">
                         <i class="fas fa-plus"></i>
@@ -1052,163 +1051,27 @@ document.addEventListener('DOMContentLoaded', function () {
 </fieldset>
 
 <style>
-.button-cell {
-    display: none;
-    justify-content: center;
-    align-items: center;
-}
-.addRow, .removeRow {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    padding: 0;
-}
+.button-cell { display: none; justify-content: center; align-items: center; }
+.addRow, .removeRow { width: 35px; height: 35px; border-radius: 50%; padding: 0; }
+.panitia-row { transition: all 0.3s ease; opacity: 1; transform: translateY(0); }
+.panitia-row.removing { opacity: 0; transform: translateX(20px); }
 
-/* Animasi untuk panitia row */
-.panitia-row {
-    transition: all 0.3s ease;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.panitia-row.removing {
-    opacity: 0;
-    transform: translateX(20px);
-}
-
-/* AUTOCOMPLETE BOX - EXACT GOOGLE SEARCH STYLE */
-.autocomplete-box-fixed {
-    position: fixed;
-    background: #fff;
-    border: none;
-    z-index: 9999999;
-    max-height: 400px;
-    overflow-y: auto;
-    box-shadow: 0 4px 6px rgba(32,33,36,0.28);
-    border-radius: 24px;
-    font-size: 14px;
-    padding: 8px 0;
-    margin-top: 8px;
-    font-family: arial, sans-serif;
-    min-width: 300px;
-}
-
-.autocomplete-item {
-    padding: 0;
-    cursor: pointer;
-    transition: background-color 0.1s ease;
-    border: none;
-    line-height: 1.4;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: relative;
-}
-
-.autocomplete-item:hover, 
-.autocomplete-item.active {
-    background: #f8f9fa;
-}
-
-/* Icon search seperti Google */
-.autocomplete-icon {
-    width: 20px;
-    height: 20px;
-    margin-left: 16px;
-    flex-shrink: 0;
-    opacity: 0.54;
-}
-
-.autocomplete-icon svg {
-    width: 20px;
-    height: 20px;
-    fill: #5f6368;
-}
-
-/* Content wrapper */
-.autocomplete-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 12px 16px 12px 0;
-    flex: 1;
-    min-width: 0;
-}
-
-/* Text styling seperti Google */
-.autocomplete-item .item-primary {
-    font-size: 14px;
-    color: #202124;
-    font-weight: 400;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.autocomplete-item .item-secondary {
-    font-size: 12px;
-    color: #70757a;
-    font-weight: 400;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Bold text untuk query match */
-.query-match {
-    font-weight: 600;
-}
-
-/* First item with blue left border */
-.autocomplete-item:first-child {
-    border-left: 3px solid #1a73e8;
-}
-
-/* Loading dan empty state */
-.autocomplete-loading,
-.autocomplete-empty {
-    padding: 16px 20px;
-    text-align: center;
-    color: #70757a;
-    font-size: 13px;
-}
-
-.autocomplete-loading {
-    font-style: normal;
-}
-
-/* Scrollbar styling - Google Style */
-.autocomplete-box-fixed::-webkit-scrollbar {
-    width: 10px;
-}
-
-.autocomplete-box-fixed::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.autocomplete-box-fixed::-webkit-scrollbar-thumb {
-    background: #dadce0;
-    border-radius: 10px;
-    border: 2px solid #fff;
-}
-
-.autocomplete-box-fixed::-webkit-scrollbar-thumb:hover {
-    background: #bdc1c6;
-}
-
-/* Ensure scrollability - FORCE IT */
-.autocomplete-box-fixed {
-    overflow-y: scroll !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-}
-
-/* ensure important parents don't clip */
-.multi-step-form, fieldset, .container {
-    overflow: visible !important;
-}
+.autocomplete-box-fixed { position: fixed; background: #fff; border: none; z-index: 9999999; max-height: 400px; overflow-y: auto; box-shadow: 0 4px 6px rgba(32,33,36,0.28); border-radius: 24px; font-size: 14px; padding: 8px 0; margin-top: 8px; font-family: arial, sans-serif; min-width: 300px; }
+.autocomplete-item { padding: 0; cursor: pointer; transition: background-color 0.1s ease; border: none; line-height: 1.4; display: flex; align-items: center; gap: 16px; position: relative; }
+.autocomplete-item:hover, .autocomplete-item.active { background: #f8f9fa; }
+.autocomplete-icon { width: 20px; height: 20px; margin-left: 16px; flex-shrink: 0; opacity: 0.54; }
+.autocomplete-icon svg { width: 20px; height: 20px; fill: #5f6368; }
+.autocomplete-content { display: flex; flex-direction: column; gap: 2px; padding: 12px 16px 12px 0; flex: 1; min-width: 0; }
+.autocomplete-item .item-primary { font-size: 14px; color: #202124; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.autocomplete-item .item-secondary { font-size: 12px; color: #70757a; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.query-match { font-weight: 600; }
+.autocomplete-item:first-child { border-left: 3px solid #1a73e8; }
+.autocomplete-loading, .autocomplete-empty { padding: 16px 20px; text-align: center; color: #70757a; font-size: 13px; }
+.autocomplete-box-fixed::-webkit-scrollbar { width: 10px; }
+.autocomplete-box-fixed::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+.autocomplete-box-fixed::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 10px; border: 2px solid #fff; }
+.autocomplete-box-fixed::-webkit-scrollbar-thumb:hover { background: #bdc1c6; }
+.multi-step-form, fieldset, .container { overflow: visible !important; }
 </style>
 
 <script>
@@ -1216,97 +1079,60 @@ document.addEventListener('DOMContentLoaded', function () {
     const panitiaContainer = document.getElementById('panitiaContainer');
     const jenisPengajuan = document.getElementById('jenis_pengajuan');
 
-    // tampilkan tombol + saat Kelompok
     jenisPengajuan.addEventListener('change', function () {
-        const buttons = document.querySelectorAll('.button-cell');
-        if (this.value === 'Kelompok') {
-            buttons.forEach(btn => btn.style.display = 'flex');
-        } else {
-            buttons.forEach(btn => btn.style.display = 'none');
-        }
+        document.querySelectorAll('.button-cell').forEach(btn => {
+            btn.style.display = (this.value === 'Kelompok') ? 'flex' : 'none';
+        });
     });
 
-    // EVENT DELEGATION: tambah/hapus baris
-    let isAdding = false; // Flag untuk prevent double click
-    
+    let isAdding = false;
     panitiaContainer.addEventListener('click', function (e) {
-        e.stopPropagation();
-        
         const addBtn = e.target.closest('.addRow');
         const removeBtn = e.target.closest('.removeRow');
 
         if (addBtn) {
             e.preventDefault();
-            
-            // Prevent double execution
             if (isAdding) return false;
             isAdding = true;
-            
+
             const row = addBtn.closest('.panitia-row');
             const clone = row.cloneNode(true);
-
-            // Clear all inputs
             clone.querySelectorAll('input').forEach(input => {
                 input.value = '';
-                input.removeAttribute('data-initialized');
                 input.removeAttribute('data-autocomplete-init');
             });
-            
-            clone.removeAttribute('data-autocomplete-init');
 
-            // Change button from add to remove
             const btn = clone.querySelector('.addRow');
-            if (btn) {
-                btn.classList.remove('btn-success', 'addRow');
-                btn.classList.add('btn-danger', 'removeRow');
-                btn.innerHTML = '<i class="fas fa-minus"></i>';
-                btn.setAttribute('title', 'Hapus Baris');
-            }
+            btn.classList.remove('btn-success', 'addRow');
+            btn.classList.add('btn-danger', 'removeRow');
+            btn.innerHTML = '<i class="fas fa-minus"></i>';
+            btn.setAttribute('title', 'Hapus Baris');
 
             panitiaContainer.appendChild(clone);
-            
-            // ANIMASI SMOOTH SAAT TAMBAH
             setTimeout(() => {
                 clone.style.opacity = '0';
                 clone.style.transform = 'translateY(-10px)';
-                clone.offsetHeight; // Trigger reflow
+                clone.offsetHeight;
                 clone.style.transition = 'all 0.3s ease';
                 clone.style.opacity = '1';
                 clone.style.transform = 'translateY(0)';
             }, 10);
-            
-            // Initialize autocomplete untuk row baru
+
             initAutocompleteForRow(clone);
-            
-            // Reset flag after short delay
-            setTimeout(() => {
-                isAdding = false;
-            }, 300);
-            
-            return false;
+            setTimeout(() => isAdding = false, 300);
         }
 
         if (removeBtn) {
             e.preventDefault();
-            
             const rowEl = removeBtn.closest('.panitia-row');
             if (rowEl && panitiaContainer.querySelectorAll('.panitia-row').length > 1) {
-                // ANIMASI SMOOTH SAAT HAPUS
                 rowEl.style.opacity = '0';
                 rowEl.style.transform = 'translateX(20px)';
-                
-                setTimeout(() => {
-                    rowEl.remove();
-                }, 300);
+                setTimeout(() => rowEl.remove(), 300);
             }
-            
-            return false;
         }
-    }, true); // Use capture phase
+    });
 
-    initAutocompleteForRow(document.querySelector('.panitia-row'));
-
-    // Debounce helper
     function debounce(fn, delay = 300) {
         let t;
         return function (...args) {
@@ -1315,9 +1141,8 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
-    // Create and show suggestion box with improved HTML structure
     function showSuggestionBox(inputEl, items, onSelect, fieldType) {
-        removeAllSuggestionBoxes();
+        document.querySelectorAll('.autocomplete-box-fixed').forEach(b => b.remove());
 
         const rect = inputEl.getBoundingClientRect();
         const box = document.createElement('div');
@@ -1326,359 +1151,95 @@ document.addEventListener('DOMContentLoaded', function () {
         box.style.top = (rect.bottom + 4) + 'px';
         box.style.width = Math.max(rect.width, 300) + 'px';
 
-        if (!items || items.length === 0) {
+        if (!items || !items.length) {
             const empty = document.createElement('div');
             empty.className = 'autocomplete-empty';
             empty.textContent = 'Tidak ada data ditemukan';
             box.appendChild(empty);
             document.body.appendChild(box);
-            
-            setTimeout(() => {
-                removeAllSuggestionBoxes();
-            }, 2000);
+            setTimeout(() => box.remove(), 2000);
             return;
         }
 
         let selectedIndex = -1;
-
         items.forEach((it, idx) => {
             const option = document.createElement('div');
             option.className = `autocomplete-item type-${fieldType}`;
-            
-            const icon = `
+            option.innerHTML = `
                 <div class="autocomplete-icon">
                     <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
                     </svg>
                 </div>
+                <div class="autocomplete-content">
+                    <div class="item-primary">${it[fieldType] || '-'}</div>
+                    ${it.nama_dosen ? '<div class="item-secondary">' + it.nama_dosen + '</div>' : ''}
+                </div>
             `;
-            
-            let htmlContent = '';
-            
-            switch(fieldType) {
-                case 'nip':
-                    const nipValue = (it.nip !== undefined && it.nip !== null && it.nip !== '') 
-                        ? String(it.nip) 
-                        : 'NIP tidak tersedia';
-                    const namaValue = it.nama_dosen || '';
-                    
-                    htmlContent = `
-                        ${icon}
-                        <div class="autocomplete-content">
-                            <div class="item-primary">${nipValue}</div>
-                            ${namaValue ? '<div class="item-secondary">' + namaValue + '</div>' : ''}
-                        </div>
-                    `;
-                    break;
-                    
-                case 'nama':
-                    htmlContent = `
-                        ${icon}
-                        <div class="autocomplete-content">
-                            <div class="item-primary">${it.nama_dosen || '-'}</div>
-                            ${it.nip || it.jabatan ? '<div class="item-secondary">' + 
-                                (it.nip ? 'NIP: ' + it.nip : '') + 
-                                (it.nip && it.jabatan ? ' • ' : '') + 
-                                (it.jabatan ? it.jabatan : '') + 
-                            '</div>' : ''}
-                        </div>
-                    `;
-                    break;
-                    
-                case 'jabatan':
-                    htmlContent = `
-                        ${icon}
-                        <div class="autocomplete-content">
-                            <div class="item-primary">${it.jabatan || '-'}</div>
-                            ${it.nama_dosen ? '<div class="item-secondary">' + it.nama_dosen + (it.nip ? ' • NIP: ' + it.nip : '') + '</div>' : ''}
-                        </div>
-                    `;
-                    break;
-                    
-                case 'divisi':
-                    htmlContent = `
-                        ${icon}
-                        <div class="autocomplete-content">
-                            <div class="item-primary">${it.divisi || '-'}</div>
-                            ${it.nama_dosen || it.jabatan ? '<div class="item-secondary">' + 
-                                (it.nama_dosen ? it.nama_dosen : '') + 
-                                (it.nama_dosen && it.jabatan ? ' • ' : '') + 
-                                (it.jabatan ? it.jabatan : '') + 
-                            '</div>' : ''}
-                        </div>
-                    `;
-                    break;
-            }
-            
-            option.innerHTML = htmlContent;
-
-            option.addEventListener('click', (ev) => {
-                ev.stopPropagation();
-                onSelect(it);
-                removeAllSuggestionBoxes();
-            });
+            option.addEventListener('click', (ev) => { onSelect(it); box.remove(); });
             box.appendChild(option);
         });
 
-        // Keyboard navigation
-        function onKey(e) {
+        document.body.appendChild(box);
+        inputEl.addEventListener('keydown', (e) => {
             const opts = box.querySelectorAll('.autocomplete-item');
             if (!opts.length) return;
-            
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                selectedIndex = Math.min(selectedIndex + 1, opts.length - 1);
-                opts.forEach((o,i) => o.classList.toggle('active', i === selectedIndex));
-                opts[selectedIndex].scrollIntoView({block:'nearest'});
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                selectedIndex = Math.max(selectedIndex - 1, 0);
-                opts.forEach((o,i) => o.classList.toggle('active', i === selectedIndex));
-                opts[selectedIndex].scrollIntoView({block:'nearest'});
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (selectedIndex >= 0 && opts[selectedIndex]) {
-                    opts[selectedIndex].click();
-                }
-            } else if (e.key === 'Escape') {
-                removeAllSuggestionBoxes();
-            }
-        }
-
-        document.body.appendChild(box);
-        box._sourceInput = inputEl;
-        inputEl.addEventListener('keydown', onKey);
-
-        const offClick = (ev) => {
-            if (!box.contains(ev.target) && ev.target !== inputEl) {
-                removeAllSuggestionBoxes();
-            }
-        };
-        setTimeout(() => document.addEventListener('click', offClick), 0);
-
-        box._cleanup = function () {
-            inputEl.removeEventListener('keydown', onKey);
-            document.removeEventListener('click', offClick);
-        };
-    }
-
-    function removeAllSuggestionBoxes() {
-        document.querySelectorAll('.autocomplete-box-fixed').forEach(b => {
-            if (b._cleanup) b._cleanup();
-            b.remove();
+            if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = Math.min(selectedIndex + 1, opts.length - 1); opts.forEach((o,i) => o.classList.toggle('active', i === selectedIndex)); opts[selectedIndex].scrollIntoView({block:'nearest'});}
+            else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = Math.max(selectedIndex - 1, 0); opts.forEach((o,i) => o.classList.toggle('active', i === selectedIndex)); opts[selectedIndex].scrollIntoView({block:'nearest'});}
+            else if (e.key === 'Enter') { e.preventDefault(); if (selectedIndex >= 0 && opts[selectedIndex]) opts[selectedIndex].click();}
+            else if (e.key === 'Escape') box.remove();
         });
+        setTimeout(() => document.addEventListener('click', (ev) => { if (!box.contains(ev.target) && ev.target !== inputEl) box.remove(); }), 0);
     }
 
-    // Fetch suggestions from server
-    async function fetchSuggestions(q) {
-        if (!q || q.trim().length < 1) return [];
+    async function fetchSuggestions(q, fieldType = 'nip') {
+        if (!q) return [];
         try {
-            const res = await fetch("<?= base_url('surat/autocomplete-nip') ?>?q=" + encodeURIComponent(q));
+            const res = await fetch("<?= base_url('surat/autocomplete-nip') ?>?q=" + encodeURIComponent(q) + "&field=" + fieldType);
             if (!res.ok) return [];
             const data = await res.json();
-            
-            return (Array.isArray(data) ? data : []).map(it => {
-                let nipValue = '';
-                const possibleNipFields = ['nip', 'NIP', 'nip_karyawan', 'employee_number', 'nip_dosen', 'id'];
-                
-                for (let field of possibleNipFields) {
-                    if (it[field] !== undefined && it[field] !== null && it[field] !== '') {
-                        nipValue = String(it[field]);
-                        break;
-                    }
-                }
-                
-                return {
-                    nip: nipValue,
-                    nama_dosen: it.nama_dosen || it.nama || it.name || it.nama_lengkap || it.full_name || '',
-                    jabatan: it.jabatan || it.position || it.job_title || it.title || '',
-                    divisi: it.divisi || it.division || it.fakultas || it.prodi || it.department || ''
-                };
-            });
-        } catch (err) {
-            console.error('fetchSuggestions err', err);
-            return [];
-        }
+            return Array.isArray(data) ? data.map(i => ({
+                nip: i.nip || '',
+                nama_dosen: i.nama_dosen || '',
+                jabatan: i.jabatan || '',
+                divisi: i.divisi || ''
+            })) : [];
+        } catch(e) { console.error(e); return []; }
     }
 
-    // Fetch by exact NIP
-    async function fetchByNip(nip) {
-        if (!nip || nip.trim().length < 1) return null;
-        try {
-            const res = await fetch("<?= base_url('get-dosen') ?>?nip=" + encodeURIComponent(nip));
-            if (!res.ok) return null;
-            const data = await res.json();
-            
-            let nipValue = '';
-            if (data.nip !== undefined && data.nip !== null) {
-                nipValue = String(data.nip);
-            } else if (data.NIP !== undefined && data.NIP !== null) {
-                nipValue = String(data.NIP);
-            } else {
-                nipValue = nip;
-            }
-            
-            return {
-                nip: nipValue,
-                nama_dosen: data.nama_dosen || data.nama || '',
-                jabatan: data.jabatan || data.position || '',
-                divisi: data.divisi || data.division || ''
-            };
-        } catch (err) {
-            console.error('fetchByNip err', err);
-            return null;
-        }
-    }
-
-    // Initialize autocomplete for a row
     function initAutocompleteForRow(rowEl) {
-        if (!rowEl) return;
-        
-        if (rowEl.hasAttribute('data-autocomplete-init')) {
-            return;
-        }
-        
-        rowEl.setAttribute('data-autocomplete-init', 'true');
+        if (!rowEl || rowEl.dataset.autocompleteInit) return;
+        rowEl.dataset.autocompleteInit = true;
 
         const inputNip = rowEl.querySelector('.nip-input');
         const inputNama = rowEl.querySelector('.nama_dosen');
         const inputJabatan = rowEl.querySelector('.jabatan');
         const inputDivisi = rowEl.querySelector('.divisi');
-        
-        if (!inputNip || !inputNama || !inputJabatan || !inputDivisi) {
-            return;
-        }
 
         function fillRowWith(item) {
             if (!item) return;
-            if (inputNip) inputNip.value = item.nip || '';
-            if (inputNama) inputNama.value = item.nama_dosen || '';
-            if (inputJabatan) inputJabatan.value = item.jabatan || '';
-            if (inputDivisi) inputDivisi.value = item.divisi || '';
+            inputNip.value = item.nip || '';
+            inputNama.value = item.nama_dosen || '';
+            inputJabatan.value = item.jabatan || '';
+            inputDivisi.value = item.divisi || '';
         }
 
-        // NIP Input Handler
-        const onNipInput = debounce(async function (ev) {
-            const v = ev.target.value.trim();
-            if (v.length < 1) {
-                removeAllSuggestionBoxes();
-                return;
-            }
-            const list = await fetchSuggestions(v);
-            showSuggestionBox(inputNip, list, fillRowWith, 'nip');
-        }, 250);
-
-        if (inputNip._nipInputHandler) {
-            inputNip.removeEventListener('input', inputNip._nipInputHandler.fn);
-        }
-        inputNip._nipInputHandler = { fn: onNipInput };
-        inputNip.addEventListener('input', onNipInput);
-
-        const onNipBlur = async function () {
-            setTimeout(async () => {
-                removeAllSuggestionBoxes();
-                const val = inputNip.value.trim();
+        function createHandler(fieldType, inputEl) {
+            return debounce(async function () {
+                const val = inputEl.value.trim();
                 if (!val) return;
-                const data = await fetchByNip(val);
-                if (data) fillRowWith(data);
-            }, 150);
-        };
-        
-        if (inputNip._nipBlurHandler) {
-            inputNip.removeEventListener('blur', inputNip._nipBlurHandler.fn);
+                const list = await fetchSuggestions(val, fieldType);
+                showSuggestionBox(inputEl, list, fillRowWith, fieldType);
+            }, 300);
         }
-        inputNip._nipBlurHandler = { fn: onNipBlur };
-        inputNip.addEventListener('blur', onNipBlur);
 
-        // NAMA DOSEN Input Handler
-        const onNamaInput = debounce(async function (ev) {
-            const v = ev.target.value.trim();
-            if (v.length < 1) { 
-                removeAllSuggestionBoxes(); 
-                return; 
-            }
-            const list = await fetchSuggestions(v);
-            showSuggestionBox(inputNama, list, fillRowWith, 'nama');
-        }, 250);
-
-        if (inputNama._namaInputHandler) {
-            inputNama.removeEventListener('input', inputNama._namaInputHandler.fn);
-        }
-        inputNama._namaInputHandler = { fn: onNamaInput };
-        inputNama.addEventListener('input', onNamaInput);
-
-        // JABATAN Input Handler
-        const onJabatanInput = debounce(async function (ev) {
-            const v = ev.target.value.trim();
-            if (v.length < 1) { 
-                removeAllSuggestionBoxes(); 
-                return; 
-            }
-            const list = await fetchSuggestions(v);
-            showSuggestionBox(inputJabatan, list, fillRowWith, 'jabatan');
-        }, 250);
-
-        if (inputJabatan._jabatanInputHandler) {
-            inputJabatan.removeEventListener('input', inputJabatan._jabatanInputHandler.fn);
-        }
-        inputJabatan._jabatanInputHandler = { fn: onJabatanInput };
-        inputJabatan.addEventListener('input', onJabatanInput);
-
-        // DIVISI Input Handler
-        const onDivisiInput = debounce(async function (ev) {
-            const v = ev.target.value.trim();
-            if (v.length < 1) { 
-                removeAllSuggestionBoxes(); 
-                return; 
-            }
-            const list = await fetchSuggestions(v);
-            showSuggestionBox(inputDivisi, list, fillRowWith, 'divisi');
-        }, 250);
-
-        if (inputDivisi._divisiInputHandler) {
-            inputDivisi.removeEventListener('input', inputDivisi._divisiInputHandler.fn);
-        }
-        inputDivisi._divisiInputHandler = { fn: onDivisiInput };
-        inputDivisi.addEventListener('input', onDivisiInput);
+        inputNip.addEventListener('input', createHandler('nip', inputNip));
+        inputNama.addEventListener('input', createHandler('nama_dosen', inputNama));
+        inputJabatan.addEventListener('input', createHandler('jabatan', inputJabatan));
+        inputDivisi.addEventListener('input', createHandler('divisi', inputDivisi));
     }
 
-    // Init existing rows
     document.querySelectorAll('.panitia-row').forEach(r => initAutocompleteForRow(r));
-
-    window.addEventListener('resize', removeAllSuggestionBoxes);
-    
-    let scrollTimeout;
-    window.addEventListener('scroll', function(e) {
-        const activeBox = document.querySelector('.autocomplete-box-fixed');
-        if (!activeBox) return;
-        
-        const isScrollingInsideBox = activeBox.contains(e.target) || e.target === activeBox;
-        if (isScrollingInsideBox) {
-            e.stopPropagation();
-            return;
-        }
-        
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            if (activeBox && activeBox._sourceInput) {
-                const rect = activeBox._sourceInput.getBoundingClientRect();
-                activeBox.style.left = rect.left + 'px';
-                activeBox.style.top = (rect.bottom + 4) + 'px';
-            }
-        }, 10);
-    }, true);
-    
-    document.body.addEventListener('wheel', function(e) {
-        const activeBox = document.querySelector('.autocomplete-box-fixed');
-        if (activeBox && activeBox.contains(e.target)) {
-            const isAtTop = activeBox.scrollTop === 0;
-            const isAtBottom = activeBox.scrollHeight - activeBox.scrollTop === activeBox.clientHeight;
-            
-            if ((isAtTop && e.deltaY < 0) || (isAtBottom && e.deltaY > 0)) {
-                e.preventDefault();
-            }
-        }
-    }, { passive: false });
 });
 </script>
 <!-- ===== UPLOADCARE CDN ===== -->
@@ -1746,14 +1307,24 @@ document.addEventListener('DOMContentLoaded', function () {
     display: block;
     text-align: center;
 }
+
+/* Success state */
+.upload-success {
+    border-color: #28a745 !important;
+}
+
+.upload-success-message {
+    color: #28a745;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+}
 </style>
 
 <!-- ===== STEP 3 ===== -->
 <fieldset>
     <div class="container" style="min-height: 270px; display: flex; justify-content: center;">
-
         <div class="upload-card">
-
             <div class="upload-title">Upload File Eviden</div>
             <div class="upload-desc">
                 Unggah foto atau dokumen pendukung. Anda dapat memilih lebih dari satu file.
@@ -1764,23 +1335,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 name="eviden"
                 id="evidenUploader"
                 role="uploadcare-uploader"
-
                 data-multiple="true"
                 data-multiple-max="0"
                 data-multiple-min="1"
                 data-clearable="true"
-
                 data-preview-step="true"
                 data-images-only="false"
-
                 data-tabs="file url camera dropbox gdrive"
                 data-multiple-upload="true"
             />
 
+            <div id="upload-status" class="upload-success-message" style="display: none;">
+                <i class="fas fa-check-circle"></i> File berhasil diupload!
+            </div>
+
             <span id="chk-error"></span>
-
         </div>
-
     </div>
 </fieldset>
 
@@ -1793,34 +1363,88 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- ===== SCRIPT VALIDASI ===== -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
     const nextBtn = document.querySelector(".next-btn");
     const prevBtn = document.querySelector(".prev-btn");
     const uploader = document.querySelector("#evidenUploader");
     const err = document.getElementById("chk-error");
+    const uploadStatus = document.getElementById("upload-status");
+    const uploadCard = document.querySelector('.upload-card');
+
+    // Track upload status
+    let isFileUploaded = false;
+
+    // Listen for upload completion from Uploadcare
+    if (typeof uploadcare !== 'undefined') {
+        const widget = uploadcare.Widget('[role="uploadcare-uploader"]');
+        
+        widget.onChange(function(file) {
+            if (file) {
+                isFileUploaded = true;
+                uploadStatus.style.display = 'block';
+                uploadCard.classList.add('upload-success');
+                err.textContent = '';
+            } else {
+                isFileUploaded = false;
+                uploadStatus.style.display = 'none';
+                uploadCard.classList.remove('upload-success');
+            }
+        });
+    }
 
     // Tombol Back
     prevBtn.addEventListener("click", function () {
+        // Back button logic will be handled by the main multi-step script
         console.log("Going back...");
     });
 
     // Validasi Continue
     nextBtn.addEventListener("click", function () {
-
-        const value = uploader.value;
-
-        if (!value || value.trim() === "") {
+        // PERUBAHAN PENTING: Validasi dan redirect ke list_surat_tugas.php
+        if (!isFileUploaded) {
             err.textContent = "Mohon upload minimal 1 file eviden!";
             return;
         }
 
         err.textContent = "";
-        console.log("Files:", value);
-        console.log("Continuing...");
+        
+        // Simpan data form ke localStorage/sessionStorage sebelum redirect
+        const formData = new FormData(document.getElementById('msform'));
+        const formObject = {};
+        for (let [key, value] of formData.entries()) {
+            formObject[key] = value;
+        }
+        
+        // Simpan data form sementara
+        sessionStorage.setItem('suratTugasFormData', JSON.stringify(formObject));
+        
+        // Tampilkan loading state
+        nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        nextBtn.disabled = true;
+        
+        // Submit form yang akan mengarah ke list_surat_tugas.php
+        setTimeout(() => {
+            document.getElementById('msform').submit();
+        }, 1000);
+        
+        // Alternatif: Redirect langsung jika tidak perlu submit
+        // window.location.href = 'list_surat_tugas.php';
     });
+
+    // Cek jika ada file yang sudah diupload saat halaman dimuat
+    function checkInitialUpload() {
+        if (uploader.value && uploader.value.trim() !== "") {
+            isFileUploaded = true;
+            uploadStatus.style.display = 'block';
+            uploadCard.classList.add('upload-success');
+        }
+    }
+
+    // Panggil fungsi pengecekan
+    setTimeout(checkInitialUpload, 1000);
 
 });
 </script>
+
 
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -1837,8 +1461,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <p style="color:red;"><?php echo $this->session->flashdata('error'); ?></p>
         <?php endif; ?>
 
-<!-- ===== STYLE ===== -->
-<!-- ===== IMPORT FONT ===== -->
+
 
 
 <!-- FONT AWESOME ICON -->

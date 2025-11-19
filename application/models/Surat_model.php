@@ -70,6 +70,44 @@ class Surat_model extends CI_Model
     }
 
     // ============================================
+    // GET MULTIPLE BY IDs - FOR MULTI EDIT (NEW)
+    // ============================================
+    public function getMultiByIds($ids)
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        // Pastikan semua ID adalah integer
+        $ids = array_map('intval', $ids);
+        
+        // Filter ID yang valid (> 0)
+        $ids = array_filter($ids, function($id) {
+            return $id > 0;
+        });
+
+        if (empty($ids)) {
+            return [];
+        }
+        
+        // Query dengan WHERE IN
+        $this->db->where_in('id', $ids);
+        $this->db->order_by('id', 'ASC');
+        $result = $this->db->get('surat')->result();
+
+        // Decode JSON fields untuk setiap row
+        foreach ($result as &$row) {
+            $row->nip        = json_decode($row->nip, true) ?: [];
+            $row->nama_dosen = json_decode($row->nama_dosen, true) ?: [];
+            $row->jabatan    = json_decode($row->jabatan, true) ?: [];
+            $row->divisi     = json_decode($row->divisi, true) ?: [];
+            $row->eviden     = json_decode($row->eviden, true) ?: [];
+        }
+
+        return $result;
+    }
+
+    // ============================================
     // GET STATUS BY ID - FIXED VERSION
     // ============================================
     public function get_status_by_id($id)

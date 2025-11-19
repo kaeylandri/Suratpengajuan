@@ -2,9 +2,14 @@
 // Fungsi decode aman untuk menghindari error json_decode array
 function safe_json($data) {
     if (is_array($data)) return $data;
-    if (empty($data)) return [];
+    if ($data === null || $data === '' || $data === '-') return [];
     $decoded = json_decode($data, true);
-    return is_array($decoded) ? $decoded : [];
+    return (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
+}
+
+// Pastikan $surat_list selalu terdefinisi (hindari warning)
+if (!isset($surat_list) || !is_array($surat_list)) {
+    $surat_list = [];
 }
 ?>
 <!DOCTYPE html>
@@ -68,26 +73,27 @@ function safe_json($data) {
         <?php foreach ($surat_list as $index => $surat): ?>
 
         <?php
-        $nip_array     = safe_json($surat->nip);
-        $nama_array    = safe_json($surat->nama_dosen);
-        $jabatan_array = safe_json($surat->jabatan);
-        $divisi_array  = safe_json($surat->divisi);
+        // Pastikan field tersedia & decode aman
+        $nip_array     = safe_json($surat->nip ?? []);
+        $nama_array    = safe_json($surat->nama_dosen ?? []);
+        $jabatan_array = safe_json($surat->jabatan ?? []);
+        $divisi_array  = safe_json($surat->divisi ?? []);
         ?>
 
         <div class="edit-card">
 
             <div class="card-header-custom d-flex justify-content-between">
                 <div>
-                    <div class="card-title"><?= htmlspecialchars($surat->nama_kegiatan); ?></div>
+                    <div class="card-title"><?= htmlspecialchars($surat->nama_kegiatan ?? '-'); ?></div>
                     <div style="font-size:13px;color:#666;">
-                        <?= htmlspecialchars($surat->jenis_pengajuan); ?> •
-                        <?= $surat->tanggal_pengajuan ? date('d M Y', strtotime($surat->tanggal_pengajuan)) : '-'; ?>
+                        <?= htmlspecialchars($surat->jenis_pengajuan ?? '-'); ?> •
+                        <?= !empty($surat->tanggal_pengajuan) && $surat->tanggal_pengajuan !== '-' ? date('d M Y', strtotime($surat->tanggal_pengajuan)) : '-'; ?>
                     </div>
                 </div>
-                <div class="item-id">ID: <?= $surat->id; ?></div>
+                <div class="item-id">ID: <?= htmlspecialchars($surat->id); ?></div>
             </div>
 
-            <input type="hidden" name="items[<?= $index ?>][id]" value="<?= $surat->id ?>">
+            <input type="hidden" name="items[<?= $index ?>][id]" value="<?= htmlspecialchars($surat->id); ?>">
 
             <div class="form-section-title"><i class="fas fa-calendar-alt"></i> Informasi Kegiatan</div>
 
@@ -96,61 +102,62 @@ function safe_json($data) {
                     <label>Nama Kegiatan</label>
                     <input type="text" class="form-control"
                            name="items[<?= $index ?>][nama_kegiatan]"
-                           value="<?= htmlspecialchars($surat->nama_kegiatan); ?>">
+                           value="<?= htmlspecialchars($surat->nama_kegiatan ?? ''); ?>">
                 </div>
 
                 <div class="col-md-6">
                     <label>Jenis Tanggal</label>
                     <select class="form-control jenis-date-select" data-index="<?= $index ?>"
                             name="items[<?= $index ?>][jenis_date]">
-                        <option value="custom"  <?= $surat->jenis_date=='custom'?'selected':'' ?>>Custom</option>
-                        <option value="periode" <?= $surat->jenis_date=='periode'?'selected':'' ?>>Periode</option>
+                        <option value="custom"  <?= isset($surat->jenis_date) && $surat->jenis_date=='custom'?'selected':'' ?>>Custom</option>
+                        <option value="periode" <?= isset($surat->jenis_date) && $surat->jenis_date=='periode'?'selected':'' ?>>Periode</option>
                     </select>
                 </div>
             </div>
 
-            <div id="custom_<?= $index ?>" style="<?= $surat->jenis_date=='custom'?'':'display:none' ?>">
+            <div id="custom_<?= $index ?>" style="<?= (isset($surat->jenis_date) && $surat->jenis_date=='custom') ? '' : 'display:none' ?>">
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <label>Tanggal Mulai</label>
                         <input type="date" class="form-control tanggal-kegiatan"
                                data-index="<?= $index ?>"
                                name="items[<?= $index ?>][tanggal_kegiatan]"
-                               value="<?= $surat->tanggal_kegiatan!='-'?$surat->tanggal_kegiatan:'' ?>">
+                               value="<?= (!empty($surat->tanggal_kegiatan) && $surat->tanggal_kegiatan!='-') ? htmlspecialchars($surat->tanggal_kegiatan) : '' ?>">
                     </div>
                     <div class="col-md-6">
                         <label>Tanggal Akhir</label>
                         <input type="date" class="form-control akhir-kegiatan"
                                data-index="<?= $index ?>"
                                name="items[<?= $index ?>][akhir_kegiatan]"
-                               value="<?= $surat->akhir_kegiatan!='-'?$surat->akhir_kegiatan:'' ?>">
+                               value="<?= (!empty($surat->akhir_kegiatan) && $surat->akhir_kegiatan!='-') ? htmlspecialchars($surat->akhir_kegiatan) : '' ?>">
                     </div>
                     <div class="col-md-6">
                         <label>Periode Penugasan</label>
                         <input type="date" class="form-control periode-penugasan"
                                data-index="<?= $index ?>"
                                name="items[<?= $index ?>][periode_penugasan]"
-                               value="<?= $surat->periode_penugasan!='-'?$surat->periode_penugasan:'' ?>">
+                               value="<?= (!empty($surat->periode_penugasan) && $surat->periode_penugasan!='-') ? htmlspecialchars($surat->periode_penugasan) : '' ?>">
                     </div>
                     <div class="col-md-6">
                         <label>Akhir Periode</label>
                         <input type="date" class="form-control akhir-periode-penugasan"
                                data-index="<?= $index ?>"
                                name="items[<?= $index ?>][akhir_periode_penugasan]"
-                               value="<?= $surat->akhir_periode_penugasan!='-'?$surat->akhir_periode_penugasan:'' ?>">
+                               value="<?= (!empty($surat->akhir_periode_penugasan) && $surat->akhir_periode_penugasan!='-') ? htmlspecialchars($surat->akhir_periode_penugasan) : '' ?>">
                     </div>
                 </div>
             </div>
 
-            <div id="periode_<?= $index ?>" style="<?= $surat->jenis_date=='periode'?'':'display:none' ?>" class="mt-3">
+            <div id="periode_<?= $index ?>" style="<?= (isset($surat->jenis_date) && $surat->jenis_date=='periode') ? '' : 'display:none' ?>" class="mt-3">
                 <label>Pilih Periode</label>
                 <select class="form-control" name="items[<?= $index ?>][periode_value]">
                     <?php
                     $years = ["2024/2025","2025/2026","2026/2027","2027/2028","2028/2029","2029/2030"];
                     foreach ($years as $y):
                         foreach (["Ganjil","Genap"] as $smt):
-                            $val = "$y $smt";
-                            echo "<option value='$val' ".($surat->periode_value==$val?'selected':'').">$val</option>";
+                            $val = $y . ' ' . $smt;
+                            $sel = (isset($surat->periode_value) && $surat->periode_value == $val) ? 'selected' : '';
+                            echo "<option value='".htmlspecialchars($val)."' $sel>".htmlspecialchars($val)."</option>";
                         endforeach;
                     endforeach;
                     ?>
@@ -164,54 +171,58 @@ function safe_json($data) {
                     <label>Jenis Pengajuan</label>
                     <select class="form-control jenis-pengajuan-select" data-index="<?= $index ?>"
                             name="items[<?= $index ?>][jenis_pengajuan]">
-                        <option value="Perorangan" <?= $surat->jenis_pengajuan=='Perorangan'?'selected':'' ?>>Perorangan</option>
-                        <option value="Kelompok"   <?= $surat->jenis_pengajuan=='Kelompok'?'selected':'' ?>>Kelompok</option>
+                        <option value="Perorangan" <?= isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan=='Perorangan'?'selected':'' ?>>Perorangan</option>
+                        <option value="Kelompok"   <?= isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan=='Kelompok'?'selected':'' ?>>Kelompok</option>
                     </select>
                 </div>
 
                 <div class="col-md-3">
                     <label>Format</label>
                     <select class="form-control" name="items[<?= $index ?>][format]">
-                        <option value="Online"  <?= $surat->format=='Online'?'selected':'' ?>>Online</option>
-                        <option value="Offline" <?= $surat->format=='Offline'?'selected':'' ?>>Offline</option>
-                        <option value="Hybrid"  <?= $surat->format=='Hybrid'?'selected':'' ?>>Hybrid</option>
+                        <option value="Online"  <?= isset($surat->format) && $surat->format=='Online'?'selected':'' ?>>Online</option>
+                        <option value="Offline" <?= isset($surat->format) && $surat->format=='Offline'?'selected':'' ?>>Offline</option>
+                        <option value="Hybrid"  <?= isset($surat->format) && $surat->format=='Hybrid'?'selected':'' ?>>Hybrid</option>
                     </select>
                 </div>
             </div>
 
-            <div id="perorangan_<?= $index ?>" style="<?= $surat->jenis_pengajuan=='Perorangan'?'':'display:none' ?>" class="mt-3">
+            <div id="perorangan_<?= $index ?>" style="<?= (isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan=='Perorangan') ? '' : 'display:none' ?>" class="mt-3">
                 <label>Jenis Penugasan (Perorangan)</label>
                 <select class="form-control jenis-penugasan-per-select" data-index="<?= $index ?>"
                         name="items[<?= $index ?>][jenis_penugasan_perorangan]">
-                    <?php foreach(["Juri","Pembicara","Narasumber","Lainnya"] as $o): ?>
-                        <option value="<?= $o ?>" <?= $surat->jenis_penugasan_perorangan==$o?'selected':'' ?>><?= $o ?></option>
+                    <?php foreach(["Juri","Pembicara","Narasumber","Lainnya"] as $o): 
+                        $sel = (isset($surat->jenis_penugasan_perorangan) && $surat->jenis_penugasan_perorangan == $o) ? 'selected' : '';
+                    ?>
+                        <option value="<?= htmlspecialchars($o) ?>" <?= $sel ?>><?= htmlspecialchars($o) ?></option>
                     <?php endforeach ?>
                 </select>
 
                 <div id="lainnya_per_<?= $index ?>" class="mt-2"
-                     style="<?= $surat->jenis_penugasan_perorangan=='Lainnya'?'':'display:none' ?>">
+                     style="<?= (isset($surat->jenis_penugasan_perorangan) && $surat->jenis_penugasan_perorangan=='Lainnya') ? '' : 'display:none' ?>">
                     <label>Isi Lainnya</label>
                     <input type="text" class="form-control"
                            name="items[<?= $index ?>][penugasan_lainnya_perorangan]"
-                           value="<?= htmlspecialchars($surat->penugasan_lainnya_perorangan) ?>">
+                           value="<?= htmlspecialchars($surat->penugasan_lainnya_perorangan ?? '') ?>">
                 </div>
             </div>
 
-            <div id="kelompok_<?= $index ?>" style="<?= $surat->jenis_pengajuan=='Kelompok'?'':'display:none' ?>" class="mt-3">
+            <div id="kelompok_<?= $index ?>" style="<?= (isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan=='Kelompok') ? '' : 'display:none' ?>" class="mt-3">
                 <label>Jenis Penugasan (Kelompok)</label>
                 <select class="form-control jenis-penugasan-kel-select" data-index="<?= $index ?>"
                         name="items[<?= $index ?>][jenis_penugasan_kelompok]">
-                    <?php foreach(["Tim","Kepanitiaan","Lainnya"] as $o): ?>
-                        <option value="<?= $o ?>" <?= $surat->jenis_penugasan_kelompok==$o?'selected':'' ?>><?= $o ?></option>
+                    <?php foreach(["Tim","Kepanitiaan","Lainnya"] as $o): 
+                        $sel = (isset($surat->jenis_penugasan_kelompok) && $surat->jenis_penugasan_kelompok == $o) ? 'selected' : '';
+                    ?>
+                        <option value="<?= htmlspecialchars($o) ?>" <?= $sel ?>><?= htmlspecialchars($o) ?></option>
                     <?php endforeach ?>
                 </select>
 
                 <div id="lainnya_kel_<?= $index ?>" class="mt-2"
-                     style="<?= $surat->jenis_penugasan_kelompok=='Lainnya'?'':'display:none' ?>">
+                     style="<?= (isset($surat->jenis_penugasan_kelompok) && $surat->jenis_penugasan_kelompok=='Lainnya') ? '' : 'display:none' ?>">
                     <label>Isi Lainnya</label>
                     <input type="text" class="form-control"
                            name="items[<?= $index ?>][penugasan_lainnya_kelompok]"
-                           value="<?= htmlspecialchars($surat->penugasan_lainnya_kelompok) ?>">
+                           value="<?= htmlspecialchars($surat->penugasan_lainnya_kelompok ?? '') ?>">
                 </div>
             </div>
 
@@ -234,9 +245,9 @@ function safe_json($data) {
                         <?php foreach ($nip_array as $i => $nip): ?>
                             <tr>
                                 <td><input type="text" class="form-control" name="items[<?= $index ?>][nip][]" value="<?= htmlspecialchars($nip) ?>"></td>
-                                <td><input type="text" class="form-control" name="items[<?= $index ?>][nama_dosen][]" value="<?= htmlspecialchars($nama_array[$i] ?? '') ?>"></td>
-                                <td><input type="text" class="form-control" name="items[<?= $index ?>][jabatan][]" value="<?= htmlspecialchars($jabatan_array[$i] ?? '') ?>"></td>
-                                <td><input type="text" class="form-control" name="items[<?= $index ?>][divisi][]" value="<?= htmlspecialchars($divisi_array[$i] ?? '') ?>"></td>
+                                <td><input type="text" class="form-control" name="items[<?= $index ?>][nama_dosen][]" value="<?= htmlspecialchars(isset($nama_array[$i]) ? $nama_array[$i] : '') ?>"></td>
+                                <td><input type="text" class="form-control" name="items[<?= $index ?>][jabatan][]" value="<?= htmlspecialchars(isset($jabatan_array[$i]) ? $jabatan_array[$i] : '') ?>"></td>
+                                <td><input type="text" class="form-control" name="items[<?= $index ?>][divisi][]" value="<?= htmlspecialchars(isset($divisi_array[$i]) ? $divisi_array[$i] : '') ?>"></td>
                                 <td class="text-center"><span class="remove-row">&times;</span></td>
                             </tr>
                         <?php endforeach; ?>
@@ -270,7 +281,7 @@ function safe_json($data) {
 
             <div>
                 <a href="<?= site_url('surat'); ?>" class="btn btn-secondary">Batal</a>
-                <button class="btn btn-primary"><i class="fa fa-save"></i> Simpan Semua</button>
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Simpan Semua</button>
             </div>
         </div>
 
@@ -282,7 +293,7 @@ function safe_json($data) {
 $(document).ready(() => {
 
     // === SWITCH CUSTOM/PERIODE ===
-    $('.jenis-date-select').on('change', function() {
+    $(document).on('change', '.jenis-date-select', function() {
         const i = $(this).data('index');
         const v = $(this).val();
         $('#custom_'+i).toggle(v === 'custom');
@@ -290,25 +301,25 @@ $(document).ready(() => {
     });
 
     // === SWITCH PERORANGAN / KELOMPOK ===
-    $('.jenis-pengajuan-select').on('change', function() {
+    $(document).on('change', '.jenis-pengajuan-select', function() {
         const i = $(this).data('index');
         const v = $(this).val();
         $('#perorangan_'+i).toggle(v === 'Perorangan');
         $('#kelompok_'+i).toggle(v === 'Kelompok');
     });
 
-    $('.jenis-penugasan-per-select').on('change', function() {
+    $(document).on('change', '.jenis-penugasan-per-select', function() {
         const i = $(this).data('index');
         $('#lainnya_per_'+i).toggle($(this).val() === 'Lainnya');
     });
 
-    $('.jenis-penugasan-kel-select').on('change', function() {
+    $(document).on('change', '.jenis-penugasan-kel-select', function() {
         const i = $(this).data('index');
         $('#lainnya_kel_'+i).toggle($(this).val() === 'Lainnya');
     });
 
     // === TAMBAH ROW DOSEN ===
-    $('.btn-add-row').on('click', function() {
+    $(document).on('click', '.btn-add-row', function() {
         const i = $(this).data('index');
         const tbody = $('.dosen-table[data-index="'+i+'"] tbody');
         const row = `
@@ -324,6 +335,12 @@ $(document).ready(() => {
     });
 
     $(document).on('click', '.remove-row', function() {
+        // jika hanya 1 row tersisa, kosongkan inputnya agar tidak menghapus struktur form
+        const tbody = $(this).closest('tbody');
+        if (tbody.find('tr').length <= 1) {
+            tbody.find('tr').first().find('input').val('');
+            return;
+        }
         $(this).closest('tr').remove();
     });
 
@@ -338,7 +355,7 @@ $(document).ready(() => {
     }
 
     // 1. tanggal_kegiatan → akhir_kegiatan
-    $(document).on("change", ".akhir-kegiatan, .tanggal-kegiatan", function() {
+    $(document).on("change", ".tanggal-kegiatan, .akhir-kegiatan", function() {
         let i = $(this).data('index');
         let start = $(`.tanggal-kegiatan[data-index="${i}"]`).val();
         let end   = $(`.akhir-kegiatan[data-index="${i}"]`).val();
@@ -352,7 +369,7 @@ $(document).ready(() => {
     });
 
     // 2. periode_penugasan → akhir_periode_penugasan
-    $(document).on("change", ".akhir-periode-penugasan, .periode-penugasan", function() {
+    $(document).on("change", ".periode-penugasan, .akhir-periode-penugasan", function() {
         let i = $(this).data('index');
         let start = $(`.periode-penugasan[data-index="${i}"]`).val();
         let end   = $(`.akhir-periode-penugasan[data-index="${i}"]`).val();

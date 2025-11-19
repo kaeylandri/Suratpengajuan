@@ -311,9 +311,6 @@ class Surat extends CI_Controller
             $data['eviden'] = is_array($eviden_raw) ? $eviden_raw : [];
         }
 
-        // Debug: uncomment untuk cek isi eviden
-        // echo '<pre>'; print_r($data['eviden']); die();
-
         // Jika belum submit → tampilkan view edit
         if (!$this->input->post()) {
             $this->load->view('edit_surat', $data);
@@ -468,33 +465,59 @@ class Surat extends CI_Controller
 
     /* ===========================================
        MULTI DELETE - HAPUS BANYAK DATA SEKALIGUS
+       FIXED: Menangani multiple IDs dengan benar
     ============================================*/
     public function multi_delete()
     {
-        // Ambil IDs dari POST request
-        $ids = $this->input->post('ids');
-        
-        // Validasi: pastikan IDs adalah array dan tidak kosong
-        if (!$ids || !is_array($ids) || empty($ids)) {
-            $this->session->set_flashdata('error', 'Tidak ada data yang dipilih untuk dihapus.');
-            redirect('surat');
+        // Cek apakah request adalah AJAX
+        if (!$this->input->is_ajax_request()) {
+            show_404();
             return;
         }
 
-        // Counter untuk tracking berapa data yang berhasil dihapus
+        // Ambil IDs dari POST request
+        $ids_input = $this->input->post('ids');
+        
+        // Validasi input
+        if (!$ids_input) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Tidak ada data yang dipilih untuk dihapus.'
+            ]);
+            return;
+        }
+
+        // Parse IDs - handle berbagai format input
+        if (is_string($ids_input)) {
+            $ids = array_map('intval', explode(',', $ids_input));
+        } else if (is_array($ids_input)) {
+            $ids = array_map('intval', $ids_input);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Format ID tidak valid.'
+            ]);
+            return;
+        }
+
+        // Filter IDs yang valid
+        $ids = array_filter($ids, function($id) {
+            return $id > 0;
+        });
+
+        if (empty($ids)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Tidak ada ID yang valid untuk dihapus.'
+            ]);
+            return;
+        }
+
         $deleted_count = 0;
         $failed_ids = [];
 
         // Loop setiap ID dan hapus satu per satu
         foreach ($ids as $id) {
-            // Sanitize ID
-            $id = intval($id);
-            
-            if ($id <= 0) {
-                $failed_ids[] = $id;
-                continue;
-            }
-
             // Ambil data surat untuk hapus file eviden
             $surat = $this->Surat_model->get_by_id($id);
             
@@ -523,7 +546,7 @@ class Surat extends CI_Controller
             }
         }
 
-        // Set flashdata berdasarkan hasil
+        // Response JSON
         if ($deleted_count > 0) {
             $message = "Berhasil menghapus {$deleted_count} data.";
             
@@ -531,66 +554,82 @@ class Surat extends CI_Controller
                 $message .= " Gagal menghapus ID: " . implode(', ', $failed_ids);
             }
             
-            $this->session->set_flashdata('success', $message);
+            echo json_encode([
+                'success' => true,
+                'message' => $message,
+                'deleted_count' => $deleted_count
+            ]);
         } else {
-            $this->session->set_flashdata('error', 'Tidak ada data yang berhasil dihapus.');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Tidak ada data yang berhasil dihapus.'
+            ]);
         }
-
-        redirect('surat');
     }
 
     /* ===========================================
-       MULTI EDIT - EDIT BANYAK DATA SEKALIGUS
+       MULTI EDIT - FIXED VERSION
+       Menampilkan halaman multi edit untuk beberapa surat sekaligus
     ============================================*/
     public function multi_edit()
     {
-        // Ambil IDs dari GET request
-        $ids_param = $this->input->get('ids');
-        
-        if (!$ids_param) {
+        // Ambil parameter IDs dari URL (GET request)
+        $ids = $this->input->get('ids');
+
+        // Validasi: IDs harus ada
+        if (!$ids) {
             $this->session->set_flashdata('error', 'Tidak ada data yang dipilih untuk di-edit.');
             redirect('surat');
             return;
         }
 
-        // Parse IDs
-        $ids = array_map('intval', explode(',', $ids_param));
-        $ids = array_filter($ids, fn($id) => $id > 0);
+        // Pecah IDs menjadi array
+        // Format: "54,48" → [54, 48]
+        $idArray = explode(',', $ids);
+        
+        // Bersihkan dan validasi setiap ID
+        $idArray = array_filter(array_map('intval', $idArray), function($id) {
+            return $id > 0;
+        });
 
-        if (empty($ids)) {
-            $this->session->set_flashdata('error', 'ID tidak valid.');
+        // Jika tidak ada ID yang valid
+        if (empty($idArray)) {
+            $this->session->set_flashdata('error', 'ID yang diberikan tidak valid.');
             redirect('surat');
             return;
         }
 
-        // Ambil data surat berdasarkan IDs
-        $data['surat_list'] = [];
-        foreach ($ids as $id) {
-            $surat = $this->Surat_model->get_by_id($id);
-            if ($surat) {
-                $data['surat_list'][] = $surat;
-            }
-        }
+        // Ambil data semua surat berdasarkan IDs
+        $data['surat_list'] = $this->Surat_model->getMultiByIds($idArray);
 
+        // Jika data tidak ditemukan
         if (empty($data['surat_list'])) {
-            $this->session->set_flashdata('error', 'Data tidak ditemukan.');
+            $this->session->set_flashdata('error', 'Data tidak ditemukan untuk ID: ' . implode(', ', $idArray));
             redirect('surat');
             return;
         }
 
-        // Tampilkan view multi-edit
+        // Load view multi edit dengan data
         $this->load->view('multi_edit_surat', $data);
     }
 
     /* ===========================================
        SAVE MULTI EDIT - SIMPAN PERUBAHAN MULTI EDIT
+       FIXED: Menangani data dari form multi edit
     ============================================*/
     public function save_multi_edit()
     {
+        if (!$this->input->post()) {
+            $this->session->set_flashdata('error', 'Tidak ada data yang dikirim.');
+            redirect('surat');
+            return;
+        }
+
         $post = $this->input->post();
         
+        // Validasi: pastikan ada items
         if (!isset($post['items']) || !is_array($post['items'])) {
-            $this->session->set_flashdata('error', 'Data tidak valid.');
+            $this->session->set_flashdata('error', 'Format data tidak valid.');
             redirect('surat');
             return;
         }
@@ -599,19 +638,24 @@ class Surat extends CI_Controller
         $failed_count = 0;
 
         foreach ($post['items'] as $item) {
-            if (!isset($item['id'])) continue;
+            if (!isset($item['id']) || empty($item['id'])) {
+                continue;
+            }
 
             $id = intval($item['id']);
-            if ($id <= 0) continue;
+            if ($id <= 0) {
+                $failed_count++;
+                continue;
+            }
 
-            // Ambil data existing
+            // Ambil data existing untuk fallback
             $existing = $this->Surat_model->get_by_id($id);
             if (!$existing) {
                 $failed_count++;
                 continue;
             }
 
-            // Prepare update data (LENGKAP dengan semua field)
+            // Prepare update data
             $update_data = [
                 'nama_kegiatan' => $item['nama_kegiatan'] ?? $existing->nama_kegiatan,
                 'jenis_date' => $item['jenis_date'] ?? $existing->jenis_date,
@@ -630,11 +674,11 @@ class Surat extends CI_Controller
                 'jenis_penugasan_kelompok' => $item['jenis_penugasan_kelompok'] ?? $existing->jenis_penugasan_kelompok,
                 'penugasan_lainnya_kelompok' => $item['penugasan_lainnya_kelompok'] ?? $existing->penugasan_lainnya_kelompok,
                 
-                // Encode data dosen sebagai JSON
-                'nip' => json_encode($item['nip'] ?? []),
-                'nama_dosen' => json_encode($item['nama_dosen'] ?? []),
-                'jabatan' => json_encode($item['jabatan'] ?? []),
-                'divisi' => json_encode($item['divisi'] ?? []),
+                // Encode array data dosen
+                'nip' => isset($item['nip']) ? json_encode($item['nip']) : $existing->nip,
+                'nama_dosen' => isset($item['nama_dosen']) ? json_encode($item['nama_dosen']) : $existing->nama_dosen,
+                'jabatan' => isset($item['jabatan']) ? json_encode($item['jabatan']) : $existing->jabatan,
+                'divisi' => isset($item['divisi']) ? json_encode($item['divisi']) : $existing->divisi,
             ];
 
             // Update database
@@ -692,141 +736,5 @@ class Surat extends CI_Controller
     {
         $data['surat_list'] = $this->Surat_model->get_all_surat();
         $this->load->view('list_surat_tugas', $data);
-    }
-
-    /* ===========================================
-       GET DOSEN BY NIP
-    ============================================*/
-    public function get_dosen_by_nip()
-    {
-        $nip = $this->input->get('nip');
-        if (!$nip) { echo json_encode(['status' => false]); return; }
-
-        $row = $this->db->get_where('list_dosen', ['nip' => $nip])->row();
-
-        echo json_encode(
-            $row ? [
-                'status' => true,
-                'nip' => $row->nip,
-                'nama_dosen' => $row->nama_dosen,
-                'jabatan' => $row->jabatan,
-                'divisi' => $row->divisi
-            ] : ['status' => false]
-        );
-    }
-
-    /* ===========================================
-       DEBUG EVIDEN - TAMBAHKAN DI CONTROLLER
-       Method untuk cek data eviden di database
-    ============================================*/
-    public function debug_eviden($id)
-    {
-        $surat = $this->Surat_model->get_by_id($id);
-        
-        if (!$surat) {
-            die('Data tidak ditemukan');
-        }
-        
-        echo "<h2>Debug Eviden - ID: $id</h2>";
-        echo "<hr>";
-        
-        echo "<h3>Raw Data dari Database:</h3>";
-        echo "<pre>";
-        print_r($surat);
-        echo "</pre>";
-        
-        echo "<hr>";
-        
-        echo "<h3>Eviden Field (Raw):</h3>";
-        echo "<code>" . htmlspecialchars($surat->eviden ?? 'NULL') . "</code>";
-        
-        echo "<hr>";
-        
-        echo "<h3>Eviden Decoded:</h3>";
-        $eviden = json_decode($surat->eviden ?? '[]', true);
-        echo "<pre>";
-        print_r($eviden);
-        echo "</pre>";
-        
-        echo "<hr>";
-        
-        echo "<h3>Analisis Eviden:</h3>";
-        if (is_array($eviden)) {
-            foreach ($eviden as $idx => $file) {
-                echo "<strong>[$idx]</strong> $file<br>";
-                echo "- Is URL: " . (filter_var($file, FILTER_VALIDATE_URL) ? 'YES' : 'NO') . "<br>";
-                echo "- Contains ucarecdn: " . (strpos($file, 'ucarecdn.com') !== false ? 'YES' : 'NO') . "<br>";
-                echo "- Contains tilde (~): " . (strpos($file, '~') !== false ? 'YES' : 'NO') . "<br>";
-                
-                if (filter_var($file, FILTER_VALIDATE_URL)) {
-                    echo "- <strong style='color: green;'>Ini adalah URL UploadCare yang valid</strong><br>";
-                    echo "- Download URL: <a href='" . site_url('surat/download_eviden_url?url=' . urlencode($file)) . "' target='_blank'>Test Download</a><br>";
-                } else {
-                    $local_path = './uploads/eviden/' . basename($file);
-                    echo "- File lokal path: $local_path<br>";
-                    echo "- File exists: " . (file_exists($local_path) ? 'YES' : 'NO') . "<br>";
-                }
-                
-                echo "<br>";
-            }
-        } else {
-            echo "<em>Eviden bukan array atau kosong</em>";
-        }
-    }
-
-    /* ===========================================
-       AUTOCOMPLETE NIP
-    ============================================*/
-    public function autocomplete_nip()
-    {
-        $term = $this->input->get('term') ?? $this->input->get('q');
-        if (!$term) { echo json_encode([]); return; }
-
-        $this->db->select('nip,nama_dosen,jabatan,divisi')
-            ->group_start()
-            ->like('nip', $term)
-            ->or_like('nama_dosen', $term)
-            ->or_like('jabatan', $term)
-            ->or_like('divisi', $term)
-            ->group_end()
-            ->limit(10);
-
-        $result = $this->db->get('list_dosen')->result();
-
-        $out = [];
-        foreach ($result as $r) {
-            $out[] = [
-                'nip' => $r->nip,
-                'nama_dosen' => $r->nama_dosen,
-                'jabatan' => $r->jabatan,
-                'divisi' => $r->divisi,
-                'label' => "{$r->nip} - {$r->nama_dosen}",
-                'value' => $r->nip
-            ];
-        }
-
-        echo json_encode($out);
-    }
-
-    /* ===========================================
-       GENERATE QR CODE
-    ============================================*/
-    public function generate_qr($id)
-    {
-        $this->load->library('qr');
-
-        // Link yang akan disimpan di QR
-        $url = base_url('regulation/validate/' . $id);
-
-        // Lokasi simpan file
-        $path = FCPATH . 'uploads/qr/surat_' . $id . '.png';
-        if (!is_dir(FCPATH . 'uploads/qr')) {
-            mkdir(FCPATH . 'uploads/qr', 0777, TRUE);
-        }
-
-        // Generate & simpan
-        $this->qr->generate($url, $path, 6);
-
-        echo "QR berhasil dibuat di: " . $path;
     }
 }
