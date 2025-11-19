@@ -121,12 +121,13 @@
                 <?php endfor; ?>
             </select>
         </div>
+
     </div>
 
-    <!-- Grafik 3D Enhanced -->
-    <div class="card">
-        <div class="card-header">
-            <strong><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan — Tahun <?= isset($tahun) ? $tahun : date('Y') ?></strong>
+   <!-- Grafik 3D -->
+    <div class="card" style="background: linear-gradient(135deg, #ffffffff 0%, #ffffffff 100%);">
+        <div class="card-header" style="border-bottom-color: rgba(0, 0, 0, 0.1)">
+            <strong style="color: #000000ff"><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan — Tahun <?= isset($tahun) ? $tahun : date('Y') ?></strong>
         </div>
         <div class="chart-container">
             <canvas id="grafikSurat"></canvas>
@@ -166,7 +167,7 @@
                             // Mapping status ke kategori
                             if ($st_l === 'disetujui sekretariat') {
                                 $st_key = 'pending';
-                                $badge = '<span class="badge badge-pending">$stat</span>';
+                                $badge = '<span class="badge badge-pending">Menunggu Persetujuan</span>';
                             } elseif ($st_l === 'disetujui dekan') {
                                 $st_key = 'approved';
                                 $badge = '<span class="badge badge-approved">Disetujui Dekan</span>';
@@ -420,44 +421,25 @@ function escapeHtml(unsafe) {
        .replace(/'/g, "&#039;");
 }
 
-// Enhanced 3D Bar Chart
-const ctx = document.getElementById('grafikSurat').getContext('2d');
 
-// Plugin untuk efek 3D lebih bagus
-const enhanced3DPlugin = {
-    id: 'enhanced3d',
+// Grafik 3D
+const ctx = document.getElementById('grafikSurat').getContext('2d');
+const fusionStyle3DPlugin = {
+    id: 'fusionStyle3d',
     beforeDatasetsDraw: (chart) => {
         const ctx = chart.ctx;
-        const datasets = chart.data.datasets;
-        
-        datasets.forEach((dataset, datasetIndex) => {
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
             const meta = chart.getDatasetMeta(datasetIndex);
             if (!meta.hidden) {
-                meta.data.forEach((bar, index) => {
-                    const x = bar.x;
-                    const y = bar.y;
-                    const base = bar.base;
-                    const width = bar.width;
-                    const height = base - y;
-                    
-                    if (height <= 0) return;
-                    
-                    const offsetX = 10;
-                    const offsetY = -10;
-                    
+                meta.data.forEach((bar) => {
+                    const x = bar.x, y = bar.y, base = bar.base, width = bar.width, height = base - y;
+                    if (height <= 1) return;
+                    const offsetX = 15, offsetY = -15;
                     ctx.save();
-                    
-                    // Bayangan bawah (soft shadow)
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-                    ctx.shadowBlur = 15;
-                    ctx.shadowOffsetX = 5;
-                    ctx.shadowOffsetY = 5;
-                    
-                    // Sisi kanan 3D (gradient)
-                    const rightGradient = ctx.createLinearGradient(x + width/2, y, x + width/2 + offsetX, y);
-                    rightGradient.addColorStop(0, 'rgba(0, 0, 0, 0.3)');
-                    rightGradient.addColorStop(1, 'rgba(0, 0, 0, 0.15)');
-                    
+                    const rightGradient = ctx.createLinearGradient(x + width/2, y, x + width/2 + offsetX, y + offsetY);
+                    let darkColor = datasetIndex === 0 ? 'rgba(0, 177, 253, 0.6)' : (datasetIndex === 1 ? 'rgba(0, 177, 253, 0.6)' : 'rgba(192, 57, 43, 0.6)');
+                    rightGradient.addColorStop(0, darkColor);
+                    rightGradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
                     ctx.fillStyle = rightGradient;
                     ctx.beginPath();
                     ctx.moveTo(x + width/2, y);
@@ -466,12 +448,10 @@ const enhanced3DPlugin = {
                     ctx.lineTo(x + width/2, base);
                     ctx.closePath();
                     ctx.fill();
-                    
-                    // Sisi atas 3D (highlight)
-                    const topGradient = ctx.createLinearGradient(x, y, x, y + offsetY);
-                    topGradient.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+                    const topGradient = ctx.createLinearGradient(x - width/2, y, x + width/2 + offsetX, y + offsetY);
+                    let lightColor = datasetIndex === 0 ? 'rgba(162, 217, 206, 0.9)' : (datasetIndex === 1 ? 'rgba(200, 247, 197, 0.9)' : 'rgba(245, 183, 177, 0.9)');
+                    topGradient.addColorStop(0, lightColor);
                     topGradient.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
-                    
                     ctx.fillStyle = topGradient;
                     ctx.beginPath();
                     ctx.moveTo(x - width/2, y);
@@ -480,15 +460,6 @@ const enhanced3DPlugin = {
                     ctx.lineTo(x - width/2 + offsetX, y + offsetY);
                     ctx.closePath();
                     ctx.fill();
-                    
-                    // Glow effect untuk batang tinggi
-                    if (chart.data.datasets[datasetIndex].data[index] > 5) {
-                        ctx.shadowColor = dataset.borderColor;
-                        ctx.shadowBlur = 20;
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-                        ctx.fillRect(x - width/2, y, width, height);
-                    }
-                    
                     ctx.restore();
                 });
             }
@@ -496,164 +467,25 @@ const enhanced3DPlugin = {
     }
 };
 
-// Data grafik dari PHP
-const chartData = {
-    total: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>,
-    approved: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>,
-    rejected: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>
-};
-
-// Buat gradient colors
-const totalGradient = ctx.createLinearGradient(0, 0, 0, 400);
-totalGradient.addColorStop(0, 'rgba(52, 152, 219, 1)');
-totalGradient.addColorStop(1, 'rgba(52, 152, 219, 0.7)');
-
-const approvedGradient = ctx.createLinearGradient(0, 0, 0, 400);
-approvedGradient.addColorStop(0, 'rgba(46, 204, 113, 1)');
-approvedGradient.addColorStop(1, 'rgba(46, 204, 113, 0.7)');
-
-const rejectedGradient = ctx.createLinearGradient(0, 0, 0, 400);
-rejectedGradient.addColorStop(0, 'rgba(231, 76, 60, 1)');
-rejectedGradient.addColorStop(1, 'rgba(231, 76, 60, 0.7)');
-
-// Render chart
 new Chart(ctx, {
     type: 'bar',
     data: {
         labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
         datasets: [
-            {
-                label: "Total Pengajuan",
-                data: chartData.total,
-                backgroundColor: totalGradient,
-                borderColor: 'rgba(52, 152, 219, 1)',
-                borderWidth: 3,
-                borderRadius: 8,
-                hoverBackgroundColor: 'rgba(52, 152, 219, 1)',
-                hoverBorderColor: 'rgba(41, 128, 185, 1)',
-                hoverBorderWidth: 4
-            },
-            {
-                label: "Disetujui Dekan",
-                data: chartData.approved,
-                backgroundColor: approvedGradient,
-                borderColor: 'rgba(46, 204, 113, 1)',
-                borderWidth: 3,
-                borderRadius: 8,
-                hoverBackgroundColor: 'rgba(46, 204, 113, 1)',
-                hoverBorderColor: 'rgba(39, 174, 96, 1)',
-                hoverBorderWidth: 4
-            },
-            {
-                label: "Ditolak KK/Sekretariat",
-                data: chartData.rejected,
-                backgroundColor: rejectedGradient,
-                borderColor: 'rgba(231, 76, 60, 1)',
-                borderWidth: 3,
-                borderRadius: 8,
-                hoverBackgroundColor: 'rgba(231, 76, 60, 1)',
-                hoverBorderColor: 'rgba(192, 57, 43, 1)',
-                hoverBorderWidth: 4
-            }
+            {label: "Total", data: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(0, 177, 253, 0.6)', borderColor: 'rgba(4, 146, 207, 0.6)', borderWidth: 2, borderRadius: 6},
+            {label: "Disetujui", data: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(46, 204, 113, 0.85)', borderColor: 'rgba(46, 204, 113, 1)', borderWidth: 2, borderRadius: 6},
+            {label: "Ditolak", data: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(231, 76, 60, 0.85)', borderColor: 'rgba(231, 76, 60, 1)', borderWidth: 2, borderRadius: 6}
         ]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: {
-            mode: 'index',
-            intersect: false
-        },
-        plugins: {
-            legend: {
-                position: 'top',
-                labels: {
-                    padding: 20,
-                    font: {
-                        size: 14,
-                        weight: '700',
-                        family: "'Segoe UI', sans-serif"
-                    },
-                    usePointStyle: true,
-                    pointStyle: 'rectRounded',
-                    boxWidth: 15,
-                    boxHeight: 15
-                }
-            },
-            tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.85)',
-                padding: 15,
-                cornerRadius: 10,
-                titleFont: {
-                    size: 15,
-                    weight: 'bold'
-                },
-                bodyFont: {
-                    size: 14
-                },
-                displayColors: true,
-                boxPadding: 6,
-                callbacks: {
-                    label: function(context) {
-                        let label = context.dataset.label || '';
-                        if (label) {
-                            label += ': ';
-                        }
-                        label += context.parsed.y + ' surat';
-                        return label;
-                    }
-                }
-            }
-        },
-        scales: {
-            x: {
-                grid: {
-                    display: false,
-                    drawBorder: false
-                },
-                ticks: {
-                    font: {
-                        size: 13,
-                        weight: '600'
-                    },
-                    color: '#34495e'
-                }
-            },
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.06)',
-                    drawBorder: false
-                },
-                ticks: {
-                    font: {
-                        size: 13,
-                        weight: '500'
-                    },
-                    color: '#7f8c8d',
-                    stepSize: 5,
-                    callback: function(value) {
-                        return value + ' ';
-                    }
-                }
-            }
-        },
-        layout: {
-            padding: {
-                top: 20,
-                right: 25,
-                bottom: 20,
-                left: 10
-            }
-        },
-        animation: {
-            duration: 1500,
-            easing: 'easeInOutQuart'
-        }
+        plugins: {legend: {position: 'top', labels: {padding: 20, font: {size: 14, weight: '700'}, color: '#000000ff'}}, tooltip: {backgroundColor: 'rgba(44, 62, 80, 0.95)', padding: 16}},
+        scales: {x: {grid: {display: false}, ticks: {color: '#ffffff'}}, y: {beginAtZero: true, grid: {color: 'rgba(12, 7, 7, 0.08)'}, ticks: {color: '#95a5a6'}}},
+        animation: {duration: 1800, easing: 'easeInOutQuart'}
     },
-    plugins: [enhanced3DPlugin]
+    plugins: [fusionStyle3DPlugin]
 });
 </script>
-
 </body>
 </html>
