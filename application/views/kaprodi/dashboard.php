@@ -84,12 +84,12 @@
         </div>
         
         <div class="stat-card" style="border-left-color:#27ae60;" onclick="filterTable('approved')">
-            <h3><i class="fa-solid fa-check-circle"></i> Disetujui KK</h3>
+            <h3><i class="fa-solid fa-check-circle"></i> Disetujui</h3>
             <div class="number"><?= $approved_count ?></div>
         </div>
         
         <div class="stat-card" style="border-left-color:#e74c3c;" onclick="filterTable('rejected')">
-            <h3><i class="fa-solid fa-times-circle"></i> Ditolak KK</h3>
+            <h3><i class="fa-solid fa-times-circle"></i> Ditolak </h3>
             <div class="number"><?= $rejected_count ?></div>
         </div>
         
@@ -115,32 +115,12 @@
                 <?php endfor; ?>
             </select>
         </div>
-
-        <div>
-            <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
-                <i class="fa-solid fa-filter"></i> Filter Status
-            </label>
-            <div style="display:flex;gap:10px">
-                <button class="filter-btn active" data-filter="all" onclick="filterTable('all')">
-                    <i class="fa-solid fa-list"></i> Semua
-                </button>
-                <button class="filter-btn" data-filter="pending" onclick="filterTable('pending')">
-                    <i class="fa-solid fa-clock"></i> Menunggu
-                </button>
-                <button class="filter-btn" data-filter="approved" onclick="filterTable('approved')">
-                    <i class="fa-solid fa-check"></i> Disetujui
-                </button>
-                <button class="filter-btn" data-filter="rejected" onclick="filterTable('rejected')">
-                    <i class="fa-solid fa-times"></i> Ditolak
-                </button>
-            </div>
-        </div>
     </div>
 
     <!-- Grafik 3D -->
-    <div class="card" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
-        <div class="card-header" style="border-bottom-color: rgba(255,255,255,0.1)">
-            <strong style="color: #ecf0f1"><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan — Tahun <?= isset($tahun) ? $tahun : date('Y') ?></strong>
+    <div class="card" style="background: linear-gradient(135deg, #ffffffff 0%, #f7f7f7ff 100%);">
+        <div class="card-header" style="border-bottom-color: rgba(16, 11, 11, 0.1)">
+            <strong style="color: #030707ff"><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan — Tahun <?= isset($tahun) ? $tahun : date('Y') ?></strong>
         </div>
         <div class="chart-container">
             <canvas id="grafikSurat"></canvas>
@@ -164,32 +144,41 @@
                         <th>Nama Kegiatan</th>
                         <th>Penyelenggara</th>
                         <th>Tanggal Pengajuan</th>
+                        <th>Tanggal Kegiatan</th>
+                        <th>Jenis</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <?php if(!empty($surat_list)): $no=1; foreach($surat_list as $s): 
+                    <?php if(isset($surat_list) && !empty($surat_list)): $no=1; foreach($surat_list as $s): 
                         $st_l = strtolower($s->status);
-                        if ($st_l === 'pengajuan') {
-                            $st_key = 'pending';
-                            $badge = '<span class="badge badge-pending">Menunggu Persetujuan</span>';
-                        } elseif ($st_l === 'disetujui kk') {
+
+                        // Tentukan warna berdasarkan kata kunci
+                        if (str_contains($st_l, 'setuju') || str_contains($st_l, 'disetujui')) {
                             $st_key = 'approved';
-                            $badge = '<span class="badge badge-approved">Disetujui KK</span>';
-                        } elseif ($st_l === 'ditolak kk') {
+                            $badge = '<span class="badge badge-approved">'.ucwords($s->status).'</span>';
+
+                        } elseif (str_contains($st_l, 'tolak') || str_contains($st_l, 'ditolak')) {
                             $st_key = 'rejected';
-                            $badge = '<span class="badge badge-rejected">Ditolak KK</span>';
+                            $badge = '<span class="badge badge-rejected">'.ucwords($s->status).'</span>';
+
                         } else {
+                            // selain itu dianggap pending atau proses
                             $st_key = 'pending';
                             $badge = '<span class="badge badge-pending">'.ucwords($s->status).'</span>';
                         }
+
+                        $tgl_pengajuan = isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? date('d M Y', strtotime($s->tanggal_pengajuan)) : '-';
+                        $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
                     ?>
                     <tr data-status="<?= $st_key ?>">
                         <td><?= $no++ ?></td>
                         <td><strong><?= htmlspecialchars($s->nama_kegiatan) ?></strong></td>
                         <td><?= htmlspecialchars($s->penyelenggara) ?></td>
-                        <td><?= date("d M Y", strtotime($s->tanggal_pengajuan)) ?></td>
+                        <td><?= $tgl_pengajuan ?></td>
+                        <td><?= $tgl_kegiatan ?></td>
+                        <td><?= htmlspecialchars($s->jenis_pengajuan) ?></td>
                         <td><?= $badge ?></td>
                         <td>
                             <div style="display:flex;gap:6px">
@@ -209,7 +198,7 @@
                     </tr>
                     <?php endforeach; else: ?>
                     <tr id="emptyRow">
-                        <td colspan="6" style="text-align:center;padding:40px;color:#7f8c8d">
+                        <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
                             <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
                             <strong>Belum ada pengajuan</strong>
                         </td>
@@ -218,6 +207,17 @@
                 </tbody>
             </table>
         </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan</h3>
+            <button onclick="closeModal('detailModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
+        </div>
+        <div id="detailContent"></div>
     </div>
 </div>
 
@@ -251,16 +251,10 @@ function updateTahun(year) {
 
 function filterTable(status) {
     const rows = document.querySelectorAll('#tableBody tr:not(#emptyRow)');
-    const filterBtns = document.querySelectorAll('.filter-btn');
     const filterInfo = document.getElementById('filterInfo');
     let visibleCount = 0;
     
-    filterBtns.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.filter === status) btn.classList.add('active');
-    });
-    
-    rows.forEach((row, index) => {
+    rows.forEach((row) => {
         const rowStatus = row.dataset.status;
         if (status === 'all' || rowStatus === status) {
             row.style.display = '';
@@ -273,12 +267,27 @@ function filterTable(status) {
     
     const statusText = {'all': 'Semua Data', 'pending': 'Menunggu', 'approved': 'Disetujui', 'rejected': 'Ditolak'};
     filterInfo.textContent = `Menampilkan: ${statusText[status]} (${visibleCount} data)`;
+    
+    if (visibleCount === 0) {
+        const tbody = document.getElementById('tableBody');
+        if (!document.getElementById('emptyRowFiltered')) {
+            const newRow = tbody.insertRow();
+            newRow.id = 'emptyRowFiltered';
+            newRow.innerHTML = '<td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d"><i class="fa-solid fa-search" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i><strong>Tidak ada data</strong></td>';
+        }
+    } else {
+        const filtered = document.getElementById('emptyRowFiltered');
+        if (filtered) filtered.remove();
+    }
 }
 
 function showDetail(id) {
     const item = suratList.find(s => Number(s.id) === Number(id));
     if (!item) { alert('Data tidak ditemukan'); return; }
-    alert('Detail: ' + item.nama_kegiatan);
+    
+    const content = `<div><div class="detail-row"><div class="detail-label">Nama Kegiatan:</div><div class="detail-value">${item.nama_kegiatan || '-'}</div></div><div class="detail-row"><div class="detail-label">Penyelenggara:</div><div class="detail-value">${item.penyelenggara || '-'}</div></div><div class="detail-row"><div class="detail-label">Status:</div><div class="detail-value">${item.status || '-'}</div></div></div>`;
+    document.getElementById('detailContent').innerHTML = content;
+    document.getElementById('detailModal').classList.add('show');
 }
 
 function approveSurat(id) {
@@ -314,13 +323,8 @@ function confirmReject() {
     form.submit();
 }
 
-function closeModal(id) {
-    document.getElementById(id).classList.remove('show');
-}
-
-function modalClickOutside(evt, id) {
-    if (evt.target && evt.target.id === id) closeModal(id);
-}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function modalClickOutside(evt, id) { if (evt.target && evt.target.id === id) closeModal(id); }
 
 // Grafik 3D
 const ctx = document.getElementById('grafikSurat').getContext('2d');
@@ -336,9 +340,8 @@ const fusionStyle3DPlugin = {
                     if (height <= 1) return;
                     const offsetX = 15, offsetY = -15;
                     ctx.save();
-                    
                     const rightGradient = ctx.createLinearGradient(x + width/2, y, x + width/2 + offsetX, y + offsetY);
-                    let darkColor = datasetIndex === 0 ? 'rgba(41, 128, 185, 0.6)' : (datasetIndex === 1 ? 'rgba(39, 174, 96, 0.6)' : 'rgba(192, 57, 43, 0.6)');
+                    let darkColor = datasetIndex === 0 ? 'rgba(0, 177, 253, 0.6)' : (datasetIndex === 1 ? 'rgba(0, 177, 253, 0.6)' : 'rgba(192, 57, 43, 0.6)');
                     rightGradient.addColorStop(0, darkColor);
                     rightGradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
                     ctx.fillStyle = rightGradient;
@@ -349,9 +352,8 @@ const fusionStyle3DPlugin = {
                     ctx.lineTo(x + width/2, base);
                     ctx.closePath();
                     ctx.fill();
-                    
                     const topGradient = ctx.createLinearGradient(x - width/2, y, x + width/2 + offsetX, y + offsetY);
-                    let lightColor = datasetIndex === 0 ? 'rgba(174, 214, 241, 0.9)' : (datasetIndex === 1 ? 'rgba(200, 247, 197, 0.9)' : 'rgba(245, 183, 177, 0.9)');
+                    let lightColor = datasetIndex === 0 ? 'rgba(162, 217, 206, 0.9)' : (datasetIndex === 1 ? 'rgba(200, 247, 197, 0.9)' : 'rgba(245, 183, 177, 0.9)');
                     topGradient.addColorStop(0, lightColor);
                     topGradient.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
                     ctx.fillStyle = topGradient;
@@ -362,7 +364,6 @@ const fusionStyle3DPlugin = {
                     ctx.lineTo(x - width/2 + offsetX, y + offsetY);
                     ctx.closePath();
                     ctx.fill();
-                    
                     ctx.restore();
                 });
             }
@@ -375,22 +376,16 @@ new Chart(ctx, {
     data: {
         labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
         datasets: [
-            {label: "Total", data: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(142, 68, 173, 0.85)', borderColor: 'rgba(142, 68, 173, 1)', borderWidth: 2, borderRadius: 6},
-            {label: "Disetujui KK", data: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(46, 204, 113, 0.85)', borderColor: 'rgba(46, 204, 113, 1)', borderWidth: 2, borderRadius: 6},
-            {label: "Ditolak KK", data: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(231, 76, 60, 0.85)', borderColor: 'rgba(231, 76, 60, 1)', borderWidth: 2, borderRadius: 6}
+            {label: "Total", data: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(0, 177, 253, 0.6)', borderColor: 'rgba(4, 146, 207, 0.6)', borderWidth: 2, borderRadius: 6},
+            {label: "Disetujui", data: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(46, 204, 113, 0.85)', borderColor: 'rgba(46, 204, 113, 1)', borderWidth: 2, borderRadius: 6},
+            {label: "Ditolak", data: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(231, 76, 60, 0.85)', borderColor: 'rgba(231, 76, 60, 1)', borderWidth: 2, borderRadius: 6}
         ]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-            legend: {position: 'top', labels: {padding: 20, font: {size: 14, weight: '700'}, color: '#ecf0f1'}},
-            tooltip: {backgroundColor: 'rgba(44, 62, 80, 0.95)', padding: 16, cornerRadius: 8}
-        },
-        scales: {
-            x: {grid: {display: false}, ticks: {color: '#ffffff', font: {size: 13, weight: '600'}}},
-            y: {beginAtZero: true, grid: {color: 'rgba(255, 255, 255, 0.08)'}, ticks: {color: '#95a5a6'}}
-        },
+        plugins: {legend: {position: 'top', labels: {padding: 20, font: {size: 14, weight: '700'}, color: '#000000ff'}}, tooltip: {backgroundColor: 'rgba(44, 62, 80, 0.95)', padding: 16}},
+        scales: {x: {grid: {display: false}, ticks: {color: '#ffffff'}}, y: {beginAtZero: true, grid: {color: 'rgba(12, 7, 7, 0.08)'}, ticks: {color: '#95a5a6'}}},
         animation: {duration: 1800, easing: 'easeInOutQuart'}
     },
     plugins: [fusionStyle3DPlugin]

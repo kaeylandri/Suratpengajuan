@@ -28,15 +28,15 @@ class Dekan extends CI_Controller
     // Statistik
     $data['total_surat'] = $this->db->count_all_results('surat');
 
-    $data['approved_count'] = $this->db->where('YEAR(created_at)', $tahun)
+    $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
                                       ->where('status', 'disetujui dekan')
                                       ->count_all_results('surat');
 
-    $data['pending_count'] = $this->db->where('YEAR(created_at)', $tahun)
+    $data['pending_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
                                       ->where('status', 'disetujui sekretariat')
                                       ->count_all_results('surat');
 
-    $data['rejected_count'] = $this->db->where('YEAR(created_at)', $tahun)
+    $data['rejected_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
                                        ->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
                                        ->count_all_results('surat');
 
