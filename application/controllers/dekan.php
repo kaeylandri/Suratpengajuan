@@ -13,45 +13,61 @@ class Dekan extends CI_Controller
 
     public function index()
 {
+    $this->db->where("status", 'disetujui sekretariat');
+        $data['surat_list'] = $this->db->order_by('created_at', 'DESC')
+                               ->get('surat')
+                               ->result_array();
+
+
+    $tahun = $this->input->get('tahun') ?? date('Y');
+    $data['tahun'] = $tahun;
+
+    // Filter berdasarkan tahun
+    $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+
     // Statistik
-    $data['total_surat'] = $this->db->count_all('surat');
-    $data['approved_count'] = $this->db->where('status', 'disetujui dekan')->count_all_results('surat');
-    $data['pending_count'] = $this->db->where('status', 'disetujui sekretariat')->count_all_results('surat');
-    $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])->count_all_results('surat');
+    $data['total_surat'] = $this->db->count_all_results('surat');
 
-    // Surat yg akan tampil ke Dekan = yg sudah disetujui sekretariat
-    $this->db->where('status', 'disetujui sekretariat');
-    $this->db->order_by('created_at', 'DESC');
-    $data['surat_list'] = $this->db->get('surat')->result_array();
+    $data['approved_count'] = $this->db->where('YEAR(created_at)', $tahun)
+                                      ->where('status', 'disetujui dekan')
+                                      ->count_all_results('surat');
 
-    // Data grafik (sesuai kode Anda)
-    $bulan = array_fill(0, 12, 0);
-    $disetujui = array_fill(0, 12, 0);
-    $ditolak = array_fill(0, 12, 0);
+    $data['pending_count'] = $this->db->where('YEAR(created_at)', $tahun)
+                                      ->where('status', 'disetujui sekretariat')
+                                      ->count_all_results('surat');
 
-    $surat = $this->db->get('surat')->result();
+    $data['rejected_count'] = $this->db->where('YEAR(created_at)', $tahun)
+                                       ->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
+                                       ->count_all_results('surat');
 
-    foreach ($surat as $s) {
-        $monthIndex = (int)date('m', strtotime($s->created_at)) - 1;
+    // Grafik
+    $total     = array_fill(0, 12, 0);
+    $approved  = array_fill(0, 12, 0);
+    $rejected  = array_fill(0, 12, 0);
 
-        $bulan[$monthIndex]++;
+    $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+    $query = $this->db->get('surat')->result();
 
-        if ($s->status == 'disetujui dekan') {
-            $disetujui[$monthIndex]++;
+    foreach ($query as $row) {
+        $month = (int)date('m', strtotime($row->tanggal_pengajuan)) - 1;
+
+        $total[$month]++;
+
+        if ($row->status == 'disetujui dekan') {
+            $approved[$month]++;
         }
 
-        if (in_array($s->status, ['ditolak KK', 'ditolak sekretariat'])) {
-            $ditolak[$monthIndex]++;
+        if (in_array($row->status, ['ditolak KK', 'ditolak sekretariat'])) {
+            $rejected[$month]++;
         }
     }
 
-    $data['chart_total'] = $bulan;
-    $data['chart_approved'] = $disetujui;
-    $data['chart_rejected'] = $ditolak;
+    $data['chart_total']    = $total;
+    $data['chart_approved'] = $approved;
+    $data['chart_rejected'] = $rejected;
 
     $this->load->view('dekan/dashboard', $data);
 }
-
 
 
 
@@ -59,7 +75,6 @@ class Dekan extends CI_Controller
 {
     $this->db->where('id', $id)->update('surat', [
         'status' => 'disetujui dekan',
-        'approved_by_dekan' => date('Y-m-d H:i:s')
     ]);
 
     $this->session->set_flashdata('success', 'Surat berhasil disetujui oleh Dekan.');
@@ -72,9 +87,8 @@ public function reject($id)
 
     // Dekan tidak memutuskan ditolak, tetapi mengembalikan ke sekretariat
     $this->db->where('id', $id)->update('surat', [
-        'status' => 'pengajuan',
-        'catatan_dekan' => $notes,
-        'updated_at' => date('Y-m-d H:i:s')
+        'status' => 'ditolak dekan',
+        'catatan_penolakan' => $notes,
     ]);
 
     $this->session->set_flashdata('success', 'Surat dikembalikan ke Sekretariat.');

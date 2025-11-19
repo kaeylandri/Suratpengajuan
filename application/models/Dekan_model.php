@@ -1,89 +1,175 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Dekan_model extends CI_Model {
+class Dekan extends CI_Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
+        $this->load->library('session');
         $this->load->database();
     }
 
-    public function get_dashboard_stats() {
-        $stats = array(
-            'total_surat_tugas' => $this->db->count_all('surat_tugas'),
-            'surat_pending' => $this->db->where('status', 'pending')->count_all_results('surat_tugas'),
-            'surat_approved' => $this->db->where('status', 'approved')->count_all_results('surat_tugas'),
-            'total_peminjaman' => $this->db->count_all('peminjaman_ruangan'),
-            'ticketing_open' => $this->db->where('status', 'open')->count_all_results('ticketing')
-        );
-        return $stats;
+    public function index()
+{
+    $tahun = $this->input->get('tahun') ?? date('Y');
+    $data['tahun'] = $tahun;
+
+    // Filter berdasarkan tahun
+    $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+
+    // Statistik
+    $data['total_surat'] = $this->db->count_all_results('surat');
+
+    $data['approved_count'] = $this->db->where('YEAR(created_at)', $tahun)
+                                      ->where('status', 'disetujui dekan')
+                                      ->count_all_results('surat');
+
+    $data['pending_count'] = $this->db->where('YEAR(created_at)', $tahun)
+                                      ->where('status', 'disetujui sekretariat')
+                                      ->count_all_results('surat');
+
+    $data['rejected_count'] = $this->db->where('YEAR(created_at)', $tahun)
+                                       ->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
+                                       ->count_all_results('surat');
+
+    // Grafik
+    $total     = array_fill(0, 12, 0);
+    $approved  = array_fill(0, 12, 0);
+    $rejected  = array_fill(0, 12, 0);
+
+    $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+    $query = $this->db->get('surat')->result();
+
+    foreach ($query as $row) {
+        $month = (int)date('m', strtotime($row->tanggal_pengajuan)) - 1;
+
+        $total[$month]++;
+
+        if ($row->status == 'disetujui dekan') {
+            $approved[$month]++;
+        }
+
+        if (in_array($row->status, ['ditolak KK', 'ditolak sekretariat'])) {
+            $rejected[$month]++;
+        }
     }
 
-    public function get_surat_tugas_terbaru($limit = 5) {
-        $this->db->select('*');
-        $this->db->from('surat_tugas');
-        $this->db->order_by('created_at', 'DESC');
-        $this->db->limit($limit);
-        return $this->db->get()->result_array();
+    $data['chart_total']    = $total;
+    $data['chart_approved'] = $approved;
+    $data['chart_rejected'] = $rejected;
+
+    $this->load->view('dekan/dashboard', $data);
+}
+
+
+
+    public function approve($id)
+{
+    $this->db->where('id', $id)->update('surat', [
+        'status' => 'disetujui dekan',
+    ]);
+
+    $this->session->set_flashdata('success', 'Surat berhasil disetujui oleh Dekan.');
+    redirect('dekan');
+}
+
+public function reject($id)
+{
+    $notes = $this->input->post('rejection_notes');
+
+    // Dekan tidak memutuskan ditolak, tetapi mengembalikan ke sekretariat
+    $this->db->where('id', $id)->update('surat', [
+        'status' => 'ditolak dekan',
+        'catatan_penolakan' => $notes,
+    ]);
+
+    $this->session->set_flashdata('success', 'Surat dikembalikan ke Sekretariat.');
+    redirect('dekan');
+}
+
+    public function list_surat_tugas()
+    {
+        // Semua surat yg pernah diproses Dekan
+        $this->db->where_in("status", [
+            'disetujui sekretariat',
+            'disetujui dekan',
+            'kembalikan ke sekretariat'
+        ]);
+        $this->db->order_by("created_at", "DESC");
+        $data['surat_list'] = $this->db->get("surat")->result();
+
+        // Statistik mengikuti aturan baru
+        $data['approved_count'] = $this->db->where('status', 'disetujui dekan')->count_all_results('surat');
+        $data['pending_count'] = $this->db->where('status', 'disetujui sekretariat')->count_all_results('surat');
+        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])->count_all_results('surat');
+        $data['total_count'] = $this->db->count_all_results('surat');
+
+        $this->load->view('dekan/list_surat_tugas', $data);
     }
 
-    public function get_peminjaman_ruangan($limit = 5) {
-        $this->db->select('*');
-        $this->db->from('peminjaman_ruangan');
-        $this->db->order_by('tanggal', 'DESC');
-        $this->db->limit($limit);
-        return $this->db->get()->result_array();
-    }
+    public function laporan()
+    {
+        $data['stats'] = [
+            'total_surat'        => $this->db->count_all_results('surat'),
+            'surat_bulan_ini'    => $this->db->like('created_at', date('Y-m'))->count_all_results('surat'),
+            'surat_diselesaikan' => $this->db->where('status', 'disetujui dekan')->count_all_results('surat'),
+            'surat_ditolak'      => $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])->count_all_results('surat'),
+            'surat_menunggu'     => $this->db->where('status', 'disetujui sekretariat')->count_all_results('surat')
+        ];
 
-    public function get_ticketing_terbaru($limit = 5) {
-        $this->db->select('*');
-        $this->db->from('ticketing');
-        $this->db->order_by('created_at', 'DESC');
-        $this->db->limit($limit);
-        return $this->db->get()->result_array();
+        $this->load->view('dekan/laporan', $data);
     }
+    
 
-    public function get_all_surat_tugas() {
-        $this->db->select('st.*, u.nama as pic_nama');
-        $this->db->from('surat_tugas st');
-        $this->db->join('users u', 'st.user_id = u.id', 'left');
-        $this->db->order_by('st.created_at', 'DESC');
-        return $this->db->get()->result_array();
-    }
-
-    public function approve_surat_tugas($id) {
-        $data = array(
-            'status' => 'approved',
-            'approved_by' => $this->session->userdata('user_id'),
-            'approved_at' => date('Y-m-d H:i:s')
-        );
+    public function detail($id)
+    {
         $this->db->where('id', $id);
-        return $this->db->update('surat_tugas', $data);
+        $data['surat'] = $this->db->get("surat")->row();
+
+        if (!$data['surat']) {
+            show_404();
+        }
+
+        $this->load->view('dekan/detail_surat', $data);
     }
 
-    public function reject_surat_tugas($id) {
-        $data = array(
-            'status' => 'rejected',
-            'approved_by' => $this->session->userdata('user_id'),
-            'approved_at' => date('Y-m-d H:i:s')
-        );
+    public function get_surat_detail($id)
+    {
         $this->db->where('id', $id);
-        return $this->db->update('surat_tugas', $data);
+        $surat = $this->db->get("surat")->row();
+
+        echo json_encode($surat ? $surat : ['error' => 'Data tidak ditemukan']);
     }
 
-    public function get_stats_periode() {
-        $current_month = date('Y-m');
-        
-        $stats = array(
-            'surat_bulan_ini' => $this->db->where("DATE_FORMAT(created_at, '%Y-%m') =", $current_month)
-                                         ->count_all_results('surat_tugas'),
-            'peminjaman_bulan_ini' => $this->db->where("DATE_FORMAT(tanggal, '%Y-%m') =", $current_month)
-                                             ->count_all_results('peminjaman_ruangan'),
-            'ticketing_bulan_ini' => $this->db->where("DATE_FORMAT(created_at, '%Y-%m') =", $current_month)
-                                            ->count_all_results('ticketing')
-        );
-        
-        return $stats;
+    // Filter laporan sesuai aturan baru
+    public function filter($status = '')
+    {
+        $this->db->order_by("created_at", "DESC");
+
+        if ($status == 'menunggu') {
+            $this->db->where('status', 'disetujui sekretariat');
+        } 
+        elseif ($status == 'disetujui') {
+            $this->db->where('status', 'disetujui dekan');
+        } 
+        elseif ($status == 'ditolak') {
+            // DITOLAK = KK + sekretariat, BUKAN dekan
+            $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
+        } 
+        else {
+            // Semua yg terkait Dekan
+            $this->db->where_in('status', [
+                'disetujui sekretariat',
+                'disetujui dekan',
+                'kembalikan ke sekretariat'
+            ]);
+        }
+
+        $data['surat_list'] = $this->db->get("surat")->result();
+        $data['current_filter'] = $status;
+
+        $this->load->view('dekan/list_surat_tugas', $data);
     }
 }
-?>

@@ -1,619 +1,400 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Ketua Kaproli</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f5f7fa;
-    }
-
-    .navbar {
-        background: #FB8C00;
-        color: white;
-        padding: 15px 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .navbar h2 {
-        font-size: 20px;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .user-info span {
-        background: #34495e;
-        padding: 8px 15px;
-        border-radius: 5px;
-        font-size: 14px;
-    }
-
-    .logout-btn {
-        background: #e74c3c;
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 14px;
-    }
-
-    .logout-btn:hover {
-        background: #c0392b;
-    }
-
-    .container {
-        max-width: 1200px;
-        margin: 30px auto;
-        padding: 0 20px;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-
-    .stat-card {
-        background: white;
-        padding: 25px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        border-left: 4px solid #3498db;
-    }
-
-    .stat-card h3 {
-        color: #7f8c8d;
-        font-size: 14px;
-        margin-bottom: 10px;
-        text-transform: uppercase;
-    }
-
-    .stat-card .number {
-        font-size: 36px;
-        font-weight: bold;
-        color: #2c3e50;
-    }
-
-    .card {
-        background: white;
-        border-radius: 10px;
-        padding: 25px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #ecf0f1;
-    }
-
-    .card-header h3 {
-        color: #2c3e50;
-        font-size: 20px;
-    }
-
-    .filter-btn {
-        background: #3498db;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 14px;
-    }
-
-    .filter-btn:hover {
-        background: #2980b9;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    thead {
-        background: #ecf0f1;
-    }
-
-    th {
-        padding: 15px;
-        text-align: left;
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 14px;
-    }
-
-    td {
-        padding: 15px;
-        border-bottom: 1px solid #ecf0f1;
-        font-size: 14px;
-    }
-
-    tbody tr:hover {
-        background: #f8f9fa;
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .status-pending {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .btn-group {
-        display: flex;
-        gap: 8px;
-    }
-
-    .btn {
-        padding: 6px 12px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 500;
-    }
-
-    .btn-detail {
-        background: #3498db;
-        color: white;
-    }
-
-    .btn-detail:hover {
-        background: #2980b9;
-    }
-
-    .btn-approve {
-        background: #27ae60;
-        color: white;
-    }
-
-    .btn-approve:hover {
-        background: #229954;
-    }
-
-    .btn-reject {
-        background: #e74c3c;
-        color: white;
-    }
-
-    .btn-reject:hover {
-        background: #c0392b;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #7f8c8d;
-    }
-
-    .empty-state i {
-        font-size: 64px;
-        margin-bottom: 20px;
-        opacity: 0.3;
-    }
-
-    /* Modal */
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-    }
-
-    .modal-content {
-        background: white;
-        margin: 50px auto;
-        padding: 30px;
-        border-radius: 10px;
-        width: 90%;
-        max-width: 600px;
-        max-height: 80vh;
-        overflow-y: auto;
-    }
-
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #ecf0f1;
-    }
-
-    .close {
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-        color: #7f8c8d;
-    }
-
-    .close:hover {
-        color: #2c3e50;
-    }
-
-    .detail-row {
-        display: grid;
-        grid-template-columns: 200px 1fr;
-        padding: 12px 0;
-        border-bottom: 1px solid #ecf0f1;
-    }
-
-    .detail-label {
-        font-weight: 600;
-        color: #7f8c8d;
-    }
-
-    .detail-value {
-        color: #2c3e50;
-    }
-
-    textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-family: inherit;
-        margin-top: 10px;
-        resize: vertical;
-    }
-
-    .alert {
-        padding: 15px;
-        border-radius: 5px;
-        margin-bottom: 20px;
-    }
-
-    .alert-success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .alert-error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Kaprodi</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f5f7fa;}
+    .navbar{background:#8E44AD;color:white;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+    .navbar h2{font-size:20px;}
+    .container{max-width:1200px;margin:30px auto;padding:0 20px;}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:20px;}
+    .stat-card{background:white;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid #3498db;transition:all 0.3s ease;cursor:pointer}
+    .stat-card:hover{transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,0.12)}
+    .stat-card h3{color:#7f8c8d;font-size:13px;margin-bottom:8px;text-transform:uppercase}
+    .stat-card .number{font-size:28px;font-weight:700;color:#2c3e50}
+    .card{background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px}
+    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee}
+    table{width:100%;border-collapse:collapse}
+    thead{background:#f4f6f7}
+    th,td{padding:12px;border-bottom:1px solid #ecf0f1;text-align:left;font-size:14px}
+    tbody tr:hover{background:#fbfcfd}
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
+    .badge-pending{background:#fff3cd;color:#856404}
+    .badge-approved{background:#d4edda;color:#155724}
+    .badge-rejected{background:#f8d7da;color:#721c24}
+    .btn{padding:6px 10px;border-radius:6px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s}
+    .btn:hover{transform:scale(1.05)}
+    .btn-approve{background:#27ae60;color:#fff}
+    .btn-approve:hover{background:#229954}
+    .btn-reject{background:#e74c3c;color:#fff}
+    .btn-reject:hover{background:#c0392b}
+    .btn-detail{background:#3498db;color:#fff}
+    .btn-detail:hover{background:#2980b9}
+    .chart-container{position:relative;height:450px;padding:20px}
+    .filter-container{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap}
+    .filter-btn{padding:10px 20px;border-radius:8px;border:2px solid #ddd;background:white;cursor:pointer;font-weight:600;transition:all 0.3s;font-size:14px}
+    .filter-btn:hover{border-color:#8E44AD;color:#8E44AD;transform:translateY(-2px)}
+    .filter-btn.active{background:#8E44AD;color:white;border-color:#8E44AD}
+    .filter-select{padding:10px 15px;border-radius:8px;border:2px solid #ddd;font-weight:600;cursor:pointer;min-width:200px}
+    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
+    .modal.show{display:flex}
+    .modal-content{background:white;padding:20px;border-radius:10px;max-width:800px;width:95%;max-height:85vh;overflow:auto;animation:slideIn 0.3s ease}
+    @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px}
+    .detail-row{display:grid;grid-template-columns:200px 1fr;padding:8px 0;border-bottom:1px solid #f4f6f7}
+    .detail-label{font-weight:700;color:#7f8c8d}
+    .detail-value{color:#2c3e50}
 </style>
 </head>
 <body>
-    <!-- Navbar -->
-    <div class="navbar">
-        <h2>📋 Dashboard Ketua Kaproli</h2>
-    </div>
-<!-- Container -->
+
+<div class="navbar">
+    <h2><i class="fa-solid fa-user-tie"></i> Dashboard Kaprodi</h2>
+    <div></div>
+</div>
+
 <div class="container">
-    <!-- Alert Messages -->
     <?php if($this->session->flashdata('success')): ?>
-    <div class="alert alert-success">
-        <?php echo $this->session->flashdata('success'); ?>
+    <div class="card" style="border-left:4px solid #27ae60;margin-bottom:18px">
+        <div style="color:#155724;font-weight:700"><?php echo $this->session->flashdata('success'); ?></div>
     </div>
     <?php endif; ?>
-    
     <?php if($this->session->flashdata('error')): ?>
-    <div class="alert alert-error">
-        <?php echo $this->session->flashdata('error'); ?>
+    <div class="card" style="border-left:4px solid #e74c3c;margin-bottom:18px">
+        <div style="color:#721c24;font-weight:700"><?php echo $this->session->flashdata('error'); ?></div>
     </div>
     <?php endif; ?>
 
-    <div id="alertContainer"></div>
+    <?php
+    $total_all = isset($total_surat) ? (int)$total_surat : 0;
+    $approved_count = isset($approved_count) ? (int)$approved_count : 0;
+    $rejected_count = isset($rejected_count) ? (int)$rejected_count : 0;
+    $pending_count = isset($pending_count) ? (int)$pending_count : 0;
+    ?>
 
-    <!-- Statistics Cards -->
+    <!-- Statistik -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <h3>Menunggu Persetujuan</h3>
-            <div class="number" id="pendingCount"><?php echo isset($pending_count) ? $pending_count : 0; ?></div>
+        <div class="stat-card" style="border-left-color:#8E44AD;" onclick="filterTable('all')">
+            <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
+            <div class="number"><?= $total_all ?></div>
         </div>
-        <div class="stat-card" style="border-left-color: #27ae60;">
-            <h3>Disetujui Bulan Ini</h3>
-            <div class="number" id="approvedCount"><?php echo isset($approved_count) ? $approved_count : 0; ?></div>
+        
+        <div class="stat-card" style="border-left-color:#27ae60;" onclick="filterTable('approved')">
+            <h3><i class="fa-solid fa-check-circle"></i> Disetujui KK</h3>
+            <div class="number"><?= $approved_count ?></div>
         </div>
-        <div class="stat-card" style="border-left-color: #e74c3c;">
-            <h3>Ditolak Bulan Ini</h3>
-            <div class="number" id="rejectedCount"><?php echo isset($rejected_count) ? $rejected_count : 0; ?></div>
+        
+        <div class="stat-card" style="border-left-color:#e74c3c;" onclick="filterTable('rejected')">
+            <h3><i class="fa-solid fa-times-circle"></i> Ditolak KK</h3>
+            <div class="number"><?= $rejected_count ?></div>
+        </div>
+        
+        <div class="stat-card" style="border-left-color:#f39c12;" onclick="filterTable('pending')">
+            <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
+            <div class="number"><?= $pending_count ?></div>
         </div>
     </div>
 
-    <!-- Main Card -->
+    <!-- Filter -->
+    <div class="filter-container">
+        <div>
+            <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
+                <i class="fa-solid fa-calendar"></i> Filter Tahun
+            </label>
+            <select class="filter-select" id="tahunSelect" onchange="updateTahun(this.value)">
+                <?php 
+                    $currentYear = date('Y');
+                    $selectedYear = isset($tahun) ? $tahun : $currentYear;
+                    for ($y = $currentYear; $y >= $currentYear - 5; $y--): 
+                ?>
+                    <option value="<?= $y ?>" <?= ($selectedYear == $y ? 'selected' : '') ?>>Tahun <?= $y ?></option>
+                <?php endfor; ?>
+            </select>
+        </div>
+
+        <div>
+            <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
+                <i class="fa-solid fa-filter"></i> Filter Status
+            </label>
+            <div style="display:flex;gap:10px">
+                <button class="filter-btn active" data-filter="all" onclick="filterTable('all')">
+                    <i class="fa-solid fa-list"></i> Semua
+                </button>
+                <button class="filter-btn" data-filter="pending" onclick="filterTable('pending')">
+                    <i class="fa-solid fa-clock"></i> Menunggu
+                </button>
+                <button class="filter-btn" data-filter="approved" onclick="filterTable('approved')">
+                    <i class="fa-solid fa-check"></i> Disetujui
+                </button>
+                <button class="filter-btn" data-filter="rejected" onclick="filterTable('rejected')">
+                    <i class="fa-solid fa-times"></i> Ditolak
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grafik 3D -->
+    <div class="card" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);">
+        <div class="card-header" style="border-bottom-color: rgba(255,255,255,0.1)">
+            <strong style="color: #ecf0f1"><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan — Tahun <?= isset($tahun) ? $tahun : date('Y') ?></strong>
+        </div>
+        <div class="chart-container">
+            <canvas id="grafikSurat"></canvas>
+        </div>
+    </div>
+
+    <!-- Tabel -->
     <div class="card">
         <div class="card-header">
-            <h3>Daftar Pengajuan Surat</h3>
+            <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Surat</h3>
+            <div>
+                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">Menampilkan: Semua Data</span>
+            </div>
         </div>
-
-        <!-- Table -->
-        <div style="overflow-x: auto;">
-            <table id="suratTable">
+        
+        <div style="overflow-x:auto">
+            <table>
                 <thead>
                     <tr>
                         <th>No</th>
                         <th>Nama Kegiatan</th>
                         <th>Penyelenggara</th>
                         <th>Tanggal Pengajuan</th>
-                        <th>Tanggal Kegiatan</th>
-                        <th>Jenis</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Data will be loaded here -->
+                    <?php if(!empty($surat_list)): $no=1; foreach($surat_list as $s): 
+                        $st_l = strtolower($s->status);
+                        if ($st_l === 'pengajuan') {
+                            $st_key = 'pending';
+                            $badge = '<span class="badge badge-pending">Menunggu Persetujuan</span>';
+                        } elseif ($st_l === 'disetujui kk') {
+                            $st_key = 'approved';
+                            $badge = '<span class="badge badge-approved">Disetujui KK</span>';
+                        } elseif ($st_l === 'ditolak kk') {
+                            $st_key = 'rejected';
+                            $badge = '<span class="badge badge-rejected">Ditolak KK</span>';
+                        } else {
+                            $st_key = 'pending';
+                            $badge = '<span class="badge badge-pending">'.ucwords($s->status).'</span>';
+                        }
+                    ?>
+                    <tr data-status="<?= $st_key ?>">
+                        <td><?= $no++ ?></td>
+                        <td><strong><?= htmlspecialchars($s->nama_kegiatan) ?></strong></td>
+                        <td><?= htmlspecialchars($s->penyelenggara) ?></td>
+                        <td><?= date("d M Y", strtotime($s->tanggal_pengajuan)) ?></td>
+                        <td><?= $badge ?></td>
+                        <td>
+                            <div style="display:flex;gap:6px">
+                                <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?>)" title="Lihat Detail">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <?php if($s->status == 'pengajuan'): ?>
+                                    <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?>)" title="Setujui">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?>)" title="Tolak">
+                                        <i class="fa-solid fa-times"></i>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; else: ?>
+                    <tr id="emptyRow">
+                        <td colspan="6" style="text-align:center;padding:40px;color:#7f8c8d">
+                            <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
+                            <strong>Belum ada pengajuan</strong>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
-
-        <div id="emptyState" class="empty-state" style="display: none;">
-            <div style="font-size: 64px; opacity: 0.3;">📭</div>
-            <h3>Tidak ada pengajuan surat</h3>
-            <p>Belum ada pengajuan yang menunggu persetujuan Anda</p>
-        </div>
     </div>
 </div>
 
-<!-- Modal Reject -->
-<div id="rejectModal" class="modal">
-    <div class="modal-content">
+<!-- Reject Modal -->
+<div id="rejectModal" class="modal" onclick="modalClickOutside(event,'rejectModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3>Tolak Pengajuan</h3>
-            <span class="close" onclick="closeModal('rejectModal')">&times;</span>
+            <h3><i class="fa-solid fa-ban"></i> Tolak Pengajuan</h3>
+            <button onclick="closeModal('rejectModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
         </div>
-        <p style="margin-bottom: 15px;">Berikan alasan penolakan:</p>
-        <textarea id="rejectionNotes" rows="5" placeholder="Masukkan alasan penolakan..."></textarea>
-        <div style="margin-top: 20px; text-align: right;">
-            <button class="btn btn-reject" onclick="confirmReject()">Tolak Pengajuan</button>
+        <div>
+            <p style="margin-bottom:10px;color:#7f8c8d">Berikan alasan penolakan:</p>
+            <textarea id="rejectionNotes" rows="5" placeholder="Masukkan alasan penolakan..." style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-family:inherit;resize:vertical"></textarea>
+            <div style="text-align:right;margin-top:12px">
+                <button class="btn btn-reject" onclick="confirmReject()">
+                    <i class="fa-solid fa-paper-plane"></i> Kirim Penolakan
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-    // Data dari database PHP - di-pass dari controller
-    let currentRejectId = null;
-    const sampleData = <?php echo json_encode($surat_list); ?>;
+const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
+let currentRejectId = null;
+
+function updateTahun(year) {
+    window.location.href = "<?= base_url('kaprodi?tahun=') ?>" + year;
+}
+
+function filterTable(status) {
+    const rows = document.querySelectorAll('#tableBody tr:not(#emptyRow)');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const filterInfo = document.getElementById('filterInfo');
+    let visibleCount = 0;
     
-    // Update stats dari database
-    const stats = {
-        pending: <?php echo isset($pending_count) ? $pending_count : 0; ?>,
-        approved: <?php echo isset($approved_count) ? $approved_count : 0; ?>,
-        rejected: <?php echo isset($rejected_count) ? $rejected_count : 0; ?>
-    };
-
-    // Load data on page load
-    window.onload = function() {
-        loadTableData();
-    };
-
-    function loadTableData() {
-        const tbody = document.getElementById('tableBody');
-        const emptyState = document.getElementById('emptyState');
-        
-        if (sampleData.length === 0) {
-            tbody.innerHTML = '';
-            emptyState.style.display = 'block';
-            return;
+    filterBtns.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === status) btn.classList.add('active');
+    });
+    
+    rows.forEach((row, index) => {
+        const rowStatus = row.dataset.status;
+        if (status === 'all' || rowStatus === status) {
+            row.style.display = '';
+            visibleCount++;
+            row.querySelector('td:first-child').textContent = visibleCount;
+        } else {
+            row.style.display = 'none';
         }
+    });
+    
+    const statusText = {'all': 'Semua Data', 'pending': 'Menunggu', 'approved': 'Disetujui', 'rejected': 'Ditolak'};
+    filterInfo.textContent = `Menampilkan: ${statusText[status]} (${visibleCount} data)`;
+}
 
-        emptyState.style.display = 'none';
-        tbody.innerHTML = sampleData.map((item, index) => `
-            <tr>
-                <td>${index + 1}</td>
-                <td><strong>${item.nama_kegiatan}</strong></td>
-                <td>${item.penyelenggara}<br><small style="color: #7f8c8d;"></small></td>
-                <td>${formatDate(item.tanggal_pengajuan)}</td>
-                <td>${formatDate(item.tanggal_kegiatan)}</td>
-                <td>${item.jenis_pengajuan}</td>
-                <td>${item.status}</td>
-                <td>
-                    <div class="btn-group">
-                        <button class="btn btn-approve" onclick="approveSurat(${item.id})">✓ Setuju</button>
-                        <button class="btn btn-reject" onclick="showRejectModal(${item.id})">✗ Tolak</button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
+function showDetail(id) {
+    const item = suratList.find(s => Number(s.id) === Number(id));
+    if (!item) { alert('Data tidak ditemukan'); return; }
+    alert('Detail: ' + item.nama_kegiatan);
+}
+
+function approveSurat(id) {
+    if (!confirm('Apakah Anda yakin ingin menyetujui pengajuan ini?')) return;
+    window.location.href = '<?= base_url("kaprodi/approve/") ?>' + id;
+}
+
+function showRejectModal(id) {
+    currentRejectId = id;
+    document.getElementById('rejectionNotes').value = '';
+    document.getElementById('rejectModal').classList.add('show');
+}
+
+function confirmReject() {
+    const notes = document.getElementById('rejectionNotes').value.trim();
+    if (!notes) { alert('Alasan penolakan harus diisi'); return; }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= base_url("kaprodi/reject/") ?>' + currentRejectId;
+    
+    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
+    const inpCsrf = document.createElement('input');
+    inpCsrf.type='hidden'; inpCsrf.name=csrfName; inpCsrf.value=csrfHash;
+    form.appendChild(inpCsrf);
+    
+    const inpNotes = document.createElement('input');
+    inpNotes.type='hidden'; inpNotes.name='rejection_notes'; inpNotes.value=notes;
+    form.appendChild(inpNotes);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+}
+
+function modalClickOutside(evt, id) {
+    if (evt.target && evt.target.id === id) closeModal(id);
+}
+
+// Grafik 3D
+const ctx = document.getElementById('grafikSurat').getContext('2d');
+const fusionStyle3DPlugin = {
+    id: 'fusionStyle3d',
+    beforeDatasetsDraw: (chart) => {
+        const ctx = chart.ctx;
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+            const meta = chart.getDatasetMeta(datasetIndex);
+            if (!meta.hidden) {
+                meta.data.forEach((bar) => {
+                    const x = bar.x, y = bar.y, base = bar.base, width = bar.width, height = base - y;
+                    if (height <= 1) return;
+                    const offsetX = 15, offsetY = -15;
+                    ctx.save();
+                    
+                    const rightGradient = ctx.createLinearGradient(x + width/2, y, x + width/2 + offsetX, y + offsetY);
+                    let darkColor = datasetIndex === 0 ? 'rgba(41, 128, 185, 0.6)' : (datasetIndex === 1 ? 'rgba(39, 174, 96, 0.6)' : 'rgba(192, 57, 43, 0.6)');
+                    rightGradient.addColorStop(0, darkColor);
+                    rightGradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
+                    ctx.fillStyle = rightGradient;
+                    ctx.beginPath();
+                    ctx.moveTo(x + width/2, y);
+                    ctx.lineTo(x + width/2 + offsetX, y + offsetY);
+                    ctx.lineTo(x + width/2 + offsetX, base + offsetY);
+                    ctx.lineTo(x + width/2, base);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    const topGradient = ctx.createLinearGradient(x - width/2, y, x + width/2 + offsetX, y + offsetY);
+                    let lightColor = datasetIndex === 0 ? 'rgba(174, 214, 241, 0.9)' : (datasetIndex === 1 ? 'rgba(200, 247, 197, 0.9)' : 'rgba(245, 183, 177, 0.9)');
+                    topGradient.addColorStop(0, lightColor);
+                    topGradient.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
+                    ctx.fillStyle = topGradient;
+                    ctx.beginPath();
+                    ctx.moveTo(x - width/2, y);
+                    ctx.lineTo(x + width/2, y);
+                    ctx.lineTo(x + width/2 + offsetX, y + offsetY);
+                    ctx.lineTo(x - width/2 + offsetX, y + offsetY);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.restore();
+                });
+            }
+        });
     }
+};
 
-    function formatDate(dateStr) {
-        const date = new Date(dateStr);
-        const options = { day: '2-digit', month: 'short', year: 'numeric' };
-        return date.toLocaleDateString('id-ID', options);
-    }
-
-    function showDetail(id) {
-        const item = sampleData.find(s => s.id === id);
-        if (!item) return;
-
-        const content = `
-            <div class="detail-row">
-                <div class="detail-label">Nama Kegiatan:</div>
-                <div class="detail-value">${item.nama_kegiatan}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Nama Dosen:</div>
-                <div class="detail-value">${item.nama_dosen}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">NIP:</div>
-                <div class="detail-value">${item.nip}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Jabatan:</div>
-                <div class="detail-value">${item.jabatan}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Divisi:</div>
-                <div class="detail-value">${item.divisi}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Pengajuan:</div>
-                <div class="detail-value">${formatDate(item.tanggal_pengajuan)}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Jenis Date:</div>
-                <div class="detail-value">${item.jenis_date}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Kegiatan:</div>
-                <div class="detail-value">${formatDate(item.tanggal_kegiatan)} s/d ${formatDate(item.akhir_kegiatan)}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Periode Pengusasan:</div>
-                <div class="detail-value">${item.periode_pengusasan} (${item.periode_value})</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Akhir Periode:</div>
-                <div class="detail-value">${formatDate(item.akhir_periode_pengusasan)}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Jenis Pengajuan:</div>
-                <div class="detail-value">${item.jenis_pengajuan}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tempat Kegiatan:</div>
-                <div class="detail-value">${item.tempat_kegiatan}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Penyelenggara:</div>
-                <div class="detail-value">${item.penyelenggara}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Lingkup Penugasan:</div>
-                <div class="detail-value">${item.lingkup_penugasan}</div>
-            </div>
-            ${item.jenis_penugasan_perorangan ? `
-            <div class="detail-row">
-                <div class="detail-label">Jenis Penugasan:</div>
-                <div class="detail-value">${item.jenis_penugasan_perorangan}</div>
-            </div>
-            ` : ''}
-            ${item.jenis_penugasan_kelompok ? `
-            <div class="detail-row">
-                <div class="detail-label">Jenis Penugasan:</div>
-                <div class="detail-value">${item.jenis_penugasan_kelompok}</div>
-            </div>
-            ` : ''}
-            <div class="detail-row">
-                <div class="detail-label">Format:</div>
-                <div class="detail-value">${item.format}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">File Eviden:</div>
-                <div class="detail-value">
-                    <a href="<?php echo base_url('uploads/'); ?>${item.eviden}" target="_blank" style="color: #3498db; text-decoration: none;">
-                        📄 ${item.eviden}
-                    </a>
-                </div>
-            </div>
-            <div style="margin-top: 20px; text-align: right;">
-                <button class="btn btn-approve" onclick="approveSurat(${item.id}); closeModal('detailModal')">✓ Setujui</button>
-                <button class="btn btn-reject" onclick="showRejectModal(${item.id}); closeModal('detailModal')">✗ Tolak</button>
-            </div>
-        `;
-
-        document.getElementById('detailContent').innerHTML = content;
-        document.getElementById('detailModal').style.display = 'block';
-    }
-
-    function approveSurat(id) {
-        if (confirm('Apakah Anda yakin ingin menyetujui pengajuan ini?')) {
-            // Redirect ke controller untuk approve
-            window.location.href = '<?php echo base_url("kaprodi/approve/"); ?>' + id;
-        }
-    }
-
-    function showRejectModal(id) {
-        currentRejectId = id;
-        document.getElementById('rejectionNotes').value = '';
-        document.getElementById('rejectModal').style.display = 'block';
-    }
-
-    function confirmReject() {
-        const notes = document.getElementById('rejectionNotes').value.trim();
-        
-        if (!notes) {
-            alert('Alasan penolakan harus diisi!');
-            return;
-        }
-
-        // Submit form untuk reject
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '<?php echo base_url("kaprodi/reject/"); ?>' + currentRejectId;
-        
-        // CSRF Token
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '<?php echo $this->security->get_csrf_token_name(); ?>';
-        csrfInput.value = '<?php echo $this->security->get_csrf_hash(); ?>';
-        form.appendChild(csrfInput);
-        
-        // Rejection notes
-        const notesInput = document.createElement('input');
-        notesInput.type = 'hidden';
-        notesInput.name = 'rejection_notes';
-        notesInput.value = notes;
-        form.appendChild(notesInput);
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
-
-    function updateStats() {
-        document.getElementById('pendingCount').textContent = sampleData.length;
-    }
-
-    function filterData() {
-        alert('Fitur filter akan segera ditambahkan');
-    }
-
-    function logout() {
-        if (confirm('Apakah Anda yakin ingin logout?')) {
-            window.location.href = '<?php echo base_url("auth/logout"); ?>';
-        }
-    }
-
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-        const detailModal = document.getElementById('detailModal');
-        const rejectModal = document.getElementById('rejectModal');
-        if (event.target == detailModal) {
-            detailModal.style.display = 'none';
-        }
-        if (event.target == rejectModal) {
-            rejectModal.style.display = 'none';
-        }
-    }
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
+        datasets: [
+            {label: "Total", data: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(142, 68, 173, 0.85)', borderColor: 'rgba(142, 68, 173, 1)', borderWidth: 2, borderRadius: 6},
+            {label: "Disetujui KK", data: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(46, 204, 113, 0.85)', borderColor: 'rgba(46, 204, 113, 1)', borderWidth: 2, borderRadius: 6},
+            {label: "Ditolak KK", data: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(231, 76, 60, 0.85)', borderColor: 'rgba(231, 76, 60, 1)', borderWidth: 2, borderRadius: 6}
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {position: 'top', labels: {padding: 20, font: {size: 14, weight: '700'}, color: '#ecf0f1'}},
+            tooltip: {backgroundColor: 'rgba(44, 62, 80, 0.95)', padding: 16, cornerRadius: 8}
+        },
+        scales: {
+            x: {grid: {display: false}, ticks: {color: '#ffffff', font: {size: 13, weight: '600'}}},
+            y: {beginAtZero: true, grid: {color: 'rgba(255, 255, 255, 0.08)'}, ticks: {color: '#95a5a6'}}
+        },
+        animation: {duration: 1800, easing: 'easeInOutQuart'}
+    },
+    plugins: [fusionStyle3DPlugin]
+});
 </script>
+</body>
+</html>
