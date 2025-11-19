@@ -46,4 +46,5 @@ $route['surat/debug_eviden/(:num)'] = 'surat/debug_eviden/$1';
 // DASHBOARD
 $route['kaprodi'] = 'Kaprodi';
 $route['sekretariat'] = 'sekretariat';
+$route['dekan'] = 'Dekan';
 

@@ -1,20 +1,28 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Sekretariat extends CI_Controller {
+class Dekan extends CI_Controller {
     
     public function __construct() {
         parent::__construct();
+        
         $this->load->library('session');
         $this->load->database();
     }
     
-    public function index() {
-        // Status surat yang harus muncul di Sekretariat (hanya yang disetujui KK)
-        $this->db->where("status", 'disetujui KK');
-        $this->db->order_by("tanggal_pengajuan", "DESC");
-        $data['surat_list'] = $this->db->get("surat")->result();
+    public function index()
+{
+    // Surat yang sudah disetujui kaprodi akan masuk ke sekretariat
+    $this->db->where_in("status", ['disetujui sekretariat']);
+    $this->db->order_by("created_at", "DESC");
+    $data['surat_list'] = $this->db->get("surat")->result_array(); // WAJIB result_array()
 
+    // Statistik
+    $data['pending_count']  = $this->db->where('status', 'disetujui sekretariat')->count_all_results('surat');
+    $data['approved_count'] = $this->db->where('status', 'disetujui dekan')->count_all_results('surat');
+    $data['rejected_count'] = $this->db->where('status', 'ditolak dekan')->count_all_results('surat');
+
+    
         // Statistik dengan filter bulan
         $current_month = date('m');
         $current_year = date('Y');
@@ -34,31 +42,30 @@ class Sekretariat extends CI_Controller {
             ->where('YEAR(tanggal_pengajuan)', $current_year)
             ->count_all_results('surat');
 
-        $this->load->view('sekretariat/dashboard', $data);
-    }
-    
+    $this->load->view('dekan/dashboard', $data);
+}
+
     public function approve($id) {
+
         $this->db->where('id', $id);
         $this->db->update('surat', [
-            'status' => 'disetujui sekretariat'
-            // Tidak perlu disetujui_pada
+            'status' => 'disetujui dekan'
         ]);
 
-        $this->session->set_flashdata('success', 'Surat diteruskan ke dekan.');
-        redirect('sekretariat');
+        $this->session->set_flashdata('success', 'Surat telah disetujui Dekan.');
+        redirect('dekan');
     }
-
+    
     public function reject($id) {
         $notes = $this->input->post('rejection_notes');
         
         $this->db->where('id', $id);
         $this->db->update('surat', [
-            'status' => 'ditolak sekretariat',
+            'status' => 'ditolak dekan',
             'catatan_penolakan' => $notes
-            // Tidak perlu ditolak_pada
         ]);
         
-        $this->session->set_flashdata('success', 'Pengajuan ditolak');
+        $this->session->set_flashdata('success', 'Pengajuan ditolak oleh Dekan.');
         redirect('sekretariat');
     }
 }
