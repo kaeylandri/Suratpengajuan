@@ -43,6 +43,66 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
+       GET STATUS - NEW METHOD FOR STATUS TRACKING
+    ============================================*/
+    public function get_status($surat_id)
+    {
+        // Ambil data dari database
+        $status_data = $this->Surat_model->get_status_by_id($surat_id);
+        
+        if (!$status_data) {
+            // Jika data tidak ditemukan
+            $response = [
+                'success' => false,
+                'message' => 'Data surat tidak ditemukan',
+                'data' => null
+            ];
+        } else {
+            // Format data untuk response JSON
+            $response = [
+                'success' => true,
+                'data' => [
+                    'steps' => [
+                        [
+                            'step_name' => 'Pengajuan',
+                            'status' => $status_data->step1_status ?? 'pending',
+                            'date' => $status_data->step1_date ?? null,
+                            'custom_text' => $status_data->step1_text ?? 'Menunggu persetujuan'
+                        ],
+                        [
+                            'step_name' => 'Review Kaprodi',
+                            'status' => $status_data->step2_status ?? 'pending',
+                            'date' => $status_data->step2_date ?? null,
+                            'custom_text' => $status_data->step2_text ?? 'Menunggu review'
+                        ],
+                        [
+                            'step_name' => 'Persetujuan',
+                            'status' => $status_data->step3_status ?? 'pending',
+                            'date' => $status_data->step3_date ?? null,
+                            'custom_text' => $status_data->step3_text ?? 'Menunggu persetujuan akhir'
+                        ],
+                        [
+                            'step_name' => 'Selesai',
+                            'status' => $status_data->step4_status ?? 'pending',
+                            'date' => $status_data->step4_date ?? null,
+                            'custom_text' => $status_data->step4_text ?? 'Proses selesai'
+                        ]
+                    ],
+                    'current_status' => $status_data->status ?? 'pengajuan',
+                    'description' => $status_data->current_description ?? 'Surat dalam proses pengajuan',
+                    'estimated_time' => $status_data->estimated_time ?? null,
+                    'rejection_reason' => $status_data->rejection_reason ?? null,
+                    'last_updated' => $status_data->updated_at ?? $status_data->created_at
+                ]
+            ];
+        }
+        
+        // Set header JSON
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
+
+    /* ===========================================
        SUBMIT DATA — FIX EVIDEN UPLOADCARE
     ============================================*/
     public function submit()
@@ -73,37 +133,36 @@ class Surat extends CI_Controller
         $arr = array_values(array_filter($arr, fn($x) => trim($x) !== ""));
 
         $data = [
-    'user_id' => $post['user_id'] ?? '-',
-    'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
-    'jenis_date' => $post['jenis_date'] ?? '-',
-    'tanggal_pengajuan' => $tanggal_pengajuan,
-    'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
-    'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
-    'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
-    'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
-    'periode_value' => $post['periode_value'] ?? '-',
-    'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
-    'penyelenggara' => $post['penyelenggara'] ?? '-',
-    'jenis_pengajuan' => $post['jenis_pengajuan'] ?? '-',
-    'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
-    'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? '-',
-    'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
-    'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
-    'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
-    'format' => $post['format'] ?? '-',
+            'user_id' => $post['user_id'] ?? '-',
+            'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
+            'jenis_date' => $post['jenis_date'] ?? '-',
+            'tanggal_pengajuan' => $tanggal_pengajuan,
+            'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
+            'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
+            'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
+            'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
+            'periode_value' => $post['periode_value'] ?? '-',
+            'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
+            'penyelenggara' => $post['penyelenggara'] ?? '-',
+            'jenis_pengajuan' => $post['jenis_pengajuan'] ?? '-',
+            'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
+            'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? '-',
+            'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
+            'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
+            'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
+            'format' => $post['format'] ?? '-',
 
-    'nip' => json_encode($post['nip'] ?? []),
-    'nama_dosen' => json_encode($post['nama_dosen'] ?? []),
-    'jabatan' => json_encode($post['jabatan'] ?? []),
-    'divisi' => json_encode($post['divisi'] ?? []),
+            'nip' => json_encode($post['nip'] ?? []),
+            'nama_dosen' => json_encode($post['nama_dosen'] ?? []),
+            'jabatan' => json_encode($post['jabatan'] ?? []),
+            'divisi' => json_encode($post['divisi'] ?? []),
 
-    'eviden' => json_encode($arr),
+            'eviden' => json_encode($arr),
 
-    // ❗ WAJIB supaya muncul di dashboard Kaprodi
-    'status' => 'pengajuan',
-    'created_at' => date('Y-m-d H:i:s')
-];
-
+            // ❗ WAJIB supaya muncul di dashboard Kaprodi
+            'status' => 'pengajuan',
+            'created_at' => date('Y-m-d H:i:s')
+        ];
 
         $this->Surat_model->insert_surat($data);
 
@@ -112,7 +171,7 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       DOWNLOAD VIA URL (Legacy - untuk UploadCare)
+       DOWNLOAD VIA URL (LEGACY - UploadCare)
     ============================================*/
     public function download_eviden_url()
     {
@@ -126,106 +185,105 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       DOWNLOAD EVIDEN FILE - NEW METHOD
+       DOWNLOAD EVIDEN FILE - NEW METHOD (REVISION)
     ============================================*/
-    public function download_eviden($filename = null)
+    public function download_eviden()
     {
-        if (!$filename) {
+        $file = $this->input->get('file');
+
+        if (!$file) {
             show_404();
             return;
         }
 
-        // Decode filename jika di-encode
-        $filename = urldecode($filename);
+        // Decode input filename/url
+        $file = urldecode($file);
 
-        // Cek apakah file adalah URL (UploadCare atau external)
-        if (filter_var($filename, FILTER_VALIDATE_URL)) {
-            // Download dari URL external
-            $this->_download_from_url($filename);
+        // Jika file adalah URL → download via URL
+        if (filter_var($file, FILTER_VALIDATE_URL)) {
+            $this->_download_from_url($file);
             return;
         }
 
-        // File lokal - cek keamanan path
-        $safe_filename = basename($filename);
-        $filepath = './uploads/eviden/' . $safe_filename;
+        // ↓↓↓ FILE LOKAL ↓↓↓
+
+        // Aman-kan input (hindari path traversal)
+        $safe_filename = basename($file);
+
+        // Path default folder eviden
+        $filepath = FCPATH . 'uploads/eviden/' . $safe_filename;
 
         if (!file_exists($filepath)) {
             show_404();
             return;
         }
 
-        // Get mime type
+        // Ambil mime type
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_file($finfo, $filepath);
         finfo_close($finfo);
 
-        // Clear any previous output
+        // Bersihkan output buffer
         if (ob_get_level()) {
             ob_end_clean();
         }
 
-        // Set headers untuk force download
+        // Set header download
         header('Content-Description: File Transfer');
         header('Content-Type: ' . $mime_type);
         header('Content-Disposition: attachment; filename="' . $safe_filename . '"');
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Cache-Control: must-revalidate');
         header('Pragma: public');
         header('Content-Length: ' . filesize($filepath));
-        
-        // Flush output
+
         flush();
-        
-        // Read and output file
         readfile($filepath);
         exit;
     }
 
     /* ===========================================
-       HELPER: DOWNLOAD FROM EXTERNAL URL
+       HELPER: DOWNLOAD FROM EXTERNAL URL (REVISION)
     ============================================*/
     private function _download_from_url($url)
     {
-        // Get filename dari URL
+        // Ambil nama file dari URL
         $filename = basename(parse_url($url, PHP_URL_PATH));
-        
+
         if (empty($filename)) {
             $filename = 'download_' . time();
         }
 
-        // Get file content
+        // Ambil konten dari URL
         $file_content = @file_get_contents($url);
-        
+
         if ($file_content === false) {
             show_404();
             return;
         }
 
-        // Detect mime type from content
+        // Tentukan mime type
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime_type = finfo_buffer($finfo, $file_content);
         finfo_close($finfo);
 
-        // Clear any previous output
+        // Bersihkan output buffer
         if (ob_get_level()) {
             ob_end_clean();
         }
 
-        // Set headers untuk force download
+        // Set header download
         header('Content-Description: File Transfer');
         header('Content-Type: ' . $mime_type);
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Cache-Control: must-revalidate');
         header('Pragma: public');
         header('Content-Length: ' . strlen($file_content));
-        
-        // Flush output
+
         flush();
-        
-        // Output file content
         echo $file_content;
         exit;
     }
@@ -629,12 +687,12 @@ class Surat extends CI_Controller
         // load halaman cetak
         $this->load->view('surat_print', $data);
     }
-    public function list_surat_tugas()
-{
-    $data['surat_list'] = $this->Surat_model->get_all_surat();
 
-    $this->load->view('list_surat_tugas', $data);
-}
+    public function list_surat_tugas()
+    {
+        $data['surat_list'] = $this->Surat_model->get_all_surat();
+        $this->load->view('list_surat_tugas', $data);
+    }
 
     /* ===========================================
        GET DOSEN BY NIP
@@ -749,23 +807,26 @@ class Surat extends CI_Controller
 
         echo json_encode($out);
     }
+
+    /* ===========================================
+       GENERATE QR CODE
+    ============================================*/
     public function generate_qr($id)
-{
-    $this->load->library('qr');
+    {
+        $this->load->library('qr');
 
-    // Link yang akan disimpan di QR
-    $url = base_url('regulation/validate/' . $id);
+        // Link yang akan disimpan di QR
+        $url = base_url('regulation/validate/' . $id);
 
-    // Lokasi simpan file
-    $path = FCPATH . 'uploads/qr/surat_' . $id . '.png';
-    if (!is_dir(FCPATH . 'uploads/qr')) {
-        mkdir(FCPATH . 'uploads/qr', 0777, TRUE);
+        // Lokasi simpan file
+        $path = FCPATH . 'uploads/qr/surat_' . $id . '.png';
+        if (!is_dir(FCPATH . 'uploads/qr')) {
+            mkdir(FCPATH . 'uploads/qr', 0777, TRUE);
+        }
+
+        // Generate & simpan
+        $this->qr->generate($url, $path, 6);
+
+        echo "QR berhasil dibuat di: " . $path;
     }
-
-    // Generate & simpan
-    $this->qr->generate($url, $path, 6);
-
-    echo "QR berhasil dibuat di: " . $path;
-}
-
 }

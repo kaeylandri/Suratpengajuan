@@ -1,5 +1,8 @@
+
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');class Dosen_model extends CI_Model {
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Dosen_model extends CI_Model {
 
     public function get_dosen_by_ids($ids)
     {

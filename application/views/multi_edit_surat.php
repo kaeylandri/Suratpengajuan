@@ -113,25 +113,29 @@ function safe_json($data) {
                 <div class="row mt-3">
                     <div class="col-md-6">
                         <label>Tanggal Mulai</label>
-                        <input type="date" class="form-control"
+                        <input type="date" class="form-control tanggal-kegiatan"
+                               data-index="<?= $index ?>"
                                name="items[<?= $index ?>][tanggal_kegiatan]"
                                value="<?= $surat->tanggal_kegiatan!='-'?$surat->tanggal_kegiatan:'' ?>">
                     </div>
                     <div class="col-md-6">
                         <label>Tanggal Akhir</label>
-                        <input type="date" class="form-control"
+                        <input type="date" class="form-control akhir-kegiatan"
+                               data-index="<?= $index ?>"
                                name="items[<?= $index ?>][akhir_kegiatan]"
                                value="<?= $surat->akhir_kegiatan!='-'?$surat->akhir_kegiatan:'' ?>">
                     </div>
                     <div class="col-md-6">
                         <label>Periode Penugasan</label>
-                        <input type="date" class="form-control"
+                        <input type="date" class="form-control periode-penugasan"
+                               data-index="<?= $index ?>"
                                name="items[<?= $index ?>][periode_penugasan]"
                                value="<?= $surat->periode_penugasan!='-'?$surat->periode_penugasan:'' ?>">
                     </div>
                     <div class="col-md-6">
                         <label>Akhir Periode</label>
-                        <input type="date" class="form-control"
+                        <input type="date" class="form-control akhir-periode-penugasan"
+                               data-index="<?= $index ?>"
                                name="items[<?= $index ?>][akhir_periode_penugasan]"
                                value="<?= $surat->akhir_periode_penugasan!='-'?$surat->akhir_periode_penugasan:'' ?>">
                     </div>
@@ -277,6 +281,7 @@ function safe_json($data) {
 <script>
 $(document).ready(() => {
 
+    // === SWITCH CUSTOM/PERIODE ===
     $('.jenis-date-select').on('change', function() {
         const i = $(this).data('index');
         const v = $(this).val();
@@ -284,6 +289,7 @@ $(document).ready(() => {
         $('#periode_'+i).toggle(v === 'periode');
     });
 
+    // === SWITCH PERORANGAN / KELOMPOK ===
     $('.jenis-pengajuan-select').on('change', function() {
         const i = $(this).data('index');
         const v = $(this).val();
@@ -301,6 +307,7 @@ $(document).ready(() => {
         $('#lainnya_kel_'+i).toggle($(this).val() === 'Lainnya');
     });
 
+    // === TAMBAH ROW DOSEN ===
     $('.btn-add-row').on('click', function() {
         const i = $(this).data('index');
         const tbody = $('.dosen-table[data-index="'+i+'"] tbody');
@@ -318,6 +325,44 @@ $(document).ready(() => {
 
     $(document).on('click', '.remove-row', function() {
         $(this).closest('tr').remove();
+    });
+
+    // ============================================
+    //     AUTO-ADJUST 60 HARI VALIDATION
+    // ============================================
+
+    function addDays(date, days) {
+        let d = new Date(date);
+        d.setDate(d.getDate() + days);
+        return d.toISOString().split('T')[0];
+    }
+
+    // 1. tanggal_kegiatan → akhir_kegiatan
+    $(document).on("change", ".akhir-kegiatan, .tanggal-kegiatan", function() {
+        let i = $(this).data('index');
+        let start = $(`.tanggal-kegiatan[data-index="${i}"]`).val();
+        let end   = $(`.akhir-kegiatan[data-index="${i}"]`).val();
+        if (!start || !end) return;
+
+        let maxEnd = addDays(start, 60);
+
+        if (end > maxEnd) {
+            $(`.akhir-kegiatan[data-index="${i}"]`).val(maxEnd);
+        }
+    });
+
+    // 2. periode_penugasan → akhir_periode_penugasan
+    $(document).on("change", ".akhir-periode-penugasan, .periode-penugasan", function() {
+        let i = $(this).data('index');
+        let start = $(`.periode-penugasan[data-index="${i}"]`).val();
+        let end   = $(`.akhir-periode-penugasan[data-index="${i}"]`).val();
+        if (!start || !end) return;
+
+        let maxEnd = addDays(start, 60);
+
+        if (end > maxEnd) {
+            $(`.akhir-periode-penugasan[data-index="${i}"]`).val(maxEnd);
+        }
     });
 
 });
