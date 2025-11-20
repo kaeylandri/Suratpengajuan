@@ -35,19 +35,22 @@ class Surat_model extends CI_Model
     // GET ALL
     // ============================================
     public function get_all_surat()
-    {
-        $this->db->order_by('id', 'DESC');
-        $result = $this->db->get('surat')->result();
+{
+   $this->db->select('*');
 
-        foreach ($result as &$row) {
-            $row->nip        = json_decode($row->nip, true);
-            $row->nama_dosen = json_decode($row->nama_dosen, true);
-            $row->jabatan    = json_decode($row->jabatan, true);
-            $row->divisi     = json_decode($row->divisi, true);
-        }
+    $this->db->order_by('id', 'DESC');
+    $result = $this->db->get('surat')->result();
 
-        return $result;
+    foreach ($result as &$row) {
+        $row->nip        = json_decode($row->nip, true) ?: [];
+        $row->nama_dosen = json_decode($row->nama_dosen, true) ?: [];
+        $row->jabatan    = json_decode($row->jabatan, true) ?: [];
+        $row->divisi     = json_decode($row->divisi, true) ?: [];
     }
+
+    return $result;
+}
+
 
     // ============================================
     // GET BY ID
