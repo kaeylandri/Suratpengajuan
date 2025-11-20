@@ -1380,7 +1380,6 @@
                     <div class="status-info mt-4">
                         <h5>Informasi Status:</h5>
                         <p id="status-description">Memuat informasi status...</p>
-                        <p><strong>Estimasi waktu:</strong> <span id="estimated-time">1 - 2 hari</span></p>
                         <div id="rejection-reason" class="rejection-reason" style="display: none;">
                             <h6>Alasan Penolakan:</h6>
                             <p id="rejection-text"></p>
