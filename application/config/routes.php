@@ -34,14 +34,40 @@ $route['surat/save_multi_edit'] = 'surat/save_multi_edit';
 // CRUD ROUTES - FIXED
 $route['surat'] = 'surat/index';
 $route['surat/index'] = 'surat/index';
-$route['surat/create'] = 'surat/create'; // ← TAMBAH INI
+$route['surat/create'] = 'surat/create';
 $route['surat/submit'] = 'surat/submit';
 $route['surat/edit/(:num)'] = 'surat/edit/$1';
 $route['surat/delete/(:num)'] = 'surat/delete/$1';
 $route['surat/cetak/(:num)'] = 'surat/cetak/$1';
 
-// LIST SURAT TUGAS - FIXED (HAPUS DUPLIKAT)
-$route['list-surat-tugas'] = 'surat/list_surat_tugas'; // ← HANYA INI YANG PENTING!
+// STATUS PAGES ROUTES - NEWLY ADDED
+$route['surat/semua'] = 'surat/semua';
+$route['surat/disetujui'] = 'surat/disetujui';
+$route['surat/ditolak'] = 'surat/ditolak';
+$route['surat/pending'] = 'surat/pending';
+$route['surat/menunggu'] = 'surat/menunggu';
+
+/*
+| -------------------------------------------------------------------------
+| SEKRETARIAT SURAT ROUTES - NEWLY ADDED
+| -------------------------------------------------------------------------
+*/
+$route['surat/sekretariat/semua'] = 'surat/semua_sekretariat';
+$route['surat/sekretariat/disetujui'] = 'surat/disetujui_sekretariat';
+$route['surat/sekretariat/ditolak'] = 'surat/ditolak_sekretariat';
+$route['surat/sekretariat/pending'] = 'surat/pending_sekretariat';
+$route['surat/sekretariat/menunggu'] = 'surat/menunggu_sekretariat';
+
+// APPROVAL ROUTES
+$route['surat/setujui/(:num)'] = 'surat/setujui/$1';
+$route['surat/tolak/(:num)'] = 'surat/tolak/$1';
+$route['surat/update_status/(:num)/(:any)'] = 'surat/update_status/$1/$2';
+
+// DETAIL ROUTE
+$route['surat/detail/(:num)'] = 'surat/detail/$1';
+
+// LIST SURAT TUGAS
+$route['list-surat-tugas'] = 'surat/list_surat_tugas';
 
 // QR CODE
 $route['surat/generate_qr/(:num)'] = 'surat/generate_qr/$1';
@@ -68,6 +94,8 @@ $route['dekan/test'] = 'dekan/test';
 // Kaprodi routes
 $route['kaprodi'] = 'kaprodi/index';
 $route['kaprodi/dashboard'] = 'kaprodi/index';
+$route['kaprodi/approve/(:num)'] = 'kaprodi/approve/$1';
+$route['kaprodi/reject/(:num)'] = 'kaprodi/reject/$1';
 
 // Sekretariat routes
 $route['sekretariat'] = 'sekretariat/index';
@@ -85,7 +113,7 @@ $route['api/surat/detail/(:num)'] = 'surat/get_status/$1';
 
 /*
 | -------------------------------------------------------------------------
-| CATCH-ALL ROUTE
+| CATCH-ALL ROUTE - HARUS DI BAWAH
 | -------------------------------------------------------------------------
 */
 

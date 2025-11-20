@@ -22,7 +22,7 @@ class Kaprodi extends CI_Controller
 
         // Disetujui KK tahun ini
         $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
-                                          ->where('status', 'disetujui dekan')
+                                          ->where_in('status', ['disetujui dekan', 'disetujui KK', 'disetujui sekretariat'])
                                           ->count_all_results('surat');
 
         // Ditolak KK tahun ini

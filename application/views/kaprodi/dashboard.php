@@ -12,8 +12,9 @@
     .navbar h2{font-size:20px;}
     .container{max-width:1200px;margin:30px auto;padding:0 20px;}
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:20px;}
-    .stat-card{background:white;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid #3498db;transition:all 0.3s ease;cursor:pointer}
+    .stat-card{background:white;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid #3498db;transition:all 0.3s ease;cursor:pointer;position:relative;}
     .stat-card:hover{transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,0.12)}
+    .stat-card.active{box-shadow:0 0 0 3px rgba(142, 68, 173, 0.3);}
     .stat-card h3{color:#7f8c8d;font-size:13px;margin-bottom:8px;text-transform:uppercase}
     .stat-card .number{font-size:28px;font-weight:700;color:#2c3e50}
     .card{background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px}
@@ -76,28 +77,32 @@
     $pending_count = isset($pending_count) ? (int)$pending_count : 0;
     ?>
 
-    <!-- Statistik -->
-    <div class="stats-grid">
-        <div class="stat-card" style="border-left-color:#8E44AD;" onclick="filterTable('all')">
-            <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
-            <div class="number"><?= $total_all ?></div>
-        </div>
-        
-        <div class="stat-card" style="border-left-color:#27ae60;" onclick="filterTable('approved')">
-            <h3><i class="fa-solid fa-check-circle"></i> Disetujui</h3>
-            <div class="number"><?= $approved_count ?></div>
-        </div>
-        
-        <div class="stat-card" style="border-left-color:#e74c3c;" onclick="filterTable('rejected')">
-            <h3><i class="fa-solid fa-times-circle"></i> Ditolak </h3>
-            <div class="number"><?= $rejected_count ?></div>
-        </div>
-        
-        <div class="stat-card" style="border-left-color:#f39c12;" onclick="filterTable('pending')">
-            <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
-            <div class="number"><?= $pending_count ?></div>
-        </div>
+   <!-- Statistik -->
+<div class="stats-grid">
+    <!-- Total Pengajuan -->
+    <div class="stat-card" onclick="window.location.href='<?= base_url('surat/semua') ?>'">
+        <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
+        <div class="number"><?= $total_all ?></div>
     </div>
+    
+    <!-- Disetujui -->
+    <div class="stat-card" style="border-left-color:#27ae60;" onclick="window.location.href='<?= base_url('surat/disetujui') ?>'">
+        <h3><i class="fa-solid fa-check-circle"></i> Disetujui</h3>
+        <div class="number"><?= $approved_count ?></div>
+    </div>
+    
+    <!-- Ditolak -->
+    <div class="stat-card" style="border-left-color:#e74c3c;" onclick="window.location.href='<?= base_url('surat/ditolak') ?>'">
+        <h3><i class="fa-solid fa-times-circle"></i> Ditolak</h3>
+        <div class="number"><?= $rejected_count ?></div>
+    </div>
+    
+    <!-- Menunggu Persetujuan -->
+    <div class="stat-card" style="border-left-color:#f39c12;" onclick="window.location.href='<?= base_url('surat/pending') ?>'">
+        <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
+        <div class="number"><?= $pending_count ?></div>
+    </div>
+</div>
 
     <!-- Filter -->
     <div class="filter-container">
@@ -132,7 +137,7 @@
         <div class="card-header">
             <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Surat</h3>
             <div>
-                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">Menampilkan: Semua Data</span>
+                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">Menampilkan: Semua Data (<?= $total_all ?> data)</span>
             </div>
         </div>
         
@@ -244,6 +249,7 @@
 <script>
 const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
+let currentFilter = 'all';
 
 function updateTahun(year) {
     window.location.href = "<?= base_url('kaprodi?tahun=') ?>" + year;
@@ -253,6 +259,12 @@ function filterTable(status) {
     const rows = document.querySelectorAll('#tableBody tr:not(#emptyRow)');
     const filterInfo = document.getElementById('filterInfo');
     let visibleCount = 0;
+    
+    // Update active state of stat cards
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    document.getElementById(`stat-${status}`).classList.add('active');
     
     rows.forEach((row) => {
         const rowStatus = row.dataset.status;
@@ -265,15 +277,33 @@ function filterTable(status) {
         }
     });
     
-    const statusText = {'all': 'Semua Data', 'pending': 'Menunggu', 'approved': 'Disetujui', 'rejected': 'Ditolak'};
+    const statusText = {
+        'all': 'Semua Data', 
+        'pending': 'Menunggu Persetujuan', 
+        'approved': 'Disetujui', 
+        'rejected': 'Ditolak'
+    };
+    
+    const countData = {
+        'all': <?= $total_all ?>,
+        'pending': <?= $pending_count ?>,
+        'approved': <?= $approved_count ?>,
+        'rejected': <?= $rejected_count ?>
+    };
+    
     filterInfo.textContent = `Menampilkan: ${statusText[status]} (${visibleCount} data)`;
+    currentFilter = status;
     
     if (visibleCount === 0) {
         const tbody = document.getElementById('tableBody');
         if (!document.getElementById('emptyRowFiltered')) {
             const newRow = tbody.insertRow();
             newRow.id = 'emptyRowFiltered';
-            newRow.innerHTML = '<td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d"><i class="fa-solid fa-search" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i><strong>Tidak ada data</strong></td>';
+            newRow.innerHTML = `
+                <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
+                    <i class="fa-solid fa-search" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
+                    <strong>Tidak ada data ${statusText[status].toLowerCase()}</strong>
+                </td>`;
         }
     } else {
         const filtered = document.getElementById('emptyRowFiltered');
@@ -285,7 +315,33 @@ function showDetail(id) {
     const item = suratList.find(s => Number(s.id) === Number(id));
     if (!item) { alert('Data tidak ditemukan'); return; }
     
-    const content = `<div><div class="detail-row"><div class="detail-label">Nama Kegiatan:</div><div class="detail-value">${item.nama_kegiatan || '-'}</div></div><div class="detail-row"><div class="detail-label">Penyelenggara:</div><div class="detail-value">${item.penyelenggara || '-'}</div></div><div class="detail-row"><div class="detail-label">Status:</div><div class="detail-value">${item.status || '-'}</div></div></div>`;
+    const content = `
+        <div>
+            <div class="detail-row">
+                <div class="detail-label">Nama Kegiatan:</div>
+                <div class="detail-value">${item.nama_kegiatan || '-'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Penyelenggara:</div>
+                <div class="detail-value">${item.penyelenggara || '-'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Pengajuan:</div>
+                <div class="detail-value">${item.jenis_pengajuan || '-'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Pengajuan:</div>
+                <div class="detail-value">${item.tanggal_pengajuan ? new Date(item.tanggal_pengajuan).toLocaleDateString('id-ID') : '-'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Kegiatan:</div>
+                <div class="detail-value">${item.tanggal_kegiatan ? new Date(item.tanggal_kegiatan).toLocaleDateString('id-ID') : '-'}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status:</div>
+                <div class="detail-value">${item.status || '-'}</div>
+            </div>
+        </div>`;
     document.getElementById('detailContent').innerHTML = content;
     document.getElementById('detailModal').classList.add('show');
 }
@@ -325,6 +381,11 @@ function confirmReject() {
 
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 function modalClickOutside(evt, id) { if (evt.target && evt.target.id === id) closeModal(id); }
+
+// Initialize the table with all data
+document.addEventListener('DOMContentLoaded', function() {
+    filterTable('all');
+});
 
 // Grafik 3D
 const ctx = document.getElementById('grafikSurat').getContext('2d');

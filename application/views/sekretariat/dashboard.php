@@ -12,7 +12,7 @@
     .navbar h2{font-size:20px;}
     .container{max-width:1200px;margin:30px auto;padding:0 20px;}
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:20px;}
-    .stat-card{background:white;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid #3498db;transition:all 0.3s ease;cursor:pointer}
+    .stat-card{background:white;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06);border-left:4px solid #3498db;transition:all 0.3s ease;cursor:pointer;text-decoration:none;display:block;color:inherit}
     .stat-card:hover{transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,0.12)}
     .stat-card h3{color:#7f8c8d;font-size:13px;margin-bottom:8px;text-transform:uppercase}
     .stat-card .number{font-size:28px;font-weight:700;color:#2c3e50}
@@ -73,27 +73,27 @@
     $rejected_count = isset($rejected_count) ? (int)$rejected_count : 0;
     ?>
 
-    <!-- Statistik -->
+    <!-- Statistik dengan Link -->
     <div class="stats-grid">
-        <div class="stat-card" style="border-left-color:#16A085;" onclick="filterTable('all')">
+        <a href="<?= base_url('surat/sekretariat/semua') ?>" class="stat-card" style="border-left-color:#16A085;">
             <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
             <div class="number"><?= $total_all ?></div>
-        </div>
-        <div class="stat-card" style="border-left-color:#27ae60;" onclick="filterTable('approved')">
+        </a>
+        
+        <a href="<?= base_url('surat/disetujui_sekretariat') ?>" class="stat-card" style="border-left-color:#27ae60;">
             <h3><i class="fa-solid fa-check-circle"></i> Disetujui</h3>
             <div class="number"><?= $approved_count ?></div>
-        </div>
+        </a>
         
-        <div class="stat-card" style="border-left-color:#e74c3c;" onclick="filterTable('rejected')">
+        <a href="<?= base_url('surat/ditolak_sekretariat') ?>" class="stat-card" style="border-left-color:#e74c3c;">
             <h3><i class="fa-solid fa-times-circle"></i> Ditolak</h3>
             <div class="number"><?= $rejected_count ?></div>
-        </div>
+        </a>
         
-        <div class="stat-card" style="border-left-color:#f39c12;" onclick="filterTable('pending')">
+        <a href="<?= base_url('surat/pending_sekretariat') ?>" class="stat-card" style="border-left-color:#f39c12;">
             <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
             <div class="number"><?= $pending_count ?></div>
-        </div>
-        
+        </a>
     </div>
 
     <!-- Filter -->

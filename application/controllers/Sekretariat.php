@@ -30,7 +30,7 @@ class Sekretariat extends CI_Controller {
         
         // Disetujui sekretariat tahun ini
         $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
-                                           ->where('status', 'disetujui dekan')
+                                           ->where_in('status', ['disetujui dekan','disetujui KK','disetujui sekretariat'])
                                            ->count_all_results('surat');
             
         // Ditolak sekretariat tahun ini
