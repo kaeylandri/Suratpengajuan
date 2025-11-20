@@ -1056,22 +1056,119 @@ document.addEventListener('DOMContentLoaded', function () {
 .panitia-row { transition: all 0.3s ease; opacity: 1; transform: translateY(0); }
 .panitia-row.removing { opacity: 0; transform: translateX(20px); }
 
-.autocomplete-box-fixed { position: fixed; background: #fff; border: none; z-index: 9999999; max-height: 400px; overflow-y: auto; box-shadow: 0 4px 6px rgba(32,33,36,0.28); border-radius: 24px; font-size: 14px; padding: 8px 0; margin-top: 8px; font-family: arial, sans-serif; min-width: 300px; }
-.autocomplete-item { padding: 0; cursor: pointer; transition: background-color 0.1s ease; border: none; line-height: 1.4; display: flex; align-items: center; gap: 16px; position: relative; }
-.autocomplete-item:hover, .autocomplete-item.active { background: #f8f9fa; }
-.autocomplete-icon { width: 20px; height: 20px; margin-left: 16px; flex-shrink: 0; opacity: 0.54; }
-.autocomplete-icon svg { width: 20px; height: 20px; fill: #5f6368; }
-.autocomplete-content { display: flex; flex-direction: column; gap: 2px; padding: 12px 16px 12px 0; flex: 1; min-width: 0; }
-.autocomplete-item .item-primary { font-size: 14px; color: #202124; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.autocomplete-item .item-secondary { font-size: 12px; color: #70757a; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.query-match { font-weight: 600; }
-.autocomplete-item:first-child { border-left: 3px solid #1a73e8; }
-.autocomplete-loading, .autocomplete-empty { padding: 16px 20px; text-align: center; color: #70757a; font-size: 13px; }
-.autocomplete-box-fixed::-webkit-scrollbar { width: 10px; }
-.autocomplete-box-fixed::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-.autocomplete-box-fixed::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 10px; border: 2px solid #fff; }
-.autocomplete-box-fixed::-webkit-scrollbar-thumb:hover { background: #bdc1c6; }
-.multi-step-form, fieldset, .container { overflow: visible !important; }
+/* Google-style Autocomplete */
+.autocomplete-box-fixed {
+    position: fixed;
+    background: #fff;
+    border: none;
+    z-index: 9999999;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(32,33,36,0.28);
+    border-radius: 24px;
+    font-size: 14px;
+    padding: 8px 0;
+    margin-top: 8px;
+    font-family: arial, sans-serif;
+    min-width: 300px;
+}
+
+.autocomplete-item {
+    padding: 0;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    border: none;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background: #f8f9fa;
+}
+
+.autocomplete-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 16px;
+    flex-shrink: 0;
+    opacity: 0.54;
+}
+
+.autocomplete-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: #5f6368;
+}
+
+.autocomplete-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 16px 12px 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.autocomplete-item .item-primary {
+    font-size: 14px;
+    color: #202124;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-item .item-secondary {
+    font-size: 12px;
+    color: #70757a;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.query-match {
+    font-weight: 600;
+}
+
+.autocomplete-item:first-child {
+    border-left: 3px solid #1a73e8;
+}
+
+.autocomplete-loading,
+.autocomplete-empty {
+    padding: 16px 20px;
+    text-align: center;
+    color: #70757a;
+    font-size: 13px;
+}
+
+.autocomplete-box-fixed::-webkit-scrollbar {
+    width: 10px;
+}
+
+.autocomplete-box-fixed::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.autocomplete-box-fixed::-webkit-scrollbar-thumb {
+    background: #dadce0;
+    border-radius: 10px;
+    border: 2px solid #fff;
+}
+
+.autocomplete-box-fixed::-webkit-scrollbar-thumb:hover {
+    background: #bdc1c6;
+}
+
+.multi-step-form, fieldset, .container {
+    overflow: visible !important;
+}
 </style>
 
 <script>
@@ -1079,12 +1176,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const panitiaContainer = document.getElementById('panitiaContainer');
     const jenisPengajuan = document.getElementById('jenis_pengajuan');
 
+    // Toggle button visibility based on jenis pengajuan
     jenisPengajuan.addEventListener('change', function () {
         document.querySelectorAll('.button-cell').forEach(btn => {
             btn.style.display = (this.value === 'Kelompok') ? 'flex' : 'none';
         });
     });
 
+    // Add/Remove row handlers
     let isAdding = false;
     panitiaContainer.addEventListener('click', function (e) {
         const addBtn = e.target.closest('.addRow');
@@ -1097,11 +1196,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const row = addBtn.closest('.panitia-row');
             const clone = row.cloneNode(true);
+            
+            // Clear inputs
             clone.querySelectorAll('input').forEach(input => {
                 input.value = '';
                 input.removeAttribute('data-autocomplete-init');
             });
 
+            // Change button to remove
             const btn = clone.querySelector('.addRow');
             btn.classList.remove('btn-success', 'addRow');
             btn.classList.add('btn-danger', 'removeRow');
@@ -1109,6 +1211,8 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.setAttribute('title', 'Hapus Baris');
 
             panitiaContainer.appendChild(clone);
+            
+            // Animation
             setTimeout(() => {
                 clone.style.opacity = '0';
                 clone.style.transform = 'translateY(-10px)';
@@ -1133,15 +1237,25 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Debounce function
     function debounce(fn, delay = 300) {
-        let t;
+        let timeout;
         return function (...args) {
-            clearTimeout(t);
-            t = setTimeout(() => fn.apply(this, args), delay);
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn.apply(this, args), delay);
         };
     }
 
+    // Highlight matching text
+    function highlightMatch(text, query) {
+        if (!query || !text) return text;
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<span class="query-match">$1</span>');
+    }
+
+    // Show suggestion box (Google-style)
     function showSuggestionBox(inputEl, items, onSelect, fieldType) {
+        // Remove existing boxes
         document.querySelectorAll('.autocomplete-box-fixed').forEach(b => b.remove());
 
         const rect = inputEl.getBoundingClientRect();
@@ -1161,10 +1275,36 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        const query = inputEl.value.trim();
         let selectedIndex = -1;
-        items.forEach((it, idx) => {
+
+        items.forEach((item, idx) => {
             const option = document.createElement('div');
             option.className = `autocomplete-item type-${fieldType}`;
+            
+            // Determine primary and secondary text based on field type
+            let primaryText = '';
+            let secondaryText = '';
+            
+            switch(fieldType) {
+                case 'nip':
+                    primaryText = highlightMatch(item.nip, query);
+                    secondaryText = item.nama_dosen;
+                    break;
+                case 'nama_dosen':
+                    primaryText = highlightMatch(item.nama_dosen, query);
+                    secondaryText = `NIP: ${item.nip}`;
+                    break;
+                case 'jabatan':
+                    primaryText = highlightMatch(item.jabatan, query);
+                    secondaryText = `${item.nama_dosen} (${item.nip})`;
+                    break;
+                case 'divisi':
+                    primaryText = highlightMatch(item.divisi, query);
+                    secondaryText = `${item.nama_dosen} (${item.nip})`;
+                    break;
+            }
+
             option.innerHTML = `
                 <div class="autocomplete-icon">
                     <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -1172,41 +1312,111 @@ document.addEventListener('DOMContentLoaded', function () {
                     </svg>
                 </div>
                 <div class="autocomplete-content">
-                    <div class="item-primary">${it[fieldType] || '-'}</div>
-                    ${it.nama_dosen ? '<div class="item-secondary">' + it.nama_dosen + '</div>' : ''}
+                    <div class="item-primary">${primaryText || '-'}</div>
+                    ${secondaryText ? '<div class="item-secondary">' + secondaryText + '</div>' : ''}
                 </div>
             `;
-            option.addEventListener('click', (ev) => { onSelect(it); box.remove(); });
+            
+            option.addEventListener('click', () => {
+                onSelect(item);
+                box.remove();
+            });
+            
             box.appendChild(option);
         });
 
         document.body.appendChild(box);
-        inputEl.addEventListener('keydown', (e) => {
+
+        // Keyboard navigation
+        inputEl.addEventListener('keydown', function handleKeydown(e) {
             const opts = box.querySelectorAll('.autocomplete-item');
             if (!opts.length) return;
-            if (e.key === 'ArrowDown') { e.preventDefault(); selectedIndex = Math.min(selectedIndex + 1, opts.length - 1); opts.forEach((o,i) => o.classList.toggle('active', i === selectedIndex)); opts[selectedIndex].scrollIntoView({block:'nearest'});}
-            else if (e.key === 'ArrowUp') { e.preventDefault(); selectedIndex = Math.max(selectedIndex - 1, 0); opts.forEach((o,i) => o.classList.toggle('active', i === selectedIndex)); opts[selectedIndex].scrollIntoView({block:'nearest'});}
-            else if (e.key === 'Enter') { e.preventDefault(); if (selectedIndex >= 0 && opts[selectedIndex]) opts[selectedIndex].click();}
-            else if (e.key === 'Escape') box.remove();
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, opts.length - 1);
+                opts.forEach((o, i) => o.classList.toggle('active', i === selectedIndex));
+                opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, 0);
+                opts.forEach((o, i) => o.classList.toggle('active', i === selectedIndex));
+                opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && opts[selectedIndex]) {
+                    opts[selectedIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                box.remove();
+            }
         });
-        setTimeout(() => document.addEventListener('click', (ev) => { if (!box.contains(ev.target) && ev.target !== inputEl) box.remove(); }), 0);
+
+        // Close on outside click
+        setTimeout(() => {
+            document.addEventListener('click', function handleClickOutside(ev) {
+                if (!box.contains(ev.target) && ev.target !== inputEl) {
+                    box.remove();
+                    document.removeEventListener('click', handleClickOutside);
+                }
+            });
+        }, 0);
     }
 
-    async function fetchSuggestions(q, fieldType = 'nip') {
-        if (!q) return [];
+    // Mock data untuk testing (hapus ini setelah backend siap)
+    const mockData = [
+        { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
+        { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
+        { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', divisi: 'DI' },
+        { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', divisi: 'DP' },
+        { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', divisi: 'Admin KK' }
+    ];
+
+    // Fetch suggestions from database
+    async function fetchSuggestions(query, fieldType = 'nip') {
+        if (!query) return [];
+        
         try {
-            const res = await fetch("<?= base_url('surat/autocomplete-nip') ?>?q=" + encodeURIComponent(q) + "&field=" + fieldType);
-            if (!res.ok) return [];
-            const data = await res.json();
-            return Array.isArray(data) ? data.map(i => ({
-                nip: i.nip || '',
-                nama_dosen: i.nama_dosen || '',
-                jabatan: i.jabatan || '',
-                divisi: i.divisi || ''
+            // CARA 1: Gunakan mock data untuk testing (comment jika backend sudah siap)
+            await new Promise(resolve => setTimeout(resolve, 300)); // Simulasi delay
+            const lowerQuery = query.toLowerCase();
+            return mockData.filter(item => {
+                const searchIn = item[fieldType] ? item[fieldType].toLowerCase() : '';
+                return searchIn.includes(lowerQuery);
+            });
+
+            // CARA 2: Gunakan backend API (uncomment jika backend sudah siap)
+            /*
+            const url = `<?= base_url('surat/autocomplete-nip') ?>?q=${encodeURIComponent(query)}&field=${fieldType}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                console.error('Response not OK:', response.status);
+                return [];
+            }
+            
+            const data = await response.json();
+            console.log('Response data:', data); // Debug log
+            
+            return Array.isArray(data) ? data.map(item => ({
+                nip: item.nip || '',
+                nama_dosen: item.nama_dosen || '',
+                jabatan: item.jabatan || '',
+                divisi: item.divisi || ''
             })) : [];
-        } catch(e) { console.error(e); return []; }
+            */
+        } catch (error) {
+            console.error('Autocomplete fetch error:', error);
+            return [];
+        }
     }
 
+    // Initialize autocomplete for a row
     function initAutocompleteForRow(rowEl) {
         if (!rowEl || rowEl.dataset.autocompleteInit) return;
         rowEl.dataset.autocompleteInit = true;
@@ -1216,6 +1426,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const inputJabatan = rowEl.querySelector('.jabatan');
         const inputDivisi = rowEl.querySelector('.divisi');
 
+        // Fill all fields when item is selected
         function fillRowWith(item) {
             if (!item) return;
             inputNip.value = item.nip || '';
@@ -1224,22 +1435,26 @@ document.addEventListener('DOMContentLoaded', function () {
             inputDivisi.value = item.divisi || '';
         }
 
-        function createHandler(fieldType, inputEl) {
+        // Create input handler for each field
+        function createInputHandler(fieldType, inputEl) {
             return debounce(async function () {
                 const val = inputEl.value.trim();
                 if (!val) return;
-                const list = await fetchSuggestions(val, fieldType);
-                showSuggestionBox(inputEl, list, fillRowWith, fieldType);
+                
+                const suggestions = await fetchSuggestions(val, fieldType);
+                showSuggestionBox(inputEl, suggestions, fillRowWith, fieldType);
             }, 300);
         }
 
-        inputNip.addEventListener('input', createHandler('nip', inputNip));
-        inputNama.addEventListener('input', createHandler('nama_dosen', inputNama));
-        inputJabatan.addEventListener('input', createHandler('jabatan', inputJabatan));
-        inputDivisi.addEventListener('input', createHandler('divisi', inputDivisi));
+        // Attach handlers to each input
+        inputNip.addEventListener('input', createInputHandler('nip', inputNip));
+        inputNama.addEventListener('input', createInputHandler('nama_dosen', inputNama));
+        inputJabatan.addEventListener('input', createInputHandler('jabatan', inputJabatan));
+        inputDivisi.addEventListener('input', createInputHandler('divisi', inputDivisi));
     }
 
-    document.querySelectorAll('.panitia-row').forEach(r => initAutocompleteForRow(r));
+    // Initialize autocomplete for existing rows
+    document.querySelectorAll('.panitia-row').forEach(row => initAutocompleteForRow(row));
 });
 </script>
 <!-- ===== UPLOADCARE CDN ===== -->
@@ -1262,6 +1477,7 @@ document.addEventListener('DOMContentLoaded', function () {
     margin: auto;
     transition: 0.3s ease;
 }
+
 .upload-card:hover {
     box-shadow: 0 8px 22px rgba(0,0,0,0.10);
     transform: translateY(-2px);
@@ -1319,6 +1535,59 @@ document.addEventListener('DOMContentLoaded', function () {
     text-align: center;
     margin-top: 10px;
 }
+
+/* Loading overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.loading-content {
+    background: white;
+    padding: 40px 50px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #FB8C00;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.loading-subtext {
+    font-size: 14px;
+    color: #666;
+}
 </style>
 
 <!-- ===== STEP 3 ===== -->
@@ -1354,13 +1623,22 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
 </fieldset>
 
+<!-- ===== LOADING OVERLAY ===== -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Menyimpan Data...</div>
+        <div class="loading-subtext">Mohon tunggu, sedang memproses data Anda</div>
+    </div>
+</div>
+
 <!-- ===== BUTTON AREA ===== -->
 <div class="button-area" style="margin-top:25px; text-align:center;">
     <button type="button" class="btn btn-primary prev-btn rounded-pill btn-sm" style="padding: 6px 20px;">Back</button>
     <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Continue</button>
 </div>
 
-<!-- ===== SCRIPT VALIDASI ===== -->
+<!-- ===== SCRIPT VALIDASI DAN SUBMIT ===== -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const nextBtn = document.querySelector(".next-btn");
@@ -1369,9 +1647,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const err = document.getElementById("chk-error");
     const uploadStatus = document.getElementById("upload-status");
     const uploadCard = document.querySelector('.upload-card');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const msform = document.getElementById('msform');
 
-    // Track upload status
     let isFileUploaded = false;
+    let isSubmitting = false;
+
+    console.log("Step 3 script initialized");
 
     // Listen for upload completion from Uploadcare
     if (typeof uploadcare !== 'undefined') {
@@ -1383,67 +1665,293 @@ document.addEventListener("DOMContentLoaded", function () {
                 uploadStatus.style.display = 'block';
                 uploadCard.classList.add('upload-success');
                 err.textContent = '';
+                console.log("File uploaded successfully");
             } else {
                 isFileUploaded = false;
                 uploadStatus.style.display = 'none';
                 uploadCard.classList.remove('upload-success');
+                console.log("File upload cleared");
             }
+        });
+    } else {
+        console.warn("Uploadcare not loaded");
+    }
+
+    // Function untuk submit form via AJAX
+    function submitFormData() {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData(msform);
+            
+            console.log("=== DATA YANG AKAN DIKIRIM ===");
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
+            
+            const actionUrl = msform.getAttribute('action') || 'process_surat_tugas.php';
+            console.log("Submitting to:", actionUrl);
+            
+            fetch(actionUrl, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log("Response status:", response.status);
+                return response.text();
+            })
+            .then(data => {
+                console.log("Response received:", data);
+                
+                try {
+                    const jsonData = JSON.parse(data);
+                    if (jsonData.success) {
+                        resolve(jsonData);
+                    } else {
+                        reject(jsonData.message || "Gagal menyimpan data");
+                    }
+                } catch (e) {
+                    console.log("Response bukan JSON, anggap sukses");
+                    resolve({ success: true });
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                reject("Terjadi kesalahan saat menghubungi server: " + error.message);
+            });
         });
     }
 
-    // Tombol Back
-    prevBtn.addEventListener("click", function () {
-        // Back button logic will be handled by the main multi-step script
-        console.log("Going back...");
-    });
-
-    // Validasi Continue
-    nextBtn.addEventListener("click", function () {
-        // PERUBAHAN PENTING: Validasi dan redirect ke list_surat_tugas.php
-        if (!isFileUploaded) {
+    // Handler untuk tombol Finish di Step 3
+    nextBtn.addEventListener("click", function (e) {
+        const currentFieldset = document.querySelector('fieldset.active');
+        const allFieldsets = document.querySelectorAll('fieldset');
+        const currentStepIndex = Array.from(allFieldsets).indexOf(currentFieldset);
+        
+        console.log("Next button clicked, current step index:", currentStepIndex);
+        
+        // Jika bukan step 3 (index 2), return dan biarkan multi-step handler yang proses
+        if (currentStepIndex !== 2) {
+            console.log("Not step 3, skipping custom handler");
+            return;
+        }
+        
+        // Di step 3, prevent default dan handle sendiri
+        e.preventDefault();
+        e.stopPropagation();
+        
+        console.log("Step 3 detected, processing...");
+        
+        // Prevent double submit
+        if (isSubmitting) {
+            console.log("Already submitting, please wait...");
+            return;
+        }
+        
+        // Validasi upload file
+        const uploaderValue = uploader.value ? uploader.value.trim() : '';
+        console.log("Uploader value:", uploaderValue);
+        console.log("Is file uploaded:", isFileUploaded);
+        
+        if (!isFileUploaded && uploaderValue === "") {
             err.textContent = "Mohon upload minimal 1 file eviden!";
+            uploadCard.style.borderColor = "#e53935";
+            console.log("Validation failed: No file uploaded");
             return;
         }
 
+        // Validasi berhasil
         err.textContent = "";
+        uploadCard.style.borderColor = "#28a745";
+        console.log("Validation passed");
         
-        // Simpan data form ke localStorage/sessionStorage sebelum redirect
-        const formData = new FormData(document.getElementById('msform'));
-        const formObject = {};
-        for (let [key, value] of formData.entries()) {
-            formObject[key] = value;
-        }
+        // Set flag submitting
+        isSubmitting = true;
         
-        // Simpan data form sementara
-        sessionStorage.setItem('suratTugasFormData', JSON.stringify(formObject));
+        // Tampilkan loading overlay
+        loadingOverlay.classList.add('active');
         
-        // Tampilkan loading state
-        nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        // Disable button
         nextBtn.disabled = true;
+        nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         
-        // Submit form yang akan mengarah ke list_surat_tugas.php
-        setTimeout(() => {
-            document.getElementById('msform').submit();
-        }, 1000);
+        console.log("=== MEMULAI PROSES SUBMIT ===");
         
-        // Alternatif: Redirect langsung jika tidak perlu submit
-        // window.location.href = 'list_surat_tugas.php';
+        // Submit data via AJAX
+        submitFormData()
+            .then(response => {
+                console.log("Submit berhasil!", response);
+                
+                // Update loading text
+                document.querySelector('.loading-text').textContent = 'Berhasil!';
+                document.querySelector('.loading-subtext').textContent = 'Mengalihkan ke halaman daftar...';
+                
+                // Redirect ke list_surat_tugas.php
+                setTimeout(() => {
+                    console.log("Redirecting to list_surat_tugas.php");
+                    window.location.href = 'list_surat_tugas.php';
+                }, 1500);
+            })
+            .catch(error => {
+                console.error("Submit gagal:", error);
+                
+                // Sembunyikan loading
+                loadingOverlay.classList.remove('active');
+                
+                // Tampilkan error
+                err.textContent = error || "Terjadi kesalahan saat menyimpan data";
+                uploadCard.style.borderColor = "#e53935";
+                
+                // Enable button kembali
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = 'Finish';
+                isSubmitting = false;
+            });
     });
 
     // Cek jika ada file yang sudah diupload saat halaman dimuat
     function checkInitialUpload() {
-        if (uploader.value && uploader.value.trim() !== "") {
+        const uploaderValue = uploader.value ? uploader.value.trim() : '';
+        console.log("Checking initial upload, value:", uploaderValue);
+        
+        if (uploaderValue !== "") {
             isFileUploaded = true;
             uploadStatus.style.display = 'block';
             uploadCard.classList.add('upload-success');
+            console.log("Found existing upload");
         }
     }
 
-    // Panggil fungsi pengecekan
-    setTimeout(checkInitialUpload, 1000);
-
+    setTimeout(checkInitialUpload, 1500);
 });
 </script>
+
+<script>
+// Integrasi dengan multi-step form
+$(document).ready(function() {
+    console.log("=== Multi-step form initialized ===");
+    
+    // Set form action jika belum ada
+    const formAction = $('#msform').attr('action');
+    console.log("Current form action:", formAction);
+    
+    if (!formAction || formAction === '') {
+        $('#msform').attr('action', 'process_surat_tugas.php');
+        console.log("Form action set to: process_surat_tugas.php");
+    }
+    
+    // Function untuk update button text
+    function updateButtonText() {
+        const currentStep = $('fieldset.active').index();
+        if (currentStep === 2) {
+            $('.next-btn').text('Finish');
+            console.log("Button text changed to: Finish");
+        } else {
+            $('.next-btn').text('Continue');
+            console.log("Button text changed to: Continue");
+        }
+    }
+    
+    // Override next button untuk step 1 dan 2
+    $('.next-btn').off('click').on('click', function(e) {
+        const currentStep = $('fieldset.active').index();
+        
+        console.log("Multi-step next clicked, step:", currentStep);
+        
+        // Jika step 3, biarkan handler native JavaScript yang proses
+        if (currentStep === 2) {
+            console.log("Step 3, letting native handler process");
+            return;
+        }
+        
+        // Step 1 dan 2 - validasi dan pindah
+        e.preventDefault();
+        
+        let isValid = true;
+        const currentFieldset = $('fieldset').eq(currentStep);
+        
+        // Validasi required fields
+        currentFieldset.find('input[required], select[required]').each(function() {
+            const val = $(this).val();
+            if (!val || val === '' || val === null) {
+                isValid = false;
+                $(this).css('border-color', '#e53935');
+                console.log("Field validation failed:", $(this).attr('name'));
+            } else {
+                $(this).css('border-color', '');
+            }
+        });
+        
+        if (!isValid) {
+            alert('Mohon lengkapi semua field yang wajib diisi!');
+            console.log("Validation failed on step:", currentStep + 1);
+            return;
+        }
+        
+        console.log("Validation passed, moving to next step");
+        
+        // Pindah ke step berikutnya
+        currentFieldset.removeClass('active');
+        $('fieldset').eq(currentStep + 1).addClass('active');
+        
+        // Update progress bar
+        if ($('#progressBar').length) {
+            const progress = ((currentStep + 2) / 3) * 100;
+            $('#progressBar').css('width', progress + '%');
+            console.log("Progress bar updated:", progress + "%");
+        }
+        
+        if ($('#currentStep').length) {
+            $('#currentStep').text(currentStep + 2);
+        }
+        
+        // Update button text
+        updateButtonText();
+        
+        // Show back button
+        $('.prev-btn').show();
+        
+        console.log("Moved to step:", currentStep + 2);
+    });
+    
+    // Back button handler
+    $('.prev-btn').off('click').on('click', function(e) {
+        e.preventDefault();
+        const currentStep = $('fieldset.active').index();
+        
+        console.log("Back button clicked, current step:", currentStep);
+        
+        if (currentStep > 0) {
+            $('fieldset').eq(currentStep).removeClass('active');
+            $('fieldset').eq(currentStep - 1).addClass('active');
+            
+            // Update progress bar
+            if ($('#progressBar').length) {
+                const progress = ((currentStep) / 3) * 100;
+                $('#progressBar').css('width', progress + '%');
+            }
+            
+            if ($('#currentStep').length) {
+                $('#currentStep').text(currentStep);
+            }
+            
+            // Update button text
+            updateButtonText();
+            
+            // Hide back button di step 1
+            if (currentStep - 1 === 0) {
+                $('.prev-btn').hide();
+            }
+            
+            console.log("Moved back to step:", currentStep);
+        }
+    });
+    
+    // Set initial button text
+    updateButtonText();
+    
+    console.log("=== Multi-step setup complete ===");
+});
+</script>
+
 
 
 

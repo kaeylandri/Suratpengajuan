@@ -34,6 +34,54 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
+       AUTOCOMPLETE NIP - UNTUK FORM PANITIA
+       NEW METHOD: Mendukung pencarian NIP, Nama, Jabatan, Divisi
+    ============================================*/
+    public function autocomplete_nip()
+    {
+        // Set header JSON
+        header('Content-Type: application/json');
+        
+        // Ambil parameter dari GET
+        $query = $this->input->get('q');
+        $field = $this->input->get('field');
+        
+        // Validasi query
+        if (empty($query) || strlen($query) < 1) {
+            echo json_encode([]);
+            return;
+        }
+        
+        // Validasi field (hanya izinkan field tertentu untuk keamanan)
+        $allowed_fields = ['nip', 'nama_dosen', 'jabatan', 'divisi'];
+        if (!in_array($field, $allowed_fields)) {
+            $field = 'nip'; // default ke nip
+        }
+        
+        try {
+            // Query database
+            $this->db->select('nip, nama_dosen, jabatan, divisi');
+            $this->db->from('list_dosen');
+            $this->db->like($field, $query);
+            $this->db->limit(10);
+            $this->db->order_by($field, 'ASC');
+            
+            $result = $this->db->get();
+            
+            if ($result->num_rows() > 0) {
+                $data = $result->result_array();
+                echo json_encode($data);
+            } else {
+                echo json_encode([]);
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Autocomplete error: ' . $e->getMessage());
+            echo json_encode([]);
+        }
+    }
+
+    /* ===========================================
        LIST DATA
     ============================================*/
     public function index()
