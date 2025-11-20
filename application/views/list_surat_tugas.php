@@ -1360,7 +1360,7 @@
                     <div class="status-info mt-4">
                         <h5>Informasi Status:</h5>
                         <p id="status-description">Memuat informasi status...</p>
-                        <p><strong>Estimasi waktu:</strong> <span id="estimated-time">-</span></p>
+                        <p><strong>Estimasi waktu:</strong> <span id="estimated-time">1 - 2 hari</span></p>
                         <div id="rejection-reason" class="rejection-reason" style="display: none;">
                             <h6>Alasan Penolakan:</h6>
                             <p id="rejection-text"></p>
@@ -1369,6 +1369,94 @@
                 </div>
             </div>
         </div>
+        <script>
+            // Function untuk load status dan update progress bar
+        function loadStatus(suratId) {
+            // Show modal
+            document.getElementById('statusModal').style.display = 'flex';
+            
+            // Fetch status dari server
+            fetch(`<?= base_url('surat/get_status/') ?>${suratId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateProgressBar(data.data);
+                    } else {
+                        alert('Gagal memuat status: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat memuat status');
+                });
+        }
+
+        // Function untuk update progress bar
+        function updateProgressBar(statusData) {
+            const steps = statusData.steps;
+            const progressLine = document.getElementById('progressLine');
+            
+            // Update setiap step
+            steps.forEach((step, index) => {
+                const stepNumber = index + 1;
+                const stepElement = document.getElementById(`step${stepNumber}`);
+                const iconElement = document.getElementById(`step${stepNumber}-icon`);
+                const textElement = document.getElementById(`step${stepNumber}-text`);
+                const dateElement = document.getElementById(`step${stepNumber}-date`);
+                
+                // Reset classes
+                stepElement.classList.remove('completed', 'rejected', 'in-progress', 'pending');
+                
+                // Update berdasarkan status
+                if (step.status === 'completed' || step.status === 'approved') {
+                    stepElement.classList.add('completed');
+                    iconElement.className = 'fas fa-check';
+                } else if (step.status === 'rejected') {
+                    stepElement.classList.add('rejected');
+                    iconElement.className = 'fas fa-times';
+                } else if (step.status === 'in-progress') {
+                    stepElement.classList.add('in-progress');
+                    iconElement.className = 'fas fa-spinner fa-spin';
+                } else {
+                    stepElement.classList.add('pending');
+                    iconElement.className = 'fas fa-clock';
+                }
+                
+                // Update text dan date
+                textElement.textContent = step.step_name;
+                dateElement.textContent = step.date;
+            });
+            
+            // Update progress line width
+            progressLine.style.width = `${statusData.progress_percentage}%`;
+            
+            // Update informasi status
+            document.getElementById('status-description').textContent = statusData.description;
+            document.getElementById('estimated-time').textContent = statusData.estimated_time;
+            
+            // Show/hide rejection reason
+            const rejectionDiv = document.getElementById('rejection-reason');
+            if (statusData.rejection_reason) {
+                rejectionDiv.style.display = 'block';
+                document.getElementById('rejection-text').textContent = statusData.rejection_reason;
+            } else {
+                rejectionDiv.style.display = 'none';
+            }
+        }
+
+        // Event listener untuk close modal
+        document.querySelector('.close-status').addEventListener('click', function() {
+            document.getElementById('statusModal').style.display = 'none';
+        });
+
+        // Close modal ketika klik di luar modal
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('statusModal');
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+        </script>
 
         <!-- Table -->
         <table id="tabelSurat" class="display nowrap">
@@ -1487,684 +1575,534 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
-    <script>
-    // Toggle Sidebar for Mobile
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
+<script>
+// Toggle Sidebar for Mobile
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+}
 
-    // Close sidebar when clicking outside on mobile
-    $(document).click(function(e) {
-        if ($(window).width() <= 992) {
-            if (!$(e.target).closest('.fik-db-side-menu, .db-menu-trigger').length) {
-                $('#sidebar').removeClass('active');
-            }
+// Close sidebar when clicking outside on mobile
+$(document).click(function(e) {
+    if ($(window).width() <= 992) {
+        if (!$(e.target).closest('.fik-db-side-menu, .db-menu-trigger').length) {
+            $('#sidebar').removeClass('active');
         }
-    });
-
-    // Fungsi untuk tombol Kembali
-    function goBack() {
-        // Redirect ke halaman sebelumnya atau halaman default
-        window.location.href = '<?= base_url() ?>'; // Ganti dengan URL yang sesuai
     }
+});
 
-    // Status Modal Functions
-    let currentSuratId = null;
-    let statusRefreshInterval = null;
+// Fungsi untuk tombol Kembali
+function goBack() {
+    window.location.href = '<?= base_url() ?>';
+}
+// ===== STATUS MODAL FUNCTIONS (SIMPLIFIED) =====
+function showStatusModal(suratId) {
+    const modal = document.getElementById('statusModal');
+    modal.style.display = 'flex';
+    
+    // Reset semua status terlebih dahulu
+    resetAllStatus();
+    
+    // Ambil data status dari server
+    loadStatusData(suratId);
+}
 
-    function showStatusModal(suratId) {
-        const modal = document.getElementById('statusModal');
-        modal.classList.add('show');
-        currentSuratId = suratId;
+function resetAllStatus() {
+    // Reset semua step ke status pending
+    for (let i = 1; i <= 4; i++) {
+        const step = document.getElementById(`step${i}`);
+        const icon = document.getElementById(`step${i}-icon`);
+        const text = document.getElementById(`step${i}-text`);
+        const date = document.getElementById(`step${i}-date`);
         
-        // Reset semua status terlebih dahulu
-        resetAllStatus();
+        step.className = 'progress-step pending';
+        icon.className = 'fas fa-clock';
         
-        // Ambil data status dari server/database berdasarkan suratId
-        loadStatusData(suratId);
-        
-        // Mulai auto-refresh setiap 30 detik
-        startStatusAutoRefresh(suratId);
+        // Reset teks ke default
+        const defaultTexts = ['Mengirim', 'Persetujuan KK', 'Persetujuan Sekretariat', 'Persetujuan Dekan'];
+        text.textContent = defaultTexts[i-1];
+        date.textContent = '-';
     }
+    
+    // Reset progress line
+    document.getElementById('progressLine').style.width = '0%';
+}
 
-    function closeStatusModal() {
-        const modal = document.getElementById('statusModal');
-        modal.classList.remove('show');
-        currentSuratId = null;
-        
-        // Hentikan auto-refresh
-        stopStatusAutoRefresh();
-    }
-
-    function resetAllStatus() {
-        // Reset semua step ke status pending
-        for (let i = 1; i <= 4; i++) {
-            const step = document.getElementById(`step${i}`);
-            const icon = document.getElementById(`step${i}-icon`);
-            const text = document.getElementById(`step${i}-text`);
-            const date = document.getElementById(`step${i}-date`);
-            
-            step.className = 'progress-step';
-            icon.className = 'fas fa-clock';
-            // Reset teks ke default
-            const defaultTexts = ['Mengirim', 'Persetujuan KK', 'Persetujuan Sekretariat', 'Persetujuan Dekan'];
-            text.textContent = defaultTexts[i-1];
-            date.textContent = '-';
-        }
-        
-        // Reset progress line
-        document.getElementById('progressLine').style.width = '0%';
-        
-        // Reset informasi tambahan
-        document.getElementById('status-description').textContent = 'Memuat informasi status...';
-        document.getElementById('estimated-time').textContent = '-';
-        document.getElementById('rejection-reason').style.display = 'none';
-    }
-
-    // Fungsi untuk memuat data status dari server
-    function loadStatusData(suratId) {
-        // AJAX request ke server untuk mengambil data status
-        $.ajax({
-            url: '<?= site_url("surat/get_status/") ?>' + suratId,
-            method: 'GET',
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    updateStatusDisplay(response.data);
-                } else {
-                    // Fallback ke data dummy jika gagal
-                    console.error('Gagal memuat data status:', response.message);
-                    const dummyData = getDummyStatusData(suratId);
-                    updateStatusDisplay(dummyData);
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading status data:', error);
-                // Fallback ke data dummy untuk demo
-                const dummyData = getDummyStatusData(suratId);
-                updateStatusDisplay(dummyData);
+// Fungsi untuk memuat data status dari server
+function loadStatusData(suratId) {
+    fetch('<?= site_url("surat/get_status/") ?>' + suratId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateStatusDisplay(data.data);
+            } else {
+                alert('Gagal memuat status: ' + (data.message || 'Unknown error'));
             }
+        })
+        .catch(error => {
+            console.error('Error loading status data:', error);
+            alert('Terjadi kesalahan saat memuat status');
         });
-    }
+}
 
-    // Fungsi untuk update tampilan status berdasarkan data
-    function updateStatusDisplay(statusData) {
-        const steps = statusData.steps;
-        let progressPercentage = 0;
-        let currentStep = 0;
+// Fungsi untuk update tampilan status berdasarkan data
+function updateStatusDisplay(statusData) {
+    const steps = statusData.steps;
+    
+    // Update setiap step berdasarkan data
+    steps.forEach((step, index) => {
+        const stepNumber = index + 1;
+        const stepElement = document.getElementById(`step${stepNumber}`);
+        const iconElement = document.getElementById(`step${stepNumber}-icon`);
+        const textElement = document.getElementById(`step${stepNumber}-text`);
+        const dateElement = document.getElementById(`step${stepNumber}-date`);
         
-        // Update setiap step berdasarkan data
-        steps.forEach((step, index) => {
-            const stepNumber = index + 1;
-            const stepElement = document.getElementById(`step${stepNumber}`);
-            const iconElement = document.getElementById(`step${stepNumber}-icon`);
-            const textElement = document.getElementById(`step${stepNumber}-text`);
-            const dateElement = document.getElementById(`step${stepNumber}-date`);
-            
-            // Update status dan tampilan
-            updateStepStatus(stepElement, iconElement, textElement, dateElement, step);
-            
-            // Hitung progress percentage dan current step
-            if (step.status === 'completed' || step.status === 'approved') {
-                progressPercentage = (stepNumber / 4) * 100;
-                currentStep = stepNumber;
-            } else if (step.status === 'rejected') {
-                progressPercentage = ((stepNumber - 1) / 4) * 100;
-                currentStep = stepNumber;
-                // Jika ditolak, hentikan progress
-                progressPercentage = ((stepNumber - 1) / 4) * 100;
-            } else if (step.status === 'in-progress') {
-                progressPercentage = ((stepNumber - 0.5) / 4) * 100;
-                currentStep = stepNumber;
-            }
-        });
-        
-        // Update progress line
-        document.getElementById('progressLine').style.width = progressPercentage + '%';
-        
-        // Update informasi tambahan
-        document.getElementById('status-description').textContent = statusData.description;
-        document.getElementById('estimated-time').textContent = statusData.estimated_time;
-        
-        // Tampilkan alasan penolakan jika ada
-        if (statusData.rejection_reason) {
-            document.getElementById('rejection-reason').style.display = 'block';
-            document.getElementById('rejection-text').textContent = statusData.rejection_reason;
-        } else {
-            document.getElementById('rejection-reason').style.display = 'none';
-        }
-    }
-
-    // Fungsi untuk update status individual step
-    function updateStepStatus(stepElement, iconElement, textElement, dateElement, stepData) {
         // Reset class
         stepElement.className = 'progress-step';
         
-        // Update teks jika ada custom text
-        if (stepData.custom_text) {
-            textElement.textContent = stepData.custom_text;
-        }
-        
         // Update berdasarkan status
-        switch (stepData.status) {
-            case 'completed':
-                stepElement.classList.add('status-completed');
-                iconElement.className = 'fas fa-check';
-                break;
-            case 'approved':
-                stepElement.classList.add('status-approved');
-                iconElement.className = 'fas fa-check';
-                // Update teks untuk menunjukkan disetujui
-                if (!stepData.custom_text) {
-                    const currentText = textElement.textContent;
-                    if (currentText.includes('Persetujuan')) {
-                        textElement.textContent = currentText.replace('Persetujuan', 'Disetujui');
-                    }
-                }
-                break;
-            case 'rejected':
-                stepElement.classList.add('status-rejected');
-                iconElement.className = 'fas fa-times';
-                // Update teks untuk menunjukkan ditolak
-                if (!stepData.custom_text) {
-                    const currentText = textElement.textContent;
-                    if (currentText.includes('Persetujuan')) {
-                        textElement.textContent = currentText.replace('Persetujuan', 'Ditolak');
-                    }
-                }
-                break;
-            case 'in-progress':
-                stepElement.classList.add('status-in-progress');
-                iconElement.className = 'fas fa-clock';
-                break;
-            case 'pending':
-            default:
-                stepElement.classList.add('status-pending');
-                iconElement.className = 'fas fa-clock';
-                break;
+        if (step.status === 'completed' || step.status === 'approved') {
+            stepElement.classList.add('completed');
+            iconElement.className = 'fas fa-check';
+        } else if (step.status === 'rejected') {
+            stepElement.classList.add('rejected');
+            iconElement.className = 'fas fa-times';
+        } else if (step.status === 'in-progress') {
+            stepElement.classList.add('in-progress');
+            iconElement.className = 'fas fa-spinner fa-spin';
+        } else {
+            stepElement.classList.add('pending');
+            iconElement.className = 'fas fa-clock';
         }
         
-        // Update tanggal
-        dateElement.textContent = stepData.date || '-';
-    }
+        // Update text dan date
+        textElement.textContent = step.step_name;
+        dateElement.textContent = step.date;
+    });
+    
+    // Update progress line width
+    const progressPercentage = statusData.progress_percentage || 0;
+    document.getElementById('progressLine').style.width = progressPercentage + '%';
+}
 
-    // Auto-refresh status
-    function startStatusAutoRefresh(suratId) {
-        // Hentikan interval sebelumnya jika ada
-        stopStatusAutoRefresh();
-        
-        // Mulai interval baru setiap 30 detik
-        statusRefreshInterval = setInterval(() => {
-            loadStatusData(suratId);
-        }, 30000); // 30 detik
+// Event listener untuk close modal status
+document.addEventListener('DOMContentLoaded', function() {
+    const closeBtn = document.querySelector('.close-status');
+    const modal = document.getElementById('statusModal');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
     }
-
-    function stopStatusAutoRefresh() {
-        if (statusRefreshInterval) {
-            clearInterval(statusRefreshInterval);
-            statusRefreshInterval = null;
+    
+    // Close modal ketika klik di luar modal
+    window.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
         }
-    }
+    });
+});
 
-    // Data dummy untuk demo (akan diganti dengan data real dari database)
-    function getDummyStatusData(suratId) {
-        // Contoh data - dalam implementasi nyata, ini berasal dari database
-        // Status bisa berubah: 'pending', 'in-progress', 'completed', 'approved', 'rejected'
-        
-        // Simulasi status yang berbeda berdasarkan ID surat (untuk demo)
-        const statusVariations = [
-            {
-                steps: [
-                    { status: 'completed', date: '<?= date("d M Y") ?>', custom_text: 'Mengirim' },
-                    { status: 'approved', date: '<?= date("d M Y", strtotime("+1 day")) ?>', custom_text: 'Disetujui KK' },
-                    { status: 'in-progress', date: '-', custom_text: 'Menunggu Persetujuan Sekretariat' },
-                    { status: 'pending', date: '-', custom_text: 'Menunggu Persetujuan Dekan' }
-                ],
-                description: 'Pengajuan surat tugas Anda saat ini sedang menunggu persetujuan dari Sekretariat.',
-                estimated_time: '2-3 hari kerja',
-                rejection_reason: null
-            },
-            {
-                steps: [
-                    { status: 'completed', date: '<?= date("d M Y", strtotime("-3 days")) ?>', custom_text: 'Mengirim' },
-                    { status: 'rejected', date: '<?= date("d M Y", strtotime("-2 days")) ?>', custom_text: 'Ditolak KK' },
-                    { status: 'pending', date: '-', custom_text: 'Persetujuan Sekretariat' },
-                    { status: 'pending', date: '-', custom_text: 'Persetujuan Dekan' }
-                ],
-                description: 'Pengajuan surat tugas Anda ditolak oleh KK. Silakan perbaiki dan ajukan kembali.',
-                estimated_time: '-',
-                rejection_reason: 'Dokumen pendukung tidak lengkap. Silakan lengkapi semua dokumen yang diperlukan.'
-            },
-            {
-                steps: [
-                    { status: 'completed', date: '<?= date("d M Y", strtotime("-5 days")) ?>', custom_text: 'Mengirim' },
-                    { status: 'approved', date: '<?= date("d M Y", strtotime("-4 days")) ?>', custom_text: 'Disetujui KK' },
-                    { status: 'approved', date: '<?= date("d M Y", strtotime("-2 days")) ?>', custom_text: 'Disetujui Sekretariat' },
-                    { status: 'in-progress', date: '-', custom_text: 'Menunggu Persetujuan Dekan' }
-                ],
-                description: 'Pengajuan surat tugas Anda sedang dalam proses persetujuan akhir oleh Dekan.',
-                estimated_time: '1-2 hari kerja',
-                rejection_reason: null
-            }
-        ];
-        
-        // Pilih variasi berdasarkan ID surat (untuk demo)
-        const variationIndex = suratId % statusVariations.length;
-        return statusVariations[variationIndex];
-    }
+// ===== JQUERY DOCUMENT READY =====
+$(document).ready(function () {
+    const BASE_URL = '<?= rtrim(base_url(), "/"); ?>';
 
-    $(document).ready(function () {
-        const BASE_URL = '<?= rtrim(base_url(), "/"); ?>';
+    let table = $('#tabelSurat').DataTable({
+        responsive:true,
+        pageLength:5,
+        dom:'rtp',
+        columnDefs:[
+            {orderable:false, targets:[0, -1]},
+            {className: 'dt-center', targets: [0, 1]}
+        ],
+        order: [[1, 'asc']]
+    });
 
-        let table = $('#tabelSurat').DataTable({
-            responsive:true,
-            pageLength:5,
-            dom:'rtp',
-            columnDefs:[
-                {orderable:false, targets:[0, -1]},
-                {className: 'dt-center', targets: [0, 1]}
-            ],
-            order: [[1, 'asc']]
+    // ===== MULTI-SELECT FUNCTIONALITY =====
+    let selectedIds = [];
+
+    function updateMultiActions() {
+        selectedIds = [];
+        $('.row-checkbox:checked').each(function(){
+            selectedIds.push($(this).data('id'));
         });
-
-        // ===== MULTI-SELECT FUNCTIONALITY =====
-        let selectedIds = [];
-
-        function updateMultiActions() {
-            selectedIds = [];
-            $('.row-checkbox:checked').each(function(){
-                selectedIds.push($(this).data('id'));
-            });
-            
-            $('#selectedCount').text(selectedIds.length);
-            
-            if(selectedIds.length > 0) {
-                $('#multiActions').addClass('show');
-            } else {
-                $('#multiActions').removeClass('show');
-            }
-            
-            const totalCheckboxes = $('.row-checkbox').length;
-            const checkedCheckboxes = $('.row-checkbox:checked').length;
-            $('#checkAll').prop('checked', totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0);
+        
+        $('#selectedCount').text(selectedIds.length);
+        
+        if(selectedIds.length > 0) {
+            $('#multiActions').addClass('show');
+        } else {
+            $('#multiActions').removeClass('show');
         }
+        
+        const totalCheckboxes = $('.row-checkbox').length;
+        const checkedCheckboxes = $('.row-checkbox:checked').length;
+        $('#checkAll').prop('checked', totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0);
+    }
 
-        $('#checkAll').on('change', function(){
-            const isChecked = $(this).is(':checked');
-            $('.row-checkbox').prop('checked', isChecked);
-            if(isChecked) {
-                $('tr.row-detail').addClass('selected');
-            } else {
-                $('tr.row-detail').removeClass('selected');
-            }
-            updateMultiActions();
-        });
+    $('#checkAll').on('change', function(){
+        const isChecked = $(this).is(':checked');
+        $('.row-checkbox').prop('checked', isChecked);
+        if(isChecked) {
+            $('tr.row-detail').addClass('selected');
+        } else {
+            $('tr.row-detail').removeClass('selected');
+        }
+        updateMultiActions();
+    });
 
-        $(document).on('change', '.row-checkbox', function(e){
-            e.stopPropagation();
-            const $row = $(this).closest('tr');
-            if($(this).is(':checked')) {
-                $row.addClass('selected');
-            } else {
-                $row.removeClass('selected');
-            }
-            updateMultiActions();
-        });
+    $(document).on('change', '.row-checkbox', function(e){
+        e.stopPropagation();
+        const $row = $(this).closest('tr');
+        if($(this).is(':checked')) {
+            $row.addClass('selected');
+        } else {
+            $row.removeClass('selected');
+        }
+        updateMultiActions();
+    });
 
-        $(document).on('click', '.row-checkbox', function(e){
-            e.stopPropagation();
-        });
+    $(document).on('click', '.row-checkbox', function(e){
+        e.stopPropagation();
+    });
 
-        $('#btnMultiEdit').click(function(){
-            if(selectedIds.length === 0) {
-                alert('Pilih minimal 1 item untuk di-edit');
-                return;
-            }
-            window.location.href = '<?= site_url("surat/multi_edit"); ?>?ids=' + selectedIds.join(',');
-        });
+    $('#btnMultiEdit').click(function(){
+        if(selectedIds.length === 0) {
+            alert('Pilih minimal 1 item untuk di-edit');
+            return;
+        }
+        window.location.href = '<?= site_url("surat/multi_edit"); ?>?ids=' + selectedIds.join(',');
+    });
 
-        $('#btnMultiDelete').click(function(){
-            if(selectedIds.length === 0) {
-                alert('Pilih minimal 1 item untuk dihapus');
-                return;
-            }
-            
-            const confirmed = confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' item yang dipilih?');
-            if(!confirmed) return;
-            
-            // Solusi langsung dengan delete individual
-            deleteMultipleSurat(selectedIds);
-        });
+    $('#btnMultiDelete').click(function(){
+        if(selectedIds.length === 0) {
+            alert('Pilih minimal 1 item untuk dihapus');
+            return;
+        }
+        
+        const confirmed = confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' item yang dipilih?');
+        if(!confirmed) return;
+        
+        deleteMultipleSurat(selectedIds);
+    });
 
-        // Fungsi untuk menghapus multiple surat dengan sequential requests
-        function deleteMultipleSurat(ids) {
-            let successCount = 0;
-            let errorCount = 0;
-            const total = ids.length;
-            
-            // Tampilkan loading
-            const originalText = $('#btnMultiDelete').html();
-            $('#btnMultiDelete').html('<i class="fa fa-spinner fa-spin"></i> Menghapus...').prop('disabled', true);
-            
-            // Hapus satu per satu
-            ids.forEach((id, index) => {
-                setTimeout(() => {
-                    $.ajax({
-                        url: '<?= site_url("surat/delete/") ?>' + id,
-                        method: 'GET',
-                        success: function(response) {
-                            successCount++;
-                            // Hapus row dari tabel setelah berhasil
-                            $(`tr[data-id="${id}"]`).fadeOut(300, function(){
-                                $(this).remove();
-                            });
+    // Fungsi untuk menghapus multiple surat
+    function deleteMultipleSurat(ids) {
+        let successCount = 0;
+        let errorCount = 0;
+        const total = ids.length;
+        
+        const originalText = $('#btnMultiDelete').html();
+        $('#btnMultiDelete').html('<i class="fa fa-spinner fa-spin"></i> Menghapus...').prop('disabled', true);
+        
+        ids.forEach((id, index) => {
+            setTimeout(() => {
+                $.ajax({
+                    url: '<?= site_url("surat/delete/") ?>' + id,
+                    method: 'GET',
+                    success: function(response) {
+                        successCount++;
+                        $(`tr[data-id="${id}"]`).fadeOut(300, function(){
+                            $(this).remove();
+                        });
+                        
+                        if (successCount + errorCount === total) {
+                            $('#btnMultiDelete').html(originalText).prop('disabled', false);
                             
-                            if (successCount + errorCount === total) {
-                                // Semua request selesai
-                                $('#btnMultiDelete').html(originalText).prop('disabled', false);
-                                
-                                if (successCount > 0) {
-                                    alert(successCount + ' data berhasil dihapus' + (errorCount > 0 ? ', ' + errorCount + ' gagal' : ''));
-                                    // Refresh multi actions
-                                    updateMultiActions();
-                                }
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            errorCount++;
-                            console.error('Error deleting ID ' + id + ':', error);
-                            
-                            if (successCount + errorCount === total) {
-                                $('#btnMultiDelete').html(originalText).prop('disabled', false);
-                                alert(successCount + ' data berhasil dihapus, ' + errorCount + ' gagal');
+                            if (successCount > 0) {
+                                alert(successCount + ' data berhasil dihapus' + (errorCount > 0 ? ', ' + errorCount + ' gagal' : ''));
                                 updateMultiActions();
                             }
                         }
-                    });
-                }, index * 200); // Delay 200ms antara setiap request
-            });
+                    },
+                    error: function(xhr, status, error) {
+                        errorCount++;
+                        console.error('Error deleting ID ' + id + ':', error);
+                        
+                        if (successCount + errorCount === total) {
+                            $('#btnMultiDelete').html(originalText).prop('disabled', false);
+                            alert(successCount + ' data berhasil dihapus, ' + errorCount + ' gagal');
+                            updateMultiActions();
+                        }
+                    }
+                });
+            }, index * 200);
+        });
+    }
+
+    // ===== FILTER FUNCTIONALITY =====
+    const filterData = {
+        jenis: <?= json_encode(array_values(array_unique(array_map(function($s){ return $s->jenis_pengajuan; }, $surat_list)))); ?>,
+        dosen: <?= json_encode(array_values(array_unique(array_reduce($surat_list, function($carry,$s){
+            if(isset($s->nama_dosen) && !empty($s->nama_dosen)){
+                $nd=$s->nama_dosen;
+                if(is_string($nd)){ $maybe=json_decode($nd,true); if(json_last_error()===JSON_ERROR_NONE) $nd=$maybe; }
+                if(is_array($nd)) foreach($nd as $d) $carry[]=trim($d); else $carry[]=trim($nd);
+            }
+            return $carry;
+        },[])))); ?>,
+        divisi: <?= json_encode(array_values(array_unique(array_reduce($surat_list,function($carry,$s){
+            if(isset($s->divisi)&&!empty($s->divisi)){
+                $dv=$s->divisi;
+                if(is_string($dv)){ $maybe2=json_decode($dv,true); if(json_last_error()===JSON_ERROR_NONE) $dv=$maybe2; }
+                if(is_array($dv)) foreach($dv as $d) $carry[]=trim($d); else $carry[]=trim($dv);
+            }
+            return $carry;
+        },[])))); ?>
+    };
+
+    Object.keys(filterData).forEach(k=>{
+        filterData[k] = (filterData[k]||[]).map(x=>String(x||'').trim()).filter(x=>x!=='');
+        filterData[k] = Array.from(new Set(filterData[k])).sort((a,b)=>a.localeCompare(b));
+    });
+
+    let rows = [];
+    let uid = 0;
+    function nextId(){ return 'r'+(++uid); }
+
+    function makeRowDOM(r){
+        const $wr = $(`<div class="filter-row" data-id="${r.id}"></div>`);
+
+        const $searchWrapper = $(`<div class="row-search-wrapper"></div>`);
+        const $search = $(`<input type="text" class="row-search" placeholder="Search..." />`);
+        const $searchIcon = $(`<i class="fa fa-search"></i>`);
+        
+        const $dateStart = $(`<input type="date" class="row-date-start" style="display:none" />`);
+        const $dateEnd = $(`<input type="date" class="row-date-end" style="display:none" />`);
+
+        $searchWrapper.append($search).append($searchIcon);
+
+        const $cat = $(`<select class="row-cat">
+            <option value="jenis">Jenis Pengajuan</option>
+            <option value="dosen">Nama Dosen</option>
+            <option value="divisi">Divisi</option>
+            <option value="tanggal">Tanggal Pengajuan</option>
+        </select>`);
+
+        const $btnAdd = $(`<button class="row-btn add" title="Tambah baris"><i class="fa fa-plus"></i></button>`);
+        const $btnRemove = $(`<button class="row-btn remove" title="Hapus baris"><i class="fa fa-times"></i></button>`);
+
+        if(r.category) $cat.val(r.category);
+        if(r.text) $search.val(r.text);
+        if(r.dateStart) $dateStart.val(r.dateStart);
+        if(r.dateEnd) $dateEnd.val(r.dateEnd);
+
+        function refreshInputs(){
+            const catVal = $cat.val();
+            if(catVal === 'tanggal'){
+                $searchWrapper.hide();
+                $dateStart.show();
+                $dateEnd.show();
+            } else {
+                $searchWrapper.show();
+                $dateStart.hide();
+                $dateEnd.hide();
+            }
         }
+        refreshInputs();
 
-        // ===== FILTER FUNCTIONALITY =====
-        const filterData = {
-            jenis: <?= json_encode(array_values(array_unique(array_map(function($s){ return $s->jenis_pengajuan; }, $surat_list)))); ?>,
-            dosen: <?= json_encode(array_values(array_unique(array_reduce($surat_list, function($carry,$s){
-                if(isset($s->nama_dosen) && !empty($s->nama_dosen)){
-                    $nd=$s->nama_dosen;
-                    if(is_string($nd)){ $maybe=json_decode($nd,true); if(json_last_error()===JSON_ERROR_NONE) $nd=$maybe; }
-                    if(is_array($nd)) foreach($nd as $d) $carry[]=trim($d); else $carry[]=trim($nd);
-                }
-                return $carry;
-            },[])))); ?>,
-            divisi: <?= json_encode(array_values(array_unique(array_reduce($surat_list,function($carry,$s){
-                if(isset($s->divisi)&&!empty($s->divisi)){
-                    $dv=$s->divisi;
-                    if(is_string($dv)){ $maybe2=json_decode($dv,true); if(json_last_error()===JSON_ERROR_NONE) $dv=$maybe2; }
-                    if(is_array($dv)) foreach($dv as $d) $carry[]=trim($d); else $carry[]=trim($dv);
-                }
-                return $carry;
-            },[])))); ?>
-        };
-
-        Object.keys(filterData).forEach(k=>{
-            filterData[k] = (filterData[k]||[]).map(x=>String(x||'').trim()).filter(x=>x!=='');
-            filterData[k] = Array.from(new Set(filterData[k])).sort((a,b)=>a.localeCompare(b));
+        $search.on('input', function(){
+            const id = $wr.data('id');
+            const obj = rows.find(x=>x.id===id);
+            if(!obj) return;
+            obj.text = $(this).val() || '';
+            applyFilters();
         });
 
-        let rows = [];
-        let uid = 0;
-        function nextId(){ return 'r'+(++uid); }
+        $dateStart.on('change', function(){
+            const id = $wr.data('id');
+            const obj = rows.find(x=>x.id===id);
+            if(!obj) return;
+            obj.dateStart = $(this).val() || '';
+            applyFilters();
+        });
+        $dateEnd.on('change', function(){
+            const id = $wr.data('id');
+            const obj = rows.find(x=>x.id===id);
+            if(!obj) return;
+            obj.dateEnd = $(this).val() || '';
+            applyFilters();
+        });
 
-        function makeRowDOM(r){
-            const $wr = $(`<div class="filter-row" data-id="${r.id}"></div>`);
-
-            const $searchWrapper = $(`<div class="row-search-wrapper"></div>`);
-            const $search = $(`<input type="text" class="row-search" placeholder="Search..." />`);
-            const $searchIcon = $(`<i class="fa fa-search"></i>`);
-            
-            const $dateStart = $(`<input type="date" class="row-date-start" style="display:none" />`);
-            const $dateEnd = $(`<input type="date" class="row-date-end" style="display:none" />`);
-
-            $searchWrapper.append($search).append($searchIcon);
-
-            const $cat = $(`<select class="row-cat">
-                <option value="jenis">Jenis Pengajuan</option>
-                <option value="dosen">Nama Dosen</option>
-                <option value="divisi">Divisi</option>
-                <option value="tanggal">Tanggal Pengajuan</option>
-            </select>`);
-
-            const $btnAdd = $(`<button class="row-btn add" title="Tambah baris"><i class="fa fa-plus"></i></button>`);
-            const $btnRemove = $(`<button class="row-btn remove" title="Hapus baris"><i class="fa fa-times"></i></button>`);
-
-            if(r.category) $cat.val(r.category);
-            if(r.text) $search.val(r.text);
-            if(r.dateStart) $dateStart.val(r.dateStart);
-            if(r.dateEnd) $dateEnd.val(r.dateEnd);
-
-            function refreshInputs(){
-                const catVal = $cat.val();
-                if(catVal === 'tanggal'){
-                    $searchWrapper.hide();
-                    $dateStart.show();
-                    $dateEnd.show();
-                } else {
-                    $searchWrapper.show();
-                    $dateStart.hide();
-                    $dateEnd.hide();
-                }
-            }
+        $cat.on('change', function(){
+            const id = $wr.data('id');
+            const obj = rows.find(x=>x.id===id);
+            if(!obj) return;
+            obj.category = $(this).val();
+            obj.text = '';
+            obj.dateStart = '';
+            obj.dateEnd = '';
+            $search.val('');
+            $dateStart.val('');
+            $dateEnd.val('');
             refreshInputs();
+            applyFilters();
+        });
 
-            $search.on('input', function(){
-                const id = $wr.data('id');
-                const obj = rows.find(x=>x.id===id);
-                if(!obj) return;
-                obj.text = $(this).val() || '';
-                applyFilters();
-            });
-
-            $dateStart.on('change', function(){
-                const id = $wr.data('id');
-                const obj = rows.find(x=>x.id===id);
-                if(!obj) return;
-                obj.dateStart = $(this).val() || '';
-                applyFilters();
-            });
-            $dateEnd.on('change', function(){
-                const id = $wr.data('id');
-                const obj = rows.find(x=>x.id===id);
-                if(!obj) return;
-                obj.dateEnd = $(this).val() || '';
-                applyFilters();
-            });
-
-            $cat.on('change', function(){
-                const id = $wr.data('id');
-                const obj = rows.find(x=>x.id===id);
-                if(!obj) return;
-                obj.category = $(this).val();
-                obj.text = '';
-                obj.dateStart = '';
-                obj.dateEnd = '';
-                $search.val('');
-                $dateStart.val('');
-                $dateEnd.val('');
-                refreshInputs();
-                applyFilters();
-            });
-
-            $btnAdd.on('click', function(){
-                const id = $wr.data('id');
-                const idx = rows.findIndex(x=>x.id===id);
-                const cur = rows[idx] || {};
-                const newRow = { id: nextId(), category: cur.category || 'jenis', text:'', dateStart:'', dateEnd:'' };
-                if(idx >= 0 && idx < rows.length-1){
-                    rows.splice(idx+1, 0, newRow);
-                } else {
-                    rows.push(newRow);
-                }
-                renderRows();
-                applyFilters();
-            });
-
-            $btnRemove.on('click', function(){
-                const id = $wr.data('id');
-                rows = rows.filter(x=>x.id !== id);
-                renderRows();
-                applyFilters();
-            });
-
-            $wr.append($searchWrapper).append($dateStart).append($dateEnd).append($cat).append($btnAdd).append($btnRemove);
-            return $wr;
-        }
-
-        function renderRows(){
-            const $b = $('#filterBuilder');
-            $b.empty();
-            rows.forEach(r=>{
-                $b.append(makeRowDOM(r));
-            });
-            $('#btnResetAll').prop('hidden', rows.length === 0 && $('#tableSearch').val().trim()==='');
-        }
-
-        $('#btnAddFilterRow').click(function(){
-            const cat = $('#filterCategory').val() || 'jenis';
-            rows.push({ id: nextId(), category: cat, text:'', dateStart:'', dateEnd:'' });
+        $btnAdd.on('click', function(){
+            const id = $wr.data('id');
+            const idx = rows.findIndex(x=>x.id===id);
+            const cur = rows[idx] || {};
+            const newRow = { id: nextId(), category: cur.category || 'jenis', text:'', dateStart:'', dateEnd:'' };
+            if(idx >= 0 && idx < rows.length-1){
+                rows.splice(idx+1, 0, newRow);
+            } else {
+                rows.push(newRow);
+            }
             renderRows();
             applyFilters();
         });
 
-        $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(fn => fn.name !== 'customRowsFilter');
-
-        const customRowsFilter = function(settings, data){
-            const q = $('#tableSearch').val().trim().toLowerCase();
-            if(q){
-                const keywords = q.split(/\s+/).filter(x=>x);
-                const rowText = data.join(' ').toLowerCase();
-                const okText = keywords.every(k => rowText.indexOf(k) >= 0);
-                if(!okText) return false;
-            }
-
-            for(const r of rows){
-                if(!r || !r.category) continue;
-
-                if(r.category === 'tanggal'){
-                    const cell = (data[6] || '').trim();
-                    const start = r.dateStart || '';
-                    const end = r.dateEnd || '';
-                    if(!start && !end) continue;
-                    if(!cell || cell === '-') return false;
-                    if(start && cell < start) return false;
-                    if(end && cell > end) return false;
-                    continue;
-                }
-
-                const colIndex = (r.category === 'jenis') ? 3 : (r.category === 'dosen' ? 4 : 5);
-                const cellRaw = (data[colIndex] || '').toLowerCase();
-
-                if(!r.text || String(r.text).trim() === '') continue;
-
-                const needle = String(r.text).toLowerCase().trim();
-                if(cellRaw.indexOf(needle) === -1) return false;
-            }
-
-            return true;
-        };
-        Object.defineProperty(customRowsFilter, 'name', { value: 'customRowsFilter' });
-        $.fn.dataTable.ext.search.push(customRowsFilter);
-
-        function applyFilters(){
-            table.draw();
-            const anyFilterActive = rows.length>0 || $('#tableSearch').val().trim()!=='';
-            $('#btnResetAll').prop('hidden', !anyFilterActive);
-        }
-
-        let debounce = null;
-        $('#tableSearch').on('input', function(){
-            if(debounce) clearTimeout(debounce);
-            debounce = setTimeout(()=> applyFilters(), 180);
-        });
-
-        $('#btnResetAll').click(function(){
-            rows = [];
-            $('#tableSearch').val('');
+        $btnRemove.on('click', function(){
+            const id = $wr.data('id');
+            rows = rows.filter(x=>x.id !== id);
             renderRows();
             applyFilters();
         });
 
-        // ===== POPUP DETAIL =====
-        $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
-            if($(e.target).closest('input, a, button').length) return;
-            
-            let raw=$(this).attr('data-detail')||'{}';
-            let data={};
-            try{ data=JSON.parse(raw);}catch(err){ console.error(err);}
-            let html='';
-            Object.entries(data).forEach(([k,v])=>{
-                let display=v;
-                if(display===null||display===undefined||(typeof display==='string'&&display.trim()==='')) display='-';
-                if(k==='eviden'){
-                    if(typeof display==='string'){ try{display=JSON.parse(display);}catch(e){} }
-                    if(Array.isArray(display)&&display.length>0){
-                        let list='<ul style="margin:0;padding-left:18px;">';
-                        display.forEach(item=>{
-                            let url='', name='';
-                            if(typeof item==='string'){ url=item; name=item.split('/').pop().split('?')[0]; }
-                            else if(typeof item==='object'&&item!==null){
-                                url=item.cdnUrl||item.path||item.url||'';
-                                if(item.nama_asli) name=item.nama_asli;
-                                else if(item.name) name=item.name;
-                                else name=url.split('/').pop().split('?')[0];
-                                if(url && !url.match(/^https?:\/\//i)) url=BASE_URL + (url.startsWith('/')?'':'/')+url;
-                            }
-                            const escName=$('<div/>').text(name).html();
-                            const escUrl=$('<div/>').text(url).html();
-                            list+=`<li style="margin-bottom:6px;"><a href="#" class="force-download" data-url="${escUrl}" data-name="${escName}" style="color:#FB8C00;font-weight:600;text-decoration:none;">📄 ${escName}</a></li>`;
-                        });
-                        list+='</ul>';
-                        display=list;
-                    } else display='-';
-                } else if(Array.isArray(display)){
-                    display=display.map(x=>$('<div/>').text(String(x)).html()).join('<br>');
-                } else { if(typeof display==='string') display=$('<div/>').text(display).html(); }
-                html+=`<tr><td class="detail-key">${k.replace(/_/g,' ')}</td><td>${display}</td></tr>`;
-            });
-            $('#detailContent').html(html);
-            $('#modalDetail').addClass('show');
-        });
+        $wr.append($searchWrapper).append($dateStart).append($dateEnd).append($cat).append($btnAdd).append($btnRemove);
+        return $wr;
+    }
 
-        $(document).on("click",".force-download",function(e){
-            e.preventDefault();
-            const url=$(this).data("url");
-            const name=$(this).data("name");
-            const link=document.createElement("a");
-            link.href=url+"?download=1";
-            link.download=name||"file";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+    function renderRows(){
+        const $b = $('#filterBuilder');
+        $b.empty();
+        rows.forEach(r=>{
+            $b.append(makeRowDOM(r));
         });
+        $('#btnResetAll').prop('hidden', rows.length === 0 && $('#tableSearch').val().trim()==='');
+    }
 
-        // Close modals
-        $('.close-modal').click(function(){
-            $('#modalDetail').removeClass('show');
-        });
+    $('#btnAddFilterRow').click(function(){
+        const cat = $('#filterCategory').val() || 'jenis';
+        rows.push({ id: nextId(), category: cat, text:'', dateStart:'', dateEnd:'' });
+        renderRows();
+        applyFilters();
+    });
+
+    $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(fn => fn.name !== 'customRowsFilter');
+
+    const customRowsFilter = function(settings, data){
+        const q = $('#tableSearch').val().trim().toLowerCase();
+        if(q){
+            const keywords = q.split(/\s+/).filter(x=>x);
+            const rowText = data.join(' ').toLowerCase();
+            const okText = keywords.every(k => rowText.indexOf(k) >= 0);
+            if(!okText) return false;
+        }
+
+        for(const r of rows){
+            if(!r || !r.category) continue;
+
+            if(r.category === 'tanggal'){
+                const cell = (data[6] || '').trim();
+                const start = r.dateStart || '';
+                const end = r.dateEnd || '';
+                if(!start && !end) continue;
+                if(!cell || cell === '-') return false;
+                if(start && cell < start) return false;
+                if(end && cell > end) return false;
+                continue;
+            }
+
+            const colIndex = (r.category === 'jenis') ? 3 : (r.category === 'dosen' ? 4 : 5);
+            const cellRaw = (data[colIndex] || '').toLowerCase();
+
+            if(!r.text || String(r.text).trim() === '') continue;
+
+            const needle = String(r.text).toLowerCase().trim();
+            if(cellRaw.indexOf(needle) === -1) return false;
+        }
+
+        return true;
+    };
+    Object.defineProperty(customRowsFilter, 'name', { value: 'customRowsFilter' });
+    $.fn.dataTable.ext.search.push(customRowsFilter);
+
+    function applyFilters(){
+        table.draw();
+        const anyFilterActive = rows.length>0 || $('#tableSearch').val().trim()!=='';
+        $('#btnResetAll').prop('hidden', !anyFilterActive);
+    }
+
+    let debounce = null;
+    $('#tableSearch').on('input', function(){
+        if(debounce) clearTimeout(debounce);
+        debounce = setTimeout(()=> applyFilters(), 180);
+    });
+
+    $('#btnResetAll').click(function(){
+        rows = [];
+        $('#tableSearch').val('');
+        renderRows();
+        applyFilters();
+    });
+
+    // ===== POPUP DETAIL =====
+    $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
+        if($(e.target).closest('input, a, button').length) return;
         
-        $('.close-status').click(function(){
-            closeStatusModal();
+        let raw=$(this).attr('data-detail')||'{}';
+        let data={};
+        try{ data=JSON.parse(raw);}catch(err){ console.error(err);}
+        let html='';
+        Object.entries(data).forEach(([k,v])=>{
+            let display=v;
+            if(display===null||display===undefined||(typeof display==='string'&&display.trim()==='')) display='-';
+            if(k==='eviden'){
+                if(typeof display==='string'){ try{display=JSON.parse(display);}catch(e){} }
+                if(Array.isArray(display)&&display.length>0){
+                    let list='<ul style="margin:0;padding-left:18px;">';
+                    display.forEach(item=>{
+                        let url='', name='';
+                        if(typeof item==='string'){ url=item; name=item.split('/').pop().split('?')[0]; }
+                        else if(typeof item==='object'&&item!==null){
+                            url=item.cdnUrl||item.path||item.url||'';
+                            if(item.nama_asli) name=item.nama_asli;
+                            else if(item.name) name=item.name;
+                            else name=url.split('/').pop().split('?')[0];
+                            if(url && !url.match(/^https?:\/\//i)) url=BASE_URL + (url.startsWith('/')?'':'/')+url;
+                        }
+                        const escName=$('<div/>').text(name).html();
+                        const escUrl=$('<div/>').text(url).html();
+                        list+=`<li style="margin-bottom:6px;"><a href="#" class="force-download" data-url="${escUrl}" data-name="${escName}" style="color:#FB8C00;font-weight:600;text-decoration:none;">📄 ${escName}</a></li>`;
+                    });
+                    list+='</ul>';
+                    display=list;
+                } else display='-';
+            } else if(Array.isArray(display)){
+                display=display.map(x=>$('<div/>').text(String(x)).html()).join('<br>');
+            } else { if(typeof display==='string') display=$('<div/>').text(display).html(); }
+            html+=`<tr><td class="detail-key">${k.replace(/_/g,' ')}</td><td>${display}</td></tr>`;
         });
-        
-        $(window).click(function(e){
-            if(e.target.id==='modalDetail') $('#modalDetail').removeClass('show');
-            if(e.target.id==='statusModal') closeStatusModal();
-        });
+        $('#detailContent').html(html);
+        $('#modalDetail').addClass('show');
+    });
 
+    $(document).on("click",".force-download",function(e){
+        e.preventDefault();
+        const url=$(this).data("url");
+        const name=$(this).data("name");
+        const link=document.createElement("a");
+        link.href=url+"?download=1";
+        link.download=name||"file";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    // Close modals
+    $('.close-modal').click(function(){
+        $('#modalDetail').removeClass('show');
     });
     
-    </script>
+    $(window).click(function(e){
+        if(e.target.id==='modalDetail') $('#modalDetail').removeClass('show');
+    });
+});
+</script>
 </body>
 </html>
