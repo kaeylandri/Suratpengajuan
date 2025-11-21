@@ -21,6 +21,7 @@
     .badge-pending{background:#fff3cd;color:#856404}
     .badge-approved{background:#d4edda;color:#155724}
     .badge-rejected{background:#f8d7da;color:#721c24}
+    .badge-completed{background:#d1ecf1;color:#0c5460}
     .btn{padding:6px 10px;border-radius:6px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s}
     .btn:hover{transform:scale(1.05)}
     .btn-approve{background:#27ae60;color:#fff}
@@ -51,7 +52,6 @@
     .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
     .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#3498db;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
     .back-btn:hover{background:#2980b9;transform:translateY(-2px)}
-    .debug-info{background:#fff3cd;border-left:4px solid #ffc107;padding:15px;margin-bottom:15px;border-radius:4px;font-size:14px}
 </style>
 </head>
 <body>
@@ -77,15 +77,6 @@
         <div style="color:#721c24;font-weight:700"><?php echo $this->session->flashdata('error'); ?></div>
     </div>
     <?php endif; ?>
-
-    <!-- Debug Info -->
-    <div class="debug-info">
-        <strong>Debug Info:</strong> 
-        Total Data: <?= isset($total_surat) ? $total_surat : '0' ?> | 
-        Jumlah Data: <?= isset($surat_list) ? count($surat_list) : '0' ?> |
-        Search: "<?= $this->input->get('search') ?>" |
-        Status: "<?= $this->input->get('status') ?>"
-    </div>
 
     <!-- Tabel Total Pengajuan -->
     <div class="card">
@@ -157,22 +148,37 @@
                     if(isset($surat_list) && is_array($surat_list) && !empty($surat_list)): 
                         $no = 1; 
                         foreach($surat_list as $s): 
-                            // Logika status khusus untuk sekretariat
+                            // ✅ LOGIKA STATUS YANG DIPERBAIKI - SEMUA STATUS DITANGANI DENGAN BENAR
                             $status = $s->status ?? '';
                             
                             if ($status == 'disetujui KK') {
                                 $st_key = 'pending';
-                                $badge = '<span class="badge badge-pending">Menunggu</span>';
+                                $badge = '<span class="badge badge-pending">Menunggu Sekretariat</span>';
                             } elseif ($status == 'disetujui sekretariat') {
                                 $st_key = 'approved';
-                                $badge = '<span class="badge badge-approved">Disetujui</span>';
+                                $badge = '<span class="badge badge-approved">Disetujui Sekretariat</span>';
                             } elseif ($status == 'ditolak sekretariat') {
                                 $st_key = 'rejected';
-                                $badge = '<span class="badge badge-rejected">Ditolak</span>';
+                                $badge = '<span class="badge badge-rejected">Ditolak Sekretariat</span>';
+                            } elseif ($status == 'disetujui dekan') {
+                                $st_key = 'approved';
+                                $badge = '<span class="badge badge-approved">Disetujui Dekan</span>';
+                            } elseif ($status == 'ditolak dekan') {
+                                $st_key = 'rejected';
+                                $badge = '<span class="badge badge-rejected">Ditolak Dekan</span>';
+                            } elseif (strpos($status, 'pengajuan') !== false || strpos($status, 'pending') !== false || strpos($status, 'menunggu') !== false) {
+                                $st_key = 'pending';
+                                $badge = '<span class="badge badge-pending">' . ucwords($status) . '</span>';
+                            } elseif (strpos($status, 'setuju') !== false || strpos($status, 'approved') !== false) {
+                                $st_key = 'approved';
+                                $badge = '<span class="badge badge-approved">' . ucwords($status) . '</span>';
+                            } elseif (strpos($status, 'tolak') !== false || strpos($status, 'rejected') !== false) {
+                                $st_key = 'rejected';
+                                $badge = '<span class="badge badge-rejected">' . ucwords($status) . '</span>';
                             } else {
-                                // Untuk status lain yang tidak relevan dengan sekretariat
+                                // Fallback untuk status lain yang tidak dikenal
                                 $st_key = 'other';
-                                $badge = '<span class="badge badge-pending">'.ucwords($status).'</span>';
+                                $badge = '<span class="badge badge-pending">' . ucwords($status) . '</span>';
                             }
 
                             $tgl_pengajuan = isset($s->created_at) && $s->created_at ? date('d M Y', strtotime($s->created_at)) : '-';

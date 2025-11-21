@@ -84,12 +84,56 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       LIST DATA
+       LIST DATA - DEFAULT
     ============================================*/
     public function index()
     {
         $data['surat_list'] = $this->Surat_model->get_all_surat();
         $this->load->view('surat', $data);
+    }
+
+    /* ===========================================
+       HALAMAN STATS GRID - TOTAL
+    ============================================*/
+    public function halaman_total()
+    {
+        $data['surat_list'] = $this->Surat_model->get_all_surat();
+        $data['title'] = 'Semua Surat';
+        $data['page_type'] = 'total';
+        $this->load->view('halaman_total', $data);
+    }
+
+    /* ===========================================
+       HALAMAN STATS GRID - PENDING
+    ============================================*/
+    public function halaman_pending()
+    {
+        $data['surat_list'] = $this->Surat_model->get_by_status('pengajuan');
+        $data['title'] = 'Surat Pending';
+        $data['page_type'] = 'pending';
+        $this->load->view('halaman_pending', $data);
+    }
+
+    /* ===========================================
+       HALAMAN STATS GRID - DITOLAK
+    ============================================*/
+    public function halaman_ditolak()
+    {
+        $data['surat_list'] = $this->Surat_model->get_ditolak();
+        $data['title'] = 'Surat Ditolak';
+        $data['page_type'] = 'ditolak';
+        $this->load->view('halaman_ditolak', $data);
+    }
+
+    /* ===========================================
+       HALAMAN STATS GRID - DISETUJUI
+    ============================================*/
+    public function halaman_disetujui()
+    {
+        $data['surat_list'] = $this->Surat_model->get_disetujui();
+        $data['title'] = 'Surat Disetujui';
+        $data['page_type'] = 'disetujui';
+        $this->load->view('halaman_disetujui', $data);
     }
 
     /* ===========================================
@@ -306,9 +350,9 @@ class Surat extends CI_Controller
 }
 
 
-private function bedaWaktu($start, $end)
-{
-    if (!$start || !$end) return '-';
+    private function bedaWaktu($start, $end)
+    {
+        if (!$start || !$end) return '-';
 
     try {
         $mulai = new DateTime($start);
@@ -358,7 +402,6 @@ private function bedaWaktu($start, $end)
         
         return round(($completed / $total) * 100);
     }
-
 
     /* ===========================================
        SUBMIT DATA

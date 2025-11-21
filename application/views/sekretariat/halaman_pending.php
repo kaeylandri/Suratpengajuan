@@ -42,7 +42,6 @@
     .detail-row{display:grid;grid-template-columns:200px 1fr;padding:8px 0;border-bottom:1px solid #f4f6f7}
     .detail-label{font-weight:700;color:#7f8c8d}
     .detail-value{color:#2c3e50}
-    .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
     .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#3498db;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
     .back-btn:hover{background:#2980b9;transform:translateY(-2px)}
     .status-header{display:flex;align-items:center;gap:15px;margin-bottom:20px;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
@@ -51,7 +50,6 @@
     .status-info h1{margin:0;color:#2c3e50;font-size:28px}
     .status-info p{margin:5px 0 0 0;color:#7f8c8d;font-size:16px}
     .data-count-info {background:#e8f4fd;padding:10px 15px;border-radius:6px;margin-bottom:15px;font-size:14px;color:#2c3e50;border-left:4px solid #3498db;}
-    .debug-info {background:#fff3cd;padding:10px;border-radius:6px;margin-bottom:15px;font-size:12px;color:#856404;border-left:4px solid #ffc107;}
 </style>
 </head>
 <body>
@@ -88,15 +86,6 @@
         <div style="color:#721c24;font-weight:700"><?php echo $this->session->flashdata('error'); ?></div>
     </div>
     <?php endif; ?>
-
-    <!-- Debug Info -->
-    <div class="debug-info">
-        <strong>Debug Info:</strong><br>
-        Total Data: <?= isset($total_surat) ? $total_surat : '0' ?><br>
-        Data Count: <?= isset($surat_list) ? count($surat_list) : '0' ?><br>
-        Status Filter: disetujui KK<br>
-        URL: <?= base_url('sekretariat/pending') ?>
-    </div>
 
     <!-- Tabel Pengajuan Menunggu -->
     <div class="card">
@@ -168,7 +157,6 @@
                         <td><?= $tgl_kegiatan ?></td>
                         <td><?= htmlspecialchars($s->jenis_pengajuan ?? '-') ?></td>
                         <td>
-                            <!-- PERBAIKAN: Ganti status menjadi "Menunggu" bukan "disetujui KK" -->
                             <span class="badge badge-pending">
                                 Menunggu
                             </span>
@@ -200,7 +188,7 @@
                                     <?php if($this->input->get('search')): ?>
                                         Tidak ada pengajuan yang sesuai dengan pencarian "<?= htmlspecialchars($this->input->get('search')) ?>"
                                     <?php else: ?>
-                                        Tidak ada pengajuan yang menunggu persetujuan (status: disetujui KK)
+                                        Tidak ada pengajuan yang menunggu persetujuan
                                     <?php endif; ?>
                                 <?php else: ?>
                                     Data tidak valid
@@ -211,15 +199,6 @@
                     <?php endif; ?>
                 </tbody>
             </table>
-        </div>
-
-        <div class="pagination-info">
-            Menampilkan: Pengajuan Menunggu Persetujuan 
-            <?php if($this->input->get('search')): ?>
-                (<?= isset($surat_list) ? count($surat_list) : '0' ?> data dari <?= isset($total_surat) ? $total_surat : '0' ?> total)
-            <?php else: ?>
-                (<?= isset($surat_list) ? count($surat_list) : '0' ?> data)
-            <?php endif; ?>
         </div>
     </div>
 </div>
