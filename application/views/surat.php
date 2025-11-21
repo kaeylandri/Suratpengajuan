@@ -1820,7 +1820,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Continue</button>
 </div>
 
-<!-- ===== SCRIPT VALIDASI DAN SUBMIT - WORKING VERSION ===== -->
+<!-- ===== SCRIPT VALIDASI DAN SUBMIT - AUTO OPEN VERSION ===== -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const nextBtn = document.querySelector(".next-btn");
@@ -1834,12 +1834,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let isFileUploaded = false;
     let isSubmitting = false;
+    let widget = null;
+    let dialogOpened = false;
 
     console.log("Step 3 script initialized");
 
     // Listen for upload completion from Uploadcare
     if (typeof uploadcare !== 'undefined') {
-        const widget = uploadcare.Widget('[role="uploadcare-uploader"]');
+        widget = uploadcare.Widget('[role="uploadcare-uploader"]');
         
         widget.onChange(function(file) {
             if (file) {
@@ -1855,11 +1857,39 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log("File upload cleared");
             }
         });
+
+        // Auto open dialog ketika step 3 aktif
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                const currentFieldset = document.querySelector('fieldset.active');
+                if (currentFieldset && currentFieldset.contains(uploader) && !dialogOpened) {
+                    console.log("Step 3 is now active, opening upload dialog...");
+                    dialogOpened = true;
+                    
+                    // Delay sedikit untuk memastikan UI sudah render
+                    setTimeout(function() {
+                        if (widget) {
+                            widget.openDialog();
+                            console.log("Upload dialog opened automatically");
+                        }
+                    }, 300);
+                }
+            });
+        });
+
+        // Observe perubahan class pada fieldset
+        const fieldsets = document.querySelectorAll('fieldset');
+        fieldsets.forEach(function(fieldset) {
+            observer.observe(fieldset, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        });
+
     } else {
         console.warn("Uploadcare not loaded");
     }
 
-    // ===== TAMBAHKAN FUNCTION INI DI SINI =====
     // Function untuk submit form via AJAX
     function submitFormData() {
         return new Promise((resolve, reject) => {
@@ -1897,7 +1927,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
-    // ===== AKHIR FUNCTION =====
 
     // Handler untuk tombol Finish di Step 3
     nextBtn.addEventListener("click", function (e) {
@@ -2004,8 +2033,6 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(checkInitialUpload, 1500);
 });
 </script>
-
-
 
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
