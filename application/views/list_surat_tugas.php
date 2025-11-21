@@ -1042,12 +1042,13 @@
         font-size: 14px;
     }
 
-    /* Responsive */
-    @media (max-width: 992px) {
-        .fik-db-side-menu {
-            transform: translateX(-100%);
-            top: 70px;
-            height: calc(100vh - 70px);
+        /* Responsive */
+    @media (max-width:880px){
+        .progress-track {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 30px;
+            padding: 0 10px;
         }
         
         .fik-db-side-menu.active {
@@ -1128,29 +1129,27 @@
             padding: 8px;
         }
         
-        .progress-track {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 20px;
-        }
-        
         .progress-track::before {
-            display: none;
-        }
-        
-        .progress-step {
-            flex-direction: row;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-        }
-        
-        .step-text {
-            text-align: left;
-            max-width: none;
-            flex: 1;
-        }
+        display: none;
     }
+    
+    .progress-step {
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+    }
+    
+    .step-text {
+        text-align: left;
+        max-width: none;
+        flex: 1;
+    }
+    
+    .step-label {
+        min-width: 90px;
+    }
+}
     </style>
 </head>
 
@@ -1645,9 +1644,7 @@ $(document).click(function(e) {
 function goBack() {
     window.location.href = '<?= base_url() ?>';
 }
-// ======================================================================
-//  STATUS MODAL HANDLER – FINAL VERSION
-// ======================================================================
+
 
 // Tampilkan modal dan load data
 function showStatusModal(suratId) {
@@ -1694,7 +1691,7 @@ function loadStatusData(suratId) {
         .then(data => {
             if (data.success) {
                 updateStatusDisplay(data.data);
-                
+                updateEstimasiWaktu(data.data);
             } else {
                 alert('Gagal memuat status: ' + (data.message || 'Unknown error'));
             }
@@ -1783,16 +1780,16 @@ function updateStatusDisplay(statusData) {
     } else {
         rejectionBox.style.display = "none";
     }
-
-
 }
 function updateEstimasiWaktu(statusData) {
-    const estimasi = statusData.estimasi;
+    const d = statusData.durasi;
 
-    document.getElementById("est1").textContent = estimasi.kirim_ke_kk;
-    document.getElementById("est2").textContent = estimasi.kk_ke_sekretariat;
-    document.getElementById("est3").textContent = estimasi.sekretariat_ke_dekan;
+    document.getElementById("est1").textContent = d.durasi_1 || "-";
+    document.getElementById("est2").textContent = d.durasi_2 || "-";
+    document.getElementById("est3").textContent = d.durasi_3 || "-";
 }
+
+
 
 
 
