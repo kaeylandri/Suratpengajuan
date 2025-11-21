@@ -71,6 +71,7 @@ class Kaprodi extends CI_Controller
     {
         $this->db->where('id', $id)->update('surat', [
             'status' => 'disetujui KK',
+            'tanggal_disetujui_kk' => date("Y-m-d H:i:s"),
         ]);
 
         $this->session->set_flashdata('success', 'Surat berhasil disetujui Kaprodi.');

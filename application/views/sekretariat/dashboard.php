@@ -67,32 +67,33 @@
     <?php endif; ?>
 
     <?php
+    // ✅ Data dari controller - hanya status yang relevan dengan sekretariat
     $total_all = isset($total_surat) ? (int)$total_surat : 0;
     $pending_count = isset($pending_count) ? (int)$pending_count : 0;
     $approved_count = isset($approved_count) ? (int)$approved_count : 0;
     $rejected_count = isset($rejected_count) ? (int)$rejected_count : 0;
     ?>
 
-    <!-- Statistik dengan Link -->
+    <!-- ✅ Statistik dengan Link - Konsisten dengan Controller -->
     <div class="stats-grid">
-        <a href="<?= base_url('surat/sekretariat/semua') ?>" class="stat-card" style="border-left-color:#16A085;">
+        <a href="<?= base_url('sekretariat/semua') ?>" class="stat-card" style="border-left-color:#3498db;">
             <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
             <div class="number"><?= $total_all ?></div>
         </a>
         
-        <a href="<?= base_url('surat/disetujui_sekretariat') ?>" class="stat-card" style="border-left-color:#27ae60;">
+        <a href="<?= base_url('sekretariat/pending') ?>" class="stat-card" style="border-left-color:#f39c12;">
+            <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
+            <div class="number"><?= $pending_count ?></div>
+        </a>
+        
+        <a href="<?= base_url('sekretariat/disetujui') ?>" class="stat-card" style="border-left-color:#27ae60;">
             <h3><i class="fa-solid fa-check-circle"></i> Disetujui</h3>
             <div class="number"><?= $approved_count ?></div>
         </a>
         
-        <a href="<?= base_url('surat/ditolak_sekretariat') ?>" class="stat-card" style="border-left-color:#e74c3c;">
+        <a href="<?= base_url('sekretariat/ditolak') ?>" class="stat-card" style="border-left-color:#e74c3c;">
             <h3><i class="fa-solid fa-times-circle"></i> Ditolak</h3>
             <div class="number"><?= $rejected_count ?></div>
-        </a>
-        
-        <a href="<?= base_url('surat/pending_sekretariat') ?>" class="stat-card" style="border-left-color:#f39c12;">
-            <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
-            <div class="number"><?= $pending_count ?></div>
         </a>
     </div>
 
@@ -114,22 +115,22 @@
         </div>
     </div>
 
-    <!-- Grafik 3D -->
+    <!-- ✅ Grafik 3D - Hanya Data Sekretariat -->
     <div class="card" style="background: linear-gradient(135deg, #ffffffff 0%, #ffffffff 100%);">
         <div class="card-header" style="border-bottom-color: rgba(0, 0, 0, 0.1)">
-            <strong style="color: #000000ff"><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan — Tahun <?= isset($tahun) ? $tahun : date('Y') ?></strong>
+            <strong style="color: #000000ff"><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan Sekretariat — Tahun <?= isset($tahun) ? $tahun : date('Y') ?></strong>
         </div>
         <div class="chart-container">
             <canvas id="grafikSurat"></canvas>
         </div>
     </div>
 
-    <!-- Tabel -->
+    <!-- ✅ Tabel - Hanya Status Relevan Sekretariat -->
     <div class="card">
         <div class="card-header">
             <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Surat</h3>
             <div>
-                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">Menampilkan: Semua Data</span>
+                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">Menampilkan: Semua Data (<?= count($surat_list ?? []) ?>)</span>
             </div>
         </div>
         
@@ -149,22 +150,21 @@
                 </thead>
                 <tbody id="tableBody">
                     <?php if(isset($surat_list) && !empty($surat_list)): $no=1; foreach($surat_list as $s): 
-                        $st_l = strtolower($s->status);
-
-                    // Tentukan warna berdasarkan kata kunci
-                    if (str_contains($st_l, 'setuju') || str_contains($st_l, 'disetujui')) {
-                        $st_key = 'approved';
-                        $badge = '<span class="badge badge-approved">'.ucwords($s->status).'</span>';
-
-                    } elseif (str_contains($st_l, 'tolak') || str_contains($st_l, 'ditolak')) {
-                        $st_key = 'rejected';
-                        $badge = '<span class="badge badge-rejected">'.ucwords($s->status).'</span>';
-
-                    } else {
-                        // selain itu dianggap pending atau proses
-                        $st_key = 'pending';
-                        $badge = '<span class="badge badge-pending">'.ucwords($s->status).'</span>';
-                    }
+                        // ✅ Logika badge yang konsisten dan singkat
+                        if ($s->status == 'disetujui KK') {
+                            $st_key = 'pending';
+                            $badge = '<span class="badge badge-pending">Menunggu</span>';
+                        } elseif ($s->status == 'disetujui sekretariat') {
+                            $st_key = 'approved';
+                            $badge = '<span class="badge badge-approved">Disetujui</span>';
+                        } elseif ($s->status == 'ditolak sekretariat') {
+                            $st_key = 'rejected';
+                            $badge = '<span class="badge badge-rejected">Ditolak</span>';
+                        } else {
+                            // Fallback untuk status lain
+                            $st_key = 'unknown';
+                            $badge = '<span class="badge badge-pending">'.htmlspecialchars(ucwords($s->status)).'</span>';
+                        }
 
                         $tgl_pengajuan = isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? date('d M Y', strtotime($s->tanggal_pengajuan)) : '-';
                         $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
@@ -178,15 +178,18 @@
                         <td><?= htmlspecialchars($s->jenis_pengajuan) ?></td>
                         <td><?= $badge ?></td>
                         <td>
-                            <div style="display:flex;gap:6px">
+                            <div style="display:flex;gap:6px;flex-wrap:wrap">
                                 <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?>)" title="Lihat Detail">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
-                                <?php if($s->status == 'disetujui KK' || $s->status == 'ditolak dekan'): ?>
-                                    <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?>)" title="Teruskan ke Dekan">
+                                <?php 
+                                // ✅ Tombol approve/reject hanya untuk status "disetujui KK"
+                                if($s->status == 'disetujui KK'): 
+                                ?>
+                                    <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?>)" title="Setujui & Teruskan ke Dekan">
                                         <i class="fa-solid fa-check"></i>
                                     </button>
-                                    <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?>)" title="Tolak">
+                                    <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?>)" title="Tolak Pengajuan">
                                         <i class="fa-solid fa-times"></i>
                                     </button>
                                 <?php endif; ?>
@@ -267,16 +270,100 @@ function filterTable(status) {
 }
 
 function showDetail(id) {
-    const item = suratList.find(s => Number(s.id) === Number(id));
-    if (!item) { alert('Data tidak ditemukan'); return; }
-    
-    const content = `<div><div class="detail-row"><div class="detail-label">Nama Kegiatan:</div><div class="detail-value">${item.nama_kegiatan || '-'}</div></div><div class="detail-row"><div class="detail-label">Penyelenggara:</div><div class="detail-value">${item.penyelenggara || '-'}</div></div><div class="detail-row"><div class="detail-label">Status:</div><div class="detail-value">${item.status || '-'}</div></div></div>`;
-    document.getElementById('detailContent').innerHTML = content;
-    document.getElementById('detailModal').classList.add('show');
+    // ✅ Ambil detail via AJAX untuk data yang lebih lengkap
+    fetch(`<?= base_url('sekretariat/getDetailPengajuan/') ?>${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const item = data.data;
+                
+                // Format tanggal
+                const formatDate = (dateStr) => {
+                    if (!dateStr) return '-';
+                    const date = new Date(dateStr);
+                    return date.toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'});
+                };
+                
+                // Format currency
+                const formatCurrency = (amount) => {
+                    if (!amount) return '-';
+                    return new Intl.NumberFormat('id-ID', {
+                        style: 'currency',
+                        currency: 'IDR'
+                    }).format(amount);
+                };
+
+                // Tampilkan status yang singkat di modal
+                let displayStatus = item.status || '-';
+                if (item.status == 'disetujui KK') displayStatus = 'Menunggu';
+                else if (item.status == 'disetujui sekretariat') displayStatus = 'Disetujui';
+                else if (item.status == 'ditolak sekretariat') displayStatus = 'Ditolak';
+                
+                const content = `
+                    <div class="detail-row">
+                        <div class="detail-label">Nama Kegiatan</div>
+                        <div class="detail-value">${item.nama_kegiatan || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Penyelenggara</div>
+                        <div class="detail-value">${item.penyelenggara || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Jenis Pengajuan</div>
+                        <div class="detail-value">${item.jenis_pengajuan || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Pengajuan</div>
+                        <div class="detail-value">${formatDate(item.tanggal_pengajuan)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Kegiatan</div>
+                        <div class="detail-value">${formatDate(item.tanggal_kegiatan)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value"><strong>${displayStatus}</strong></div>
+                    </div>
+                    ${item.deskripsi_kegiatan ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Deskripsi Kegiatan</div>
+                        <div class="detail-value">${item.deskripsi_kegiatan}</div>
+                    </div>
+                    ` : ''}
+                    ${item.jumlah_peserta ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Jumlah Peserta</div>
+                        <div class="detail-value">${item.jumlah_peserta} orang</div>
+                    </div>
+                    ` : ''}
+                    ${item.anggaran ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Anggaran</div>
+                        <div class="detail-value">${formatCurrency(item.anggaran)}</div>
+                    </div>
+                    ` : ''}
+                    ${item.catatan_penolakan ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Alasan Penolakan</div>
+                        <div class="detail-value" style="color:#e74c3c">${item.catatan_penolakan}</div>
+                    </div>
+                    ` : ''}
+                `;
+                
+                document.getElementById('detailContent').innerHTML = content;
+                document.getElementById('detailModal').classList.add('show');
+            } else {
+                alert('Gagal memuat detail pengajuan');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memuat data');
+        });
 }
 
 function approveSurat(id) {
-    if (!confirm('Apakah Anda yakin ingin meneruskan pengajuan ini ke Dekan?')) return;
+    if (!confirm('Apakah Anda yakin ingin menyetujui dan meneruskan pengajuan ini ke Dekan?')) return;
     window.location.href = '<?= base_url("sekretariat/approve/") ?>' + id;
 }
 
@@ -288,7 +375,10 @@ function showRejectModal(id) {
 
 function confirmReject() {
     const notes = document.getElementById('rejectionNotes').value.trim();
-    if (!notes) { alert('Alasan penolakan harus diisi'); return; }
+    if (!notes) { 
+        alert('Alasan penolakan harus diisi'); 
+        return; 
+    }
     
     const form = document.createElement('form');
     form.method = 'POST';
@@ -297,21 +387,30 @@ function confirmReject() {
     const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
     const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
     const inpCsrf = document.createElement('input');
-    inpCsrf.type='hidden'; inpCsrf.name=csrfName; inpCsrf.value=csrfHash;
+    inpCsrf.type='hidden'; 
+    inpCsrf.name=csrfName; 
+    inpCsrf.value=csrfHash;
     form.appendChild(inpCsrf);
     
     const inpNotes = document.createElement('input');
-    inpNotes.type='hidden'; inpNotes.name='rejection_notes'; inpNotes.value=notes;
+    inpNotes.type='hidden'; 
+    inpNotes.name='rejection_notes'; 
+    inpNotes.value=notes;
     form.appendChild(inpNotes);
     
     document.body.appendChild(form);
     form.submit();
 }
 
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-function modalClickOutside(evt, id) { if (evt.target && evt.target.id === id) closeModal(id); }
+function closeModal(id) { 
+    document.getElementById(id).classList.remove('show'); 
+}
 
-// Grafik 3D
+function modalClickOutside(evt, id) { 
+    if (evt.target && evt.target.id === id) closeModal(id); 
+}
+
+// ✅ Grafik 3D - Data Hanya dari Sekretariat
 const ctx = document.getElementById('grafikSurat').getContext('2d');
 const fusionStyle3DPlugin = {
     id: 'fusionStyle3d',
@@ -325,8 +424,11 @@ const fusionStyle3DPlugin = {
                     if (height <= 1) return;
                     const offsetX = 15, offsetY = -15;
                     ctx.save();
+                    
+                    // Side gradient
                     const rightGradient = ctx.createLinearGradient(x + width/2, y, x + width/2 + offsetX, y + offsetY);
-                    let darkColor = datasetIndex === 0 ? 'rgba(0, 177, 253, 0.6)' : (datasetIndex === 1 ? 'rgba(0, 177, 253, 0.6)' : 'rgba(192, 57, 43, 0.6)');
+                    let darkColor = datasetIndex === 0 ? 'rgba(52, 152, 219, 0.7)' : 
+                                   (datasetIndex === 1 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)');
                     rightGradient.addColorStop(0, darkColor);
                     rightGradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
                     ctx.fillStyle = rightGradient;
@@ -337,10 +439,13 @@ const fusionStyle3DPlugin = {
                     ctx.lineTo(x + width/2, base);
                     ctx.closePath();
                     ctx.fill();
+                    
+                    // Top gradient
                     const topGradient = ctx.createLinearGradient(x - width/2, y, x + width/2 + offsetX, y + offsetY);
-                    let lightColor = datasetIndex === 0 ? 'rgba(162, 217, 206, 0.9)' : (datasetIndex === 1 ? 'rgba(200, 247, 197, 0.9)' : 'rgba(245, 183, 177, 0.9)');
+                    let lightColor = datasetIndex === 0 ? 'rgba(173, 216, 230, 0.95)' : 
+                                    (datasetIndex === 1 ? 'rgba(200, 247, 197, 0.95)' : 'rgba(245, 183, 177, 0.95)');
                     topGradient.addColorStop(0, lightColor);
-                    topGradient.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
+                    topGradient.addColorStop(1, 'rgba(255, 255, 255, 0.3)');
                     ctx.fillStyle = topGradient;
                     ctx.beginPath();
                     ctx.moveTo(x - width/2, y);
@@ -361,16 +466,62 @@ new Chart(ctx, {
     data: {
         labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
         datasets: [
-            {label: "Total", data: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(0, 177, 253, 0.6)', borderColor: 'rgba(4, 146, 207, 0.6)', borderWidth: 2, borderRadius: 6},
-            {label: "Disetujui", data: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(46, 204, 113, 0.85)', borderColor: 'rgba(46, 204, 113, 1)', borderWidth: 2, borderRadius: 6},
-            {label: "Ditolak", data: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(231, 76, 60, 0.85)', borderColor: 'rgba(231, 76, 60, 1)', borderWidth: 2, borderRadius: 6}
+            {
+                label: "Total", 
+                data: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>, 
+                backgroundColor: 'rgba(52, 152, 219, 0.85)', 
+                borderColor: 'rgba(52, 152, 219, 1)', 
+                borderWidth: 2, 
+                borderRadius: 6
+            },
+            {
+                label: "Disetujui", 
+                data: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>, 
+                backgroundColor: 'rgba(46, 204, 113, 0.85)', 
+                borderColor: 'rgba(46, 204, 113, 1)', 
+                borderWidth: 2, 
+                borderRadius: 6
+            },
+            {
+                label: "Ditolak", 
+                data: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>, 
+                backgroundColor: 'rgba(231, 76, 60, 0.85)', 
+                borderColor: 'rgba(231, 76, 60, 1)', 
+                borderWidth: 2, 
+                borderRadius: 6
+            }
         ]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {legend: {position: 'top', labels: {padding: 20, font: {size: 14, weight: '700'}, color: '#000000ff'}}, tooltip: {backgroundColor: 'rgba(44, 62, 80, 0.95)', padding: 16}},
-        scales: {x: {grid: {display: false}, ticks: {color: '#000000ff'}}, y: {beginAtZero: true, grid: {color: 'rgba(12, 7, 7, 0.08)'}, ticks: {color: '#95a5a6'}}},
+        plugins: {
+            legend: {
+                position: 'top', 
+                labels: {
+                    padding: 20, 
+                    font: {size: 14, weight: '700'}, 
+                    color: '#2c3e50'
+                }
+            }, 
+            tooltip: {
+                backgroundColor: 'rgba(44, 62, 80, 0.95)', 
+                padding: 16,
+                titleFont: {size: 14, weight: '700'},
+                bodyFont: {size: 13}
+            }
+        },
+        scales: {
+            x: {
+                grid: {display: false}, 
+                ticks: {color: '#2c3e50', font: {size: 12, weight: '600'}}
+            }, 
+            y: {
+                beginAtZero: true, 
+                grid: {color: 'rgba(149, 165, 166, 0.15)'}, 
+                ticks: {color: '#7f8c8d', font: {size: 12}}
+            }
+        },
         animation: {duration: 1800, easing: 'easeInOutQuart'}
     },
     plugins: [fusionStyle3DPlugin]

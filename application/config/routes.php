@@ -86,9 +86,21 @@ $route['surat/debug_eviden/(:num)'] = 'surat/debug_eviden/$1';
 | -------------------------------------------------------------------------
 */
 
-// Dekan routes
+// Dekan routes - UPDATED WITH NEW PAGES
 $route['dekan'] = 'dekan/index';
 $route['dekan/dashboard'] = 'dekan/index';
+$route['dekan/index'] = 'dekan/index';
+$route['dekan/index/(:any)'] = 'dekan/index/$1';
+$route['dekan/halaman_total'] = 'dekan/halaman_total';
+$route['dekan/halaman_disetujui'] = 'dekan/halaman_disetujui';
+$route['dekan/halaman_ditolak'] = 'dekan/halaman_ditolak';
+$route['dekan/halaman_pending'] = 'dekan/halaman_pending';
+$route['dekan/approve/(:num)'] = 'dekan/approve/$1';
+$route['dekan/reject/(:num)'] = 'dekan/reject/$1';
+$route['dekan/detail/(:num)'] = 'dekan/detail/$1';
+$route['dekan/laporan'] = 'dekan/laporan';
+$route['dekan/list_surat_tugas'] = 'dekan/list_surat_tugas';
+$route['dekan/filter/(:any)'] = 'dekan/filter/$1';
 $route['dekan/test'] = 'dekan/test';
 
 // Kaprodi routes

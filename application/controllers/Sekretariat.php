@@ -7,84 +7,264 @@ class Sekretariat extends CI_Controller {
         parent::__construct();
         $this->load->library('session');
         $this->load->database();
+        $this->load->model('Surat_model');
     }
-    
+
+    /* ================================
+       DASHBOARD
+    ================================= */
     public function index() {
         $tahun = $this->input->get('tahun') ?? date('Y');
         $data['tahun'] = $tahun;
 
-        // ✅ PERBAIKAN: Tampilkan surat yang DISETUJUI KK atau DITOLAK DEKAN
-        $this->db->where_in("status", ['disetujui KK', 'ditolak dekan']);
+        // Surat yang relevan bagi sekretariat
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where_in("status", ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
         $this->db->order_by("tanggal_pengajuan", "DESC");
         $data['surat_list'] = $this->db->get("surat")->result();
 
-        // ✅ STATISTIK YANG BENAR
-        // Total semua surat tahun ini
-        $data['total_surat'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
-                                        ->count_all_results('surat');
-        
-        // Menunggu: disetujui KK + ditolak dekan
-        $data['pending_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
-                                          ->where_in('status', ['disetujui KK', 'ditolak dekan'])
-                                          ->count_all_results('surat');
-        
-        // Disetujui sekretariat tahun ini
-        $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
-                                           ->where_in('status', ['disetujui dekan','disetujui KK','disetujui sekretariat'])
-                                           ->count_all_results('surat');
-            
-        // Ditolak sekretariat tahun ini
-        $data['rejected_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
-                                           ->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
-                                           ->count_all_results('surat');
+        // Statistik
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
+        $data['total_surat'] = $this->db->count_all_results('surat');
 
-        // ✅ GRAFIK BULANAN
+        // Pending (menunggu sekretariat)
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('status', 'disetujui KK');
+        $data['pending_count'] = $this->db->count_all_results('surat');
+
+        // Disetujui oleh dekan
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('status', 'disetujui dekan');
+        $data['approved_count'] = $this->db->count_all_results('surat');
+
+        // Ditolak oleh dekan
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('status', 'ditolak dekan');
+        $data['rejected_count'] = $this->db->count_all_results('surat');
+
+        // Grafik
         $total     = array_fill(0, 12, 0);
         $approved  = array_fill(0, 12, 0);
         $rejected  = array_fill(0, 12, 0);
+        $pending   = array_fill(0, 12, 0);
 
         $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
         $query = $this->db->get('surat')->result();
 
         foreach ($query as $row) {
             $month = (int)date('m', strtotime($row->tanggal_pengajuan)) - 1;
+
             $total[$month]++;
+
+            if ($row->status == 'disetujui KK') {
+                $pending[$month]++;
+            }
 
             if ($row->status == 'disetujui dekan') {
                 $approved[$month]++;
             }
-            if (in_array($row->status, ['ditolak KK', 'ditolak sekretariat'])) {
-            $rejected[$month]++;
-        }
+
+            if ($row->status == 'ditolak dekan') {
+                $rejected[$month]++;
+            }
         }
 
         $data['chart_total']    = $total;
         $data['chart_approved'] = $approved;
         $data['chart_rejected'] = $rejected;
+        $data['chart_pending']  = $pending;
 
         $this->load->view('sekretariat/dashboard', $data);
     }
-    
-    public function approve($id) {
-        $this->db->where('id', $id);
-        $this->db->update('surat', [
-            'status' => 'disetujui sekretariat'
-        ]);
 
-        $this->session->set_flashdata('success', 'Surat diteruskan ke dekan.');
-        redirect('sekretariat');
+    /* ================================
+       PENDING (Disetujui KK)
+    ================================= */
+    public function pending() {
+        $search = $this->input->get('search');
+        $tahun = $this->input->get('tahun') ?? date('Y');
+        
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('status', 'disetujui KK');
+        
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('nama_kegiatan', $search);
+            $this->db->or_like('penyelenggara', $search);
+            $this->db->or_like('jenis_pengajuan', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by("tanggal_pengajuan", "DESC");
+        $data['surat_list'] = $this->db->get("surat")->result();
+
+        $data['total_surat'] = count($data['surat_list']);
+        $data['judul'] = "Pengajuan Menunggu Persetujuan Sekretariat";
+        $data['role'] = "sekretariat";
+        $data['tahun'] = $tahun;
+
+        $this->load->view('sekretariat/halaman_pending', $data);
     }
 
-    public function reject($id) {
-        $notes = $this->input->post('rejection_notes');
-        
+    /* ================================
+       DISETUJUI DEKAN
+    ================================= */
+    public function disetujui() {
+        $search = $this->input->get('search');
+        $tahun = $this->input->get('tahun') ?? date('Y');
+
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('status', 'disetujui dekan');
+
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('nama_kegiatan', $search);
+            $this->db->or_like('penyelenggara', $search);
+            $this->db->or_like('jenis_pengajuan', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by("tanggal_pengajuan", "DESC");
+        $data['surat_list'] = $this->db->get("surat")->result();
+
+        $data['total_surat'] = count($data['surat_list']);
+        $data['judul'] = "Pengajuan Disetujui - Final Dekan";
+        $data['role'] = "sekretariat";
+        $data['tahun'] = $tahun;
+
+        $this->load->view('sekretariat/halaman_disetujui', $data);
+    }
+
+    /* ================================
+       DITOLAK DEKAN
+    ================================= */
+    public function ditolak() {
+        $search = $this->input->get('search');
+        $tahun = $this->input->get('tahun') ?? date('Y');
+
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('status', 'ditolak dekan');
+
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('nama_kegiatan', $search);
+            $this->db->or_like('penyelenggara', $search);
+            $this->db->or_like('jenis_pengajuan', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by("tanggal_pengajuan", "DESC");
+        $data['pengajuan_ditolak'] = $this->db->get("surat")->result();
+
+        $data['total_surat'] = count($data['pengajuan_ditolak']);
+        $data['judul'] = "Pengajuan Ditolak - Final Dekan";
+        $data['role'] = "sekretariat";
+        $data['tahun'] = $tahun;
+
+        $this->load->view('sekretariat/halaman_ditolak', $data);
+    }
+
+    /* ================================
+       TOTAL SEMUA PENGAJUAN
+    ================================= */
+    public function semua() {
+        $search = $this->input->get('search');
+        $status_filter = $this->input->get('status');
+        $tahun = $this->input->get('tahun') ?? date('Y');
+
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+
+        if (!empty($status_filter)) {
+            switch ($status_filter) {
+                case 'pending':
+                    $this->db->where('status', 'disetujui KK');
+                    break;
+                case 'approved':
+                    $this->db->where('status', 'disetujui dekan');
+                    break;
+                case 'rejected':
+                    $this->db->where('status', 'ditolak dekan');
+                    break;
+                default:
+                    $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
+                    break;
+            }
+        } else {
+            $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
+        }
+
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('nama_kegiatan', $search);
+            $this->db->or_like('penyelenggara', $search);
+            $this->db->or_like('jenis_pengajuan', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by("tanggal_pengajuan", "DESC");
+        $data['surat_list'] = $this->db->get("surat")->result();
+
+        $data['total_surat'] = count($data['surat_list']);
+        $data['judul'] = "Total Pengajuan - Sekretariat";
+        $data['role'] = "sekretariat";
+        $data['tahun'] = $tahun;
+        $data['status_filter'] = $status_filter;
+
+        $this->load->view('sekretariat/halaman_total', $data);
+    }
+
+    /* ================================
+       DETAIL MODAL (AJAX)
+    ================================= */
+    public function getDetailPengajuan($id) {
         $this->db->where('id', $id);
-        $this->db->update('surat', [
-            'status' => 'ditolak sekretariat',
-            'catatan_penolakan' => $notes
-        ]);
+        $pengajuan = $this->db->get('surat')->row();
         
-        $this->session->set_flashdata('success', 'Pengajuan ditolak');
-        redirect('sekretariat');
+        if ($pengajuan) {
+            echo json_encode([
+                'success' => true,
+                'data' => $pengajuan
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ]);
+        }
+    }
+
+    /* ================================
+       REALTIME DASHBOARD COUNTER
+    ================================= */
+    public function get_dashboard_counts() {
+        $tahun = $this->input->get('tahun') ?? date('Y');
+
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
+        $total = $this->db->count_all_results('surat');
+
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('status', 'disetujui KK');
+        $pending = $this->db->count_all_results('surat');
+
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('status', 'disetujui dekan');
+        $approved = $this->db->count_all_results('surat');
+
+        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('status', 'ditolak dekan');
+        $rejected = $this->db->count_all_results('surat');
+
+        $counts = [
+            'total' => $total,
+            'pending' => $pending,
+            'approved' => $approved,
+            'rejected' => $rejected
+        ];
+
+        header('Content-Type: application/json');
+        echo json_encode($counts);
     }
 }

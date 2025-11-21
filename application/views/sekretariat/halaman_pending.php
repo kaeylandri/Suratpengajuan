@@ -50,6 +50,8 @@
     .status-icon.pending{background:#fff3cd;color:#f39c12}
     .status-info h1{margin:0;color:#2c3e50;font-size:28px}
     .status-info p{margin:5px 0 0 0;color:#7f8c8d;font-size:16px}
+    .data-count-info {background:#e8f4fd;padding:10px 15px;border-radius:6px;margin-bottom:15px;font-size:14px;color:#2c3e50;border-left:4px solid #3498db;}
+    .debug-info {background:#fff3cd;padding:10px;border-radius:6px;margin-bottom:15px;font-size:12px;color:#856404;border-left:4px solid #ffc107;}
 </style>
 </head>
 <body>
@@ -87,14 +89,29 @@
     </div>
     <?php endif; ?>
 
+    <!-- Debug Info -->
+    <div class="debug-info">
+        <strong>Debug Info:</strong><br>
+        Total Data: <?= isset($total_surat) ? $total_surat : '0' ?><br>
+        Data Count: <?= isset($surat_list) ? count($surat_list) : '0' ?><br>
+        Status Filter: disetujui KK<br>
+        URL: <?= base_url('sekretariat/pending') ?>
+    </div>
+
     <!-- Tabel Pengajuan Menunggu -->
     <div class="card">
         <div class="card-header">
             <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Menunggu Persetujuan</h3>
         </div>
         
+        <!-- Info Jumlah Data -->
+        <div class="data-count-info">
+            <i class="fa-solid fa-info-circle"></i> 
+            Menampilkan <strong><?= isset($surat_list) ? count($surat_list) : '0' ?></strong> dari <strong><?= isset($total_surat) ? $total_surat : '0' ?></strong> pengajuan menunggu persetujuan
+        </div>
+        
         <!-- Search Box -->
-        <form method="get" action="<?= base_url('surat/sekretariat/pending') ?>">
+        <form method="get" action="<?= base_url('sekretariat/pending') ?>">
             <div class="search-container">
                 <div class="search-box">
                     <input 
@@ -114,7 +131,7 @@
                 </button>
                 
                 <?php if($this->input->get('search')): ?>
-                <a href="<?= base_url('surat/sekretariat/pending') ?>" class="btn-secondary" style="white-space:nowrap">
+                <a href="<?= base_url('sekretariat/pending') ?>" class="btn-secondary" style="white-space:nowrap">
                     <i class="fa-solid fa-refresh"></i> Reset
                 </a>
                 <?php endif; ?>
@@ -150,7 +167,12 @@
                         <td><?= $tgl_pengajuan ?></td>
                         <td><?= $tgl_kegiatan ?></td>
                         <td><?= htmlspecialchars($s->jenis_pengajuan ?? '-') ?></td>
-                        <td><span class="badge badge-pending"><?= ucwords($s->status ?? 'Menunggu') ?></span></td>
+                        <td>
+                            <!-- PERBAIKAN: Ganti status menjadi "Menunggu" bukan "disetujui KK" -->
+                            <span class="badge badge-pending">
+                                Menunggu
+                            </span>
+                        </td>
                         <td>
                             <div style="display:flex;gap:6px">
                                 <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?? 0 ?>)" title="Lihat Detail">
@@ -165,7 +187,9 @@
                             </div>
                         </td>
                     </tr>
-                    <?php endforeach; else: ?>
+                    <?php endforeach; 
+                    
+                    else: ?>
                     <tr>
                         <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
                             <i class="fa-solid fa-clock" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
@@ -176,7 +200,7 @@
                                     <?php if($this->input->get('search')): ?>
                                         Tidak ada pengajuan yang sesuai dengan pencarian "<?= htmlspecialchars($this->input->get('search')) ?>"
                                     <?php else: ?>
-                                        Tidak ada pengajuan yang menunggu persetujuan
+                                        Tidak ada pengajuan yang menunggu persetujuan (status: disetujui KK)
                                     <?php endif; ?>
                                 <?php else: ?>
                                     Data tidak valid
@@ -192,9 +216,9 @@
         <div class="pagination-info">
             Menampilkan: Pengajuan Menunggu Persetujuan 
             <?php if($this->input->get('search')): ?>
-                (Hasil pencarian: "<?= htmlspecialchars($this->input->get('search')) ?>")
+                (<?= isset($surat_list) ? count($surat_list) : '0' ?> data dari <?= isset($total_surat) ? $total_surat : '0' ?> total)
             <?php else: ?>
-                (<?= isset($total_surat) ? $total_surat : '0' ?> data)
+                (<?= isset($surat_list) ? count($surat_list) : '0' ?> data)
             <?php endif; ?>
         </div>
     </div>
@@ -235,7 +259,7 @@ const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($s
 let currentRejectId = null;
 
 function showDetail(id) {
-    const item = suratList.find(s => Number(s.id) === Number(id));
+    const item = suratList.find(s => s && Number(s.id) === Number(id));
     if (!item) { 
         alert('Data tidak ditemukan'); 
         return; 
@@ -265,7 +289,7 @@ function showDetail(id) {
             </div>
             <div class="detail-row">
                 <div class="detail-label">Status:</div>
-                <div class="detail-value">${item.status || 'Menunggu'}</div>
+                <div class="detail-value">Menunggu</div>
             </div>
         </div>`;
     document.getElementById('detailContent').innerHTML = content;
@@ -274,7 +298,7 @@ function showDetail(id) {
 
 function approveSurat(id) {
     if (!confirm('Apakah Anda yakin ingin menyetujui pengajuan ini?')) return;
-    window.location.href = '<?= base_url("surat/setujui/") ?>' + id;
+    window.location.href = '<?= base_url("sekretariat/approve/") ?>' + id;
 }
 
 function showRejectModal(id) {
@@ -292,11 +316,16 @@ function confirmReject() {
     
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = '<?= base_url("surat/tolak/") ?>' + currentRejectId;
+    form.action = '<?= base_url("sekretariat/reject/") ?>' + currentRejectId;
     
     const inpNotes = document.createElement('input');
-    inpNotes.type='hidden'; inpNotes.name='alasan_penolakan'; inpNotes.value=notes;
+    inpNotes.type='hidden'; inpNotes.name='rejection_notes'; inpNotes.value=notes;
     form.appendChild(inpNotes);
+    
+    const csrfToken = document.createElement('input');
+    csrfToken.type='hidden'; csrfToken.name='<?= $this->security->get_csrf_token_name() ?>'; 
+    csrfToken.value='<?= $this->security->get_csrf_hash() ?>';
+    form.appendChild(csrfToken);
     
     document.body.appendChild(form);
     form.submit();

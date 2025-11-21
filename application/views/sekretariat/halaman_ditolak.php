@@ -1,4 +1,3 @@
-<!-- Versi Sekretariat (Pengajuan Ditolak) -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -70,7 +69,7 @@
         </div>
         <div class="status-info">
             <h1>DITOLAK</h1>
-            <p><?= isset($total_surat) ? $total_surat : '0' ?> Pengajuan</p>
+            <p><?= $total_surat ?> Pengajuan</p>
         </div>
     </div>
 
@@ -111,14 +110,37 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- PHP Loop Sama Seperti Versi Kaprodi -->
-                    <?= "<?php include 'partials/sekretariat_ditolak_rows.php'; ?>" ?>
+                    <?php if(!empty($pengajuan_ditolak)): ?>
+                        <?php $no = 1; ?>
+                        <?php foreach($pengajuan_ditolak as $pengajuan): ?>
+                        <tr>
+                            <td><?= $no++ ?></td>
+                            <td><?= htmlspecialchars($pengajuan->nama_kegiatan) ?></td>
+                            <td><?= htmlspecialchars($pengajuan->penyelenggara) ?></td>
+                            <td><?= date('d/m/Y', strtotime($pengajuan->tanggal_pengajuan)) ?></td>
+                            <td><?= date('d/m/Y', strtotime($pengajuan->tanggal_kegiatan)) ?></td>
+                            <td><?= htmlspecialchars($pengajuan->jenis_pengajuan) ?></td>
+                            <td><span class="badge badge-rejected">Ditolak</span></td>
+                            <td>
+                                <button class="btn btn-detail" onclick="showDetail(<?= $pengajuan->id ?>)">
+                                    <i class="fa-solid fa-eye"></i> Detail
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="8" style="text-align:center;padding:20px;color:#7f8c8d">
+                                <i class="fa-solid fa-inbox"></i> Tidak ada data pengajuan yang ditolak
+                            </td>
+                        </tr>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
         <div class="pagination-info">
-            Menampilkan: Pengajuan Ditolak (<?= isset($total_surat) ? $total_surat : '0' ?> data)
+            Menampilkan: Pengajuan Ditolak (<?= $total_surat ?> data)
         </div>
     </div>
 </div>
@@ -130,12 +152,138 @@
             <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan</h3>
             <button onclick="closeModal('detailModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
         </div>
-        <div id="detailContent"></div>
+        <div id="detailContent">
+            <!-- Detail content akan diisi oleh JavaScript -->
+        </div>
     </div>
 </div>
 
 <script>
-// Seluruh script sama seperti versi kaprodi, hanya nama dashboard yang berbeda
+// Fungsi untuk menampilkan modal detail
+function showDetail(id) {
+    // AJAX request untuk mengambil data detail dari server
+    fetch(`<?= base_url('sekretariat/getDetailPengajuan/') ?>${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if(data.success) {
+                const pengajuan = data.data;
+                const detailContent = `
+                    <div class="detail-row">
+                        <div class="detail-label">Nama Kegiatan</div>
+                        <div class="detail-value">${pengajuan.nama_kegiatan}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Penyelenggara</div>
+                        <div class="detail-value">${pengajuan.penyelenggara}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Pengajuan</div>
+                        <div class="detail-value">${formatDate(pengajuan.tanggal_pengajuan)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Kegiatan</div>
+                        <div class="detail-value">${formatDate(pengajuan.tanggal_kegiatan)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Jenis Kegiatan</div>
+                        <div class="detail-value">${pengajuan.jenis_pengajuan}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value"><span class="badge badge-rejected">Ditolak</span></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Alasan Penolakan</div>
+                        <div class="detail-value" style="color:#e74c3c;font-weight:600">${pengajuan.alasan_penolakan || 'Tidak ada alasan spesifik'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Deskripsi Kegiatan</div>
+                        <div class="detail-value">${pengajuan.deskripsi_kegiatan || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Jumlah Peserta</div>
+                        <div class="detail-value">${pengajuan.jumlah_peserta || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Anggaran yang Diajukan</div>
+                        <div class="detail-value">${formatCurrency(pengajuan.anggaran)}</div>
+                    </div>
+                    ${pengajuan.catatan ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Catatan Tambahan</div>
+                        <div class="detail-value">${pengajuan.catatan}</div>
+                    </div>
+                    ` : ''}
+                `;
+                
+                document.getElementById('detailContent').innerHTML = detailContent;
+                document.getElementById('detailModal').classList.add('show');
+            } else {
+                alert('Gagal memuat data detail');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat memuat data');
+        });
+}
+
+// Fungsi format tanggal
+function formatDate(dateString) {
+    if(!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID');
+}
+
+// Fungsi format currency
+function formatCurrency(amount) {
+    if(!amount) return '-';
+    return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR'
+    }).format(amount);
+}
+
+// Fungsi untuk menutup modal
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('show');
+}
+
+// Fungsi untuk pencarian
+function handleSearch() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#tableBody tr');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const rowText = row.textContent.toLowerCase();
+        if (rowText.includes(searchTerm)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Update info pagination
+    const paginationInfo = document.querySelector('.pagination-info');
+    paginationInfo.textContent = `Menampilkan: Pengajuan Ditolak (${visibleCount} data)`;
+}
+
+// Event listener untuk pencarian saat menekan Enter
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        handleSearch();
+    }
+});
+
+// Event listener untuk menutup modal saat klik di luar
+window.addEventListener('click', function(e) {
+    const modal = document.getElementById('detailModal');
+    if (e.target === modal) {
+        closeModal('detailModal');
+    }
+});
 </script>
 
 </body>

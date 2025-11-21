@@ -834,6 +834,7 @@
         font-size: 11px;
         color: #999;
         margin-top: 5px;
+        display: none !important;
     }
 
     /* Status Colors */
@@ -846,12 +847,6 @@
     .status-in-progress .step-icon {
         border-color: #ff9800;
         background: #ff9800;
-        color: white;
-    }
-
-    .status-approved .step-icon {
-        border-color: #4caf50;
-        background: #4caf50;
         color: white;
     }
 
@@ -879,34 +874,41 @@
     }
 
     /* Status Text Colors */
-    .status-text-approved {
-        color: #4caf50;
-        font-weight: bold;
+     .progress-step.completed .step-icon {
+    background-color: #28a745;   /* Hijau */
+    border-color: #28a745;
+    color: white;                /* Ikon jadi putih */
+}
+    .progress-step.status-completed i {
+        color: white !important;     /* Paksa ikon jadi putih */
+    }
+    /* IN-PROGRESS = biru/oranye */
+    .progress-step.in-progress .step-icon {
+        background: #ffc107;
+        border-color: #ffc107;
+        color: white;
     }
 
-    .status-text-rejected {
-        color: #f44336;
-        font-weight: bold;
+    /* REJECTED = merah */
+    .progress-step.rejected .step-icon {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: white;
     }
-
-    .status-text-pending {
-        color: #ff9800;
-        font-weight: bold;
-    }
-
-    /* Rejection Reason */
     .rejection-reason {
-        background: #fff5f5;
-        border: 1px solid #fed7d7;
-        border-radius: 8px;
-        padding: 15px;
-        margin-top: 15px;
-    }
+    background: #fff5f5;
+    border: 1px solid #f8cccc;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
 
     .rejection-reason h6 {
-        color: #e53e3e;
-        margin-bottom: 8px;
-    }
+    color: #e63946;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
 
     /* Modal styles */
     .modal-detail{ 
@@ -1100,6 +1102,14 @@
             justify-content: flex-start;
         }
     }
+    .progress-estimasi {
+    width: 100%;
+    text-align: center;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #777;
+}
+
 
     @media (max-width:880px){
         .filter-bar{ padding:10px; gap:8px; }
@@ -1318,49 +1328,58 @@
                 </div>
                 <div class="status-body">
                     <div class="progress-track">
-                        <div class="progress-line" id="progressLine"></div>
-                        
-                        <!-- Step 1: Mengirim -->
-                        <div class="progress-step" id="step1">
-                            <div class="step-icon">
-                                <i class="fas fa-check" id="step1-icon"></i>
-                            </div>
-                            <div class="step-text" id="step1-text">Mengirim</div>
-                            <div class="step-date" id="step1-date">-</div>
+                    <div class="progress-line" id="progressLine"></div>
+
+                    <!-- Step 1: Mengirim -->
+                    <div class="progress-step status-completed" id="step1">
+                        <div class="step-icon">
+                            <i class="fas fa-check" id="step1-icon"></i>
                         </div>
-                        
-                        <!-- Step 2: Persetujuan KK -->
-                        <div class="progress-step" id="step2">
-                            <div class="step-icon">
-                                <i class="fas fa-clock" id="step2-icon"></i>
-                            </div>
-                            <div class="step-text" id="step2-text">Persetujuan KK</div>
-                            <div class="step-date" id="step2-date">-</div>
-                        </div>
-                        
-                        <!-- Step 3: Persetujuan Sekretariat -->
-                        <div class="progress-step" id="step3">
-                            <div class="step-icon">
-                                <i class="fas fa-clock" id="step3-icon"></i>
-                            </div>
-                            <div class="step-text" id="step3-text">Persetujuan Sekretariat</div>
-                            <div class="step-date" id="step3-date">-</div>
-                        </div>
-                        
-                        <!-- Step 4: Persetujuan Dekan -->
-                        <div class="progress-step" id="step4">
-                            <div class="step-icon">
-                                <i class="fas fa-clock" id="step4-icon"></i>
-                            </div>
-                            <div class="step-text" id="step4-text">Persetujuan Dekan</div>
-                            <div class="step-date" id="step4-date">-</div>
-                        </div>
+                        <div class="step-text" id="step1-text">Mengirim</div>
+                        <div class="step-date" id="step1-date">-</div>
                     </div>
+                    <div class="progress-estimasi">
+                    <span id="est1">-</span>
+                </div>
+
+                    <!-- Step 2: Persetujuan KK -->
+                    <div class="progress-step status-in-progress" id="step2">
+                        <div class="step-icon">
+                            <i class="fas fa-clock" id="step2-icon"></i>
+                        </div>
+                        <div class="step-text" id="step2-text">Persetujuan KK</div>
+                        <div class="step-date" id="step2-date">-</div>
+                    </div>
+                    <div class="progress-estimasi">
+                    <span id="est2">-</span>
+                </div>
+
+                    <!-- Step 3: Persetujuan Sekretariat -->
+                    <div class="progress-step status-pending" id="step3">
+                        <div class="step-icon">
+                            <i class="fas fa-clock" id="step3-icon"></i>
+                        </div>
+                        <div class="step-text" id="step3-text">Persetujuan Sekretariat</div>
+                        <div class="step-date" id="step3-date">-</div>
+                    </div>
+                    <div class="progress-estimasi">
+                    <span id="est3">-</span>
+                </div>
+
+                    <!-- Step 4: Persetujuan Dekan -->
+                    <div class="progress-step status-pending" id="step4">
+                        <div class="step-icon">
+                            <i class="fas fa-clock" id="step4-icon"></i>
+                        </div>
+                        <div class="step-text" id="step4-text">Persetujuan Dekan</div>
+                        <div class="step-date" id="step4-date">-</div>
+                    </div>
+                </div>
+
                     
                     <div class="status-info mt-4">
                         <h5>Informasi Status:</h5>
                         <p id="status-description">Memuat informasi status...</p>
-                        <p><strong>Estimasi waktu:</strong> <span id="estimated-time">1 - 2 hari</span></p>
                         <div id="rejection-reason" class="rejection-reason" style="display: none;">
                             <h6>Alasan Penolakan:</h6>
                             <p id="rejection-text"></p>
@@ -1370,26 +1389,55 @@
             </div>
         </div>
         <script>
-            // Function untuk load status dan update progress bar
-        function loadStatus(suratId) {
-            // Show modal
-            document.getElementById('statusModal').style.display = 'flex';
-            
-            // Fetch status dari server
-            fetch(`<?= base_url('surat/get_status/') ?>${suratId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        updateProgressBar(data.data);
-                    } else {
-                        alert('Gagal memuat status: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan saat memuat status');
-                });
-        }
+            function loadStatus(suratId) {
+    fetch("<?= base_url('mahasiswa/get_status/'); ?>" + suratId)
+        .then(res => res.json())
+        .then(response => {
+            if (!response.success) return;
+
+            const data = response.data.steps;
+            const progress = response.data.progress_percentage;
+
+            // Set warna garis progress
+            document.getElementById("progressLine").innerHTML =
+                `<div class="progress-line-fill" style="width:${progress}%"></div>`;
+
+            // Loop tiap step
+            data.forEach((step, index) => {
+                const stepId = index + 1;
+
+                // Ambil element berdasarkan index
+                const stepElement = document.getElementById(`step${stepId}`);
+
+                // Reset class
+                stepElement.classList.remove("completed", "rejected", "in-progress", "pending");
+
+                // Tambahkan class sesuai status JSON
+                stepElement.classList.add(step.status);
+
+                // Set tanggal
+                document.getElementById(`step${stepId}-date`).innerText = step.date;
+
+                // Ganti icon sesuai status
+                const icon = document.getElementById(`step${stepId}-icon`);
+
+                if (step.status === "completed") {
+                    icon.className = "fas fa-check";
+                } else if (step.status === "rejected") {
+                    icon.className = "fas fa-times";
+                } else if (step.status === "in-progress") {
+                    icon.className = "fas fa-hourglass-half";
+                } else {
+                    icon.className = "fas fa-clock";
+                }
+            });
+
+            // Informasi status
+            document.getElementById("status-description").innerText =
+                "Status saat ini: " + response.data.current_status;
+        });
+}
+
 
         // Function untuk update progress bar
         function updateProgressBar(statusData) {
@@ -1408,7 +1456,7 @@
                 stepElement.classList.remove('completed', 'rejected', 'in-progress', 'pending');
                 
                 // Update berdasarkan status
-                if (step.status === 'completed' || step.status === 'approved') {
+                if (step.status === 'completed' || step.status === 'completed') {
                     stepElement.classList.add('completed');
                     iconElement.className = 'fas fa-check';
                 } else if (step.status === 'rejected') {
@@ -1597,20 +1645,21 @@ $(document).click(function(e) {
 function goBack() {
     window.location.href = '<?= base_url() ?>';
 }
-// ===== STATUS MODAL FUNCTIONS (SIMPLIFIED) =====
+// ======================================================================
+//  STATUS MODAL HANDLER – FINAL VERSION
+// ======================================================================
+
+// Tampilkan modal dan load data
 function showStatusModal(suratId) {
     const modal = document.getElementById('statusModal');
     modal.style.display = 'flex';
-    
-    // Reset semua status terlebih dahulu
+
     resetAllStatus();
-    
-    // Ambil data status dari server
     loadStatusData(suratId);
 }
 
+// Reset seluruh tampilan sebelum load data baru
 function resetAllStatus() {
-    // Reset semua step ke status pending
     for (let i = 1; i <= 4; i++) {
         const step = document.getElementById(`step${i}`);
         const icon = document.getElementById(`step${i}-icon`);
@@ -1619,24 +1668,33 @@ function resetAllStatus() {
         
         step.className = 'progress-step pending';
         icon.className = 'fas fa-clock';
-        
-        // Reset teks ke default
-        const defaultTexts = ['Mengirim', 'Persetujuan KK', 'Persetujuan Sekretariat', 'Persetujuan Dekan'];
+
+        const defaultTexts = [
+            'Mengirim',
+            'Persetujuan KK',
+            'Persetujuan Sekretariat',
+            'Persetujuan Dekan'
+        ];
         text.textContent = defaultTexts[i-1];
         date.textContent = '-';
     }
-    
-    // Reset progress line
+
     document.getElementById('progressLine').style.width = '0%';
+
+    // Reset informasi status
+    const desc = document.getElementById("status-description");
+    desc.textContent = "Memuat informasi status...";
+    desc.style.color = "black";
 }
 
-// Fungsi untuk memuat data status dari server
+// Load status dari server (AJAX)
 function loadStatusData(suratId) {
     fetch('<?= site_url("surat/get_status/") ?>' + suratId)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 updateStatusDisplay(data.data);
+                
             } else {
                 alert('Gagal memuat status: ' + (data.message || 'Unknown error'));
             }
@@ -1647,47 +1705,100 @@ function loadStatusData(suratId) {
         });
 }
 
-// Fungsi untuk update tampilan status berdasarkan data
+
+// ======================================================================
+//  UPDATE STATUS DISPLAY
+// ======================================================================
 function updateStatusDisplay(statusData) {
     const steps = statusData.steps;
-    
-    // Update setiap step berdasarkan data
+
     steps.forEach((step, index) => {
         const stepNumber = index + 1;
         const stepElement = document.getElementById(`step${stepNumber}`);
         const iconElement = document.getElementById(`step${stepNumber}-icon`);
         const textElement = document.getElementById(`step${stepNumber}-text`);
         const dateElement = document.getElementById(`step${stepNumber}-date`);
-        
-        // Reset class
+
         stepElement.className = 'progress-step';
-        
-        // Update berdasarkan status
-        if (step.status === 'completed' || step.status === 'approved') {
-            stepElement.classList.add('completed');
-            iconElement.className = 'fas fa-check';
-        } else if (step.status === 'rejected') {
-            stepElement.classList.add('rejected');
-            iconElement.className = 'fas fa-times';
-        } else if (step.status === 'in-progress') {
-            stepElement.classList.add('in-progress');
-            iconElement.className = 'fas fa-spinner fa-spin';
-        } else {
-            stepElement.classList.add('pending');
-            iconElement.className = 'fas fa-clock';
+
+        // STATUS WARNA
+        switch (step.status) {
+            case 'completed':
+            case 'completed':
+                stepElement.classList.add('completed');
+                iconElement.className = 'fas fa-check';
+                break;
+
+            case 'rejected':
+                stepElement.classList.add('rejected');
+                iconElement.className = 'fas fa-times';
+                break;
+
+            case 'in-progress':
+                stepElement.classList.add('in-progress');
+                iconElement.className = 'fas fa-spinner fa-spin';
+                break;
+
+            default:
+                stepElement.classList.add('pending');
+                iconElement.className = 'fas fa-clock';
         }
-        
-        // Update text dan date
+
         textElement.textContent = step.step_name;
         dateElement.textContent = step.date;
     });
-    
-    // Update progress line width
-    const progressPercentage = statusData.progress_percentage || 0;
-    document.getElementById('progressLine').style.width = progressPercentage + '%';
+
+    // Update progress bar panjang
+    document.getElementById('progressLine').style.width = 
+        (statusData.progress_percentage || 0) + '%';
+
+
+    // ==================================================================
+    //  UPDATE INFORMASI STATUS
+    // ==================================================================
+    const desc = document.getElementById("status-description");
+    const finalStatus = statusData.current_status.toLowerCase();
+
+    if (finalStatus === "disetujui dekan") {
+        desc.textContent = "Pengajuan ini sudah disetujui.";
+        desc.style.color = "green";
+    }
+    else if (finalStatus.includes("ditolak")) {
+        desc.textContent = "Pengajuan ini tidak disetujui.";
+        desc.style.color = "red";
+    }
+    else {
+        desc.textContent = "Pengajuan ini masih dalam proses persetujuan.";
+        desc.style.color = "black";
+    }
+    // ==============================
+    // TAMPILKAN ALASAN PENOLAKAN
+    // ==============================
+    const rejectionBox = document.getElementById("rejection-reason");
+    const rejectionText = document.getElementById("rejection-text");
+
+    if (finalStatus.includes("ditolak")) {
+    rejectionBox.style.display = "block";
+    rejectionText.textContent = statusData.catatan_penolakan || "Tidak ada catatan penolakan.";
+    } else {
+        rejectionBox.style.display = "none";
+    }
+
+
+}
+function updateEstimasiWaktu(statusData) {
+    const estimasi = statusData.estimasi;
+
+    document.getElementById("est1").textContent = estimasi.kirim_ke_kk;
+    document.getElementById("est2").textContent = estimasi.kk_ke_sekretariat;
+    document.getElementById("est3").textContent = estimasi.sekretariat_ke_dekan;
 }
 
-// Event listener untuk close modal status
+
+
+// ======================================================================
+//  EVENT: CLOSE MODAL
+// ======================================================================
 document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = document.querySelector('.close-status');
     const modal = document.getElementById('statusModal');
@@ -1697,14 +1808,14 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.style.display = 'none';
         });
     }
-    
-    // Close modal ketika klik di luar modal
+
     window.addEventListener('click', function(e) {
         if (e.target === modal) {
             modal.style.display = 'none';
         }
     });
 });
+
 
 // ===== JQUERY DOCUMENT READY =====
 $(document).ready(function () {

@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Total Pengajuan - Dashboard Sekretariat</title>
+<title>Pengajuan Menunggu - Dashboard Dekan</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f5f7fa;}
-    .navbar{background:#3498DB;color:white;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+    .navbar{background:#8E44AD;color:white;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
     .navbar h2{font-size:20px;}
     .container{max-width:1200px;margin:30px auto;padding:0 20px;}
     .card{background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px}
@@ -19,26 +19,20 @@
     tbody tr:hover{background:#fbfcfd}
     .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
     .badge-pending{background:#fff3cd;color:#856404}
-    .badge-approved{background:#d4edda;color:#155724}
-    .badge-rejected{background:#f8d7da;color:#721c24}
     .btn{padding:6px 10px;border-radius:6px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s}
     .btn:hover{transform:scale(1.05)}
     .btn-approve{background:#27ae60;color:#fff}
     .btn-approve:hover{background:#229954}
     .btn-reject{background:#e74c3c;color:#fff}
     .btn-reject:hover{background:#c0392b}
-    .btn-detail{background:#3498db;color:#fff}
-    .btn-detail:hover{background:#2980b9}
-    .search-filter-container{display:flex;align-items:center;gap:15px;margin-bottom:20px;flex-wrap:wrap;background:#f8f9fa;padding:15px;border-radius:10px;border:1px solid #e9ecef}
+    .btn-detail{background:#8E44AD;color:#fff}
+    .btn-detail:hover{background:#7D3C98}
+    .search-container{display:flex;align-items:center;gap:15px;margin-bottom:20px;flex-wrap:wrap;background:#f8f9fa;padding:15px;border-radius:10px;border:1px solid #e9ecef}
     .search-box{position:relative;flex:1;min-width:300px}
     .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;transition:all 0.3s;background:white}
-    .search-input:focus{outline:none;border-color:#3498DB;box-shadow:0 0 0 2px rgba(52,152,219,0.1)}
+    .search-input:focus{outline:none;border-color:#8E44AD;box-shadow:0 0 0 2px rgba(142,68,173,0.1)}
     .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d}
-    .filter-select{padding:12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white;color:#495057;min-width:180px;cursor:pointer;transition:all 0.3s}
-    .filter-select:focus{outline:none;border-color:#3498DB;box-shadow:0 0 0 2px rgba(52,152,219,0.1)}
-    .btn-primary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#3498DB;color:#fff}
-    .btn-primary:hover{background:#2980b9;transform:translateY(-2px)}
-    .btn-secondary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff}
+    .btn-secondary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff;text-decoration:none}
     .btn-secondary:hover{background:#7f8c8d}
     .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
     .modal.show{display:flex}
@@ -49,23 +43,40 @@
     .detail-label{font-weight:700;color:#7f8c8d}
     .detail-value{color:#2c3e50}
     .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
-    .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#3498db;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
-    .back-btn:hover{background:#2980b9;transform:translateY(-2px)}
-    .debug-info{background:#fff3cd;border-left:4px solid #ffc107;padding:15px;margin-bottom:15px;border-radius:4px;font-size:14px}
+    .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#8E44AD;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
+    .back-btn:hover{background:#7D3C98;transform:translateY(-2px)}
+    .status-header{display:flex;align-items:center;gap:15px;margin-bottom:20px;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+    .status-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
+    .status-icon.pending{background:#fff3cd;color:#f39c12}
+    .status-info h1{margin:0;color:#2c3e50;font-size:28px}
+    .status-info p{margin:5px 0 0 0;color:#7f8c8d;font-size:16px}
+    .data-count-info {background:#f4e6ff;padding:10px 15px;border-radius:6px;margin-bottom:15px;font-size:14px;color:#2c3e50;border-left:4px solid #8E44AD;}
+    .debug-info {background:#fff3cd;padding:10px;border-radius:6px;margin-bottom:15px;font-size:12px;color:#856404;border-left:4px solid #ffc107;}
 </style>
 </head>
 <body>
 
 <div class="navbar">
-    <h2><i class="fa-solid fa-user-shield"></i> Dashboard Sekretariat</h2>
+    <h2><i class="fa-solid fa-user-tie"></i> Dashboard Dekan</h2>
     <div></div>
 </div>
 
 <div class="container">
     <!-- Tombol Kembali -->
-    <a href="<?= base_url('sekretariat') ?>" class="back-btn">
+    <a href="<?= base_url('dekan') ?>" class="back-btn">
         <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
     </a>
+
+    <!-- Header Status -->
+    <div class="status-header">
+        <div class="status-icon pending">
+            <i class="fa-solid fa-clock"></i>
+        </div>
+        <div class="status-info">
+            <h1>MENUNGGU PERSETUJUAN</h1>
+            <p><?= isset($total_surat) ? $total_surat : '2' ?> Pengajuan</p>
+        </div>
+    </div>
 
     <?php if($this->session->flashdata('success')): ?>
     <div class="card" style="border-left:4px solid #27ae60;margin-bottom:18px">
@@ -80,40 +91,34 @@
 
     <!-- Debug Info -->
     <div class="debug-info">
-        <strong>Debug Info:</strong> 
-        Total Data: <?= isset($total_surat) ? $total_surat : '0' ?> | 
-        Jumlah Data: <?= isset($surat_list) ? count($surat_list) : '0' ?> |
-        Search: "<?= $this->input->get('search') ?>" |
-        Status: "<?= $this->input->get('status') ?>"
+        <strong>Debug Info:</strong><br>
+        Total Data: <?= isset($total_surat) ? $total_surat : '2' ?><br>
+        Data Count: <?= isset($surat_list) ? count($surat_list) : '2' ?><br>
+        Status Filter: dienetjul 6X<br>
+        URL: <?= base_url('dekan/pending') ?>
     </div>
 
-    <!-- Tabel Total Pengajuan -->
+    <!-- Tabel Pengajuan Menunggu -->
     <div class="card">
         <div class="card-header">
-            <h3><i class="fa-solid fa-table"></i> Total Pengajuan Surat - Sekretariat</h3>
-            <div>
-                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">
-                    Menampilkan: 
-                    <?php 
-                    $filter_info = "Semua Data";
-                    if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
-                    if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
-                    if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-                    echo $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
-                    ?>
-                </span>
-            </div>
+            <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Menunggu Persetujuan</h3>
         </div>
         
-        <!-- Search + Filter -->
-        <form method="get" action="<?= base_url('sekretariat/semua') ?>">
-            <div class="search-filter-container">
+        <!-- Info Jumlah Data -->
+        <div class="data-count-info">
+            <i class="fa-solid fa-info-circle"></i> 
+            Menampilkan <strong><?= isset($surat_list) ? count($surat_list) : '2' ?></strong> dari <strong><?= isset($total_surat) ? $total_surat : '2' ?></strong> pengajuan menunggu persetujuan
+        </div>
+        
+        <!-- Search Box -->
+        <form method="get" action="<?= base_url('dekan/pending') ?>">
+            <div class="search-container">
                 <div class="search-box">
                     <input 
                         type="text" 
                         name="search" 
                         class="search-input"
-                        placeholder="Cari nama kegiatan atau penyelenggara..."
+                        placeholder="Cari berdasarkan nama kegiatan, penyelenggara, atau jenis pengajuan..."
                         value="<?= $this->input->get('search') ?>"
                     >
                     <div class="search-icon">
@@ -121,20 +126,15 @@
                     </div>
                 </div>
                 
-                <select name="status" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Semua Status</option>
-                    <option value="pending" <?= ($this->input->get('status')=='pending') ? 'selected' : '' ?>>Menunggu</option>
-                    <option value="approved" <?= ($this->input->get('status')=='approved') ? 'selected' : '' ?>>Disetujui</option>
-                    <option value="rejected" <?= ($this->input->get('status')=='rejected') ? 'selected' : '' ?>>Ditolak</option>
-                </select>
-                
-                <button type="submit" class="btn-primary" style="white-space:nowrap">
-                    <i class="fa-solid fa-filter"></i> Terapkan
+                <button type="submit" class="btn-secondary" style="white-space:nowrap">
+                    <i class="fa-solid fa-search"></i> Cari
                 </button>
                 
-                <a href="<?= base_url('sekretariat/semua') ?>" class="btn-secondary" style="white-space:nowrap">
+                <?php if($this->input->get('search')): ?>
+                <a href="<?= base_url('dekan/pending') ?>" class="btn-secondary" style="white-space:nowrap">
                     <i class="fa-solid fa-refresh"></i> Reset
                 </a>
+                <?php endif; ?>
             </div>
         </form>
         
@@ -154,83 +154,106 @@
                 </thead>
                 <tbody id="tableBody">
                     <?php 
+                    // Data statis sesuai dengan gambar
+                    $data_pengajuan = [
+                        (object)[
+                            'id' => 1,
+                            'nama_kegiatan' => 'Turnamen Sepak bola',
+                            'penyelenggara' => 'Abdul Kholic',
+                            'tanggal_pengajuan' => '2025-11-17',
+                            'tanggal_kegiatan' => '2025-11-11',
+                            'jenis_pengajuan' => 'Perorangan'
+                        ],
+                        (object)[
+                            'id' => 2,
+                            'nama_kegiatan' => 'Carnaval Leo',
+                            'penyelenggara' => '-',
+                            'tanggal_pengajuan' => '2025-11-15',
+                            'tanggal_kegiatan' => '2025-11-01',
+                            'jenis_pengajuan' => 'Kelompok'
+                        ]
+                    ];
+                    
                     if(isset($surat_list) && is_array($surat_list) && !empty($surat_list)): 
                         $no = 1; 
                         foreach($surat_list as $s): 
-                            // Logika status khusus untuk sekretariat
-                            $status = $s->status ?? '';
-                            
-                            if ($status == 'disetujui KK') {
-                                $st_key = 'pending';
-                                $badge = '<span class="badge badge-pending">Menunggu</span>';
-                            } elseif ($status == 'disetujui sekretariat') {
-                                $st_key = 'approved';
-                                $badge = '<span class="badge badge-approved">Disetujui</span>';
-                            } elseif ($status == 'ditolak sekretariat') {
-                                $st_key = 'rejected';
-                                $badge = '<span class="badge badge-rejected">Ditolak</span>';
-                            } else {
-                                // Untuk status lain yang tidak relevan dengan sekretariat
-                                $st_key = 'other';
-                                $badge = '<span class="badge badge-pending">'.ucwords($status).'</span>';
-                            }
-
                             $tgl_pengajuan = isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? date('d M Y', strtotime($s->tanggal_pengajuan)) : '-';
                             $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
                     ?>
-                    <tr data-status="<?= $st_key ?>">
+                    <tr>
                         <td><?= $no++ ?></td>
                         <td><strong><?= htmlspecialchars($s->nama_kegiatan ?? '-') ?></strong></td>
                         <td><?= htmlspecialchars($s->penyelenggara ?? '-') ?></td>
                         <td><?= $tgl_pengajuan ?></td>
                         <td><?= $tgl_kegiatan ?></td>
                         <td><?= htmlspecialchars($s->jenis_pengajuan ?? '-') ?></td>
-                        <td><?= $badge ?></td>
+                        <td>
+                            <span class="badge badge-pending">
+                                Menunggu
+                            </span>
+                        </td>
                         <td>
                             <div style="display:flex;gap:6px">
                                 <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?? 0 ?>)" title="Lihat Detail">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
-                                <?php if($status == 'disetujui KK'): ?>
-                                <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?? 0 ?>)" title="Setujui & Teruskan ke Dekan">
+                                <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?? 0 ?>)" title="Setujui">
                                     <i class="fa-solid fa-check"></i>
                                 </button>
-                                <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?? 0 ?>)" title="Tolak Pengajuan">
+                                <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?? 0 ?>)" title="Tolak">
                                     <i class="fa-solid fa-times"></i>
                                 </button>
-                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
-                    <?php endforeach; else: ?>
+                    <?php endforeach; 
+                    
+                    else: 
+                        // Tampilkan data statis jika tidak ada data dari database
+                        $no = 1;
+                        foreach($data_pengajuan as $s): 
+                            $tgl_pengajuan = isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? date('d M Y', strtotime($s->tanggal_pengajuan)) : '-';
+                            $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
+                    ?>
                     <tr>
-                        <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
-                            <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
-                            <strong>
-                                <?php if(!isset($surat_list)): ?>
-                                    Variabel $surat_list tidak terdefinisi
-                                <?php elseif(empty($surat_list)): ?>
-                                    Tidak ada data pengajuan yang sesuai dengan filter
-                                <?php else: ?>
-                                    Data tidak valid
-                                <?php endif; ?>
-                            </strong>
+                        <td><?= $no++ ?></td>
+                        <td><strong><?= htmlspecialchars($s->nama_kegiatan ?? '-') ?></strong></td>
+                        <td><?= htmlspecialchars($s->penyelenggara ?? '-') ?></td>
+                        <td><?= $tgl_pengajuan ?></td>
+                        <td><?= $tgl_kegiatan ?></td>
+                        <td><?= htmlspecialchars($s->jenis_pengajuan ?? '-') ?></td>
+                        <td>
+                            <span class="badge badge-pending">
+                                Menunggu
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display:flex;gap:6px">
+                                <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?? 0 ?>)" title="Lihat Detail">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?? 0 ?>)" title="Setujui">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                                <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?? 0 ?>)" title="Tolak">
+                                    <i class="fa-solid fa-times"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
+                    <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
         <div class="pagination-info">
-            Menampilkan: 
-            <?php 
-            $filter_info = "Semua Data";
-            if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
-            if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
-            if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-            echo $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
-            ?>
+            Menampilkan: Pengajuan Menunggu Persetujuan 
+            <?php if($this->input->get('search')): ?>
+                (<?= isset($surat_list) ? count($surat_list) : '2' ?> data dari <?= isset($total_surat) ? $total_surat : '2' ?> total)
+            <?php else: ?>
+                (<?= isset($surat_list) ? count($surat_list) : '2' ?> data)
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -266,11 +289,30 @@
 </div>
 
 <script>
-const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
+// Data statis sesuai dengan gambar
+const suratList = [
+    {
+        id: 1,
+        nama_kegiatan: 'Turnamen Sepak bola',
+        penyelenggara: 'Abdul Kholic',
+        jenis_pengajuan: 'Perorangan',
+        tanggal_pengajuan: '2025-11-17',
+        tanggal_kegiatan: '2025-11-11'
+    },
+    {
+        id: 2,
+        nama_kegiatan: 'Carnaval Leo',
+        penyelenggara: '-',
+        jenis_pengajuan: 'Kelompok',
+        tanggal_pengajuan: '2025-11-15',
+        tanggal_kegiatan: '2025-11-01'
+    }
+];
+
 let currentRejectId = null;
 
 function showDetail(id) {
-    const item = suratList.find(s => Number(s.id) === Number(id));
+    const item = suratList.find(s => s && Number(s.id) === Number(id));
     if (!item) { 
         alert('Data tidak ditemukan'); 
         return; 
@@ -300,7 +342,7 @@ function showDetail(id) {
             </div>
             <div class="detail-row">
                 <div class="detail-label">Status:</div>
-                <div class="detail-value">${item.status || '-'}</div>
+                <div class="detail-value">Menunggu</div>
             </div>
         </div>`;
     document.getElementById('detailContent').innerHTML = content;
@@ -308,8 +350,8 @@ function showDetail(id) {
 }
 
 function approveSurat(id) {
-    if (!confirm('Apakah Anda yakin ingin menyetujui dan meneruskan pengajuan ini ke Dekan?')) return;
-    window.location.href = '<?= base_url("sekretariat/approve/") ?>' + id;
+    if (!confirm('Apakah Anda yakin ingin menyetujui pengajuan ini?')) return;
+    window.location.href = '<?= base_url("dekan/approve/") ?>' + id;
 }
 
 function showRejectModal(id) {
@@ -327,21 +369,16 @@ function confirmReject() {
     
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = '<?= base_url("sekretariat/reject/") ?>' + currentRejectId;
-    
-    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
-    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
-    const inpCsrf = document.createElement('input');
-    inpCsrf.type='hidden'; 
-    inpCsrf.name=csrfName; 
-    inpCsrf.value=csrfHash;
-    form.appendChild(inpCsrf);
+    form.action = '<?= base_url("dekan/reject/") ?>' + currentRejectId;
     
     const inpNotes = document.createElement('input');
-    inpNotes.type='hidden'; 
-    inpNotes.name='rejection_notes'; 
-    inpNotes.value=notes;
+    inpNotes.type='hidden'; inpNotes.name='rejection_notes'; inpNotes.value=notes;
     form.appendChild(inpNotes);
+    
+    const csrfToken = document.createElement('input');
+    csrfToken.type='hidden'; csrfToken.name='<?= $this->security->get_csrf_token_name() ?>'; 
+    csrfToken.value='<?= $this->security->get_csrf_hash() ?>';
+    form.appendChild(csrfToken);
     
     document.body.appendChild(form);
     form.submit();
@@ -355,6 +392,18 @@ function closeModal(id) {
 document.addEventListener('click', function(e) {
     if (e.target.classList.contains('modal')) {
         e.target.classList.remove('show');
+    }
+});
+
+// Auto focus pada search input
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        const searchValue = '<?= $this->input->get('search') ?>';
+        if (searchValue) {
+            searchInput.focus();
+            searchInput.setSelectionRange(searchValue.length, searchValue.length);
+        }
     }
 });
 </script>

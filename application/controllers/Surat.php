@@ -119,12 +119,13 @@ class Surat extends CI_Controller
         ];
         
         // Tentukan status untuk setiap step berdasarkan status utama
+        $status = strtolower(trim($surat->status));
         switch ($status) {
             case 'pengajuan':
                 // Baru terkirim, menunggu approval KK
                 $steps[] = [
                     'step_name' => 'Disetujui KK',
-                    'status' => 'in-progress',
+                    'status' => 'pending',
                     'date' => '-'
                 ];
                 $steps[] = [
@@ -140,11 +141,11 @@ class Surat extends CI_Controller
                 $progress_percentage = 25;
                 break;
                 
-            case 'disetujui KK':
+            case 'disetujui kk':
                 // Sudah disetujui KK, menunggu Sekretariat
                 $steps[] = [
                     'step_name' => 'Disetujui KK',
-                    'status' => 'approved',
+                    'status' => 'completed',
                     'date' => date('d M Y')
                 ];
                 $steps[] = [
@@ -164,12 +165,12 @@ class Surat extends CI_Controller
                 // Sudah disetujui Sekretariat, menunggu Dekan
                 $steps[] = [
                     'step_name' => 'Disetujui KK',
-                    'status' => 'approved',
+                    'status' => 'completed',
                     'date' => date('d M Y')
                 ];
                 $steps[] = [
                     'step_name' => 'Disetujui Sekretariat',
-                    'status' => 'approved',
+                    'status' => 'completed',
                     'date' => date('d M Y')
                 ];
                 $steps[] = [
@@ -181,85 +182,86 @@ class Surat extends CI_Controller
                 break;
                 
             case 'disetujui dekan':
-            case 'approved':
+            case 'completed':
                 // Semua sudah disetujui
                 $steps[] = [
                     'step_name' => 'Disetujui KK',
-                    'status' => 'approved',
+                    'status' => 'completed',
                     'date' => date('d M Y')
                 ];
                 $steps[] = [
                     'step_name' => 'Disetujui Sekretariat',
-                    'status' => 'approved',
+                    'status' => 'completed',
                     'date' => date('d M Y')
                 ];
                 $steps[] = [
                     'step_name' => 'Disetujui Dekan',
-                    'status' => 'approved',
+                    'status' => 'completed',
                     'date' => date('d M Y')
                 ];
                 $progress_percentage = 100;
                 break;
                 
-            case 'ditolak KK':
-                // Ditolak oleh KK
-                $steps[] = [
-                    'step_name' => 'Ditolak KK',
-                    'status' => 'rejected',
-                    'date' => date('d M Y')
-                ];
-                $steps[] = [
-                    'step_name' => 'Persetujuan Sekretariat',
-                    'status' => 'pending',
-                    'date' => '-'
-                ];
-                $steps[] = [
-                    'step_name' => 'Persetujuan Dekan',
-                    'status' => 'pending',
-                    'date' => '-'
-                ];
-                $progress_percentage = 25;
-                break;
-                
-            case 'ditolak sekretariat':
-                // Ditolak oleh Sekretariat
-                $steps[] = [
-                    'step_name' => 'Disetujui KK',
-                    'status' => 'approved',
-                    'date' => date('d M Y')
-                ];
-                $steps[] = [
-                    'step_name' => 'Ditolak Sekretariat',
-                    'status' => 'rejected',
-                    'date' => date('d M Y')
-                ];
-                $steps[] = [
-                    'step_name' => 'Persetujuan Dekan',
-                    'status' => 'pending',
-                    'date' => '-'
-                ];
-                $progress_percentage = 50;
-                break;
-                
-            case 'ditolak dekan':
-                // Ditolak oleh Dekan
-                $steps[] = [
-                    'step_name' => 'Disetujui KK',
-                    'status' => 'approved',
-                    'date' => date('d M Y')
-                ];
-                $steps[] = [
-                    'step_name' => 'Disetujui Sekretariat',
-                    'status' => 'approved',
-                    'date' => date('d M Y')
-                ];
-                $steps[] = [
-                    'step_name' => 'Ditolak Dekan',
-                    'status' => 'rejected',
-                    'date' => date('d M Y')
-                ];
-                $progress_percentage = 75;
-                break;
+            case 'ditolak kk':
+            $steps[] = [
+                'step_name' => 'Ditolak KK',
+                'status' => 'rejected',
+                'date' => date('d M Y', strtotime($surat->created_at)),
+                'catatan_penolakan' => $catatan_penolakan
+            ];
+            $steps[] = [
+                'step_name' => 'Persetujuan Sekretariat',
+                'status' => 'pending',
+                'date' => '-'
+            ];
+            $steps[] = [
+                'step_name' => 'Persetujuan Dekan',
+                'status' => 'pending',
+                'date' => '-'
+            ];
+            $progress_percentage = 25;
+            break;
+
+        case 'ditolak sekretariat':
+            $steps[] = [
+                'step_name' => 'Disetujui KK',
+                'status' => 'completed',
+                'date' => date('d M Y', strtotime($surat->created_at))
+            ];
+            $steps[] = [
+                'step_name' => 'Ditolak Sekretariat',
+                'status' => 'rejected',
+                'date' => date('d M Y', strtotime($surat->created_at)),
+                'catatan_penolakan' => $catatan_penolakan
+            ];
+            $steps[] = [
+                'step_name' => 'Persetujuan Dekan',
+                'status' => 'pending',
+                'date' => '-'
+            ];
+            $progress_percentage = 50;
+            break;
+
+        case 'ditolak dekan':
+            $steps[] = [
+                'step_name' => 'Disetujui KK',
+                'status' => 'completed',
+                'date' => date('d M Y', strtotime($surat->created_at))
+            ];
+            $steps[] = [
+                'step_name' => 'Disetujui Sekretariat',
+                'status' => 'completed',
+                'date' => date('d M Y', strtotime($surat->created_at))
+            ];
+            $steps[] = [
+                'step_name' => 'Ditolak Dekan',
+                'status' => 'rejected',
+                'date' => date('d M Y', strtotime($surat->created_at)),
+                'catatan_penolakan' => $catatan_penolakan
+            ];
+            $progress_percentage = 75;
+            break;
+
                 
             default:
                 // Default: status pengajuan
@@ -281,14 +283,14 @@ class Surat extends CI_Controller
                 $progress_percentage = 25;
                 break;
         }
-        
         // Response JSON
         $response = [
             'success' => true,
             'data' => [
                 'steps' => $steps,
                 'current_status' => $status,
-                'progress_percentage' => $progress_percentage
+                'progress_percentage' => $progress_percentage,
+                'catatan_penolakan' => $catatan_penolakan,
             ]
         ];
         
@@ -329,6 +331,7 @@ class Surat extends CI_Controller
         
         return round(($completed / $total) * 100);
     }
+
 
     /* ===========================================
        SUBMIT DATA
@@ -859,220 +862,6 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       HELPER METHOD UNTUK FILTER DATA
-    ============================================*/
-    private function filter_data($data, $search = '', $status = '')
-    {
-        $filtered = [];
-        
-        foreach ($data as $item) {
-            $match_search = true;
-            $match_status = true;
-            
-            // Filter berdasarkan pencarian
-            if (!empty($search)) {
-                $search_lower = strtolower($search);
-                $match_search = 
-                    strpos(strtolower($item->nama_kegiatan ?? ''), $search_lower) !== false ||
-                    strpos(strtolower($item->penyelenggara ?? ''), $search_lower) !== false ||
-                    strpos(strtolower($item->jenis_pengajuan ?? ''), $search_lower) !== false;
-            }
-            
-            // Filter berdasarkan status
-            if (!empty($status)) {
-                $item_status = strtolower($item->status ?? '');
-                switch ($status) {
-                    case 'pending':
-                        $match_status = $item_status === 'pengajuan' || 
-                                       strpos($item_status, 'pending') !== false ||
-                                       strpos($item_status, 'menunggu') !== false;
-                        break;
-                    case 'approved':
-                        $match_status = strpos($item_status, 'setuju') !== false ||
-                                       strpos($item_status, 'approved') !== false;
-                        break;
-                    case 'rejected':
-                        $match_status = strpos($item_status, 'tolak') !== false ||
-                                       strpos($item_status, 'rejected') !== false;
-                        break;
-                    default:
-                        $match_status = true;
-                }
-            }
-            
-            if ($match_search && $match_status) {
-                $filtered[] = $item;
-            }
-        }
-        
-        return $filtered;
-    }
-
-    /* ===========================================
-       HALAMAN DISETUJUI - UNTUK KAPRODI
-    ============================================*/
-    public function disetujui()
-    {
-        // Ambil data yang statusnya mengandung kata "setuju" atau "approved"
-        $this->db->where("(status LIKE '%setuju%' OR status LIKE '%approved%')", NULL, FALSE);
-        $query = $this->db->get('surat');
-        
-        $data['surat_list'] = $query->result();
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Pengajuan Disetujui";
-        
-        // GUNAKAN VIEW KHUSUS UNTUK KAPRODI
-        $this->load->view('pengajuan/halaman_disetujui', $data);
-    }
-
-    /* ===========================================
-       HALAMAN DITOLAK - UNTUK KAPRODI
-    ============================================*/
-    public function ditolak()
-    {
-        // Ambil data yang statusnya mengandung kata "tolak" atau "rejected"
-        $this->db->where("(status LIKE '%tolak%' OR status LIKE '%rejected%')", NULL, FALSE);
-        $query = $this->db->get('surat');
-        
-        $data['surat_list'] = $query->result();
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Pengajuan Ditolak";
-        
-        // GUNAKAN VIEW KHUSUS UNTUK KAPRODI
-        $this->load->view('pengajuan/halaman_ditolak', $data);
-    }
-
-    /* ===========================================
-       HALAMAN PENDING - UNTUK KAPRODI
-    ============================================*/
-    public function pending()
-    {
-        $search = $this->input->get('search');
-        
-        // Ambil data dengan status pengajuan/pending
-        $this->db->where("(status = 'pengajuan' OR status LIKE '%pending%' OR status LIKE '%menunggu%')", NULL, FALSE);
-        
-        // Jika ada pencarian, tambahkan kondisi pencarian
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('nama_kegiatan', $search);
-            $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->group_end();
-        }
-        
-        $query = $this->db->get('surat');
-        $data['surat_list'] = $query->result();
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Pengajuan Menunggu Persetujuan";
-        
-        // GUNAKAN VIEW KHUSUS UNTUK KAPRODI
-        $this->load->view('pengajuan/halaman_pending', $data);
-    }
-
-    /* ===========================================
-       HALAMAN MENUNGGU (ALIAS UNTUK PENDING) - UNTUK KAPRODI
-    ============================================*/
-    public function menunggu()
-    {
-        // Redirect ke method pending untuk konsistensi
-        $this->pending();
-    }
-
-    /* ===========================================
-       HALAMAN TOTAL PENGAJUAN - UNTUK KAPRODI
-    ============================================*/
-    public function semua()
-    {
-        $search = $this->input->get('search');
-        $status = $this->input->get('status');
-
-        // Ambil semua data
-        $this->db->from('surat');
-        
-        // Filter berdasarkan pencarian
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('nama_kegiatan', $search);
-            $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->group_end();
-        }
-        
-        // Filter berdasarkan status
-        if (!empty($status)) {
-            switch ($status) {
-                case 'pending':
-                    $this->db->where("(status = 'pengajuan' OR status LIKE '%pending%' OR status LIKE '%menunggu%')", NULL, FALSE);
-                    break;
-                case 'approved':
-                    $this->db->where("(status LIKE '%setuju%' OR status LIKE '%approved%')", NULL, FALSE);
-                    break;
-                case 'rejected':
-                    $this->db->where("(status LIKE '%tolak%' OR status LIKE '%rejected%')", NULL, FALSE);
-                    break;
-            }
-        }
-        
-        $query = $this->db->get();
-        $data['surat_list'] = $query->result();
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Total Pengajuan";
-        
-        // GUNAKAN VIEW KHUSUS UNTUK KAPRODI
-        $this->load->view('pengajuan/halaman_total', $data);
-    }
-
-    /* ===========================================
-       DETAIL PENGAJUAN
-    ============================================*/
-    public function detail($id)
-    {
-        $data['detail'] = $this->Surat_model->get_by_id($id);
-        if (!$data['detail']) {
-            show_404();
-        }
-        $this->load->view('pengajuan/detail', $data);
-    }
-
-    /* ===========================================
-       SETUJUI PENGAJUAN
-    ============================================*/
-    public function setujui($id)
-    {
-        $result = $this->Surat_model->update_status($id, 'disetujui');
-        if ($result) {
-            $this->session->set_flashdata('success', 'Pengajuan berhasil disetujui!');
-        } else {
-            $this->session->set_flashdata('error', 'Gagal menyetujui pengajuan!');
-        }
-        redirect($_SERVER['HTTP_REFERER']);
-    }
-
-    /* ===========================================
-       TOLAK PENGAJUAN
-    ============================================*/
-    public function tolak($id)
-    {
-        $alasan_penolakan = $this->input->post('alasan_penolakan');
-        $result = $this->Surat_model->update_status($id, 'ditolak', $alasan_penolakan);
-        if ($result) {
-            $this->session->set_flashdata('success', 'Pengajuan berhasil ditolak!');
-        } else {
-            $this->session->set_flashdata('error', 'Gagal menolak pengajuan!');
-        }
-        redirect($_SERVER['HTTP_REFERER']);
-    }
-
-    /* ===========================================
-       UPDATE STATUS
-    ============================================*/
-    public function update_status($id, $status)
-    {
-        return $this->Surat_model->update_surat_status($id, $status);
-    }
-
-    /* ===========================================
        CETAK SURAT
     ============================================*/
     public function cetak($id)
@@ -1098,118 +887,5 @@ class Surat extends CI_Controller
     {
         $data['surat_list'] = $this->Surat_model->get_all_surat();
         $this->load->view('list_surat_tugas', $data);
-    }
-
-    /* ===========================================
-       METHOD UNTUK SEKRETARIAT - BARU DITAMBAHKAN
-    ============================================*/
-    
-    // Method untuk menampilkan semua surat di sekretariat
-    public function semua_sekretariat()
-    {
-        $search = $this->input->get('search');
-        $status = $this->input->get('status');
-
-        // Ambil semua data
-        $this->db->from('surat');
-        
-        // Filter berdasarkan pencarian
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('nama_kegiatan', $search);
-            $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->group_end();
-        }
-        
-        // Filter berdasarkan status
-        if (!empty($status)) {
-            switch ($status) {
-                case 'pending':
-                    $this->db->where("(status = 'pengajuan' OR status LIKE '%pending%' OR status LIKE '%menunggu%')", NULL, FALSE);
-                    break;
-                case 'approved':
-                    $this->db->where("(status LIKE '%setuju%' OR status LIKE '%approved%')", NULL, FALSE);
-                    break;
-                case 'rejected':
-                    $this->db->where("(status LIKE '%tolak%' OR status LIKE '%rejected%')", NULL, FALSE);
-                    break;
-            }
-        }
-        
-        $query = $this->db->get();
-        $data['surat_list'] = $query->result();
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Total Pengajuan - Sekretariat";
-        $data['role'] = "sekretariat";
-        
-        // GUNAKAN VIEW KHUSUS UNTUK SEKRETARIAT
-        $this->load->view('sekretariat/halaman_total', $data);
-    }
-
-    // Method untuk menampilkan surat disetujui di sekretariat
-    public function disetujui_sekretariat()
-    {
-        // Ambil data yang statusnya mengandung kata "setuju" atau "approved"
-        $this->db->where("(status LIKE '%setuju%' OR status LIKE '%approved%')", NULL, FALSE);
-        $query = $this->db->get('surat');
-        
-        $data['surat_list'] = $query->result();
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Pengajuan Disetujui - Sekretariat";
-        $data['role'] = "sekretariat";
-        
-        // GUNAKAN VIEW KHUSUS UNTUK SEKRETARIAT
-        $this->load->view('sekretariat/halaman_disetujui', $data);
-    }
-
-    // Method untuk menampilkan surat ditolak di sekretariat
-    public function ditolak_sekretariat()
-    {
-        // Ambil data yang statusnya mengandung kata "tolak" atau "rejected"
-        $this->db->where("(status LIKE '%tolak%' OR status LIKE '%rejected%')", NULL, FALSE);
-        $query = $this->db->get('surat');
-        
-        $data['surat_list'] = $query->result();
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Pengajuan Ditolak - Sekretariat";
-        $data['role'] = "sekretariat";
-        
-        // GUNAKAN VIEW KHUSUS UNTUK SEKRETARIAT
-        $this->load->view('sekretariat/halaman_ditolak', $data);
-    }
-
-    // Method untuk menampilkan surat pending di sekretariat
-    public function pending_sekretariat()
-    {
-        $search = $this->input->get('search');
-        
-        // Ambil data dengan status pengajuan/pending
-        $this->db->where("(status = 'pengajuan' OR status LIKE '%pending%' OR status LIKE '%menunggu%')", NULL, FALSE);
-        
-        // Jika ada pencarian, tambahkan kondisi pencarian
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('nama_kegiatan', $search);
-            $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->group_end();
-        }
-        
-        $query = $this->db->get('surat');
-        $data['surat_list'] = $query->result();
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Pengajuan Menunggu Persetujuan - Sekretariat";
-        $data['role'] = "sekretariat";
-        
-        // GUNAKAN VIEW KHUSUS UNTUK SEKRETARIAT
-        $this->load->view('sekretariat/halaman_pending', $data);
-    }
-
-    // Method untuk menampilkan surat menunggu di sekretariat
-    public function menunggu_sekretariat()
-    {
-        // Redirect ke method pending_sekretariat untuk konsistensi
-        $this->pending_sekretariat();
     }
 }

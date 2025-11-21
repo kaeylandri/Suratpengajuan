@@ -51,6 +51,19 @@
     .detail-row{display:grid;grid-template-columns:200px 1fr;padding:8px 0;border-bottom:1px solid #f4f6f7}
     .detail-label{font-weight:700;color:#7f8c8d}
     .detail-value{color:#2c3e50}
+    
+    /* Tambahan untuk card yang dapat diklik */
+    .stat-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .stat-card.active {
+        border-left-width: 6px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
 </style>
 </head>
 <body>
@@ -78,29 +91,40 @@
     $approved_count = isset($approved_count) ? (int)$approved_count : 0;
     $rejected_count = isset($rejected_count) ? (int)$rejected_count : 0;
     $pending_count = isset($pending_count) ? (int)$pending_count : 0;
+    
+    // Tentukan halaman aktif
+    $current_page = 'dashboard'; // Default
     ?>
 
     <!-- Statistik ringkas -->
     <div class="stats-grid">
-        <div class="stat-card" style="border-left-color:#3498db;" onclick="filterTable('all')">
-            <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
-            <div class="number" id="totalAll"><?= $total_all ?></div>
-        </div>
+        <a href="<?= base_url('dekan/halaman_total') ?>" class="stat-card-link">
+            <div class="stat-card" style="border-left-color:#3498db;">
+                <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
+                <div class="number" id="totalAll"><?= $total_all ?></div>
+            </div>
+        </a>
         
-        <div class="stat-card" style="border-left-color:#27ae60;" onclick="filterTable('approved')">
-            <h3><i class="fa-solid fa-check-circle"></i> Disetujui</h3>
-            <div class="number" id="approvedCount"><?= $approved_count ?></div>
-        </div>
+        <a href="<?= base_url('dekan/halaman_disetujui') ?>" class="stat-card-link">
+            <div class="stat-card" style="border-left-color:#27ae60;">
+                <h3><i class="fa-solid fa-check-circle"></i> Disetujui</h3>
+                <div class="number" id="approvedCount"><?= $approved_count ?></div>
+            </div>
+        </a>
         
-        <div class="stat-card" style="border-left-color:#e74c3c;" onclick="filterTable('rejected')">
-            <h3><i class="fa-solid fa-times-circle"></i> Ditolak</h3>
-            <div class="number" id="rejectedCount"><?= $rejected_count ?></div>
-        </div>
+        <a href="<?= base_url('dekan/halaman_ditolak') ?>" class="stat-card-link">
+            <div class="stat-card" style="border-left-color:#e74c3c;">
+                <h3><i class="fa-solid fa-times-circle"></i> Ditolak</h3>
+                <div class="number" id="rejectedCount"><?= $rejected_count ?></div>
+            </div>
+        </a>
         
-        <div class="stat-card" style="border-left-color:#f39c12;" onclick="filterTable('pending')">
-            <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
-            <div class="number" id="pendingCount"><?= $pending_count ?></div>
-        </div>
+        <a href="<?= base_url('dekan/halaman_pending') ?>" class="stat-card-link">
+            <div class="stat-card" style="border-left-color:#f39c12;">
+                <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
+                <div class="number" id="pendingCount"><?= $pending_count ?></div>
+            </div>
+        </a>
     </div>
 
     <!-- Filter Tahun & Status -->
@@ -121,7 +145,6 @@
                 <?php endfor; ?>
             </select>
         </div>
-
     </div>
 
    <!-- Grafik 3D -->
@@ -420,7 +443,6 @@ function escapeHtml(unsafe) {
        .replace(/"/g, "&quot;")
        .replace(/'/g, "&#039;");
 }
-
 
 // Grafik 3D
 const ctx = document.getElementById('grafikSurat').getContext('2d');
