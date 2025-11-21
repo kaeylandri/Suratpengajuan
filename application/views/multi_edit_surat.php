@@ -87,7 +87,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                     <div class="card-title"><?= htmlspecialchars($surat->nama_kegiatan ?? '-'); ?></div>
                     <div style="font-size:13px;color:#666;">
                         <?= htmlspecialchars($surat->jenis_pengajuan ?? '-'); ?> •
-                        <?= !empty($surat->tanggal_pengajuan) && $surat->tanggal_pengajuan !== '-' ? date('d M Y', strtotime($surat->tanggal_pengajuan)) : '-'; ?>
+                        <?= !empty($surat->created_at) && $surat->created_at !== '-' ? date('d M Y', strtotime($surat->created_at)) : '-'; ?>
                     </div>
                 </div>
                 <div class="item-id">ID: <?= htmlspecialchars($surat->id); ?></div>

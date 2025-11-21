@@ -197,7 +197,7 @@
                             }
                             
                             // Format tanggal
-                            $tgl_pengajuan = isset($item['tanggal_pengajuan']) && $item['tanggal_pengajuan'] ? date('d M Y', strtotime($item['tanggal_pengajuan'])) : '-';
+                            $tgl_pengajuan = isset($item['created_at']) && $item['created_at'] ? date('d M Y', strtotime($item['created_at'])) : '-';
                             $tgl_kegiatan = isset($item['tanggal_kegiatan']) && $item['tanggal_kegiatan'] ? date('d M Y', strtotime($item['tanggal_kegiatan'])) : '-';
                     ?>
                     <tr data-status="<?= $st_key ?>">
@@ -306,7 +306,7 @@ function showDetail(id) {
             <div class="detail-row"><div class="detail-label">Nama Kegiatan:</div><div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div></div>
             <div class="detail-row"><div class="detail-label">Nama Dosen:</div><div class="detail-value">${escapeHtml(getVal('nama_dosen'))}</div></div>
             <div class="detail-row"><div class="detail-label">NIP:</div><div class="detail-value">${escapeHtml(getVal('nip'))}</div></div>
-            <div class="detail-row"><div class="detail-label">Tanggal Pengajuan:</div><div class="detail-value">${formatDate(getVal('tanggal_pengajuan'))}</div></div>
+            <div class="detail-row"><div class="detail-label">Tanggal Pengajuan:</div><div class="detail-value">${formatDate(getVal('created_at'))}</div></div>
             <div class="detail-row"><div class="detail-label">Tanggal Kegiatan:</div><div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div></div>
             <div class="detail-row"><div class="detail-label">Jenis Pengajuan:</div><div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div></div>
             <div class="detail-row"><div class="detail-label">Penyelenggara:</div><div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div></div>

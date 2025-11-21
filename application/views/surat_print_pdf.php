@@ -48,7 +48,7 @@
     </style>
 </head>
 
-<body onload="window.print()">
+<body>
 
 <h3 class="title">SURAT TUGAS</h3>
     <h6 class="subtitle">Nomor : <?= $surat->nomor_surat ?></h6>
@@ -119,22 +119,6 @@ $divisi     = $surat->divisi;
 
     <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
     Dekan Fakultas Industri Kreatif
-<style>
-.no-break {
-    page-break-inside: avoid;
-}
-
-.qr-box {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;  /* QR ke kanan */
-    margin-top: 50px;
-}
-</style>
-
-    <div class="qr-wrapper">
-    <img src="data:image/png;base64,<?= $qr_base64 ?>" width="140">
-</div>
 
 </body>
 </html>

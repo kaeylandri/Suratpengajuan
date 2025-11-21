@@ -160,7 +160,7 @@
                             'id' => 1,
                             'nama_kegiatan' => 'Turnamen Sepak bola',
                             'penyelenggara' => 'Abdul Kholic',
-                            'tanggal_pengajuan' => '2025-11-17',
+                            'created_at' => '2025-11-17',
                             'tanggal_kegiatan' => '2025-11-11',
                             'jenis_pengajuan' => 'Perorangan'
                         ],
@@ -168,7 +168,7 @@
                             'id' => 2,
                             'nama_kegiatan' => 'Carnaval Leo',
                             'penyelenggara' => '-',
-                            'tanggal_pengajuan' => '2025-11-15',
+                            'created_at' => '2025-11-15',
                             'tanggal_kegiatan' => '2025-11-01',
                             'jenis_pengajuan' => 'Kelompok'
                         ]
@@ -177,7 +177,7 @@
                     if(isset($surat_list) && is_array($surat_list) && !empty($surat_list)): 
                         $no = 1; 
                         foreach($surat_list as $s): 
-                            $tgl_pengajuan = isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? date('d M Y', strtotime($s->tanggal_pengajuan)) : '-';
+                            $tgl_pengajuan = isset($s->created_at) && $s->created_at ? date('d M Y', strtotime($s->created_at)) : '-';
                             $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
                     ?>
                     <tr>
@@ -212,7 +212,7 @@
                         // Tampilkan data statis jika tidak ada data dari database
                         $no = 1;
                         foreach($data_pengajuan as $s): 
-                            $tgl_pengajuan = isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? date('d M Y', strtotime($s->tanggal_pengajuan)) : '-';
+                            $tgl_pengajuan = isset($s->created_at) && $s->created_at ? date('d M Y', strtotime($s->created_at)) : '-';
                             $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
                     ?>
                     <tr>
@@ -296,7 +296,7 @@ const suratList = [
         nama_kegiatan: 'Turnamen Sepak bola',
         penyelenggara: 'Abdul Kholic',
         jenis_pengajuan: 'Perorangan',
-        tanggal_pengajuan: '2025-11-17',
+        created_at: '2025-11-17',
         tanggal_kegiatan: '2025-11-11'
     },
     {
@@ -304,7 +304,7 @@ const suratList = [
         nama_kegiatan: 'Carnaval Leo',
         penyelenggara: '-',
         jenis_pengajuan: 'Kelompok',
-        tanggal_pengajuan: '2025-11-15',
+        created_at: '2025-11-15',
         tanggal_kegiatan: '2025-11-01'
     }
 ];
@@ -334,7 +334,7 @@ function showDetail(id) {
             </div>
             <div class="detail-row">
                 <div class="detail-label">Tanggal Pengajuan:</div>
-                <div class="detail-value">${item.tanggal_pengajuan ? new Date(item.tanggal_pengajuan).toLocaleDateString('id-ID') : '-'}</div>
+                <div class="detail-value">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Tanggal Kegiatan:</div>

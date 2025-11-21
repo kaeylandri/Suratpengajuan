@@ -1,6 +1,14 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+require_once FCPATH . 'vendor/autoload.php';
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelLow;
+
 class Surat extends CI_Controller
 {
     public function __construct()
@@ -115,7 +123,7 @@ class Surat extends CI_Controller
 
     $status = strtolower(trim($surat->status ?? 'pengajuan'));
     $catatan_penolakan = $surat->catatan_penolakan ?? null;
-    $tanggal_pengajuan = $surat->tanggal_pengajuan ?? $surat->created_at;
+    $created_at = $surat->created_at ?? $surat->created_at;
     
     $steps = [];
     $progress_percentage = 0;
@@ -124,7 +132,7 @@ class Surat extends CI_Controller
     $steps[] = [
         'step_name' => 'Mengirim',
         'status' => 'completed',
-        'date' => date('d M Y', strtotime($tanggal_pengajuan)),
+        'date' => date('d M Y', strtotime($created_at)),
         'label' => 'Terkirim'
     ];
     
@@ -446,8 +454,8 @@ private function bedaWaktu($start, $end)
             }
         }
 
-        $tp_safe = $this->safe_date($post['tanggal_pengajuan'] ?? null);
-        $tanggal_pengajuan = ($tp_safe === "-") ? date('Y-m-d') : $tp_safe;
+        $tp_safe = $this->safe_date($post['created_at'] ?? null);
+        $created_at = ($tp_safe === "-") ? date('Y-m-d') : $tp_safe;
 
         $eviden_raw = $post['eviden'] ?? [];
 
@@ -463,7 +471,7 @@ private function bedaWaktu($start, $end)
             'user_id' => $post['user_id'] ?? '-',
             'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
             'jenis_date' => $post['jenis_date'] ?? '-',
-            'tanggal_pengajuan' => $tanggal_pengajuan,
+            'created_at' => $created_at,
             'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
             'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
             'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
@@ -710,9 +718,9 @@ private function bedaWaktu($start, $end)
             'eviden' => $update_eviden
         ];
 
-        if (!empty($post['tanggal_pengajuan'])) {
-            $tp = $this->safe_date($post['tanggal_pengajuan']);
-            if ($tp !== '-') $update['tanggal_pengajuan'] = $tp;
+        if (!empty($post['created_at'])) {
+            $tp = $this->safe_date($post['created_at']);
+            if ($tp !== '-') $update['created_at'] = $tp;
         }
 
         $this->Surat_model->update_surat($id, $update);
@@ -958,29 +966,79 @@ private function bedaWaktu($start, $end)
 
         redirect('surat');
     }
+    
 
     /* ===========================================
        CETAK SURAT
     ============================================*/
     public function cetak($id)
-    {
-        $surat = $this->Surat_model->get_by_id($id);
-        if (!$surat) show_404();
-        
-        $dosen_ids = $this->safe_json_decode($surat->nama_dosen);
-        
-        $this->load->model('Dosen_model');
-        
-        $list_dosen = $this->Dosen_model->get_dosen_by_ids($dosen_ids);
-        
-        $data = [
-            'surat' => $surat,
-            'list_dosen' => $list_dosen
-        ];
-        
-        $this->load->view('surat_print', $data);
+{
+    $surat = $this->Surat_model->get_by_id($id);
+    if (!$surat) show_404();
+
+    // URL validasi
+    $validation_url = "http://localhost/surat/validasi/" . $surat->id;
+
+    // === QR Code (Endroid v4) ===
+    $qrCode = QrCode::create($validation_url)
+        ->setEncoding(new Encoding('UTF-8'))
+        ->setErrorCorrectionLevel(new ErrorCorrectionLevelLow())
+        ->setSize(160);
+
+    $writer = new PngWriter();
+    $qrResult = $writer->write($qrCode);
+
+    $qr_base64 = base64_encode($qrResult->getString());
+
+    // Data ke view
+    $data = [
+        'surat' => $surat,
+        'qr_base64' => $qr_base64
+    ];
+
+    $html = $this->load->view('surat_print', $data, TRUE);
+
+    // PDF
+    $options = new Options();
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('isRemoteEnabled', true);
+
+    $dompdf = new Dompdf($options);
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+
+    $filename = "surat_tugas_" . $surat->id . ".pdf";
+    $dompdf->stream($filename, array("Attachment" => 1));
+}
+
+    public function download_pdf($id)
+{
+    $this->load->helper('download');
+
+    $surat = $this->Surat_model->get_by_id($id);
+
+    $file_path = FCPATH . "uploads/surat_pdf/" . $surat->file_pdf;
+
+    if (!file_exists($file_path)) {
+        show_404();
+        return;
     }
 
+    force_download($file_path, NULL);
+}
+public function validasi($id)
+{
+    $surat = $this->Surat_model->get_by_id($id);
+    if (!$surat) {
+        $data['found'] = false;
+    } else {
+        $data['found'] = true;
+        $data['surat'] = $surat;
+    }
+
+    $this->load->view('surat_validasi', $data);
+}
     public function list_surat_tugas()
     {
         $data['surat_list'] = $this->Surat_model->get_all_surat();

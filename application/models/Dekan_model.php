@@ -17,7 +17,7 @@ class Dekan extends CI_Controller
     $data['tahun'] = $tahun;
 
     // Filter berdasarkan tahun
-    $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+    $this->db->where('YEAR(created_at)', $tahun);
 
     // Statistik
     $data['total_surat'] = $this->db->count_all_results('surat');
@@ -39,11 +39,11 @@ class Dekan extends CI_Controller
     $approved  = array_fill(0, 12, 0);
     $rejected  = array_fill(0, 12, 0);
 
-    $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+    $this->db->where('YEAR(created_at)', $tahun);
     $query = $this->db->get('surat')->result();
 
     foreach ($query as $row) {
-        $month = (int)date('m', strtotime($row->tanggal_pengajuan)) - 1;
+        $month = (int)date('m', strtotime($row->created_at)) - 1;
 
         $total[$month]++;
 

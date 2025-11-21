@@ -141,7 +141,7 @@
                             'nama_dosen' => 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.',
                             'nip' => '17770081',
                             'penyelenggara' => '-',
-                            'tanggal_pengajuan' => '2025-11-18',
+                            'created_at' => '2025-11-18',
                             'tanggal_kegiatan' => '2025-11-17',
                             'akhir_kegiatan' => '2026-01-16',
                             'jenis_pengajuan' => 'Perorangan',
@@ -162,7 +162,7 @@
                             // Pastikan $s adalah array, bukan objek
                             $s = (array)$s;
                             
-                            $tgl_pengajuan = isset($s['tanggal_pengajuan']) && $s['tanggal_pengajuan'] ? date('d M Y', strtotime($s['tanggal_pengajuan'])) : '-';
+                            $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
                             
                             // Format tanggal kegiatan - handle range tanggal
                             $tgl_kegiatan = '-';
@@ -315,7 +315,7 @@ function showDetail(id) {
             </div>
             <div class="detail-row">
                 <div class="detail-label">Tanggal Pengajuan:</div>
-                <div class="detail-value">${formatDate(getVal('tanggal_pengajuan'))}</div>
+                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Tanggal Kegiatan:</div>

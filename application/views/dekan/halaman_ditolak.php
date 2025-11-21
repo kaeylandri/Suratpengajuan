@@ -160,7 +160,7 @@
                             'nama_dosen' => 'Dr. Ahmad Wijaya, M.Kom.',
                             'nip' => '1987654321',
                             'penyelenggara' => 'Fakultas Teknik',
-                            'tanggal_pengajuan' => '2025-11-20',
+                            'created_at' => '2025-11-20',
                             'tanggal_kegiatan' => '2025-12-15',
                             'akhir_kegiatan' => '2025-12-15',
                             'jenis_pengajuan' => 'Kelompok',
@@ -176,7 +176,7 @@
                             'nama_dosen' => 'Prof. Sari Indah, M.T.',
                             'nip' => '1976543210',
                             'penyelenggara' => '-',
-                            'tanggal_pengajuan' => '2025-11-18',
+                            'created_at' => '2025-11-18',
                             'tanggal_kegiatan' => '2025-12-10',
                             'akhir_kegiatan' => '2025-12-12',
                             'jenis_pengajuan' => 'Perorangan',
@@ -197,7 +197,7 @@
                             // Pastikan $s adalah array, bukan objek
                             $s = (array)$s;
                             
-                            $tgl_pengajuan = isset($s['tanggal_pengajuan']) && $s['tanggal_pengajuan'] ? date('d M Y', strtotime($s['tanggal_pengajuan'])) : '-';
+                            $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
                             
                             // Format tanggal kegiatan - handle range tanggal
                             $tgl_kegiatan = '-';
@@ -342,7 +342,7 @@ function showDetail(id) {
             </div>
             <div class="detail-row">
                 <div class="detail-label">Tanggal Pengajuan:</div>
-                <div class="detail-value">${formatDate(getVal('tanggal_pengajuan'))}</div>
+                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Tanggal Kegiatan:</div>
