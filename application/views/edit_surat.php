@@ -86,7 +86,7 @@ label { font-weight: 600; }
 </div>
 <div class="form-group">
 <label>Tanggal Pengajuan (readonly)</label>
-<input type="text" class="form-control" value="<?= htmlspecialchars($surat['tanggal_pengajuan'] ?? '-'); ?>" readonly>
+<input type="text" class="form-control" value="<?= htmlspecialchars($surat['created_at'] ?? '-'); ?>" readonly>
 </div>
 <div class="form-group">
 <label>Jenis Tanggal</label>

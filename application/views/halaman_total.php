@@ -287,6 +287,7 @@ function showDetail(id) {
             <div class="detail-row">
                 <div class="detail-label">Tanggal Pengajuan:</div>
                 <div class="detail-value">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</div>
+                <div class="detail-value">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</div>
             </div>
             <div class="detail-row">
                 <div class="detail-label">Tanggal Kegiatan:</div>

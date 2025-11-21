@@ -407,6 +407,7 @@
                             'nip' => '17770081',
                             'penyelenggara' => '-',
                             'created_at' => '2025-11-18',
+                            'created_at' => '2025-11-18',
                             'tanggal_kegiatan' => '2025-11-17',
                             'akhir_kegiatan' => '2026-01-16',
                             'jenis_pengajuan' => 'Perorangan',
@@ -427,6 +428,7 @@
                             // Pastikan $s adalah array, bukan objek
                             $s = (array)$s;
                             
+                            $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
                             $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
                             
                             // Format tanggal kegiatan - handle range tanggal

@@ -388,6 +388,7 @@
                             'nip' => '1987654321',
                             'penyelenggara' => 'Fakultas Teknik',
                             'created_at' => '2025-11-20',
+                            'created_at' => '2025-11-20',
                             'tanggal_kegiatan' => '2025-12-15',
                             'akhir_kegiatan' => '2025-12-15',
                             'jenis_pengajuan' => 'Kelompok',
@@ -403,6 +404,7 @@
                             'nama_dosen' => 'Prof. Sari Indah, M.T.',
                             'nip' => '1976543210',
                             'penyelenggara' => '-',
+                            'created_at' => '2025-11-18',
                             'created_at' => '2025-11-18',
                             'tanggal_kegiatan' => '2025-12-10',
                             'akhir_kegiatan' => '2025-12-12',
@@ -424,6 +426,7 @@
                             // Pastikan $s adalah array, bukan objek
                             $s = (array)$s;
                             
+                            $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
                             $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
                             
                             // Format tanggal kegiatan - handle range tanggal
