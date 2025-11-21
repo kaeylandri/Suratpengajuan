@@ -1677,6 +1677,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.warn("Uploadcare not loaded");
     }
 
+    // ===== TAMBAHKAN FUNCTION INI DI SINI =====
     // Function untuk submit form via AJAX
     function submitFormData() {
         return new Promise((resolve, reject) => {
@@ -1687,7 +1688,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log(key + ': ' + value);
             }
             
-            const actionUrl = msform.getAttribute('action') || 'process_surat_tugas.php';
+            // Gunakan base_url CodeIgniter untuk submit
+            const actionUrl = '<?= base_url("surat/submit") ?>';
             console.log("Submitting to:", actionUrl);
             
             fetch(actionUrl, {
@@ -1697,22 +1699,23 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => {
                 console.log("Response status:", response.status);
                 
-                // Langsung resolve tanpa menunggu response body
-                // Karena kita tidak peduli dengan response, langsung sukses
-                resolve({ success: true, message: 'Data berhasil disimpan' });
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
                 
                 return response.text();
             })
             .then(data => {
                 console.log("Response received:", data);
+                resolve({ success: true, message: 'Data berhasil disimpan', data: data });
             })
             .catch(error => {
                 console.error("Fetch error:", error);
-                // Tetap resolve meskipun ada error, karena kita ingin pindah halaman
-                resolve({ success: true, message: 'Data terkirim' });
+                reject(error);
             });
         });
     }
+    // ===== AKHIR FUNCTION =====
 
     // Handler untuk tombol Finish di Step 3
     nextBtn.addEventListener("click", function (e) {
@@ -1731,7 +1734,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Di step 3, prevent default dan handle sendiri
         e.preventDefault();
         e.stopPropagation();
-        e.stopImmediatePropagation(); // Tambahan untuk stop semua handler
+        e.stopImmediatePropagation();
         
         console.log("Step 3 detected, processing...");
         
@@ -1779,25 +1782,28 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.querySelector('.loading-text').textContent = 'Berhasil!';
                 document.querySelector('.loading-subtext').textContent = 'Mengalihkan ke halaman daftar...';
                 
-                // Redirect ke list_surat_tugas.php setelah 800ms
-                console.log("Preparing to redirect...");
+                // Redirect setelah 1.5 detik untuk memastikan data tersimpan
                 setTimeout(() => {
-                    console.log("Redirecting NOW to list_surat_tugas.php");
-                    // Gunakan cara yang paling force untuk redirect
-                    window.location.replace('list_surat_tugas.php');
-                }, 800);
+                    console.log("Redirecting to list_surat_tugas");
+                    window.location.href = '<?= base_url("surat/list_surat_tugas") ?>';
+                }, 1500);
             })
             .catch(error => {
                 console.error("Submit gagal:", error);
                 
-                // Tetap redirect meskipun error
-                console.log("Error occurred, but still redirecting...");
-                setTimeout(() => {
-                    window.location.replace('list_surat_tugas.php');
-                }, 1000);
+                // Sembunyikan loading
+                loadingOverlay.classList.remove('active');
+                
+                // Enable button kembali
+                isSubmitting = false;
+                nextBtn.disabled = false;
+                nextBtn.innerHTML = 'Finish';
+                
+                // Tampilkan error
+                alert('Gagal menyimpan data: ' + error.message + '\nSilakan coba lagi.');
             });
         
-        return false; // Prevent any default action
+        return false;
     });
 
     // Cek jika ada file yang sudah diupload saat halaman dimuat
@@ -1814,140 +1820,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     setTimeout(checkInitialUpload, 1500);
-});
-</script>
-
-<script>
-// Integrasi dengan multi-step form
-$(document).ready(function() {
-    console.log("=== Multi-step form initialized ===");
-    
-    // Set form action jika belum ada
-    const formAction = $('#msform').attr('action');
-    console.log("Current form action:", formAction);
-    
-    if (!formAction || formAction === '') {
-        $('#msform').attr('action', 'process_surat_tugas.php');
-        console.log("Form action set to: process_surat_tugas.php");
-    }
-    
-    // Function untuk update button text
-    function updateButtonText() {
-        const currentStep = $('fieldset.active').index();
-        if (currentStep === 2) {
-            $('.next-btn').text('Finish');
-            console.log("Button text changed to: Finish");
-        } else {
-            $('.next-btn').text('Continue');
-            console.log("Button text changed to: Continue");
-        }
-    }
-    
-    // Override next button untuk step 1 dan 2 ONLY
-    $(document).on('click', '.next-btn', function(e) {
-        const currentStep = $('fieldset.active').index();
-        
-        console.log("jQuery Multi-step next clicked, step:", currentStep);
-        
-        // Jika step 3, jangan handle di sini, biarkan native JS handler
-        if (currentStep === 2) {
-            console.log("Step 3, letting native JS handler process");
-            // TIDAK PREVENT DEFAULT, biarkan native JS handler yang ambil alih
-            return;
-        }
-        
-        // Step 1 dan 2 - validasi dan pindah
-        e.preventDefault();
-        e.stopPropagation();
-        
-        let isValid = true;
-        const currentFieldset = $('fieldset').eq(currentStep);
-        
-        // Validasi required fields
-        currentFieldset.find('input[required], select[required]').each(function() {
-            const val = $(this).val();
-            if (!val || val === '' || val === null) {
-                isValid = false;
-                $(this).css('border-color', '#e53935');
-                console.log("Field validation failed:", $(this).attr('name'));
-            } else {
-                $(this).css('border-color', '');
-            }
-        });
-        
-        if (!isValid) {
-            alert('Mohon lengkapi semua field yang wajib diisi!');
-            console.log("Validation failed on step:", currentStep + 1);
-            return false;
-        }
-        
-        console.log("Validation passed, moving to next step");
-        
-        // Pindah ke step berikutnya
-        currentFieldset.removeClass('active');
-        $('fieldset').eq(currentStep + 1).addClass('active');
-        
-        // Update progress bar
-        if ($('#progressBar').length) {
-            const progress = ((currentStep + 2) / 3) * 100;
-            $('#progressBar').css('width', progress + '%');
-            console.log("Progress bar updated:", progress + "%");
-        }
-        
-        if ($('#currentStep').length) {
-            $('#currentStep').text(currentStep + 2);
-        }
-        
-        // Update button text
-        updateButtonText();
-        
-        // Show back button
-        $('.prev-btn').show();
-        
-        console.log("Moved to step:", currentStep + 2);
-        
-        return false;
-    });
-    
-    // Back button handler
-    $('.prev-btn').off('click').on('click', function(e) {
-        e.preventDefault();
-        const currentStep = $('fieldset.active').index();
-        
-        console.log("Back button clicked, current step:", currentStep);
-        
-        if (currentStep > 0) {
-            $('fieldset').eq(currentStep).removeClass('active');
-            $('fieldset').eq(currentStep - 1).addClass('active');
-            
-            // Update progress bar
-            if ($('#progressBar').length) {
-                const progress = ((currentStep) / 3) * 100;
-                $('#progressBar').css('width', progress + '%');
-            }
-            
-            if ($('#currentStep').length) {
-                $('#currentStep').text(currentStep);
-            }
-            
-            // Update button text
-            updateButtonText();
-            
-            // Hide back button di step 1
-            if (currentStep - 1 === 0) {
-                $('.prev-btn').hide();
-            }
-            
-            console.log("Moved back to step:", currentStep);
-        }
-        
-        return false;
-    });
-    
-    // Set initial button text
-    updateButtonText();
-    
-    console.log("=== Multi-step setup complete ===");
 });
 </script>
 
