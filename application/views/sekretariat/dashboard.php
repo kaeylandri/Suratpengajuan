@@ -186,7 +186,7 @@
                             $badge = '<span class="badge badge-pending">' . $badge_text . '</span>';
                         }
 
-                        $tgl_pengajuan = isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? date('d M Y', strtotime($s->tanggal_pengajuan)) : '-';
+                        $tgl_pengajuan = isset($s->created_at) && $s->created_at ? date('d M Y', strtotime($s->created_at)) : '-';
                         $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
                     ?>
                     <tr data-status="<?= $st_key ?>">
@@ -337,7 +337,7 @@ function showDetail(id) {
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tanggal Pengajuan</div>
-                        <div class="detail-value">${formatDate(item.tanggal_pengajuan)}</div>
+                        <div class="detail-value">${formatDate(item.created_at)}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tanggal Kegiatan</div>

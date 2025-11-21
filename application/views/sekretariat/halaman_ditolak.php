@@ -117,7 +117,7 @@
                             <td><?= $no++ ?></td>
                             <td><?= htmlspecialchars($pengajuan->nama_kegiatan) ?></td>
                             <td><?= htmlspecialchars($pengajuan->penyelenggara) ?></td>
-                            <td><?= date('d/m/Y', strtotime($pengajuan->tanggal_pengajuan)) ?></td>
+                            <td><?= date('d/m/Y', strtotime($pengajuan->created_at)) ?></td>
                             <td><?= date('d/m/Y', strtotime($pengajuan->tanggal_kegiatan)) ?></td>
                             <td><?= htmlspecialchars($pengajuan->jenis_pengajuan) ?></td>
                             <td><span class="badge badge-rejected">Ditolak</span></td>
@@ -178,7 +178,7 @@ function showDetail(id) {
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tanggal Pengajuan</div>
-                        <div class="detail-value">${formatDate(pengajuan.tanggal_pengajuan)}</div>
+                        <div class="detail-value">${formatDate(pengajuan.created_at)}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tanggal Kegiatan</div>

@@ -17,27 +17,27 @@ class Kaprodi extends CI_Controller
 
         // ✅ STATISTIK YANG BENAR
         // Total semua surat tahun ini
-        $data['total_surat'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['total_surat'] = $this->db->where('YEAR(created_at)', $tahun)
                                         ->count_all_results('surat');
 
         // Disetujui KK tahun ini
-        $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['approved_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where_in('status', ['disetujui dekan', 'disetujui KK', 'disetujui sekretariat'])
                                           ->count_all_results('surat');
 
         // Ditolak KK tahun ini
-        $data['rejected_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['rejected_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                            ->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
                                            ->count_all_results('surat');
 
         // Menunggu (status pengajuan) tahun ini
-        $data['pending_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['pending_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'pengajuan')
                                           ->count_all_results('surat');
 
         // ✅ Ambil daftar surat HANYA status pengajuan
         $this->db->where("status", 'pengajuan');
-        $this->db->order_by("tanggal_pengajuan", "DESC");
+        $this->db->order_by("created_at", "DESC");
         $data['surat_list'] = $this->db->get("surat")->result();
 
         // ✅ GRAFIK BULANAN
@@ -45,11 +45,11 @@ class Kaprodi extends CI_Controller
         $approved  = array_fill(0, 12, 0);
         $rejected  = array_fill(0, 12, 0);
 
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $query = $this->db->get('surat')->result();
 
         foreach ($query as $row) {
-            $month = (int)date('m', strtotime($row->tanggal_pengajuan)) - 1;
+            $month = (int)date('m', strtotime($row->created_at)) - 1;
             $total[$month]++;
 
             if ($row->status == 'disetujui dekan') {

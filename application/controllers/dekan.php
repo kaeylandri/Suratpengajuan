@@ -21,7 +21,7 @@ class Dekan extends CI_Controller
         $data['current_filter'] = $filter;
 
         // Hanya ambil data yang relevan untuk dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         
         // Filter search
@@ -69,19 +69,19 @@ class Dekan extends CI_Controller
                                ->result_array();
 
         // Statistik untuk card - hanya data yang relevan untuk dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
-        $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['approved_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'disetujui dekan')
                                           ->count_all_results('surat');
 
-        $data['pending_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['pending_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                          ->where('status', 'disetujui sekretariat')
                                          ->count_all_results('surat');
 
-        $data['rejected_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['rejected_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'ditolak dekan')
                                           ->count_all_results('surat');
 
@@ -90,12 +90,12 @@ class Dekan extends CI_Controller
         $approved  = array_fill(0, 12, 0);
         $rejected  = array_fill(0, 12, 0);
 
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         $query = $this->db->get('surat')->result();
 
         foreach ($query as $row) {
-            $month = (int)date('m', strtotime($row->tanggal_pengajuan)) - 1;
+            $month = (int)date('m', strtotime($row->created_at)) - 1;
 
             $total[$month]++;
 
@@ -126,7 +126,7 @@ class Dekan extends CI_Controller
         $data['current_page'] = 'total';
 
         // Ambil semua data yang relevan untuk dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
 
         // Filter search
@@ -158,7 +158,7 @@ class Dekan extends CI_Controller
                                ->result_array();
 
         // Statistik - hanya data yang relevan untuk dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         
         // Apply same filters for statistics
@@ -186,15 +186,15 @@ class Dekan extends CI_Controller
         
         $data['total_surat'] = $this->db->count_all_results('surat');
 
-        $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['approved_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'disetujui dekan')
                                           ->count_all_results('surat');
 
-        $data['pending_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['pending_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                          ->where('status', 'disetujui sekretariat')
                                          ->count_all_results('surat');
 
-        $data['rejected_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['rejected_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'ditolak dekan')
                                           ->count_all_results('surat');
 
@@ -210,7 +210,7 @@ class Dekan extends CI_Controller
         $data['current_page'] = 'disetujui';
 
         // Ambil hanya data yang disetujui dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where('status', 'disetujui dekan');
 
         // Filter search
@@ -227,19 +227,19 @@ class Dekan extends CI_Controller
                                ->result_array();
 
         // Statistik - hanya data yang relevan untuk dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
-        $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['approved_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'disetujui dekan')
                                           ->count_all_results('surat');
 
-        $data['pending_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['pending_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                          ->where('status', 'disetujui sekretariat')
                                          ->count_all_results('surat');
 
-        $data['rejected_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['rejected_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'ditolak dekan')
                                           ->count_all_results('surat');
 
@@ -255,7 +255,7 @@ class Dekan extends CI_Controller
         $data['current_page'] = 'ditolak';
 
         // Ambil hanya data yang ditolak dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where('status', 'ditolak dekan');
 
         // Filter search
@@ -272,19 +272,19 @@ class Dekan extends CI_Controller
                                ->result_array();
 
         // Statistik - hanya data yang relevan untuk dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
-        $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['approved_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'disetujui dekan')
                                           ->count_all_results('surat');
 
-        $data['pending_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['pending_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                          ->where('status', 'disetujui sekretariat')
                                          ->count_all_results('surat');
 
-        $data['rejected_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['rejected_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'ditolak dekan')
                                           ->count_all_results('surat');
 
@@ -300,7 +300,7 @@ class Dekan extends CI_Controller
         $data['current_page'] = 'pending';
 
         // Ambil hanya data yang menunggu persetujuan dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where('status', 'disetujui sekretariat');
 
         // Filter search
@@ -317,19 +317,19 @@ class Dekan extends CI_Controller
                                ->result_array();
 
         // Statistik - hanya data yang relevan untuk dekan
-        $this->db->where('YEAR(tanggal_pengajuan)', $tahun);
+        $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
-        $data['approved_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['approved_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'disetujui dekan')
                                           ->count_all_results('surat');
 
-        $data['pending_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['pending_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                          ->where('status', 'disetujui sekretariat')
                                          ->count_all_results('surat');
 
-        $data['rejected_count'] = $this->db->where('YEAR(tanggal_pengajuan)', $tahun)
+        $data['rejected_count'] = $this->db->where('YEAR(created_at)', $tahun)
                                           ->where('status', 'ditolak dekan')
                                           ->count_all_results('surat');
 
