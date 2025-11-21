@@ -330,11 +330,22 @@
         flex-wrap: wrap;
     }
 
+    /* PERUBAHAN: Filter actions di sebelah kiri */
+    .filter-actions {
+        display:flex;
+        gap:8px;
+        align-items:center;
+        order: 1;
+    }
+
+    /* PERUBAHAN: Search di sebelah kanan */
     .filter-search {
         flex: 1 1 360px;
         min-width: 220px;
         display:flex;
         position:relative;
+        order: 2;
+        margin-left: auto;
     }
 
     .filter-search input{
@@ -354,12 +365,6 @@
         transform:translateY(-50%);
         color:#FB8C00;
         pointer-events:none;
-    }
-
-    .filter-actions {
-        display:flex;
-        gap:8px;
-        align-items:center;
     }
 
     .btn-small {
@@ -406,6 +411,7 @@
         margin-bottom:14px;
     }
 
+    /* PERUBAHAN: Filter row - struktur sama dengan filter-bar */
     .filter-row {
         width: 100%;
         background: #ffffff;
@@ -419,14 +425,25 @@
         flex-wrap: wrap;
     }
 
-    .filter-row .row-search-wrapper {
+    /* PERUBAHAN: Filter row actions di sebelah kiri */
+    .filter-row-actions {
+        display:flex;
+        gap:8px;
+        align-items:center;
+        order: 1;
+    }
+
+    /* PERUBAHAN: Filter row search di sebelah kanan */
+    .filter-row-search {
         flex: 1 1 360px;
         min-width: 220px;
         display:flex;
         position:relative;
+        order: 2;
+        margin-left: auto;
     }
 
-    .filter-row .row-search {
+    .filter-row-search input{
         width:100%;
         padding:10px 40px 10px 14px;
         height:44px;
@@ -437,7 +454,7 @@
         background:white;
     }
 
-    .filter-row .row-search-wrapper i{
+    .filter-row-search i{
         position:absolute;
         right:12px;
         top:50%;
@@ -909,8 +926,7 @@
     margin-bottom: 8px;
 }
 
-
-    /* Modal styles */
+    /* Detail Modal Styles */
     .modal-detail{ 
         display:none !important; 
         position:fixed; 
@@ -919,7 +935,7 @@
         z-index:9999; 
         justify-content:center; 
         align-items:center; 
-        padding-top:40px;
+        padding:20px;
     }
 
     .modal-detail.show{ 
@@ -927,63 +943,156 @@
     }
 
     .modal-content-detail{ 
-        width:85%; 
-        max-width:850px; 
+        width:90%; 
+        max-width:800px; 
         background:white; 
         border-radius:12px; 
         overflow:hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .modal-header-detail{ 
         background:#FB8C00; 
-        padding:14px 18px; 
+        padding:20px; 
         color:white; 
         display:flex; 
         justify-content:space-between;
+        align-items: center;
+        font-size: 18px;
+        font-weight: 600;
     }
 
     .modal-body-detail{ 
-        max-height:70vh; 
-        overflow-y:auto; 
-        padding:18px;
+        padding:30px;
+        background: #f8f9fa;
     }
 
-    .detail-table{ 
-        width:100%; 
-        border-collapse:collapse;
+    /* Form-like detail styles */
+    .detail-section {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        border: 1px solid #e9ecef;
     }
 
-    .detail-table td{ 
-        padding:10px 12px; 
-        border-bottom:1px solid #eee;
+    .detail-section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #FB8C00;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #FB8C00;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    .detail-key{ 
-        width:35%; 
-        font-weight:600; 
-        background:#fff4e6; 
-        color:#663c00;
+    .detail-section-title i {
+        font-size: 18px;
     }
 
-    /* Eviden file styles */
-    .eviden-files {
+    .detail-row {
+        display: flex;
+        margin-bottom: 15px;
+        align-items: flex-start;
+    }
+
+    .detail-label {
+        width: 200px;
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .detail-value {
+        flex: 1;
+        color: #212529;
+        font-size: 14px;
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+    }
+
+    .detail-value-empty {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    /* Dosen list in detail */
+    .dosen-list {
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
 
-    .eviden-file-item {
+    .dosen-item {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px;
-        border: 1px solid #e0e0e0;
+        gap: 10px;
+        padding: 8px 12px;
+        background: white;
+        border: 1px solid #e9ecef;
         border-radius: 6px;
-        transition: background 0.2s;
     }
 
-    .eviden-file-item:hover {
-        background: #f5f5f5;
+    .dosen-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #FB8C00;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .dosen-info {
+        flex: 1;
+    }
+
+    .dosen-name {
+        font-weight: 600;
+        color: #212529;
+        font-size: 14px;
+    }
+
+    .dosen-details {
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+    /* File evidence styles */
+    .file-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 15px;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+
+    .file-item:hover {
+        background: #fffaf5;
+        border-color: #FB8C00;
     }
 
     .file-icon {
@@ -993,27 +1102,63 @@
         align-items: center;
         justify-content: center;
         color: #FB8C00;
+        font-size: 16px;
+    }
+
+    .file-info {
+        flex: 1;
     }
 
     .file-name {
-        flex: 1;
+        font-weight: 600;
+        color: #212529;
         font-size: 14px;
-        color: #333;
+    }
+
+    .file-size {
+        font-size: 12px;
+        color: #6c757d;
     }
 
     .download-btn {
         background: #FB8C00;
         color: white;
         border: none;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 6px 12px;
+        border-radius: 6px;
         cursor: pointer;
         font-size: 12px;
+        font-weight: 600;
         transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
     .download-btn:hover {
         background: #e67e00;
+        text-decoration: none;
+        color: white;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+
+    .close-modal:hover {
+        background: rgba(255,255,255,0.2);
     }
 
     .hide-mobile {
@@ -1042,7 +1187,7 @@
         font-size: 14px;
     }
 
-        /* Responsive */
+    /* Responsive */
     @media (max-width:880px){
         .progress-track {
             flex-direction: column;
@@ -1102,6 +1247,50 @@
             width: 100%;
             justify-content: flex-start;
         }
+
+        .detail-row {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .detail-label {
+            width: 100%;
+        }
+
+        .detail-value {
+            width: 100%;
+        }
+
+        .modal-content-detail {
+            width: 95%;
+            margin: 10px;
+        }
+
+        .modal-body-detail {
+            padding: 20px;
+        }
+
+        .detail-section {
+            padding: 15px;
+        }
+        
+        /* PERUBAHAN: Responsive untuk filter bar */
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .filter-actions {
+            order: 1;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        .filter-search {
+            order: 2;
+            margin-left: 0;
+            margin-top: 10px;
+        }
     }
     .progress-estimasi {
     width: 100%;
@@ -1111,13 +1300,12 @@
     color: #777;
 }
 
-
     @media (max-width:880px){
         .filter-bar{ padding:10px; gap:8px; }
         .filter-search{ flex-basis: 100%; }
         .filter-builder{ gap:8px; }
         .filter-row{ padding:10px; gap:8px; }
-        .filter-row .row-search-wrapper { flex-basis: 100%; }
+        .filter-row .filter-row-search { flex-basis: 100%; }
         .filter-row select.row-cat { min-width:140px; }
         .filter-row input[type="date"] { min-width:140px; }
         
@@ -1267,13 +1455,8 @@
             </div>
         </div>
 
-        <!-- Search + Filter -->
+        <!-- PERUBAHAN: Filter dan tombol di kiri, search di kanan -->
         <div class="filter-bar">
-            <div class="filter-search">
-                <input type="text" id="tableSearch" placeholder="Search global...">
-                <i class="fa fa-search"></i>
-            </div>
-
             <div class="filter-actions">
                 <select id="filterCategory" class="btn-small">
                     <option value="jenis" selected>Jenis Pengajuan</option>
@@ -1289,6 +1472,11 @@
                 <button id="btnResetAll" class="btn-small btn-reset" hidden title="Reset semua filter & pencarian">
                     <i class="fa fa-times"></i>&nbsp;Reset
                 </button>
+            </div>
+
+            <div class="filter-search">
+                <input type="text" id="tableSearch" placeholder="Search global...">
+                <i class="fa fa-search"></i>
             </div>
         </div>
 
@@ -1309,11 +1497,13 @@
         <div id="modalDetail" class="modal-detail">
             <div class="modal-content-detail">
                 <div class="modal-header-detail">
-                    Detail Data Surat
-                    <span class="close-modal" style="cursor:pointer;">&times;</span>
+                    <span>Detail Surat Tugas</span>
+                    <button class="close-modal">&times;</button>
                 </div>
                 <div class="modal-body-detail">
-                    <table class="detail-table" id="detailContent"></table>
+                    <div id="detailContent">
+                        <!-- Content akan diisi oleh JavaScript -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -1387,123 +1577,6 @@
                 </div>
             </div>
         </div>
-        <script>
-            function loadStatus(suratId) {
-    fetch("<?= base_url('mahasiswa/get_status/'); ?>" + suratId)
-        .then(res => res.json())
-        .then(response => {
-            if (!response.success) return;
-
-            const data = response.data.steps;
-            const progress = response.data.progress_percentage;
-
-            // Set warna garis progress
-            document.getElementById("progressLine").innerHTML =
-                `<div class="progress-line-fill" style="width:${progress}%"></div>`;
-
-            // Loop tiap step
-            data.forEach((step, index) => {
-                const stepId = index + 1;
-
-                // Ambil element berdasarkan index
-                const stepElement = document.getElementById(`step${stepId}`);
-
-                // Reset class
-                stepElement.classList.remove("completed", "rejected", "in-progress", "pending");
-
-                // Tambahkan class sesuai status JSON
-                stepElement.classList.add(step.status);
-
-                // Set tanggal
-                document.getElementById(`step${stepId}-date`).innerText = step.date;
-
-                // Ganti icon sesuai status
-                const icon = document.getElementById(`step${stepId}-icon`);
-
-                if (step.status === "completed") {
-                    icon.className = "fas fa-check";
-                } else if (step.status === "rejected") {
-                    icon.className = "fas fa-times";
-                } else if (step.status === "in-progress") {
-                    icon.className = "fas fa-hourglass-half";
-                } else {
-                    icon.className = "fas fa-clock";
-                }
-            });
-
-            // Informasi status
-            document.getElementById("status-description").innerText =
-                "Status saat ini: " + response.data.current_status;
-        });
-}
-
-
-        // Function untuk update progress bar
-        function updateProgressBar(statusData) {
-            const steps = statusData.steps;
-            const progressLine = document.getElementById('progressLine');
-            
-            // Update setiap step
-            steps.forEach((step, index) => {
-                const stepNumber = index + 1;
-                const stepElement = document.getElementById(`step${stepNumber}`);
-                const iconElement = document.getElementById(`step${stepNumber}-icon`);
-                const textElement = document.getElementById(`step${stepNumber}-text`);
-                const dateElement = document.getElementById(`step${stepNumber}-date`);
-                
-                // Reset classes
-                stepElement.classList.remove('completed', 'rejected', 'in-progress', 'pending');
-                
-                // Update berdasarkan status
-                if (step.status === 'completed' || step.status === 'completed') {
-                    stepElement.classList.add('completed');
-                    iconElement.className = 'fas fa-check';
-                } else if (step.status === 'rejected') {
-                    stepElement.classList.add('rejected');
-                    iconElement.className = 'fas fa-times';
-                } else if (step.status === 'in-progress') {
-                    stepElement.classList.add('in-progress');
-                    iconElement.className = 'fas fa-spinner fa-spin';
-                } else {
-                    stepElement.classList.add('pending');
-                    iconElement.className = 'fas fa-clock';
-                }
-                
-                // Update text dan date
-                textElement.textContent = step.step_name;
-                dateElement.textContent = step.date;
-            });
-            
-            // Update progress line width
-            progressLine.style.width = `${statusData.progress_percentage}%`;
-            
-            // Update informasi status
-            document.getElementById('status-description').textContent = statusData.description;
-            document.getElementById('estimated-time').textContent = statusData.estimated_time;
-            
-            // Show/hide rejection reason
-            const rejectionDiv = document.getElementById('rejection-reason');
-            if (statusData.rejection_reason) {
-                rejectionDiv.style.display = 'block';
-                document.getElementById('rejection-text').textContent = statusData.rejection_reason;
-            } else {
-                rejectionDiv.style.display = 'none';
-            }
-        }
-
-        // Event listener untuk close modal
-        document.querySelector('.close-status').addEventListener('click', function() {
-            document.getElementById('statusModal').style.display = 'none';
-        });
-
-        // Close modal ketika klik di luar modal
-        window.addEventListener('click', function(e) {
-            const modal = document.getElementById('statusModal');
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-        </script>
 
         <!-- Table -->
         <table id="tabelSurat" class="display nowrap">
@@ -1645,7 +1718,6 @@ function goBack() {
     window.location.href = '<?= base_url() ?>';
 }
 
-
 // Tampilkan modal dan load data
 function showStatusModal(suratId) {
     const modal = document.getElementById('statusModal');
@@ -1702,7 +1774,6 @@ function loadStatusData(suratId) {
         });
 }
 
-
 // ======================================================================
 //  UPDATE STATUS DISPLAY
 // ======================================================================
@@ -1749,7 +1820,6 @@ function updateStatusDisplay(statusData) {
     document.getElementById('progressLine').style.width = 
         (statusData.progress_percentage || 0) + '%';
 
-
     // ==================================================================
     //  UPDATE INFORMASI STATUS
     // ==================================================================
@@ -1768,6 +1838,7 @@ function updateStatusDisplay(statusData) {
         desc.textContent = "Pengajuan ini masih dalam proses persetujuan.";
         desc.style.color = "black";
     }
+    
     // ==============================
     // TAMPILKAN ALASAN PENOLAKAN
     // ==============================
@@ -1781,6 +1852,7 @@ function updateStatusDisplay(statusData) {
         rejectionBox.style.display = "none";
     }
 }
+
 function updateEstimasiWaktu(statusData) {
     const d = statusData.durasi;
 
@@ -1788,10 +1860,6 @@ function updateEstimasiWaktu(statusData) {
     document.getElementById("est2").textContent = d.durasi_2 || "-";
     document.getElementById("est3").textContent = d.durasi_3 || "-";
 }
-
-
-
-
 
 // ======================================================================
 //  EVENT: CLOSE MODAL
@@ -1812,7 +1880,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
 
 // ===== JQUERY DOCUMENT READY =====
 $(document).ready(function () {
@@ -1971,17 +2038,22 @@ $(document).ready(function () {
     let uid = 0;
     function nextId(){ return 'r'+(++uid); }
 
+    // PERUBAHAN: Fungsi untuk membuat baris filter dengan struktur yang sama
     function makeRowDOM(r){
         const $wr = $(`<div class="filter-row" data-id="${r.id}"></div>`);
 
-        const $searchWrapper = $(`<div class="row-search-wrapper"></div>`);
+        // PERUBAHAN: Filter row actions di kiri
+        const $filterRowActions = $(`<div class="filter-row-actions"></div>`);
+        
+        // PERUBAHAN: Filter row search di kanan
+        const $filterRowSearch = $(`<div class="filter-row-search"></div>`);
         const $search = $(`<input type="text" class="row-search" placeholder="Search..." />`);
         const $searchIcon = $(`<i class="fa fa-search"></i>`);
         
         const $dateStart = $(`<input type="date" class="row-date-start" style="display:none" />`);
         const $dateEnd = $(`<input type="date" class="row-date-end" style="display:none" />`);
 
-        $searchWrapper.append($search).append($searchIcon);
+        $filterRowSearch.append($search).append($searchIcon);
 
         const $cat = $(`<select class="row-cat">
             <option value="jenis">Jenis Pengajuan</option>
@@ -2001,11 +2073,11 @@ $(document).ready(function () {
         function refreshInputs(){
             const catVal = $cat.val();
             if(catVal === 'tanggal'){
-                $searchWrapper.hide();
+                $filterRowSearch.hide();
                 $dateStart.show();
                 $dateEnd.show();
             } else {
-                $searchWrapper.show();
+                $filterRowSearch.show();
                 $dateStart.hide();
                 $dateEnd.hide();
             }
@@ -2071,7 +2143,9 @@ $(document).ready(function () {
             applyFilters();
         });
 
-        $wr.append($searchWrapper).append($dateStart).append($dateEnd).append($cat).append($btnAdd).append($btnRemove);
+        // PERUBAHAN: Struktur yang sama dengan filter-bar
+        $filterRowActions.append($cat).append($btnAdd).append($btnRemove);
+        $wr.append($filterRowActions).append($filterRowSearch).append($dateStart).append($dateEnd);
         return $wr;
     }
 
@@ -2149,58 +2223,166 @@ $(document).ready(function () {
         applyFilters();
     });
 
-    // ===== POPUP DETAIL =====
+    // ===== POPUP DETAIL - FORM-LIKE STYLE =====
     $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
         if($(e.target).closest('input, a, button').length) return;
         
         let raw=$(this).attr('data-detail')||'{}';
         let data={};
         try{ data=JSON.parse(raw);}catch(err){ console.error(err);}
-        let html='';
-        Object.entries(data).forEach(([k,v])=>{
-            let display=v;
-            if(display===null||display===undefined||(typeof display==='string'&&display.trim()==='')) display='-';
-            if(k==='eviden'){
-                if(typeof display==='string'){ try{display=JSON.parse(display);}catch(e){} }
-                if(Array.isArray(display)&&display.length>0){
-                    let list='<ul style="margin:0;padding-left:18px;">';
-                    display.forEach(item=>{
-                        let url='', name='';
-                        if(typeof item==='string'){ url=item; name=item.split('/').pop().split('?')[0]; }
-                        else if(typeof item==='object'&&item!==null){
-                            url=item.cdnUrl||item.path||item.url||'';
-                            if(item.nama_asli) name=item.nama_asli;
-                            else if(item.name) name=item.name;
-                            else name=url.split('/').pop().split('?')[0];
-                            if(url && !url.match(/^https?:\/\//i)) url=BASE_URL + (url.startsWith('/')?'':'/')+url;
-                        }
-                        const escName=$('<div/>').text(name).html();
-                        const escUrl=$('<div/>').text(url).html();
-                        list+=`<li style="margin-bottom:6px;"><a href="#" class="force-download" data-url="${escUrl}" data-name="${escName}" style="color:#FB8C00;font-weight:600;text-decoration:none;">📄 ${escName}</a></li>`;
-                    });
-                    list+='</ul>';
-                    display=list;
-                } else display='-';
-            } else if(Array.isArray(display)){
-                display=display.map(x=>$('<div/>').text(String(x)).html()).join('<br>');
-            } else { if(typeof display==='string') display=$('<div/>').text(display).html(); }
-            html+=`<tr><td class="detail-key">${k.replace(/_/g,' ')}</td><td>${display}</td></tr>`;
-        });
+        
+        let html = `
+            <div class="detail-section">
+                <div class="detail-section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Informasi Kegiatan
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Nama Kegiatan</div>
+                    <div class="detail-value">${escapeHtml(data.nama_kegiatan || '-')}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Tanggal Pengajuan</div>
+                    <div class="detail-value">${escapeHtml(data.tanggal_pengajuan || '-')}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Jenis Tanggal</div>
+                    <div class="detail-value">${escapeHtml(data.jenis_tanggal || '-')}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Tempat Kegiatan</div>
+                    <div class="detail-value">${escapeHtml(data.tempat_kegiatan || '-')}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Penyelenggara</div>
+                    <div class="detail-value">${escapeHtml(data.penyelenggara || '-')}</div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-section-title">
+                    <i class="fas fa-users"></i>
+                    Informasi Pengajuan
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Jenis Pengajuan</div>
+                    <div class="detail-value">${escapeHtml(data.jenis_pengajuan || '-')}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Status Kepegawaian</div>
+                    <div class="detail-value">${escapeHtml(data.lingkup_penugasan || '-')}</div>
+                </div>
+                
+                <div class="detail-row">
+                    <div class="detail-label">Jenis Penugasan</div>
+                    <div class="detail-value">${escapeHtml(data.jenis_penugasan || data.jenis_penugasan_kelompok || '-')}</div>
+                </div>
+            </div>
+        `;
+
+        // Dosen Section
+        if (data.nama_dosen && (Array.isArray(data.nama_dosen) ? data.nama_dosen.length > 0 : data.nama_dosen !== '-')) {
+            html += `
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-user-graduate"></i>
+                        Dosen Terkait
+                    </div>
+                    <div class="dosen-list">
+            `;
+            
+            const namaDosen = Array.isArray(data.nama_dosen) ? data.nama_dosen : [data.nama_dosen];
+            const nipDosen = Array.isArray(data.nip) ? data.nip : [data.nip];
+            const jabatanDosen = Array.isArray(data.jabatan) ? data.jabatan : [data.jabatan];
+            const divisiDosen = Array.isArray(data.divisi) ? data.divisi : [data.divisi];
+            
+            namaDosen.forEach((nama, index) => {
+                const nip = nipDosen[index] || '-';
+                const jabatan = jabatanDosen[index] || '-';
+                const divisi = divisiDosen[index] || '-';
+                const initial = nama ? nama.charAt(0).toUpperCase() : '?';
+                
+                html += `
+                    <div class="dosen-item">
+                        <div class="dosen-avatar">${initial}</div>
+                        <div class="dosen-info">
+                            <div class="dosen-name">${escapeHtml(nama)}</div>
+                            <div class="dosen-details">
+                                NIP: ${escapeHtml(nip)} | Jabatan: ${escapeHtml(jabatan)} | Divisi: ${escapeHtml(divisi)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div></div>`;
+        }
+
+        // File Evidence Section
+        if (data.eviden && (Array.isArray(data.eviden) ? data.eviden.length > 0 : data.eviden !== '-')) {
+            html += `
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-file-alt"></i>
+                        File Evidence
+                    </div>
+                    <div class="file-list">
+            `;
+            
+            const evidenFiles = Array.isArray(data.eviden) ? data.eviden : [data.eviden];
+            
+            evidenFiles.forEach((file, index) => {
+                let fileName = '-';
+                let fileUrl = '';
+                
+                if (typeof file === 'string') {
+                    fileUrl = file;
+                    fileName = file.split('/').pop().split('?')[0] || 'File ' + (index + 1);
+                } else if (typeof file === 'object' && file !== null) {
+                    fileUrl = file.cdnUrl || file.path || file.url || '';
+                    fileName = file.nama_asli || file.name || fileUrl.split('/').pop().split('?')[0] || 'File ' + (index + 1);
+                }
+                
+                if (fileUrl && !fileUrl.match(/^https?:\/\//i)) {
+                    fileUrl = BASE_URL + (fileUrl.startsWith('/') ? '' : '/') + fileUrl;
+                }
+                
+                html += `
+                    <div class="file-item">
+                        <div class="file-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">${escapeHtml(fileName)}</div>
+                        </div>
+                        <a href="${fileUrl}?download=1" class="download-btn" download="${fileName}">
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                `;
+            });
+            
+            html += `</div></div>`;
+        }
+
         $('#detailContent').html(html);
         $('#modalDetail').addClass('show');
     });
 
-    $(document).on("click",".force-download",function(e){
-        e.preventDefault();
-        const url=$(this).data("url");
-        const name=$(this).data("name");
-        const link=document.createElement("a");
-        link.href=url+"?download=1";
-        link.download=name||"file";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
+    // Helper function untuk escape HTML
+    function escapeHtml(text) {
+        if (!text) return '-';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
 
     // Close modals
     $('.close-modal').click(function(){
