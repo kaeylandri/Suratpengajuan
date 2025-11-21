@@ -40,12 +40,15 @@ $route['surat/edit/(:num)'] = 'surat/edit/$1';
 $route['surat/delete/(:num)'] = 'surat/delete/$1';
 $route['surat/cetak/(:num)'] = 'surat/cetak/$1';
 
-// STATUS PAGES ROUTES - NEWLY ADDED
-$route['surat/semua'] = 'surat/semua';
-$route['surat/disetujui'] = 'surat/disetujui';
-$route['surat/ditolak'] = 'surat/ditolak';
-$route['surat/pending'] = 'surat/pending';
-$route['surat/menunggu'] = 'surat/menunggu';
+// STATS GRID ROUTES - UPDATED TO MATCH CONTROLLER
+$route['surat/total'] = 'surat/halaman_total';
+$route['surat/disetujui'] = 'surat/halaman_disetujui';
+$route['surat/ditolak'] = 'surat/halaman_ditolak';
+$route['surat/pending'] = 'surat/halaman_pending';
+
+// COMPATIBILITY ROUTES - KEEP EXISTING FOR BACKWARD COMPATIBILITY
+$route['surat/semua'] = 'surat/halaman_total';
+$route['surat/menunggu'] = 'surat/halaman_pending';
 
 /*
 | -------------------------------------------------------------------------

@@ -26,6 +26,7 @@
     .badge-pending{background:#fff3cd;color:#856404}
     .badge-approved{background:#d4edda;color:#155724}
     .badge-rejected{background:#f8d7da;color:#721c24}
+    .badge-completed{background:#d1ecf1;color:#0c5460}
     .btn{padding:6px 10px;border-radius:6px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s}
     .btn:hover{transform:scale(1.05)}
     .btn-approve{background:#27ae60;color:#fff}
@@ -150,20 +151,39 @@
                 </thead>
                 <tbody id="tableBody">
                     <?php if(isset($surat_list) && !empty($surat_list)): $no=1; foreach($surat_list as $s): 
-                        // ✅ Logika badge yang konsisten dan singkat
-                        if ($s->status == 'disetujui KK') {
+                        // ✅ LOGIKA BADGE YANG DIPERBAIKI - SEMUA STATUS DITANGANI DENGAN BENAR
+                        $status = $s->status ?? '';
+                        $st_key = 'unknown';
+                        $badge_text = ucwords($status);
+                        
+                        if ($status == 'disetujui KK') {
                             $st_key = 'pending';
                             $badge = '<span class="badge badge-pending">Menunggu</span>';
-                        } elseif ($s->status == 'disetujui sekretariat') {
+                        } elseif ($status == 'disetujui sekretariat') {
                             $st_key = 'approved';
-                            $badge = '<span class="badge badge-approved">Disetujui</span>';
-                        } elseif ($s->status == 'ditolak sekretariat') {
+                            $badge = '<span class="badge badge-approved">Disetujui Sekretariat</span>';
+                        } elseif ($status == 'ditolak sekretariat') {
                             $st_key = 'rejected';
-                            $badge = '<span class="badge badge-rejected">Ditolak</span>';
+                            $badge = '<span class="badge badge-rejected">Ditolak Sekretariat</span>';
+                        } elseif ($status == 'disetujui dekan') {
+                            $st_key = 'completed';
+                            $badge = '<span class="badge badge-completed">Disetujui Dekan</span>';
+                        } elseif ($status == 'ditolak dekan') {
+                            $st_key = 'rejected';
+                            $badge = '<span class="badge badge-rejected">Ditolak Dekan</span>';
+                        } elseif (strpos($status, 'pengajuan') !== false || strpos($status, 'pending') !== false || strpos($status, 'menunggu') !== false) {
+                            $st_key = 'pending';
+                            $badge = '<span class="badge badge-pending">' . $badge_text . '</span>';
+                        } elseif (strpos($status, 'setuju') !== false || strpos($status, 'approved') !== false) {
+                            $st_key = 'approved';
+                            $badge = '<span class="badge badge-approved">' . $badge_text . '</span>';
+                        } elseif (strpos($status, 'tolak') !== false || strpos($status, 'rejected') !== false) {
+                            $st_key = 'rejected';
+                            $badge = '<span class="badge badge-rejected">' . $badge_text . '</span>';
                         } else {
-                            // Fallback untuk status lain
+                            // Fallback untuk status lain yang tidak dikenal
                             $st_key = 'unknown';
-                            $badge = '<span class="badge badge-pending">'.htmlspecialchars(ucwords($s->status)).'</span>';
+                            $badge = '<span class="badge badge-pending">' . $badge_text . '</span>';
                         }
 
                         $tgl_pengajuan = isset($s->tanggal_pengajuan) && $s->tanggal_pengajuan ? date('d M Y', strtotime($s->tanggal_pengajuan)) : '-';
@@ -184,7 +204,7 @@
                                 </button>
                                 <?php 
                                 // ✅ Tombol approve/reject hanya untuk status "disetujui KK"
-                                if($s->status == 'disetujui KK'): 
+                                if($status == 'disetujui KK'): 
                                 ?>
                                     <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?>)" title="Setujui & Teruskan ke Dekan">
                                         <i class="fa-solid fa-check"></i>
@@ -265,7 +285,13 @@ function filterTable(status) {
         }
     });
     
-    const statusText = {'all': 'Semua Data', 'pending': 'Menunggu', 'approved': 'Disetujui', 'rejected': 'Ditolak'};
+    const statusText = {
+        'all': 'Semua Data', 
+        'pending': 'Menunggu', 
+        'approved': 'Disetujui', 
+        'rejected': 'Ditolak',
+        'completed': 'Selesai'
+    };
     filterInfo.textContent = `Menampilkan: ${statusText[status]} (${visibleCount} data)`;
 }
 
@@ -293,11 +319,8 @@ function showDetail(id) {
                     }).format(amount);
                 };
 
-                // Tampilkan status yang singkat di modal
-                let displayStatus = item.status || '-';
-                if (item.status == 'disetujui KK') displayStatus = 'Menunggu';
-                else if (item.status == 'disetujui sekretariat') displayStatus = 'Disetujui';
-                else if (item.status == 'ditolak sekretariat') displayStatus = 'Ditolak';
+                // Tampilkan status lengkap di modal
+                const displayStatus = item.status || '-';
                 
                 const content = `
                     <div class="detail-row">

@@ -94,7 +94,7 @@ class Surat_model extends CI_Model
     }
 
     // ============================================================
-    //  GET SURAT DISETUJUI (SEMUA STATUS SETUJU)
+    //  GET SURAT DISETUJUI (SEMUA STATUS SETUJU) - METHOD UTAMA
     // ============================================================
     public function get_surat_disetujui()
     {
@@ -102,6 +102,14 @@ class Surat_model extends CI_Model
         $this->db->order_by('created_at', 'DESC');
         $result = $this->db->get('surat')->result();
         return $this->decode_json_fields($result);
+    }
+
+    // ============================================================
+    //  ALIAS UNTUK get_disetujui() - METHOD YANG DIPANGGIL DI CONTROLLER
+    // ============================================================
+    public function get_disetujui()
+    {
+        return $this->get_surat_disetujui();
     }
 
     // ============================================================
@@ -115,6 +123,12 @@ class Surat_model extends CI_Model
         return $this->decode_json_fields($result);
     }
 
+    // Alias untuk get_ditolak
+    public function get_ditolak()
+    {
+        return $this->get_surat_ditolak();
+    }
+
     // ============================================================
     //  GET SURAT PENDING (SEMUA STATUS MENUNGGU)
     // ============================================================
@@ -124,6 +138,12 @@ class Surat_model extends CI_Model
         $this->db->order_by('created_at', 'DESC');
         $result = $this->db->get('surat')->result();
         return $this->decode_json_fields($result);
+    }
+
+    // Alias untuk get_pending
+    public function get_pending()
+    {
+        return $this->get_surat_pending();
     }
 
     // ============================================================
@@ -367,7 +387,7 @@ class Surat_model extends CI_Model
     }
 
     // ============================================================
-    //  METHOD UNTUK SEKRETARIAT - BARU DITAMBAHKAN
+    //  METHOD UNTUK SEKRETARIAT
     // ============================================================
 
     // Get semua surat untuk sekretariat dengan filter

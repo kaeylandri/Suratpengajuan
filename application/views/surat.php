@@ -1175,66 +1175,31 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('DOMContentLoaded', function () {
     const panitiaContainer = document.getElementById('panitiaContainer');
     const jenisPengajuan = document.getElementById('jenis_pengajuan');
+    
+    // Mock data untuk testing
+    const mockData = [
+        { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
+        { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
+        { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', divisi: 'DI' },
+        { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', divisi: 'DP' },
+        { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', divisi: 'Admin KK' }
+    ];
+
+    // Global state untuk autocomplete
+    let currentAutocompleteBox = null;
+    let currentKeydownHandler = null;
+    let currentClickHandler = null;
 
     // Toggle button visibility based on jenis pengajuan
     jenisPengajuan.addEventListener('change', function () {
         document.querySelectorAll('.button-cell').forEach(btn => {
             btn.style.display = (this.value === 'Kelompok') ? 'flex' : 'none';
         });
-    });
-
-    // Add/Remove row handlers
-    let isAdding = false;
-    panitiaContainer.addEventListener('click', function (e) {
-        const addBtn = e.target.closest('.addRow');
-        const removeBtn = e.target.closest('.removeRow');
-
-        if (addBtn) {
-            e.preventDefault();
-            if (isAdding) return false;
-            isAdding = true;
-
-            const row = addBtn.closest('.panitia-row');
-            const clone = row.cloneNode(true);
-            
-            // Clear inputs
-            clone.querySelectorAll('input').forEach(input => {
-                input.value = '';
-                input.removeAttribute('data-autocomplete-init');
-            });
-
-            // Change button to remove
-            const btn = clone.querySelector('.addRow');
-            btn.classList.remove('btn-success', 'addRow');
-            btn.classList.add('btn-danger', 'removeRow');
-            btn.innerHTML = '<i class="fas fa-minus"></i>';
-            btn.setAttribute('title', 'Hapus Baris');
-
-            panitiaContainer.appendChild(clone);
-            
-            // Animation
-            setTimeout(() => {
-                clone.style.opacity = '0';
-                clone.style.transform = 'translateY(-10px)';
-                clone.offsetHeight;
-                clone.style.transition = 'all 0.3s ease';
-                clone.style.opacity = '1';
-                clone.style.transform = 'translateY(0)';
-            }, 10);
-
-            initAutocompleteForRow(clone);
-            setTimeout(() => isAdding = false, 300);
-        }
-
-        if (removeBtn) {
-            e.preventDefault();
-            const rowEl = removeBtn.closest('.panitia-row');
-            if (rowEl && panitiaContainer.querySelectorAll('.panitia-row').length > 1) {
-                rowEl.style.opacity = '0';
-                rowEl.style.transform = 'translateX(20px)';
-                setTimeout(() => rowEl.remove(), 300);
-            }
-        }
     });
 
     // Debounce function
@@ -1253,10 +1218,52 @@ document.addEventListener('DOMContentLoaded', function () {
         return text.replace(regex, '<span class="query-match">$1</span>');
     }
 
-    // Show suggestion box (Google-style)
+    // Remove existing autocomplete box
+    function removeAutocompleteBox() {
+        if (currentAutocompleteBox) {
+            currentAutocompleteBox.remove();
+            currentAutocompleteBox = null;
+        }
+        if (currentKeydownHandler) {
+            document.removeEventListener('keydown', currentKeydownHandler);
+            currentKeydownHandler = null;
+        }
+        if (currentClickHandler) {
+            document.removeEventListener('click', currentClickHandler);
+            currentClickHandler = null;
+        }
+    }
+
+    // Fetch suggestions from database
+    async function fetchSuggestions(query, fieldType = 'nip') {
+        if (!query) return [];
+        
+        try {
+            // Mock data untuk testing
+            await new Promise(resolve => setTimeout(resolve, 200));
+            const lowerQuery = query.toLowerCase();
+            return mockData.filter(item => {
+                const searchIn = item[fieldType] ? item[fieldType].toLowerCase() : '';
+                return searchIn.includes(lowerQuery);
+            });
+
+            // Uncomment untuk backend API
+            /*
+            const url = `<?= base_url('surat/autocomplete-nip') ?>?q=${encodeURIComponent(query)}&field=${fieldType}`;
+            const response = await fetch(url);
+            if (!response.ok) return [];
+            const data = await response.json();
+            return Array.isArray(data) ? data : [];
+            */
+        } catch (error) {
+            console.error('Autocomplete error:', error);
+            return [];
+        }
+    }
+
+    // Show suggestion box
     function showSuggestionBox(inputEl, items, onSelect, fieldType) {
-        // Remove existing boxes
-        document.querySelectorAll('.autocomplete-box-fixed').forEach(b => b.remove());
+        removeAutocompleteBox();
 
         const rect = inputEl.getBoundingClientRect();
         const box = document.createElement('div');
@@ -1271,7 +1278,8 @@ document.addEventListener('DOMContentLoaded', function () {
             empty.textContent = 'Tidak ada data ditemukan';
             box.appendChild(empty);
             document.body.appendChild(box);
-            setTimeout(() => box.remove(), 2000);
+            currentAutocompleteBox = box;
+            setTimeout(() => removeAutocompleteBox(), 2000);
             return;
         }
 
@@ -1282,7 +1290,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const option = document.createElement('div');
             option.className = `autocomplete-item type-${fieldType}`;
             
-            // Determine primary and secondary text based on field type
             let primaryText = '';
             let secondaryText = '';
             
@@ -1317,19 +1324,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             `;
             
-            option.addEventListener('click', () => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
                 onSelect(item);
-                box.remove();
+                removeAutocompleteBox();
             });
             
             box.appendChild(option);
         });
 
         document.body.appendChild(box);
+        currentAutocompleteBox = box;
 
         // Keyboard navigation
-        inputEl.addEventListener('keydown', function handleKeydown(e) {
-            const opts = box.querySelectorAll('.autocomplete-item');
+        currentKeydownHandler = function(e) {
+            if (!currentAutocompleteBox) return;
+            
+            const opts = currentAutocompleteBox.querySelectorAll('.autocomplete-item');
             if (!opts.length) return;
 
             if (e.key === 'ArrowDown') {
@@ -1348,83 +1359,31 @@ document.addEventListener('DOMContentLoaded', function () {
                     opts[selectedIndex].click();
                 }
             } else if (e.key === 'Escape') {
-                box.remove();
+                removeAutocompleteBox();
             }
-        });
+        };
+        
+        document.addEventListener('keydown', currentKeydownHandler);
 
         // Close on outside click
         setTimeout(() => {
-            document.addEventListener('click', function handleClickOutside(ev) {
-                if (!box.contains(ev.target) && ev.target !== inputEl) {
-                    box.remove();
-                    document.removeEventListener('click', handleClickOutside);
+            currentClickHandler = function(ev) {
+                if (currentAutocompleteBox && !currentAutocompleteBox.contains(ev.target) && ev.target !== inputEl) {
+                    removeAutocompleteBox();
                 }
-            });
+            };
+            document.addEventListener('click', currentClickHandler);
         }, 0);
-    }
-
-    // Mock data untuk testing (hapus ini setelah backend siap)
-    const mockData = [
-        { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
-        { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
-        { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', divisi: 'DI' },
-        { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', divisi: 'DP' },
-        { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', divisi: 'Admin KK' }
-    ];
-
-    // Fetch suggestions from database
-    async function fetchSuggestions(query, fieldType = 'nip') {
-        if (!query) return [];
-        
-        try {
-            // CARA 1: Gunakan mock data untuk testing (comment jika backend sudah siap)
-            await new Promise(resolve => setTimeout(resolve, 300)); // Simulasi delay
-            const lowerQuery = query.toLowerCase();
-            return mockData.filter(item => {
-                const searchIn = item[fieldType] ? item[fieldType].toLowerCase() : '';
-                return searchIn.includes(lowerQuery);
-            });
-
-            // CARA 2: Gunakan backend API (uncomment jika backend sudah siap)
-            /*
-            const url = `<?= base_url('surat/autocomplete-nip') ?>?q=${encodeURIComponent(query)}&field=${fieldType}`;
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                console.error('Response not OK:', response.status);
-                return [];
-            }
-            
-            const data = await response.json();
-            console.log('Response data:', data); // Debug log
-            
-            return Array.isArray(data) ? data.map(item => ({
-                nip: item.nip || '',
-                nama_dosen: item.nama_dosen || '',
-                jabatan: item.jabatan || '',
-                divisi: item.divisi || ''
-            })) : [];
-            */
-        } catch (error) {
-            console.error('Autocomplete fetch error:', error);
-            return [];
-        }
     }
 
     // Initialize autocomplete for a row
     function initAutocompleteForRow(rowEl) {
-        if (!rowEl || rowEl.dataset.autocompleteInit) return;
-        rowEl.dataset.autocompleteInit = true;
-
         const inputNip = rowEl.querySelector('.nip-input');
         const inputNama = rowEl.querySelector('.nama_dosen');
         const inputJabatan = rowEl.querySelector('.jabatan');
         const inputDivisi = rowEl.querySelector('.divisi');
+
+        if (!inputNip || !inputNama || !inputJabatan || !inputDivisi) return;
 
         // Fill all fields when item is selected
         function fillRowWith(item) {
@@ -1435,26 +1394,117 @@ document.addEventListener('DOMContentLoaded', function () {
             inputDivisi.value = item.divisi || '';
         }
 
-        // Create input handler for each field
-        function createInputHandler(fieldType, inputEl) {
-            return debounce(async function () {
-                const val = inputEl.value.trim();
-                if (!val) return;
-                
-                const suggestions = await fetchSuggestions(val, fieldType);
-                showSuggestionBox(inputEl, suggestions, fillRowWith, fieldType);
-            }, 300);
-        }
+        // Remove old event listeners by cloning
+        const newInputNip = inputNip.cloneNode(true);
+        const newInputNama = inputNama.cloneNode(true);
+        const newInputJabatan = inputJabatan.cloneNode(true);
+        const newInputDivisi = inputDivisi.cloneNode(true);
 
-        // Attach handlers to each input
-        inputNip.addEventListener('input', createInputHandler('nip', inputNip));
-        inputNama.addEventListener('input', createInputHandler('nama_dosen', inputNama));
-        inputJabatan.addEventListener('input', createInputHandler('jabatan', inputJabatan));
-        inputDivisi.addEventListener('input', createInputHandler('divisi', inputDivisi));
+        inputNip.parentNode.replaceChild(newInputNip, inputNip);
+        inputNama.parentNode.replaceChild(newInputNama, inputNama);
+        inputJabatan.parentNode.replaceChild(newInputJabatan, inputJabatan);
+        inputDivisi.parentNode.replaceChild(newInputDivisi, inputDivisi);
+
+        // Create input handler
+        const handleNipInput = debounce(async function() {
+            const val = newInputNip.value.trim();
+            if (!val) return;
+            const suggestions = await fetchSuggestions(val, 'nip');
+            showSuggestionBox(newInputNip, suggestions, fillRowWith, 'nip');
+        }, 300);
+
+        const handleNamaInput = debounce(async function() {
+            const val = newInputNama.value.trim();
+            if (!val) return;
+            const suggestions = await fetchSuggestions(val, 'nama_dosen');
+            showSuggestionBox(newInputNama, suggestions, fillRowWith, 'nama_dosen');
+        }, 300);
+
+        const handleJabatanInput = debounce(async function() {
+            const val = newInputJabatan.value.trim();
+            if (!val) return;
+            const suggestions = await fetchSuggestions(val, 'jabatan');
+            showSuggestionBox(newInputJabatan, suggestions, fillRowWith, 'jabatan');
+        }, 300);
+
+        const handleDivisiInput = debounce(async function() {
+            const val = newInputDivisi.value.trim();
+            if (!val) return;
+            const suggestions = await fetchSuggestions(val, 'divisi');
+            showSuggestionBox(newInputDivisi, suggestions, fillRowWith, 'divisi');
+        }, 300);
+
+        // Attach handlers
+        newInputNip.addEventListener('input', handleNipInput);
+        newInputNama.addEventListener('input', handleNamaInput);
+        newInputJabatan.addEventListener('input', handleJabatanInput);
+        newInputDivisi.addEventListener('input', handleDivisiInput);
+
+        // Focus handlers to close autocomplete
+        newInputNip.addEventListener('focus', () => removeAutocompleteBox());
+        newInputNama.addEventListener('focus', () => removeAutocompleteBox());
+        newInputJabatan.addEventListener('focus', () => removeAutocompleteBox());
+        newInputDivisi.addEventListener('focus', () => removeAutocompleteBox());
     }
 
-    // Initialize autocomplete for existing rows
-    document.querySelectorAll('.panitia-row').forEach(row => initAutocompleteForRow(row));
+    // Add/Remove row handlers
+    let isAdding = false;
+    panitiaContainer.addEventListener('click', function (e) {
+        const addBtn = e.target.closest('.addRow');
+        const removeBtn = e.target.closest('.removeRow');
+
+        if (addBtn) {
+            e.preventDefault();
+            if (isAdding) return;
+            isAdding = true;
+
+            const row = addBtn.closest('.panitia-row');
+            const clone = row.cloneNode(true);
+            
+            // Clear inputs
+            clone.querySelectorAll('input').forEach(input => input.value = '');
+
+            // Change button to remove
+            const btn = clone.querySelector('.addRow');
+            btn.classList.remove('btn-success', 'addRow');
+            btn.classList.add('btn-danger', 'removeRow');
+            btn.innerHTML = '<i class="fas fa-minus"></i>';
+            btn.setAttribute('title', 'Hapus Baris');
+
+            panitiaContainer.appendChild(clone);
+            
+            // Animation
+            setTimeout(() => {
+                clone.style.opacity = '0';
+                clone.style.transform = 'translateY(-10px)';
+                clone.offsetHeight;
+                clone.style.transition = 'all 0.3s ease';
+                clone.style.opacity = '1';
+                clone.style.transform = 'translateY(0)';
+            }, 10);
+
+            // Initialize autocomplete for new row
+            initAutocompleteForRow(clone);
+            
+            setTimeout(() => isAdding = false, 300);
+        }
+
+        if (removeBtn) {
+            e.preventDefault();
+            const rowEl = removeBtn.closest('.panitia-row');
+            if (rowEl && panitiaContainer.querySelectorAll('.panitia-row').length > 1) {
+                rowEl.style.opacity = '0';
+                rowEl.style.transform = 'translateX(20px)';
+                setTimeout(() => rowEl.remove(), 300);
+            }
+        }
+    });
+
+    // Initialize autocomplete for first row
+    const firstRow = panitiaContainer.querySelector('.panitia-row');
+    if (firstRow) {
+        initAutocompleteForRow(firstRow);
+    }
 });
 </script>
 <!-- ===== UPLOADCARE CDN ===== -->
