@@ -46,6 +46,9 @@ if (!isset($surat_list) || !is_array($surat_list)) {
     .remove-row{cursor:pointer;color:#dc3545;font-weight:bold;font-size:20px;}
     .submit-section{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);
         display:flex;justify-content:space-between;margin-top:30px;}
+    .date-error{color:#dc3545;font-size:12px;margin-top:5px;display:none;}
+    .is-invalid{border-color:#dc3545 !important;}
+    .date-group{position:relative;}
     </style>
 </head>
 
@@ -66,9 +69,12 @@ if (!isset($surat_list) || !is_array($surat_list)) {
         <p><strong><i class="fa fa-info-circle"></i> Panduan Multi Edit:</strong></p>
         <p>• Edit setiap item secara individual</p>
         <p>• Semua perubahan disimpan sekaligus</p>
+        <p>• Tanggal akhir tidak boleh lebih awal dari tanggal mulai</p>
+        <p>• Akhir periode tidak boleh lebih awal dari periode penugasan</p>
+        <p>• Maksimal periode 60 hari untuk semua tanggal</p>
     </div>
 
-    <form method="POST" action="<?= site_url('surat/save_multi_edit'); ?>">
+    <form method="POST" action="<?= site_url('surat/save_multi_edit'); ?>" id="multiEditForm">
 
         <?php foreach ($surat_list as $index => $surat): ?>
 
@@ -87,7 +93,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                     <div class="card-title"><?= htmlspecialchars($surat->nama_kegiatan ?? '-'); ?></div>
                     <div style="font-size:13px;color:#666;">
                         <?= htmlspecialchars($surat->jenis_pengajuan ?? '-'); ?> •
-                        <?= !empty($surat->created_at) && $surat->created_at !== '-' ? date('d M Y', strtotime($surat->created_at)) : '-'; ?>
+                        <?= !empty($surat->tanggal_pengajuan) && $surat->tanggal_pengajuan !== '-' ? date('d M Y', strtotime($surat->tanggal_pengajuan)) : '-'; ?>
                     </div>
                 </div>
                 <div class="item-id">ID: <?= htmlspecialchars($surat->id); ?></div>
@@ -117,33 +123,37 @@ if (!isset($surat_list) || !is_array($surat_list)) {
 
             <div id="custom_<?= $index ?>" style="<?= (isset($surat->jenis_date) && $surat->jenis_date=='custom') ? '' : 'display:none' ?>">
                 <div class="row mt-3">
-                    <div class="col-md-6">
+                    <div class="col-md-6 date-group">
                         <label>Tanggal Mulai</label>
                         <input type="date" class="form-control tanggal-kegiatan"
                                data-index="<?= $index ?>"
                                name="items[<?= $index ?>][tanggal_kegiatan]"
                                value="<?= (!empty($surat->tanggal_kegiatan) && $surat->tanggal_kegiatan!='-') ? htmlspecialchars($surat->tanggal_kegiatan) : '' ?>">
+                        <div class="date-error" id="error_tanggal_<?= $index ?>">Tanggal mulai tidak valid</div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 date-group">
                         <label>Tanggal Akhir</label>
                         <input type="date" class="form-control akhir-kegiatan"
                                data-index="<?= $index ?>"
                                name="items[<?= $index ?>][akhir_kegiatan]"
                                value="<?= (!empty($surat->akhir_kegiatan) && $surat->akhir_kegiatan!='-') ? htmlspecialchars($surat->akhir_kegiatan) : '' ?>">
+                        <div class="date-error" id="error_akhir_<?= $index ?>">Tanggal akhir tidak boleh lebih awal dari tanggal mulai</div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 date-group">
                         <label>Periode Penugasan</label>
                         <input type="date" class="form-control periode-penugasan"
                                data-index="<?= $index ?>"
                                name="items[<?= $index ?>][periode_penugasan]"
                                value="<?= (!empty($surat->periode_penugasan) && $surat->periode_penugasan!='-') ? htmlspecialchars($surat->periode_penugasan) : '' ?>">
+                        <div class="date-error" id="error_periode_<?= $index ?>">Tanggal periode tidak valid</div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 date-group">
                         <label>Akhir Periode</label>
                         <input type="date" class="form-control akhir-periode-penugasan"
                                data-index="<?= $index ?>"
                                name="items[<?= $index ?>][akhir_periode_penugasan]"
                                value="<?= (!empty($surat->akhir_periode_penugasan) && $surat->akhir_periode_penugasan!='-') ? htmlspecialchars($surat->akhir_periode_penugasan) : '' ?>">
+                        <div class="date-error" id="error_akhir_periode_<?= $index ?>">Tanggal akhir periode tidak boleh lebih awal dari periode penugasan</div>
                     </div>
                 </div>
             </div>
@@ -345,6 +355,131 @@ $(document).ready(() => {
     });
 
     // ============================================
+    //     VALIDASI TANGGAL - PERBAIKAN UTAMA
+    // ============================================
+
+    // Fungsi untuk validasi tanggal
+    function validateDates(index) {
+        let isValid = true;
+        
+        // Reset semua error message
+        $(`#error_tanggal_${index}, #error_akhir_${index}, #error_periode_${index}, #error_akhir_periode_${index}`)
+            .hide().prev().removeClass('is-invalid');
+        
+        // Validasi 1: Tanggal Kegiatan & Akhir Kegiatan
+        const tanggalKegiatan = $(`.tanggal-kegiatan[data-index="${index}"]`).val();
+        const akhirKegiatan = $(`.akhir-kegiatan[data-index="${index}"]`).val();
+        
+        if (tanggalKegiatan && akhirKegiatan) {
+            if (new Date(akhirKegiatan) < new Date(tanggalKegiatan)) {
+                $(`#error_akhir_${index}`).show().prev().addClass('is-invalid');
+                isValid = false;
+            }
+        }
+        
+        // Validasi 2: Periode Penugasan & Akhir Periode - PERBAIKAN UTAMA
+        const periodePenugasan = $(`.periode-penugasan[data-index="${index}"]`).val();
+        const akhirPeriode = $(`.akhir-periode-penugasan[data-index="${index}"]`).val();
+        
+        if (periodePenugasan && akhirPeriode) {
+            if (new Date(akhirPeriode) < new Date(periodePenugasan)) {
+                $(`#error_akhir_periode_${index}`).show().prev().addClass('is-invalid');
+                isValid = false;
+            }
+        }
+        
+        return isValid;
+    }
+
+    // Fungsi untuk set min date pada tanggal akhir - PERBAIKAN UTAMA
+    function updateMinDates(index) {
+        const tanggalKegiatan = $(`.tanggal-kegiatan[data-index="${index}"]`).val();
+        const periodePenugasan = $(`.periode-penugasan[data-index="${index}"]`).val();
+        
+        // Set min date untuk akhir kegiatan
+        if (tanggalKegiatan) {
+            $(`.akhir-kegiatan[data-index="${index}"]`).attr('min', tanggalKegiatan);
+        } else {
+            $(`.akhir-kegiatan[data-index="${index}"]`).removeAttr('min');
+        }
+        
+        // Set min date untuk akhir periode - PERBAIKAN UTAMA
+        if (periodePenugasan) {
+            $(`.akhir-periode-penugasan[data-index="${index}"]`).attr('min', periodePenugasan);
+        } else {
+            $(`.akhir-periode-penugasan[data-index="${index}"]`).removeAttr('min');
+        }
+    }
+
+    // Event handlers untuk perubahan tanggal - PERBAIKAN UTAMA
+    $(document).on('change', '.tanggal-kegiatan', function() {
+        const index = $(this).data('index');
+        updateMinDates(index);
+        validateDates(index);
+        
+        // Auto-correction untuk akhir kegiatan
+        const akhirKegiatan = $(`.akhir-kegiatan[data-index="${index}"]`).val();
+        if (akhirKegiatan && new Date(akhirKegiatan) < new Date($(this).val())) {
+            $(`.akhir-kegiatan[data-index="${index}"]`).val($(this).val());
+            validateDates(index);
+        }
+    });
+
+    $(document).on('change', '.periode-penugasan', function() {
+        const index = $(this).data('index');
+        updateMinDates(index);
+        validateDates(index);
+        
+        // Auto-correction untuk akhir periode - PERBAIKAN UTAMA
+        const akhirPeriode = $(`.akhir-periode-penugasan[data-index="${index}"]`).val();
+        if (akhirPeriode && new Date(akhirPeriode) < new Date($(this).val())) {
+            $(`.akhir-periode-penugasan[data-index="${index}"]`).val($(this).val());
+            validateDates(index);
+        }
+    });
+
+    $(document).on('change', '.akhir-kegiatan', function() {
+        const index = $(this).data('index');
+        validateDates(index);
+    });
+
+    $(document).on('change', '.akhir-periode-penugasan', function() {
+        const index = $(this).data('index');
+        // Validasi real-time saat user mengubah akhir periode
+        const periodePenugasan = $(`.periode-penugasan[data-index="${index}"]`).val();
+        const akhirPeriode = $(this).val();
+        
+        if (periodePenugasan && akhirPeriode && new Date(akhirPeriode) < new Date(periodePenugasan)) {
+            // Auto-correction jika user memilih tanggal yang lebih awal
+            $(this).val(periodePenugasan);
+        }
+        validateDates(index);
+    });
+
+    // Validasi form sebelum submit
+    $('#multiEditForm').on('submit', function(e) {
+        let allValid = true;
+        
+        // Validasi semua item
+        $('.edit-card').each(function() {
+            const index = $(this).find('.jenis-date-select').data('index');
+            if (!validateDates(index)) {
+                allValid = false;
+                // Scroll ke card yang error
+                $(this).get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+        
+        if (!allValid) {
+            e.preventDefault();
+            alert('Terdapat kesalahan dalam pengisian tanggal. Harap periksa kembali:\n\n• Tanggal akhir tidak boleh lebih awal dari tanggal mulai\n• Akhir periode tidak boleh lebih awal dari periode penugasan');
+            return false;
+        }
+        
+        return true;
+    });
+
+    // ============================================
     //     AUTO-ADJUST 60 HARI VALIDATION
     // ============================================
 
@@ -365,10 +500,11 @@ $(document).ready(() => {
 
         if (end > maxEnd) {
             $(`.akhir-kegiatan[data-index="${i}"]`).val(maxEnd);
+            validateDates(i);
         }
     });
 
-    // 2. periode_penugasan → akhir_periode_penugasan
+    // 2. periode_penugasan → akhir_periode_penugasan - PERBAIKAN UTAMA
     $(document).on("change", ".periode-penugasan, .akhir-periode-penugasan", function() {
         let i = $(this).data('index');
         let start = $(`.periode-penugasan[data-index="${i}"]`).val();
@@ -379,6 +515,35 @@ $(document).ready(() => {
 
         if (end > maxEnd) {
             $(`.akhir-periode-penugasan[data-index="${i}"]`).val(maxEnd);
+            validateDates(i);
+        }
+        
+        // Validasi tambahan untuk memastikan akhir periode tidak lebih awal
+        if (end < start) {
+            $(`.akhir-periode-penugasan[data-index="${i}"]`).val(start);
+            validateDates(i);
+        }
+    });
+
+    // Inisialisasi min dates saat load
+    $('.edit-card').each(function() {
+        const index = $(this).find('.jenis-date-select').data('index');
+        updateMinDates(index);
+    });
+
+    // Pencegahan input manual yang tidak valid
+    $(document).on('input', '.akhir-periode-penugasan', function() {
+        const index = $(this).data('index');
+        const periodePenugasan = $(`.periode-penugasan[data-index="${index}"]`).val();
+        const currentValue = $(this).val();
+        
+        if (periodePenugasan && currentValue) {
+            setTimeout(() => {
+                if (new Date(currentValue) < new Date(periodePenugasan)) {
+                    $(this).val(periodePenugasan);
+                    validateDates(index);
+                }
+            }, 100);
         }
     });
 

@@ -99,12 +99,11 @@ class Surat extends CI_Controller
 {
     header('Content-Type: application/json');
     
-    $this->db->select('id, status, created_at, catatan_penolakan,
-                   tanggal_disetujui_kk, tanggal_disetujui_sekretariat, tanggal_disetujui_dekan');
-
+    // Ambil data surat
+    $this->db->select('id, status, created_at, catatan_penolakan, approval_status');
     $this->db->where('id', $surat_id);
     $query = $this->db->get('surat');
-    
+
     if ($query->num_rows() == 0) {
         echo json_encode([
             'success' => false,
@@ -112,295 +111,217 @@ class Surat extends CI_Controller
         ]);
         return;
     }
-    
+
     $surat = $query->row();
 
-        // Hitung durasi waktu di tiap tahap
-    $durasi_1 = $this->bedaWaktu($surat->created_at, $surat->tanggal_disetujui_kk);
-    $durasi_2 = $this->bedaWaktu($surat->tanggal_disetujui_kk, $surat->tanggal_disetujui_sekretariat);
-    $durasi_3 = $this->bedaWaktu($surat->tanggal_disetujui_sekretariat, $surat->tanggal_disetujui_dekan);
+    // Decode JSON approval_status
+    $approval = json_decode($surat->approval_status, true);
+    if (!is_array($approval)) $approval = [];
 
+    // Ambil waktu persetujuan / penolakan
+    $getTime = function($val) {
+        if (!$val) return null;
 
+        if (is_string($val)) return $val; // approved → datetime string
+        if (is_array($val) && isset($val['waktu'])) return $val['waktu']; // rejected → ambil waktu penolakan
+
+        return null;
+    };
+
+    $kk  = $getTime($approval['kk'] ?? null);
+    $sek = $getTime($approval['sekretariat'] ?? null);
+    $dek = $getTime($approval['dekan'] ?? null);
+
+    // Normalisasi status
     $status = strtolower(trim($surat->status ?? 'pengajuan'));
     $catatan_penolakan = $surat->catatan_penolakan ?? null;
-    $created_at = $surat->created_at ?? $surat->created_at;
-    
+    $created_at = $surat->created_at;
+
     $steps = [];
     $progress_percentage = 0;
-    
-    // Step 1: Mengirim (Always completed)
+
+    // Step pertama: Mengirim
     $steps[] = [
         'step_name' => 'Mengirim',
         'status' => 'completed',
         'date' => date('d M Y', strtotime($created_at)),
         'label' => 'Terkirim'
     ];
-    
-    // Tentukan status berdasarkan field status di database
+
+    // Tentukan steps berdasarkan status
     switch ($status) {
+
         case 'pengajuan':
-            // Baru diajukan, menunggu KK
-            $steps[] = [
-                'step_name' => 'Dalam Proses',
-                'status' => 'in-progress',
-                'date' => '-',
-                'label' => 'Dalam Proses'
-            ];
-            $steps[] = [
-                'step_name' => 'Menunggu',
-                'status' => 'pending',
-                'date' => '-',
-                'label' => 'Menunggu'
-            ];
-            $steps[] = [
-                'step_name' => 'Menunggu',
-                'status' => 'pending',
-                'date' => '-',
-                'label' => 'Menunggu'
-            ];
+            $steps[] = ['step_name'=>'Dalam Proses','status'=>'in-progress','date'=>'-','label'=>'Dalam Proses'];
+            $steps[] = ['step_name'=>'Menunggu','status'=>'pending','date'=>'-','label'=>'Menunggu'];
+            $steps[] = ['step_name'=>'Menunggu','status'=>'pending','date'=>'-','label'=>'Menunggu'];
             $progress_percentage = 35;
             break;
-            
+
         case 'disetujui kk':
-            // Sudah disetujui KK, menunggu Sekretariat
             $steps[] = [
-                'step_name' => 'Disetujui Kaprodi',
-                'status' => 'completed',
-                'date' => date('d M Y'),
-                'label' => 'Disetujui'
+                'step_name'=>'Disetujui Kaprodi',
+                'status'=>'completed',
+                'date'=> ($kk) ? date('d M Y', strtotime($kk)) : '-',
+                'label'=>'Disetujui'
             ];
-            $steps[] = [
-                'step_name' => 'Dalam Proses',
-                'status' => 'in-progress',
-                'date' => '-',
-                'label' => 'Dalam Proses'
-            ];
-            $steps[] = [
-                'step_name' => 'Menunggu',
-                'status' => 'pending',
-                'date' => '-',
-                'label' => 'Menunggu'
-            ];
+            $steps[] = ['step_name'=>'Dalam Proses','status'=>'in-progress','date'=>'-','label'=>'Dalam Proses'];
+            $steps[] = ['step_name'=>'Menunggu','status'=>'pending','date'=>'-','label'=>'Menunggu'];
             $progress_percentage = 65;
             break;
-            
+
         case 'disetujui sekretariat':
-            // Sudah disetujui Sekretariat, menunggu Dekan
             $steps[] = [
-                'step_name' => 'Disetujui Kaprodi',
-                'status' => 'completed',
-                'date' => date('d M Y'),
-                'label' => 'Disetujui'
+                'step_name'=>'Disetujui Kaprodi',
+                'status'=>'completed',
+                'date'=> ($kk) ? date('d M Y', strtotime($kk)) : '-',
+                'label'=>'Disetujui'
             ];
             $steps[] = [
-                'step_name' => 'Disetujui Sekretariat',
-                'status' => 'completed',
-                'date' => date('d M Y'),
-                'label' => 'Disetujui'
+                'step_name'=>'Disetujui Sekretariat',
+                'status'=>'completed',
+                'date'=> ($sek) ? date('d M Y', strtotime($sek)) : '-',
+                'label'=>'Disetujui'
             ];
-            $steps[] = [
-                'step_name' => 'Dalam Proses',
-                'status' => 'in-progress',
-                'date' => '-',
-                'label' => 'Dalam Proses'
-            ];
+            $steps[] = ['step_name'=>'Dalam Proses','status'=>'in-progress','date'=>'-','label'=>'Dalam Proses'];
             $progress_percentage = 95;
             break;
-            
+
         case 'disetujui dekan':
         case 'selesai':
         case 'completed':
-            // Semua sudah disetujui
             $steps[] = [
-                'step_name' => 'Disetujui KK',
-                'status' => 'completed',
-                'date' => date('d M Y'),
-                'label' => 'Disetujui'
+                'step_name'=>'Disetujui Kaprodi',
+                'status'=>'completed',
+                'date'=> ($kk) ? date('d M Y', strtotime($kk)) : '-',
+                'label'=>'Disetujui'
             ];
             $steps[] = [
-                'step_name' => 'Disetujui Sekretariat',
-                'status' => 'completed',
-                'date' => date('d M Y'),
-                'label' => 'Disetujui'
+                'step_name'=>'Disetujui Sekretariat',
+                'status'=>'completed',
+                'date'=> ($sek) ? date('d M Y', strtotime($sek)) : '-',
+                'label'=>'Disetujui'
             ];
             $steps[] = [
-                'step_name' => 'Disetujui Dekan',
-                'status' => 'completed',
-                'date' => date('d M Y'),
-                'label' => 'Disetujui'
+                'step_name'=>'Disetujui Dekan',
+                'status'=>'completed',
+                'date'=> ($dek) ? date('d M Y', strtotime($dek)) : '-',
+                'label'=>'Disetujui'
             ];
             $progress_percentage = 100;
             break;
-            
+
         case 'ditolak kk':
-            // Ditolak di KK
             $steps[] = [
-                'step_name' => 'Ditolak Kaprodi',
-                'status' => 'rejected',
-                'date' => date('d M Y'),
-                'label' => 'Ditolak',
-                'catatan_penolakan' => $catatan_penolakan
+                'step_name'=>'Ditolak Kaprodi',
+                'status'=>'rejected',
+                'date'=> ($kk) ? date('d M Y', strtotime($kk)) : '-',
+                'label'=>'Ditolak',
+                'catatan_penolakan'=>$catatan_penolakan
             ];
-            $steps[] = [
-                'step_name' => 'Menunggu',
-                'status' => 'pending',
-                'date' => '-',
-                'label' => 'Menunggu'
-            ];
-            $steps[] = [
-                'step_name' => 'Menunggu',
-                'status' => 'pending',
-                'date' => '-',
-                'label' => 'Menunggu'
-            ];
+            $steps[] = ['step_name'=>'Menunggu','status'=>'pending','date'=>'-','label'=>'Menunggu'];
+            $steps[] = ['step_name'=>'Menunggu','status'=>'pending','date'=>'-','label'=>'Menunggu'];
             $progress_percentage = 35;
             break;
 
         case 'ditolak sekretariat':
-            // Ditolak di Sekretariat
             $steps[] = [
-                'step_name' => 'Disetujui Kaprodi',
-                'status' => 'completed',
-                'date' => date('d M Y'),
-                'label' => 'Disetujui'
+                'step_name'=>'Disetujui Kaprodi',
+                'status'=>'completed',
+                'date'=> ($kk) ? date('d M Y', strtotime($kk)) : '-',
+                'label'=>'Disetujui'
             ];
             $steps[] = [
-                'step_name' => 'Ditolak Sekretariat',
-                'status' => 'rejected',
-                'date' => date('d M Y'),
-                'label' => 'Ditolak',
-                'catatan_penolakan' => $catatan_penolakan
+                'step_name'=>'Ditolak Sekretariat',
+                'status'=>'rejected',
+                'date'=> ($sek) ? date('d M Y', strtotime($sek)) : '-',
+                'label'=>'Ditolak',
+                'catatan_penolakan'=>$catatan_penolakan
             ];
-            $steps[] = [
-                'step_name' => 'Menunggu',
-                'status' => 'pending',
-                'date' => '-',
-                'label' => 'Menunggu'
-            ];
+            $steps[] = ['step_name'=>'Menunggu','status'=>'pending','date'=>'-','label'=>'Menunggu'];
             $progress_percentage = 65;
             break;
 
         case 'ditolak dekan':
-            // Ditolak di Dekan
             $steps[] = [
-                'step_name' => 'Disetujui Kaprodi',
-                'status' => 'completed',
-                'date' => date('d M Y'),
-                'label' => 'Disetujui'
+                'step_name'=>'Disetujui Kaprodi',
+                'status'=>'completed',
+                'date'=> ($kk) ? date('d M Y', strtotime($kk)) : '-',
+                'label'=>'Disetujui'
             ];
             $steps[] = [
-                'step_name' => 'Disetujui Sekretariat',
-                'status' => 'completed',
-                'date' => date('d M Y'),
-                'label' => 'Disetujui'
+                'step_name'=>'Disetujui Sekretariat',
+                'status'=>'completed',
+                'date'=> ($sek) ? date('d M Y', strtotime($sek)) : '-',
+                'label'=>'Disetujui'
             ];
             $steps[] = [
-                'step_name' => 'Ditolak Dekan',
-                'status' => 'rejected',
-                'date' => date('d M Y'),
-                'label' => 'Ditolak',
-                'catatan_penolakan' => $catatan_penolakan
+                'step_name'=>'Ditolak Dekan',
+                'status'=>'rejected',
+                'date'=> ($dek) ? date('d M Y', strtotime($dek)) : '-',
+                'label'=>'Ditolak',
+                'catatan_penolakan'=>$catatan_penolakan
             ];
             $progress_percentage = 100;
             break;
-            
+
         default:
-            // Default: status tidak dikenali, anggap sebagai pengajuan
-            $steps[] = [
-                'step_name' => 'Persetujuan KK',
-                'status' => 'in-progress',
-                'date' => '-',
-                'label' => 'Dalam Proses'
-            ];
-            $steps[] = [
-                'step_name' => 'Persetujuan Sekretariat',
-                'status' => 'pending',
-                'date' => '-',
-                'label' => 'Menunggu'
-            ];
-            $steps[] = [
-                'step_name' => 'Persetujuan Dekan',
-                'status' => 'pending',
-                'date' => '-',
-                'label' => 'Menunggu'
-            ];
+            $steps[] = ['step_name'=>'Persetujuan KK','status'=>'in-progress','date'=>'-','label'=>'Dalam Proses'];
+            $steps[] = ['step_name'=>'Persetujuan Sekretariat','status'=>'pending','date'=>'-','label'=>'Menunggu'];
+            $steps[] = ['step_name'=>'Persetujuan Dekan','status'=>'pending','date'=>'-','label'=>'Menunggu'];
             $progress_percentage = 25;
             break;
     }
-    
-    // Buat deskripsi status
-    $status_description = '';
-    switch ($status) {
-        case 'pengajuan':
-            $status_description = '⏳ Pengajuan Anda sedang menunggu persetujuan dari Kepala Kelompok (KK).';
-            break;
-        case 'disetujui kk':
-            $status_description = '⏳ Pengajuan telah disetujui KK, sedang menunggu persetujuan Sekretariat.';
-            break;
-        case 'disetujui sekretariat':
-            $status_description = '⏳ Pengajuan telah disetujui Sekretariat, sedang menunggu persetujuan Dekan.';
-            break;
-        case 'disetujui dekan':
-        case 'selesai':
-        case 'completed':
-            $status_description = '✅ Selamat! Pengajuan Anda telah disetujui oleh semua pihak.';
-            break;
-        case 'ditolak kk':
-            $status_description = '❌ Pengajuan Anda ditolak oleh Kepala Kelompok (KK).';
-            break;
-        case 'ditolak sekretariat':
-            $status_description = '❌ Pengajuan Anda ditolak oleh Sekretariat.';
-            break;
-        case 'ditolak dekan':
-            $status_description = '❌ Pengajuan Anda ditolak oleh Dekan.';
-            break;
-        default:
-            $status_description = '⏳ Pengajuan Anda sedang dalam proses.';
-            break;
-    }
-    
-    $response = [
+
+    // Deskripsi status
+    $status_description = match ($status) {
+        'pengajuan'              => '⏳ Menunggu persetujuan Kepala Kelompok (KK).',
+        'disetujui kk'           => '⏳ Menunggu persetujuan Sekretariat.',
+        'disetujui sekretariat'  => '⏳ Menunggu persetujuan Dekan.',
+        'disetujui dekan','selesai','completed'
+                                 => '✅ Semua persetujuan selesai.',
+        'ditolak kk'             => '❌ Ditolak oleh Kepala Kelompok (KK).',
+        'ditolak sekretariat'    => '❌ Ditolak oleh Sekretariat.',
+        'ditolak dekan'          => '❌ Ditolak oleh Dekan.',
+        default                  => '⏳ Pengajuan sedang dalam proses.',
+    };
+
+    // Response final
+    echo json_encode([
         'success' => true,
         'data' => [
-        'steps' => $steps,
-        'current_status' => $status,
-        'status_raw' => $surat->status,
-        'progress_percentage' => $progress_percentage,
-        'catatan_penolakan' => $catatan_penolakan,
-        'status_description' => $status_description,
-        'durasi' => [
-        'durasi_1' => (!empty($surat->tanggal_disetujui_kk)) 
-                        ? $this->bedaWaktu($surat->created_at, $surat->tanggal_disetujui_kk)
-                        : '-',
-
-        'durasi_2' => (!empty($surat->tanggal_disetujui_sekretariat)) 
-                        ? $this->bedaWaktu($surat->tanggal_disetujui_kk, $surat->tanggal_disetujui_sekretariat)
-                        : '-',
-
-        'durasi_3' => (!empty($surat->tanggal_disetujui_dekan)) 
-                        ? $this->bedaWaktu($surat->tanggal_disetujui_sekretariat, $surat->tanggal_disetujui_dekan)
-                        : '-',
-    ]
-
-]
-
-    ];
-    
-    echo json_encode($response);
-    log_message('error', print_r($surat, true));
-
+            'steps' => $steps,
+            'current_status' => $status,
+            'status_raw' => $surat->status,
+            'progress_percentage' => $progress_percentage,
+            'catatan_penolakan' => $catatan_penolakan,
+            'status_description' => $status_description,
+            'durasi' => [
+                'durasi_1' => ($kk) ? $this->bedaWaktu($created_at, $kk) : '-',
+                'durasi_2' => ($kk && $sek) ? $this->bedaWaktu($kk, $sek) : '-',
+                'durasi_3' => ($sek && $dek) ? $this->bedaWaktu($sek, $dek) : '-',
+            ]
+        ]
+    ]);
 }
+
 
 private function bedaWaktu($start, $end)
 {
     if (!$start || !$end) return '-';
 
-    $mulai = new DateTime($start);
-    $selesai = new DateTime($end);
+    try {
+        $mulai = new DateTime($start);
+        $selesai = new DateTime($end);
+    } catch (Exception $e) {
+        return '-';
+    }
+
     $diff = $mulai->diff($selesai);
 
     return $diff->d . " hari " . $diff->h . " jam " ;
 }
+
 
 
     /* ===========================================

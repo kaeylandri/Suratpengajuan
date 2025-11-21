@@ -971,7 +971,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
 
         <!-- Jenis Penugasan Perorangan -->
-        <div class="form-group has-select mb-3">
+        <div class="form-group has-select mb-3" id="jenis_penugasan_perorangan_container">
             <select class="form-control" name="jenis_penugasan" id="jenis_penugasan_perorangan">
                 <option disabled selected value="">Jenis Penugasan</option>
                 <option value="Juri">Juri</option>
@@ -987,7 +987,7 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
 
         <!-- Jenis Penugasan Kelompok -->
-        <div class="form-group has-select mb-3">
+        <div class="form-group has-select mb-3" id="jenis_penugasan_kelompok_container">
             <select class="form-control" name="jenis_penugasan_kelompok" id="jenis_penugasan_kelompok">
                 <option disabled selected value="">Jenis Penugasan</option>
                 <option value="Tim">Tim</option>
@@ -1016,7 +1016,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         <!-- FORM PANITIA -->
         <div id="panitiaContainer" class="mt-4">
-            <div class="row g-3 align-items-end panitia-row">
+            <div class="row g-3 align-items-end panitia-row" data-row-index="0">
 
                 <div class="col-md-2 position-relative">
                     <label>NIP</label>
@@ -1025,21 +1025,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 <div class="col-md-3 position-relative">
                     <label>Nama Dosen</label>
-                    <input type="text" name="nama_dosen[]" class="form-control nama_dosen" autocomplete="off" required>
+                    <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" autocomplete="off" required>
                 </div>
 
                 <div class="col-md-3 position-relative">
                     <label>Jabatan</label>
-                    <input type="text" name="jabatan[]" class="form-control jabatan" autocomplete="off" required>
+                    <input type="text" name="jabatan[]" class="form-control jabatan-input" autocomplete="off" required>
                 </div>
 
                 <div class="col-md-3 position-relative">
                     <label>Divisi</label>
-                    <input type="text" name="divisi[]" class="form-control divisi" autocomplete="off" required>
+                    <input type="text" name="divisi[]" class="form-control divisi-input" autocomplete="off" required>
                 </div>
 
                 <div class="col-md-1 text-center button-cell">
-                    <button type="button" class="btn btn-success addRow" title="Tambah Baris">
+                    <button type="button" class="btn btn-success add-row-btn" title="Tambah Baris">
                         <i class="fas fa-plus"></i>
                     </button>
                 </div>
@@ -1052,7 +1052,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <style>
 .button-cell { display: none; justify-content: center; align-items: center; }
-.addRow, .removeRow { width: 35px; height: 35px; border-radius: 50%; padding: 0; }
+.add-row-btn, .remove-row-btn { width: 35px; height: 35px; border-radius: 50%; padding: 0; }
 .panitia-row { transition: all 0.3s ease; opacity: 1; transform: translateY(0); }
 .panitia-row.removing { opacity: 0; transform: translateX(20px); }
 
@@ -1169,71 +1169,96 @@ document.addEventListener('DOMContentLoaded', function () {
 .multi-step-form, fieldset, .container {
     overflow: visible !important;
 }
+
+/* Perbaikan untuk tampilan form */
+.form-group.has-select {
+    margin-bottom: 1rem;
+}
+
+.form-control.custom-form-control {
+    margin-top: 12px;
+}
+
+.panitia-row {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.panitia-row:last-child {
+    border-bottom: none;
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const panitiaContainer = document.getElementById('panitiaContainer');
     const jenisPengajuan = document.getElementById('jenis_pengajuan');
+    const jenisPenugasanPeroranganContainer = document.getElementById('jenis_penugasan_perorangan_container');
+    const jenisPenugasanKelompokContainer = document.getElementById('jenis_penugasan_kelompok_container');
+    
+    let rowCounter = 1;
+
+    // Mock data untuk testing
+    const mockData = [
+        { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
+        { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
+        { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', divisi: 'DI' },
+        { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
+        { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', divisi: 'DP' },
+        { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', divisi: 'Admin KK' }
+    ];
+
+    // Global state untuk autocomplete
+    let currentAutocompleteBox = null;
+    let currentKeydownHandler = null;
+    let currentClickHandler = null;
+    let currentInputElement = null;
+
+    // Toggle visibility jenis penugasan berdasarkan jenis pengajuan
+    function toggleJenisPenugasan() {
+        if (jenisPengajuan.value === 'Perorangan') {
+            jenisPenugasanPeroranganContainer.style.display = 'block';
+            jenisPenugasanKelompokContainer.style.display = 'none';
+        } else if (jenisPengajuan.value === 'Kelompok') {
+            jenisPenugasanPeroranganContainer.style.display = 'none';
+            jenisPenugasanKelompokContainer.style.display = 'block';
+        } else {
+            jenisPenugasanPeroranganContainer.style.display = 'none';
+            jenisPenugasanKelompokContainer.style.display = 'none';
+        }
+    }
 
     // Toggle button visibility based on jenis pengajuan
     jenisPengajuan.addEventListener('change', function () {
         document.querySelectorAll('.button-cell').forEach(btn => {
             btn.style.display = (this.value === 'Kelompok') ? 'flex' : 'none';
         });
+        toggleJenisPenugasan();
     });
 
-    // Add/Remove row handlers
-    let isAdding = false;
-    panitiaContainer.addEventListener('click', function (e) {
-        const addBtn = e.target.closest('.addRow');
-        const removeBtn = e.target.closest('.removeRow');
+    // Inisialisasi awal
+    toggleJenisPenugasan();
 
-        if (addBtn) {
-            e.preventDefault();
-            if (isAdding) return false;
-            isAdding = true;
-
-            const row = addBtn.closest('.panitia-row');
-            const clone = row.cloneNode(true);
-            
-            // Clear inputs
-            clone.querySelectorAll('input').forEach(input => {
-                input.value = '';
-                input.removeAttribute('data-autocomplete-init');
-            });
-
-            // Change button to remove
-            const btn = clone.querySelector('.addRow');
-            btn.classList.remove('btn-success', 'addRow');
-            btn.classList.add('btn-danger', 'removeRow');
-            btn.innerHTML = '<i class="fas fa-minus"></i>';
-            btn.setAttribute('title', 'Hapus Baris');
-
-            panitiaContainer.appendChild(clone);
-            
-            // Animation
-            setTimeout(() => {
-                clone.style.opacity = '0';
-                clone.style.transform = 'translateY(-10px)';
-                clone.offsetHeight;
-                clone.style.transition = 'all 0.3s ease';
-                clone.style.opacity = '1';
-                clone.style.transform = 'translateY(0)';
-            }, 10);
-
-            initAutocompleteForRow(clone);
-            setTimeout(() => isAdding = false, 300);
+    // Handle "Lainnya" option untuk penugasan perorangan
+    document.getElementById('jenis_penugasan_perorangan').addEventListener('change', function() {
+        const lainnyaInput = document.getElementById('penugasan_lainnya_perorangan');
+        lainnyaInput.style.display = this.value === 'Penugasan Lainnya' ? 'block' : 'none';
+        if (this.value !== 'Penugasan Lainnya') {
+            lainnyaInput.value = '';
         }
+    });
 
-        if (removeBtn) {
-            e.preventDefault();
-            const rowEl = removeBtn.closest('.panitia-row');
-            if (rowEl && panitiaContainer.querySelectorAll('.panitia-row').length > 1) {
-                rowEl.style.opacity = '0';
-                rowEl.style.transform = 'translateX(20px)';
-                setTimeout(() => rowEl.remove(), 300);
-            }
+    // Handle "Lainnya" option untuk penugasan kelompok
+    document.getElementById('jenis_penugasan_kelompok').addEventListener('change', function() {
+        const lainnyaInput = document.getElementById('penugasan_lainnya_kelompok');
+        lainnyaInput.style.display = this.value === 'Penugasan Lainnya' ? 'block' : 'none';
+        if (this.value !== 'Penugasan Lainnya') {
+            lainnyaInput.value = '';
         }
     });
 
@@ -1249,14 +1274,49 @@ document.addEventListener('DOMContentLoaded', function () {
     // Highlight matching text
     function highlightMatch(text, query) {
         if (!query || !text) return text;
-        const regex = new RegExp(`(${query})`, 'gi');
+        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escapedQuery})`, 'gi');
         return text.replace(regex, '<span class="query-match">$1</span>');
     }
 
-    // Show suggestion box (Google-style)
+    // Remove existing autocomplete box
+    function removeAutocompleteBox() {
+        if (currentAutocompleteBox) {
+            currentAutocompleteBox.remove();
+            currentAutocompleteBox = null;
+        }
+        if (currentKeydownHandler) {
+            document.removeEventListener('keydown', currentKeydownHandler);
+            currentKeydownHandler = null;
+        }
+        if (currentClickHandler) {
+            document.removeEventListener('click', currentClickHandler);
+            currentClickHandler = null;
+        }
+        currentInputElement = null;
+    }
+
+    // Fetch suggestions from database
+    async function fetchSuggestions(query, fieldType = 'nip') {
+        if (!query) return [];
+        
+        try {
+            // Mock data untuk testing
+            await new Promise(resolve => setTimeout(resolve, 200));
+            const lowerQuery = query.toLowerCase();
+            return mockData.filter(item => {
+                const searchIn = item[fieldType] ? item[fieldType].toLowerCase() : '';
+                return searchIn.includes(lowerQuery);
+            });
+        } catch (error) {
+            console.error('Autocomplete error:', error);
+            return [];
+        }
+    }
+
+    // Show suggestion box
     function showSuggestionBox(inputEl, items, onSelect, fieldType) {
-        // Remove existing boxes
-        document.querySelectorAll('.autocomplete-box-fixed').forEach(b => b.remove());
+        removeAutocompleteBox();
 
         const rect = inputEl.getBoundingClientRect();
         const box = document.createElement('div');
@@ -1271,7 +1331,9 @@ document.addEventListener('DOMContentLoaded', function () {
             empty.textContent = 'Tidak ada data ditemukan';
             box.appendChild(empty);
             document.body.appendChild(box);
-            setTimeout(() => box.remove(), 2000);
+            currentAutocompleteBox = box;
+            currentInputElement = inputEl;
+            setTimeout(() => removeAutocompleteBox(), 2000);
             return;
         }
 
@@ -1282,7 +1344,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const option = document.createElement('div');
             option.className = `autocomplete-item type-${fieldType}`;
             
-            // Determine primary and secondary text based on field type
             let primaryText = '';
             let secondaryText = '';
             
@@ -1317,144 +1378,265 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             `;
             
-            option.addEventListener('click', () => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
                 onSelect(item);
-                box.remove();
+                removeAutocompleteBox();
             });
             
             box.appendChild(option);
         });
 
         document.body.appendChild(box);
+        currentAutocompleteBox = box;
+        currentInputElement = inputEl;
 
         // Keyboard navigation
-        inputEl.addEventListener('keydown', function handleKeydown(e) {
-            const opts = box.querySelectorAll('.autocomplete-item');
+        currentKeydownHandler = function(e) {
+            if (!currentAutocompleteBox) return;
+            
+            const opts = currentAutocompleteBox.querySelectorAll('.autocomplete-item');
             if (!opts.length) return;
 
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 selectedIndex = Math.min(selectedIndex + 1, opts.length - 1);
                 opts.forEach((o, i) => o.classList.toggle('active', i === selectedIndex));
-                opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+                if (opts[selectedIndex]) {
+                    opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+                }
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 selectedIndex = Math.max(selectedIndex - 1, 0);
                 opts.forEach((o, i) => o.classList.toggle('active', i === selectedIndex));
-                opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+                if (opts[selectedIndex]) {
+                    opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+                }
             } else if (e.key === 'Enter') {
                 e.preventDefault();
                 if (selectedIndex >= 0 && opts[selectedIndex]) {
                     opts[selectedIndex].click();
                 }
             } else if (e.key === 'Escape') {
-                box.remove();
+                removeAutocompleteBox();
             }
-        });
+        };
+        
+        document.addEventListener('keydown', currentKeydownHandler);
 
         // Close on outside click
-        setTimeout(() => {
-            document.addEventListener('click', function handleClickOutside(ev) {
-                if (!box.contains(ev.target) && ev.target !== inputEl) {
-                    box.remove();
-                    document.removeEventListener('click', handleClickOutside);
-                }
-            });
-        }, 0);
-    }
-
-    // Mock data untuk testing (hapus ini setelah backend siap)
-    const mockData = [
-        { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
-        { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DI' },
-        { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', divisi: 'DI' },
-        { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
-        { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', divisi: 'DP' },
-        { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', divisi: 'Admin KK' }
-    ];
-
-    // Fetch suggestions from database
-    async function fetchSuggestions(query, fieldType = 'nip') {
-        if (!query) return [];
-        
-        try {
-            // CARA 1: Gunakan mock data untuk testing (comment jika backend sudah siap)
-            await new Promise(resolve => setTimeout(resolve, 300)); // Simulasi delay
-            const lowerQuery = query.toLowerCase();
-            return mockData.filter(item => {
-                const searchIn = item[fieldType] ? item[fieldType].toLowerCase() : '';
-                return searchIn.includes(lowerQuery);
-            });
-
-            // CARA 2: Gunakan backend API (uncomment jika backend sudah siap)
-            /*
-            const url = `<?= base_url('surat/autocomplete-nip') ?>?q=${encodeURIComponent(query)}&field=${fieldType}`;
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                console.error('Response not OK:', response.status);
-                return [];
+        currentClickHandler = function(ev) {
+            if (currentAutocompleteBox && !currentAutocompleteBox.contains(ev.target) && ev.target !== currentInputElement) {
+                removeAutocompleteBox();
             }
-            
-            const data = await response.json();
-            console.log('Response data:', data); // Debug log
-            
-            return Array.isArray(data) ? data.map(item => ({
-                nip: item.nip || '',
-                nama_dosen: item.nama_dosen || '',
-                jabatan: item.jabatan || '',
-                divisi: item.divisi || ''
-            })) : [];
-            */
-        } catch (error) {
-            console.error('Autocomplete fetch error:', error);
-            return [];
-        }
+        };
+        document.addEventListener('click', currentClickHandler);
     }
 
     // Initialize autocomplete for a row
     function initAutocompleteForRow(rowEl) {
-        if (!rowEl || rowEl.dataset.autocompleteInit) return;
-        rowEl.dataset.autocompleteInit = true;
+        // Hapus flag initialization sebelumnya
+        delete rowEl.dataset.autocompleteInitialized;
 
         const inputNip = rowEl.querySelector('.nip-input');
-        const inputNama = rowEl.querySelector('.nama_dosen');
-        const inputJabatan = rowEl.querySelector('.jabatan');
-        const inputDivisi = rowEl.querySelector('.divisi');
+        const inputNama = rowEl.querySelector('.nama-dosen-input');
+        const inputJabatan = rowEl.querySelector('.jabatan-input');
+        const inputDivisi = rowEl.querySelector('.divisi-input');
+
+        if (!inputNip || !inputNama || !inputJabatan || !inputDivisi) {
+            console.log('Input elements not found in row:', rowEl);
+            return;
+        }
+
+        console.log('Initializing autocomplete for row:', rowEl.dataset.rowIndex);
 
         // Fill all fields when item is selected
         function fillRowWith(item) {
             if (!item) return;
+            
+            console.log('Filling row with data:', item);
+            
+            // Set values untuk semua field
             inputNip.value = item.nip || '';
             inputNama.value = item.nama_dosen || '';
             inputJabatan.value = item.jabatan || '';
             inputDivisi.value = item.divisi || '';
+            
+            // Trigger input events untuk validasi
+            inputNip.dispatchEvent(new Event('input', { bubbles: true }));
+            inputNama.dispatchEvent(new Event('input', { bubbles: true }));
+            inputJabatan.dispatchEvent(new Event('input', { bubbles: true }));
+            inputDivisi.dispatchEvent(new Event('input', { bubbles: true }));
         }
 
-        // Create input handler for each field
-        function createInputHandler(fieldType, inputEl) {
-            return debounce(async function () {
-                const val = inputEl.value.trim();
-                if (!val) return;
+        // Create input handler untuk setiap field
+        function createAutocompleteHandler(fieldType, inputElement) {
+            const handler = debounce(async function() {
+                const val = this.value.trim();
+                console.log(`Input detected in ${fieldType}:`, val);
                 
+                // Hanya tampilkan autocomplete jika user aktif mengetik
+                if (val.length < 2 || document.activeElement !== this) {
+                    removeAutocompleteBox();
+                    return;
+                }
+
                 const suggestions = await fetchSuggestions(val, fieldType);
-                showSuggestionBox(inputEl, suggestions, fillRowWith, fieldType);
+                console.log(`Suggestions for ${fieldType}:`, suggestions);
+                showSuggestionBox(inputElement, suggestions, fillRowWith, fieldType);
             }, 300);
+
+            // Hapus event listener lama jika ada
+            if (inputElement._currentHandler) {
+                inputElement.removeEventListener('input', inputElement._currentHandler);
+            }
+            
+            // Simpan reference ke handler baru
+            inputElement._currentHandler = handler;
+            // Pasang event listener baru
+            inputElement.addEventListener('input', handler);
+            
+            console.log(`Handler attached to ${fieldType}`);
         }
 
-        // Attach handlers to each input
-        inputNip.addEventListener('input', createInputHandler('nip', inputNip));
-        inputNama.addEventListener('input', createInputHandler('nama_dosen', inputNama));
-        inputJabatan.addEventListener('input', createInputHandler('jabatan', inputJabatan));
-        inputDivisi.addEventListener('input', createInputHandler('divisi', inputDivisi));
+        // Initialize autocomplete untuk semua field dalam row ini
+        createAutocompleteHandler('nip', inputNip);
+        createAutocompleteHandler('nama_dosen', inputNama);
+        createAutocompleteHandler('jabatan', inputJabatan);
+        createAutocompleteHandler('divisi', inputDivisi);
+
+        // Focus handlers untuk close autocomplete
+        [inputNip, inputNama, inputJabatan, inputDivisi].forEach(input => {
+            input.addEventListener('focus', () => {
+                removeAutocompleteBox();
+            });
+            
+            // Tambahkan event untuk blur (kehilangan fokus)
+            input.addEventListener('blur', () => {
+                // Delay sedikit sebelum menutup autocomplete untuk memberi waktu klik opsi
+                setTimeout(() => {
+                    if (document.activeElement !== input && 
+                        (!currentAutocompleteBox || !currentAutocompleteBox.contains(document.activeElement))) {
+                        removeAutocompleteBox();
+                    }
+                }, 150);
+            });
+        });
+
+        // Set flag bahwa row sudah diinisialisasi
+        rowEl.dataset.autocompleteInitialized = 'true';
     }
 
-    // Initialize autocomplete for existing rows
-    document.querySelectorAll('.panitia-row').forEach(row => initAutocompleteForRow(row));
+    // Add new row function
+    function addNewRow() {
+        const originalRow = document.querySelector('.panitia-row');
+        const newRow = originalRow.cloneNode(true);
+        
+        // Update row index
+        newRow.dataset.rowIndex = rowCounter++;
+        
+        // Clear all input values
+        newRow.querySelectorAll('input').forEach(input => {
+            input.value = '';
+        });
+        
+        // Change add button to remove button
+        const addBtn = newRow.querySelector('.add-row-btn');
+        if (addBtn) {
+            addBtn.classList.remove('btn-success', 'add-row-btn');
+            addBtn.classList.add('btn-danger', 'remove-row-btn');
+            addBtn.innerHTML = '<i class="fas fa-minus"></i>';
+            addBtn.setAttribute('title', 'Hapus Baris');
+        }
+        
+        // Add to container
+        panitiaContainer.appendChild(newRow);
+        
+        // Initialize autocomplete untuk row baru
+        setTimeout(() => {
+            initAutocompleteForRow(newRow);
+        }, 100);
+        
+        // Add animation
+        animateNewRow(newRow);
+        
+        console.log('New row added:', newRow.dataset.rowIndex);
+    }
+
+    function removeRowWithAnimation(rowEl) {
+        rowEl.style.opacity = '0';
+        rowEl.style.transform = 'translateX(20px)';
+        setTimeout(() => {
+            if (rowEl.parentNode) {
+                rowEl.remove();
+            }
+        }, 300);
+    }
+
+    function animateNewRow(rowEl) {
+        rowEl.style.opacity = '0';
+        rowEl.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            rowEl.style.transition = 'all 0.3s ease';
+            rowEl.style.opacity = '1';
+            rowEl.style.transform = 'translateY(0)';
+        }, 10);
+    }
+
+    // Add/Remove row handlers
+    panitiaContainer.addEventListener('click', function (e) {
+        const addBtn = e.target.closest('.add-row-btn');
+        const removeBtn = e.target.closest('.remove-row-btn');
+
+        if (addBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            addNewRow();
+        }
+
+        if (removeBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const rowEl = removeBtn.closest('.panitia-row');
+            if (rowEl && panitiaContainer.querySelectorAll('.panitia-row').length > 1) {
+                removeRowWithAnimation(rowEl);
+            }
+        }
+    });
+
+    // Initialize autocomplete untuk semua existing rows
+    function initializeAllRows() {
+        const rows = panitiaContainer.querySelectorAll('.panitia-row');
+        console.log('Initializing all rows:', rows.length);
+        
+        rows.forEach((row, index) => {
+            row.dataset.rowIndex = index;
+            initAutocompleteForRow(row);
+        });
+    }
+
+    // Initialize saat DOM ready
+    setTimeout(() => {
+        initializeAllRows();
+    }, 100);
+
+    // Close autocomplete ketika klik di luar
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.autocomplete-box-fixed') && 
+            !e.target.closest('.nip-input') && 
+            !e.target.closest('.nama-dosen-input') && 
+            !e.target.closest('.jabatan-input') && 
+            !e.target.closest('.divisi-input')) {
+            removeAutocompleteBox();
+        }
+    });
+
+    // Juga close autocomplete ketika tekan ESC di mana saja
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            removeAutocompleteBox();
+        }
+    });
 });
 </script>
 <!-- ===== UPLOADCARE CDN ===== -->
@@ -1638,7 +1820,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Continue</button>
 </div>
 
-<!-- ===== SCRIPT VALIDASI DAN SUBMIT - WORKING VERSION ===== -->
+<!-- ===== SCRIPT VALIDASI DAN SUBMIT - AUTO OPEN VERSION ===== -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const nextBtn = document.querySelector(".next-btn");
@@ -1652,12 +1834,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let isFileUploaded = false;
     let isSubmitting = false;
+    let widget = null;
+    let dialogOpened = false;
 
     console.log("Step 3 script initialized");
 
     // Listen for upload completion from Uploadcare
     if (typeof uploadcare !== 'undefined') {
-        const widget = uploadcare.Widget('[role="uploadcare-uploader"]');
+        widget = uploadcare.Widget('[role="uploadcare-uploader"]');
         
         widget.onChange(function(file) {
             if (file) {
@@ -1673,11 +1857,39 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log("File upload cleared");
             }
         });
+
+        // Auto open dialog ketika step 3 aktif
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                const currentFieldset = document.querySelector('fieldset.active');
+                if (currentFieldset && currentFieldset.contains(uploader) && !dialogOpened) {
+                    console.log("Step 3 is now active, opening upload dialog...");
+                    dialogOpened = true;
+                    
+                    // Delay sedikit untuk memastikan UI sudah render
+                    setTimeout(function() {
+                        if (widget) {
+                            widget.openDialog();
+                            console.log("Upload dialog opened automatically");
+                        }
+                    }, 300);
+                }
+            });
+        });
+
+        // Observe perubahan class pada fieldset
+        const fieldsets = document.querySelectorAll('fieldset');
+        fieldsets.forEach(function(fieldset) {
+            observer.observe(fieldset, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        });
+
     } else {
         console.warn("Uploadcare not loaded");
     }
 
-    // ===== TAMBAHKAN FUNCTION INI DI SINI =====
     // Function untuk submit form via AJAX
     function submitFormData() {
         return new Promise((resolve, reject) => {
@@ -1715,7 +1927,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     }
-    // ===== AKHIR FUNCTION =====
 
     // Handler untuk tombol Finish di Step 3
     nextBtn.addEventListener("click", function (e) {
@@ -1822,8 +2033,6 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(checkInitialUpload, 1500);
 });
 </script>
-
-
 
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
