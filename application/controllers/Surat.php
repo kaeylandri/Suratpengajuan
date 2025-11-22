@@ -218,7 +218,7 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-    GET STATUS - WITH REJECTION REASON
+       GET STATUS - WITH APPROVAL STATUS JSON
     ============================================*/
    public function get_status($surat_id)
 {

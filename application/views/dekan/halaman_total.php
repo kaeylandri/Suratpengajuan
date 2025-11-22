@@ -16,9 +16,6 @@
     .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#FB8C00;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
     .back-btn:hover{background:#e67e22;transform:translateY(-2px)}
     
-    /* Debug Info */
-    .debug-info{background:#fff3cd;border-left:4px solid #ffc107;padding:15px;margin-bottom:15px;border-radius:4px;font-size:14px}
-    
     /* Card Styles */
     .card{background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px}
     .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee}
@@ -58,18 +55,284 @@
     .btn-detail{background:#3498db;color:#fff}
     .btn-detail:hover{background:#2980b9}
     
+    /* Tombol status hijau */
+    .btn-status {
+        background: #66bb6a !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 6px 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s ease-in-out;
+        font-size: 14px;
+        height: 32px;
+    }
+
+    .btn-status i {
+        font-size: 14px;
+    }
+
+    .btn-status:hover {
+        background: #4caf50 !important;
+        transform: scale(1.05);
+    }
+    
     /* Pagination Info */
     .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
     
     /* Modal Styles */
     .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
     .modal.show{display:flex}
-    .modal-content{background:white;padding:20px;border-radius:10px;max-width:800px;width:95%;max-height:85vh;overflow:auto;animation:slideIn 0.3s ease}
+    .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px}
-    .detail-row{display:grid;grid-template-columns:200px 1fr;padding:8px 0;border-bottom:1px solid #f4f6f7}
-    .detail-label{font-weight:700;color:#7f8c8d}
-    .detail-value{color:#2c3e50}
+    .modal-header{background:#FB8C00;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
+    .modal-header h3{margin:0;font-size:18px;font-weight:600}
+    .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
+    .close-modal:hover{background:rgba(255,255,255,0.2)}
+    
+    /* Detail Content Styles */
+    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
+    .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
+    .detail-section:last-child{margin-bottom:0}
+    .detail-section-title{font-size:16px;font-weight:700;color:#FB8C00;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #FB8C00;display:flex;align-items:center;gap:10px}
+    .detail-section-title i{font-size:18px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
+    .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
+    .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
+    .detail-value-empty{color:#6c757d;font-style:italic}
+    
+    /* File Evidence Styles */
+    .file-evidence{margin-top:10px}
+    .file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
+    .file-item:hover{background:#fef7e5;border-color:#FB8C00}
+    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#FB8C00;font-size:16px}
+    .file-info{flex:1}
+    .file-name{font-weight:600;color:#212529;font-size:14px}
+    .file-size{font-size:12px;color:#6c757d}
+    .download-btn{background:#FB8C00;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+    .download-btn:hover{background:#e67e22;color:white;text-decoration:none}
+    
+    /* Action Buttons in Modal */
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef}
+    .modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+    .modal-btn-close{background:#6c757d;color:white}
+    .modal-btn-close:hover{background:#5a6268;transform:translateY(-2px)}
+    .modal-btn-approve{background:#27ae60;color:white}
+    .modal-btn-approve:hover{background:#229954;transform:translateY(-2px)}
+    .modal-btn-reject{background:#e74c3c;color:white}
+    .modal-btn-reject:hover{background:#c0392b;transform:translateY(-2px)}
+    
+    /* Rejection Notes Styles */
+    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:15px;margin-top:15px}
+    .rejection-notes .detail-label{color:#dc3545}
+    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24}
+
+    /* Progress Bar Styles */
+    .progress-track {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin: 40px 0;
+    }
+
+    .progress-track::before {
+        content: '';
+        position: absolute;
+        top: 20px;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: #e0e0e0;
+        z-index: 1;
+    }
+
+    .progress-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+    }
+
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        margin-bottom: 10px;
+        border: 3px solid #e0e0e0;
+        background: white;
+    }
+
+    .step-text {
+        font-size: 12px;
+        text-align: center;
+        max-width: 100px;
+        color: #666;
+    }
+
+    .step-date {
+        font-size: 11px;
+        color: #999;
+        margin-top: 5px;
+        display: none !important;
+    }
+
+    /* Progress Line */
+    .progress-line {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        height: 4px;
+        background: #4caf50;
+        z-index: 2;
+        transition: width 0.5s ease;
+    }
+
+    /* Status Colors */
+    .progress-step.completed .step-icon {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
+    }
+
+    .progress-step.status-completed i {
+        color: white !important;
+    }
+
+    .progress-step.in-progress .step-icon {
+        background: #ffc107;
+        border-color: #ffc107;
+        color: white;
+    }
+
+    .progress-step.rejected .step-icon {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+
+    .progress-step.pending .step-icon {
+        background: #e0e0e0;
+        border-color: #e0e0e0;
+        color: #666;
+    }
+
+    .progress-estimasi {
+        width: 100%;
+        text-align: center;
+        margin-top: 5px;
+        font-size: 12px;
+        color: #777;
+    }
+
+    .rejection-reason {
+        background: #fff5f5;
+        border: 1px solid #f8cccc;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+    }
+
+    .rejection-reason h6 {
+        color: #e63946;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    /* Status Modal Styles */
+    .status-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .status-modal.show {
+        display: flex;
+    }
+
+    .status-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        padding: 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .status-header {
+        background: #FB8C00;
+        color: white;
+        padding: 20px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .status-header h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .close-status {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    .status-body {
+        padding: 30px;
+    }
+    
+    /* Responsive */
+    @media (max-width:768px){
+        .detail-grid{grid-template-columns:1fr}
+        .modal-content{width:95%;margin:10px}
+        .detail-content{padding:15px}
+        .modal-actions{flex-direction:column}
+        .modal-btn{justify-content:center}
+        .progress-track {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        .progress-track::before {
+            top: 0;
+            left: 20px;
+            width: 4px;
+            height: 100%;
+        }
+        .progress-line {
+            top: 0;
+            left: 20px;
+            width: 4px;
+            height: 0%;
+        }
+        .progress-step {
+            flex-direction: row;
+            gap: 15px;
+        }
+        .step-text, .step-date {
+            text-align: left;
+        }
+    }
 </style>
 </head>
 <body>
@@ -95,15 +358,6 @@
         <div style="color:#721c24;font-weight:700"><?php echo $this->session->flashdata('error'); ?></div>
     </div>
     <?php endif; ?>
-
-    <!-- Debug Info -->
-    <div class="debug-info">
-        <strong>Debug Info:</strong> 
-        Total Data: <?= isset($total_surat) ? $total_surat : '0' ?> | 
-        Jumlah Data: <?= isset($surat_list) ? count($surat_list) : '0' ?> |
-        Search: "<?= htmlspecialchars($this->input->get('search') ?? '') ?>" |
-        Status: "<?= htmlspecialchars($this->input->get('status') ?? '') ?>"
-    </div>
 
     <!-- Tabel Total Pengajuan -->
     <div class="card">
@@ -176,9 +430,9 @@
                     <?php 
                     if (isset($surat_list) && is_array($surat_list) && count($surat_list) > 0): 
                         $i = 1; 
-                        foreach ($surat_list as $item): 
+                        foreach ($surat_list as $s): 
                             // Normalisasi status untuk dekan
-                            $st_raw = isset($item['status']) ? trim($item['status']) : '';
+                            $st_raw = isset($s['status']) ? trim($s['status']) : '';
                             $st_l = strtolower($st_raw);
                             
                             // Mapping status ke kategori
@@ -197,27 +451,30 @@
                             }
                             
                             // Format tanggal
-                            $tgl_pengajuan = isset($item['created_at']) && $item['created_at'] ? date('d M Y', strtotime($item['created_at'])) : '-';
-                            $tgl_kegiatan = isset($item['tanggal_kegiatan']) && $item['tanggal_kegiatan'] ? date('d M Y', strtotime($item['tanggal_kegiatan'])) : '-';
+                            $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
+                            $tgl_kegiatan = isset($s['tanggal_kegiatan']) && $s['tanggal_kegiatan'] ? date('d M Y', strtotime($s['tanggal_kegiatan'])) : '-';
                     ?>
                     <tr data-status="<?= $st_key ?>">
                         <td><?= $i ?></td>
-                        <td><strong><?= htmlspecialchars($item['nama_kegiatan'] ?? '-') ?></strong></td>
-                        <td><?= htmlspecialchars($item['penyelenggara'] ?? '-') ?></td>
+                        <td><strong><?= htmlspecialchars($s['nama_kegiatan'] ?? '-') ?></strong></td>
+                        <td><?= htmlspecialchars($s['penyelenggara'] ?? '-') ?></td>
                         <td><?= $tgl_pengajuan ?></td>
                         <td><?= $tgl_kegiatan ?></td>
-                        <td><?= htmlspecialchars($item['jenis_pengajuan'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars($s['jenis_pengajuan'] ?? '-') ?></td>
                         <td><?= $badge ?></td>
                         <td>
                             <div style="display:flex;gap:6px">
-                                <button class="btn btn-detail" onclick="showDetail(<?= (int)$item['id'] ?>)" title="Lihat Detail">
+                                <button class="btn btn-detail" onclick="showDetail(<?= (int)$s['id'] ?>)" title="Lihat Detail">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
+                                <button class="btn btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s['id']; ?>)">
+                                    <i class="fas fa-tasks"></i>
+                                </button>
                                 <?php if ($st_l === 'disetujui sekretariat'): ?>
-                                    <button class="btn btn-approve" onclick="approveSurat(<?= (int)$item['id'] ?>)" title="Setujui">
+                                    <button class="btn btn-approve" onclick="approveSurat(<?= (int)$s['id'] ?>)" title="Setujui">
                                         <i class="fa-solid fa-check"></i>
                                     </button>
-                                    <button class="btn btn-reject" onclick="showRejectModal(<?= (int)$item['id'] ?>)" title="Tolak">
+                                    <button class="btn btn-reject" onclick="showRejectModal(<?= (int)$s['id'] ?>)" title="Tolak">
                                         <i class="fa-solid fa-times"></i>
                                     </button>
                                 <?php endif; ?>
@@ -256,13 +513,15 @@
 </div>
 
 <!-- Detail Modal -->
-<div id="detailModal" class="modal">
-    <div class="modal-content">
+<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan</h3>
-            <button onclick="closeModal('detailModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
+            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
+            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
         </div>
-        <div id="detailContent"></div>
+        <div class="detail-content" id="detailContent">
+            <!-- Content akan diisi oleh JavaScript -->
+        </div>
     </div>
 </div>
 
@@ -285,6 +544,75 @@
     </div>
 </div>
 
+<!-- Status Modal -->
+<div id="statusModal" class="status-modal">
+    <div class="status-content">
+        <div class="status-header">
+            <h3>Status Pengajuan Surat Tugas</h3>
+            <button class="close-status">&times;</button>
+        </div>
+        <div class="status-body">
+            <div class="progress-track">
+                <div class="progress-line" id="progressLine"></div>
+
+                <!-- Step 1: Mengirim -->
+                <div class="progress-step status-completed" id="step1">
+                    <div class="step-icon">
+                        <i class="fas fa-check" id="step1-icon"></i>
+                    </div>
+                    <div class="step-text" id="step1-text">Mengirim</div>
+                    <div class="step-date" id="step1-date">-</div>
+                </div>
+                <div class="progress-estimasi">
+                    <span id="est1">-</span>
+                </div>
+
+                <!-- Step 2: Persetujuan KK -->
+                <div class="progress-step status-in-progress" id="step2">
+                    <div class="step-icon">
+                        <i class="fas fa-clock" id="step2-icon"></i>
+                    </div>
+                    <div class="step-text" id="step2-text">Persetujuan KK</div>
+                    <div class="step-date" id="step2-date">-</div>
+                </div>
+                <div class="progress-estimasi">
+                    <span id="est2">-</span>
+                </div>
+
+                <!-- Step 3: Persetujuan Sekretariat -->
+                <div class="progress-step status-pending" id="step3">
+                    <div class="step-icon">
+                        <i class="fas fa-clock" id="step3-icon"></i>
+                    </div>
+                    <div class="step-text" id="step3-text">Persetujuan Sekretariat</div>
+                    <div class="step-date" id="step3-date">-</div>
+                </div>
+                <div class="progress-estimasi">
+                    <span id="est3">-</span>
+                </div>
+
+                <!-- Step 4: Persetujuan Dekan -->
+                <div class="progress-step status-pending" id="step4">
+                    <div class="step-icon">
+                        <i class="fas fa-clock" id="step4-icon"></i>
+                    </div>
+                    <div class="step-text" id="step4-text">Persetujuan Dekan</div>
+                    <div class="step-date" id="step4-date">-</div>
+                </div>
+            </div>
+
+            <div class="status-info mt-4">
+                <h5>Informasi Status:</h5>
+                <p id="status-description">Memuat informasi status...</p>
+                <div id="rejection-reason" class="rejection-reason" style="display: none;">
+                    <h6>Alasan Penolakan:</h6>
+                    <p id="rejection-text"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Data dari controller
 const suratList = <?= isset($surat_list) ? json_encode($surat_list) : '[]' ?>;
@@ -299,31 +627,158 @@ function showDetail(id) {
     const item = findSuratById(id);
     if (!item) { alert('Data tidak ditemukan'); return; }
 
+    // Helper functions
     const getVal = (k) => (item[k] !== undefined && item[k] !== null ? item[k] : '-');
+    const formatDate = (dateString) => {
+        if (!dateString || dateString === '-') return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+    };
+    const escapeHtml = (unsafe) => {
+        if (unsafe === null || unsafe === undefined) return '-';
+        return String(unsafe)
+           .replace(/&/g, "&amp;")
+           .replace(/</g, "&lt;")
+           .replace(/>/g, "&gt;")
+           .replace(/"/g, "&quot;")
+           .replace(/'/g, "&#039;");
+    };
+    
+    // Format status dengan badge
+    const status = getVal('status');
+    let statusBadge = '';
+    if (status.toLowerCase() === 'disetujui dekan') {
+        statusBadge = '<span class="badge badge-approved" style="margin-left:10px">Disetujui</span>';
+    } else if (status.toLowerCase() === 'disetujui sekretariat') {
+        statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Disetujui Sekretariat</span>';
+    } else if (status.toLowerCase().includes('ditolak')) {
+        statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak</span>';
+    } else {
+        statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
+    }
+
+    // Tentukan apakah menampilkan tombol aksi
+    const showActions = status.toLowerCase() === 'disetujui sekretariat';
 
     const content = `
-        <div>
-            <div class="detail-row"><div class="detail-label">Nama Kegiatan:</div><div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div></div>
-            <div class="detail-row"><div class="detail-label">Nama Dosen:</div><div class="detail-value">${escapeHtml(getVal('nama_dosen'))}</div></div>
-            <div class="detail-row"><div class="detail-label">NIP:</div><div class="detail-value">${escapeHtml(getVal('nip'))}</div></div>
-            <div class="detail-row"><div class="detail-label">Tanggal Pengajuan:</div><div class="detail-value">${formatDate(getVal('created_at'))}</div></div>
-            <div class="detail-row"><div class="detail-label">Tanggal Kegiatan:</div><div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div></div>
-            <div class="detail-row"><div class="detail-label">Jenis Pengajuan:</div><div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div></div>
-            <div class="detail-row"><div class="detail-label">Penyelenggara:</div><div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div></div>
-            <div class="detail-row"><div class="detail-label">Lingkup:</div><div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div></div>
-            <div class="detail-row"><div class="detail-label">File Eviden:</div><div class="detail-value">${getVal('eviden') ? '<a href="<?= base_url('uploads/') ?>'+escapeHtml(getVal('eviden'))+'" target="_blank" style="color:#3498db"><i class="fa-solid fa-paperclip"></i> '+escapeHtml(getVal('eviden'))+'</a>' : '-'}</div></div>
-            ${getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-' ? '<div class="detail-row"><div class="detail-label">Catatan Penolakan:</div><div class="detail-value" style="color:#e74c3c">'+escapeHtml(getVal('catatan_penolakan'))+'</div></div>' : ''}
-            <div style="text-align:right;margin-top:20px;padding-top:15px;border-top:1px solid #eee">
-                ${ (item.status && item.status.toLowerCase() === 'disetujui sekretariat') ? 
-                    `<button class="btn btn-approve" onclick="approveSurat(${item.id}); closeModal('detailModal')" style="margin-right:8px">
-                        <i class="fa-solid fa-check"></i> Setujui
-                    </button>
-                    <button class="btn btn-reject" onclick="showRejectModal(${item.id}); closeModal('detailModal')">
-                        <i class="fa-solid fa-times"></i> Tolak
-                    </button>` : '' }
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-info-circle"></i> Informasi Utama
+            </div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">Nama Kegiatan</div>
+                    <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Status Pengajuan</div>
+                    <div class="detail-value" style="display:flex;align-items:center">
+                        ${escapeHtml(status)} ${statusBadge}
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Jenis Pengajuan</div>
+                    <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Lingkup Penugasan</div>
+                    <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
+                </div>
             </div>
         </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-user-tie"></i> Informasi Dosen
+            </div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">Nama Dosen</div>
+                    <div class="detail-value">${escapeHtml(getVal('nama_dosen'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">NIP</div>
+                    <div class="detail-value">${escapeHtml(getVal('nip'))}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
+            </div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">Tanggal Pengajuan</div>
+                    <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Tanggal Kegiatan</div>
+                    <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Penyelenggara</div>
+                    <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Tempat Kegiatan</div>
+                    <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+                </div>
+            </div>
+        </div>
+
+        ${getVal('eviden') && getVal('eviden') !== '-' ? `
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-paperclip"></i> File Evidence
+            </div>
+            <div class="file-evidence">
+                <div class="file-item">
+                    <div class="file-icon">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">${escapeHtml(getVal('eviden'))}</div>
+                    </div>
+                    <a href="<?= base_url('uploads/') ?>${escapeHtml(getVal('eviden'))}" target="_blank" class="download-btn">
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>
+            </div>
+        </div>
+        ` : ''}
+
+        ${getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-' ? `
+        <div class="detail-section rejection-notes">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-exclamation-triangle"></i> Catatan Penolakan
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Alasan Penolakan</div>
+                <div class="detail-value">${escapeHtml(getVal('catatan_penolakan'))}</div>
+            </div>
+        </div>
+        ` : ''}
+
+        <div class="modal-actions">
+            ${showActions ? `
+                <button class="modal-btn modal-btn-approve" onclick="approveSurat(${item.id}); closeModal('detailModal')">
+                    <i class="fa-solid fa-check"></i> Setujui
+                </button>
+                <button class="modal-btn modal-btn-reject" onclick="showRejectModal(${item.id}); closeModal('detailModal')">
+                    <i class="fa-solid fa-times"></i> Tolak
+                </button>
+            ` : ''}
+            <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+                <i class="fa-solid fa-times"></i> Tutup
+            </button>
+        </div>
     `;
+    
     document.getElementById('detailContent').innerHTML = content;
     document.getElementById('detailModal').classList.add('show');
 }
@@ -383,22 +838,161 @@ function closeModal(id) {
     document.getElementById(id).classList.remove('show');
 }
 
-function formatDate(d) {
-    if (!d || d === '-') return '-';
-    const t = new Date(d);
-    if (isNaN(t)) return d;
-    return t.toLocaleDateString('id-ID', { day:'2-digit', month: 'short', year:'numeric' });
+function modalClickOutside(evt, id) {
+    if (evt.target && evt.target.id === id) closeModal(id);
 }
 
-function escapeHtml(unsafe) {
-    if (unsafe === null || unsafe === undefined) return '-';
-    return String(unsafe)
-       .replace(/&/g, "&amp;")
-       .replace(/</g, "&lt;")
-       .replace(/>/g, "&gt;")
-       .replace(/"/g, "&quot;")
-       .replace(/'/g, "&#039;");
+// Status Modal Functions
+// Tampilkan modal dan load data
+function showStatusModal(suratId) {
+    const modal = document.getElementById('statusModal');
+    modal.style.display = 'flex';
+    resetAllStatus();
+    loadStatusData(suratId);
 }
+
+// Reset seluruh tampilan sebelum load data baru
+function resetAllStatus() {
+    for (let i = 1; i <= 4; i++) {
+        const step = document.getElementById(`step${i}`);
+        const icon = document.getElementById(`step${i}-icon`);
+        const text = document.getElementById(`step${i}-text`);
+        const date = document.getElementById(`step${i}-date`);
+        
+        step.className = 'progress-step pending';
+        icon.className = 'fas fa-clock';
+
+        const defaultTexts = [
+            'Mengirim',
+            'Persetujuan KK',
+            'Persetujuan Sekretariat',
+            'Persetujuan Dekan'
+        ];
+        text.textContent = defaultTexts[i-1];
+        date.textContent = '-';
+    }
+
+    document.getElementById('progressLine').style.width = '0%';
+    const desc = document.getElementById("status-description");
+    desc.textContent = "Memuat informasi status...";
+    desc.style.color = "black";
+}
+
+// Load status dari server (AJAX)
+function loadStatusData(suratId) {
+    fetch('<?= site_url("surat/get_status/") ?>' + suratId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateStatusDisplay(data.data);
+                updateEstimasiWaktu(data.data);
+            } else {
+                alert('Gagal memuat status: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error loading status data:', error);
+            alert('Terjadi kesalahan saat memuat status');
+        });
+}
+
+// Update tampilan status
+function updateStatusDisplay(statusData) {
+    const steps = statusData.steps;
+
+    steps.forEach((step, index) => {
+        const stepNumber = index + 1;
+        const stepElement = document.getElementById(`step${stepNumber}`);
+        const iconElement = document.getElementById(`step${stepNumber}-icon`);
+        const textElement = document.getElementById(`step${stepNumber}-text`);
+        const dateElement = document.getElementById(`step${stepNumber}-date`);
+
+        stepElement.className = 'progress-step';
+
+        // STATUS WARNA
+        switch (step.status) {
+            case 'completed':
+                stepElement.classList.add('completed');
+                iconElement.className = 'fas fa-check';
+                break;
+
+            case 'rejected':
+                stepElement.classList.add('rejected');
+                iconElement.className = 'fas fa-times';
+                break;
+
+            case 'in-progress':
+                stepElement.classList.add('in-progress');
+                iconElement.className = 'fas fa-spinner fa-spin';
+                break;
+
+            default:
+                stepElement.classList.add('pending');
+                iconElement.className = 'fas fa-clock';
+        }
+
+        textElement.textContent = step.step_name;
+        dateElement.textContent = step.date;
+    });
+
+    // Update progress bar panjang
+    document.getElementById('progressLine').style.width = 
+        (statusData.progress_percentage || 0) + '%';
+
+    // Update informasi status
+    const desc = document.getElementById("status-description");
+    const finalStatus = statusData.current_status.toLowerCase();
+
+    if (finalStatus === "disetujui dekan") {
+        desc.textContent = "Pengajuan ini sudah disetujui.";
+        desc.style.color = "green";
+    }
+    else if (finalStatus.includes("ditolak")) {
+        desc.textContent = "Pengajuan ini tidak disetujui.";
+        desc.style.color = "red";
+    }
+    else {
+        desc.textContent = "Pengajuan ini masih dalam proses persetujuan.";
+        desc.style.color = "black";
+    }
+    
+    // Tampilkan alasan penolakan
+    const rejectionBox = document.getElementById("rejection-reason");
+    const rejectionText = document.getElementById("rejection-text");
+
+    if (finalStatus.includes("ditolak")) {
+        rejectionBox.style.display = "block";
+        rejectionText.textContent = statusData.catatan_penolakan || "Tidak ada catatan penolakan.";
+    } else {
+        rejectionBox.style.display = "none";
+    }
+}
+
+// Update estimasi waktu
+function updateEstimasiWaktu(statusData) {
+    const d = statusData.durasi;
+    document.getElementById("est1").textContent = d.durasi_1 || "-";
+    document.getElementById("est2").textContent = d.durasi_2 || "-";
+    document.getElementById("est3").textContent = d.durasi_3 || "-";
+}
+
+// Event listener untuk close modal status
+document.addEventListener('DOMContentLoaded', function() {
+    const closeBtn = document.querySelector('.close-status');
+    const modal = document.getElementById('statusModal');
+    
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    }
+
+    window.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+});
 
 // Close modal ketika klik di luar
 document.addEventListener('click', function(e) {
