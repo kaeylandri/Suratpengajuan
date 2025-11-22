@@ -267,4 +267,78 @@ class Sekretariat extends CI_Controller {
         header('Content-Type: application/json');
         echo json_encode($counts);
     }
+
+    /* ================================
+       APPROVE - DENGAN NOMOR SURAT
+    ================================= */
+    public function approve($id)
+    {
+        // Validasi nomor surat wajib diisi
+        $nomor_surat = $this->input->post('nomor_surat');
+        
+        if (empty($nomor_surat)) {
+            $this->session->set_flashdata('error', 'Nomor surat harus diisi!');
+            redirect('sekretariat');
+            return;
+        }
+
+        // Cek apakah nomor surat sudah digunakan
+        $this->db->where('nomor_surat', $nomor_surat);
+        $this->db->where('id !=', $id);
+        $existing = $this->db->get('surat')->row();
+
+        if ($existing) {
+            $this->session->set_flashdata('error', 'Nomor surat sudah digunakan! Silakan gunakan nomor lain.');
+            redirect('sekretariat');
+            return;
+        }
+
+        // Ambil data surat
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+        $approval = json_decode($surat->approval_status, true);
+
+        // Update approval status
+        $approval['sekretariat'] = date("Y-m-d H:i:s");
+        
+        $this->db->where('id', $id)->update('surat', [
+            'status' => 'disetujui sekretariat',
+            'approval_status' => json_encode($approval),
+            'nomor_surat' => $nomor_surat,
+        ]);
+        
+        $this->session->set_flashdata('success', 'Surat berhasil disetujui dengan nomor: ' . $nomor_surat);
+        redirect('sekretariat');
+    }
+    
+    /* ================================
+       REJECT
+    ================================= */
+    public function reject($id)
+    {
+        $notes = $this->input->post('rejection_notes');
+
+        // Ambil data surat dari database
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+
+        // Decode approval_status lama
+        $approval = json_decode($surat->approval_status, true);
+
+        // Jika null, jadikan array kosong agar tidak error
+        if (!is_array($approval)) {
+            $approval = [];
+        }
+
+        // Tambahkan timestamp penolakan sekretariat
+        $approval['sekretariat'] = date("Y-m-d H:i:s");
+
+        // Update database
+        $this->db->where('id', $id)->update('surat', [
+            'status' => 'ditolak sekretariat',
+            'approval_status' => json_encode($approval),
+            'catatan_penolakan' => $notes,
+        ]);
+
+        $this->session->set_flashdata('success', 'Surat berhasil ditolak Sekretariat.');
+        redirect('sekretariat');
+    }
 }

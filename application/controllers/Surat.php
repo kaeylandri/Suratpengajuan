@@ -42,6 +42,57 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
+       GET DOSEN DATA BY NIP - FUNCTION BARU
+    ============================================*/
+    private function get_dosen_by_nip($nip_array)
+    {
+        if (empty($nip_array)) return [];
+        
+        // Decode jika masih JSON string
+        if (is_string($nip_array)) {
+            $nip_array = json_decode($nip_array, true);
+        }
+        
+        // Pastikan array
+        if (!is_array($nip_array)) {
+            $nip_array = [$nip_array];
+        }
+        
+        // Clean and filter NIP array
+        $nip_array = array_filter(array_map('trim', $nip_array));
+        
+        if (empty($nip_array)) return [];
+        
+        // Query ke tabel list_dosen
+        $this->db->select('nip, nama_dosen, jabatan, divisi');
+        $this->db->from('list_dosen');
+        $this->db->where_in('nip', $nip_array);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            $results = $query->result_array();
+            
+            // Create associative array with NIP as key untuk mapping
+            $dosen_data = [];
+            foreach ($results as $row) {
+                $dosen_data[$row['nip']] = $row;
+            }
+            
+            // Return data dalam urutan yang sama dengan input NIP array
+            $ordered_data = [];
+            foreach ($nip_array as $nip) {
+                if (isset($dosen_data[$nip])) {
+                    $ordered_data[] = $dosen_data[$nip];
+                }
+            }
+            
+            return $ordered_data;
+        }
+        
+        return [];
+    }
+
+    /* ===========================================
        AUTOCOMPLETE NIP - UNTUK FORM PANITIA
     ============================================*/
     public function autocomplete_nip()
@@ -84,53 +135,83 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       LIST DATA - DEFAULT
+       LIST DATA - DEFAULT (UPDATED)
     ============================================*/
     public function index()
     {
         $data['surat_list'] = $this->Surat_model->get_all_surat();
+        
+        // TAMBAHAN: Enrich data dengan informasi dosen dari list_dosen
+        foreach ($data['surat_list'] as &$surat) {
+            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
+        }
+        
         $this->load->view('surat', $data);
     }
 
     /* ===========================================
-       HALAMAN STATS GRID - TOTAL
+       HALAMAN STATS GRID - TOTAL (UPDATED)
     ============================================*/
     public function halaman_total()
     {
         $data['surat_list'] = $this->Surat_model->get_all_surat();
+        
+        // TAMBAHAN: Enrich data dengan informasi dosen
+        foreach ($data['surat_list'] as &$surat) {
+            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
+        }
+        
         $data['title'] = 'Semua Surat';
         $data['page_type'] = 'total';
         $this->load->view('halaman_total', $data);
     }
 
     /* ===========================================
-       HALAMAN STATS GRID - PENDING
+       HALAMAN STATS GRID - PENDING (UPDATED)
     ============================================*/
     public function halaman_pending()
     {
         $data['surat_list'] = $this->Surat_model->get_by_status('pengajuan');
+        
+        // TAMBAHAN: Enrich data dengan informasi dosen
+        foreach ($data['surat_list'] as &$surat) {
+            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
+        }
+        
         $data['title'] = 'Surat Pending';
         $data['page_type'] = 'pending';
         $this->load->view('halaman_pending', $data);
     }
 
     /* ===========================================
-       HALAMAN STATS GRID - DITOLAK
+       HALAMAN STATS GRID - DITOLAK (UPDATED)
     ============================================*/
     public function halaman_ditolak()
     {
         $data['surat_list'] = $this->Surat_model->get_ditolak();
+        
+        // TAMBAHAN: Enrich data dengan informasi dosen
+        foreach ($data['surat_list'] as &$surat) {
+            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
+        }
+        
         $data['title'] = 'Surat Ditolak';
         $data['page_type'] = 'ditolak';
         $this->load->view('halaman_ditolak', $data);
     }
 
     /* ===========================================
-       HALAMAN STATS GRID - DISETUJUI
+       HALAMAN STATS GRID - DISETUJUI (UPDATED)
     ============================================*/
     public function halaman_disetujui()
     {
         $data['surat_list'] = $this->Surat_model->get_disetujui();
+        
+        // TAMBAHAN: Enrich data dengan informasi dosen
+        foreach ($data['surat_list'] as &$surat) {
+            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
+        }
+        
         $data['title'] = 'Surat Disetujui';
         $data['page_type'] = 'disetujui';
         $this->load->view('halaman_disetujui', $data);
@@ -404,7 +485,7 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       SUBMIT DATA
+       SUBMIT DATA (UPDATED - HANYA SIMPAN NIP)
     ============================================*/
     public function submit()
     {
@@ -451,10 +532,8 @@ class Surat extends CI_Controller
             'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
             'format' => $post['format'] ?? '-',
 
+            // PERUBAHAN: HANYA SIMPAN NIP, TIDAK LAGI SIMPAN nama_dosen, jabatan, divisi
             'nip' => json_encode($post['nip'] ?? []),
-            'nama_dosen' => json_encode($post['nama_dosen'] ?? []),
-            'jabatan' => json_encode($post['jabatan'] ?? []),
-            'divisi' => json_encode($post['divisi'] ?? []),
 
             'eviden' => json_encode($arr),
 
@@ -566,7 +645,7 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       EDIT DATA
+       EDIT DATA (UPDATED)
     ============================================*/
     public function edit($id)
     {
@@ -575,6 +654,9 @@ class Surat extends CI_Controller
         if (!$surat) show_404();
 
         $data['surat'] = (array)$surat;
+        
+        // TAMBAHAN: Get dosen data untuk ditampilkan
+        $data['dosen_data'] = $this->get_dosen_by_nip($surat->nip);
         
         $eviden_raw = $surat->eviden ?? "[]";
         
@@ -674,10 +756,8 @@ class Surat extends CI_Controller
             'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'],
             'format' => $post['format'],
 
+            // PERUBAHAN: HANYA UPDATE NIP, tidak update nama_dosen, jabatan, divisi
             'nip' => json_encode($post['nip']),
-            'nama_dosen' => json_encode($post['nama_dosen']),
-            'jabatan' => json_encode($post['jabatan']),
-            'divisi' => json_encode($post['divisi']),
 
             'eviden' => $update_eviden
         ];
@@ -811,7 +891,7 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       MULTI EDIT
+       MULTI EDIT (UPDATED)
     ============================================*/
     public function multi_edit()
     {
@@ -843,11 +923,16 @@ class Surat extends CI_Controller
             return;
         }
 
+        // TAMBAHAN: Enrich dengan data dosen
+        foreach ($data['surat_list'] as &$surat) {
+            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
+        }
+
         $this->load->view('multi_edit_surat', $data);
     }
 
     /* ===========================================
-       SAVE MULTI EDIT
+       SAVE MULTI EDIT (UPDATED)
     ============================================*/
     public function save_multi_edit()
     {
@@ -903,10 +988,8 @@ class Surat extends CI_Controller
                 'jenis_penugasan_kelompok' => $item['jenis_penugasan_kelompok'] ?? $existing->jenis_penugasan_kelompok,
                 'penugasan_lainnya_kelompok' => $item['penugasan_lainnya_kelompok'] ?? $existing->penugasan_lainnya_kelompok,
                 
+                // PERUBAHAN: HANYA UPDATE NIP
                 'nip' => isset($item['nip']) ? json_encode($item['nip']) : $existing->nip,
-                'nama_dosen' => isset($item['nama_dosen']) ? json_encode($item['nama_dosen']) : $existing->nama_dosen,
-                'jabatan' => isset($item['jabatan']) ? json_encode($item['jabatan']) : $existing->jabatan,
-                'divisi' => isset($item['divisi']) ? json_encode($item['divisi']) : $existing->divisi,
             ];
 
             $result = $this->Surat_model->update_surat($id, $update_data);
@@ -933,79 +1016,98 @@ class Surat extends CI_Controller
     
 
     /* ===========================================
-       CETAK SURAT
+       CETAK SURAT (UPDATED)
     ============================================*/
     public function cetak($id)
-{
-    $surat = $this->Surat_model->get_by_id($id);
-    if (!$surat) show_404();
+    {
+        $surat = $this->Surat_model->get_by_id($id);
+        if (!$surat) show_404();
 
-    // URL validasi
-    $validation_url = "http://localhost/surat/validasi/" . $surat->id;
+        // TAMBAHAN: Get dosen data untuk PDF
+        $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
 
-    // === QR Code (Endroid v4) ===
-    $qrCode = QrCode::create($validation_url)
-        ->setEncoding(new Encoding('UTF-8'))
-        ->setErrorCorrectionLevel(new ErrorCorrectionLevelLow())
-        ->setSize(160);
+        // URL validasi
+        $validation_url = base_url("surat/validasi/" . $surat->id);
 
-    $writer = new PngWriter();
-    $qrResult = $writer->write($qrCode);
+        // === QR Code (Endroid v4) ===
+        $qrCode = QrCode::create($validation_url)
+            ->setEncoding(new Encoding('UTF-8'))
+            ->setErrorCorrectionLevel(new ErrorCorrectionLevelLow())
+            ->setSize(160);
 
-    $qr_base64 = base64_encode($qrResult->getString());
+        $writer = new PngWriter();
+        $qrResult = $writer->write($qrCode);
 
-    // Data ke view
-    $data = [
-        'surat' => $surat,
-        'qr_base64' => $qr_base64
-    ];
+        $qr_base64 = base64_encode($qrResult->getString());
 
-    $html = $this->load->view('surat_print', $data, TRUE);
+        // Data ke view
+        $data = [
+            'surat' => $surat,
+            'qr_base64' => $qr_base64
+        ];
 
-    // PDF
-    $options = new Options();
-    $options->set('isHtml5ParserEnabled', true);
-    $options->set('isRemoteEnabled', true);
+        $html = $this->load->view('surat_print', $data, TRUE);
 
-    $dompdf = new Dompdf($options);
-    $dompdf->loadHtml($html);
-    $dompdf->setPaper('A4', 'portrait');
-    $dompdf->render();
+        // PDF
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', true);
 
-    $filename = "surat_tugas_" . $surat->id . ".pdf";
-    $dompdf->stream($filename, array("Attachment" => 1));
-}
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = "surat_tugas_" . $surat->id . ".pdf";
+        $dompdf->stream($filename, array("Attachment" => 1));
+    }
 
     public function download_pdf($id)
-{
-    $this->load->helper('download');
+    {
+        $this->load->helper('download');
 
-    $surat = $this->Surat_model->get_by_id($id);
+        $surat = $this->Surat_model->get_by_id($id);
 
-    $file_path = FCPATH . "uploads/surat_pdf/" . $surat->file_pdf;
+        $file_path = FCPATH . "uploads/surat_pdf/" . $surat->file_pdf;
 
-    if (!file_exists($file_path)) {
-        show_404();
-        return;
+        if (!file_exists($file_path)) {
+            show_404();
+            return;
+        }
+
+        force_download($file_path, NULL);
     }
 
-    force_download($file_path, NULL);
-}
-public function validasi($id)
-{
-    $surat = $this->Surat_model->get_by_id($id);
-    if (!$surat) {
-        $data['found'] = false;
-    } else {
-        $data['found'] = true;
-        $data['surat'] = $surat;
+    /* ===========================================
+       VALIDASI (UPDATED)
+    ============================================*/
+    public function validasi($id)
+    {
+        $surat = $this->Surat_model->get_by_id($id);
+        if (!$surat) {
+            $data['found'] = false;
+        } else {
+            // TAMBAHAN: Get dosen data untuk halaman validasi
+            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
+            $data['found'] = true;
+            $data['surat'] = $surat;
+        }
+
+        $this->load->view('surat_validasi', $data);
     }
 
-    $this->load->view('surat_validasi', $data);
-}
+    /* ===========================================
+       LIST SURAT TUGAS (UPDATED)
+    ============================================*/
     public function list_surat_tugas()
     {
         $data['surat_list'] = $this->Surat_model->get_all_surat();
+        
+        // TAMBAHAN: Enrich data dengan informasi dosen
+        foreach ($data['surat_list'] as &$surat) {
+            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
+        }
+        
         $this->load->view('list_surat_tugas', $data);
     }
 }

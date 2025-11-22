@@ -69,9 +69,13 @@ class Kaprodi extends CI_Controller
 
     public function approve($id)
     {
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+        $approval = json_decode($surat->approval_status, true);
+
+        $approval['kk'] = date("Y-m-d H:i:s");
         $this->db->where('id', $id)->update('surat', [
             'status' => 'disetujui KK',
-            'tanggal_disetujui_kk' => date("Y-m-d H:i:s"),
+            'approval_status' => json_encode($approval),
         ]);
 
         $this->session->set_flashdata('success', 'Surat berhasil disetujui Kaprodi.');
@@ -81,9 +85,13 @@ class Kaprodi extends CI_Controller
     public function reject($id)
     {
         $notes = $this->input->post('rejection_notes');
+        $approval = json_decode($surat->approval_status, true);
+
+        $approval['kk'] = date("Y-m-d H:i:s");
 
         $this->db->where('id', $id)->update('surat', [
             'status' => 'ditolak KK',
+            'approval_status' => json_encode($approval),
             'catatan_penolakan' => $notes,
         ]);
 

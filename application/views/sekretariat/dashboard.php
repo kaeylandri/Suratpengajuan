@@ -46,6 +46,11 @@
     .detail-row{display:grid;grid-template-columns:200px 1fr;padding:8px 0;border-bottom:1px solid #f4f6f7}
     .detail-label{font-weight:700;color:#7f8c8d}
     .detail-value{color:#2c3e50}
+    .form-group{margin-bottom:15px}
+    .form-group label{display:block;margin-bottom:5px;font-weight:600;color:#2c3e50}
+    .form-control{width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px}
+    .form-control:focus{outline:none;border-color:#3498db}
+    .alert-info{background:#d1ecf1;color:#0c5460;padding:12px;border-radius:8px;margin-bottom:15px;border-left:4px solid #17a2b8}
 </style>
 </head>
 <body>
@@ -68,14 +73,12 @@
     <?php endif; ?>
 
     <?php
-    // ✅ Data dari controller - hanya status yang relevan dengan sekretariat
     $total_all = isset($total_surat) ? (int)$total_surat : 0;
     $pending_count = isset($pending_count) ? (int)$pending_count : 0;
     $approved_count = isset($approved_count) ? (int)$approved_count : 0;
     $rejected_count = isset($rejected_count) ? (int)$rejected_count : 0;
     ?>
 
-    <!-- ✅ Statistik dengan Link - Konsisten dengan Controller -->
     <div class="stats-grid">
         <a href="<?= base_url('sekretariat/semua') ?>" class="stat-card" style="border-left-color:#3498db;">
             <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
@@ -98,7 +101,6 @@
         </a>
     </div>
 
-    <!-- Filter -->
     <div class="filter-container">
         <div>
             <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
@@ -116,7 +118,6 @@
         </div>
     </div>
 
-    <!-- ✅ Grafik 3D - Hanya Data Sekretariat -->
     <div class="card" style="background: linear-gradient(135deg, #ffffffff 0%, #ffffffff 100%);">
         <div class="card-header" style="border-bottom-color: rgba(0, 0, 0, 0.1)">
             <strong style="color: #000000ff"><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan Sekretariat — Tahun <?= isset($tahun) ? $tahun : date('Y') ?></strong>
@@ -126,7 +127,6 @@
         </div>
     </div>
 
-    <!-- ✅ Tabel - Hanya Status Relevan Sekretariat -->
     <div class="card">
         <div class="card-header">
             <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Surat</h3>
@@ -151,7 +151,6 @@
                 </thead>
                 <tbody id="tableBody">
                     <?php if(isset($surat_list) && !empty($surat_list)): $no=1; foreach($surat_list as $s): 
-                        // ✅ LOGIKA BADGE YANG DIPERBAIKI - SEMUA STATUS DITANGANI DENGAN BENAR
                         $status = $s->status ?? '';
                         $st_key = 'unknown';
                         $badge_text = ucwords($status);
@@ -181,7 +180,6 @@
                             $st_key = 'rejected';
                             $badge = '<span class="badge badge-rejected">' . $badge_text . '</span>';
                         } else {
-                            // Fallback untuk status lain yang tidak dikenal
                             $st_key = 'unknown';
                             $badge = '<span class="badge badge-pending">' . $badge_text . '</span>';
                         }
@@ -202,11 +200,8 @@
                                 <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?>)" title="Lihat Detail">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
-                                <?php 
-                                // ✅ Tombol approve/reject hanya untuk status "disetujui KK"
-                                if($status == 'disetujui KK'): 
-                                ?>
-                                    <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?>)" title="Setujui & Teruskan ke Dekan">
+                                <?php if($status == 'disetujui KK'): ?>
+                                    <button class="btn btn-approve" onclick="showApproveModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')" title="Setujui & Teruskan ke Dekan">
                                         <i class="fa-solid fa-check"></i>
                                     </button>
                                     <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?>)" title="Tolak Pengajuan">
@@ -241,6 +236,53 @@
     </div>
 </div>
 
+<!-- Approve Modal - Dengan Input Nomor Surat -->
+<div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-check-circle"></i> Setujui Pengajuan</h3>
+            <button onclick="closeModal('approveModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
+        </div>
+        <div>
+            <div class="alert-info">
+                <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong><br>
+                Pengajuan: <span id="approveNamaKegiatan" style="font-weight:700"></span>
+            </div>
+            
+            <form id="approveForm" method="POST" action="">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <div class="form-group">
+                    <label for="nomorSurat">
+                        <i class="fa-solid fa-file-alt"></i> Nomor Surat <span style="color:#e74c3c">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nomorSurat" 
+                        name="nomor_surat" 
+                        class="form-control" 
+                        placeholder="Contoh: 001/SKT/FT/2025" 
+                        required
+                        autocomplete="off"
+                    >
+                    <small style="color:#7f8c8d;display:block;margin-top:5px">
+                        <i class="fa-solid fa-exclamation-circle"></i> Format: 001/SKT/FT/Tahun
+                    </small>
+                </div>
+
+                <div style="text-align:right;margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
+                    <button type="button" class="btn" onclick="closeModal('approveModal')" style="background:#95a5a6;color:white">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="btn btn-approve">
+                        <i class="fa-solid fa-check"></i> Setujui & Teruskan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Reject Modal -->
 <div id="rejectModal" class="modal" onclick="modalClickOutside(event,'rejectModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
@@ -264,6 +306,7 @@
 <script>
 const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
+let currentApproveId = null;
 
 function updateTahun(year) {
     window.location.href = "<?= base_url('sekretariat?tahun=') ?>" + year;
@@ -296,21 +339,18 @@ function filterTable(status) {
 }
 
 function showDetail(id) {
-    // ✅ Ambil detail via AJAX untuk data yang lebih lengkap
     fetch(`<?= base_url('sekretariat/getDetailPengajuan/') ?>${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 const item = data.data;
                 
-                // Format tanggal
                 const formatDate = (dateStr) => {
                     if (!dateStr) return '-';
                     const date = new Date(dateStr);
                     return date.toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'});
                 };
                 
-                // Format currency
                 const formatCurrency = (amount) => {
                     if (!amount) return '-';
                     return new Intl.NumberFormat('id-ID', {
@@ -319,7 +359,6 @@ function showDetail(id) {
                     }).format(amount);
                 };
 
-                // Tampilkan status lengkap di modal
                 const displayStatus = item.status || '-';
                 
                 const content = `
@@ -335,6 +374,12 @@ function showDetail(id) {
                         <div class="detail-label">Jenis Pengajuan</div>
                         <div class="detail-value">${item.jenis_pengajuan || '-'}</div>
                     </div>
+                    ${item.nomor_surat ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Nomor Surat</div>
+                        <div class="detail-value"><strong style="color:#27ae60">${item.nomor_surat}</strong></div>
+                    </div>
+                    ` : ''}
                     <div class="detail-row">
                         <div class="detail-label">Tanggal Pengajuan</div>
                         <div class="detail-value">${formatDate(item.created_at)}</div>
@@ -385,9 +430,17 @@ function showDetail(id) {
         });
 }
 
-function approveSurat(id) {
-    if (!confirm('Apakah Anda yakin ingin menyetujui dan meneruskan pengajuan ini ke Dekan?')) return;
-    window.location.href = '<?= base_url("sekretariat/approve/") ?>' + id;
+function showApproveModal(id, namaKegiatan) {
+    currentApproveId = id;
+    document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
+    document.getElementById('nomorSurat').value = '';
+    document.getElementById('approveForm').action = '<?= base_url("sekretariat/approve/") ?>' + id;
+    document.getElementById('approveModal').classList.add('show');
+    
+    // Auto focus ke input nomor surat
+    setTimeout(() => {
+        document.getElementById('nomorSurat').focus();
+    }, 300);
 }
 
 function showRejectModal(id) {
@@ -433,7 +486,7 @@ function modalClickOutside(evt, id) {
     if (evt.target && evt.target.id === id) closeModal(id); 
 }
 
-// ✅ Grafik 3D - Data Hanya dari Sekretariat
+// Grafik
 const ctx = document.getElementById('grafikSurat').getContext('2d');
 const fusionStyle3DPlugin = {
     id: 'fusionStyle3d',
@@ -448,7 +501,6 @@ const fusionStyle3DPlugin = {
                     const offsetX = 15, offsetY = -15;
                     ctx.save();
                     
-                    // Side gradient
                     const rightGradient = ctx.createLinearGradient(x + width/2, y, x + width/2 + offsetX, y + offsetY);
                     let darkColor = datasetIndex === 0 ? 'rgba(52, 152, 219, 0.7)' : 
                                    (datasetIndex === 1 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)');
@@ -457,13 +509,10 @@ const fusionStyle3DPlugin = {
                     ctx.fillStyle = rightGradient;
                     ctx.beginPath();
                     ctx.moveTo(x + width/2, y);
-                    ctx.lineTo(x + width/2 + offsetX, y + offsetY);
-                    ctx.lineTo(x + width/2 + offsetX, base + offsetY);
                     ctx.lineTo(x + width/2, base);
                     ctx.closePath();
                     ctx.fill();
                     
-                    // Top gradient
                     const topGradient = ctx.createLinearGradient(x - width/2, y, x + width/2 + offsetX, y + offsetY);
                     let lightColor = datasetIndex === 0 ? 'rgba(173, 216, 230, 0.95)' : 
                                     (datasetIndex === 1 ? 'rgba(200, 247, 197, 0.95)' : 'rgba(245, 183, 177, 0.95)');

@@ -354,6 +354,7 @@ function showDetail(id) {
 
     const content = `
         <div>
+            <div class="detail-row"><div class="detail-label">Nomor Surat:</div><div class="detail-value">${escapeHtml(getVal('nomor_surat'))}</div></div>
             <div class="detail-row"><div class="detail-label">Nama Kegiatan:</div><div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div></div>
             <div class="detail-row"><div class="detail-label">Nama Dosen:</div><div class="detail-value">${escapeHtml(getVal('nama_dosen'))}</div></div>
             <div class="detail-row"><div class="detail-label">NIP:</div><div class="detail-value">${escapeHtml(getVal('nip'))}</div></div>

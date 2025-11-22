@@ -330,7 +330,6 @@
         flex-wrap: wrap;
     }
 
-    /* PERUBAHAN: Filter actions di sebelah kiri */
     .filter-actions {
         display:flex;
         gap:8px;
@@ -338,7 +337,6 @@
         order: 1;
     }
 
-    /* PERUBAHAN: Search di sebelah kanan */
     .filter-search {
         flex: 1 1 360px;
         min-width: 220px;
@@ -411,7 +409,6 @@
         margin-bottom:14px;
     }
 
-    /* PERUBAHAN: Filter row - struktur sama dengan filter-bar */
     .filter-row {
         width: 100%;
         background: #ffffff;
@@ -425,7 +422,6 @@
         flex-wrap: wrap;
     }
 
-    /* PERUBAHAN: Filter row actions di sebelah kiri */
     .filter-row-actions {
         display:flex;
         gap:8px;
@@ -433,7 +429,6 @@
         order: 1;
     }
 
-    /* PERUBAHAN: Filter row search di sebelah kanan */
     .filter-row-search {
         flex: 1 1 360px;
         min-width: 220px;
@@ -737,14 +732,24 @@
     }
 
     .btn-status {
-        background: #66bb6a;
-        color: white;
-    }
+    background: #66bb6a;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+}
 
-    .btn-status:hover {
-        background: #4caf50;
-        transform: scale(1.05);
-    }
+.btn-status:hover {
+    background: #4caf50;
+    transform: scale(1.05);
+}
+
 
     /* Status Modal Styles */
     .status-modal {
@@ -892,21 +897,19 @@
 
     /* Status Text Colors */
      .progress-step.completed .step-icon {
-    background-color: #28a745;   /* Hijau */
+    background-color: #28a745;
     border-color: #28a745;
-    color: white;                /* Ikon jadi putih */
+    color: white;
 }
     .progress-step.status-completed i {
-        color: white !important;     /* Paksa ikon jadi putih */
+        color: white !important;
     }
-    /* IN-PROGRESS = biru/oranye */
     .progress-step.in-progress .step-icon {
         background: #ffc107;
         border-color: #ffc107;
         color: white;
     }
 
-    /* REJECTED = merah */
     .progress-step.rejected .step-icon {
         background: #dc3545;
         border-color: #dc3545;
@@ -1187,6 +1190,14 @@
         font-size: 14px;
     }
 
+    .progress-estimasi {
+        width: 100%;
+        text-align: center;
+        margin-top: 5px;
+        font-size: 12px;
+        color: #777;
+    }
+
     /* Responsive */
     @media (max-width:880px){
         .progress-track {
@@ -1274,7 +1285,6 @@
             padding: 15px;
         }
         
-        /* PERUBAHAN: Responsive untuk filter bar */
         .filter-bar {
             flex-direction: column;
             align-items: stretch;
@@ -1291,16 +1301,7 @@
             margin-left: 0;
             margin-top: 10px;
         }
-    }
-    .progress-estimasi {
-    width: 100%;
-    text-align: center;
-    margin-top: 5px;
-    font-size: 12px;
-    color: #777;
-}
 
-    @media (max-width:880px){
         .filter-bar{ padding:10px; gap:8px; }
         .filter-search{ flex-basis: 100%; }
         .filter-builder{ gap:8px; }
@@ -1318,26 +1319,26 @@
         }
         
         .progress-track::before {
-        display: none;
+            display: none;
+        }
+        
+        .progress-step {
+            flex-direction: row;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .step-text {
+            text-align: left;
+            max-width: none;
+            flex: 1;
+        }
+        
+        .step-label {
+            min-width: 90px;
+        }
     }
-    
-    .progress-step {
-        flex-direction: row;
-        align-items: center;
-        gap: 15px;
-        width: 100%;
-    }
-    
-    .step-text {
-        text-align: left;
-        max-width: none;
-        flex: 1;
-    }
-    
-    .step-label {
-        min-width: 90px;
-    }
-}
     </style>
 </head>
 
@@ -1455,7 +1456,7 @@
             </div>
         </div>
 
-        <!-- PERUBAHAN: Filter dan tombol di kiri, search di kanan -->
+        <!-- Filter Bar -->
         <div class="filter-bar">
             <div class="filter-actions">
                 <select id="filterCategory" class="btn-small">
@@ -1595,16 +1596,38 @@
             <tbody>
                 <?php 
                 $no = 1;
-                foreach ($surat_list as $s): ?>
-                <?php
-                $detail = (array) $s;
-                foreach (['nip','nama_dosen','jabatan','divisi','eviden'] as $jf) {
-                    if (isset($detail[$jf]) && is_string($detail[$jf])) {
-                        $decoded = json_decode($detail[$jf], true);
-                        if (json_last_error() === JSON_ERROR_NONE) $detail[$jf] = $decoded;
+                foreach ($surat_list as $s): 
+                    // === PERUBAHAN: Ambil data dosen dari relasi ===
+                    $dosen_data = isset($s->dosen_data) ? $s->dosen_data : [];
+                    
+                    // Prepare detail data
+                    $detail = (array) $s;
+                    
+                    // Prepare arrays untuk data-detail attribute
+                    $nip_array = [];
+                    $nama_dosen_array = [];
+                    $jabatan_array = [];
+                    $divisi_array = [];
+                    
+                    foreach ($dosen_data as $dosen) {
+                        $nip_array[] = $dosen['nip'];
+                        $nama_dosen_array[] = $dosen['nama_dosen'];
+                        $jabatan_array[] = $dosen['jabatan'];
+                        $divisi_array[] = $dosen['divisi'];
                     }
-                }
-                $data_detail_attr = htmlspecialchars(json_encode($detail, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), ENT_QUOTES,'UTF-8');
+                    
+                    $detail['nip'] = $nip_array;
+                    $detail['nama_dosen'] = $nama_dosen_array;
+                    $detail['jabatan'] = $jabatan_array;
+                    $detail['divisi'] = $divisi_array;
+                    
+                    // Decode eviden untuk filter
+                    if (isset($detail['eviden']) && is_string($detail['eviden'])) {
+                        $decoded = json_decode($detail['eviden'], true);
+                        if (json_last_error() === JSON_ERROR_NONE) $detail['eviden'] = $decoded;
+                    }
+                    
+                    $data_detail_attr = htmlspecialchars(json_encode($detail, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), ENT_QUOTES,'UTF-8');
                 ?>
                 <tr class="row-detail" data-detail='<?= $data_detail_attr; ?>' data-id="<?= $s->id; ?>">
                     <td><input type="checkbox" class="row-checkbox" data-id="<?= $s->id; ?>"></td>
@@ -1614,32 +1637,34 @@
                     <td>
                         <div class="dosen-container">
                             <?php
-                            $nd = $s->nama_dosen;
-                            if(is_string($nd)){ $maybe=json_decode($nd,true); if(json_last_error()===JSON_ERROR_NONE) $nd=$maybe; }
-                            if(!empty($nd)){
-                                if(is_array($nd)){
-                                    $nama=$nd[0]??'-';
-                                    $short= strlen($nama)>30 ? substr($nama,0,30).'...' : $nama;
-                                    echo '<span class="nama-dosen-badge" title="'.htmlspecialchars($nama).'">'.htmlspecialchars($short).'</span>';
-                                    if(count($nd)>1) echo '<span class="nama-dosen-more" title="Klik row untuk lihat semua dosen">+'.(count($nd)-1).'</span>';
-                                }else{
-                                    $nama=$nd;
-                                    $short= strlen($nama)>30 ? substr($nama,0,30).'...' : $nama;
-                                    echo '<span class="nama-dosen-badge" title="'.htmlspecialchars($nama).'">'.htmlspecialchars($short).'</span>';
+                            // === PERUBAHAN: Tampilkan dari dosen_data ===
+                            if (!empty($dosen_data)) {
+                                $nama = $dosen_data[0]['nama_dosen'] ?? '-';
+                                $short = strlen($nama) > 30 ? substr($nama, 0, 30) . '...' : $nama;
+                                echo '<span class="nama-dosen-badge" title="' . htmlspecialchars($nama) . '">' . htmlspecialchars($short) . '</span>';
+                                
+                                if (count($dosen_data) > 1) {
+                                    echo '<span class="nama-dosen-more" title="Klik row untuk lihat semua dosen">+' . (count($dosen_data) - 1) . '</span>';
                                 }
-                            }else echo '-';
+                            } else {
+                                echo '-';
+                            }
                             ?>
                         </div>
                     </td>
                     <td>
                         <div class="divisi-container">
                             <?php
-                            $dv=$s->divisi;
-                            if(is_string($dv)){ $maybe2=json_decode($dv,true); if(json_last_error()===JSON_ERROR_NONE) $dv=$maybe2; }
-                            if(!empty($dv)){
-                                if(is_array($dv)){ foreach($dv as $div) echo '<span class="divisi-badge">'.htmlspecialchars($div).'</span>'; }
-                                else echo '<span class="divisi-badge">'.htmlspecialchars($dv).'</span>';
-                            }else echo '-';
+                            // === PERUBAHAN: Tampilkan dari dosen_data ===
+                            if (!empty($dosen_data)) {
+                                // Get unique divisions
+                                $divisions = array_unique(array_column($dosen_data, 'divisi'));
+                                foreach ($divisions as $div) {
+                                    echo '<span class="divisi-badge">' . htmlspecialchars($div) . '</span>';
+                                }
+                            } else {
+                                echo '-';
+                            }
                             ?>
                         </div>
                     </td>
@@ -1774,9 +1799,7 @@ function loadStatusData(suratId) {
         });
 }
 
-// ======================================================================
-//  UPDATE STATUS DISPLAY
-// ======================================================================
+// UPDATE STATUS DISPLAY
 function updateStatusDisplay(statusData) {
     const steps = statusData.steps;
 
@@ -1792,7 +1815,7 @@ function updateStatusDisplay(statusData) {
         // STATUS WARNA
         switch (step.status) {
             case 'completed':
-            case 'completed':
+            case 'approved':
                 stepElement.classList.add('completed');
                 iconElement.className = 'fas fa-check';
                 break;
@@ -1820,9 +1843,7 @@ function updateStatusDisplay(statusData) {
     document.getElementById('progressLine').style.width = 
         (statusData.progress_percentage || 0) + '%';
 
-    // ==================================================================
-    //  UPDATE INFORMASI STATUS
-    // ==================================================================
+    // UPDATE INFORMASI STATUS
     const desc = document.getElementById("status-description");
     const finalStatus = statusData.current_status.toLowerCase();
 
@@ -1839,15 +1860,13 @@ function updateStatusDisplay(statusData) {
         desc.style.color = "black";
     }
     
-    // ==============================
     // TAMPILKAN ALASAN PENOLAKAN
-    // ==============================
     const rejectionBox = document.getElementById("rejection-reason");
     const rejectionText = document.getElementById("rejection-text");
 
     if (finalStatus.includes("ditolak")) {
-    rejectionBox.style.display = "block";
-    rejectionText.textContent = statusData.catatan_penolakan || "Tidak ada catatan penolakan.";
+        rejectionBox.style.display = "block";
+        rejectionText.textContent = statusData.catatan_penolakan || "Tidak ada catatan penolakan.";
     } else {
         rejectionBox.style.display = "none";
     }
@@ -1861,9 +1880,7 @@ function updateEstimasiWaktu(statusData) {
     document.getElementById("est3").textContent = d.durasi_3 || "-";
 }
 
-// ======================================================================
-//  EVENT: CLOSE MODAL
-// ======================================================================
+// EVENT: CLOSE MODAL
 document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = document.querySelector('.close-status');
     const modal = document.getElementById('statusModal');
@@ -2008,25 +2025,40 @@ $(document).ready(function () {
         });
     }
 
-    // ===== FILTER FUNCTIONALITY =====
+    // ===== FILTER FUNCTIONALITY - UPDATED =====
     const filterData = {
-        jenis: <?= json_encode(array_values(array_unique(array_map(function($s){ return $s->jenis_pengajuan; }, $surat_list)))); ?>,
-        dosen: <?= json_encode(array_values(array_unique(array_reduce($surat_list, function($carry,$s){
-            if(isset($s->nama_dosen) && !empty($s->nama_dosen)){
-                $nd=$s->nama_dosen;
-                if(is_string($nd)){ $maybe=json_decode($nd,true); if(json_last_error()===JSON_ERROR_NONE) $nd=$maybe; }
-                if(is_array($nd)) foreach($nd as $d) $carry[]=trim($d); else $carry[]=trim($nd);
+        jenis: <?php 
+            $jenis_list = array_unique(array_map(function($s){ 
+                return $s->jenis_pengajuan; 
+            }, $surat_list));
+            echo json_encode(array_values($jenis_list));
+        ?>,
+        dosen: <?php 
+            // === PERUBAHAN: Ambil dari dosen_data ===
+            $dosen_list = [];
+            foreach ($surat_list as $s) {
+                if (isset($s->dosen_data) && !empty($s->dosen_data)) {
+                    foreach ($s->dosen_data as $dosen) {
+                        $dosen_list[] = $dosen['nama_dosen'];
+                    }
+                }
             }
-            return $carry;
-        },[])))); ?>,
-        divisi: <?= json_encode(array_values(array_unique(array_reduce($surat_list,function($carry,$s){
-            if(isset($s->divisi)&&!empty($s->divisi)){
-                $dv=$s->divisi;
-                if(is_string($dv)){ $maybe2=json_decode($dv,true); if(json_last_error()===JSON_ERROR_NONE) $dv=$maybe2; }
-                if(is_array($dv)) foreach($dv as $d) $carry[]=trim($d); else $carry[]=trim($dv);
+            $dosen_list = array_unique($dosen_list);
+            echo json_encode(array_values($dosen_list));
+        ?>,
+        divisi: <?php 
+            // === PERUBAHAN: Ambil dari dosen_data ===
+            $divisi_list = [];
+            foreach ($surat_list as $s) {
+                if (isset($s->dosen_data) && !empty($s->dosen_data)) {
+                    foreach ($s->dosen_data as $dosen) {
+                        $divisi_list[] = $dosen['divisi'];
+                    }
+                }
             }
-            return $carry;
-        },[])))); ?>
+            $divisi_list = array_unique($divisi_list);
+            echo json_encode(array_values($divisi_list));
+        ?>
     };
 
     Object.keys(filterData).forEach(k=>{
@@ -2038,14 +2070,10 @@ $(document).ready(function () {
     let uid = 0;
     function nextId(){ return 'r'+(++uid); }
 
-    // PERUBAHAN: Fungsi untuk membuat baris filter dengan struktur yang sama
     function makeRowDOM(r){
         const $wr = $(`<div class="filter-row" data-id="${r.id}"></div>`);
 
-        // PERUBAHAN: Filter row actions di kiri
         const $filterRowActions = $(`<div class="filter-row-actions"></div>`);
-        
-        // PERUBAHAN: Filter row search di kanan
         const $filterRowSearch = $(`<div class="filter-row-search"></div>`);
         const $search = $(`<input type="text" class="row-search" placeholder="Search..." />`);
         const $searchIcon = $(`<i class="fa fa-search"></i>`);
@@ -2143,7 +2171,6 @@ $(document).ready(function () {
             applyFilters();
         });
 
-        // PERUBAHAN: Struktur yang sama dengan filter-bar
         $filterRowActions.append($cat).append($btnAdd).append($btnRemove);
         $wr.append($filterRowActions).append($filterRowSearch).append($dateStart).append($dateEnd);
         return $wr;
@@ -2223,7 +2250,7 @@ $(document).ready(function () {
         applyFilters();
     });
 
-    // ===== POPUP DETAIL - FORM-LIKE STYLE =====
+    // ===== POPUP DETAIL - FORM-LIKE STYLE (UPDATED) =====
     $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
         if($(e.target).closest('input, a, button').length) return;
         
@@ -2250,7 +2277,7 @@ $(document).ready(function () {
                 
                 <div class="detail-row">
                     <div class="detail-label">Jenis Tanggal</div>
-                    <div class="detail-value">${escapeHtml(data.jenis_tanggal || '-')}</div>
+                    <div class="detail-value">${escapeHtml(data.jenis_date || '-')}</div>
                 </div>
                 
                 <div class="detail-row">
@@ -2287,8 +2314,8 @@ $(document).ready(function () {
             </div>
         `;
 
-        // Dosen Section
-        if (data.nama_dosen && (Array.isArray(data.nama_dosen) ? data.nama_dosen.length > 0 : data.nama_dosen !== '-')) {
+        // === PERUBAHAN: Dosen Section - Menggunakan data dari relasi ===
+        if (data.nama_dosen && Array.isArray(data.nama_dosen) && data.nama_dosen.length > 0) {
             html += `
                 <div class="detail-section">
                     <div class="detail-section-title">
@@ -2298,15 +2325,10 @@ $(document).ready(function () {
                     <div class="dosen-list">
             `;
             
-            const namaDosen = Array.isArray(data.nama_dosen) ? data.nama_dosen : [data.nama_dosen];
-            const nipDosen = Array.isArray(data.nip) ? data.nip : [data.nip];
-            const jabatanDosen = Array.isArray(data.jabatan) ? data.jabatan : [data.jabatan];
-            const divisiDosen = Array.isArray(data.divisi) ? data.divisi : [data.divisi];
-            
-            namaDosen.forEach((nama, index) => {
-                const nip = nipDosen[index] || '-';
-                const jabatan = jabatanDosen[index] || '-';
-                const divisi = divisiDosen[index] || '-';
+            data.nama_dosen.forEach((nama, index) => {
+                const nip = (data.nip && data.nip[index]) ? data.nip[index] : '-';
+                const jabatan = (data.jabatan && data.jabatan[index]) ? data.jabatan[index] : '-';
+                const divisi = (data.divisi && data.divisi[index]) ? data.divisi[index] : '-';
                 const initial = nama ? nama.charAt(0).toUpperCase() : '?';
                 
                 html += `
