@@ -1641,260 +1641,423 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <!-- ===== UPLOADCARE CDN ===== -->
 <script>
-UPLOADCARE_PUBLIC_KEY = "demopublickey";
+    UPLOADCARE_PUBLIC_KEY = "demopublickey"; 
+    UPLOADCARE_LOCALE = "en";
+    UPLOADCARE_TABS = "file url camera dropbox gdrive";
 </script>
 <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
+<style>
+    /* Enhanced Upload Eviden Styling */
+    .upload-eviden-wrapper {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    .upload-header {
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .upload-icon-circle {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, #FB8C00, #F57C00);
+        border-radius: 50%;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(251, 140, 0, 0.3);
+        animation: pulse-upload 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-upload {
+        0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 8px 20px rgba(251, 140, 0, 0.3);
+        }
+        50% {
+            transform: scale(1.05);
+            box-shadow: 0 12px 28px rgba(251, 140, 0, 0.4);
+        }
+    }
+
+    .upload-icon-circle i {
+        color: white;
+        font-size: 40px;
+    }
+
+    .upload-header h4 {
+        color: #2c3e50;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .upload-header p {
+        color: #6c757d;
+        font-size: 15px;
+        margin: 0;
+    }
+
+    .info-alert-box {
+        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+        border-left: 5px solid #FB8C00;
+        padding: 18px 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: start;
+        gap: 15px;
+    }
+
+    .info-alert-box i {
+        color: #FB8C00;
+        font-size: 22px;
+        margin-top: 2px;
+    }
+
+    .info-alert-content h6 {
+        color: #e65100;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-alert-content p {
+        color: #5d4037;
+        font-size: 13px;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .upload-dropzone {
+        background: #fafbfc;
+        border: 3px dashed #dee2e6;
+        border-radius: 14px;
+        padding: 45px 25px;
+        text-align: center;
+        transition: all 0.3s ease;
+        margin-bottom: 25px;
+        position: relative;
+    }
+
+    .upload-dropzone:hover {
+        border-color: #FB8C00;
+        background: #fff8f0;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(251, 140, 0, 0.1);
+    }
+
+    /* Uploadcare Widget Custom Styling */
+    .uploadcare--widget__button {
+        background: #FB8C00 !important;
+        border: none !important;
+        padding: 14px 35px !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 5px 15px rgba(251, 140, 0, 0.3) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    .uploadcare--widget__button:hover {
+        background: #F57C00 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 7px 20px rgba(251, 140, 0, 0.4) !important;
+    }
+
+    .file-formats-info {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 18px;
+        margin-top: 20px;
+    }
+
+    .file-formats-info h6 {
+        color: #495057;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .formats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        gap: 10px;
+    }
+
+    .format-badge {
+        background: white;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .format-badge:hover {
+        border-color: #FB8C00;
+        transform: translateY(-2px);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .format-badge i {
+        font-size: 22px;
+        color: #FB8C00;
+        margin-bottom: 6px;
+    }
+
+    .format-badge span {
+        display: block;
+        color: #495057;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .requirements-box {
+        background: white;
+        border: 2px solid #e3f2fd;
+        border-radius: 10px;
+        padding: 18px;
+        margin-top: 20px;
+    }
+
+    .requirements-box h6 {
+        color: #1976d2;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .requirements-box ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .requirements-box li {
+        padding: 8px 0;
+        color: #495057;
+        font-size: 13px;
+        display: flex;
+        align-items: start;
+        gap: 10px;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .requirements-box li:last-child {
+        border-bottom: none;
+    }
+
+    .requirements-box li i {
+        color: #28a745;
+        font-size: 14px;
+        margin-top: 2px;
+    }
+
+    #chk-error {
+        color: #dc3545;
+        text-align: center;
+        margin-top: 18px;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 12px 18px;
+        background: #ffebee;
+        border-radius: 8px;
+        border-left: 4px solid #dc3545;
+        display: none;
+    }
+
+    #chk-error.show {
+        display: block;
+        animation: shake-error 0.4s ease;
+    }
+
+    @keyframes shake-error {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-8px); }
+        75% { transform: translateX(8px); }
+    }
+
+    #chk-error i {
+        margin-right: 6px;
+    }
+
+    .upload-success-msg {
+        background: #e8f5e9;
+        border: 2px solid #28a745;
+        border-radius: 10px;
+        padding: 16px;
+        margin-top: 20px;
+        display: none;
+        animation: slideDown 0.4s ease;
+    }
+
+    .upload-success-msg.show {
+        display: block;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .upload-success-msg h6 {
+        color: #28a745;
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .upload-success-msg p {
+        color: #2e7d32;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .upload-eviden-wrapper {
+            padding: 20px 15px;
+        }
+
+        .upload-header h4 {
+            font-size: 24px;
+        }
+
+        .upload-dropzone {
+            padding: 35px 20px;
+        }
+
+        .formats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 480px) {
+        .upload-icon-circle {
+            width: 75px;
+            height: 75px;
+        }
+
+        .upload-icon-circle i {
+            font-size: 32px;
+        }
+
+        .formats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<!-- ===== STEP 3 (FULL UPLOADCARE WIDGET) ===== -->
 <fieldset>
-    <div style="width: 100%;">
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333;">
-                <i class="fas fa-cloud-upload-alt"></i> Upload File Eviden
-            </label>
-            <p style="font-size: 13px; color: #6c757d; margin-bottom: 15px;">
-                <i class="fas fa-info-circle"></i> Upload file pendukung (PDF, gambar, dokumen). Anda dapat memilih beberapa file sekaligus.
-            </p>
-        </div>
-
-        <!-- KONTAINER UPLOADCARE (harus div kosong) -->
-        <div id="eviden-panel" style="min-height: 420px; border:1px solid #ddd; border-radius:10px;"></div>
-
-        <!-- Hidden input untuk simpan URL -->
-        <input type="hidden" name="eviden" id="eviden" value="[]">
+    <div class="upload-eviden-wrapper">
         
-        <!-- Display uploaded files -->
-        <div id="uploaded-files-display" style="margin-top: 20px; display: none;">
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; border: 1px solid #dee2e6;">
-                <h6 style="font-weight: 600; margin-bottom: 10px; color: #495057;">
-                    <i class="fas fa-check-circle" style="color: #28a745;"></i> File yang sudah diupload:
-                </h6>
-                <div id="files-list"></div>
+        <!-- Header Section -->
+        <div class="upload-header">
+            <div class="upload-icon-circle">
+                <i class="fas fa-cloud-upload-alt"></i>
             </div>
+            <h4>Upload Eviden</h4>
+            <p>Unggah dokumen pendukung untuk melengkapi surat tugas Anda</p>
         </div>
+
+        <!-- Upload Zone -->
+        <div class="upload-dropzone">
+            <input
+                type="hidden"
+                name="eviden"
+                role="uploadcare-uploader"
+                data-clearable="true"
+                data-multiple="true"
+                data-multiple-max="0"
+                data-preview-step="true"
+                data-tabs="file url camera dropbox gdrive"
+                data-images-only="false"
+                style="width:100%;"
+            />
+        </div>
+        <!-- Error Message -->
+        <p id="chk-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            Mohon upload minimal 1 file eviden!
+        </p>
+
     </div>
 </fieldset>
 
-<!-- BUTTON AREA -->
-<div class="button-area" style="margin-top:25px; text-align:center;">
-    <button type="button" class="btn btn-primary prev-btn rounded-pill btn-sm" style="padding: 6px 20px;">Back</button>
-    <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Continue</button>
+<!-- BUTTON AREA (Di luar fieldset, sesuai dengan struktur form Anda) -->
+<div class="button-area">
+    <button type="button" class="btn btn-secondary prev-btn rounded-pill" style="padding: 10px 25px;">
+        <i class="fas fa-arrow-left"></i> Back
+    </button>
+    <button type="button" class="action-btn next-btn rounded-pill" style="padding: 10px 25px;">
+        Continue <i class="fas fa-arrow-right"></i>
+    </button>
 </div>
 
 <script>
-// ========================================
-// PERBAIKAN UPLOADCARE - SIMPAN URL KE DATABASE
-// ========================================
-
 document.addEventListener("DOMContentLoaded", function () {
-    const evidenInput = document.getElementById("eviden");
-    const msform = document.getElementById("msform");
-    const uploadedDisplay = document.getElementById("uploaded-files-display");
-    const filesList = document.getElementById("files-list");
+    const nextBtn = document.querySelector(".next-btn");
+    const prevBtn = document.querySelector(".prev-btn");
+    const uploader = uploadcare.Widget('[role="uploadcare-uploader"]');
+    const err = document.getElementById("chk-error");
+    const successMsg = document.getElementById("uploadSuccessMsg");
     
-    // Pastikan default selalu array kosong (bukan string kosong)
-    if (!evidenInput.value || evidenInput.value === "") {
-        evidenInput.value = "[]";
-    }
-
-    // Array untuk menyimpan semua URL yang di-upload
-    let uploadedFiles = [];
-
-    // Function untuk update display files
-    function updateFilesDisplay() {
-        if (uploadedFiles.length === 0) {
-            uploadedDisplay.style.display = 'none';
-            return;
+    // Handle file selection change
+    uploader.onChange(function(value) {
+        if (value) {
+            err.classList.remove('show');
+            successMsg.classList.add('show');
+        } else {
+            successMsg.classList.remove('show');
         }
-
-        uploadedDisplay.style.display = 'block';
-        filesList.innerHTML = '';
-
-        uploadedFiles.forEach((url, index) => {
-            const filename = url.split('/').pop().split('?')[0]; // Extract filename dari URL
-            const fileItem = document.createElement('div');
-            fileItem.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 6px; margin-bottom: 8px; border: 1px solid #e9ecef;';
-            
-            fileItem.innerHTML = `
-                <div style="flex-shrink: 0;">
-                    <i class="fas fa-file-alt" style="font-size: 20px; color: #6c757d;"></i>
-                </div>
-                <div style="flex: 1; min-width: 0;">
-                    <strong style="font-size: 13px; color: #495057;">File ${index + 1}</strong>
-                    <div style="font-size: 11px; color: #6c757d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${filename}</div>
-                </div>
-                <button type="button" 
-                        onclick="removeFile(${index})" 
-                        style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
-                    <i class="fas fa-times"></i> Hapus
-                </button>
-            `;
-            
-            filesList.appendChild(fileItem);
-        });
-    }
-
-    // Function untuk remove file
-    window.removeFile = function(index) {
-        uploadedFiles.splice(index, 1);
-        evidenInput.value = JSON.stringify(uploadedFiles);
-        updateFilesDisplay();
-        console.log("🗑️ File dihapus. Total file:", uploadedFiles.length);
-    };
-
-    // Inisialisasi Uploadcare Panel
-    const panel = uploadcare.openPanel('#eviden-panel', null, {
-        multiple: true,
-        previewStep: true,
-        tabs: "file url camera dropbox gdrive",
-        publicKey: "demopublickey"
     });
-
-    // Event ketika user selesai upload file
-    panel.done(function (fileGroup) {
-        console.log("✅ Upload selesai! File group:", fileGroup);
-        
-        // Proses semua file yang di-upload
-        fileGroup.files().forEach(filePromise => {
-            filePromise.done(fileInfo => {
-                console.log("📁 File info:", fileInfo);
-                
-                // Tambahkan URL ke array
-                uploadedFiles.push(fileInfo.cdnUrl);
-                
-                // Update hidden input dengan format JSON array
-                evidenInput.value = JSON.stringify(uploadedFiles);
-                
-                // Update display
-                updateFilesDisplay();
-                
-                console.log("💾 Eviden tersimpan:", evidenInput.value);
-                console.log("📊 Total files:", uploadedFiles.length);
-            });
-        });
-    });
-
-    // ========================================
-    // PERBAIKAN FORM SUBMIT
-    // ========================================
     
-    // Cegah submit default di tombol "Finish"
-    const nextBtn = document.querySelector('.next-btn');
-    const fieldsets = document.querySelectorAll('fieldset');
-    let currentStep = 0;
-
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function(e) {
+    // Next button validation (ini akan dihandle oleh multi-step form script yang sudah ada)
+    nextBtn.addEventListener("click", function (e) {
+        const uuidValue = uploader.value();
+        if (!uuidValue) {
             e.preventDefault();
             e.stopPropagation();
+            err.classList.add('show');
+            err.scrollIntoView({ behavior: 'smooth', block: 'center' });
             
-            const totalSteps = fieldsets.length;
-            
-            // Jika masih ada step berikutnya
-            if (currentStep < totalSteps - 1) {
-                fieldsets[currentStep].classList.remove('active');
-                currentStep++;
-                fieldsets[currentStep].classList.add('active');
-                
-                // Update progress bar
-                const percent = ((currentStep + 1) / totalSteps) * 100;
-                document.getElementById('progressBar').style.width = percent + '%';
-                document.getElementById('currentStep').textContent = currentStep + 1;
-                
-                // Toggle tombol back
-                document.querySelector('.prev-btn').style.display = currentStep > 0 ? 'inline-block' : 'none';
-                
-                // Update text tombol
-                nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
-            } 
-            // Jika sudah di step terakhir (Finish)
-            else {
-                console.log("🚀 Submitting form...");
-                console.log("📎 Final eviden value:", evidenInput.value);
-                
-                // Validasi: pastikan eviden tidak kosong jika wajib
-                if (uploadedFiles.length === 0) {
-                    alert("⚠️ Silakan upload minimal 1 file eviden!");
-                    return false;
-                }
-                
-                // Submit form
-                msform.submit();
-            }
-        });
-    }
-
-    // Tombol Back
-    const prevBtn = document.querySelector('.prev-btn');
-    if (prevBtn) {
-        prevBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            if (currentStep > 0) {
-                fieldsets[currentStep].classList.remove('active');
-                currentStep--;
-                fieldsets[currentStep].classList.add('active');
-                
-                // Update progress
-                const totalSteps = fieldsets.length;
-                const percent = ((currentStep + 1) / totalSteps) * 100;
-                document.getElementById('progressBar').style.width = percent + '%';
-                document.getElementById('currentStep').textContent = currentStep + 1;
-                
-                prevBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
-                nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
-            }
-        });
-    }
-});
-
-// ========================================
-// DEBUG HELPER - CEK ISI FORM SEBELUM SUBMIT
-// ========================================
-document.getElementById("msform").addEventListener("submit", function(e) {
-    const evidenValue = document.getElementById("eviden").value;
-    console.log("📤 Form akan di-submit dengan eviden:", evidenValue);
-    
-    // Cek apakah eviden kosong
-    try {
-        const parsed = JSON.parse(evidenValue);
-        if (!Array.isArray(parsed) || parsed.length === 0) {
-            console.warn("⚠️ WARNING: Eviden kosong!");
-        } else {
-            console.log("✅ Eviden berisi", parsed.length, "file(s)");
+            // Auto hide error after 5 seconds
+            setTimeout(function() {
+                err.classList.remove('show');
+            }, 5000);
+            return false;
         }
-    } catch (err) {
-        console.error("❌ ERROR: Format eviden tidak valid!", err);
-    }
+        err.classList.remove('show');
+        // Biarkan multi-step form script menangani navigasi ke step berikutnya atau submit
+    });
 });
 </script>
-
-<style>
-/* Styling untuk uploaded files display */
-#uploaded-files-display {
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-#files-list > div:hover {
-    background: #f8f9fa !important;
-    border-color: #8E44AD !important;
-}
-
-#files-list button:hover {
-    background: #c82333 !important;
-    transform: scale(1.05);
-}
-</style>
+</div>
 </form>
 </section>
 </main>
