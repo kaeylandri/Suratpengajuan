@@ -24,12 +24,12 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         
-        // Filter search
+        // Filter search - GANTI nama_dosen menjadi nip
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('nama_dosen', $search);
+            $this->db->or_like('nip', $search);
             $this->db->group_end();
         }
 
@@ -129,12 +129,12 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
 
-        // Filter search
+        // Filter search - GANTI nama_dosen menjadi nip
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('nama_dosen', $search);
+            $this->db->or_like('nip', $search);
             $this->db->group_end();
         }
 
@@ -166,7 +166,7 @@ class Dekan extends CI_Controller
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('nama_dosen', $search);
+            $this->db->or_like('nip', $search);
             $this->db->group_end();
         }
         
@@ -213,12 +213,12 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where('status', 'disetujui dekan');
 
-        // Filter search
+        // Filter search - GANTI nama_dosen menjadi nip
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('nama_dosen', $search);
+            $this->db->or_like('nip', $search);
             $this->db->group_end();
         }
 
@@ -258,12 +258,12 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where('status', 'ditolak dekan');
 
-        // Filter search
+        // Filter search - GANTI nama_dosen menjadi nip
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('nama_dosen', $search);
+            $this->db->or_like('nip', $search);
             $this->db->group_end();
         }
 
@@ -303,12 +303,12 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where('status', 'disetujui sekretariat');
 
-        // Filter search
+        // Filter search - GANTI nama_dosen menjadi nip
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('nama_dosen', $search);
+            $this->db->or_like('nip', $search);
             $this->db->group_end();
         }
 

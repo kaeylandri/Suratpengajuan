@@ -1682,21 +1682,6 @@ document.addEventListener('DOMContentLoaded', function () {
     margin-bottom: 25px;
 }
 
-/* Uploadcare button customization */
-.uploadcare--widget__button,
-.ucare-widget__button {
-    background: #FB8C00 !important;
-    border-radius: 12px !important;
-    font-size: 14px !important;
-    padding: 11px 20px !important;
-    font-weight: 600;
-    transition: 0.25s ease;
-}
-
-.uploadcare--widget__button:hover {
-    background: #e07000 !important;
-}
-
 /* Error text */
 #chk-error {
     color: #e53935;
@@ -1770,17 +1755,45 @@ document.addEventListener('DOMContentLoaded', function () {
     font-size: 14px;
     color: #666;
 }
+
+/* Hide Uploadcare default button */
+.uploadcare--widget,
+.uploadcare--widget__button,
+.uploadcare--widget__button_type_open {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Drag & Drop styling */
+#imagePreviewBox.drag-over {
+    background: #e3f2fd !important;
+    border-color: #ff9800 !important;
+    border-width: 3px !important;
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(255, 152, 0, 0.3);
+}
+
+#imagePreviewBox {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+#imagePreviewBox:hover {
+    border-color: #bbb !important;
+}
 </style>
 
 <!-- ===== STEP 3 ===== -->
 <fieldset>
-    <div class="container" style="min-height: 270px; display: flex; justify-content: center;">
-        <div class="upload-card">
-            <div class="upload-title">Upload File Eviden</div>
-            <div class="upload-desc">
-                Unggah foto atau dokumen pendukung. Anda dapat memilih lebih dari satu file.
-            </div>
-
+    <div class="container" style="min-height: 400px; display: flex; justify-content: center; align-items: center; padding: 20px;">
+        <div class="upload-card" style="max-width: 550px; width: 100%;">
+            
+            <!-- Hidden Uploadcare Input -->
             <input 
                 type="hidden"
                 name="eviden"
@@ -1794,13 +1807,59 @@ document.addEventListener('DOMContentLoaded', function () {
                 data-images-only="false"
                 data-tabs="file url camera dropbox gdrive"
                 data-multiple-upload="true"
+                style="display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; width: 0 !important; height: 0 !important;"
             />
 
-            <div id="upload-status" class="upload-success-message" style="display: none;">
+            <!-- Custom Choose Files Button -->
+            <button 
+                type="button" 
+                id="chooseFilesBtn"
+                style="padding: 12px 28px; background: linear-gradient(90deg, #ff9800 0%, #ff6f00 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3); margin-bottom: 15px;"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(255,152,0,0.4)';"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(255, 152, 0, 0.3)';"
+            >
+                Choose files
+            </button>
+
+            <!-- Label -->
+            <div style="font-size: 14px; color: #666; margin-bottom: 12px;">
+                Pilih File atau Gambar
+            </div>
+
+            <!-- File Name Display -->
+            <div style="margin-bottom: 20px;">
+                <input 
+                    type="text" 
+                    id="fileDisplay" 
+                    readonly 
+                    placeholder="No file chosen"
+                    style="width: 100%; padding: 12px 16px; border: 1.5px solid #ddd; border-radius: 8px; background: #fff; font-size: 14px; color: #999; box-sizing: border-box;"
+                />
+            </div>
+
+            <!-- Image Preview Area with Drag & Drop -->
+            <div id="imagePreviewBox" style="width: 100%; min-height: 220px; background: #f5f5f5; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 30px; box-sizing: border-box; position: relative;">
+                <div id="placeholderIcon" style="text-align: center; pointer-events: none;">
+                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <div style="font-size: 14px; color: #999; line-height: 1.6;">
+                        <strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>
+                        atau klik tombol di atas
+                    </div>
+                </div>
+                <img id="previewImage" src="" style="display: none; max-width: 100%; max-height: 220px; border-radius: 8px; pointer-events: none;" />
+            </div>
+
+            <!-- Success Message -->
+            <div id="upload-status" style="display: none; margin-top: 15px; text-align: center; color: #4caf50; font-size: 14px;">
                 <i class="fas fa-check-circle"></i> File berhasil diupload!
             </div>
 
-            <span id="chk-error"></span>
+            <!-- Error Message -->
+            <span id="chk-error" style="display: block; margin-top: 10px; color: #e53935; font-size: 13px; text-align: center;"></span>
         </div>
     </div>
 </fieldset>
@@ -1820,12 +1879,17 @@ document.addEventListener('DOMContentLoaded', function () {
     <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Continue</button>
 </div>
 
-<!-- ===== SCRIPT VALIDASI DAN SUBMIT - AUTO OPEN VERSION ===== -->
+<!-- ===== SCRIPT VALIDASI DAN SUBMIT WITH DRAG & DROP ===== -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const nextBtn = document.querySelector(".next-btn");
     const prevBtn = document.querySelector(".prev-btn");
     const uploader = document.querySelector("#evidenUploader");
+    const chooseFilesBtn = document.getElementById("chooseFilesBtn");
+    const fileDisplay = document.getElementById("fileDisplay");
+    const imagePreviewBox = document.getElementById("imagePreviewBox");
+    const placeholderIcon = document.getElementById("placeholderIcon");
+    const previewImage = document.getElementById("previewImage");
     const err = document.getElementById("chk-error");
     const uploadStatus = document.getElementById("upload-status");
     const uploadCard = document.querySelector('.upload-card');
@@ -1839,7 +1903,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     console.log("Step 3 script initialized");
 
-    // Listen for upload completion from Uploadcare
+    // Initialize Uploadcare Widget
     if (typeof uploadcare !== 'undefined') {
         widget = uploadcare.Widget('[role="uploadcare-uploader"]');
         
@@ -1849,11 +1913,35 @@ document.addEventListener("DOMContentLoaded", function () {
                 uploadStatus.style.display = 'block';
                 uploadCard.classList.add('upload-success');
                 err.textContent = '';
-                console.log("File uploaded successfully");
+                
+                file.done(function(info) {
+                    console.log("File uploaded successfully:", info);
+                    
+                    // Update file display
+                    if (info.count) {
+                        fileDisplay.value = info.count + " file(s) selected";
+                    } else {
+                        fileDisplay.value = info.name || "File uploaded";
+                    }
+                    
+                    // Show image preview if it's an image
+                    if (info.isImage) {
+                        placeholderIcon.style.display = 'none';
+                        previewImage.style.display = 'block';
+                        previewImage.src = info.cdnUrl + '-/preview/400x400/';
+                    } else {
+                        // Show file icon for non-images
+                        placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" style="pointer-events: none;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><div style="font-size: 14px; color: #4caf50; margin-top: 10px;">File berhasil dipilih</div>';
+                    }
+                });
             } else {
                 isFileUploaded = false;
                 uploadStatus.style.display = 'none';
                 uploadCard.classList.remove('upload-success');
+                fileDisplay.value = '';
+                previewImage.style.display = 'none';
+                placeholderIcon.style.display = 'block';
+                placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><div style="font-size: 14px; color: #999; line-height: 1.6;"><strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>atau klik tombol di atas</div>';
                 console.log("File upload cleared");
             }
         });
@@ -1866,7 +1954,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.log("Step 3 is now active, opening upload dialog...");
                     dialogOpened = true;
                     
-                    // Delay sedikit untuk memastikan UI sudah render
                     setTimeout(function() {
                         if (widget) {
                             widget.openDialog();
@@ -1877,7 +1964,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        // Observe perubahan class pada fieldset
         const fieldsets = document.querySelectorAll('fieldset');
         fieldsets.forEach(function(fieldset) {
             observer.observe(fieldset, {
@@ -1890,6 +1976,144 @@ document.addEventListener("DOMContentLoaded", function () {
         console.warn("Uploadcare not loaded");
     }
 
+    // Click on Choose Files button
+    chooseFilesBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (widget) {
+            widget.openDialog();
+        }
+    });
+
+    // Click on preview box to open dialog
+    imagePreviewBox.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (widget && placeholderIcon.style.display !== 'none') {
+            widget.openDialog();
+        }
+    });
+
+    // ========== DRAG & DROP FUNCTIONALITY ==========
+    
+    // Prevent default drag behaviors on entire document
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        document.body.addEventListener(eventName, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+
+    // Highlight drop zone when item is dragged over
+    ['dragenter', 'dragover'].forEach(eventName => {
+        imagePreviewBox.addEventListener(eventName, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            imagePreviewBox.classList.add('drag-over');
+        }, false);
+    });
+
+    // Remove highlight when item leaves or is dropped
+    ['dragleave', 'drop'].forEach(eventName => {
+        imagePreviewBox.addEventListener(eventName, function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            imagePreviewBox.classList.remove('drag-over');
+        }, false);
+    });
+
+    // Handle dropped files
+    imagePreviewBox.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files && files.length > 0) {
+            console.log("Files dropped:", files.length, "file(s)");
+            handleDroppedFiles(files);
+        }
+    }, false);
+
+    // Function to handle dropped files and upload via Uploadcare
+    function handleDroppedFiles(files) {
+        const filesArray = Array.from(files);
+        console.log("Processing dropped files:", filesArray);
+        
+        if (filesArray.length === 0) {
+            console.warn("No files to process");
+            return;
+        }
+
+        // Show loading state
+        placeholderIcon.innerHTML = '<svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><div style="font-size: 14px; color: #ff9800; margin-top: 10px;">Mengupload file...</div>';
+        
+        // Upload via Uploadcare
+        if (widget && typeof uploadcare !== 'undefined') {
+            try {
+                // Upload single file or multiple files
+                if (filesArray.length === 1) {
+                    const uploadedFile = uploadcare.fileFrom('object', filesArray[0]);
+                    
+                    uploadedFile.done(function(fileInfo) {
+                        console.log("File uploaded via drag & drop:", fileInfo);
+                        
+                        // Set value to widget
+                        widget.value(fileInfo.uuid);
+                        
+                        // Update UI
+                        isFileUploaded = true;
+                        uploadStatus.style.display = 'block';
+                        uploadCard.classList.add('upload-success');
+                        err.textContent = '';
+                        fileDisplay.value = filesArray[0].name;
+                        
+                        // Show preview
+                        if (filesArray[0].type.startsWith('image/')) {
+                            placeholderIcon.style.display = 'none';
+                            previewImage.style.display = 'block';
+                            previewImage.src = fileInfo.cdnUrl + '-/preview/400x400/';
+                        } else {
+                            placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" style="pointer-events: none;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><div style="font-size: 14px; color: #4caf50; margin-top: 10px;">File berhasil diupload</div>';
+                        }
+                    }).fail(function(error) {
+                        console.error("Upload failed:", error);
+                        err.textContent = "Gagal mengupload file. Silakan coba lagi.";
+                        placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><div style="font-size: 14px; color: #999; line-height: 1.6;"><strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>atau klik tombol di atas</div>';
+                    });
+                } else {
+                    // Multiple files - create group
+                    const filePromises = filesArray.map(file => uploadcare.fileFrom('object', file));
+                    const group = uploadcare.loadFileGroup(filePromises);
+                    
+                    group.done(function(groupInfo) {
+                        console.log("Files uploaded via drag & drop:", groupInfo);
+                        
+                        // Set value to widget
+                        widget.value(groupInfo.uuid);
+                        
+                        // Update UI
+                        isFileUploaded = true;
+                        uploadStatus.style.display = 'block';
+                        uploadCard.classList.add('upload-success');
+                        err.textContent = '';
+                        fileDisplay.value = filesArray.length + " file(s) uploaded";
+                        
+                        // Show multiple files icon
+                        placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" style="pointer-events: none;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline><path d="M14 2v6h6"></path></svg><div style="font-size: 14px; color: #4caf50; margin-top: 10px;">' + filesArray.length + ' file(s) berhasil diupload</div>';
+                    }).fail(function(error) {
+                        console.error("Upload failed:", error);
+                        err.textContent = "Gagal mengupload file. Silakan coba lagi.";
+                        placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><div style="font-size: 14px; color: #999; line-height: 1.6;"><strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>atau klik tombol di atas</div>';
+                    });
+                }
+            } catch (error) {
+                console.error("Error processing files:", error);
+                err.textContent = "Terjadi kesalahan saat memproses file.";
+                placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><div style="font-size: 14px; color: #999; line-height: 1.6;"><strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>atau klik tombol di atas</div>';
+            }
+        }
+    }
+
     // Function untuk submit form via AJAX
     function submitFormData() {
         return new Promise((resolve, reject) => {
@@ -1900,7 +2124,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log(key + ': ' + value);
             }
             
-            // Gunakan base_url CodeIgniter untuk submit
             const actionUrl = '<?= base_url("surat/submit") ?>';
             console.log("Submitting to:", actionUrl);
             
@@ -1928,7 +2151,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Handler untuk tombol Finish di Step 3
+    // Handler untuk tombol Continue di Step 3
     nextBtn.addEventListener("click", function (e) {
         const currentFieldset = document.querySelector('fieldset.active');
         const allFieldsets = document.querySelectorAll('fieldset');
@@ -1936,20 +2159,17 @@ document.addEventListener("DOMContentLoaded", function () {
         
         console.log("Next button clicked, current step index:", currentStepIndex);
         
-        // Jika bukan step 3 (index 2), return dan biarkan multi-step handler yang proses
         if (currentStepIndex !== 2) {
             console.log("Not step 3, skipping custom handler");
             return;
         }
         
-        // Di step 3, prevent default dan handle sendiri
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
         
         console.log("Step 3 detected, processing...");
         
-        // Prevent double submit
         if (isSubmitting) {
             console.log("Already submitting, please wait...");
             return false;
@@ -1967,33 +2187,25 @@ document.addEventListener("DOMContentLoaded", function () {
             return false;
         }
 
-        // Validasi berhasil
         err.textContent = "";
         uploadCard.style.borderColor = "#28a745";
         console.log("Validation passed");
         
-        // Set flag submitting
         isSubmitting = true;
-        
-        // Tampilkan loading overlay
         loadingOverlay.classList.add('active');
         
-        // Disable button
         nextBtn.disabled = true;
         nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         
         console.log("=== MEMULAI PROSES SUBMIT ===");
         
-        // Submit data via AJAX
         submitFormData()
             .then(response => {
                 console.log("Submit berhasil!", response);
                 
-                // Update loading text
                 document.querySelector('.loading-text').textContent = 'Berhasil!';
                 document.querySelector('.loading-subtext').textContent = 'Mengalihkan ke halaman daftar...';
                 
-                // Redirect setelah 1.5 detik untuk memastikan data tersimpan
                 setTimeout(() => {
                     console.log("Redirecting to list_surat_tugas");
                     window.location.href = '<?= base_url("surat/list_surat_tugas") ?>';
@@ -2002,15 +2214,12 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => {
                 console.error("Submit gagal:", error);
                 
-                // Sembunyikan loading
                 loadingOverlay.classList.remove('active');
                 
-                // Enable button kembali
                 isSubmitting = false;
                 nextBtn.disabled = false;
-                nextBtn.innerHTML = 'Finish';
+                nextBtn.innerHTML = 'Continue';
                 
-                // Tampilkan error
                 alert('Gagal menyimpan data: ' + error.message + '\nSilakan coba lagi.');
             });
         
@@ -2026,6 +2235,7 @@ document.addEventListener("DOMContentLoaded", function () {
             isFileUploaded = true;
             uploadStatus.style.display = 'block';
             uploadCard.classList.add('upload-success');
+            fileDisplay.value = "File uploaded";
             console.log("Found existing upload");
         }
     }
@@ -2033,7 +2243,6 @@ document.addEventListener("DOMContentLoaded", function () {
     setTimeout(checkInitialUpload, 1500);
 });
 </script>
-
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 

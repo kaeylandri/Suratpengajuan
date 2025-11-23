@@ -106,11 +106,18 @@ $route['dekan/list_surat_tugas'] = 'dekan/list_surat_tugas';
 $route['dekan/filter/(:any)'] = 'dekan/filter/$1';
 $route['dekan/test'] = 'dekan/test';
 
-// Kaprodi routes
+// Kaprodi routes - UPDATED WITH MISSING ROUTES
 $route['kaprodi'] = 'kaprodi/index';
 $route['kaprodi/dashboard'] = 'kaprodi/index';
+$route['kaprodi/index'] = 'kaprodi/index';
+$route['kaprodi/semua'] = 'kaprodi/semua';
+$route['kaprodi/disetujui'] = 'kaprodi/disetujui';
+$route['kaprodi/ditolak'] = 'kaprodi/ditolak';
+$route['kaprodi/pending'] = 'kaprodi/pending';
+$route['kaprodi/rejected'] = 'kaprodi/rejected';
 $route['kaprodi/approve/(:num)'] = 'kaprodi/approve/$1';
 $route['kaprodi/reject/(:num)'] = 'kaprodi/reject/$1';
+$route['kaprodi/getDetailPengajuan/(:num)'] = 'kaprodi/getDetailPengajuan/$1';
 
 // Sekretariat routes
 $route['sekretariat'] = 'sekretariat/index';

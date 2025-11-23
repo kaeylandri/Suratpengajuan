@@ -36,22 +36,44 @@
     .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d}
     .filter-select{padding:12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white;color:#495057;min-width:180px;cursor:pointer;transition:all 0.3s}
     .filter-select:focus{outline:none;border-color:#8E44AD;box-shadow:0 0 0 2px rgba(142,68,173,0.1)}
-    .btn-primary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#8E44AD;color:#fff}
+    .btn-primary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#8E44AD;color:#fff;text-decoration:none}
     .btn-primary:hover{background:#7d3c98;transform:translateY(-2px)}
-    .btn-secondary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff}
+    .btn-secondary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff;text-decoration:none}
     .btn-secondary:hover{background:#7f8c8d}
-    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
-    .modal.show{display:flex}
-    .modal-content{background:white;padding:20px;border-radius:10px;max-width:800px;width:95%;max-height:85vh;overflow:auto;animation:slideIn 0.3s ease}
-    @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px}
-    .detail-row{display:grid;grid-template-columns:200px 1fr;padding:8px 0;border-bottom:1px solid #f4f6f7}
-    .detail-label{font-weight:700;color:#7f8c8d}
-    .detail-value{color:#2c3e50}
     .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
     .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#3498db;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
     .back-btn:hover{background:#2980b9;transform:translateY(-2px)}
-    .debug-info{background:#fff3cd;border-left:4px solid #ffc107;padding:15px;margin-bottom:15px;border-radius:4px;font-size:14px}
+    
+    /* Modal Styles */
+    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
+    .modal.show{display:flex}
+    .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .modal-header{background:#8E44AD;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
+    .modal-header h3{margin:0;font-size:18px;font-weight:600}
+    .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
+    .close-modal:hover{background:rgba(255,255,255,0.2)}
+    
+    /* Detail Content Styles */
+    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
+    .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
+    .detail-section:last-child{margin-bottom:0}
+    .detail-section-title{font-size:16px;font-weight:700;color:#8E44AD;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #8E44AD;display:flex;align-items:center;gap:10px}
+    .detail-section-title i{font-size:18px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
+    .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
+    .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
+    
+    /* Responsive */
+    @media (max-width:768px){
+        .detail-grid{grid-template-columns:1fr}
+        .modal-content{width:95%;margin:10px}
+        .detail-content{padding:15px}
+        .search-filter-container{flex-direction:column}
+        .search-box{width:100%;min-width:100%}
+        .filter-select{width:100%}
+    }
 </style>
 </head>
 <body>
@@ -72,71 +94,45 @@
         <div style="color:#155724;font-weight:700"><?php echo $this->session->flashdata('success'); ?></div>
     </div>
     <?php endif; ?>
-    <?php if($this->session->flashdata('error')): ?>
-    <div class="card" style="border-left:4px solid #e74c3c;margin-bottom:18px">
-        <div style="color:#721c24;font-weight:700"><?php echo $this->session->flashdata('error'); ?></div>
-    </div>
-    <?php endif; ?>
-
-    <!-- Debug Info -->
-    <div class="debug-info">
-        <strong>Debug Info:</strong> 
-        Total Data: <?= isset($total_surat) ? $total_surat : '0' ?> | 
-        Jumlah Data: <?= isset($surat_list) ? count($surat_list) : '0' ?> |
-        Search: "<?= $this->input->get('search') ?>" |
-        Status: "<?= $this->input->get('status') ?>"
-    </div>
 
     <!-- Tabel Total Pengajuan -->
     <div class="card">
         <div class="card-header">
             <h3><i class="fa-solid fa-table"></i> Total Pengajuan Surat</h3>
             <div>
-                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">
-                    Menampilkan: 
-                    <?php 
-                    $filter_info = "Semua Data";
-                    if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
-                    if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
-                    if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-                    echo $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
-                    ?>
+                <span style="color:#7f8c8d;font-size:13px">
+                    Total: <?= isset($total_surat) ? $total_surat : '0' ?> data
                 </span>
             </div>
         </div>
         
         <!-- Search + Filter -->
-        <form method="get" action="<?= base_url('surat/semua') ?>">
-            <div class="search-filter-container">
-                <div class="search-box">
-                    <input 
-                        type="text" 
-                        name="search" 
-                        class="search-input"
-                        placeholder="Search global..."
-                        value="<?= $this->input->get('search') ?>"
-                    >
-                    <div class="search-icon">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </div>
+        <div class="search-filter-container">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    class="search-input"
+                    placeholder="Cari berdasarkan nama kegiatan, penyelenggara, atau jenis pengajuan..."
+                    value=""
+                    autocomplete="off"
+                >
+                <div class="search-icon">
+                    <i class="fa-solid fa-magnifying-glass"></i>
                 </div>
-                
-                <select name="status" class="filter-select">
-                    <option value="">Status</option>
-                    <option value="pending" <?= ($this->input->get('status')=='pending') ? 'selected' : '' ?>>Menunggu</option>
-                    <option value="approved" <?= ($this->input->get('status')=='approved') ? 'selected' : '' ?>>Disetujui</option>
-                    <option value="rejected" <?= ($this->input->get('status')=='rejected') ? 'selected' : '' ?>>Ditolak</option>
-                </select>
-                
-                <button type="submit" class="btn-primary" style="white-space:nowrap">
-                    <i class="fa-solid fa-filter"></i> Terapkan
-                </button>
-                
-                <a href="<?= base_url('surat/semua') ?>" class="btn-secondary" style="white-space:nowrap">
-                    <i class="fa-solid fa-refresh"></i> Reset
-                </a>
             </div>
-        </form>
+            
+            <select id="statusSelect" class="filter-select">
+                <option value="">Semua Status</option>
+                <option value="pending">Menunggu</option>
+                <option value="approved">Disetujui</option>
+                <option value="rejected">Ditolak</option>
+            </select>
+            
+            <button type="button" onclick="resetFilter()" class="btn-secondary">
+                <i class="fa-solid fa-refresh"></i> Reset
+            </button>
+        </div>
         
         <div style="overflow-x:auto">
             <table>
@@ -174,7 +170,7 @@
                             $tgl_pengajuan = isset($s->created_at) && $s->created_at? date('d M Y', strtotime($s->created_at)) : '-';
                             $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
                     ?>
-                    <tr data-status="<?= $st_key ?>">
+                    <tr data-status="<?= $st_key ?>" data-nama="<?= strtolower(htmlspecialchars($s->nama_kegiatan ?? '')) ?>" data-penyelenggara="<?= strtolower(htmlspecialchars($s->penyelenggara ?? '')) ?>" data-jenis="<?= strtolower(htmlspecialchars($s->jenis_pengajuan ?? '')) ?>">
                         <td><?= $no++ ?></td>
                         <td><strong><?= htmlspecialchars($s->nama_kegiatan ?? '-') ?></strong></td>
                         <td><?= htmlspecialchars($s->penyelenggara ?? '-') ?></td>
@@ -187,12 +183,14 @@
                                 <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?? 0 ?>)" title="Lihat Detail">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
-                                <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?? 0 ?>)" title="Setujui">
-                                    <i class="fa-solid fa-check"></i>
-                                </button>
-                                <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?? 0 ?>)" title="Tolak">
-                                    <i class="fa-solid fa-times"></i>
-                                </button>
+                                <?php if(($s->status ?? '') == 'pengajuan'): ?>
+                                    <button class="btn btn-approve" onclick="approveSurat(<?= $s->id ?? 0 ?>)" title="Setujui">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?? 0 ?>)" title="Tolak">
+                                        <i class="fa-solid fa-times"></i>
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
@@ -200,15 +198,7 @@
                     <tr>
                         <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
                             <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
-                            <strong>
-                                <?php if(!isset($surat_list)): ?>
-                                    Variabel $surat_list tidak terdefinisi
-                                <?php elseif(empty($surat_list)): ?>
-                                    Tidak ada data yang sesuai dengan filter
-                                <?php else: ?>
-                                    Data tidak valid
-                                <?php endif; ?>
-                            </strong>
+                            <strong>Tidak ada data pengajuan</strong>
                         </td>
                     </tr>
                     <?php endif; ?>
@@ -216,38 +206,33 @@
             </table>
         </div>
 
-        <div class="pagination-info">
-            Menampilkan: 
-            <?php 
-            $filter_info = "Semua Data";
-            if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
-            if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
-            if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-            echo $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
-            ?>
+        <div class="pagination-info" id="paginationInfo">
+            Menampilkan: Semua Data (<?= isset($total_surat) ? $total_surat : '0' ?> data)
         </div>
     </div>
 </div>
 
 <!-- Detail Modal -->
-<div id="detailModal" class="modal">
-    <div class="modal-content">
+<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan</h3>
-            <button onclick="closeModal('detailModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
+            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
+            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
         </div>
-        <div id="detailContent"></div>
+        <div class="detail-content" id="detailContent">
+            <!-- Content akan diisi oleh JavaScript -->
+        </div>
     </div>
 </div>
 
 <!-- Reject Modal -->
-<div id="rejectModal" class="modal">
-    <div class="modal-content">
+<div id="rejectModal" class="modal" onclick="modalClickOutside(event,'rejectModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-ban"></i> Tolak Pengajuan</h3>
-            <button onclick="closeModal('rejectModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
+            <button class="close-modal" onclick="closeModal('rejectModal')">&times;</button>
         </div>
-        <div>
+        <div style="padding:25px">
             <p style="margin-bottom:10px;color:#7f8c8d">Berikan alasan penolakan:</p>
             <textarea id="rejectionNotes" rows="5" placeholder="Masukkan alasan penolakan..." style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-family:inherit;resize:vertical"></textarea>
             <div style="text-align:right;margin-top:12px">
@@ -262,7 +247,101 @@
 <script>
 const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
+let allRows = [];
 
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    allRows = Array.from(document.querySelectorAll('#tableBody tr[data-status]'));
+    
+    const searchInput = document.getElementById('searchInput');
+    const statusSelect = document.getElementById('statusSelect');
+    
+    // Search input dengan debounce
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(filterTable, 300);
+    });
+    
+    // Status filter
+    statusSelect.addEventListener('change', filterTable);
+});
+
+function filterTable() {
+    const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
+    const statusValue = document.getElementById('statusSelect').value;
+    
+    let visibleCount = 0;
+    let rowNumber = 1;
+    
+    allRows.forEach(row => {
+        const rowStatus = row.getAttribute('data-status');
+        const rowNama = row.getAttribute('data-nama');
+        const rowPenyelenggara = row.getAttribute('data-penyelenggara');
+        const rowJenis = row.getAttribute('data-jenis');
+        
+        // Check status filter
+        const statusMatch = !statusValue || rowStatus === statusValue;
+        
+        // Check search filter
+        const searchMatch = !searchValue || 
+            rowNama.includes(searchValue) || 
+            rowPenyelenggara.includes(searchValue) || 
+            rowJenis.includes(searchValue);
+        
+        if (statusMatch && searchMatch) {
+            row.style.display = '';
+            row.cells[0].textContent = rowNumber++;
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Update pagination info
+    updatePaginationInfo(visibleCount, searchValue, statusValue);
+    
+    // Show/hide empty message
+    showEmptyMessage(visibleCount === 0);
+}
+
+function updatePaginationInfo(count, search, status) {
+    let filterInfo = 'Semua Data';
+    if (status === 'pending') filterInfo = 'Menunggu';
+    if (status === 'approved') filterInfo = 'Disetujui';
+    if (status === 'rejected') filterInfo = 'Ditolak';
+    
+    let searchInfo = search ? ` (Hasil pencarian: "${search}")` : '';
+    
+    document.getElementById('paginationInfo').textContent = 
+        `Menampilkan: ${filterInfo} (${count} data)${searchInfo}`;
+}
+
+function showEmptyMessage(show) {
+    const tbody = document.getElementById('tableBody');
+    let emptyRow = tbody.querySelector('.empty-message-row');
+    
+    if (show && !emptyRow) {
+        emptyRow = tbody.insertRow(0);
+        emptyRow.className = 'empty-message-row';
+        const cell = emptyRow.insertCell(0);
+        cell.colSpan = 8;
+        cell.style.textAlign = 'center';
+        cell.style.padding = '40px';
+        cell.style.color = '#7f8c8d';
+        cell.innerHTML = '<i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i><strong>Tidak ada data yang sesuai dengan filter</strong>';
+    } else if (!show && emptyRow) {
+        emptyRow.remove();
+    }
+}
+
+function resetFilter() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusSelect').value = '';
+    filterTable();
+}
+
+// Modal functions
 function showDetail(id) {
     const item = suratList.find(s => Number(s.id) === Number(id));
     if (!item) { 
@@ -270,47 +349,103 @@ function showDetail(id) {
         return; 
     }
     
+    const formatDate = (dateStr) => {
+        if (!dateStr || dateStr === '-' || dateStr === '0000-00-00') return '-';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+    };
+    
+    const escapeHtml = (unsafe) => {
+        if (unsafe === null || unsafe === undefined) return '-';
+        return String(unsafe)
+           .replace(/&/g, "&amp;")
+           .replace(/</g, "&lt;")
+           .replace(/>/g, "&gt;")
+           .replace(/"/g, "&quot;")
+           .replace(/'/g, "&#039;");
+    };
+    
+    const getVal = (k) => (item[k] !== undefined && item[k] !== null ? item[k] : '-');
+    
+    const status = getVal('status');
+    let statusBadge = '';
+    if (status.toLowerCase().includes('ditolak')) {
+        statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak</span>';
+    } else if (status.toLowerCase().includes('disetujui')) {
+        statusBadge = '<span class="badge badge-approved" style="margin-left:10px">Disetujui</span>';
+    } else {
+        statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
+    }
+
     const content = `
-        <div>
-            <div class="detail-row">
-                <div class="detail-label">Nama Kegiatan:</div>
-                <div class="detail-value">${item.nama_kegiatan || '-'}</div>
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-info-circle"></i> Informasi Utama
             </div>
-            <div class="detail-row">
-                <div class="detail-label">Penyelenggara:</div>
-                <div class="detail-value">${item.penyelenggara || '-'}</div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">NAMA KEGIATAN</div>
+                    <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">JENIS PENGAJUAN</div>
+                    <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">STATUS PENGAJUAN</div>
+                    <div class="detail-value" style="display:flex;align-items:center">
+                        ${escapeHtml(status)} ${statusBadge}
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">NIP</div>
+                    <div class="detail-value">${escapeHtml(getVal('nip'))}</div>
+                </div>
             </div>
-            <div class="detail-row">
-                <div class="detail-label">Jenis Pengajuan:</div>
-                <div class="detail-value">${item.jenis_pengajuan || '-'}</div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
             </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Pengajuan:</div>
-                <div class="detail-value">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</div>
-                <div class="detail-value">${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : '-'}</div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">TANGGAL PENGAJUAN</div>
+                    <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">TANGGAL KEGIATAN</div>
+                    <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">PENYELENGGARA</div>
+                    <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">TEMPAT KEGIATAN</div>
+                    <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan') || '-')}</div>
+                </div>
             </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Kegiatan:</div>
-                <div class="detail-value">${item.tanggal_kegiatan ? new Date(item.tanggal_kegiatan).toLocaleDateString('id-ID') : '-'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Status:</div>
-                <div class="detail-value">${item.status || '-'}</div>
-            </div>
-        </div>`;
+        </div>
+    `;
+    
     document.getElementById('detailContent').innerHTML = content;
     document.getElementById('detailModal').classList.add('show');
-}
-
-function approveSurat(id) {
-    if (!confirm('Apakah Anda yakin ingin menyetujui pengajuan ini?')) return;
-    window.location.href = '<?= base_url("surat/setujui/") ?>' + id;
 }
 
 function showRejectModal(id) {
     currentRejectId = id;
     document.getElementById('rejectionNotes').value = '';
     document.getElementById('rejectModal').classList.add('show');
+}
+
+function approveSurat(id) {
+    if (!confirm('Apakah Anda yakin ingin menyetujui pengajuan ini?')) return;
+    window.location.href = '<?= base_url("kaprodi/approve/") ?>' + id;
 }
 
 function confirmReject() {
@@ -322,10 +457,10 @@ function confirmReject() {
     
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = '<?= base_url("surat/tolak/") ?>' + currentRejectId;
+    form.action = '<?= base_url("kaprodi/reject/") ?>' + currentRejectId;
     
     const inpNotes = document.createElement('input');
-    inpNotes.type='hidden'; inpNotes.name='alasan_penolakan'; inpNotes.value=notes;
+    inpNotes.type='hidden'; inpNotes.name='rejection_notes'; inpNotes.value=notes;
     form.appendChild(inpNotes);
     
     document.body.appendChild(form);
@@ -336,22 +471,9 @@ function closeModal(id) {
     document.getElementById(id).classList.remove('show'); 
 }
 
-// Close modal ketika klik di luar
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal')) {
-        e.target.classList.remove('show');
-    }
-});
-
-// Auto submit saat memilih filter
-document.addEventListener('DOMContentLoaded', function() {
-    const filterSelects = document.querySelectorAll('.filter-select');
-    filterSelects.forEach(select => {
-        select.addEventListener('change', function() {
-            this.form.submit();
-        });
-    });
-});
+function modalClickOutside(evt, id) { 
+    if (evt.target && evt.target.id === id) closeModal(id); 
+}
 </script>
 </body>
 </html>

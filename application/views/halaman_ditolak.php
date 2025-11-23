@@ -31,25 +31,82 @@
     .status-icon.rejected{background:#f8d7da;color:#e74c3c}
     .status-info h1{margin:0;color:#2c3e50;font-size:28px}
     .status-info p{margin:5px 0 0 0;color:#7f8c8d;font-size:16px}
+    
+    /* Modal Styles */
     .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
     .modal.show{display:flex}
-    .modal-content{background:white;padding:20px;border-radius:10px;max-width:800px;width:95%;max-height:85vh;overflow:auto;animation:slideIn 0.3s ease}
+    .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px}
-    .detail-row{display:grid;grid-template-columns:200px 1fr;padding:8px 0;border-bottom:1px solid #f4f6f7}
-    .detail-label{font-weight:700;color:#7f8c8d}
-    .detail-value{color:#2c3e50}
-    /* Search Box Styles */
-    .search-container{margin-bottom:20px}
-    .search-label{display:block;margin-bottom:8px;color:#6c757d;font-size:14px;font-weight:500}
-    .search-box{display:flex;gap:10px;align-items:center;width:100%}
-    .search-input-wrapper{position:relative;flex:1}
-    .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #e9ecef;border-radius:8px;font-size:14px;transition:all 0.3s;background:white;color:#495057}
-    .search-input:focus{outline:none;border-color:#8E44AD;box-shadow:0 0 0 2px rgba(142,68,173,0.1)}
-    .search-input::placeholder{color:#6c757d}
-    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d;font-size:16px}
-    .btn-cari{padding:12px 24px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#6c757d;color:#fff;white-space:nowrap}
-    .btn-cari:hover{background:#5a6268;transform:translateY(-1px)}
+    .modal-header{background:#8E44AD;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
+    .modal-header h3{margin:0;font-size:18px;font-weight:600}
+    .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
+    .close-modal:hover{background:rgba(255,255,255,0.2)}
+    
+    /* Detail Content Styles */
+    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
+    .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
+    .detail-section:last-child{margin-bottom:0}
+    .detail-section-title{font-size:16px;font-weight:700;color:#8E44AD;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #8E44AD;display:flex;align-items:center;gap:10px}
+    .detail-section-title i{font-size:18px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
+    .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
+    .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
+    .detail-value-empty{color:#6c757d;font-style:italic}
+    
+    /* File Evidence Styles */
+    .file-evidence{margin-top:10px}
+    .file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
+    .file-item:hover{background:#f5eef8;border-color:#8E44AD}
+    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#8E44AD;font-size:16px}
+    .file-info{flex:1}
+    .file-name{font-weight:600;color:#212529;font-size:14px}
+    .file-size{font-size:12px;color:#6c757d}
+    .download-btn{background:#8E44AD;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+    .download-btn:hover{background:#7D3C98;color:white;text-decoration:none}
+    
+    /* Action Buttons in Modal */
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef}
+    .modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+    .modal-btn-close{background:#6c757d;color:white}
+    .modal-btn-close:hover{background:#5a6268;transform:translateY(-2px)}
+    
+    /* Rejection Notes Styles */
+    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:20px;margin-top:15px}
+    .rejection-notes .detail-label{color:#dc3545;font-weight:700}
+    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:14px;line-height:1.5;min-height:auto;padding:12px}
+    
+    /* Loading spinner */
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 40px;
+        color: #8E44AD;
+    }
+    .loading-spinner i {
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+    
+    /* Error message */
+    .error-message {
+        text-align: center;
+        padding: 40px;
+        color: #e74c3c;
+    }
+    .error-message i {
+        font-size: 48px;
+        margin-bottom: 15px;
+    }
+    
+    /* Responsive */
+    @media (max-width:768px){
+        .detail-grid{grid-template-columns:1fr}
+        .modal-content{width:95%;margin:10px}
+        .detail-content{padding:15px}
+        .modal-actions{flex-direction:column}
+        .modal-btn{justify-content:center}
+    }
 </style>
 </head>
 <body>
@@ -88,27 +145,6 @@
             <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Ditolak</h3>
         </div>
         
-        <!-- Search Box -->
-        <div class="search-container">
-            <label class="search-label">Cari berdasarkan nama kegiatan, penyelenggara, atau jenis pengajuan...</label>
-            <div class="search-box">
-                <div class="search-input-wrapper">
-                    <input 
-                        type="text" 
-                        id="searchInput"
-                        class="search-input"
-                        placeholder="Ketik untuk mencari..."
-                    >
-                    <div class="search-icon">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </div>
-                </div>
-                <button type="button" class="btn-cari" onclick="handleSearch()">
-                    <i class="fa-solid fa-search"></i> Cari
-                </button>
-            </div>
-        </div>
-        
         <div style="overflow-x:auto">
             <table>
                 <thead>
@@ -134,7 +170,7 @@
                             $tgl_kegiatan = '-';
                             if (isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan) {
                                 $tgl_kegiatan = date('d M Y', strtotime($s->tanggal_kegiatan));
-                                if (isset($s->akhir_kegiatan) && $s->akhir_kegiatan && $s->akhir_kegiatan !== '-' && $s->akhir_kegiatan !== $s->tanggal_kegiatan) {
+                                if (isset($s->akhir_kegiatan) && $s->akhir_kegiatan && $s->akhir_kegiatan !== $s->tanggal_kegiatan) {
                                     $tgl_kegiatan .= ' - ' . date('d M Y', strtotime($s->akhir_kegiatan));
                                 }
                             }
@@ -169,15 +205,7 @@
                     <tr>
                         <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
                             <i class="fa-solid fa-times-circle" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
-                            <strong>
-                                <?php if(!isset($surat_list)): ?>
-                                    Variabel $surat_list tidak terdefinisi
-                                <?php elseif(empty($surat_list)): ?>
-                                    Tidak ada pengajuan yang ditolak
-                                <?php else: ?>
-                                    Data tidak valid
-                                <?php endif; ?>
-                            </strong>
+                            <strong>Tidak ada pengajuan yang ditolak</strong>
                         </td>
                     </tr>
                     <?php endif; ?>
@@ -186,151 +214,282 @@
         </div>
 
         <div class="pagination-info">
-            Menampilkan: Pengajuan Ditolak (<?= isset($total_surat) ? $total_surat : '0' ?> data)
+            Menampilkan: <?= isset($total_surat) ? $total_surat : '0' ?> Pengajuan Ditolak
         </div>
     </div>
 </div>
 
 <!-- Detail Modal -->
-<div id="detailModal" class="modal">
-    <div class="modal-content">
+<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan</h3>
-            <button onclick="closeModal('detailModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
+            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
+            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
         </div>
-        <div id="detailContent"></div>
+        <div class="detail-content" id="detailContent">
+            <!-- Loading state -->
+            <div class="loading-spinner" id="detailLoading">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                <p>Memuat data...</p>
+            </div>
+            
+            <!-- Error state -->
+            <div class="error-message" id="detailError" style="display:none">
+                <i class="fa-solid fa-exclamation-triangle"></i>
+                <p id="errorText">Terjadi kesalahan saat memuat data</p>
+                <button class="btn btn-detail" onclick="retryLoadDetail()" style="margin-top:15px">
+                    <i class="fa-solid fa-refresh"></i> Coba Lagi
+                </button>
+            </div>
+            
+            <!-- Success content akan diisi oleh JavaScript -->
+        </div>
     </div>
 </div>
 
 <script>
 const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
-let currentSearchTerm = '';
+let currentDetailId = null;
 
 function showDetail(id) {
-    const item = suratList.find(s => Number(s.id) === Number(id));
-    if (!item) { 
-        alert('Data tidak ditemukan'); 
-        return; 
-    }
+    currentDetailId = id;
     
-    // Format tanggal untuk modal
-    const formatDate = (dateString) => {
-        if (!dateString || dateString === '-') return '-';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('id-ID', { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
+    // Reset dan tampilkan loading
+    const detailContent = document.getElementById('detailContent');
+    detailContent.innerHTML = `
+        <div class="loading-spinner" id="detailLoading">
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            <p>Memuat data...</p>
+        </div>
+        <div class="error-message" id="detailError" style="display:none">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <p id="errorText">Terjadi kesalahan saat memuat data</p>
+            <button class="btn btn-detail" onclick="retryLoadDetail()" style="margin-top:15px">
+                <i class="fa-solid fa-refresh"></i> Coba Lagi
+            </button>
+        </div>
+    `;
+    
+    // Tampilkan modal
+    document.getElementById('detailModal').classList.add('show');
+    
+    // Load data
+    loadDetailData(id);
+}
+
+function loadDetailData(id) {
+    const detailLoading = document.getElementById('detailLoading');
+    const detailError = document.getElementById('detailError');
+    
+    if (detailLoading) detailLoading.style.display = 'block';
+    if (detailError) detailError.style.display = 'none';
+    
+    // Fetch dari server
+    fetch(`<?= base_url('kaprodi/getDetailPengajuan/') ?>${id}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Sembunyikan loading
+            if (detailLoading) detailLoading.style.display = 'none';
+            
+            if (data.success && data.data) {
+                displayDetailContent(data);
+            } else {
+                showDetailError(data.message || 'Data tidak ditemukan');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching detail:', error);
+            if (detailLoading) detailLoading.style.display = 'none';
+            
+            // Coba gunakan data dari suratList jika ada
+            const localData = suratList.find(s => Number(s.id) === Number(id));
+            if (localData) {
+                displayDetailContent({success: true, data: localData});
+            } else {
+                showDetailError('Gagal memuat data dari server. Periksa koneksi internet Anda.');
+            }
         });
+}
+
+function displayDetailContent(data) {
+    const item = data.data;
+    const detailContent = document.getElementById('detailContent');
+    
+    const getVal = (k) => (item[k] !== undefined && item[k] !== null ? item[k] : '-');
+    
+    // Helper functions
+    const formatDate = (dateStr) => {
+        if (!dateStr || dateStr === '-' || dateStr === '0000-00-00' || dateStr === '0000-00-00 00:00:00') return '-';
+        try {
+            const date = new Date(dateStr);
+            return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('id-ID', { 
+                day: '2-digit', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+        } catch (e) {
+            return '-';
+        }
     };
     
+    const escapeHtml = (unsafe) => {
+        if (unsafe === null || unsafe === undefined) return '-';
+        return String(unsafe)
+           .replace(/&/g, "&amp;")
+           .replace(/</g, "&lt;")
+           .replace(/>/g, "&gt;")
+           .replace(/"/g, "&quot;")
+           .replace(/'/g, "&#039;");
+    };
+    
+    // Format status dengan badge
+    const status = getVal('status');
+    let statusBadge = '';
+    if (status.toLowerCase().includes('ditolak')) {
+        statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak</span>';
+    } else if (status.toLowerCase().includes('disetujui')) {
+        statusBadge = '<span class="badge badge-approved" style="margin-left:10px">Disetujui</span>';
+    } else {
+        statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
+    }
+
     const content = `
-        <div>
-            <div class="detail-row">
-                <div class="detail-label">Nama Kegiatan:</div>
-                <div class="detail-value">${item.nama_kegiatan || '-'}</div>
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-info-circle"></i> Informasi Utama
+            </div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">NAMA KEGIATAN</div>
+                    <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">JENIS PENGAJUAN</div>
+                    <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">STATUS PENGAJUAN</div>
+                    <div class="detail-value" style="display:flex;align-items:center">
+                        ${escapeHtml(status)} ${statusBadge}
+                    </div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">LINGKUP PENUGASAN</div>
+                    <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan') || '-')}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-user-tie"></i> Informasi Dosen
+            </div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">NIP</div>
+                    <div class="detail-value">${escapeHtml(getVal('nip') || '-')}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
+            </div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">TANGGAL PENGAJUAN</div>
+                    <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">TANGGAL KEGIATAN</div>
+                    <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">PENYELENGGARA</div>
+                    <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">TEMPAT KEGIATAN</div>
+                    <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan') || '-')}</div>
+                </div>
+            </div>
+        </div>
+
+        ${getVal('eviden') && getVal('eviden') !== '-' ? `
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-paperclip"></i> File Evidence
+            </div>
+            <div class="file-evidence">
+                <div class="file-item">
+                    <div class="file-icon">
+                        <i class="fa-solid fa-file-pdf"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">${escapeHtml(getVal('eviden'))}</div>
+                    </div>
+                    <a href="<?= base_url('uploads/') ?>${escapeHtml(getVal('eviden'))}" target="_blank" class="download-btn">
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>
+            </div>
+        </div>
+        ` : ''}
+
+        ${getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-' ? `
+        <div class="detail-section rejection-notes">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-exclamation-triangle"></i> Alasan Penolakan
             </div>
             <div class="detail-row">
-                <div class="detail-label">Penyelenggara:</div>
-                <div class="detail-value">${item.penyelenggara || '-'}</div>
+                <div class="detail-label">Catatan Penolakan</div>
+                <div class="detail-value">${escapeHtml(getVal('catatan_penolakan'))}</div>
             </div>
-            <div class="detail-row">
-                <div class="detail-label">Jenis Pengajuan:</div>
-                <div class="detail-value">${item.jenis_pengajuan || '-'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Pengajuan:</div>
-                <div class="detail-value">${formatDate(item.created_at)}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Kegiatan:</div>
-                <div class="detail-value">${formatDate(item.tanggal_kegiatan)}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tempat Kegiatan:</div>
-                <div class="detail-value">${item.tempat_kegiatan || '-'}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Status:</div>
-                <div class="detail-value">${item.status || 'Ditolak'}</div>
-            </div>
-            ${item.catatan_penolakan ? `
-            <div class="detail-row">
-                <div class="detail-label">Alasan Penolakan:</div>
-                <div class="detail-value" style="color:#e74c3c;font-weight:500">${item.catatan_penolakan}</div>
-            </div>
-            ` : ''}
-        </div>`;
-    document.getElementById('detailContent').innerHTML = content;
-    document.getElementById('detailModal').classList.add('show');
+        </div>
+        ` : ''}
+
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+                <i class="fa-solid fa-times"></i> Tutup
+            </button>
+        </div>
+    `;
+    
+    detailContent.innerHTML = content;
+}
+
+function showDetailError(message) {
+    const detailContent = document.getElementById('detailContent');
+    detailContent.innerHTML = `
+        <div class="error-message" id="detailError">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <p id="errorText">${message}</p>
+            <button class="btn btn-detail" onclick="retryLoadDetail()" style="margin-top:15px">
+                <i class="fa-solid fa-refresh"></i> Coba Lagi
+            </button>
+        </div>
+    `;
+}
+
+function retryLoadDetail() {
+    if (currentDetailId) {
+        loadDetailData(currentDetailId);
+    }
 }
 
 function closeModal(id) { 
     document.getElementById(id).classList.remove('show'); 
 }
 
-// Search functionality
-function handleSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchTerm = searchInput.value.toLowerCase();
-    currentSearchTerm = searchTerm;
-    
-    const rows = document.querySelectorAll('#tableBody tr');
-    let visibleCount = 0;
-    
-    rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        if (text.includes(searchTerm)) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    // Update pagination info
-    updatePaginationInfo(visibleCount, searchTerm);
+function modalClickOutside(evt, id) { 
+    if (evt.target && evt.target.id === id) closeModal(id); 
 }
-
-function updatePaginationInfo(visibleCount, searchTerm) {
-    const paginationInfo = document.querySelector('.pagination-info');
-    if (paginationInfo) {
-        if (searchTerm) {
-            paginationInfo.textContent = `Menampilkan: ${visibleCount} data (difilter)`;
-        } else {
-            paginationInfo.textContent = `Menampilkan: Pengajuan Ditolak (${visibleCount} data)`;
-        }
-    }
-}
-
-// Enter key support for search
-document.getElementById('searchInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        handleSearch();
-    }
-});
-
-// Auto reset when input is cleared
-document.getElementById('searchInput').addEventListener('input', function(e) {
-    if (e.target.value === '') {
-        const rows = document.querySelectorAll('#tableBody tr');
-        let visibleCount = 0;
-        
-        rows.forEach(row => {
-            row.style.display = '';
-            visibleCount++;
-        });
-        
-        updatePaginationInfo(visibleCount, '');
-    }
-});
-
-// Close modal ketika klik di luar
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal')) {
-        e.target.classList.remove('show');
-    }
-});
 </script>
 </body>
 </html>

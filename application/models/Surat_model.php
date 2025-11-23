@@ -74,6 +74,16 @@ class Surat_model extends CI_Model
     }
 
     // ============================================================
+    //  GET BY STATUS - METHOD YANG DITAMBAHKAN
+    // ============================================================
+    public function get_by_status($status)
+    {
+        $this->db->order_by('created_at', 'DESC');
+        $result = $this->db->get_where('surat', ['status' => $status])->result();
+        return $this->append_dosen_data($result);
+    }
+
+    // ============================================================
     //  UPDATE SURAT
     // ============================================================
     public function update_surat($id, $data)
@@ -115,4 +125,29 @@ class Surat_model extends CI_Model
         return $this->filter_status_query("status LIKE '%tolak%'");
     }
 
+    // ============================================================
+    //  COUNT METHODS (OPTIONAL - JIKA DIBUTUHKAN)
+    // ============================================================
+    public function count_by_status($status)
+    {
+        $this->db->where('status', $status);
+        return $this->db->count_all_results('surat');
+    }
+
+    public function count_pending()
+    {
+        return $this->count_by_status('pengajuan');
+    }
+
+    public function count_disetujui()
+    {
+        $this->db->like('status', 'setuju');
+        return $this->db->count_all_results('surat');
+    }
+
+    public function count_ditolak()
+    {
+        $this->db->like('status', 'tolak');
+        return $this->db->count_all_results('surat');
+    }
 }

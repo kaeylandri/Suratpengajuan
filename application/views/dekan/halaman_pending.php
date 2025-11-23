@@ -16,22 +16,30 @@
     .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#FB8C00;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
     .back-btn:hover{background:#e67e22;transform:translateY(-2px)}
     
+    /* Header Status */
+    .status-header{display:flex;align-items:center;gap:15px;margin-bottom:20px;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+    .status-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
+    .status-icon.pending{background:#fff3cd;color:#f39c12}
+    .status-info h1{margin:0;color:#2c3e50;font-size:28px}
+    .status-info p{margin:5px 0 0 0;color:#7f8c8d;font-size:16px}
+    
+    /* Search Box Styles */
+    .search-container{margin-bottom:20px}
+    .search-label{display:block;margin-bottom:8px;color:#6c757d;font-size:14px;font-weight:500}
+    .search-box{display:flex;gap:10px;align-items:center;width:100%}
+    .search-input-wrapper{position:relative;flex:1}
+    .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #e9ecef;border-radius:8px;font-size:14px;transition:all 0.3s;background:white;color:#495057}
+    .search-input:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
+    .search-input::placeholder{color:#6c757d}
+    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d;font-size:16px}
+    .btn-cari{padding:12px 24px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#FB8C00;color:#fff;white-space:nowrap}
+    .btn-cari:hover{background:#e67e22;transform:translateY(-1px)}
+    .btn-reset{padding:12px 24px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff;white-space:nowrap;text-decoration:none}
+    .btn-reset:hover{background:#7f8c8d;transform:translateY(-1px);color:white;text-decoration:none}
+    
     /* Card Styles */
     .card{background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px}
     .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee}
-    
-    /* Search and Filter */
-    .search-filter-container{display:flex;align-items:center;gap:15px;margin-bottom:20px;flex-wrap:wrap;background:#f8f9fa;padding:15px;border-radius:10px;border:1px solid #e9ecef}
-    .search-box{position:relative;flex:1;min-width:300px}
-    .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;transition:all 0.3s;background:white}
-    .search-input:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
-    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d}
-    .filter-select{padding:12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white;color:#495057;min-width:180px;cursor:pointer;transition:all 0.3s}
-    .filter-select:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
-    .btn-primary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#FB8C00;color:#fff}
-    .btn-primary:hover{background:#e67e22;transform:translateY(-2px)}
-    .btn-secondary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff}
-    .btn-secondary:hover{background:#7f8c8d}
     
     /* Table Styles */
     table{width:100%;border-collapse:collapse}
@@ -86,27 +94,61 @@
     /* Modal Styles */
     .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
     .modal.show{display:flex}
-    .modal-content{background:white;padding:0;border-radius:10px;max-width:700px;width:95%;max-height:85vh;overflow:auto;animation:slideIn 0.3s ease}
+    .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid #eee;background:#f8f9fa}
-    .modal-header h3{margin:0;color:#2c3e50;font-size:20px}
+    .modal-header{background:#FB8C00;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
+    .modal-header h3{margin:0;font-size:18px;font-weight:600}
+    .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
+    .close-modal:hover{background:rgba(255,255,255,0.2)}
     
-    /* Detail Modal Content */
-    .detail-section{margin-bottom:25px}
-    .section-title{font-size:18px;font-weight:700;color:#2c3e50;margin-bottom:15px;padding-bottom:8px;border-bottom:2px solid #FB8C00}
-    .info-grid{display:grid;gap:15px}
-    .info-item{display:flex;flex-direction:column;gap:5px}
-    .info-label{font-weight:600;color:#7f8c8d;font-size:14px}
-    .info-value{color:#2c3e50;font-size:15px;padding:8px 0}
-    .status-badge{margin-left:10px;font-size:12px !important;padding:4px 8px !important}
+    /* Detail Content Styles */
+    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
+    .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
+    .detail-section:last-child{margin-bottom:0}
+    .detail-section-title{font-size:16px;font-weight:700;color:#FB8C00;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #FB8C00;display:flex;align-items:center;gap:10px}
+    .detail-section-title i{font-size:18px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
+    .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
+    .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
+    .detail-value-empty{color:#6c757d;font-style:italic}
     
-    /* Status Badge Colors */
-    .status-ditolak{background:#e74c3c;color:white}
-    .status-disetujui{background:#27ae60;color:white}
-    .status-menunggu{background:#f39c12;color:white}
+    /* File Evidence Styles */
+    .file-evidence{margin-top:10px}
+    .file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
+    .file-item:hover{background:#fef7e0;border-color:#FB8C00}
+    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#FB8C00;font-size:16px}
+    .file-info{flex:1}
+    .file-name{font-weight:600;color:#212529;font-size:14px}
+    .file-size{font-size:12px;color:#6c757d}
+    .download-btn{background:#FB8C00;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+    .download-btn:hover{background:#e67e22;color:white;text-decoration:none}
     
-    .divider{height:1px;background:#ecf0f1;margin:20px 0}
-    .modal-body{padding:25px}
+    /* Action Buttons in Modal */
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef}
+    .modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+    .modal-btn-close{background:#6c757d;color:white}
+    .modal-btn-close:hover{background:#5a6268;transform:translateY(-2px)}
+    .modal-btn-approve{background:#27ae60;color:white}
+    .modal-btn-approve:hover{background:#229954;transform:translateY(-2px)}
+    .modal-btn-reject{background:#e74c3c;color:white}
+    .modal-btn-reject:hover{background:#c0392b;transform:translateY(-2px)}
+    
+    /* Rejection Notes Styles */
+    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:20px;margin-top:15px}
+    .rejection-notes .detail-label{color:#dc3545;font-weight:700}
+    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:14px;line-height:1.5;min-height:auto;padding:12px}
+    
+    /* Responsive */
+    @media (max-width:768px){
+        .detail-grid{grid-template-columns:1fr}
+        .modal-content{width:95%;margin:10px}
+        .detail-content{padding:15px}
+        .modal-actions{flex-direction:column}
+        .modal-btn{justify-content:center}
+        .search-box{flex-direction:column}
+        .status-header{flex-direction:column;text-align:center;gap:10px}
+    }
 
     /* Status Modal Styles */
     .status-modal {
@@ -135,7 +177,7 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
 
-    .status-header {
+    .status-header-modal {
         background: #FB8C00;
         color: white;
         padding: 20px;
@@ -145,7 +187,7 @@
         align-items: center;
     }
 
-    .status-header h3 {
+    .status-header-modal h3 {
         margin: 0;
         font-size: 18px;
     }
@@ -303,58 +345,53 @@
     </div>
     <?php endif; ?>
 
+    <!-- Header Status -->
+    <div class="status-header">
+        <div class="status-icon pending">
+            <i class="fa-solid fa-clock"></i>
+        </div>
+        <div class="status-info">
+            <h1>MENUNGGU PERSETUJUAN</h1>
+            <p><?= isset($total_surat) ? $total_surat : '2' ?> Pengajuan</p>
+        </div>
+    </div>
+
     <!-- Tabel Total Pengajuan -->
     <div class="card">
         <div class="card-header">
-            <h3><i class="fa-solid fa-table"></i> Total Pengajuan Surat - Dekan</h3>
+            <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Menunggu Persetujuan</h3>
             <div>
-                <span style="color:#7f8c8d;font-size:13px">
-                    <?php
-                    $filter_info = "Semua Data";
-                    if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
-                    if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
-                    if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-                    echo "Menampilkan: " . $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
-                    ?>
+                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">
+                    Menampilkan: Semua Data (<?= isset($surat_list) ? count($surat_list) : '2' ?>)
                 </span>
             </div>
         </div>
         
-        <!-- Search + Filter -->
-        <form method="get" action="<?= base_url('dekan/halaman_total') ?>">
-            <div class="search-filter-container">
-                <div class="search-box">
+        <!-- Search Box -->
+        <div class="search-container">
+            <label class="search-label">Cari berdasarkan nama kegiatan, penyelenggara, atau jenis pengajuan...</label>
+            <div class="search-box">
+                <div class="search-input-wrapper">
                     <input 
                         type="text" 
-                        name="search" 
+                        id="searchInput"
                         class="search-input"
-                        placeholder="Cari nama kegiatan atau penyelenggara..."
-                        value="<?= htmlspecialchars($this->input->get('search') ?? '') ?>"
+                        placeholder="Ketik untuk mencari..."
+                        value=""
                     >
                     <div class="search-icon">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
                 </div>
-                
-                <select name="status" class="filter-select">
-                    <option value="">Semua Status</option>
-                    <option value="pending" <?= ($this->input->get('status') == 'pending') ? 'selected' : '' ?>>Menunggu</option>
-                    <option value="approved" <?= ($this->input->get('status') == 'approved') ? 'selected' : '' ?>>Disetujui</option>
-                    <option value="rejected" <?= ($this->input->get('status') == 'rejected') ? 'selected' : '' ?>>Ditolak</option>
-                </select>
-                
-                <!-- Tambahkan input hidden untuk tahun -->
-                <input type="hidden" name="tahun" value="<?= isset($tahun) ? $tahun : date('Y') ?>">
-                
-                <button type="submit" class="btn-primary" style="white-space:nowrap">
-                    <i class="fa-solid fa-filter"></i> Terapkan
+                <button type="button" class="btn-cari" onclick="handleSearch()">
+                    <i class="fa-solid fa-search"></i> Cari
                 </button>
                 
-                <a href="<?= base_url('dekan/halaman_total') ?>" class="btn-secondary" style="white-space:nowrap">
+                <a href="<?= base_url('dekan/halaman_total') ?>" class="btn-reset">
                     <i class="fa-solid fa-refresh"></i> Reset
                 </a>
             </div>
-        </form>
+        </div>
         
         <div style="overflow-x:auto">
             <table>
@@ -430,13 +467,7 @@
                         <tr>
                             <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
                                 <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
-                                <strong>
-                                    <?php if($this->input->get('search') || $this->input->get('status')): ?>
-                                        Tidak ada data yang sesuai dengan filter
-                                    <?php else: ?>
-                                        Belum ada pengajuan
-                                    <?php endif; ?>
-                                </strong>
+                                <strong>Belum ada pengajuan</strong>
                             </td>
                         </tr>
                     <?php endif; ?>
@@ -446,24 +477,20 @@
 
         <div class="pagination-info">
             <?php
-            $filter_info = "Semua Data";
-            if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
-            if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
-            if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-            echo "Menampilkan: " . $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
+            echo "Menampilkan: Semua Data (" . (isset($total_surat) ? $total_surat : '0') . " data)";
             ?>
         </div>
     </div>
 </div>
 
 <!-- Detail Modal -->
-<div id="detailModal" class="modal">
-    <div class="modal-content">
+<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
+    <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3>Detail Pengajuan Surat Tugas</h3>
-            <button onclick="closeModal('detailModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
+            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
+            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
         </div>
-        <div class="modal-body" id="detailContent">
+        <div class="detail-content" id="detailContent">
             <!-- Content akan diisi oleh JavaScript -->
         </div>
     </div>
@@ -491,7 +518,7 @@
 <!-- Status Modal -->
 <div id="statusModal" class="status-modal">
     <div class="status-content">
-        <div class="status-header">
+        <div class="status-header-modal">
             <h3>Status Pengajuan Surat Tugas</h3>
             <button class="close-status">&times;</button>
         </div>
@@ -561,6 +588,7 @@
 // Data dari controller
 const suratList = <?= isset($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
+let currentSearchTerm = '';
 
 // Detail functions
 function findSuratById(id) {
@@ -573,112 +601,148 @@ function showDetail(id) {
 
     const getVal = (k) => (item[k] !== undefined && item[k] !== null ? item[k] : '-');
     
-    // Tentukan class badge status
-    let statusClass = 'status-menunggu';
-    let statusText = getVal('status');
-    if (statusText.toLowerCase().includes('ditolak')) {
-        statusClass = 'status-ditolak';
-    } else if (statusText.toLowerCase().includes('disetujui')) {
-        statusClass = 'status-disetujui';
+    // Helper functions
+    const formatDate = (dateString) => {
+        if (!dateString || dateString === '-') return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', { 
+            day: '2-digit', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+    };
+    const escapeHtml = (unsafe) => {
+        if (unsafe === null || unsafe === undefined) return '-';
+        return String(unsafe)
+           .replace(/&/g, "&amp;")
+           .replace(/</g, "&lt;")
+           .replace(/>/g, "&gt;")
+           .replace(/"/g, "&quot;")
+           .replace(/'/g, "&#039;");
+    };
+    
+    // Format status dengan badge
+    const status = getVal('status');
+    let statusBadge = '';
+    if (status.toLowerCase().includes('ditolak')) {
+        statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak</span>';
+    } else if (status.toLowerCase().includes('disetujui')) {
+        statusBadge = '<span class="badge badge-approved" style="margin-left:10px">Disetujui</span>';
+    } else {
+        statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
     }
 
     const content = `
         <div class="detail-section">
-            <div class="section-title">3 Informasi Utama</div>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">NAMA KEGIATAN</div>
-                    <div class="info-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+            <div class="detail-section-title">
+                <i class="fa-solid fa-info-circle"></i> 1 Informasi Utama
+            </div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">Nama Kegiatan</div>
+                    <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">STATUS PENGAJUAN</div>
-                    <div class="info-value">
-                        ${escapeHtml(getVal('status'))}
-                        <span class="badge status-badge ${statusClass}">${getVal('status')}</span>
+                <div class="detail-row">
+                    <div class="detail-label">Jenis Pengajuan</div>
+                    <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Status Pengajuan</div>
+                    <div class="detail-value" style="display:flex;align-items:center">
+                        ${escapeHtml(status)} ${statusBadge}
                     </div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">JENIS PENGAJUAN</div>
-                    <div class="info-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">LINGKUP PENUGASAN</div>
-                    <div class="info-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
+                <div class="detail-row">
+                    <div class="detail-label">Lingkup Penugasan</div>
+                    <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
                 </div>
             </div>
         </div>
 
         <div class="detail-section">
-            <div class="section-title">Informasi Dosen</div>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">NAMA DOSEN</div>
-                    <div class="info-value">${escapeHtml(getVal('nama_dosen'))}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">NIP</div>
-                    <div class="info-value">${escapeHtml(getVal('nip'))}</div>
-                </div>
+            <div class="detail-section-title">
+                <i class="fa-solid fa-user-tie"></i> 2 Informasi Dosen
             </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="detail-section">
-            <div class="section-title">Informasi Waktu & Tempat</div>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">TANGGAL PENGAJUAN</div>
-                    <div class="info-value">${formatDate(getVal('created_at'))}</div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">Nama Dosen</div>
+                    <div class="detail-value">${escapeHtml(getVal('nama_dosen'))}</div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">PENYELENGGARA</div>
-                    <div class="info-value">${escapeHtml(getVal('penyelenggara'))}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">TANGGAL KEGIATAN</div>
-                    <div class="info-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">TEMPAT KEGIATAN</div>
-                    <div class="info-value">${escapeHtml(getVal('tempat_kegiatan') || '-')}</div>
+                <div class="detail-row">
+                    <div class="detail-label">NIP</div>
+                    <div class="detail-value">${escapeHtml(getVal('nip'))}</div>
                 </div>
             </div>
         </div>
 
         <div class="detail-section">
-            <div class="section-title">File Evidence</div>
-            <div class="info-item">
-                <div class="info-value">
-                    ${getVal('eviden') ? 
-                        `<a href="<?= base_url('uploads/') ?>${escapeHtml(getVal('eviden'))}" target="_blank" style="color:#3498db; text-decoration:none;">
-                            <i class="fa-solid fa-download"></i> Download
-                        </a>` : 
-                        '-'
-                    }
+            <div class="detail-section-title">
+                <i class="fa-solid fa-calendar-alt"></i> 3 Informasi Waktu & Tempat
+            </div>
+            <div class="detail-grid">
+                <div class="detail-row">
+                    <div class="detail-label">Tanggal Pengajuan</div>
+                    <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Tanggal Kegiatan</div>
+                    <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Penyelenggara</div>
+                    <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Tempat Kegiatan</div>
+                    <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan') || '-')}</div>
                 </div>
             </div>
         </div>
 
-        ${getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-' ? 
-            `<div class="detail-section">
-                <div class="section-title">Catatan Penolakan</div>
-                <div class="info-item">
-                    <div class="info-value" style="color:#e74c3c; background:#f8f9fa; padding:10px; border-radius:5px;">
-                        ${escapeHtml(getVal('catatan_penolakan'))}
+        ${getVal('eviden') && getVal('eviden') !== '-' ? `
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-paperclip"></i> File Evidence
+            </div>
+            <div class="file-evidence">
+                <div class="file-item">
+                    <div class="file-icon">
+                        <i class="fa-solid fa-file-pdf"></i>
                     </div>
+                    <div class="file-info">
+                        <div class="file-name">${escapeHtml(getVal('eviden'))}</div>
+                    </div>
+                    <a href="<?= base_url('uploads/') ?>${escapeHtml(getVal('eviden'))}" target="_blank" class="download-btn">
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
                 </div>
-            </div>` : ''
-        }
+            </div>
+        </div>
+        ` : ''}
 
-        <div style="text-align:right;margin-top:20px;padding-top:15px;border-top:1px solid #eee">
+        ${getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-' ? `
+        <div class="detail-section rejection-notes">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-exclamation-triangle"></i> Alasan Penolakan
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Catatan Penolakan</div>
+                <div class="detail-value">${escapeHtml(getVal('catatan_penolakan'))}</div>
+            </div>
+        </div>
+        ` : ''}
+
+        <div class="modal-actions">
             ${ (item.status && item.status.toLowerCase() === 'disetujui sekretariat') ? 
-                `<button class="btn btn-approve" onclick="approveSurat(${item.id}); closeModal('detailModal')" style="margin-right:8px">
+                `<button class="modal-btn modal-btn-approve" onclick="approveSurat(${item.id}); closeModal('detailModal')">
                     <i class="fa-solid fa-check"></i> Setujui
                 </button>
-                <button class="btn btn-reject" onclick="showRejectModal(${item.id}); closeModal('detailModal')">
+                <button class="modal-btn modal-btn-reject" onclick="showRejectModal(${item.id}); closeModal('detailModal')">
                     <i class="fa-solid fa-times"></i> Tolak
                 </button>` : '' }
+            <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+                <i class="fa-solid fa-times"></i> Tutup
+            </button>
         </div>
     `;
     
@@ -689,12 +753,7 @@ function showDetail(id) {
 function approveSurat(id) {
     if (!confirm('Apakah Anda yakin ingin menyetujui pengajuan ini?')) return;
     
-    // Build URL dengan parameter filter yang aktif
-    const searchParams = new URLSearchParams(window.location.search);
-    const from = 'total';
-    const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
-    
-    window.location.href = `<?= base_url("dekan/approve/") ?>${id}?from=${from}&tahun=${tahun}&${searchParams.toString()}`;
+    window.location.href = `<?= base_url("dekan/approve/") ?>${id}`;
 }
 
 function showRejectModal(id) {
@@ -710,14 +769,9 @@ function confirmReject() {
         return; 
     }
     
-    // Build URL dengan parameter filter yang aktif
-    const searchParams = new URLSearchParams(window.location.search);
-    const from = 'total';
-    const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
-    
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = `<?= base_url("dekan/reject/") ?>${currentRejectId}?from=${from}&tahun=${tahun}&${searchParams.toString()}`;
+    form.action = `<?= base_url("dekan/reject/") ?>${currentRejectId}`;
 
     const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
     const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
@@ -741,24 +795,86 @@ function closeModal(id) {
     document.getElementById(id).classList.remove('show');
 }
 
-function formatDate(d) {
-    if (!d || d === '-' || d === '0000-00-00') return '-';
-    const t = new Date(d);
-    if (isNaN(t)) return d;
-    return t.toLocaleDateString('id-ID', { day:'2-digit', month: 'short', year:'numeric' });
+function modalClickOutside(evt, id) {
+    if (evt.target && evt.target.id === id) closeModal(id);
 }
 
-function escapeHtml(unsafe) {
-    if (unsafe === null || unsafe === undefined) return '-';
-    return String(unsafe)
-       .replace(/&/g, "&amp;")
-       .replace(/</g, "&lt;")
-       .replace(/>/g, "&gt;")
-       .replace(/"/g, "&quot;")
-       .replace(/'/g, "&#039;");
+// ============================================
+// SEARCH FUNCTIONALITY
+// ============================================
+
+// Search functionality
+function handleSearch() {
+    const searchInput = document.getElementById('searchInput');
+    currentSearchTerm = searchInput.value.toLowerCase();
+    applyFilters();
 }
 
-// Status Modal Functions
+function applyFilters() {
+    const rows = document.querySelectorAll('#tableBody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        
+        let matchesSearch = true;
+        
+        // Filter by search
+        if (currentSearchTerm && !text.includes(currentSearchTerm)) {
+            matchesSearch = false;
+        }
+        
+        if (matchesSearch) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Update pagination info
+    updatePaginationInfo(visibleCount);
+}
+
+function updatePaginationInfo(visibleCount) {
+    const paginationInfo = document.querySelector('.pagination-info');
+    const filterInfo = document.getElementById('filterInfo');
+    
+    if (paginationInfo && filterInfo) {
+        if (currentSearchTerm) {
+            paginationInfo.textContent = `Menampilkan: ${visibleCount} data (difilter)`;
+            filterInfo.textContent = `Menampilkan: ${visibleCount} data (difilter)`;
+        } else {
+            paginationInfo.textContent = `Menampilkan: Semua Data (${visibleCount} data)`;
+            filterInfo.textContent = `Menampilkan: Semua Data (${visibleCount})`;
+        }
+    }
+}
+
+// Enter key support for search
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        handleSearch();
+    }
+});
+
+// Auto reset when input is cleared
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    if (e.target.value === '') {
+        currentSearchTerm = '';
+        applyFilters();
+    }
+});
+
+// Initialize filters
+document.addEventListener('DOMContentLoaded', function() {
+    applyFilters();
+});
+
+// ============================================
+// STATUS MODAL FUNCTIONS
+// ============================================
+
 // Tampilkan modal dan load data
 function showStatusModal(suratId) {
     const modal = document.getElementById('statusModal');
@@ -892,7 +1008,7 @@ function updateEstimasiWaktu(statusData) {
     document.getElementById("est3").textContent = d.durasi_3 || "-";
 }
 
-// Event listener untuk close modal
+// Event listener untuk close modal status
 document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = document.querySelector('.close-status');
     const modal = document.getElementById('statusModal');
@@ -908,23 +1024,6 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.style.display = 'none';
         }
     });
-});
-
-// Close modal ketika klik di luar
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('modal')) {
-        e.target.classList.remove('show');
-    }
-});
-
-// Auto submit form ketika select berubah
-document.addEventListener('DOMContentLoaded', function() {
-    const statusSelect = document.querySelector('select[name="status"]');
-    if (statusSelect) {
-        statusSelect.addEventListener('change', function() {
-            this.form.submit();
-        });
-    }
 });
 </script>
 </body>

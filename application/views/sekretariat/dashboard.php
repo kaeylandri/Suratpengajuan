@@ -38,19 +38,87 @@
     .chart-container{position:relative;height:450px;padding:20px}
     .filter-container{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap}
     .filter-select{padding:10px 15px;border-radius:8px;border:2px solid #ddd;font-weight:600;cursor:pointer;min-width:200px}
+    
+    /* Modal Styles */
     .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
     .modal.show{display:flex}
-    .modal-content{background:white;padding:20px;border-radius:10px;max-width:800px;width:95%;max-height:85vh;overflow:auto;animation:slideIn 0.3s ease}
+    .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee;padding-bottom:10px;margin-bottom:10px}
-    .detail-row{display:grid;grid-template-columns:200px 1fr;padding:8px 0;border-bottom:1px solid #f4f6f7}
-    .detail-label{font-weight:700;color:#7f8c8d}
-    .detail-value{color:#2c3e50}
-    .form-group{margin-bottom:15px}
-    .form-group label{display:block;margin-bottom:5px;font-weight:600;color:#2c3e50}
-    .form-control{width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px}
-    .form-control:focus{outline:none;border-color:#3498db}
-    .alert-info{background:#d1ecf1;color:#0c5460;padding:12px;border-radius:8px;margin-bottom:15px;border-left:4px solid #17a2b8}
+    .modal-header{background:#16A085;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
+    .modal-header h3{margin:0;font-size:18px;font-weight:600}
+    .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
+    .close-modal:hover{background:rgba(255,255,255,0.2)}
+    
+    /* Detail Content Styles */
+    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
+    .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
+    .detail-section:last-child{margin-bottom:0}
+    .detail-section-title{font-size:16px;font-weight:700;color:#16A085;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #16A085;display:flex;align-items:center;gap:10px}
+    .detail-section-title i{font-size:18px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+    .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
+    .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
+    .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
+    .detail-value-empty{color:#6c757d;font-style:italic}
+    
+    /* File Evidence Styles */
+    .file-evidence{margin-top:10px}
+    .file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
+    .file-item:hover{background:#e8f6f3;border-color:#16A085}
+    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#16A085;font-size:16px}
+    .file-info{flex:1}
+    .file-name{font-weight:600;color:#212529;font-size:14px}
+    .file-size{font-size:12px;color:#6c757d}
+    .download-btn{background:#16A085;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+    .download-btn:hover{background:#138D75;color:white;text-decoration:none}
+    
+    /* Action Buttons in Modal */
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef}
+    .modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+    .modal-btn-close{background:#6c757d;color:white}
+    .modal-btn-close:hover{background:#5a6268;transform:translateY(-2px)}
+    .modal-btn-approve{background:#27ae60;color:white}
+    .modal-btn-approve:hover{background:#229954;transform:translateY(-2px)}
+    .modal-btn-reject{background:#e74c3c;color:white}
+    .modal-btn-reject:hover{background:#c0392b;transform:translateY(-2px)}
+    
+    /* Rejection Notes Styles */
+    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:20px;margin-top:15px}
+    .rejection-notes .detail-label{color:#dc3545;font-weight:700}
+    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:14px;line-height:1.5;min-height:auto;padding:12px}
+    
+    /* Approve Modal Styles - Diperbaiki */
+    .approve-modal-content{background:white;padding:0;border-radius:15px;max-width:550px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    .approve-modal-body{padding:25px}
+    .approve-modal-header{background:#16A085;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
+    .approve-modal-header h3{margin:0;font-size:18px;font-weight:600}
+    .approve-info-box{background:#e8f6f3;border:1px solid #16A085;border-radius:8px;padding:15px;margin-bottom:20px}
+    .approve-info-box strong{color:#16A085;display:block;margin-bottom:5px}
+    .approve-info-box span{color:#2c3e50;font-weight:600}
+    .form-group{margin-bottom:20px}
+    .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#2c3e50;font-size:14px}
+    .form-control{width:100%;padding:12px 15px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;transition:border-color 0.2s}
+    .form-control:focus{outline:none;border-color:#3498db;box-shadow:0 0 0 3px rgba(52, 152, 219, 0.2)}
+    .form-hint{color:#7f8c8d;font-size:12px;margin-top:5px;display:flex;align-items:center;gap:5px}
+    .approve-modal-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:25px;padding-top:20px;border-top:1px solid #e9ecef}
+    .approve-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+    .approve-btn-cancel{background:#95a5a6;color:white}
+    .approve-btn-cancel:hover{background:#7f8c8d;transform:translateY(-2px)}
+    .approve-btn-submit{background:#27ae60;color:white}
+    .approve-btn-submit:hover{background:#229954;transform:translateY(-2px)}
+    
+    /* Responsive */
+    @media (max-width:768px){
+        .detail-grid{grid-template-columns:1fr}
+        .modal-content{width:95%;margin:10px}
+        .detail-content{padding:15px}
+        .modal-actions{flex-direction:column}
+        .modal-btn{justify-content:center}
+        .approve-modal-content{width:95%;margin:10px}
+        .approve-modal-body{padding:15px}
+        .approve-modal-actions{flex-direction:column}
+        .approve-btn{justify-content:center}
+    }
 </style>
 </head>
 <body>
@@ -229,24 +297,26 @@
 <div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan</h3>
-            <button onclick="closeModal('detailModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
+            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
+            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
         </div>
-        <div id="detailContent"></div>
+        <div class="detail-content" id="detailContent">
+            <!-- Content akan diisi oleh JavaScript -->
+        </div>
     </div>
 </div>
 
-<!-- Approve Modal - Dengan Input Nomor Surat -->
+<!-- Approve Modal - Diperbaiki -->
 <div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-header">
+    <div class="approve-modal-content" onclick="event.stopPropagation()">
+        <div class="approve-modal-header">
             <h3><i class="fa-solid fa-check-circle"></i> Setujui Pengajuan</h3>
-            <button onclick="closeModal('approveModal')" style="background:none;border:0;font-size:20px;cursor:pointer">&times;</button>
+            <button class="close-modal" onclick="closeModal('approveModal')">&times;</button>
         </div>
-        <div>
-            <div class="alert-info">
-                <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong><br>
-                Pengajuan: <span id="approveNamaKegiatan" style="font-weight:700"></span>
+        <div class="approve-modal-body">
+            <div class="approve-info-box">
+                <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong>
+                <span id="approveNamaKegiatan"></span>
             </div>
             
             <form id="approveForm" method="POST" action="">
@@ -265,16 +335,16 @@
                         required
                         autocomplete="off"
                     >
-                    <small style="color:#7f8c8d;display:block;margin-top:5px">
+                    <div class="form-hint">
                         <i class="fa-solid fa-exclamation-circle"></i> Format: 001/SKT/FT/Tahun
-                    </small>
+                    </div>
                 </div>
 
-                <div style="text-align:right;margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
-                    <button type="button" class="btn" onclick="closeModal('approveModal')" style="background:#95a5a6;color:white">
+                <div class="approve-modal-actions">
+                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
-                    <button type="submit" class="btn btn-approve">
+                    <button type="submit" class="approve-btn approve-btn-submit">
                         <i class="fa-solid fa-check"></i> Setujui & Teruskan
                     </button>
                 </div>
@@ -312,32 +382,6 @@ function updateTahun(year) {
     window.location.href = "<?= base_url('sekretariat?tahun=') ?>" + year;
 }
 
-function filterTable(status) {
-    const rows = document.querySelectorAll('#tableBody tr:not(#emptyRow)');
-    const filterInfo = document.getElementById('filterInfo');
-    let visibleCount = 0;
-    
-    rows.forEach((row) => {
-        const rowStatus = row.dataset.status;
-        if (status === 'all' || rowStatus === status) {
-            row.style.display = '';
-            visibleCount++;
-            row.querySelector('td:first-child').textContent = visibleCount;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    const statusText = {
-        'all': 'Semua Data', 
-        'pending': 'Menunggu', 
-        'approved': 'Disetujui', 
-        'rejected': 'Ditolak',
-        'completed': 'Selesai'
-    };
-    filterInfo.textContent = `Menampilkan: ${statusText[status]} (${visibleCount} data)`;
-}
-
 function showDetail(id) {
     fetch(`<?= base_url('sekretariat/getDetailPengajuan/') ?>${id}`)
         .then(response => response.json())
@@ -345,77 +389,152 @@ function showDetail(id) {
             if (data.success) {
                 const item = data.data;
                 
+                const getVal = (k) => (item[k] !== undefined && item[k] !== null ? item[k] : '-');
+                
+                // Helper functions
                 const formatDate = (dateStr) => {
-                    if (!dateStr) return '-';
+                    if (!dateStr || dateStr === '-' || dateStr === '0000-00-00') return '-';
                     const date = new Date(dateStr);
-                    return date.toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'});
+                    return date.toLocaleDateString('id-ID', { 
+                        day: '2-digit', 
+                        month: 'short', 
+                        year: 'numeric' 
+                    });
                 };
                 
-                const formatCurrency = (amount) => {
-                    if (!amount) return '-';
-                    return new Intl.NumberFormat('id-ID', {
-                        style: 'currency',
-                        currency: 'IDR'
-                    }).format(amount);
+                const escapeHtml = (unsafe) => {
+                    if (unsafe === null || unsafe === undefined) return '-';
+                    return String(unsafe)
+                       .replace(/&/g, "&amp;")
+                       .replace(/</g, "&lt;")
+                       .replace(/>/g, "&gt;")
+                       .replace(/"/g, "&quot;")
+                       .replace(/'/g, "&#039;");
                 };
+                
+                // Format status dengan badge
+                const status = getVal('status');
+                let statusBadge = '';
+                if (status.toLowerCase().includes('ditolak')) {
+                    statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak</span>';
+                } else if (status.toLowerCase().includes('disetujui')) {
+                    statusBadge = '<span class="badge badge-approved" style="margin-left:10px">Disetujui</span>';
+                } else {
+                    statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
+                }
 
-                const displayStatus = item.status || '-';
-                
                 const content = `
-                    <div class="detail-row">
-                        <div class="detail-label">Nama Kegiatan</div>
-                        <div class="detail-value">${item.nama_kegiatan || '-'}</div>
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fa-solid fa-info-circle"></i> 1 Informasi Utama
+                        </div>
+                        <div class="detail-grid">
+                            <div class="detail-row">
+                                <div class="detail-label">NAMA KEGIATAN</div>
+                                <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">JENIS PENGAJUAN</div>
+                                <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">STATUS PENGAJUAN</div>
+                                <div class="detail-value" style="display:flex;align-items:center">
+                                    ${escapeHtml(status)} ${statusBadge}
+                                </div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">LINGKUP PENUGASAN</div>
+                                <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Penyelenggara</div>
-                        <div class="detail-value">${item.penyelenggara || '-'}</div>
+
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fa-solid fa-user-tie"></i> 2 Informasi Dosen
+                        </div>
+                        <div class="detail-grid">
+                            <div class="detail-row">
+                                <div class="detail-label">NAMA DOSEN</div>
+                                <div class="detail-value">${escapeHtml(getVal('nama_dosen'))}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">NIP</div>
+                                <div class="detail-value">${escapeHtml(getVal('nip'))}</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Jenis Pengajuan</div>
-                        <div class="detail-value">${item.jenis_pengajuan || '-'}</div>
+
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fa-solid fa-calendar-alt"></i> 3 Informasi Waktu & Tempat
+                        </div>
+                        <div class="detail-grid">
+                            <div class="detail-row">
+                                <div class="detail-label">TANGGAL PENGAJUAN</div>
+                                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">TANGGAL KEGIATAN</div>
+                                <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">PENYELENGGARA</div>
+                                <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+                            </div>
+                            <div class="detail-row">
+                                <div class="detail-label">TEMPAT KEGIATAN</div>
+                                <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan') || '-')}</div>
+                            </div>
+                        </div>
                     </div>
-                    ${item.nomor_surat ? `
-                    <div class="detail-row">
-                        <div class="detail-label">Nomor Surat</div>
-                        <div class="detail-value"><strong style="color:#27ae60">${item.nomor_surat}</strong></div>
+
+                    ${getVal('eviden') && getVal('eviden') !== '-' ? `
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fa-solid fa-paperclip"></i> File Evidence
+                        </div>
+                        <div class="file-evidence">
+                            <div class="file-item">
+                                <div class="file-icon">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name">${escapeHtml(getVal('eviden'))}</div>
+                                </div>
+                                <a href="<?= base_url('uploads/') ?>${escapeHtml(getVal('eviden'))}" target="_blank" class="download-btn">
+                                    <i class="fa-solid fa-download"></i> Download
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     ` : ''}
-                    <div class="detail-row">
-                        <div class="detail-label">Tanggal Pengajuan</div>
-                        <div class="detail-value">${formatDate(item.created_at)}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Tanggal Kegiatan</div>
-                        <div class="detail-value">${formatDate(item.tanggal_kegiatan)}</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">Status</div>
-                        <div class="detail-value"><strong>${displayStatus}</strong></div>
-                    </div>
-                    ${item.deskripsi_kegiatan ? `
-                    <div class="detail-row">
-                        <div class="detail-label">Deskripsi Kegiatan</div>
-                        <div class="detail-value">${item.deskripsi_kegiatan}</div>
+
+                    ${getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-' ? `
+                    <div class="detail-section rejection-notes">
+                        <div class="detail-section-title">
+                            <i class="fa-solid fa-exclamation-triangle"></i> Alasan Penolakan
+                        </div>
+                        <div class="detail-row">
+                            <div class="detail-label">Catatan Penolakan</div>
+                            <div class="detail-value">${escapeHtml(getVal('catatan_penolakan'))}</div>
+                        </div>
                     </div>
                     ` : ''}
-                    ${item.jumlah_peserta ? `
-                    <div class="detail-row">
-                        <div class="detail-label">Jumlah Peserta</div>
-                        <div class="detail-value">${item.jumlah_peserta} orang</div>
+
+                    <div class="modal-actions">
+                        ${ (item.status && item.status.toLowerCase() === 'disetujui kk') ? 
+                            `<button class="modal-btn modal-btn-approve" onclick="showApproveModal(${item.id}, '${escapeHtml(item.nama_kegiatan)}'); closeModal('detailModal')">
+                                <i class="fa-solid fa-check"></i> Setujui
+                            </button>
+                            <button class="modal-btn modal-btn-reject" onclick="showRejectModal(${item.id}); closeModal('detailModal')">
+                                <i class="fa-solid fa-times"></i> Tolak
+                            </button>` : '' }
+                        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+                            <i class="fa-solid fa-times"></i> Tutup
+                        </button>
                     </div>
-                    ` : ''}
-                    ${item.anggaran ? `
-                    <div class="detail-row">
-                        <div class="detail-label">Anggaran</div>
-                        <div class="detail-value">${formatCurrency(item.anggaran)}</div>
-                    </div>
-                    ` : ''}
-                    ${item.catatan_penolakan ? `
-                    <div class="detail-row">
-                        <div class="detail-label">Alasan Penolakan</div>
-                        <div class="detail-value" style="color:#e74c3c">${item.catatan_penolakan}</div>
-                    </div>
-                    ` : ''}
                 `;
                 
                 document.getElementById('detailContent').innerHTML = content;
