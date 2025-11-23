@@ -1641,619 +1641,268 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <!-- ===== UPLOADCARE CDN ===== -->
 <script>
-    UPLOADCARE_PUBLIC_KEY = "demopublickey"; 
-    UPLOADCARE_LOCALE = "en";
+UPLOADCARE_PUBLIC_KEY = "demopublickey";
 </script>
 <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
-<!-- ===== STYLE UNTUK UI STEP 3 ===== -->
-<style>
-/* Card container */
-.upload-card {
-    background: #ffffff;
-    border-radius: 18px;
-    padding: 28px 32px;
-    border: 1px solid #e6e6e6;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    max-width: 620px;
-    margin: auto;
-    transition: 0.3s ease;
-}
-
-.upload-card:hover {
-    box-shadow: 0 8px 22px rgba(0,0,0,0.10);
-    transform: translateY(-2px);
-}
-
-/* Title */
-.upload-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    text-align: center;
-    color: #333;
-}
-
-/* Description */
-.upload-desc {
-    font-size: 14px;
-    color: #666;
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-/* Error text */
-#chk-error {
-    color: #e53935;
-    font-size: 13px;
-    margin-top: 10px;
-    display: block;
-    text-align: center;
-}
-
-/* Success state */
-.upload-success {
-    border-color: #28a745 !important;
-}
-
-.upload-success-message {
-    color: #28a745;
-    font-size: 14px;
-    text-align: center;
-    margin-top: 10px;
-}
-
-/* Loading overlay */
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 999999;
-}
-
-.loading-overlay.active {
-    display: flex;
-}
-
-.loading-content {
-    background: white;
-    padding: 40px 50px;
-    border-radius: 15px;
-    text-align: center;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-}
-
-.loading-spinner {
-    width: 60px;
-    height: 60px;
-    border: 5px solid #f3f3f3;
-    border-top: 5px solid #FB8C00;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-text {
-    font-size: 18px;
-    color: #333;
-    font-weight: 600;
-    margin-bottom: 8px;
-}
-
-.loading-subtext {
-    font-size: 14px;
-    color: #666;
-}
-
-/* Hide Uploadcare default button */
-.uploadcare--widget,
-.uploadcare--widget__button,
-.uploadcare--widget__button_type_open {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    position: absolute !important;
-    width: 0 !important;
-    height: 0 !important;
-    pointer-events: none !important;
-}
-
-/* Drag & Drop styling */
-#imagePreviewBox.drag-over {
-    background: #e3f2fd !important;
-    border-color: #ff9800 !important;
-    border-width: 3px !important;
-    transform: scale(1.02);
-    box-shadow: 0 8px 20px rgba(255, 152, 0, 0.3);
-}
-
-#imagePreviewBox {
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-#imagePreviewBox:hover {
-    border-color: #bbb !important;
-}
-</style>
-
-<!-- ===== STEP 3 ===== -->
 <fieldset>
-    <div class="container" style="min-height: 400px; display: flex; justify-content: center; align-items: center; padding: 20px;">
-        <div class="upload-card" style="max-width: 550px; width: 100%;">
-            
-            <!-- Hidden Uploadcare Input -->
-            <input 
-                type="hidden"
-                name="eviden"
-                id="evidenUploader"
-                role="uploadcare-uploader"
-                data-multiple="true"
-                data-multiple-max="0"
-                data-multiple-min="1"
-                data-clearable="true"
-                data-preview-step="true"
-                data-images-only="false"
-                data-tabs="file url camera dropbox gdrive"
-                data-multiple-upload="true"
-                style="display: none !important; visibility: hidden !important; opacity: 0 !important; position: absolute !important; width: 0 !important; height: 0 !important;"
-            />
+    <div style="width: 100%;">
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333;">
+                <i class="fas fa-cloud-upload-alt"></i> Upload File Eviden
+            </label>
+            <p style="font-size: 13px; color: #6c757d; margin-bottom: 15px;">
+                <i class="fas fa-info-circle"></i> Upload file pendukung (PDF, gambar, dokumen). Anda dapat memilih beberapa file sekaligus.
+            </p>
+        </div>
 
-            <!-- Custom Choose Files Button -->
-            <button 
-                type="button" 
-                id="chooseFilesBtn"
-                style="padding: 12px 28px; background: linear-gradient(90deg, #ff9800 0%, #ff6f00 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(255, 152, 0, 0.3); margin-bottom: 15px;"
-                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(255,152,0,0.4)';"
-                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(255, 152, 0, 0.3)';"
-            >
-                Choose files
-            </button>
+        <!-- KONTAINER UPLOADCARE (harus div kosong) -->
+        <div id="eviden-panel" style="min-height: 420px; border:1px solid #ddd; border-radius:10px;"></div>
 
-            <!-- Label -->
-            <div style="font-size: 14px; color: #666; margin-bottom: 12px;">
-                Pilih File atau Gambar
+        <!-- Hidden input untuk simpan URL -->
+        <input type="hidden" name="eviden" id="eviden" value="[]">
+        
+        <!-- Display uploaded files -->
+        <div id="uploaded-files-display" style="margin-top: 20px; display: none;">
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; border: 1px solid #dee2e6;">
+                <h6 style="font-weight: 600; margin-bottom: 10px; color: #495057;">
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i> File yang sudah diupload:
+                </h6>
+                <div id="files-list"></div>
             </div>
-
-            <!-- File Name Display -->
-            <div style="margin-bottom: 20px;">
-                <input 
-                    type="text" 
-                    id="fileDisplay" 
-                    readonly 
-                    placeholder="No file chosen"
-                    style="width: 100%; padding: 12px 16px; border: 1.5px solid #ddd; border-radius: 8px; background: #fff; font-size: 14px; color: #999; box-sizing: border-box;"
-                />
-            </div>
-
-            <!-- Image Preview Area with Drag & Drop -->
-            <div id="imagePreviewBox" style="width: 100%; min-height: 220px; background: #f5f5f5; border: 2px dashed #ddd; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 30px; box-sizing: border-box; position: relative;">
-                <div id="placeholderIcon" style="text-align: center; pointer-events: none;">
-                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21 15 16 10 5 21"></polyline>
-                    </svg>
-                    <div style="font-size: 14px; color: #999; line-height: 1.6;">
-                        <strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>
-                        atau klik tombol di atas
-                    </div>
-                </div>
-                <img id="previewImage" src="" style="display: none; max-width: 100%; max-height: 220px; border-radius: 8px; pointer-events: none;" />
-            </div>
-
-            <!-- Success Message -->
-            <div id="upload-status" style="display: none; margin-top: 15px; text-align: center; color: #4caf50; font-size: 14px;">
-                <i class="fas fa-check-circle"></i> File berhasil diupload!
-            </div>
-
-            <!-- Error Message -->
-            <span id="chk-error" style="display: block; margin-top: 10px; color: #e53935; font-size: 13px; text-align: center;"></span>
         </div>
     </div>
 </fieldset>
 
-<!-- ===== LOADING OVERLAY ===== -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-content">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Menyimpan Data...</div>
-        <div class="loading-subtext">Mohon tunggu, sedang memproses data Anda</div>
-    </div>
-</div>
-
-<!-- ===== BUTTON AREA ===== -->
+<!-- BUTTON AREA -->
 <div class="button-area" style="margin-top:25px; text-align:center;">
     <button type="button" class="btn btn-primary prev-btn rounded-pill btn-sm" style="padding: 6px 20px;">Back</button>
     <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Continue</button>
 </div>
 
-<!-- ===== SCRIPT VALIDASI DAN SUBMIT WITH DRAG & DROP ===== -->
 <script>
+// ========================================
+// PERBAIKAN UPLOADCARE - SIMPAN URL KE DATABASE
+// ========================================
+
 document.addEventListener("DOMContentLoaded", function () {
-    const nextBtn = document.querySelector(".next-btn");
-    const prevBtn = document.querySelector(".prev-btn");
-    const uploader = document.querySelector("#evidenUploader");
-    const chooseFilesBtn = document.getElementById("chooseFilesBtn");
-    const fileDisplay = document.getElementById("fileDisplay");
-    const imagePreviewBox = document.getElementById("imagePreviewBox");
-    const placeholderIcon = document.getElementById("placeholderIcon");
-    const previewImage = document.getElementById("previewImage");
-    const err = document.getElementById("chk-error");
-    const uploadStatus = document.getElementById("upload-status");
-    const uploadCard = document.querySelector('.upload-card');
-    const loadingOverlay = document.getElementById('loadingOverlay');
-    const msform = document.getElementById('msform');
-
-    let isFileUploaded = false;
-    let isSubmitting = false;
-    let widget = null;
-    let dialogOpened = false;
-
-    console.log("Step 3 script initialized");
-
-    // Initialize Uploadcare Widget
-    if (typeof uploadcare !== 'undefined') {
-        widget = uploadcare.Widget('[role="uploadcare-uploader"]');
-        
-        widget.onChange(function(file) {
-            if (file) {
-                isFileUploaded = true;
-                uploadStatus.style.display = 'block';
-                uploadCard.classList.add('upload-success');
-                err.textContent = '';
-                
-                file.done(function(info) {
-                    console.log("File uploaded successfully:", info);
-                    
-                    // Update file display
-                    if (info.count) {
-                        fileDisplay.value = info.count + " file(s) selected";
-                    } else {
-                        fileDisplay.value = info.name || "File uploaded";
-                    }
-                    
-                    // Show image preview if it's an image
-                    if (info.isImage) {
-                        placeholderIcon.style.display = 'none';
-                        previewImage.style.display = 'block';
-                        previewImage.src = info.cdnUrl + '-/preview/400x400/';
-                    } else {
-                        // Show file icon for non-images
-                        placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" style="pointer-events: none;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><div style="font-size: 14px; color: #4caf50; margin-top: 10px;">File berhasil dipilih</div>';
-                    }
-                });
-            } else {
-                isFileUploaded = false;
-                uploadStatus.style.display = 'none';
-                uploadCard.classList.remove('upload-success');
-                fileDisplay.value = '';
-                previewImage.style.display = 'none';
-                placeholderIcon.style.display = 'block';
-                placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><div style="font-size: 14px; color: #999; line-height: 1.6;"><strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>atau klik tombol di atas</div>';
-                console.log("File upload cleared");
-            }
-        });
-
-        // Auto open dialog ketika step 3 aktif
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                const currentFieldset = document.querySelector('fieldset.active');
-                if (currentFieldset && currentFieldset.contains(uploader) && !dialogOpened) {
-                    console.log("Step 3 is now active, opening upload dialog...");
-                    dialogOpened = true;
-                    
-                    setTimeout(function() {
-                        if (widget) {
-                            widget.openDialog();
-                            console.log("Upload dialog opened automatically");
-                        }
-                    }, 300);
-                }
-            });
-        });
-
-        const fieldsets = document.querySelectorAll('fieldset');
-        fieldsets.forEach(function(fieldset) {
-            observer.observe(fieldset, {
-                attributes: true,
-                attributeFilter: ['class']
-            });
-        });
-
-    } else {
-        console.warn("Uploadcare not loaded");
-    }
-
-    // Click on Choose Files button
-    chooseFilesBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (widget) {
-            widget.openDialog();
-        }
-    });
-
-    // Click on preview box to open dialog
-    imagePreviewBox.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (widget && placeholderIcon.style.display !== 'none') {
-            widget.openDialog();
-        }
-    });
-
-    // ========== DRAG & DROP FUNCTIONALITY ==========
+    const evidenInput = document.getElementById("eviden");
+    const msform = document.getElementById("msform");
+    const uploadedDisplay = document.getElementById("uploaded-files-display");
+    const filesList = document.getElementById("files-list");
     
-    // Prevent default drag behaviors on entire document
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        document.body.addEventListener(eventName, function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }, false);
-    });
+    // Pastikan default selalu array kosong (bukan string kosong)
+    if (!evidenInput.value || evidenInput.value === "") {
+        evidenInput.value = "[]";
+    }
 
-    // Highlight drop zone when item is dragged over
-    ['dragenter', 'dragover'].forEach(eventName => {
-        imagePreviewBox.addEventListener(eventName, function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            imagePreviewBox.classList.add('drag-over');
-        }, false);
-    });
+    // Array untuk menyimpan semua URL yang di-upload
+    let uploadedFiles = [];
 
-    // Remove highlight when item leaves or is dropped
-    ['dragleave', 'drop'].forEach(eventName => {
-        imagePreviewBox.addEventListener(eventName, function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            imagePreviewBox.classList.remove('drag-over');
-        }, false);
-    });
-
-    // Handle dropped files
-    imagePreviewBox.addEventListener('drop', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const dt = e.dataTransfer;
-        const files = dt.files;
-
-        if (files && files.length > 0) {
-            console.log("Files dropped:", files.length, "file(s)");
-            handleDroppedFiles(files);
-        }
-    }, false);
-
-    // Function to handle dropped files and upload via Uploadcare
-    function handleDroppedFiles(files) {
-        const filesArray = Array.from(files);
-        console.log("Processing dropped files:", filesArray);
-        
-        if (filesArray.length === 0) {
-            console.warn("No files to process");
+    // Function untuk update display files
+    function updateFilesDisplay() {
+        if (uploadedFiles.length === 0) {
+            uploadedDisplay.style.display = 'none';
             return;
         }
 
-        // Show loading state
-        placeholderIcon.innerHTML = '<svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" style="animation: spin 1s linear infinite;"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg><div style="font-size: 14px; color: #ff9800; margin-top: 10px;">Mengupload file...</div>';
-        
-        // Upload via Uploadcare
-        if (widget && typeof uploadcare !== 'undefined') {
-            try {
-                // Upload single file or multiple files
-                if (filesArray.length === 1) {
-                    const uploadedFile = uploadcare.fileFrom('object', filesArray[0]);
-                    
-                    uploadedFile.done(function(fileInfo) {
-                        console.log("File uploaded via drag & drop:", fileInfo);
-                        
-                        // Set value to widget
-                        widget.value(fileInfo.uuid);
-                        
-                        // Update UI
-                        isFileUploaded = true;
-                        uploadStatus.style.display = 'block';
-                        uploadCard.classList.add('upload-success');
-                        err.textContent = '';
-                        fileDisplay.value = filesArray[0].name;
-                        
-                        // Show preview
-                        if (filesArray[0].type.startsWith('image/')) {
-                            placeholderIcon.style.display = 'none';
-                            previewImage.style.display = 'block';
-                            previewImage.src = fileInfo.cdnUrl + '-/preview/400x400/';
-                        } else {
-                            placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" style="pointer-events: none;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg><div style="font-size: 14px; color: #4caf50; margin-top: 10px;">File berhasil diupload</div>';
-                        }
-                    }).fail(function(error) {
-                        console.error("Upload failed:", error);
-                        err.textContent = "Gagal mengupload file. Silakan coba lagi.";
-                        placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><div style="font-size: 14px; color: #999; line-height: 1.6;"><strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>atau klik tombol di atas</div>';
-                    });
-                } else {
-                    // Multiple files - create group
-                    const filePromises = filesArray.map(file => uploadcare.fileFrom('object', file));
-                    const group = uploadcare.loadFileGroup(filePromises);
-                    
-                    group.done(function(groupInfo) {
-                        console.log("Files uploaded via drag & drop:", groupInfo);
-                        
-                        // Set value to widget
-                        widget.value(groupInfo.uuid);
-                        
-                        // Update UI
-                        isFileUploaded = true;
-                        uploadStatus.style.display = 'block';
-                        uploadCard.classList.add('upload-success');
-                        err.textContent = '';
-                        fileDisplay.value = filesArray.length + " file(s) uploaded";
-                        
-                        // Show multiple files icon
-                        placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2" style="pointer-events: none;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline><path d="M14 2v6h6"></path></svg><div style="font-size: 14px; color: #4caf50; margin-top: 10px;">' + filesArray.length + ' file(s) berhasil diupload</div>';
-                    }).fail(function(error) {
-                        console.error("Upload failed:", error);
-                        err.textContent = "Gagal mengupload file. Silakan coba lagi.";
-                        placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><div style="font-size: 14px; color: #999; line-height: 1.6;"><strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>atau klik tombol di atas</div>';
-                    });
-                }
-            } catch (error) {
-                console.error("Error processing files:", error);
-                err.textContent = "Terjadi kesalahan saat memproses file.";
-                placeholderIcon.innerHTML = '<svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom: 10px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><div style="font-size: 14px; color: #999; line-height: 1.6;"><strong style="color: #ff9800;">Drag & drop</strong> file di sini<br>atau klik tombol di atas</div>';
-            }
-        }
-    }
+        uploadedDisplay.style.display = 'block';
+        filesList.innerHTML = '';
 
-    // Function untuk submit form via AJAX
-    function submitFormData() {
-        return new Promise((resolve, reject) => {
-            const formData = new FormData(msform);
+        uploadedFiles.forEach((url, index) => {
+            const filename = url.split('/').pop().split('?')[0]; // Extract filename dari URL
+            const fileItem = document.createElement('div');
+            fileItem.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 6px; margin-bottom: 8px; border: 1px solid #e9ecef;';
             
-            console.log("=== DATA YANG AKAN DIKIRIM ===");
-            for (let [key, value] of formData.entries()) {
-                console.log(key + ': ' + value);
-            }
+            fileItem.innerHTML = `
+                <div style="flex-shrink: 0;">
+                    <i class="fas fa-file-alt" style="font-size: 20px; color: #6c757d;"></i>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <strong style="font-size: 13px; color: #495057;">File ${index + 1}</strong>
+                    <div style="font-size: 11px; color: #6c757d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${filename}</div>
+                </div>
+                <button type="button" 
+                        onclick="removeFile(${index})" 
+                        style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
+                    <i class="fas fa-times"></i> Hapus
+                </button>
+            `;
             
-            const actionUrl = '<?= base_url("surat/submit") ?>';
-            console.log("Submitting to:", actionUrl);
-            
-            fetch(actionUrl, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                console.log("Response status:", response.status);
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                return response.text();
-            })
-            .then(data => {
-                console.log("Response received:", data);
-                resolve({ success: true, message: 'Data berhasil disimpan', data: data });
-            })
-            .catch(error => {
-                console.error("Fetch error:", error);
-                reject(error);
-            });
+            filesList.appendChild(fileItem);
         });
     }
 
-    // Handler untuk tombol Continue di Step 3
-    nextBtn.addEventListener("click", function (e) {
-        const currentFieldset = document.querySelector('fieldset.active');
-        const allFieldsets = document.querySelectorAll('fieldset');
-        const currentStepIndex = Array.from(allFieldsets).indexOf(currentFieldset);
-        
-        console.log("Next button clicked, current step index:", currentStepIndex);
-        
-        if (currentStepIndex !== 2) {
-            console.log("Not step 3, skipping custom handler");
-            return;
-        }
-        
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        
-        console.log("Step 3 detected, processing...");
-        
-        if (isSubmitting) {
-            console.log("Already submitting, please wait...");
-            return false;
-        }
-        
-        // Validasi upload file
-        const uploaderValue = uploader.value ? uploader.value.trim() : '';
-        console.log("Uploader value:", uploaderValue);
-        console.log("Is file uploaded:", isFileUploaded);
-        
-        if (!isFileUploaded && uploaderValue === "") {
-            err.textContent = "Mohon upload minimal 1 file eviden!";
-            uploadCard.style.borderColor = "#e53935";
-            console.log("Validation failed: No file uploaded");
-            return false;
-        }
+    // Function untuk remove file
+    window.removeFile = function(index) {
+        uploadedFiles.splice(index, 1);
+        evidenInput.value = JSON.stringify(uploadedFiles);
+        updateFilesDisplay();
+        console.log("🗑️ File dihapus. Total file:", uploadedFiles.length);
+    };
 
-        err.textContent = "";
-        uploadCard.style.borderColor = "#28a745";
-        console.log("Validation passed");
-        
-        isSubmitting = true;
-        loadingOverlay.classList.add('active');
-        
-        nextBtn.disabled = true;
-        nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        
-        console.log("=== MEMULAI PROSES SUBMIT ===");
-        
-        submitFormData()
-            .then(response => {
-                console.log("Submit berhasil!", response);
-                
-                document.querySelector('.loading-text').textContent = 'Berhasil!';
-                document.querySelector('.loading-subtext').textContent = 'Mengalihkan ke halaman daftar...';
-                
-                setTimeout(() => {
-                    console.log("Redirecting to list_surat_tugas");
-                    window.location.href = '<?= base_url("surat/list_surat_tugas") ?>';
-                }, 1500);
-            })
-            .catch(error => {
-                console.error("Submit gagal:", error);
-                
-                loadingOverlay.classList.remove('active');
-                
-                isSubmitting = false;
-                nextBtn.disabled = false;
-                nextBtn.innerHTML = 'Continue';
-                
-                alert('Gagal menyimpan data: ' + error.message + '\nSilakan coba lagi.');
-            });
-        
-        return false;
+    // Inisialisasi Uploadcare Panel
+    const panel = uploadcare.openPanel('#eviden-panel', null, {
+        multiple: true,
+        previewStep: true,
+        tabs: "file url camera dropbox gdrive",
+        publicKey: "demopublickey"
     });
 
-    // Cek jika ada file yang sudah diupload saat halaman dimuat
-    function checkInitialUpload() {
-        const uploaderValue = uploader.value ? uploader.value.trim() : '';
-        console.log("Checking initial upload, value:", uploaderValue);
+    // Event ketika user selesai upload file
+    panel.done(function (fileGroup) {
+        console.log("✅ Upload selesai! File group:", fileGroup);
         
-        if (uploaderValue !== "") {
-            isFileUploaded = true;
-            uploadStatus.style.display = 'block';
-            uploadCard.classList.add('upload-success');
-            fileDisplay.value = "File uploaded";
-            console.log("Found existing upload");
-        }
+        // Proses semua file yang di-upload
+        fileGroup.files().forEach(filePromise => {
+            filePromise.done(fileInfo => {
+                console.log("📁 File info:", fileInfo);
+                
+                // Tambahkan URL ke array
+                uploadedFiles.push(fileInfo.cdnUrl);
+                
+                // Update hidden input dengan format JSON array
+                evidenInput.value = JSON.stringify(uploadedFiles);
+                
+                // Update display
+                updateFilesDisplay();
+                
+                console.log("💾 Eviden tersimpan:", evidenInput.value);
+                console.log("📊 Total files:", uploadedFiles.length);
+            });
+        });
+    });
+
+    // ========================================
+    // PERBAIKAN FORM SUBMIT
+    // ========================================
+    
+    // Cegah submit default di tombol "Finish"
+    const nextBtn = document.querySelector('.next-btn');
+    const fieldsets = document.querySelectorAll('fieldset');
+    let currentStep = 0;
+
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const totalSteps = fieldsets.length;
+            
+            // Jika masih ada step berikutnya
+            if (currentStep < totalSteps - 1) {
+                fieldsets[currentStep].classList.remove('active');
+                currentStep++;
+                fieldsets[currentStep].classList.add('active');
+                
+                // Update progress bar
+                const percent = ((currentStep + 1) / totalSteps) * 100;
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('currentStep').textContent = currentStep + 1;
+                
+                // Toggle tombol back
+                document.querySelector('.prev-btn').style.display = currentStep > 0 ? 'inline-block' : 'none';
+                
+                // Update text tombol
+                nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
+            } 
+            // Jika sudah di step terakhir (Finish)
+            else {
+                console.log("🚀 Submitting form...");
+                console.log("📎 Final eviden value:", evidenInput.value);
+                
+                // Validasi: pastikan eviden tidak kosong jika wajib
+                if (uploadedFiles.length === 0) {
+                    alert("⚠️ Silakan upload minimal 1 file eviden!");
+                    return false;
+                }
+                
+                // Submit form
+                msform.submit();
+            }
+        });
     }
 
-    setTimeout(checkInitialUpload, 1500);
+    // Tombol Back
+    const prevBtn = document.querySelector('.prev-btn');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (currentStep > 0) {
+                fieldsets[currentStep].classList.remove('active');
+                currentStep--;
+                fieldsets[currentStep].classList.add('active');
+                
+                // Update progress
+                const totalSteps = fieldsets.length;
+                const percent = ((currentStep + 1) / totalSteps) * 100;
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('currentStep').textContent = currentStep + 1;
+                
+                prevBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
+                nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
+            }
+        });
+    }
+});
+
+// ========================================
+// DEBUG HELPER - CEK ISI FORM SEBELUM SUBMIT
+// ========================================
+document.getElementById("msform").addEventListener("submit", function(e) {
+    const evidenValue = document.getElementById("eviden").value;
+    console.log("📤 Form akan di-submit dengan eviden:", evidenValue);
+    
+    // Cek apakah eviden kosong
+    try {
+        const parsed = JSON.parse(evidenValue);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+            console.warn("⚠️ WARNING: Eviden kosong!");
+        } else {
+            console.log("✅ Eviden berisi", parsed.length, "file(s)");
+        }
+    } catch (err) {
+        console.error("❌ ERROR: Format eviden tidak valid!", err);
+    }
 });
 </script>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+/* Styling untuk uploaded files display */
+#uploaded-files-display {
+    animation: fadeIn 0.3s ease;
+}
 
-        </form>
-    </section>
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#files-list > div:hover {
+    background: #f8f9fa !important;
+    border-color: #8E44AD !important;
+}
+
+#files-list button:hover {
+    background: #c82333 !important;
+    transform: scale(1.05);
+}
+</style>
+</form>
+</section>
 </main>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <div class="akun-container">
-        <?php if ($this->session->flashdata('success')): ?>
-            <p style="color:green;"><?php echo $this->session->flashdata('success'); ?></p>
+<div class="akun-container">
+    <?php if ($this->session->flashdata('success')): ?>
+        <p style="color:green;"><?php echo $this->session->flashdata('success'); ?></p>
         <?php elseif ($this->session->flashdata('error')): ?>
             <p style="color:red;"><?php echo $this->session->flashdata('error'); ?></p>
         <?php endif; ?>

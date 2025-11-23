@@ -463,24 +463,62 @@ class Dekan extends CI_Controller
     }
     
     public function detail($id)
-    {
-        $this->db->where('id', $id);
-        $data['surat'] = $this->db->get("surat")->row();
+{
+    // Ambil surat
+    $this->db->where('id', $id);
+    $data['surat'] = $this->db->get("surat")->row();
 
-        if (!$data['surat']) {
-            show_404();
-        }
-
-        $this->load->view('dekan/detail_surat', $data);
+    if (!$data['surat']) {
+        show_404();
     }
+
+    // --- Ambil Data Dosen Berdasarkan NIP ---
+    $nip_raw = $data['surat']->nip;
+
+    // NIP disimpan dalam bentuk JSON array → decode
+    $nip_list = json_decode($nip_raw, true);
+
+    if (!is_array($nip_list)) {
+        $nip_list = [$nip_raw]; // fallback jika bukan array
+    }
+
+    // Ambil semua dosen yg NIP-nya ada dalam array
+    $this->db->where_in('nip', $nip_list);
+    $data['dosen_list'] = $this->db->get('list_dosen')->result();
+
+    // Jika tidak ditemukan, tetap kirim array kosong
+    if (!$data['dosen_list']) {
+        $data['dosen_list'] = [];
+    }
+
+    $this->load->view('dekan/detail_surat', $data);
+}
 
     public function get_surat_detail($id)
-    {
-        $this->db->where('id', $id);
-        $surat = $this->db->get("surat")->row();
+{
+    // Ambil data surat dulu
+    $surat = $this->db->get_where('surat', ['id' => $id])->row_array();
 
-        echo json_encode($surat ? $surat : ['error' => 'Data tidak ditemukan']);
+    if (!$surat) {
+        echo json_encode(['error' => 'Data tidak ditemukan']);
+        return;
     }
+
+    // Ambil data dosen berdasarkan nip
+    $dosen = $this->db->get_where('list_dosen', ['nip' => $surat['nip']])->row_array();
+
+    // Gabungkan datanya
+    if ($dosen) {
+        $surat['nama_dosen'] = $dosen['nama'];   // pastikan kolomnya 'nama'
+        $surat['nip']        = $dosen['nip'];    // ambil nip dari list_dosen
+    } else {
+        $surat['nama_dosen'] = '-';
+        // nip tetap pakai dari surat jika tidak ketemu dosen
+    }
+
+    echo json_encode($surat);
+}
+
 
     // Filter laporan
     public function filter($status = '')
