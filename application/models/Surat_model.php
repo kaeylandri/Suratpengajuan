@@ -219,4 +219,12 @@ class Surat_model extends CI_Model
         $result = $this->db->get('surat')->result();
         return $this->append_dosen_data($result);
     }
+    public function get_dosen_by_nip_list($nip_list)
+{
+    if(empty($nip_list)) return [];
+
+    $this->db->where_in('nip', $nip_list);
+    return $this->db->get('list_surat')->result();
+}
+
 }

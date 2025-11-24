@@ -1012,66 +1012,74 @@ class Surat extends CI_Controller
         redirect('surat');
     }
 
-    /* ===========================================
-       CETAK SURAT (UPDATED - FIX GD ERROR)
-    ============================================*/
-    public function cetak($id)
-    {
-        $surat = $this->Surat_model->get_by_id($id);
-        if (!$surat) show_404();
+      public function cetak($id)
+{
+    $surat = $this->Surat_model->get_by_id($id);
+    if (!$surat) show_404();
 
-        // TAMBAHAN: Get dosen data untuk PDF
-        $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
+    // --- NIP array ---
+    $surat->nip = is_array($surat->nip) ? $surat->nip : json_decode($surat->nip, true);
 
-        // URL validasi
-        $validation_url = base_url("surat/validasi/" . $surat->id);
+    // --- data dosen ---
+    $surat->dosen_data = $this->get_dosen_detail($surat);
 
-        // === QR Code Generation dengan Error Handling ===
-        $qr_base64 = '';
-        
-        try {
-            // Check if GD extension is loaded
-            if (!extension_loaded('gd')) {
-                log_message('error', 'GD extension not loaded - QR Code generation skipped');
-                // Set placeholder atau kosongkan QR code
-                $qr_base64 = '';
-            } else {
-                $qrCode = QrCode::create($validation_url)
-                    ->setEncoding(new Encoding('UTF-8'))
-                    ->setErrorCorrectionLevel(new ErrorCorrectionLevelLow())
-                    ->setSize(160);
+    $jumlah_dosen = count($surat->dosen_data);
 
-                $writer = new PngWriter();
-                $qrResult = $writer->write($qrCode);
-
-                $qr_base64 = base64_encode($qrResult->getString());
-            }
-        } catch (Exception $e) {
-            log_message('error', 'QR Code generation failed: ' . $e->getMessage());
-            $qr_base64 = ''; // Set kosong jika gagal
-        }
-
-        // Data ke view
-        $data = [
-            'surat' => $surat,
-            'qr_base64' => $qr_base64
-        ];
-
-        $html = $this->load->view('surat_print', $data, TRUE);
-
-        // PDF
-        $options = new Options();
-        $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true);
-
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'portrait');
-        $dompdf->render();
-
-        $filename = "surat_tugas_" . $surat->id . ".pdf";
-        $dompdf->stream($filename, array("Attachment" => 1));
+    // Tentukan file view
+    if ($jumlah_dosen == 1) {
+        $view_file = 'surat_satu';
+    } elseif ($jumlah_dosen <= 5) {
+        $view_file = 'surat_print';   // <— DISESUAIKAN DI SINI
+    } else {
+        $view_file = 'surat_banyak';
     }
+
+    // --- QR VALIDATION URL ---
+    $validation_url = base_url("surat/validasi/" . $surat->id);
+
+    // --- QR CODE GENERATE ---
+    $qr_base64 = '';
+    try {
+        if (extension_loaded('gd')) {
+            $qrCode = QrCode::create($validation_url)
+                ->setEncoding(new Encoding('UTF-8'))
+                ->setErrorCorrectionLevel(new ErrorCorrectionLevelLow())
+                ->setSize(160);
+
+            $writer = new PngWriter();
+            $qrResult = $writer->write($qrCode);
+            $qr_base64 = base64_encode($qrResult->getString());
+        }
+    } catch (Exception $e) {
+        log_message('error', 'QR Code generation failed: ' . $e->getMessage());
+    }
+
+    $data = [
+        'surat'      => $surat,
+        'qr_base64'  => $qr_base64
+    ];
+
+    // Render view + header + footer
+    $html = $this->load->view($view_file, $data, TRUE);
+
+    // PDF OPTIONS
+    $options = new Options();
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('isRemoteEnabled', true);
+
+    $dompdf = new Dompdf($options);
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+
+    ini_set("memory_limit", "4096M");
+    ini_set("pcre.backtrack_limit", "30000000");
+
+    $dompdf->render();
+
+    $filename = "surat_tugas_" . $surat->id . ".pdf";
+
+    $dompdf->stream($filename, ["Attachment" => 0]);
+}
 
     public function download_pdf($id)
     {
@@ -1106,7 +1114,41 @@ class Surat extends CI_Controller
 
         $this->load->view('surat_validasi', $data);
     }
+    private function get_dosen_detail($surat)
+{
+    // NIP sudah array → tidak perlu json_decode
+    $nip_list = is_array($surat->nip) ? $surat->nip : json_decode($surat->nip, true);
 
+    if (!$nip_list) return [];
+
+    // Ambil dosen dari model
+    $this->load->model('ListSurat_model');
+    $dosen_data = $this->ListSurat_model->get_many_by_nip($nip_list);
+
+    // Susun ulang urutan sesuai urutan NIP di surat
+    $result = [];
+
+    foreach ($nip_list as $nip) {
+        if (isset($dosen_data[$nip])) {
+            $result[] = [
+                'nip'     => $nip,
+                'nama'    => $dosen_data[$nip]->nama_dosen,
+                'jabatan' => $dosen_data[$nip]->jabatan,
+                'divisi'  => $dosen_data[$nip]->divisi,
+            ];
+        } else {
+            // fallback jika nip tidak ada di tabel list_dosen
+            $result[] = [
+                'nip'     => $nip,
+                'nama'    => '-',
+                'jabatan' => '-',
+                'divisi'  => '-',
+            ];
+        }
+    }
+
+    return $result;
+}
     /* ===========================================
        LIST SURAT TUGAS (UPDATED)
     ============================================*/

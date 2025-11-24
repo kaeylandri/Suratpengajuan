@@ -31,13 +31,13 @@
 
     <h2>Regulation Validation</h2>
 
-    <p><b>Nama RegulasI :</b> Surat Tugas</p>
+    <p><b>Nama Regulasi :</b> Keputusan Dekan Falkultas Industri Kreatif Telkom University</p>
     <p><b>Nomor Dokumen :</b> <?= $surat->nomor_surat ?></p>
     <p><b>Tanggal :</b> <?= $surat->tanggal_kegiatan ?></p>
 
-    <p><b>Penandatangan :</b><br>
+    <p><b>Penandatangan :</b>
        Dandi Yunidar, S.Sn., M.Ds., Ph.D.<br>
-       Dekan Fakultas Industri Kreatif
+       &nbsp;Dekan Fakultas Industri Kreatif
     </p>
 
     <hr>
