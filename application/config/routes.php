@@ -40,6 +40,11 @@ $route['surat/edit/(:num)'] = 'surat/edit/$1';
 $route['surat/delete/(:num)'] = 'surat/delete/$1';
 $route['surat/cetak/(:num)'] = 'surat/cetak/$1';
 
+// LIST SURAT TUGAS ROUTES - DIPERBAIKI
+$route['surat/list-surat-tugas'] = 'surat/list_surat_tugas';
+$route['list-surat-tugas'] = 'surat/list_surat_tugas';
+$route['surat/list_surat_tugas'] = 'surat/list_surat_tugas';
+
 // STATS GRID ROUTES - UPDATED TO MATCH CONTROLLER
 $route['surat/total'] = 'surat/halaman_total';
 $route['surat/disetujui'] = 'surat/halaman_disetujui';
@@ -68,9 +73,6 @@ $route['surat/update_status/(:num)/(:any)'] = 'surat/update_status/$1/$2';
 
 // DETAIL ROUTE
 $route['surat/detail/(:num)'] = 'surat/detail/$1';
-
-// LIST SURAT TUGAS
-$route['list-surat-tugas'] = 'surat/list_surat_tugas';
 
 // QR CODE
 $route['surat/generate_qr/(:num)'] = 'surat/generate_qr/$1';
