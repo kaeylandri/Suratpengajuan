@@ -1075,7 +1075,7 @@
         color: #6c757d;
     }
 
-    /* File evidence styles */
+    /* File evidence styles - PERBAIKAN */
     .file-list {
         display: flex;
         flex-direction: column;
@@ -1110,12 +1110,17 @@
 
     .file-info {
         flex: 1;
+        cursor: pointer;
+        min-width: 0;
     }
 
     .file-name {
         font-weight: 600;
         color: #212529;
         font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .file-size {
@@ -1136,12 +1141,112 @@
         display: flex;
         align-items: center;
         gap: 5px;
+        text-decoration: none;
     }
 
     .download-btn:hover {
         background: #e67e00;
         text-decoration: none;
         color: white;
+    }
+
+    /* Preview Modal Styles */
+    .preview-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .preview-modal.show {
+        display: flex;
+    }
+
+    .preview-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .preview-header {
+        background: #FB8C00;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .preview-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .preview-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+
+    .preview-close:hover {
+        background: rgba(255,255,255,0.2);
+    }
+
+    .preview-body {
+        flex: 1;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #f8f9fa;
+        min-height: 400px;
+    }
+
+    .preview-iframe {
+        width: 100%;
+        height: 70vh;
+        border: none;
+    }
+
+    .preview-image {
+        max-width: 100%;
+        max-height: 70vh;
+        object-fit: contain;
+    }
+
+    .preview-unsupported {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+
+    .preview-unsupported i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: #FB8C00;
     }
 
     .close-modal {
@@ -1505,6 +1610,19 @@
                     <div id="detailContent">
                         <!-- Content akan diisi oleh JavaScript -->
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Modal -->
+        <div id="previewModal" class="preview-modal">
+            <div class="preview-content">
+                <div class="preview-header">
+                    <h3 id="previewTitle">Preview File</h3>
+                    <button class="preview-close">&times;</button>
+                </div>
+                <div class="preview-body" id="previewBody">
+                    <!-- Preview content akan diisi oleh JavaScript -->
                 </div>
             </div>
         </div>
@@ -2347,7 +2465,7 @@ $(document).ready(function () {
             html += `</div></div>`;
         }
 
-        // File Evidence Section
+        // File Evidence Section - PERBAIKAN UTAMA
         if (data.eviden && (Array.isArray(data.eviden) ? data.eviden.length > 0 : data.eviden !== '-')) {
             html += `
                 <div class="detail-section">
@@ -2363,28 +2481,36 @@ $(document).ready(function () {
             evidenFiles.forEach((file, index) => {
                 let fileName = '-';
                 let fileUrl = '';
+                let fileType = 'unknown';
                 
                 if (typeof file === 'string') {
                     fileUrl = file;
                     fileName = file.split('/').pop().split('?')[0] || 'File ' + (index + 1);
+                    fileType = getFileType(fileName);
                 } else if (typeof file === 'object' && file !== null) {
                     fileUrl = file.cdnUrl || file.path || file.url || '';
                     fileName = file.nama_asli || file.name || fileUrl.split('/').pop().split('?')[0] || 'File ' + (index + 1);
+                    fileType = getFileType(fileName);
                 }
                 
+                // Fix URL jika tidak lengkap
                 if (fileUrl && !fileUrl.match(/^https?:\/\//i)) {
                     fileUrl = BASE_URL + (fileUrl.startsWith('/') ? '' : '/') + fileUrl;
                 }
                 
+                // Icon berdasarkan tipe file
+                const fileIcon = getFileIcon(fileType);
+                
                 html += `
                     <div class="file-item">
                         <div class="file-icon">
-                            <i class="fas fa-file-pdf"></i>
+                            <i class="${fileIcon}"></i>
                         </div>
-                        <div class="file-info">
+                        <div class="file-info" onclick="previewFile('${escapeHtml(fileUrl)}', '${escapeHtml(fileName)}', '${fileType}')">
                             <div class="file-name">${escapeHtml(fileName)}</div>
+                            <div class="file-size">${fileType.toUpperCase()}</div>
                         </div>
-                        <a href="${fileUrl}?download=1" class="download-btn" download="${fileName}">
+                        <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank">
                             <i class="fas fa-download"></i> Download
                         </a>
                     </div>
@@ -2406,13 +2532,85 @@ $(document).ready(function () {
         return div.innerHTML;
     }
 
+    // Helper function untuk menentukan tipe file
+    function getFileType(filename) {
+        if (!filename) return 'unknown';
+        
+        const ext = filename.split('.').pop().toLowerCase();
+        const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+        const documentTypes = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+        const archiveTypes = ['zip', 'rar', '7z', 'tar', 'gz'];
+        
+        if (imageTypes.includes(ext)) return 'image';
+        if (documentTypes.includes(ext)) return 'document';
+        if (archiveTypes.includes(ext)) return 'archive';
+        return 'unknown';
+    }
+
+    // Helper function untuk icon file
+    function getFileIcon(fileType) {
+        switch(fileType) {
+            case 'image':
+                return 'fas fa-file-image';
+            case 'document':
+                return 'fas fa-file-pdf';
+            case 'archive':
+                return 'fas fa-file-archive';
+            default:
+                return 'fas fa-file';
+        }
+    }
+
+    // Fungsi untuk preview file
+    window.previewFile = function(fileUrl, fileName, fileType) {
+        const previewModal = $('#previewModal');
+        const previewTitle = $('#previewTitle');
+        const previewBody = $('#previewBody');
+        
+        previewTitle.text(fileName);
+        previewBody.empty();
+        
+        if (fileType === 'image') {
+            // Preview gambar
+            previewBody.html(`<img src="${fileUrl}" class="preview-image" alt="${fileName}">`);
+        } else if (fileType === 'document' && (fileName.toLowerCase().endsWith('.pdf'))) {
+            // Preview PDF
+            previewBody.html(`<iframe src="${fileUrl}" class="preview-iframe" frameborder="0"></iframe>`);
+        } else {
+            // File tidak bisa dipreview
+            previewBody.html(`
+                <div class="preview-unsupported">
+                    <i class="fas fa-eye-slash"></i>
+                    <h4>Preview Tidak Tersedia</h4>
+                    <p>File ini tidak dapat dipreview. Silakan download untuk melihat isinya.</p>
+                    <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank">
+                        <i class="fas fa-download"></i> Download File
+                    </a>
+                </div>
+            `);
+        }
+        
+        previewModal.addClass('show');
+    };
+
     // Close modals
     $('.close-modal').click(function(){
         $('#modalDetail').removeClass('show');
     });
     
+    $('.preview-close').click(function(){
+        $('#previewModal').removeClass('show');
+    });
+    
     $(window).click(function(e){
         if(e.target.id==='modalDetail') $('#modalDetail').removeClass('show');
+        if(e.target.id==='previewModal') $('#previewModal').removeClass('show');
+    });
+
+    // Prevent download link dari menutup modal
+    $(document).on('click', '.download-btn', function(e) {
+        e.stopPropagation();
+        // Biarkan link download berfungsi normal
     });
 });
 </script>

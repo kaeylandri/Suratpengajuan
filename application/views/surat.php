@@ -774,28 +774,28 @@
     <div class="row">
       <div class="col-md-3 mt-3">
         <div class="form-group">
-          <input type="text" name="tanggal_kegiatan" id="datepicker" class="form-control custom-form-control" required autocomplete="off">
+          <input type="text" name="tanggal_kegiatan" id="datepicker" class="form-control custom-form-control" required autocomplete="off" readonly>
           <label id="lbl_mulai">Mulai kegiatan</label>
         </div>
       </div>
 
       <div class="col-md-3 mt-3">
         <div class="form-group">
-          <input type="text" name="akhir_kegiatan" id="datepicker2" class="form-control custom-form-control" required autocomplete="off">
+          <input type="text" name="akhir_kegiatan" id="datepicker2" class="form-control custom-form-control" required autocomplete="off" readonly>
           <label id="lbl_akhir">Berakhir kegiatan</label>
         </div>
       </div>
 
       <div class="col-md-3 mt-3">
         <div class="form-group">
-          <input type="text" name="periode_penugasan" id="datepicker3" class="form-control custom-form-control" required autocomplete="off">
+          <input type="text" name="periode_penugasan" id="datepicker3" class="form-control custom-form-control" required autocomplete="off" readonly>
           <label id="lbl_mulai1">Periode Penugasan</label>
         </div>
       </div>
 
       <div class="col-md-3 mt-3">
         <div class="form-group">
-          <input type="text" name="akhir_periode_penugasan" id="datepicker4" class="form-control custom-form-control" required autocomplete="off">
+          <input type="text" name="akhir_periode_penugasan" id="datepicker4" class="form-control custom-form-control" required autocomplete="off" readonly>
           <label id="lbl_akhir1">Akhir Penugasan</label>
         </div>
       </div>
@@ -884,6 +884,70 @@
         transform: translateY(0);
     }
 }
+
+/* Style untuk error message */
+.error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+.form-group.has-error input {
+    border-color: #dc3545;
+}
+
+/* Style untuk info message */
+.info-message {
+    color: #0d6efd;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+/* Style untuk success message */
+.success-message {
+    color: #198754;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+/* Style untuk disabled dates di datepicker */
+.ui-datepicker td.ui-state-disabled {
+    opacity: 0.3;
+}
+
+.ui-datepicker td.ui-state-disabled span {
+    cursor: not-allowed !important;
+}
+
+/* Highlight untuk tanggal yang valid */
+.ui-datepicker td.valid-date a {
+    background-color: #e8f5e8 !important;
+    color: #198754 !important;
+    font-weight: bold;
+}
+
+/* Style untuk tanggal yang melebihi batas */
+.ui-datepicker td.over-limit-date a {
+    background-color: #fff3cd !important;
+    color: #856404 !important;
+    text-decoration: line-through;
+}
+
+/* tambahan visual warning kelas */
+.ui-datepicker td.warning a {
+    box-shadow: 0 0 0 1px #ffc107 inset;
+}
+
+/* Style untuk tanggal yang benar-benar tidak bisa dipilih */
+.ui-datepicker td.force-disabled a {
+    background-color: #f8d7da !important;
+    color: #721c24 !important;
+    text-decoration: line-through;
+    cursor: not-allowed !important;
+}
 </style>
 
 <!-- JS -->
@@ -892,7 +956,485 @@ document.addEventListener('DOMContentLoaded', function () {
   const jenisDate = document.getElementById('jenis_date');
   const periodeSection = document.getElementById('periode_section');
   const periodeSelect = document.getElementById('periode_value');
+  
+  // Datepicker elements
+  const datepicker1 = document.getElementById('datepicker');
+  const datepicker2 = document.getElementById('datepicker2');
+  const datepicker3 = document.getElementById('datepicker3');
+  const datepicker4 = document.getElementById('datepicker4');
 
+  // Variabel untuk menyimpan batas tanggal
+  let maxEndDate = null;
+  let maxPenugasanDate = null;
+
+  // ===== Aturan baru untuk Mulai Kegiatan (datepicker) =====
+  // Hanya dapat memilih tanggal dalam rentang: (today - 30 days) .. today
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const minStartDate = (function() {
+    const d = new Date(today);
+    d.setDate(d.getDate() - 30);
+    d.setHours(0,0,0,0);
+    return d;
+  })();
+
+  // Fungsi untuk menambahkan hari ke tanggal
+  function addDays(date, days) {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+  }
+
+  // Fungsi untuk format tanggal ke string yyyy-mm-dd
+  function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Fungsi untuk menghitung selisih hari (date2 - date1)
+  function daysDifference(date1, date2) {
+    const oneDay = 24 * 60 * 60 * 1000;
+    // normalisasi jam supaya akurat
+    const d1 = new Date(date1); d1.setHours(0,0,0,0);
+    const d2 = new Date(date2); d2.setHours(0,0,0,0);
+    return Math.round((d2 - d1) / oneDay);
+  }
+
+  // Fungsi untuk menampilkan error
+  function showError(input, message) {
+    const formGroup = input.closest('.form-group');
+    formGroup.classList.add('has-error');
+    
+    let errorDiv = formGroup.querySelector('.error-message');
+    if (!errorDiv) {
+      errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      formGroup.appendChild(errorDiv);
+    }
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+  }
+
+  // Fungsi untuk menampilkan info
+  function showInfo(input, message) {
+    const formGroup = input.closest('.form-group');
+    
+    let infoDiv = formGroup.querySelector('.info-message');
+    if (!infoDiv) {
+      infoDiv = document.createElement('div');
+      infoDiv.className = 'info-message';
+      formGroup.appendChild(infoDiv);
+    }
+    infoDiv.textContent = message;
+    infoDiv.style.display = 'block';
+  }
+
+  // Fungsi untuk menampilkan success
+  function showSuccess(input, message) {
+    const formGroup = input.closest('.form-group');
+    
+    let successDiv = formGroup.querySelector('.success-message');
+    if (!successDiv) {
+      successDiv = document.createElement('div');
+      successDiv.className = 'success-message';
+      formGroup.appendChild(successDiv);
+    }
+    successDiv.textContent = message;
+    successDiv.style.display = 'block';
+  }
+
+  // Fungsi untuk menghapus semua message
+  function clearMessages(input) {
+    const formGroup = input.closest('.form-group');
+    formGroup.classList.remove('has-error');
+    
+    const errorDiv = formGroup.querySelector('.error-message');
+    if (errorDiv) {
+      errorDiv.style.display = 'none';
+    }
+    
+    const infoDiv = formGroup.querySelector('.info-message');
+    if (infoDiv) {
+      infoDiv.style.display = 'none';
+    }
+    
+    const successDiv = formGroup.querySelector('.success-message');
+    if (successDiv) {
+      successDiv.style.display = 'none';
+    }
+  }
+
+  // Setup datepicker dengan jQuery UI (pastikan jQuery & jQuery UI sudah terload)
+  if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
+    
+    // Datepicker 1 - Mulai Kegiatan (ATURAN BARU: hanya boleh antara minStartDate .. today)
+    $('#datepicker').datepicker({
+      dateFormat: 'yy-mm-dd',
+      autoclose: true,
+      minDate: minStartDate,
+      maxDate: today,
+      beforeShowDay: function(date) {
+        // normalisasi
+        const d = new Date(date); d.setHours(0,0,0,0);
+        // jika lebih kecil dari minStartDate
+        if (d < minStartDate) {
+          return [false, 'ui-state-disabled force-disabled', `Tidak boleh lebih dari 30 hari sebelum hari ini (${formatDate(minStartDate)})`];
+        }
+        // jika lebih besar dari today (future)
+        if (d > today) {
+          return [false, 'ui-state-disabled force-disabled', 'Tidak boleh memilih tanggal di masa depan'];
+        }
+        // valid
+        const daysFromMin = daysDifference(minStartDate, d);
+        // highlight hari-hari mendekati batas (opsional)
+        if (daysFromMin <= 3) {
+          return [true, 'valid-date warning', `Tanggal valid`];
+        }
+        return [true, 'valid-date', 'Tanggal valid'];
+      },
+      onSelect: function(dateText) {
+        clearMessages(datepicker1);
+        clearMessages(datepicker2);
+
+        // parsing tanggal mulai
+        const startDate = new Date(dateText);
+        startDate.setHours(0,0,0,0);
+
+        // cek manual validasi tambahan: harus dalam rentang minStartDate..today
+        if (startDate < minStartDate) {
+          // tidak boleh -> kosongkan dan beri error
+          datepicker1.value = '';
+          showError(datepicker1, `Tanggal mulai tidak boleh lebih dari 30 hari sebelum hari ini (${formatDate(minStartDate)}).`);
+          $(this).datepicker('hide');
+          return;
+        }
+        if (startDate > today) {
+          datepicker1.value = '';
+          showError(datepicker1, 'Tanggal mulai tidak boleh di masa depan.');
+          $(this).datepicker('hide');
+          return;
+        }
+
+        // Set aturan untuk datepicker2 (akhir kegiatan)
+        const minEndDate = new Date(startDate);
+        const maxAllowed = addDays(startDate, 60); // maksimal 60 hari dari tanggal mulai
+        maxEndDate = maxAllowed;
+
+        // PERBAIKAN: Set minDate dan maxDate secara eksplisit
+        $('#datepicker2').datepicker('option', 'minDate', minEndDate);
+        $('#datepicker2').datepicker('option', 'maxDate', maxEndDate);
+
+        // Reset datepicker2 jika perlu
+        if (datepicker2.value) {
+          const currentEndDate = new Date(datepicker2.value);
+          currentEndDate.setHours(0,0,0,0);
+
+          if (currentEndDate < startDate || currentEndDate > maxEndDate) {
+            datepicker2.value = '';
+            showInfo(datepicker2, 'Silakan pilih ulang tanggal berakhir kegiatan (sesuai batas 60 hari).');
+          }
+        }
+
+        showInfo(datepicker1, `Batas tanggal mulai: minimal ${formatDate(minStartDate)} — maksimal ${formatDate(today)}. Batas akhir kegiatan: ${formatDate(maxEndDate)} (60 hari dari mulai).`);
+
+        $(this).datepicker('hide');
+      }
+    });
+
+    // Datepicker 2 - Akhir Kegiatan (Dengan PERATURAN KETAT: harus >= mulai, <= mulai+60)
+    $('#datepicker2').datepicker({
+      dateFormat: 'yy-mm-dd',
+      autoclose: true,
+      minDate: null,
+      maxDate: null,
+      beforeShowDay: function(date) {
+        if (!datepicker1.value) {
+          return [false, 'ui-state-disabled force-disabled', 'Pilih tanggal mulai terlebih dahulu'];
+        }
+
+        const startDate = new Date(datepicker1.value);
+        startDate.setHours(0,0,0,0);
+
+        const checkDate = new Date(date);
+        checkDate.setHours(0,0,0,0);
+
+        const maxAllowedDate = addDays(startDate, 60);
+        maxAllowedDate.setHours(0,0,0,0);
+
+        // TIDAK BISA memilih tanggal sebelum tanggal mulai
+        if (checkDate < startDate) {
+          return [false, 'ui-state-disabled force-disabled', 'Tidak bisa memilih tanggal sebelum tanggal mulai'];
+        }
+
+        // Batas 60 hari - tanggal dalam range valid
+        if (checkDate >= startDate && checkDate <= maxAllowedDate) {
+          const daysFromStart = daysDifference(startDate, checkDate);
+          const daysLeft = 60 - daysFromStart;
+
+          // Highlight tanggal yang mendekati batas
+          if (daysLeft <= 7) {
+            return [true, 'valid-date warning', `Sisa ${daysLeft} hari dari batas 60 hari`];
+          }
+          return [true, 'valid-date', `${daysFromStart} hari dari tanggal mulai`];
+        }
+
+        // Tanggal melebihi 60 hari - TIDAK BISA DIPILIH (PERBAIKAN: force disabled)
+        return [false, 'ui-state-disabled force-disabled', 'Melebihi batas maksimal 60 hari - TIDAK DIPERBOLEHKAN'];
+      },
+      onSelect: function(dateText) {
+        clearMessages(datepicker2);
+
+        if (datepicker1.value) {
+          const startDate = new Date(datepicker1.value);
+          const endDate = new Date(dateText);
+          const maxAllowedDate = addDays(startDate, 60);
+
+          // Validasi: Tanggal akhir tidak boleh lebih awal
+          if (endDate < startDate) {
+            datepicker2.value = '';
+            showError(datepicker2, 'Tanggal berakhir tidak boleh lebih awal dari tanggal mulai');
+            $(this).datepicker('hide');
+            return;
+          }
+
+          // Validasi: Maksimal 60 hari - TIDAK ADA AUTO CORRECT, HARUS TEPAT
+          if (endDate > maxAllowedDate) {
+            datepicker2.value = '';
+            showError(datepicker2, `Tanggal berakhir tidak boleh melebihi ${formatDate(maxAllowedDate)} (60 hari dari tanggal mulai)`);
+            $(this).datepicker('hide');
+            return;
+          }
+
+          const daysUsed = daysDifference(startDate, endDate);
+          const daysLeft = 60 - daysUsed;
+          showSuccess(datepicker2, `Durasi kegiatan: ${daysUsed} hari. Sisa: ${daysLeft} hari dari 60 hari maksimal`);
+        }
+
+        $(this).datepicker('hide');
+      }
+    });
+
+    // Datepicker 3 - Periode Penugasan
+    $('#datepicker3').datepicker({
+      dateFormat: 'yy-mm-dd',
+      autoclose: true,
+      onSelect: function(dateText) {
+        clearMessages(datepicker3);
+        clearMessages(datepicker4);
+
+        const startDate = new Date(dateText);
+        const minEndDate = new Date(dateText); // Minimal sama dengan tanggal mulai
+        maxPenugasanDate = addDays(startDate, 60); // Maksimal 60 hari dari tanggal mulai
+
+        // Update datepicker4 dengan batasan baru
+        $('#datepicker4').datepicker('option', 'minDate', minEndDate);
+        $('#datepicker4').datepicker('option', 'maxDate', maxPenugasanDate);
+
+        // Reset datepicker4 jika perlu
+        if (datepicker4.value) {
+          const currentEndDate = new Date(datepicker4.value);
+
+          if (currentEndDate < startDate || currentEndDate > maxPenugasanDate) {
+            datepicker4.value = '';
+            showInfo(datepicker4, 'Silakan pilih ulang akhir penugasan (sesuai batas 60 hari).');
+          }
+        }
+
+        showInfo(datepicker3, `Batas akhir penugasan: ${formatDate(maxPenugasanDate)} (60 hari dari periode penugasan)`);
+
+        $(this).datepicker('hide');
+      }
+    });
+
+    // Datepicker 4 - Akhir Penugasan (Dengan PERATURAN KETAT)
+    $('#datepicker4').datepicker({
+      dateFormat: 'yy-mm-dd',
+      autoclose: true,
+      minDate: null,
+      maxDate: null,
+      beforeShowDay: function(date) {
+        if (!datepicker3.value) {
+          return [false, 'ui-state-disabled force-disabled', 'Pilih periode penugasan terlebih dahulu'];
+        }
+
+        const startDate = new Date(datepicker3.value);
+        startDate.setHours(0,0,0,0);
+
+        const checkDate = new Date(date);
+        checkDate.setHours(0,0,0,0);
+
+        const maxAllowedDate = addDays(startDate, 60);
+        maxAllowedDate.setHours(0,0,0,0);
+
+        // TIDAK BISA memilih tanggal di belakang periode penugasan
+        if (checkDate < startDate) {
+          return [false, 'ui-state-disabled force-disabled', 'Tidak bisa memilih tanggal sebelum periode penugasan'];
+        }
+
+        // Batas 60 hari - tanggal dalam range valid
+        if (checkDate >= startDate && checkDate <= maxAllowedDate) {
+          const daysFromStart = daysDifference(startDate, checkDate);
+          const daysLeft = 60 - daysFromStart;
+
+          // Highlight tanggal yang mendekati batas
+          if (daysLeft <= 7) {
+            return [true, 'valid-date warning', `Sisa ${daysLeft} hari dari batas 60 hari`];
+          }
+          return [true, 'valid-date', `${daysFromStart} hari dari periode penugasan`];
+        }
+
+        // Tanggal melebihi 60 hari - TIDAK BISA DIPILIH (PERBAIKAN: force disabled)
+        return [false, 'ui-state-disabled force-disabled', 'Melebihi batas maksimal 60 hari - TIDAK DIPERBOLEHKAN'];
+      },
+      onSelect: function(dateText) {
+        clearMessages(datepicker4);
+
+        if (datepicker3.value) {
+          const startDate = new Date(datepicker3.value);
+          const endDate = new Date(dateText);
+          const maxAllowedDate = addDays(startDate, 60);
+
+          // Validasi: Akhir periode tidak boleh lebih awal
+          if (endDate < startDate) {
+            datepicker4.value = '';
+            showError(datepicker4, 'Akhir penugasan tidak boleh lebih awal dari periode penugasan');
+            $(this).datepicker('hide');
+            return;
+          }
+
+          // Validasi: Maksimal 60 hari - TIDAK ADA AUTO CORRECT, HARUS TEPAT
+          if (endDate > maxAllowedDate) {
+            datepicker4.value = '';
+            showError(datepicker4, `Akhir penugasan tidak boleh melebihi ${formatDate(maxAllowedDate)} (60 hari dari periode penugasan)`);
+            $(this).datepicker('hide');
+            return;
+          }
+
+          const daysUsed = daysDifference(startDate, endDate);
+          const daysLeft = 60 - daysUsed;
+          showSuccess(datepicker4, `Durasi penugasan: ${daysUsed} hari. Sisa: ${daysLeft} hari dari 60 hari maksimal`);
+        }
+
+        $(this).datepicker('hide');
+      }
+    });
+
+    // PERBAIKAN: Validasi real-time yang lebih ketat
+    $('#datepicker2').on('focus', function() {
+      if (!datepicker1.value) {
+        $(this).blur();
+        showError(datepicker2, 'Pilih tanggal mulai kegiatan terlebih dahulu');
+        return false;
+      }
+      
+      // Force refresh datepicker options
+      const startDate = new Date(datepicker1.value);
+      const maxAllowed = addDays(startDate, 60);
+      $(this).datepicker('option', 'minDate', startDate);
+      $(this).datepicker('option', 'maxDate', maxAllowed);
+    });
+
+    $('#datepicker4').on('focus', function() {
+      if (!datepicker3.value) {
+        $(this).blur();
+        showError(datepicker4, 'Pilih periode penugasan terlebih dahulu');
+        return false;
+      }
+      
+      // Force refresh datepicker options
+      const startDate = new Date(datepicker3.value);
+      const maxAllowed = addDays(startDate, 60);
+      $(this).datepicker('option', 'minDate', startDate);
+      $(this).datepicker('option', 'maxDate', maxAllowed);
+    });
+
+    // Validasi real-time untuk input manual - PERBAIKAN: lebih ketat
+    $('#datepicker2').on('change', function() {
+      if (datepicker1.value && this.value) {
+        const startDate = new Date(datepicker1.value);
+        const endDate = new Date(this.value);
+        const maxAllowedDate = addDays(startDate, 60);
+
+        if (endDate < startDate) {
+          showError(this, 'Tanggal berakhir tidak boleh lebih awal dari tanggal mulai');
+          this.value = '';
+        } else if (endDate > maxAllowedDate) {
+          showError(this, `Tanggal berakhir tidak boleh melebihi ${formatDate(maxAllowedDate)} (60 hari dari tanggal mulai)`);
+          this.value = '';
+        } else {
+          clearMessages(this);
+        }
+      }
+    });
+
+    $('#datepicker4').on('change', function() {
+      if (datepicker3.value && this.value) {
+        const startDate = new Date(datepicker3.value);
+        const endDate = new Date(this.value);
+        const maxAllowedDate = addDays(startDate, 60);
+
+        if (endDate < startDate) {
+          showError(this, 'Akhir penugasan tidak boleh lebih awal dari periode penugasan');
+          this.value = '';
+        } else if (endDate > maxAllowedDate) {
+          showError(this, `Akhir penugasan tidak boleh melebihi ${formatDate(maxAllowedDate)} (60 hari dari periode penugasan)`);
+          this.value = '';
+        } else {
+          clearMessages(this);
+        }
+      }
+    });
+
+    // Validasi tambahan untuk datepicker1
+    $('#datepicker').on('change', function() {
+      if (this.value) {
+        const v = new Date(this.value);
+        v.setHours(0,0,0,0);
+        if (v < minStartDate) {
+          showError(this, `Tanggal mulai tidak boleh lebih dari 30 hari sebelum hari ini (${formatDate(minStartDate)})`);
+          this.value = '';
+        } else if (v > today) {
+          showError(this, 'Tanggal mulai tidak boleh di masa depan');
+          this.value = '';
+        } else {
+          clearMessages(this);
+        }
+      }
+    });
+
+    // PERBAIKAN: Force reset datepicker2 ketika datepicker1 berubah
+    $('#datepicker').on('change', function() {
+      if (datepicker2.value) {
+        const startDate = new Date(this.value);
+        const endDate = new Date(datepicker2.value);
+        const maxAllowedDate = addDays(startDate, 60);
+
+        if (endDate < startDate || endDate > maxAllowedDate) {
+          datepicker2.value = '';
+          showInfo(datepicker2, 'Tanggal berakhir direset karena tidak sesuai dengan batas 60 hari dari tanggal mulai baru');
+        }
+      }
+    });
+
+    // PERBAIKAN: Force reset datepicker4 ketika datepicker3 berubah
+    $('#datepicker3').on('change', function() {
+      if (datepicker4.value) {
+        const startDate = new Date(this.value);
+        const endDate = new Date(datepicker4.value);
+        const maxAllowedDate = addDays(startDate, 60);
+
+        if (endDate < startDate || endDate > maxAllowedDate) {
+          datepicker4.value = '';
+          showInfo(datepicker4, 'Akhir penugasan direset karena tidak sesuai dengan batas 60 hari dari periode penugasan baru');
+        }
+      }
+    });
+
+  } // end if jquery-ui available
+
+  // Fungsi untuk toggle periode section
   function togglePeriodeSection(value) {
     const niceWrapper = periodeSection.querySelector('.nice-select');
     const originalSelect = periodeSelect;
@@ -908,7 +1450,6 @@ document.addEventListener('DOMContentLoaded', function () {
       originalSelect.classList.add('nice-original');
       periodeSelect.removeAttribute('required');
       periodeSelect.value = '';
-      // Hapus margin saat disembunyikan
       periodeSection.classList.remove('open-margin');
     }
   }
@@ -917,7 +1458,6 @@ document.addEventListener('DOMContentLoaded', function () {
   if (typeof $ !== 'undefined' && typeof $.fn.niceSelect !== 'undefined') {
     $('select#periode_value').niceSelect();
 
-    // Tambah margin saat dropdown dibuka dengan delay lebih smooth
     $('select#periode_value').parent().on("click", function () {
       setTimeout(() => {
         if ($(this).hasClass("open")) {
@@ -928,7 +1468,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }, 50);
     });
 
-    // Hapus margin saat dropdown ditutup
     $(document).on('click', function(e) {
       if (!$(e.target).closest('#periode_section').length) {
         periodeSection.classList.remove("open-margin");
@@ -944,6 +1483,71 @@ document.addEventListener('DOMContentLoaded', function () {
   jenisDate.addEventListener('change', function () {
     togglePeriodeSection(this.value);
   });
+
+  // PERBAIKAN: Tambahan validasi form submit
+  const msform = document.getElementById('msform');
+  if (msform) {
+    msform.addEventListener('submit', function(e) {
+      let isValid = true;
+      
+      // Validasi datepicker2
+      if (datepicker1.value && datepicker2.value) {
+        const startDate = new Date(datepicker1.value);
+        const endDate = new Date(datepicker2.value);
+        const maxAllowedDate = addDays(startDate, 60);
+        
+        if (endDate > maxAllowedDate) {
+          showError(datepicker2, `Tanggal berakhir melebihi batas 60 hari. Maksimal: ${formatDate(maxAllowedDate)}`);
+          isValid = false;
+        }
+      }
+      
+      // Validasi datepicker4
+      if (datepicker3.value && datepicker4.value) {
+        const startDate = new Date(datepicker3.value);
+        const endDate = new Date(datepicker4.value);
+        const maxAllowedDate = addDays(startDate, 60);
+        
+        if (endDate > maxAllowedDate) {
+          showError(datepicker4, `Akhir penugasan melebihi batas 60 hari. Maksimal: ${formatDate(maxAllowedDate)}`);
+          isValid = false;
+        }
+      }
+      
+      if (!isValid) {
+        e.preventDefault();
+        showNotification('error', 'Periksa kembali tanggal yang dimasukkan!');
+      }
+    });
+  }
+
+  // Helper function untuk notification
+  function showNotification(type, message) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${type === 'error' ? '#dc3545' : '#28a745'};
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 10000;
+      font-weight: 600;
+      animation: slideInRight 0.3s ease;
+    `;
+    notification.innerHTML = `
+      <i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'}"></i> ${message}
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideOutRight 0.3s ease';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
 });
 </script>
 <!-- Step 2 -->
@@ -1641,421 +2245,736 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <!-- ===== UPLOADCARE CDN ===== -->
 <script>
-    UPLOADCARE_PUBLIC_KEY = "demopublickey"; 
-    UPLOADCARE_LOCALE = "en";
-    UPLOADCARE_TABS = "file url camera dropbox gdrive";
+UPLOADCARE_PUBLIC_KEY = "demopublickey";
 </script>
 <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
-<style>
-    /* Enhanced Upload Eviden Styling */
-    .upload-eviden-wrapper {
-        max-width: 700px;
-        margin: 0 auto;
-        padding: 30px 20px;
-    }
-
-    .upload-header {
-        text-align: center;
-        margin-bottom: 35px;
-    }
-
-    .upload-icon-circle {
-        width: 90px;
-        height: 90px;
-        background: linear-gradient(135deg, #FB8C00, #F57C00);
-        border-radius: 50%;
-        margin: 0 auto 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 20px rgba(251, 140, 0, 0.3);
-        animation: pulse-upload 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse-upload {
-        0%, 100% {
-            transform: scale(1);
-            box-shadow: 0 8px 20px rgba(251, 140, 0, 0.3);
-        }
-        50% {
-            transform: scale(1.05);
-            box-shadow: 0 12px 28px rgba(251, 140, 0, 0.4);
-        }
-    }
-
-    .upload-icon-circle i {
-        color: white;
-        font-size: 40px;
-    }
-
-    .upload-header h4 {
-        color: #2c3e50;
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 10px;
-    }
-
-    .upload-header p {
-        color: #6c757d;
-        font-size: 15px;
-        margin: 0;
-    }
-
-    .info-alert-box {
-        background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-        border-left: 5px solid #FB8C00;
-        padding: 18px 20px;
-        border-radius: 10px;
-        margin-bottom: 30px;
-        display: flex;
-        align-items: start;
-        gap: 15px;
-    }
-
-    .info-alert-box i {
-        color: #FB8C00;
-        font-size: 22px;
-        margin-top: 2px;
-    }
-
-    .info-alert-content h6 {
-        color: #e65100;
-        font-size: 14px;
-        font-weight: 700;
-        margin-bottom: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .info-alert-content p {
-        color: #5d4037;
-        font-size: 13px;
-        margin: 0;
-        line-height: 1.6;
-    }
-
-    .upload-dropzone {
-        background: #fafbfc;
-        border: 3px dashed #dee2e6;
-        border-radius: 14px;
-        padding: 45px 25px;
-        text-align: center;
-        transition: all 0.3s ease;
-        margin-bottom: 25px;
-        position: relative;
-    }
-
-    .upload-dropzone:hover {
-        border-color: #FB8C00;
-        background: #fff8f0;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(251, 140, 0, 0.1);
-    }
-
-    /* Uploadcare Widget Custom Styling */
-    .uploadcare--widget__button {
-        background: #FB8C00 !important;
-        border: none !important;
-        padding: 14px 35px !important;
-        border-radius: 10px !important;
-        font-weight: 600 !important;
-        font-size: 15px !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 5px 15px rgba(251, 140, 0, 0.3) !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-    }
-
-    .uploadcare--widget__button:hover {
-        background: #F57C00 !important;
-        transform: translateY(-2px);
-        box-shadow: 0 7px 20px rgba(251, 140, 0, 0.4) !important;
-    }
-
-    .file-formats-info {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 18px;
-        margin-top: 20px;
-    }
-
-    .file-formats-info h6 {
-        color: #495057;
-        font-size: 13px;
-        font-weight: 700;
-        margin-bottom: 12px;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .formats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-        gap: 10px;
-    }
-
-    .format-badge {
-        background: white;
-        padding: 10px;
-        border-radius: 8px;
-        text-align: center;
-        border: 2px solid #e9ecef;
-        transition: all 0.3s ease;
-    }
-
-    .format-badge:hover {
-        border-color: #FB8C00;
-        transform: translateY(-2px);
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-    }
-
-    .format-badge i {
-        font-size: 22px;
-        color: #FB8C00;
-        margin-bottom: 6px;
-    }
-
-    .format-badge span {
-        display: block;
-        color: #495057;
-        font-size: 11px;
-        font-weight: 600;
-    }
-
-    .requirements-box {
-        background: white;
-        border: 2px solid #e3f2fd;
-        border-radius: 10px;
-        padding: 18px;
-        margin-top: 20px;
-    }
-
-    .requirements-box h6 {
-        color: #1976d2;
-        font-size: 13px;
-        font-weight: 700;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .requirements-box ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .requirements-box li {
-        padding: 8px 0;
-        color: #495057;
-        font-size: 13px;
-        display: flex;
-        align-items: start;
-        gap: 10px;
-        border-bottom: 1px solid #f1f3f5;
-    }
-
-    .requirements-box li:last-child {
-        border-bottom: none;
-    }
-
-    .requirements-box li i {
-        color: #28a745;
-        font-size: 14px;
-        margin-top: 2px;
-    }
-
-    #chk-error {
-        color: #dc3545;
-        text-align: center;
-        margin-top: 18px;
-        font-size: 14px;
-        font-weight: 600;
-        padding: 12px 18px;
-        background: #ffebee;
-        border-radius: 8px;
-        border-left: 4px solid #dc3545;
-        display: none;
-    }
-
-    #chk-error.show {
-        display: block;
-        animation: shake-error 0.4s ease;
-    }
-
-    @keyframes shake-error {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-8px); }
-        75% { transform: translateX(8px); }
-    }
-
-    #chk-error i {
-        margin-right: 6px;
-    }
-
-    .upload-success-msg {
-        background: #e8f5e9;
-        border: 2px solid #28a745;
-        border-radius: 10px;
-        padding: 16px;
-        margin-top: 20px;
-        display: none;
-        animation: slideDown 0.4s ease;
-    }
-
-    .upload-success-msg.show {
-        display: block;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-15px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .upload-success-msg h6 {
-        color: #28a745;
-        font-size: 15px;
-        font-weight: 700;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .upload-success-msg p {
-        color: #2e7d32;
-        font-size: 13px;
-        margin: 0;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .upload-eviden-wrapper {
-            padding: 20px 15px;
-        }
-
-        .upload-header h4 {
-            font-size: 24px;
-        }
-
-        .upload-dropzone {
-            padding: 35px 20px;
-        }
-
-        .formats-grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
-
-    @media (max-width: 480px) {
-        .upload-icon-circle {
-            width: 75px;
-            height: 75px;
-        }
-
-        .upload-icon-circle i {
-            font-size: 32px;
-        }
-
-        .formats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-</style>
-
-<!-- ===== STEP 3 (FULL UPLOADCARE WIDGET) ===== -->
 <fieldset>
-    <div class="upload-eviden-wrapper">
-        
-        <!-- Header Section -->
-        <div class="upload-header">
-            <div class="upload-icon-circle">
-                <i class="fas fa-cloud-upload-alt"></i>
+    <div style="width: 100%;">
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333; font-size: 16px;">
+                <i class="fas fa-cloud-upload-alt"></i> Upload File Eviden
+            </label>
+            <p style="font-size: 13px; color: #6c757d; margin-bottom: 15px;">
+                <i class="fas fa-info-circle"></i> Upload file pendukung (PDF, gambar, dokumen). Anda dapat memilih beberapa file sekaligus atau drag & drop file ke area upload.
+            </p>
+        </div>
+
+        <!-- DRAG & DROP ZONE -->
+        <div id="drop-zone" style="
+            border: 2px dashed #007bff;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        ">
+            <div style="pointer-events: none;">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #007bff; margin-bottom: 15px;"></i>
+                <h5 style="color: #495057; font-weight: 600; margin-bottom: 10px;">Drag & Drop File Di Sini</h5>
+                <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">atau</p>
+                <button type="button" id="browse-btn" style="
+                    background: #007bff;
+                    color: white;
+                    border: none;
+                    padding: 10px 30px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    font-size: 14px;
+                    transition: background 0.3s;
+                ">
+                    <i class="fas fa-folder-open"></i> Browse Files
+                </button>
+                <p style="color: #6c757d; font-size: 12px; margin-top: 15px;">
+                    Mendukung: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, ZIP (Max 10MB per file)
+                </p>
             </div>
-            <h4>Upload Eviden</h4>
-            <p>Unggah dokumen pendukung untuk melengkapi surat tugas Anda</p>
         </div>
 
-        <!-- Upload Zone -->
-        <div class="upload-dropzone">
-            <input
-                type="hidden"
-                name="eviden"
-                role="uploadcare-uploader"
-                data-clearable="true"
-                data-multiple="true"
-                data-multiple-max="0"
-                data-preview-step="true"
-                data-tabs="file url camera dropbox gdrive"
-                data-images-only="false"
-                style="width:100%;"
-            />
-        </div>
+        <!-- Hidden input untuk simpan URL -->
+        <input type="hidden" name="eviden" id="eviden" value="[]">
+        
         <!-- Error Message -->
-        <p id="chk-error">
-            <i class="fas fa-exclamation-triangle"></i>
-            Mohon upload minimal 1 file eviden!
-        </p>
+        <div id="chk-error" style="color: #dc3545; font-size: 14px; margin-top: 10px; display: none;"></div>
+        
+        <!-- Upload Status -->
+        <div id="upload-status" style="display: none; background: #d4edda; color: #155724; padding: 10px 15px; border-radius: 6px; margin-top: 10px;">
+            <i class="fas fa-check-circle"></i> File berhasil diupload!
+        </div>
 
+        <!-- Display uploaded files -->
+        <div id="uploaded-files-display" style="display: none;">
+            <div style="background: #ffffff; border-radius: 8px; padding: 20px; border: 1px solid #dee2e6; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h6 style="font-weight: 600; margin: 0; color: #495057;">
+                        <i class="fas fa-check-circle" style="color: #28a745;"></i> File yang sudah diupload
+                    </h6>
+                    <span id="file-count" style="background: #28a745; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">0 Files</span>
+                </div>
+                <div id="files-list"></div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="upload-loading" style="display: none; text-align: center; padding: 20px;">
+            <div style="display: inline-block;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #007bff;"></i>
+                <p style="margin-top: 10px; color: #6c757d; font-weight: 600;">Uploading files...</p>
+            </div>
+        </div>
     </div>
 </fieldset>
 
-<!-- BUTTON AREA (Di luar fieldset, sesuai dengan struktur form Anda) -->
-<div class="button-area">
-    <button type="button" class="btn btn-secondary prev-btn rounded-pill" style="padding: 10px 25px;">
-        <i class="fas fa-arrow-left"></i> Back
-    </button>
-    <button type="button" class="action-btn next-btn rounded-pill" style="padding: 10px 25px;">
-        Continue <i class="fas fa-arrow-right"></i>
-    </button>
+<!-- BUTTON AREA -->
+<div class="button-area" style="margin-top:25px; text-align:center;">
+    <button type="button" class="btn btn-primary prev-btn rounded-pill btn-sm" style="padding: 6px 20px;">Back</button>
+    <button type="submit" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Finish</button>
 </div>
 
+<style>
+/* Hover effect untuk drop zone */
+#drop-zone:hover {
+    background: #e7f3ff;
+    border-color: #0056b3;
+}
+
+#drop-zone.drag-over {
+    background: #cce5ff;
+    border-color: #0056b3;
+    border-width: 3px;
+}
+
+#browse-btn:hover {
+    background: #0056b3;
+}
+
+/* Animation untuk file items */
+.file-item {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Progress bar untuk upload */
+.upload-progress {
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.upload-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    transition: width 0.3s ease;
+}
+
+/* Upload success state */
+.upload-success {
+    border-color: #28a745 !important;
+    background-color: #f8fff9 !important;
+}
+</style>
+
 <script>
+// ========================================
+// UPLOADCARE + DRAG & DROP IMPLEMENTATION
+// ========================================
+
 document.addEventListener("DOMContentLoaded", function () {
-    const nextBtn = document.querySelector(".next-btn");
-    const prevBtn = document.querySelector(".prev-btn");
-    const uploader = uploadcare.Widget('[role="uploadcare-uploader"]');
-    const err = document.getElementById("chk-error");
-    const successMsg = document.getElementById("uploadSuccessMsg");
+    const evidenInput = document.getElementById("eviden");
+    const msform = document.getElementById("msform");
+    const uploadedDisplay = document.getElementById("uploaded-files-display");
+    const filesList = document.getElementById("files-list");
+    const fileCount = document.getElementById("file-count");
+    const dropZone = document.getElementById("drop-zone");
+    const browseBtn = document.getElementById("browse-btn");
+    const uploadLoading = document.getElementById("upload-loading");
+    const errorDiv = document.getElementById("chk-error");
+    const uploadStatus = document.getElementById("upload-status");
+    const nextBtn = document.querySelector('.next-btn');
     
-    // Handle file selection change
-    uploader.onChange(function(value) {
-        if (value) {
-            err.classList.remove('show');
-            successMsg.classList.add('show');
+    // Track upload status untuk validasi
+    let isFileUploaded = false;
+
+    // Pastikan default selalu array kosong
+    if (!evidenInput.value || evidenInput.value === "") {
+        evidenInput.value = "[]";
+    }
+
+    // Array untuk menyimpan semua URL yang di-upload
+    let uploadedFiles = [];
+
+    // ========================================
+    // FUNCTION: UPDATE FILES DISPLAY
+    // ========================================
+    function updateFilesDisplay() {
+        if (uploadedFiles.length === 0) {
+            uploadedDisplay.style.display = 'none';
+            uploadStatus.style.display = 'none';
+            isFileUploaded = false;
+            dropZone.classList.remove('upload-success');
+            return;
+        }
+
+        uploadedDisplay.style.display = 'block';
+        uploadStatus.style.display = 'block';
+        isFileUploaded = true;
+        dropZone.classList.add('upload-success');
+        
+        fileCount.textContent = uploadedFiles.length + ' File' + (uploadedFiles.length > 1 ? 's' : '');
+        filesList.innerHTML = '';
+
+        uploadedFiles.forEach((fileData, index) => {
+            const filename = fileData.name || fileData.url.split('/').pop().split('?')[0];
+            const fileSize = fileData.size ? formatFileSize(fileData.size) : '';
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            fileItem.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                border: 1px solid #e9ecef;
+                transition: all 0.2s;
+            `;
+            
+            fileItem.innerHTML = `
+                <div style="flex-shrink: 0; width: 40px; height: 40px; background: #007bff; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas ${getFileIcon(filename)}" style="font-size: 20px; color: white;"></i>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <strong style="font-size: 14px; color: #495057; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${filename}</strong>
+                    <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">
+                        File ${index + 1} ${fileSize ? '• ' + fileSize : ''}
+                    </div>
+                </div>
+                <button type="button" 
+                        onclick="removeFile(${index})" 
+                        style="
+                            padding: 8px 12px;
+                            background: #dc3545;
+                            color: white;
+                            border: none;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-size: 12px;
+                            font-weight: 600;
+                            transition: background 0.2s;
+                        "
+                        onmouseover="this.style.background='#c82333'"
+                        onmouseout="this.style.background='#dc3545'">
+                    <i class="fas fa-trash-alt"></i> Hapus
+                </button>
+            `;
+            
+            filesList.appendChild(fileItem);
+        });
+    }
+
+    // ========================================
+    // HELPER FUNCTIONS
+    // ========================================
+    function getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const iconMap = {
+            pdf: 'fa-file-pdf',
+            doc: 'fa-file-word',
+            docx: 'fa-file-word',
+            xls: 'fa-file-excel',
+            xlsx: 'fa-file-excel',
+            ppt: 'fa-file-powerpoint',
+            pptx: 'fa-file-powerpoint',
+            jpg: 'fa-file-image',
+            jpeg: 'fa-file-image',
+            png: 'fa-file-image',
+            gif: 'fa-file-image',
+            zip: 'fa-file-archive',
+            rar: 'fa-file-archive',
+        };
+        return iconMap[ext] || 'fa-file-alt';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    // ========================================
+    // FUNCTION: REMOVE FILE
+    // ========================================
+    window.removeFile = function(index) {
+        if (confirm('Apakah Anda yakin ingin menghapus file ini?')) {
+            uploadedFiles.splice(index, 1);
+            evidenInput.value = JSON.stringify(uploadedFiles.map(f => f.url));
+            updateFilesDisplay();
+            console.log("🗑 File dihapus. Total file:", uploadedFiles.length);
+        }
+    };
+
+    // ========================================
+    // UPLOADCARE DIALOG
+    // ========================================
+    function openUploadDialog() {
+        const dialog = uploadcare.openDialog(null, {
+            multiple: true,
+            multipleMax: 10,
+            multipleMin: 1,
+            tabs: "file url camera dropbox gdrive",
+            publicKey: "demopublickey",
+            imagesOnly: false,
+            previewStep: true,
+            crop: false
+        });
+
+        dialog.done(function (fileGroup) {
+            console.log("✅ Upload selesai! File group:", fileGroup);
+            uploadLoading.style.display = 'block';
+            
+            let filesProcessed = 0;
+            const totalFiles = fileGroup.files().length;
+            
+            fileGroup.files().forEach(filePromise => {
+                filePromise.done(fileInfo => {
+                    console.log("📁 File info:", fileInfo);
+                    
+                    // Simpan data file
+                    uploadedFiles.push({
+                        url: fileInfo.cdnUrl,
+                        name: fileInfo.name,
+                        size: fileInfo.size,
+                        mimeType: fileInfo.mimeType
+                    });
+                    
+                    filesProcessed++;
+                    
+                    // Jika semua file selesai diproses
+                    if (filesProcessed === totalFiles) {
+                        // Update hidden input dengan array URL saja
+                        evidenInput.value = JSON.stringify(uploadedFiles.map(f => f.url));
+                        
+                        // Update display
+                        updateFilesDisplay();
+                        uploadLoading.style.display = 'none';
+                        
+                        console.log("💾 Total files uploaded:", uploadedFiles.length);
+                        console.log("📊 Eviden value:", evidenInput.value);
+                        
+                        // Show success message
+                        showNotification('success', `${totalFiles} file berhasil diupload!`);
+                    }
+                });
+            });
+        });
+    }
+
+    // ========================================
+    // DRAG & DROP HANDLERS
+    // ========================================
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Highlight drop zone when dragging
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        dropZone.classList.add('drag-over');
+    }
+
+    function unhighlight(e) {
+        dropZone.classList.remove('drag-over');
+    }
+
+    // Handle dropped files
+    dropZone.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            handleFiles(files);
+        }
+    }
+
+    // Handle file upload
+    function handleFiles(files) {
+        uploadLoading.style.display = 'block';
+        console.log("📤 Uploading", files.length, "file(s)...");
+        
+        const fileArray = Array.from(files);
+        let filesProcessed = 0;
+        
+        fileArray.forEach(file => {
+            uploadcare.fileFrom('object', file).done(fileInfo => {
+                console.log("✅ File uploaded:", fileInfo);
+                
+                uploadedFiles.push({
+                    url: fileInfo.cdnUrl,
+                    name: fileInfo.name,
+                    size: fileInfo.size,
+                    mimeType: fileInfo.mimeType || file.type
+                });
+                
+                filesProcessed++;
+                
+                if (filesProcessed === fileArray.length) {
+                    evidenInput.value = JSON.stringify(uploadedFiles.map(f => f.url));
+                    updateFilesDisplay();
+                    uploadLoading.style.display = 'none';
+                    
+                    console.log("💾 All files uploaded. Total:", uploadedFiles.length);
+                    showNotification('success', `${fileArray.length} file berhasil diupload!`);
+                }
+            }).fail(error => {
+                console.error("❌ Upload error:", error);
+                filesProcessed++;
+                
+                if (filesProcessed === fileArray.length) {
+                    uploadLoading.style.display = 'none';
+                }
+                
+                showNotification('error', 'Gagal upload file: ' + file.name);
+            });
+        });
+    }
+
+    // ========================================
+    // BROWSE BUTTON CLICK
+    // ========================================
+    browseBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openUploadDialog();
+    });
+
+    dropZone.addEventListener('click', function(e) {
+        if (e.target !== browseBtn && !browseBtn.contains(e.target)) {
+            openUploadDialog();
+        }
+    });
+
+    // ========================================
+    // NOTIFICATION HELPER
+    // ========================================
+    function showNotification(type, message) {
+        const colors = {
+            success: '#28a745',
+            error: '#dc3545',
+            info: '#17a2b8'
+        };
+        
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${colors[type]};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            font-weight: 600;
+            animation: slideInRight 0.3s ease;
+        `;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    // ========================================
+    // FORM SUBMIT HANDLER - PERBAIKAN UTAMA
+    // ========================================
+    if (msform) {
+        // PERBAIKAN: Gunakan endpoint yang sesuai dengan route yang ada
+        msform.setAttribute('action', '<?= site_url("surat/submit") ?>');
+        msform.setAttribute('method', 'POST');
+        
+        msform.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            console.log("🚀 Form submission started...");
+            
+            // Validasi file upload
+            if (!isFileUploaded || uploadedFiles.length === 0) {
+                errorDiv.textContent = "Mohon upload minimal 1 file eviden!";
+                errorDiv.style.display = 'block';
+                showNotification('error', 'Mohon upload file eviden terlebih dahulu!');
+                return false;
+            }
+
+            errorDiv.style.display = 'none';
+            
+            console.log("📊 Data yang akan disimpan:");
+            console.log("- Eviden:", evidenInput.value);
+            
+            // Tampilkan loading state
+            if (nextBtn) {
+                const originalText = nextBtn.innerHTML;
+                nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+                nextBtn.disabled = true;
+            }
+
+            // Kumpulkan semua data form
+            const formData = new FormData(msform);
+            
+            // Debug: Log semua data form
+            console.log("📋 All form data:");
+            for (let [key, value] of formData.entries()) {
+                console.log(`- ${key}:`, value);
+            }
+
+            // Kirim data via AJAX untuk memastikan data tersimpan
+            fetch(msform.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                console.log("📨 Response status:", response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.text(); // Gunakan text() dulu untuk debugging
+            })
+            .then(data => {
+                console.log("✅ Server response:", data);
+                
+                // Coba parse sebagai JSON, jika gagal berarti mungkin HTML
+                try {
+                    const jsonData = JSON.parse(data);
+                    if (jsonData.success) {
+                        showNotification('success', 'Data berhasil disimpan!');
+                        
+                        // Redirect ke halaman list surat tugas setelah 1.5 detik
+                        setTimeout(() => {
+                            window.location.href = '<?= site_url("surat/list-surat-tugas") ?>';
+                        }, 1500);   
+                    } else {
+                        throw new Error(jsonData.message || 'Terjadi kesalahan saat menyimpan data');
+                    }
+                } catch (e) {
+                    // Jika response bukan JSON, anggap berhasil dan redirect
+                    console.log("⚠ Response bukan JSON, redirecting...");
+                    showNotification('success', 'Data berhasil disimpan!');
+                    
+                    setTimeout(() => {
+                        window.location.href = '<?= site_url("surat/list-surat-tugas") ?>';
+                    }, 1500);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error saving data:', error);
+                showNotification('error', 'Gagal menyimpan data: ' + error.message);
+                
+                // Reset button state
+                if (nextBtn) {
+                    nextBtn.innerHTML = 'Finish';
+                    nextBtn.disabled = false;
+                }
+            });
+
+            return false;
+        });
+    }
+
+    // ========================================
+    // FORM NAVIGATION
+    // ========================================
+    const prevBtn = document.querySelector('.prev-btn');
+    const fieldsets = document.querySelectorAll('fieldset');
+    let currentStep = 0;
+
+    // Back button functionality
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const totalSteps = fieldsets.length;
+            
+            if (currentStep > 0) {
+                fieldsets[currentStep].classList.remove('active');
+                currentStep--;
+                fieldsets[currentStep].classList.add('active');
+                
+                const percent = ((currentStep + 1) / totalSteps) * 100;
+                if (document.getElementById('progressBar')) {
+                    document.getElementById('progressBar').style.width = percent + '%';
+                }
+                if (document.getElementById('currentStep')) {
+                    document.getElementById('currentStep').textContent = currentStep + 1;
+                }
+                
+                prevBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
+                if (nextBtn) {
+                    nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
+                }
+            }
+        });
+    }
+
+    // Cek jika ada file yang sudah diupload saat halaman dimuat
+    function checkInitialUpload() {
+        try {
+            const currentValue = evidenInput.value;
+            if (currentValue && currentValue !== "[]" && currentValue !== "") {
+                const parsed = JSON.parse(currentValue);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    // Reconstruct uploadedFiles array dari existing value
+                    parsed.forEach(url => {
+                        uploadedFiles.push({
+                            url: url,
+                            name: url.split('/').pop().split('?')[0],
+                            size: null,
+                            mimeType: null
+                        });
+                    });
+                    updateFilesDisplay();
+                }
+            }
+        } catch (e) {
+            console.error("Error parsing initial eviden value:", e);
+        }
+    }
+
+    // Panggil fungsi pengecekan saat halaman dimuat
+    setTimeout(checkInitialUpload, 500);
+});
+
+// ========================================
+// INTEGRASI DENGAN MULTI-STEP FORM
+// ========================================
+$(document).ready(function() {
+    // PERBAIKAN: Gunakan endpoint yang sesuai dengan route yang ada
+    $('#msform').attr('action', '<?= site_url("surat/submit") ?>');
+    $('#msform').attr('method', 'POST');
+    
+    // Override next button behavior untuk step 3
+    $('.next-btn').off('click').on('click', function(e) {
+        const currentStep = $('fieldset.active').index();
+        
+        if (currentStep === 2) { // Step 3 - Trigger submit form
+            // Biarkan form submission handler yang menangani
+            return true;
         } else {
-            successMsg.classList.remove('show');
+            // Logic untuk step 1 dan 2
+            e.preventDefault();
+            
+            if (currentStep < 2) {
+                $('fieldset').eq(currentStep).removeClass('active');
+                $('fieldset').eq(currentStep + 1).addClass('active');
+                
+                // Update progress bar
+                const progress = ((currentStep + 2) / 3) * 100;
+                $('#progressBar').css('width', progress + '%');
+                $('#currentStep').text(currentStep + 2);
+                
+                // Update button text untuk step terakhir
+                if (currentStep + 1 === 2) {
+                    $('.next-btn').text('Finish');
+                }
+                
+                // Toggle back button
+                $('.prev-btn').show();
+            }
         }
     });
     
-    // Next button validation (ini akan dihandle oleh multi-step form script yang sudah ada)
-    nextBtn.addEventListener("click", function (e) {
-        const uuidValue = uploader.value();
-        if (!uuidValue) {
-            e.preventDefault();
-            e.stopPropagation();
-            err.classList.add('show');
-            err.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Back button behavior
+    $('.prev-btn').on('click', function(e) {
+        e.preventDefault();
+        const currentStep = $('fieldset.active').index();
+        
+        if (currentStep > 0) {
+            $('fieldset').eq(currentStep).removeClass('active');
+            $('fieldset').eq(currentStep - 1).addClass('active');
             
-            // Auto hide error after 5 seconds
-            setTimeout(function() {
-                err.classList.remove('show');
-            }, 5000);
-            return false;
+            // Update progress bar
+            const progress = ((currentStep) / 3) * 100;
+            $('#progressBar').css('width', progress + '%');
+            $('#currentStep').text(currentStep);
+            
+            // Update button text
+            $('.next-btn').text('Continue');
+            
+            // Hide back button di step 1
+            if (currentStep - 1 === 0) {
+                $('.prev-btn').hide();
+            }
         }
-        err.classList.remove('show');
-        // Biarkan multi-step form script menangani navigasi ke step berikutnya atau submit
     });
 });
+
+// Add animations CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
 </script>
 </div>
 </form>

@@ -18,37 +18,334 @@ if (!isset($surat_list) || !is_array($surat_list)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Multi Edit Surat</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:'Montserrat',sans-serif;background:#fff7ef;padding:20px;}
+    body{font-family:'Montserrat',sans-serif;background:#f8f9fa;padding:20px;color:#333;}
     .container-custom{max-width:1600px;margin:0 auto;}
-    .header{background:linear-gradient(135deg,#ff8c00,#ff6b00);padding:20px;border-radius:12px;margin-bottom:20px;
-        box-shadow:0 4px 15px rgba(255,140,0,0.3);display:flex;justify-content:space-between;align-items:center;color:#fff;}
-    .header h1{font-size:24px;display:flex;align-items:center;gap:10px;margin:0;}
-    .header .badge{background:rgba(255,255,255,0.3);padding:6px 14px;border-radius:20px;font-size:14px;font-weight:600;}
-    .btn{padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;gap:8px;transition:.2s;}
-    .btn-primary{background:#ff8c00;color:#fff;} .btn-primary:hover{background:#e67e00;}
-    .btn-secondary{background:#6c757d;color:white;}
-    .info-box{background:white;border-left:4px solid #ff8c00;padding:15px;border-radius:8px;margin-bottom:20px;
-        box-shadow:0 2px 8px rgba(0,0,0,0.05);}
-    .edit-card{background:white;border-radius:12px;padding:20px;margin-bottom:20px;
-        box-shadow:0 2px 8px rgba(0,0,0,0.1);border-left:5px solid #ff8c00;}
-    .form-section-title{background:#fff4e6;color:#ff8c00;padding:10px 15px;border-radius:8px;font-weight:700;margin:20px 0;
-        border-left:4px solid #ff8c00;}
-    .table-custom{width:100%;border-collapse:collapse;margin-top:10px;}
-    .table-custom thead{background:#ff8c00;color:white;}
-    .table-custom td,.table-custom th{padding:12px;border:1px solid #dee2e6;}
-    .btn-add-row{background:#ff8c00;color:white;border:none;padding:8px 16px;border-radius:6px;font-weight:600;margin-top:10px;}
-    .remove-row{cursor:pointer;color:#dc3545;font-weight:bold;font-size:20px;}
-    .submit-section{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);
-        display:flex;justify-content:space-between;margin-top:30px;}
-    .date-error{color:#dc3545;font-size:12px;margin-top:5px;display:none;}
-    .is-invalid{border-color:#dc3545 !important;}
-    .date-group{position:relative;}
+    
+    /* Header Styles */
+    .header{
+        background: linear-gradient(135deg, #ff8c00, #ff6b00);
+        padding: 25px 30px;
+        border-radius: 16px;
+        margin-bottom: 25px;
+        box-shadow: 0 6px 20px rgba(255, 140, 0, 0.25);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
+    .header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: rgba(255,255,255,0.3);
+    }
+    .header h1{
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        font-weight: 700;
+    }
+    .header .badge{
+        background: rgba(255,255,255,0.25);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        backdrop-filter: blur(5px);
+    }
+    
+    /* Button Styles */
+    .btn{
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        gap: 8px;
+        transition: all 0.3s ease;
+        border: none;
+        align-items: center;
+    }
+    .btn-primary{
+        background: #ff8c00;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+    }
+    .btn-primary:hover{
+        background: #e67e00;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 140, 0, 0.4);
+    }
+    .btn-secondary{
+        background: #6c757d;
+        color: white;
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.2);
+    }
+    .btn-secondary:hover{
+        background: #5a6268;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
+    }
+    
+    /* Info Box */
+    .info-box{
+        background: white;
+        border-left: 5px solid #ff8c00;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .info-box p{
+        margin: 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .info-box i{
+        color: #ff8c00;
+        margin-top: 3px;
+    }
+    
+    /* Card Styles */
+    .edit-card{
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        border-left: 6px solid #ff8c00;
+        position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .edit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+    .card-number{
+        position: absolute;
+        top: -12px;
+        left: -12px;
+        background: #ff8c00;
+        color: white;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 18px;
+        box-shadow: 0 4px 10px rgba(255, 140, 0, 0.4);
+        z-index: 1;
+    }
+    
+    /* Card Header */
+    .card-header-custom{
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #eee;
+    }
+    .card-title{
+        font-size: 20px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    .card-subtitle{
+        font-size: 14px;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .item-id{
+        font-size: 13px;
+        color: #888;
+        background: #f8f9fa;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: 1px solid #e9ecef;
+    }
+    
+    /* Section Titles */
+    .form-section-title{
+        background: linear-gradient(to right, #fff8f0, #fff4e6);
+        color: #ff8c00;
+        padding: 14px 18px;
+        border-radius: 10px;
+        font-weight: 700;
+        margin: 25px 0 20px;
+        border-left: 5px solid #ff8c00;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+    }
+    
+    /* Form Controls */
+    .form-control{
+        border-radius: 8px;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        transition: all 0.3s;
+        font-size: 14px;
+    }
+    .form-control:focus{
+        border-color: #ff8c00;
+        box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.25);
+    }
+    label{
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #444;
+        font-size: 14px;
+    }
+    
+    /* Table Styles */
+    .table-custom{
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px #e9ecef;
+    }
+    .table-custom thead{
+        background: linear-gradient(to right, #ff8c00, #ff6b00);
+        color: white;
+    }
+    .table-custom th{
+        padding: 15px 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .table-custom td{
+        padding: 12px;
+        border: 1px solid #e9ecef;
+        vertical-align: middle;
+    }
+    .table-custom tbody tr:nth-child(even){
+        background-color: #f8f9fa;
+    }
+    .table-custom tbody tr:hover{
+        background-color: #fff8f0;
+    }
+    
+    /* Button Add Row */
+    .btn-add-row{
+        background: #ff8c00;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-top: 15px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
+    }
+    .btn-add-row:hover{
+        background: #e67e00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4);
+    }
+    
+    /* Remove Row */
+    .remove-row{
+        cursor: pointer;
+        color: #dc3545;
+        font-weight: bold;
+        font-size: 22px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+    }
+    .remove-row:hover{
+        background: #f8d7da;
+        transform: scale(1.1);
+    }
+    
+    /* Submit Section */
+    .submit-section{
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 35px;
+        border-top: 4px solid #ff8c00;
+    }
+    .submit-info{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        color: #28a745;
+        font-size: 16px;
+    }
+    
+    /* Date Error */
+    .date-error{
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+        font-weight: 500;
+    }
+    .is-invalid{
+        border-color: #dc3545 !important;
+    }
+    .date-group{
+        position: relative;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        .card-header-custom {
+            flex-direction: column;
+            gap: 10px;
+        }
+        .submit-section {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+    }
     </style>
 </head>
 
@@ -67,11 +364,11 @@ if (!isset($surat_list) || !is_array($surat_list)) {
 
     <div class="info-box">
         <p><strong><i class="fa fa-info-circle"></i> Panduan Multi Edit:</strong></p>
-        <p>• Edit setiap item secara individual</p>
-        <p>• Semua perubahan disimpan sekaligus</p>
-        <p>• Tanggal akhir tidak boleh lebih awal dari tanggal mulai</p>
-        <p>• Akhir periode tidak boleh lebih awal dari periode penugasan</p>
-        <p>• Maksimal periode 60 hari untuk semua tanggal</p>
+        <p><i class="fa fa-check-circle"></i> Edit setiap item secara individual</p>
+        <p><i class="fa fa-check-circle"></i> Semua perubahan disimpan sekaligus</p>
+        <p><i class="fa fa-check-circle"></i> Tanggal akhir tidak boleh lebih awal dari tanggal mulai</p>
+        <p><i class="fa fa-check-circle"></i> Akhir periode tidak boleh lebih awal dari periode penugasan</p>
+        <p><i class="fa fa-check-circle"></i> Maksimal periode 60 hari untuk semua tanggal</p>
     </div>
 
     <form method="POST" action="<?= site_url('surat/save_multi_edit'); ?>" id="multiEditForm">
@@ -87,13 +384,15 @@ if (!isset($surat_list) || !is_array($surat_list)) {
         ?>
 
         <div class="edit-card">
+            <!-- Nomor urut card -->
+            <div class="card-number"><?= $index + 1 ?></div>
 
-            <div class="card-header-custom d-flex justify-content-between">
+            <div class="card-header-custom">
                 <div>
                     <div class="card-title"><?= htmlspecialchars($surat->nama_kegiatan ?? '-'); ?></div>
-                    <div style="font-size:13px;color:#666;">
-                        <?= htmlspecialchars($surat->jenis_pengajuan ?? '-'); ?> •
-                        <?= !empty($surat->created_at) && $surat->created_at !== '-' ? date('d M Y', strtotime($surat->created_at)) : '-'; ?>
+                    <div class="card-subtitle">
+                        <i class="fa fa-file-alt"></i> <?= htmlspecialchars($surat->jenis_pengajuan ?? '-'); ?> • 
+                        <i class="fa fa-calendar"></i> <?= !empty($surat->created_at) && $surat->created_at !== '-' ? date('d M Y', strtotime($surat->created_at)) : '-'; ?>
                     </div>
                 </div>
                 <div class="item-id">ID: <?= htmlspecialchars($surat->id); ?></div>
@@ -104,14 +403,14 @@ if (!isset($surat_list) || !is_array($surat_list)) {
             <div class="form-section-title"><i class="fas fa-calendar-alt"></i> Informasi Kegiatan</div>
 
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-6 mb-3">
                     <label>Nama Kegiatan</label>
                     <input type="text" class="form-control"
                            name="items[<?= $index ?>][nama_kegiatan]"
                            value="<?= htmlspecialchars($surat->nama_kegiatan ?? ''); ?>">
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-6 mb-3">
                     <label>Jenis Tanggal</label>
                     <select class="form-control jenis-date-select" data-index="<?= $index ?>"
                             name="items[<?= $index ?>][jenis_date]">
@@ -123,7 +422,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
 
             <div id="custom_<?= $index ?>" style="<?= (isset($surat->jenis_date) && $surat->jenis_date=='custom') ? '' : 'display:none' ?>">
                 <div class="row mt-3">
-                    <div class="col-md-6 date-group">
+                    <div class="col-md-6 mb-3 date-group">
                         <label>Tanggal Mulai</label>
                         <input type="date" class="form-control tanggal-kegiatan"
                                data-index="<?= $index ?>"
@@ -131,7 +430,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                                value="<?= (!empty($surat->tanggal_kegiatan) && $surat->tanggal_kegiatan!='-') ? htmlspecialchars($surat->tanggal_kegiatan) : '' ?>">
                         <div class="date-error" id="error_tanggal_<?= $index ?>">Tanggal mulai tidak valid</div>
                     </div>
-                    <div class="col-md-6 date-group">
+                    <div class="col-md-6 mb-3 date-group">
                         <label>Tanggal Akhir</label>
                         <input type="date" class="form-control akhir-kegiatan"
                                data-index="<?= $index ?>"
@@ -139,7 +438,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                                value="<?= (!empty($surat->akhir_kegiatan) && $surat->akhir_kegiatan!='-') ? htmlspecialchars($surat->akhir_kegiatan) : '' ?>">
                         <div class="date-error" id="error_akhir_<?= $index ?>">Tanggal akhir tidak boleh lebih awal dari tanggal mulai</div>
                     </div>
-                    <div class="col-md-6 date-group">
+                    <div class="col-md-6 mb-3 date-group">
                         <label>Periode Penugasan</label>
                         <input type="date" class="form-control periode-penugasan"
                                data-index="<?= $index ?>"
@@ -147,7 +446,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                                value="<?= (!empty($surat->periode_penugasan) && $surat->periode_penugasan!='-') ? htmlspecialchars($surat->periode_penugasan) : '' ?>">
                         <div class="date-error" id="error_periode_<?= $index ?>">Tanggal periode tidak valid</div>
                     </div>
-                    <div class="col-md-6 date-group">
+                    <div class="col-md-6 mb-3 date-group">
                         <label>Akhir Periode</label>
                         <input type="date" class="form-control akhir-periode-penugasan"
                                data-index="<?= $index ?>"
@@ -177,7 +476,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
             <div class="form-section-title"><i class="fas fa-file-alt"></i> Jenis Pengajuan</div>
 
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-6 mb-3">
                     <label>Jenis Pengajuan</label>
                     <select class="form-control jenis-pengajuan-select" data-index="<?= $index ?>"
                             name="items[<?= $index ?>][jenis_pengajuan]">
@@ -186,7 +485,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-6 mb-3">
                     <label>Format</label>
                     <select class="form-control" name="items[<?= $index ?>][format]">
                         <option value="Online"  <?= isset($surat->format) && $surat->format=='Online'?'selected':'' ?>>Online</option>
@@ -198,7 +497,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
 
             <div id="perorangan_<?= $index ?>" style="<?= (isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan=='Perorangan') ? '' : 'display:none' ?>" class="mt-3">
                 <label>Jenis Penugasan (Perorangan)</label>
-                <select class="form-control jenis-penugasan-per-select" data-index="<?= $index ?>"
+                <select class="form-control jenis-penugasan-per-select mb-3" data-index="<?= $index ?>"
                         name="items[<?= $index ?>][jenis_penugasan_perorangan]">
                     <?php foreach(["Juri","Pembicara","Narasumber","Lainnya"] as $o): 
                         $sel = (isset($surat->jenis_penugasan_perorangan) && $surat->jenis_penugasan_perorangan == $o) ? 'selected' : '';
@@ -246,7 +545,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                             <th>Nama Dosen</th>
                             <th>Jabatan</th>
                             <th>Divisi</th>
-                            <th>Aksi</th>
+                            <th width="80">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -284,7 +583,7 @@ if (!isset($surat_list) || !is_array($surat_list)) {
         <?php endforeach ?>
 
         <div class="submit-section">
-            <div>
+            <div class="submit-info">
                 <i class="fa fa-check-circle"></i>
                 Siap menyimpan <?= count($surat_list) ?> item
             </div>
@@ -300,6 +599,8 @@ if (!isset($surat_list) || !is_array($surat_list)) {
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+// JavaScript code remains exactly the same as in your original code
+// Only CSS has been improved for better visual design
 $(document).ready(() => {
 
     // === SWITCH CUSTOM/PERIODE ===
