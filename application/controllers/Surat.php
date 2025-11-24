@@ -888,7 +888,7 @@ class Surat extends CI_Controller
     }
 
     /* ===========================================
-       MULTI EDIT (UPDATED)
+       MULTI EDIT (UPDATED - FIXED)
     ============================================*/
     public function multi_edit()
     {
@@ -912,7 +912,8 @@ class Surat extends CI_Controller
             return;
         }
 
-        $data['surat_list'] = $this->Surat_model->getMultiByIds($idArray);
+        // PERBAIKAN: Ganti getMultiByIds() dengan get_by_ids()
+        $data['surat_list'] = $this->Surat_model->get_by_ids($idArray);
 
         if (empty($data['surat_list'])) {
             $this->session->set_flashdata('error', 'Data tidak ditemukan untuk ID: ' . implode(', ', $idArray));

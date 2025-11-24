@@ -74,7 +74,23 @@ class Surat_model extends CI_Model
     }
 
     // ============================================================
-    //  GET BY STATUS - METHOD YANG DITAMBAHKAN
+    //  GET BY IDS (METHOD BARU UNTUK MULTI EDIT)
+    // ============================================================
+    public function get_by_ids($ids)
+    {
+        if (empty($ids)) {
+            return [];
+        }
+        
+        $this->db->where_in('id', $ids);
+        $this->db->order_by('id', 'DESC');
+        $result = $this->db->get('surat')->result();
+        
+        return $this->append_dosen_data($result);
+    }
+
+    // ============================================================
+    //  GET BY STATUS
     // ============================================================
     public function get_by_status($status)
     {
@@ -149,5 +165,58 @@ class Surat_model extends CI_Model
     {
         $this->db->like('status', 'tolak');
         return $this->db->count_all_results('surat');
+    }
+
+    // ============================================================
+    //  METHOD TAMBAHAN UNTUK COMPATIBILITY
+    // ============================================================
+    
+    /**
+     * Alias untuk get_by_ids - untuk kompatibilitas dengan kode lama
+     */
+    public function getMultiByIds($ids)
+    {
+        return $this->get_by_ids($ids);
+    }
+
+    /**
+     * Get surat dengan filter custom
+     */
+    public function get_where($where = [])
+    {
+        $this->db->where($where);
+        $this->db->order_by('id', 'DESC');
+        $result = $this->db->get('surat')->result();
+        return $this->append_dosen_data($result);
+    }
+
+    /**
+     * Get surat dengan limit untuk pagination
+     */
+    public function get_surat_paginated($limit, $offset)
+    {
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit($limit, $offset);
+        $result = $this->db->get('surat')->result();
+        return $this->append_dosen_data($result);
+    }
+
+    /**
+     * Total semua surat
+     */
+    public function count_all()
+    {
+        return $this->db->count_all('surat');
+    }
+
+    /**
+     * Search surat by nama_kegiatan
+     */
+    public function search($keyword)
+    {
+        $this->db->like('nama_kegiatan', $keyword);
+        $this->db->order_by('id', 'DESC');
+        $result = $this->db->get('surat')->result();
+        return $this->append_dosen_data($result);
     }
 }
