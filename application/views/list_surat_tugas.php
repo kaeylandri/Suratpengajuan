@@ -2705,9 +2705,6 @@ $(document).ready(function () {
                                     <i class="fas fa-eye-slash"></i> Preview
                                 </button>
                             `}
-                            <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank">
-                                <i class="fas fa-download"></i> Download
-                            </a>
                         </div>
                     </div>
                 `;
@@ -2830,7 +2827,7 @@ $(document).ready(function () {
         // Biarkan link/button berfungsi normal
     });
 });
-// ===== PERBAIKAN UTAMA: FUNGSI getFileUrl() YANG DIPERBAIKI =====
+// ===== PERBAIKAN FUNGSI getFileUrl() =====
 function getFileUrl(file, baseUrl = BASE_URL) {
     let url = '';
 
@@ -2861,6 +2858,11 @@ function getFileUrl(file, baseUrl = BASE_URL) {
         // Jika sudah URL lengkap, return langsung
         if (url && url.match(/^https?:\/\//i)) {
             return url;
+        }
+        
+        // Cek apakah URL Uploadcare
+        if (url && (url.includes('ucarecdn.com') || url.includes('uploadcare.com'))) {
+            url = url.startsWith('//') ? 'https:' + url : 'https://' + url;
         }
     }
 

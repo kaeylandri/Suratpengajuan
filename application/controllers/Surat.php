@@ -15,7 +15,7 @@ class Surat extends CI_Controller
     {
         parent::__construct();
         $this->load->model('Surat_model');
-        $this->load->helper(['form', 'url']);
+        $this->load->helper(['file', 'url']);
         $this->load->library('session');
         $this->load->database();
     }
@@ -484,68 +484,98 @@ class Surat extends CI_Controller
         return round(($completed / $total) * 100);
     }
 
-    /* ===========================================
-       SUBMIT DATA (UPDATED - HANYA SIMPAN NIP)
-    ============================================*/
     public function submit()
-    {
-        $post = $this->input->post() ?? [];
+{
+    $post = $this->input->post() ?? [];
 
-        foreach ($post as $k => $v) {
-            if (is_array($v)) {
-                $post[$k] = array_values(array_filter($v, fn($x) => trim($x) !== ""));
-            } else {
-                $post[$k] = ($v === "" || $v === null) ? "-" : $v;
-            }
-        }
-
-        $tp_safe = $this->safe_date($post['created_at'] ?? null);
-        $created_at = ($tp_safe === "-") ? date('Y-m-d') : $tp_safe;
-
-        $eviden_raw = $post['eviden'] ?? [];
-
-        if (!is_array($eviden_raw)) {
-            $arr = array_map('trim', explode(",", $eviden_raw));
+    foreach ($post as $k => $v) {
+        if (is_array($v)) {
+            $post[$k] = array_values(array_filter($v, fn($x) => trim($x) !== ""));
         } else {
-            $arr = $eviden_raw;
+            $post[$k] = ($v === "" || $v === null) ? "-" : $v;
         }
-
-        $arr = array_values(array_filter($arr, fn($x) => trim($x) !== ""));
-
-        $data = [
-            'user_id' => $post['user_id'] ?? '-',
-            'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
-            'jenis_date' => $post['jenis_date'] ?? '-',
-            'created_at' => $created_at,
-            'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
-            'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
-            'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
-            'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
-            'periode_value' => $post['periode_value'] ?? '-',
-            'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
-            'penyelenggara' => $post['penyelenggara'] ?? '-',
-            'jenis_pengajuan' => $post['jenis_pengajuan'] ?? '-',
-            'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
-            'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? '-',
-            'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
-            'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
-            'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
-            'format' => $post['format'] ?? '-',
-
-            // PERUBAHAN: HANYA SIMPAN NIP, TIDAK LAGI SIMPAN nama_dosen, jabatan, divisi
-            'nip' => json_encode($post['nip'] ?? []),
-
-            'eviden' => json_encode($arr),
-
-            'status' => 'pengajuan',
-            'created_at' => date('Y-m-d H:i:s'),
-        ];
-
-        $this->Surat_model->insert_surat($data);
-
-        $this->session->set_flashdata('success', 'Data berhasil disimpan!');
-        redirect('surat');
     }
+
+    $tp_safe = $this->safe_date($post['created_at'] ?? null);
+    $created_at = ($tp_safe === "-") ? date('Y-m-d') : $tp_safe;
+
+    /* ======================================================
+       🔥 PROSES EVIDEN: ambil URL Uploadcare → download → simpan
+       ====================================================== */
+    $eviden_raw = $post['eviden'] ?? "[]";
+    $eviden_urls = json_decode($eviden_raw, true);
+
+    if (!is_array($eviden_urls)) {
+        $eviden_urls = [];
+    }
+
+    $saved_filenames = [];
+
+    // Pastikan folder ada
+    $upload_dir = FCPATH . "uploads/eviden/";
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+    }
+
+    foreach ($eviden_urls as $url) {
+        if (empty($url)) continue;
+
+        // Ambil nama file
+        $file_ext = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
+        if (!$file_ext) $file_ext = "jpg";
+
+        $filename = "eviden_" . time() . "_" . rand(1000,9999) . "." . $file_ext;
+
+        // Path tempat file disimpan
+        $save_path = $upload_dir . $filename;
+
+        // Download file dari Uploadcare
+        $file_data = @file_get_contents($url);
+
+        if ($file_data !== false) {
+            file_put_contents($save_path, $file_data);
+            $saved_filenames[] = $filename;
+        }
+    }
+
+    /* ======================================================
+       🔥 END PROSES EVIDEN
+       ====================================================== */
+
+    $data = [
+        'user_id' => $post['user_id'] ?? '-',
+        'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
+        'jenis_date' => $post['jenis_date'] ?? '-',
+        'created_at' => date('Y-m-d H:i:s'),
+        'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
+        'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
+        'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
+        'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
+        'periode_value' => $post['periode_value'] ?? '-',
+        'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
+        'penyelenggara' => $post['penyelenggara'] ?? '-',
+        'jenis_pengajuan' => $post['jenis_pengajuan'] ?? '-',
+        'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
+        'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? '-',
+        'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
+        'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
+        'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
+        'format' => $post['format'] ?? '-',
+
+        'nip' => json_encode($post['nip'] ?? []),
+
+        // ⬇️ Simpan hanya NAMA FILE (bukan URL)
+        'eviden' => json_encode($saved_filenames),
+
+        'status' => 'pengajuan',
+    ];
+
+    $this->Surat_model->insert_surat($data);
+
+    $this->session->set_flashdata('success', 'Data berhasil disimpan!');
+    redirect('surat');
+}
+
 
     /* ===========================================
        DOWNLOAD EVIDEN
@@ -643,6 +673,47 @@ class Surat extends CI_Controller
         echo $file_content;
         exit;
     }
+    /* ===========================================
+   GET EVIDEN URL - METHOD BARU
+============================================*/
+public function get_eviden_url($eviden_data)
+{
+    if (empty($eviden_data)) return [];
+    
+    $urls = [];
+    
+    if (is_string($eviden_data)) {
+        $decoded = json_decode($eviden_data, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $eviden_data = $decoded;
+        } else {
+            $eviden_data = [$eviden_data];
+        }
+    }
+    
+    if (!is_array($eviden_data)) {
+        $eviden_data = [];
+    }
+    
+    foreach ($eviden_data as $file) {
+        if (filter_var($file, FILTER_VALIDATE_URL)) {
+            // Jika sudah URL lengkap (dari Uploadcare)
+            $urls[] = $file;
+        } else if (strpos($file, 'ucarecdn.com') !== false || strpos($file, 'uploadcare.com') !== false) {
+            // Jika URL Uploadcare tanpa protokol
+            if (strpos($file, '//') === 0) {
+                $urls[] = 'https:' . $file;
+            } else {
+                $urls[] = 'https://' . $file;
+            }
+        } else {
+            // File lokal
+            $urls[] = base_url('uploads/eviden/' . $file);
+        }
+    }
+    
+    return $urls;
+}
 
     /* ===========================================
        EDIT DATA (UPDATED)
@@ -1074,7 +1145,7 @@ class Surat extends CI_Controller
     $dompdf->loadHtml($html);
     $dompdf->setPaper('A4', 'portrait');
 
-    ini_set("memory_limit", "16384");
+    ini_set("memory_limit", "4096M");
     ini_set("pcre.backtrack_limit", "30000000");
 
     $dompdf->render();
