@@ -108,7 +108,7 @@ $route['dekan/list_surat_tugas'] = 'dekan/list_surat_tugas';
 $route['dekan/filter/(:any)'] = 'dekan/filter/$1';
 $route['dekan/test'] = 'dekan/test';
 
-// Kaprodi routes - UPDATED WITH MISSING ROUTES
+// Kaprodi routes - UPDATED WITH MULTI APPROVE/REJECT ROUTES
 $route['kaprodi'] = 'kaprodi/index';
 $route['kaprodi/dashboard'] = 'kaprodi/index';
 $route['kaprodi/index'] = 'kaprodi/index';
@@ -121,9 +121,31 @@ $route['kaprodi/approve/(:num)'] = 'kaprodi/approve/$1';
 $route['kaprodi/reject/(:num)'] = 'kaprodi/reject/$1';
 $route['kaprodi/getDetailPengajuan/(:num)'] = 'kaprodi/getDetailPengajuan/$1';
 
-// Sekretariat routes
+// ✅ NEW MULTI APPROVE/REJECT ROUTES FOR KAPRODI
+$route['kaprodi/multi_approve'] = 'kaprodi/multi_approve';
+$route['kaprodi/multi_reject'] = 'kaprodi/multi_reject';
+$route['kaprodi/process_multi_approve'] = 'kaprodi/process_multi_approve';
+$route['kaprodi/process_multi_reject'] = 'kaprodi/process_multi_reject';
+
+// ✅ UPDATED LIST ROUTES FOR KAPRODI
+$route['kaprodi/disetujui_list'] = 'kaprodi/disetujui_list';
+$route['kaprodi/ditolak_list'] = 'kaprodi/ditolak_list';
+
+// Sekretariat routes - UPDATED WITH BULK ACTIONS
 $route['sekretariat'] = 'sekretariat/index';
 $route['sekretariat/dashboard'] = 'sekretariat/index';
+$route['sekretariat/index'] = 'sekretariat/index';
+$route['sekretariat/pending'] = 'sekretariat/pending';
+$route['sekretariat/bulk_approve'] = 'sekretariat/bulk_approve';
+$route['sekretariat/bulk_reject'] = 'sekretariat/bulk_reject';
+$route['sekretariat/disetujui'] = 'sekretariat/disetujui';
+$route['sekretariat/ditolak'] = 'sekretariat/ditolak';
+$route['sekretariat/semua'] = 'sekretariat/semua';
+$route['sekretariat/approve/(:num)'] = 'sekretariat/approve/$1';
+$route['sekretariat/reject/(:num)'] = 'sekretariat/reject/$1';
+$route['sekretariat/getDetailPengajuan/(:num)'] = 'sekretariat/getDetailPengajuan/$1';
+$route['sekretariat/get_dashboard_counts'] = 'sekretariat/get_dashboard_counts';
+
 
 /*
 | -------------------------------------------------------------------------
@@ -134,6 +156,23 @@ $route['sekretariat/dashboard'] = 'sekretariat/index';
 $route['api/surat/status/(:num)'] = 'surat/get_status/$1';
 $route['api/surat/list'] = 'surat/index';
 $route['api/surat/detail/(:num)'] = 'surat/get_status/$1';
+
+// ✅ API ROUTES FOR KAPRODI
+$route['api/kaprodi/detail/(:num)'] = 'kaprodi/getDetailPengajuan/$1';
+
+// ✅ API ROUTES FOR SEKRETARIAT
+$route['api/sekretariat/detail/(:num)'] = 'sekretariat/getDetailPengajuan/$1';
+$route['api/sekretariat/dashboard_counts'] = 'sekretariat/get_dashboard_counts';
+
+/*
+| -------------------------------------------------------------------------
+| AUTH ROUTES
+| -------------------------------------------------------------------------
+*/
+
+$route['auth/login'] = 'auth/login';
+$route['auth/logout'] = 'auth/logout';
+$route['auth/process_login'] = 'auth/process_login';
 
 /*
 | -------------------------------------------------------------------------

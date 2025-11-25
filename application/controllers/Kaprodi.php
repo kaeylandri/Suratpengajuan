@@ -109,10 +109,159 @@ class Kaprodi extends CI_Controller
         redirect('kaprodi');
     }
 
-    // ✅ METHOD BARU: Get Detail Pengajuan untuk Popup
+    // ✅ METHOD BARU: Process Multi Approve - DIPERBAIKI
+    public function process_multi_approve()
+    {
+        if ($this->input->post()) {
+            // Perbaikan: Ambil selected_ids sebagai array
+            $selected_ids = $this->input->post('selected_ids');
+            
+            // Debug: Cek data yang diterima
+            log_message('debug', 'Selected IDs: ' . print_r($selected_ids, true));
+            
+            if (empty($selected_ids)) {
+                $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih');
+                redirect('kaprodi/pending');
+            }
+            
+            $success_count = 0;
+            $error_count = 0;
+            
+            foreach ($selected_ids as $id) {
+                $surat = $this->db->get_where('surat', ['id' => $id])->row();
+                
+                if ($surat) {
+                    $approval = json_decode($surat->approval_status, true) ?? [];
+                    $approval['kk'] = date("Y-m-d H:i:s");
+                    
+                    // Generate nomor surat unik untuk setiap pengajuan
+                    $nomor_surat = $this->generate_nomor_surat();
+                    
+                    $result = $this->db->where('id', $id)->update('surat', [
+                        'status' => 'disetujui KK',
+                        'nomor_surat' => $nomor_surat,
+                        'approval_status' => json_encode($approval),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    
+                    if ($result) {
+                        $success_count++;
+                        $this->add_approval_log($id, 'Kaprodi', 'Disetujui');
+                    } else {
+                        $error_count++;
+                        log_message('error', "Gagal menyetujui pengajuan ID: $id");
+                    }
+                } else {
+                    $error_count++;
+                }
+            }
+            
+            if ($success_count > 0) {
+                $message = "Berhasil menyetujui $success_count pengajuan";
+                if ($error_count > 0) {
+                    $message .= ". Gagal: $error_count pengajuan";
+                }
+                $this->session->set_flashdata('success', $message);
+            } else {
+                $this->session->set_flashdata('error', 'Gagal menyetujui semua pengajuan yang dipilih');
+            }
+            
+            redirect('kaprodi/pending');
+        } else {
+            $this->session->set_flashdata('error', 'Metode request tidak valid');
+            redirect('kaprodi/pending');
+        }
+    }
+
+    // ✅ METHOD BARU: Process Multi Reject - DIPERBAIKI TOTAL
+    public function process_multi_reject()
+    {
+        if ($this->input->post()) {
+            // Perbaikan: Ambil selected_ids dan rejection_notes sebagai array
+            $selected_ids = $this->input->post('selected_ids');
+            $rejection_notes = $this->input->post('rejection_notes');
+            
+            // Debug: Cek data yang diterima
+            log_message('debug', 'Selected IDs: ' . print_r($selected_ids, true));
+            log_message('debug', 'Rejection Notes: ' . print_r($rejection_notes, true));
+            
+            if (empty($selected_ids)) {
+                $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih');
+                redirect('kaprodi/pending');
+            }
+            
+            // Validasi rejection notes
+            if (empty($rejection_notes)) {
+                $this->session->set_flashdata('error', 'Alasan penolakan harus diisi');
+                redirect('kaprodi/pending');
+            }
+            
+            $success_count = 0;
+            $error_count = 0;
+            
+            // PERBAIKAN UTAMA: Handle rejection_notes yang berupa array
+            foreach ($selected_ids as $index => $id) {
+                $surat = $this->db->get_where('surat', ['id' => $id])->row();
+                
+                if ($surat) {
+                    $approval = json_decode($surat->approval_status, true) ?? [];
+                    $approval['kk'] = date("Y-m-d H:i:s");
+
+                    // PERBAIKAN: Ambil catatan penolakan yang sesuai berdasarkan index
+                    if (is_array($rejection_notes)) {
+                        // Jika rejection_notes adalah array dari multiple textarea
+                        $catatan = isset($rejection_notes[$index]) ? $rejection_notes[$index] : 'Tidak ada catatan';
+                    } else {
+                        // Jika rejection_notes adalah string tunggal
+                        $catatan = $rejection_notes;
+                    }
+                    
+                    // Pastikan $catatan adalah string
+                    $catatan = is_array($catatan) ? implode(', ', $catatan) : $catatan;
+
+                    $result = $this->db->where('id', $id)->update('surat', [
+                        'status' => 'ditolak KK',
+                        'approval_status' => json_encode($approval),
+                        'catatan_penolakan' => $catatan, // Simpan sebagai string
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    
+                    if ($result) {
+                        $success_count++;
+                        $this->add_approval_log($id, 'Kaprodi', 'Ditolak', $catatan);
+                    } else {
+                        $error_count++;
+                        log_message('error', "Gagal menolak pengajuan ID: $id");
+                    }
+                } else {
+                    $error_count++;
+                }
+            }
+            
+            if ($success_count > 0) {
+                $message = "Berhasil menolak $success_count pengajuan";
+                if ($error_count > 0) {
+                    $message .= ". Gagal: $error_count pengajuan";
+                }
+                $this->session->set_flashdata('success', $message);
+            } else {
+                $this->session->set_flashdata('error', 'Gagal menolak semua pengajuan yang dipilih');
+            }
+            
+            redirect('kaprodi/pending');
+        } else {
+            $this->session->set_flashdata('error', 'Metode request tidak valid');
+            redirect('kaprodi/pending');
+        }
+    }
+
+    // ✅ METHOD BARU: Get Detail Pengajuan untuk Popup - DIPERBAIKI
     public function getDetailPengajuan($id)
     {
         try {
+            // Set header JSON pertama
+            header('Content-Type: application/json');
+            
             // Ambil data dari database
             $this->db->where('id', $id);
             $data = $this->db->get('surat')->row();
@@ -145,9 +294,8 @@ class Kaprodi extends CI_Controller
                 ];
             }
 
-            // Set header JSON
-            header('Content-Type: application/json');
             echo json_encode($response);
+            exit;
 
         } catch (Exception $e) {
             // Handle error
@@ -156,29 +304,13 @@ class Kaprodi extends CI_Controller
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ];
             
-            header('Content-Type: application/json');
             echo json_encode($response);
+            exit;
         }
     }
 
-    // ✅ METHOD TAMBAHAN: Untuk halaman filtered
-    public function semua()
-    {
-        $this->loadFilteredView('semua');
-    }
-
-    public function disetujui()
-    {
-        $this->loadFilteredView('disetujui');
-    }
-
-    public function ditolak()
-    {
-        $this->loadFilteredView('ditolak');
-    }
-
     // ✅ METHOD BARU: Untuk halaman pending dengan search
-    public function halaman_pending()
+    public function pending()
     {
         $search = $this->input->get('search');
         $tahun = $this->input->get('tahun') ?? date('Y');
@@ -197,6 +329,7 @@ class Kaprodi extends CI_Controller
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('jenis_pengajuan', $search);
             $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search);
             $this->db->group_end();
         }
 
@@ -211,7 +344,7 @@ class Kaprodi extends CI_Controller
     }
 
     // ✅ METHOD BARU: Untuk halaman rejected dengan search
-    public function halaman_ditolak()
+    public function ditolak_list()
     {
         $search = $this->input->get('search');
         $tahun = $this->input->get('tahun') ?? date('Y');
@@ -230,6 +363,7 @@ class Kaprodi extends CI_Controller
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('jenis_pengajuan', $search);
             $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search);
             $this->db->group_end();
         }
 
@@ -244,7 +378,7 @@ class Kaprodi extends CI_Controller
     }
 
     // ✅ METHOD BARU: Untuk halaman approved dengan search
-    public function halaman_disetujui()
+    public function disetujui_list()
     {
         $search = $this->input->get('search');
         $tahun = $this->input->get('tahun') ?? date('Y');
@@ -263,6 +397,7 @@ class Kaprodi extends CI_Controller
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('jenis_pengajuan', $search);
             $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search);
             $this->db->group_end();
         }
 
@@ -274,6 +409,22 @@ class Kaprodi extends CI_Controller
 
         // Load view halaman_disetujui
         $this->load->view('kaprodi/halaman_disetujui', $data);
+    }
+
+    // ✅ METHOD TAMBAHAN: Untuk halaman filtered
+    public function semua()
+    {
+        $this->loadFilteredView('semua');
+    }
+
+    public function disetujui()
+    {
+        $this->loadFilteredView('disetujui');
+    }
+
+    public function ditolak()
+    {
+        $this->loadFilteredView('ditolak');
     }
 
     private function loadFilteredView($type)
@@ -318,5 +469,34 @@ class Kaprodi extends CI_Controller
 
         // Load view yang sama dengan data berbeda
         $this->load->view('kaprodi/dashboard', $data);
+    }
+
+    // ✅ METHOD BARU: Helper function untuk generate nomor surat
+    private function generate_nomor_surat()
+    {
+        $this->load->helper('string');
+        
+        $year = date('Y');
+        $random = random_string('numeric', 3);
+        
+        return "{$random}/SKT/FT/{$year}";
+    }
+
+    // ✅ METHOD BARU: Helper function untuk log (opsional)
+    private function add_approval_log($surat_id, $approver, $status, $notes = '')
+    {
+        $log_data = [
+            'surat_tugas_id' => $surat_id,
+            'approver' => $approver,
+            'status' => $status,
+            'notes' => $notes,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Jika Anda punya tabel log, uncomment baris berikut:
+        // $this->db->insert('approval_logs', $log_data);
+        
+        // Untuk saat ini, kita hanya log ke file atau tidak melakukan apa-apa
+        log_message('info', "Approval Log: Surat ID $surat_id - $approver - $status - $notes");
     }
 }
