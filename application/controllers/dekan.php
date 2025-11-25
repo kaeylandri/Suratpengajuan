@@ -24,12 +24,13 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         
-        // Filter search - GANTI nama_dosen menjadi nip
+        // Filter search - PERBAIKAN: Tambah pencarian di field nama_dosen
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search); // TAMBAHAN: Cari di nama_dosen juga
             $this->db->group_end();
         }
 
@@ -64,7 +65,9 @@ class Dekan extends CI_Controller
             }
         }
 
-        $data['surat_list'] = $this->db->order_by('created_at', 'DESC')
+        // PERBAIKAN UTAMA: Ambil data dengan field yang lengkap untuk dosen
+        $data['surat_list'] = $this->db->select('*')
+                               ->order_by('created_at', 'DESC')
                                ->get('surat')
                                ->result_array();
 
@@ -129,12 +132,13 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
 
-        // Filter search - GANTI nama_dosen menjadi nip
+        // Filter search - PERBAIKAN: Tambah pencarian di field nama_dosen
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search); // TAMBAHAN
             $this->db->group_end();
         }
 
@@ -153,7 +157,9 @@ class Dekan extends CI_Controller
             }
         }
 
-        $data['surat_list'] = $this->db->order_by('created_at', 'DESC')
+        // PERBAIKAN: Ambil data dengan field lengkap
+        $data['surat_list'] = $this->db->select('*')
+                               ->order_by('created_at', 'DESC')
                                ->get('surat')
                                ->result_array();
 
@@ -167,6 +173,7 @@ class Dekan extends CI_Controller
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search); // TAMBAHAN
             $this->db->group_end();
         }
         
@@ -213,16 +220,19 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where('status', 'disetujui dekan');
 
-        // Filter search - GANTI nama_dosen menjadi nip
+        // Filter search - PERBAIKAN: Tambah pencarian di field nama_dosen
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search); // TAMBAHAN
             $this->db->group_end();
         }
 
-        $data['surat_list'] = $this->db->order_by('created_at', 'DESC')
+        // PERBAIKAN: Ambil data dengan field lengkap
+        $data['surat_list'] = $this->db->select('*')
+                               ->order_by('created_at', 'DESC')
                                ->get('surat')
                                ->result_array();
 
@@ -258,16 +268,19 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where('status', 'ditolak dekan');
 
-        // Filter search - GANTI nama_dosen menjadi nip
+        // Filter search - PERBAIKAN: Tambah pencarian di field nama_dosen
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search); // TAMBAHAN
             $this->db->group_end();
         }
 
-        $data['surat_list'] = $this->db->order_by('created_at', 'DESC')
+        // PERBAIKAN: Ambil data dengan field lengkap
+        $data['surat_list'] = $this->db->select('*')
+                               ->order_by('created_at', 'DESC')
                                ->get('surat')
                                ->result_array();
 
@@ -303,16 +316,19 @@ class Dekan extends CI_Controller
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where('status', 'disetujui sekretariat');
 
-        // Filter search - GANTI nama_dosen menjadi nip
+        // Filter search - PERBAIKAN: Tambah pencarian di field nama_dosen
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search); // TAMBAHAN
             $this->db->group_end();
         }
 
-        $data['surat_list'] = $this->db->order_by('created_at', 'DESC')
+        // PERBAIKAN: Ambil data dengan field lengkap
+        $data['surat_list'] = $this->db->select('*')
+                               ->order_by('created_at', 'DESC')
                                ->get('surat')
                                ->result_array();
 
@@ -601,7 +617,11 @@ class Dekan extends CI_Controller
         // Semua surat yg pernah diproses Dekan
         $this->db->where_in("status", ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
         $this->db->order_by("created_at", "DESC");
-        $data['surat_list'] = $this->db->get("surat")->result();
+        
+        // PERBAIKAN: Ambil data dengan field lengkap
+        $data['surat_list'] = $this->db->select('*')
+                               ->get("surat")
+                               ->result_array();
 
         // Statistik - hanya data yang relevan untuk dekan
         $data['approved_count'] = $this->db->where('status', 'disetujui dekan')->count_all_results('surat');
@@ -627,38 +647,58 @@ class Dekan extends CI_Controller
         $this->load->view('dekan/laporan', $data);
     }
     
+    // PERBAIKAN UTAMA: Method detail yang sudah dikoreksi
     public function detail($id)
     {
-        // Ambil surat
+        // Ambil surat dengan field lengkap
         $this->db->where('id', $id);
-        $data['surat'] = $this->db->get("surat")->row();
+        $data['surat'] = $this->db->get("surat")->row_array(); // Ubah ke row_array untuk konsistensi
 
         if (!$data['surat']) {
             show_404();
         }
 
-        // --- Ambil Data Dosen Berdasarkan NIP ---
-        $nip_raw = $data['surat']->nip;
+        // DEBUG: Tampilkan struktur data untuk troubleshooting
+        // echo "<pre>"; print_r($data['surat']); echo "</pre>"; die();
 
-        // NIP disimpan dalam bentuk JSON array → decode
-        $nip_list = json_decode($nip_raw, true);
-
-        if (!is_array($nip_list)) {
-            $nip_list = [$nip_raw]; // fallback jika bukan array
+        // PERBAIKAN: Ambil data dosen berdasarkan NIP dari tabel surat
+        $nip = $data['surat']['nip'];
+        
+        // Cek apakah NIP ada dan tidak kosong
+        if (!empty($nip)) {
+            // Jika NIP adalah JSON array, decode dulu
+            if (is_json($nip)) {
+                $nip_list = json_decode($nip, true);
+                if (is_array($nip_list)) {
+                    $this->db->where_in('nip', $nip_list);
+                } else {
+                    $this->db->where('nip', $nip);
+                }
+            } else {
+                $this->db->where('nip', $nip);
+            }
+            
+            $data['dosen_list'] = $this->db->get('list_dosen')->result_array();
+        } else {
+            $data['dosen_list'] = [];
         }
 
-        // Ambil semua dosen yg NIP-nya ada dalam array
-        $this->db->where_in('nip', $nip_list);
-        $data['dosen_list'] = $this->db->get('list_dosen')->result();
-
-        // Jika tidak ditemukan, tetap kirim array kosong
-        if (!$data['dosen_list']) {
-            $data['dosen_list'] = [];
+        // Jika tidak ada data dosen, buat data fallback dari field nama_dosen di tabel surat
+        if (empty($data['dosen_list']) && !empty($data['surat']['nama_dosen'])) {
+            $data['dosen_list'] = [
+                [
+                    'nama' => $data['surat']['nama_dosen'],
+                    'nip' => $data['surat']['nip'],
+                    'jabatan' => '-',
+                    'divisi' => '-'
+                ]
+            ];
         }
 
         $this->load->view('dekan/detail_surat', $data);
     }
 
+    // PERBAIKAN: Method untuk AJAX detail
     public function get_surat_detail($id)
     {
         // Ambil data surat dulu
@@ -669,16 +709,41 @@ class Dekan extends CI_Controller
             return;
         }
 
-        // Ambil data dosen berdasarkan nip
-        $dosen = $this->db->get_where('list_dosen', ['nip' => $surat['nip']])->row_array();
+        // PERBAIKAN: Ambil data dosen berdasarkan NIP
+        $nip = $surat['nip'];
+        $dosen_data = [];
 
-        // Gabungkan datanya
-        if ($dosen) {
-            $surat['nama_dosen'] = $dosen['nama'];   // pastikan kolomnya 'nama'
-            $surat['nip']        = $dosen['nip'];    // ambil nip dari list_dosen
-        } else {
-            $surat['nama_dosen'] = '-';
-            // nip tetap pakai dari surat jika tidak ketemu dosen
+        if (!empty($nip)) {
+            // Handle NIP yang berupa JSON array
+            if (is_json($nip)) {
+                $nip_list = json_decode($nip, true);
+                if (is_array($nip_list)) {
+                    $this->db->where_in('nip', $nip_list);
+                    $dosen_result = $this->db->get('list_dosen')->result_array();
+                    $dosen_data = $dosen_result;
+                }
+            } else {
+                // NIP tunggal
+                $dosen = $this->db->get_where('list_dosen', ['nip' => $nip])->row_array();
+                if ($dosen) {
+                    $dosen_data = [$dosen];
+                }
+            }
+        }
+
+        // Gabungkan data
+        $surat['dosen_data'] = $dosen_data;
+
+        // Jika tidak ada data dosen dari list_dosen, gunakan data dari field nama_dosen di surat
+        if (empty($dosen_data) && !empty($surat['nama_dosen'])) {
+            $surat['dosen_data'] = [
+                [
+                    'nama' => $surat['nama_dosen'],
+                    'nip' => $surat['nip'],
+                    'jabatan' => '-',
+                    'divisi' => '-'
+                ]
+            ];
         }
 
         echo json_encode($surat);
@@ -701,7 +766,11 @@ class Dekan extends CI_Controller
         } 
         // else: tampilkan semua data yang relevan untuk dekan
 
-        $data['surat_list'] = $this->db->get("surat")->result();
+        // PERBAIKAN: Ambil data dengan field lengkap
+        $data['surat_list'] = $this->db->select('*')
+                               ->get("surat")
+                               ->result_array();
+                               
         $data['current_filter'] = $status;
 
         $this->load->view('dekan/list_surat_tugas', $data);
@@ -742,15 +811,16 @@ class Dekan extends CI_Controller
         // Implementasi notifikasi email atau sistem notifikasi lainnya
         // Contoh sederhana log
         log_message('info', "Notifikasi: Pengajuan {$surat->nama_kegiatan} telah disetujui Dekan");
-        
-        // Contoh implementasi email (uncomment jika diperlukan)
-        /*
-        $this->load->library('email');
-        $this->email->from('noreply@universitas.ac.id', 'Sistem Surat Tugas');
-        $this->email->to($surat->email_pengaju); // Anda perlu menambahkan field email di tabel surat
-        $this->email->subject('Pengajuan Surat Tugas Disetujui');
-        $this->email->message("Pengajuan surat tugas '{$surat->nama_kegiatan}' telah disetujui oleh Dekan.");
-        $this->email->send();
-        */
+    }
+}
+
+// PERBAIKAN: Tambahkan helper function untuk cek JSON
+if (!function_exists('is_json')) {
+    function is_json($string) {
+        if (!is_string($string)) {
+            return false;
+        }
+        json_decode($string);
+        return (json_last_error() == JSON_ERROR_NONE);
     }
 }

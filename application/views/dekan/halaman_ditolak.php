@@ -291,6 +291,32 @@
     .status-body {
         padding: 30px;
     }
+    /* Nomor Surat Styles */
+    .nomor-surat-container {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border: 2px solid #2196f3;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .nomor-surat-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1565c0;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .nomor-surat-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0d47a1;
+        font-family: 'Courier New', monospace;
+    }
+    
 </style>
 </head>
 <body>
@@ -635,6 +661,15 @@ function showDetail(id) {
     let statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak</span>';
 
     const content = `
+     <!-- NOMOR SURAT DARI SEKRETARIAT -->
+        ${getVal('nomor_surat') && getVal('nomor_surat') !== '-' ? `
+        <div class="nomor-surat-container">
+            <div class="nomor-surat-label">
+                <i class="fa-solid fa-file-signature"></i> Nomor Surat
+            </div>
+            <div class="nomor-surat-value">${escapeHtml(getVal('nomor_surat'))}</div>
+        </div>
+        ` : ''}
         <div class="detail-section">
             <div class="detail-section-title">
                 <i class="fa-solid fa-info-circle"></i> Informasi Utama
@@ -649,10 +684,6 @@ function showDetail(id) {
                     <div class="detail-value" style="display:flex;align-items:center">
                         ${escapeHtml(status)} ${statusBadge}
                     </div>
-                </div>
-                <div class="detail-row">
-                    <div class="detail-label">Ditolak Oleh</div>
-                    <div class="detail-value">${escapeHtml(getVal('ditolak_oleh') || 'Dekan')}</div>
                 </div>
                 <div class="detail-row">
                     <div class="detail-label">Jenis Pengajuan</div>

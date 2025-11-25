@@ -361,6 +361,32 @@
     .status-body {
         padding: 30px;
     }
+    /* Nomor Surat Styles */
+    .nomor-surat-container {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border: 2px solid #2196f3;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .nomor-surat-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1565c0;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .nomor-surat-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0d47a1;
+        font-family: 'Courier New', monospace;
+    }
+    
 
     /* Progress Bar Styles */
     .progress-track {
@@ -1059,6 +1085,16 @@ function showDetail(id) {
     }
 
     const content = `
+      <!-- NOMOR SURAT DARI SEKRETARIAT -->
+        ${getVal('nomor_surat') && getVal('nomor_surat') !== '-' ? `
+        <div class="nomor-surat-container">
+            <div class="nomor-surat-label">
+                <i class="fa-solid fa-file-signature"></i> Nomor Surat
+            </div>
+            <div class="nomor-surat-value">${escapeHtml(getVal('nomor_surat'))}</div>
+        </div>
+        ` : ''}
+
         <div class="detail-section">
             <div class="detail-section-title">
                 <i class="fa-solid fa-info-circle"></i> 1 Informasi Utama

@@ -535,23 +535,7 @@
             <form id="approveForm" method="POST" action="">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
                 
-                <div class="form-group">
-                    <label for="nomorSurat">
-                        <i class="fa-solid fa-file-alt"></i> Nomor Surat <span style="color:#e74c3c">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        id="nomorSurat" 
-                        name="nomor_surat" 
-                        class="form-control" 
-                        placeholder="Contoh: 001/SKT/FT/2025" 
-                        required
-                        autocomplete="off"
-                    >
-                    <div class="form-hint">
-                        <i class="fa-solid fa-exclamation-circle"></i> Format: 001/SKT/FT/Tahun
-                    </div>
-                </div>
+    
 
                 <div class="approve-modal-actions">
                     <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
@@ -1007,10 +991,6 @@ function showDetail(id) {
                                 <div class="detail-value" style="display:flex;align-items:center">
                                     ${escapeHtml(status)} ${statusBadge}
                                 </div>
-                            </div>
-                            <div class="detail-row">
-                                <div class="detail-label">NOMOR SURAT</div>
-                                <div class="detail-value">${escapeHtml(getVal('nomor_surat'))}</div>
                             </div>
                         </div>
                     </div>
