@@ -61,17 +61,35 @@
     .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
     .detail-value-empty{color:#6c757d;font-style:italic}
     
-    /* File Evidence Styles */
-    .file-evidence{margin-top:10px}
-    .file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
-    .file-item:hover{background:#e8f6f3;border-color:#16A085}
-    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#16A085;font-size:16px}
-    .file-info{flex:1}
-    .file-name{font-weight:600;color:#212529;font-size:14px}
-    .file-size{font-size:12px;color:#6c757d}
-    .download-btn{background:#16A085;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
-    .download-btn:hover{background:#138D75;color:white;text-decoration:none}
-    
+    /* File Evidence Styles - UPDATED */
+.file-evidence{margin-top:10px}
+.file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
+.file-item:hover{background:#e8f6f3;border-color:#16A085}
+.file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#16A085;font-size:16px}
+.file-info{flex:1}
+.file-name{font-weight:600;color:#212529;font-size:14px;cursor:pointer}
+.file-name:hover{color:#16A085}
+.file-size{font-size:12px;color:#6c757d}
+.preview-btn{background:#3498db;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+.preview-btn:hover{background:#2980b9;color:white;text-decoration:none}
+.preview-btn.disabled{background:#bdc3c7;cursor:not-allowed;opacity:0.6}
+.preview-btn.disabled:hover{background:#bdc3c7}
+.download-btn{background:#16A085;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+.download-btn:hover{background:#138D75;color:white;text-decoration:none}
+
+/* Preview Modal Styles */
+.preview-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;justify-content:center;align-items:center;padding:20px}
+.preview-modal.show{display:flex}
+.preview-content{background:white;border-radius:12px;width:90%;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
+.preview-header{background:#16A085;color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
+.preview-header h3{margin:0;font-size:16px;font-weight:600}
+.preview-close{background:none;border:none;color:white;font-size:24px;cursor:pointer;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
+.preview-close:hover{background:rgba(255,255,255,0.2)}
+.preview-body{flex:1;padding:0;display:flex;justify-content:center;align-items:center;background:#f8f9fa;min-height:400px}
+.preview-iframe{width:100%;height:70vh;border:none}
+.preview-image{max-width:100%;max-height:70vh;object-fit:contain}
+.preview-unsupported{text-align:center;padding:40px;color:#6c757d}
+.preview-unsupported i{font-size:48px;margin-bottom:15px;color:#16A085}
     /* Action Buttons in Modal */
     .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef}
     .modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
@@ -510,7 +528,18 @@
         </div>
     </div>
 </div>
-
+<!-- Preview Modal -->
+<div id="previewModal" class="preview-modal">
+    <div class="preview-content">
+        <div class="preview-header">
+            <h3 id="previewTitle">Preview File</h3>
+            <button class="preview-close" onclick="closePreviewModal()">&times;</button>
+        </div>
+        <div class="preview-body" id="previewBody">
+            <!-- Preview content akan diisi oleh JavaScript -->
+        </div>
+    </div>
+</div>
 <!-- Detail Modal -->
 <div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
@@ -661,6 +690,102 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+       // DEBUG: Tambahkan console log untuk melihat URL yang dibuat
+function previewFile(fileUrl, fileName) {
+    console.log('Preview File:', {
+        fileName: fileName,
+        fileUrl: fileUrl,
+        fullUrl: fileUrl
+    });
+    
+    const previewModal = document.getElementById('previewModal');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewBody = document.getElementById('previewBody');
+    
+    previewTitle.textContent = 'Preview: ' + fileName;
+    previewBody.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #8E44AD;"></i>
+            <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
+            <p style="font-size: 12px; color: #999;">URL: ${fileUrl}</p>
+        </div>
+    `;
+    
+    previewModal.classList.add('show');
+
+    const fileExtension = fileName.split('.').pop().toLowerCase();
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+    const pdfExtensions = ['pdf'];
+    
+    setTimeout(() => {
+        if (imageExtensions.includes(fileExtension)) {
+            const img = new Image();
+            img.onload = function() {
+                console.log('Image loaded successfully');
+                previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
+            };
+            img.onerror = function() {
+                console.error('Error loading image:', fileUrl);
+                showUnsupportedPreview(fileUrl, fileName);
+            };
+            img.src = fileUrl;
+        } else if (pdfExtensions.includes(fileExtension)) {
+            previewBody.innerHTML = `
+                <iframe 
+                    src="${fileUrl}" 
+                    class="preview-iframe" 
+                    frameborder="0"
+                ></iframe>
+                <div style="text-align: center; padding: 10px; background: #f8f9fa;">
+                    <p style="margin: 0; color: #6c757d; font-size: 12px;">
+                        Loading PDF...
+                    </p>
+                </div>
+            `;
+        } else {
+            showUnsupportedPreview(fileUrl, fileName);
+        }
+    }, 100);
+}
+
+function showUnsupportedPreview(fileUrl, fileName) {
+    document.getElementById('previewBody').innerHTML = `
+        <div class="preview-unsupported">
+            <i class="fas fa-eye-slash"></i>
+            <h4>Preview Tidak Tersedia</h4>
+            <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
+            <p style="font-size: 14px; color: #6c757d; margin-top: 10px;">
+                Format file ini tidak mendukung preview langsung.
+            </p>
+            <a href="${fileUrl}" class="preview-btn" download="${fileName}" target="_blank" style="margin-top: 15px; background: #8E44AD;">
+                <i class="fas fa-download"></i> Download File
+            </a>
+        </div>
+    `;
+}
+
+// Fungsi helper untuk escape HTML
+function escapeHtml(unsafe) {
+    if (unsafe === null || unsafe === undefined || unsafe === '') return '-';
+    return String(unsafe)
+       .replace(/&/g, "&amp;")
+       .replace(/</g, "&lt;")
+       .replace(/>/g, "&gt;")
+       .replace(/"/g, "&quot;")
+       .replace(/'/g, "&#039;");
+}
+
+// Close preview modal
+function closePreviewModal() {
+    document.getElementById('previewModal').classList.remove('show');
+}
+
+// Click outside to close
+window.addEventListener('click', function(e) {
+    if (e.target.id === 'previewModal') {
+        closePreviewModal();
+    }
+});
 const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
 let currentApproveId = null;
@@ -858,10 +983,106 @@ function showDetail(id) {
                     statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
                 }
 
+                // ===== PERBAIKAN: GENERATE FILE EVIDENCE DENGAN PREVIEW =====
+                let fileEvidenceHtml = '';
+                const evidenValue = getVal('eviden');
+                
+                if (evidenValue && evidenValue !== '-') {
+                    let evidenFiles = [];
+                    
+                    try {
+                        // Try to parse as JSON first (for multiple files)
+                        if (evidenValue.startsWith('[') || evidenValue.startsWith('{')) {
+                            const parsed = JSON.parse(evidenValue);
+                            if (Array.isArray(parsed)) {
+                                evidenFiles = parsed;
+                            } else if (parsed.url) {
+                                evidenFiles = [parsed.url];
+                            }
+                        } else {
+                            // Single file path or URL
+                            evidenFiles = [evidenValue];
+                        }
+                    } catch (e) {
+                        // If not JSON, treat as single file path
+                        evidenFiles = [evidenValue];
+                    }
+                    
+                    if (evidenFiles.length > 0) {
+                        fileEvidenceHtml = `
+                        <div class="detail-section">
+                            <div class="detail-section-title">
+                                <i class="fa-solid fa-paperclip"></i> File Evidence (${evidenFiles.length} file)
+                            </div>
+                            <div class="file-evidence">`;
+                        
+                        evidenFiles.forEach((file, index) => {
+                            // Extract filename dari path/URL
+                            let fileName = file;
+                            let fileUrl = file;
+                            
+                            // Jika file adalah path lokal (tidak mengandung http/https)
+                            if (!file.startsWith('http://') && !file.startsWith('https://')) {
+                                // Ambil hanya nama file dari path
+                                fileName = file.split('/').pop();
+                                // Buat URL lengkap ke folder uploads/eviden
+                                fileUrl = '<?= base_url("uploads/eviden/") ?>' + fileName;
+                            } else {
+                                // Jika sudah URL lengkap (dari Uploadcare dll)
+                                fileName = file.split('/').pop();
+                            }
+                            
+                            // Get file extension untuk menentukan tipe file
+                            const ext = fileName.split('.').pop().toLowerCase();
+                            let fileIcon = 'fa-file';
+                            let canPreview = false;
+                            
+                            // Tentukan file type dan kemampuan preview
+                            if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
+                                fileIcon = 'fa-file-image';
+                                canPreview = true;
+                            } else if (ext === 'pdf') {
+                                fileIcon = 'fa-file-pdf';
+                                canPreview = true;
+                            } else if (['doc', 'docx'].includes(ext)) {
+                                fileIcon = 'fa-file-word';
+                            } else if (['xls', 'xlsx'].includes(ext)) {
+                                fileIcon = 'fa-file-excel';
+                            }
+                            
+                            fileEvidenceHtml += `
+                                <div class="file-item">
+                                    <div class="file-icon">
+                                        <i class="fa-solid ${fileIcon}"></i>
+                                    </div>
+                                    <div class="file-info" ${canPreview ? `onclick="previewFile('${fileUrl}', '${fileName}')" style="cursor: pointer;"` : ''}>
+                                        <div class="file-name" ${canPreview ? 'title="Klik untuk preview"' : ''}>${escapeHtml(fileName)}</div>
+                                        <div class="file-size">File ${index + 1} • ${ext.toUpperCase()}</div>
+                                    </div>
+                                    ${canPreview ? 
+                                        `<button class="preview-btn" onclick="previewFile('${fileUrl}', '${fileName}')">
+                                            <i class="fa-solid fa-eye"></i> Preview
+                                        </button>` :
+                                        `<button class="preview-btn disabled" disabled title="Preview tidak tersedia">
+                                            <i class="fa-solid fa-eye-slash"></i> Preview
+                                        </button>`
+                                    }
+                                    <a href="${fileUrl}" target="_blank" class="download-btn" download="${fileName}">
+                                        <i class="fa-solid fa-download"></i> Download
+                                    </a>
+                                </div>`;
+                        });
+                        
+                        fileEvidenceHtml += `
+                            </div>
+                        </div>`;
+                    }
+                }
+
                 const content = `
                     <div class="detail-section">
                         <div class="detail-section-title">
-                            <i class="fa-solid fa-info-circle"></i> 1 Informasi Utama
+                            <i class="fa-solid fa-info-circle"></i> Informasi Utama
                         </div>
                         <div class="detail-grid">
                             <div class="detail-row">
@@ -887,7 +1108,7 @@ function showDetail(id) {
 
                     <div class="detail-section">
                         <div class="detail-section-title">
-                            <i class="fa-solid fa-user-tie"></i> 2 Informasi Dosen
+                            <i class="fa-solid fa-user-tie"></i> Informasi Dosen
                         </div>
                         <div class="detail-grid">
                             <div class="detail-row">
@@ -903,7 +1124,7 @@ function showDetail(id) {
 
                     <div class="detail-section">
                         <div class="detail-section-title">
-                            <i class="fa-solid fa-calendar-alt"></i> 3 Informasi Waktu & Tempat
+                            <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
                         </div>
                         <div class="detail-grid">
                             <div class="detail-row">
@@ -925,26 +1146,7 @@ function showDetail(id) {
                         </div>
                     </div>
 
-                    ${getVal('eviden') && getVal('eviden') !== '-' ? `
-                    <div class="detail-section">
-                        <div class="detail-section-title">
-                            <i class="fa-solid fa-paperclip"></i> File Evidence
-                        </div>
-                        <div class="file-evidence">
-                            <div class="file-item">
-                                <div class="file-icon">
-                                    <i class="fa-solid fa-file-pdf"></i>
-                                </div>
-                                <div class="file-info">
-                                    <div class="file-name">${escapeHtml(getVal('eviden'))}</div>
-                                </div>
-                                <a href="<?= base_url('uploads/') ?>${escapeHtml(getVal('eviden'))}" target="_blank" class="download-btn">
-                                    <i class="fa-solid fa-download"></i> Download
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    ` : ''}
+                    ${fileEvidenceHtml}
 
                     ${getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-' ? `
                     <div class="detail-section rejection-notes">
@@ -983,7 +1185,6 @@ function showDetail(id) {
             alert('Terjadi kesalahan saat memuat data');
         });
 }
-
 function showApproveModal(id, namaKegiatan) {
     currentApproveId = id;
     document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;

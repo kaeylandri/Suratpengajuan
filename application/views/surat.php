@@ -2252,77 +2252,24 @@ UPLOADCARE_PUBLIC_KEY = "demopublickey";
 <fieldset>
     <div style="width: 100%;">
         <div style="margin-bottom: 20px;">
-            <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333; font-size: 16px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333;">
                 <i class="fas fa-cloud-upload-alt"></i> Upload File Eviden
             </label>
-            <p style="font-size: 13px; color: #6c757d; margin-bottom: 15px;">
-                <i class="fas fa-info-circle"></i> Upload file pendukung (PDF, gambar, dokumen). Anda dapat memilih beberapa file sekaligus atau drag & drop file ke area upload.
-            </p>
         </div>
 
-        <!-- DRAG & DROP ZONE -->
-        <div id="drop-zone" style="
-            border: 2px dashed #007bff;
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            background: #f8f9fa;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        ">
-            <div style="pointer-events: none;">
-                <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #007bff; margin-bottom: 15px;"></i>
-                <h5 style="color: #495057; font-weight: 600; margin-bottom: 10px;">Drag & Drop File Di Sini</h5>
-                <p style="color: #6c757d; font-size: 14px; margin-bottom: 15px;">atau</p>
-                <button type="button" id="browse-btn" style="
-                    background: #007bff;
-                    color: white;
-                    border: none;
-                    padding: 10px 30px;
-                    border-radius: 6px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    font-size: 14px;
-                    transition: background 0.3s;
-                ">
-                    <i class="fas fa-folder-open"></i> Browse Files
-                </button>
-                <p style="color: #6c757d; font-size: 12px; margin-top: 15px;">
-                    Mendukung: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG, ZIP (Max 10MB per file)
-                </p>
-            </div>
-        </div>
+        <!-- KONTAINER UPLOADCARE (harus div kosong) -->
+        <div id="eviden-panel" style="min-height: 420px; border:1px solid #ddd; border-radius:10px;"></div>
 
         <!-- Hidden input untuk simpan URL -->
         <input type="hidden" name="eviden" id="eviden" value="[]">
         
-        <!-- Error Message -->
-        <div id="chk-error" style="color: #dc3545; font-size: 14px; margin-top: 10px; display: none;"></div>
-        
-        <!-- Upload Status -->
-        <div id="upload-status" style="display: none; background: #d4edda; color: #155724; padding: 10px 15px; border-radius: 6px; margin-top: 10px;">
-            <i class="fas fa-check-circle"></i> File berhasil diupload!
-        </div>
-
         <!-- Display uploaded files -->
-        <div id="uploaded-files-display" style="display: none;">
-            <div style="background: #ffffff; border-radius: 8px; padding: 20px; border: 1px solid #dee2e6; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h6 style="font-weight: 600; margin: 0; color: #495057;">
-                        <i class="fas fa-check-circle" style="color: #28a745;"></i> File yang sudah diupload
-                    </h6>
-                    <span id="file-count" style="background: #28a745; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">0 Files</span>
-                </div>
+        <div id="uploaded-files-display" style="margin-top: 20px; display: none;">
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; border: 1px solid #dee2e6;">
+                <h6 style="font-weight: 600; margin-bottom: 10px; color: #495057;">
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i> File yang sudah diupload:
+                </h6>
                 <div id="files-list"></div>
-            </div>
-        </div>
-
-        <!-- Loading Indicator -->
-        <div id="upload-loading" style="display: none; text-align: center; padding: 20px;">
-            <div style="display: inline-block;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 32px; color: #007bff;"></i>
-                <p style="margin-top: 10px; color: #6c757d; font-weight: 600;">Uploading files...</p>
             </div>
         </div>
     </div>
@@ -2331,67 +2278,12 @@ UPLOADCARE_PUBLIC_KEY = "demopublickey";
 <!-- BUTTON AREA -->
 <div class="button-area" style="margin-top:25px; text-align:center;">
     <button type="button" class="btn btn-primary prev-btn rounded-pill btn-sm" style="padding: 6px 20px;">Back</button>
-    <button type="submit" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Finish</button>
+    <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Continue</button>
 </div>
-
-<style>
-/* Hover effect untuk drop zone */
-#drop-zone:hover {
-    background: #e7f3ff;
-    border-color: #0056b3;
-}
-
-#drop-zone.drag-over {
-    background: #cce5ff;
-    border-color: #0056b3;
-    border-width: 3px;
-}
-
-#browse-btn:hover {
-    background: #0056b3;
-}
-
-/* Animation untuk file items */
-.file-item {
-    animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Progress bar untuk upload */
-.upload-progress {
-    height: 4px;
-    background: #e9ecef;
-    border-radius: 2px;
-    overflow: hidden;
-    margin-top: 8px;
-}
-
-.upload-progress-bar {
-    height: 100%;
-    background: linear-gradient(90deg, #007bff, #0056b3);
-    transition: width 0.3s ease;
-}
-
-/* Upload success state */
-.upload-success {
-    border-color: #28a745 !important;
-    background-color: #f8fff9 !important;
-}
-</style>
 
 <script>
 // ========================================
-// UPLOADCARE + DRAG & DROP IMPLEMENTATION
+// PERBAIKAN UPLOADCARE - SIMPAN URL KE DATABASE
 // ========================================
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -2399,18 +2291,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const msform = document.getElementById("msform");
     const uploadedDisplay = document.getElementById("uploaded-files-display");
     const filesList = document.getElementById("files-list");
-    const fileCount = document.getElementById("file-count");
-    const dropZone = document.getElementById("drop-zone");
-    const browseBtn = document.getElementById("browse-btn");
-    const uploadLoading = document.getElementById("upload-loading");
-    const errorDiv = document.getElementById("chk-error");
-    const uploadStatus = document.getElementById("upload-status");
-    const nextBtn = document.querySelector('.next-btn');
     
-    // Track upload status untuk validasi
-    let isFileUploaded = false;
-
-    // Pastikan default selalu array kosong
+    // Pastikan default selalu array kosong (bukan string kosong)
     if (!evidenInput.value || evidenInput.value === "") {
         evidenInput.value = "[]";
     }
@@ -2418,70 +2300,33 @@ document.addEventListener("DOMContentLoaded", function () {
     // Array untuk menyimpan semua URL yang di-upload
     let uploadedFiles = [];
 
-    // ========================================
-    // FUNCTION: UPDATE FILES DISPLAY
-    // ========================================
+    // Function untuk update display files
     function updateFilesDisplay() {
         if (uploadedFiles.length === 0) {
             uploadedDisplay.style.display = 'none';
-            uploadStatus.style.display = 'none';
-            isFileUploaded = false;
-            dropZone.classList.remove('upload-success');
             return;
         }
 
         uploadedDisplay.style.display = 'block';
-        uploadStatus.style.display = 'block';
-        isFileUploaded = true;
-        dropZone.classList.add('upload-success');
-        
-        fileCount.textContent = uploadedFiles.length + ' File' + (uploadedFiles.length > 1 ? 's' : '');
         filesList.innerHTML = '';
 
-        uploadedFiles.forEach((fileData, index) => {
-            const filename = fileData.name || fileData.url.split('/').pop().split('?')[0];
-            const fileSize = fileData.size ? formatFileSize(fileData.size) : '';
-            
+        uploadedFiles.forEach((url, index) => {
+            const filename = url.split('/').pop().split('?')[0]; // Extract filename dari URL
             const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.style.cssText = `
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 12px;
-                background: #f8f9fa;
-                border-radius: 8px;
-                margin-bottom: 10px;
-                border: 1px solid #e9ecef;
-                transition: all 0.2s;
-            `;
+            fileItem.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 6px; margin-bottom: 8px; border: 1px solid #e9ecef;';
             
             fileItem.innerHTML = `
-                <div style="flex-shrink: 0; width: 40px; height: 40px; background: #007bff; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fas ${getFileIcon(filename)}" style="font-size: 20px; color: white;"></i>
+                <div style="flex-shrink: 0;">
+                    <i class="fas fa-file-alt" style="font-size: 20px; color: #6c757d;"></i>
                 </div>
                 <div style="flex: 1; min-width: 0;">
-                    <strong style="font-size: 14px; color: #495057; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${filename}</strong>
-                    <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">
-                        File ${index + 1} ${fileSize ? '• ' + fileSize : ''}
-                    </div>
+                    <strong style="font-size: 13px; color: #495057;">File ${index + 1}</strong>
+                    <div style="font-size: 11px; color: #6c757d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${filename}</div>
                 </div>
                 <button type="button" 
                         onclick="removeFile(${index})" 
-                        style="
-                            padding: 8px 12px;
-                            background: #dc3545;
-                            color: white;
-                            border: none;
-                            border-radius: 6px;
-                            cursor: pointer;
-                            font-size: 12px;
-                            font-weight: 600;
-                            transition: background 0.2s;
-                        "
-                        onmouseover="this.style.background='#c82333'"
-                        onmouseout="this.style.background='#dc3545'">
-                    <i class="fas fa-trash-alt"></i> Hapus
+                        style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
+                    <i class="fas fa-times"></i> Hapus
                 </button>
             `;
             
@@ -2489,492 +2334,139 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ========================================
-    // HELPER FUNCTIONS
-    // ========================================
-    function getFileIcon(filename) {
-        const ext = filename.split('.').pop().toLowerCase();
-        const iconMap = {
-            pdf: 'fa-file-pdf',
-            doc: 'fa-file-word',
-            docx: 'fa-file-word',
-            xls: 'fa-file-excel',
-            xlsx: 'fa-file-excel',
-            ppt: 'fa-file-powerpoint',
-            pptx: 'fa-file-powerpoint',
-            jpg: 'fa-file-image',
-            jpeg: 'fa-file-image',
-            png: 'fa-file-image',
-            gif: 'fa-file-image',
-            zip: 'fa-file-archive',
-            rar: 'fa-file-archive',
-        };
-        return iconMap[ext] || 'fa-file-alt';
-    }
-
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-    }
-
-    // ========================================
-    // FUNCTION: REMOVE FILE
-    // ========================================
+    // Function untuk remove file
     window.removeFile = function(index) {
-        if (confirm('Apakah Anda yakin ingin menghapus file ini?')) {
-            uploadedFiles.splice(index, 1);
-            evidenInput.value = JSON.stringify(uploadedFiles.map(f => f.url));
-            updateFilesDisplay();
-            console.log("🗑 File dihapus. Total file:", uploadedFiles.length);
-        }
+        uploadedFiles.splice(index, 1);
+        evidenInput.value = JSON.stringify(uploadedFiles);
+        updateFilesDisplay();
+        console.log("🗑 File dihapus. Total file:", uploadedFiles.length);
     };
 
-    // ========================================
-    // UPLOADCARE DIALOG
-    // ========================================
-    function openUploadDialog() {
-        const dialog = uploadcare.openDialog(null, {
-            multiple: true,
-            multipleMax: 10,
-            multipleMin: 1,
-            tabs: "file url camera dropbox gdrive",
-            publicKey: "demopublickey",
-            imagesOnly: false,
-            previewStep: true,
-            crop: false
-        });
+    // Inisialisasi Uploadcare Panel
+    const panel = uploadcare.openPanel('#eviden-panel', null, {
+        multiple: true,
+        previewStep: true,
+        tabs: "file url camera dropbox gdrive",
+        publicKey: "demopublickey"
+    });
 
-        dialog.done(function (fileGroup) {
-            console.log("✅ Upload selesai! File group:", fileGroup);
-            uploadLoading.style.display = 'block';
-            
-            let filesProcessed = 0;
-            const totalFiles = fileGroup.files().length;
-            
-            fileGroup.files().forEach(filePromise => {
-                filePromise.done(fileInfo => {
-                    console.log("📁 File info:", fileInfo);
-                    
-                    // Simpan data file
-                    uploadedFiles.push({
-                        url: fileInfo.cdnUrl,
-                        name: fileInfo.name,
-                        size: fileInfo.size,
-                        mimeType: fileInfo.mimeType
-                    });
-                    
-                    filesProcessed++;
-                    
-                    // Jika semua file selesai diproses
-                    if (filesProcessed === totalFiles) {
-                        // Update hidden input dengan array URL saja
-                        evidenInput.value = JSON.stringify(uploadedFiles.map(f => f.url));
-                        
-                        // Update display
-                        updateFilesDisplay();
-                        uploadLoading.style.display = 'none';
-                        
-                        console.log("💾 Total files uploaded:", uploadedFiles.length);
-                        console.log("📊 Eviden value:", evidenInput.value);
-                        
-                        // Show success message
-                        showNotification('success', `${totalFiles} file berhasil diupload!`);
-                    }
-                });
+    // Event ketika user selesai upload file
+    panel.done(function (fileGroup) {
+        console.log("✅ Upload selesai! File group:", fileGroup);
+        
+        // Proses semua file yang di-upload
+        fileGroup.files().forEach(filePromise => {
+            filePromise.done(fileInfo => {
+                console.log("📁 File info:", fileInfo);
+                
+                // Tambahkan URL ke array
+                uploadedFiles.push(fileInfo.cdnUrl);
+                
+                // Update hidden input dengan format JSON array
+                evidenInput.value = JSON.stringify(uploadedFiles);
+                
+                // Update display
+                updateFilesDisplay();
+                
+                console.log("💾 Eviden tersimpan:", evidenInput.value);
+                console.log("📊 Total files:", uploadedFiles.length);
             });
         });
-    }
+    });
 
     // ========================================
-    // DRAG & DROP HANDLERS
+    // PERBAIKAN FORM SUBMIT
     // ========================================
     
-    // Prevent default drag behaviors
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    // Highlight drop zone when dragging
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropZone.addEventListener(eventName, highlight, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropZone.addEventListener(eventName, unhighlight, false);
-    });
-
-    function highlight(e) {
-        dropZone.classList.add('drag-over');
-    }
-
-    function unhighlight(e) {
-        dropZone.classList.remove('drag-over');
-    }
-
-    // Handle dropped files
-    dropZone.addEventListener('drop', handleDrop, false);
-
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        
-        if (files.length > 0) {
-            handleFiles(files);
-        }
-    }
-
-    // Handle file upload
-    function handleFiles(files) {
-        uploadLoading.style.display = 'block';
-        console.log("📤 Uploading", files.length, "file(s)...");
-        
-        const fileArray = Array.from(files);
-        let filesProcessed = 0;
-        
-        fileArray.forEach(file => {
-            uploadcare.fileFrom('object', file).done(fileInfo => {
-                console.log("✅ File uploaded:", fileInfo);
-                
-                uploadedFiles.push({
-                    url: fileInfo.cdnUrl,
-                    name: fileInfo.name,
-                    size: fileInfo.size,
-                    mimeType: fileInfo.mimeType || file.type
-                });
-                
-                filesProcessed++;
-                
-                if (filesProcessed === fileArray.length) {
-                    evidenInput.value = JSON.stringify(uploadedFiles.map(f => f.url));
-                    updateFilesDisplay();
-                    uploadLoading.style.display = 'none';
-                    
-                    console.log("💾 All files uploaded. Total:", uploadedFiles.length);
-                    showNotification('success', `${fileArray.length} file berhasil diupload!`);
-                }
-            }).fail(error => {
-                console.error("❌ Upload error:", error);
-                filesProcessed++;
-                
-                if (filesProcessed === fileArray.length) {
-                    uploadLoading.style.display = 'none';
-                }
-                
-                showNotification('error', 'Gagal upload file: ' + file.name);
-            });
-        });
-    }
-
-    // ========================================
-    // BROWSE BUTTON CLICK
-    // ========================================
-    browseBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        openUploadDialog();
-    });
-
-    dropZone.addEventListener('click', function(e) {
-        if (e.target !== browseBtn && !browseBtn.contains(e.target)) {
-            openUploadDialog();
-        }
-    });
-
-    // ========================================
-    // NOTIFICATION HELPER
-    // ========================================
-    function showNotification(type, message) {
-        const colors = {
-            success: '#28a745',
-            error: '#dc3545',
-            info: '#17a2b8'
-        };
-        
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${colors[type]};
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 10000;
-            font-weight: 600;
-            animation: slideInRight 0.3s ease;
-        `;
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-
-    // ========================================
-    // FORM SUBMIT HANDLER - PERBAIKAN UTAMA
-    // ========================================
-    if (msform) {
-        // PERBAIKAN: Gunakan endpoint yang sesuai dengan route yang ada
-        msform.setAttribute('action', '<?= site_url("surat/submit") ?>');
-        msform.setAttribute('method', 'POST');
-        
-        msform.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            console.log("🚀 Form submission started...");
-            
-            // Validasi file upload
-            if (!isFileUploaded || uploadedFiles.length === 0) {
-                errorDiv.textContent = "Mohon upload minimal 1 file eviden!";
-                errorDiv.style.display = 'block';
-                showNotification('error', 'Mohon upload file eviden terlebih dahulu!');
-                return false;
-            }
-
-            errorDiv.style.display = 'none';
-            
-            console.log("📊 Data yang akan disimpan:");
-            console.log("- Eviden:", evidenInput.value);
-            
-            // Tampilkan loading state
-            if (nextBtn) {
-                const originalText = nextBtn.innerHTML;
-                nextBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-                nextBtn.disabled = true;
-            }
-
-            // Kumpulkan semua data form
-            const formData = new FormData(msform);
-            
-            // Debug: Log semua data form
-            console.log("📋 All form data:");
-            for (let [key, value] of formData.entries()) {
-                console.log(`- ${key}:`, value);
-            }
-
-            // Kirim data via AJAX untuk memastikan data tersimpan
-            fetch(msform.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                console.log("📨 Response status:", response.status);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.status);
-                }
-                return response.text(); // Gunakan text() dulu untuk debugging
-            })
-            .then(data => {
-                console.log("✅ Server response:", data);
-                
-                // Coba parse sebagai JSON, jika gagal berarti mungkin HTML
-                try {
-                    const jsonData = JSON.parse(data);
-                    if (jsonData.success) {
-                        showNotification('success', 'Data berhasil disimpan!');
-                        
-                        // Redirect ke halaman list surat tugas setelah 1.5 detik
-                        setTimeout(() => {
-                            window.location.href = '<?= site_url("surat/list-surat-tugas") ?>';
-                        }, 1500);   
-                    } else {
-                        throw new Error(jsonData.message || 'Terjadi kesalahan saat menyimpan data');
-                    }
-                } catch (e) {
-                    // Jika response bukan JSON, anggap berhasil dan redirect
-                    console.log("⚠ Response bukan JSON, redirecting...");
-                    showNotification('success', 'Data berhasil disimpan!');
-                    
-                    setTimeout(() => {
-                        window.location.href = '<?= site_url("surat/list-surat-tugas") ?>';
-                    }, 1500);
-                }
-            })
-            .catch(error => {
-                console.error('❌ Error saving data:', error);
-                showNotification('error', 'Gagal menyimpan data: ' + error.message);
-                
-                // Reset button state
-                if (nextBtn) {
-                    nextBtn.innerHTML = 'Finish';
-                    nextBtn.disabled = false;
-                }
-            });
-
-            return false;
-        });
-    }
-
-    // ========================================
-    // FORM NAVIGATION
-    // ========================================
-    const prevBtn = document.querySelector('.prev-btn');
+    // Cegah submit default di tombol "Finish"
+    const nextBtn = document.querySelector('.next-btn');
     const fieldsets = document.querySelectorAll('fieldset');
     let currentStep = 0;
 
-    // Back button functionality
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const totalSteps = fieldsets.length;
+            
+            // Jika masih ada step berikutnya
+            if (currentStep < totalSteps - 1) {
+                fieldsets[currentStep].classList.remove('active');
+                currentStep++;
+                fieldsets[currentStep].classList.add('active');
+                
+                // Update progress bar
+                const percent = ((currentStep + 1) / totalSteps) * 100;
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('currentStep').textContent = currentStep + 1;
+                
+                // Toggle tombol back
+                document.querySelector('.prev-btn').style.display = currentStep > 0 ? 'inline-block' : 'none';
+                
+                // Update text tombol
+                nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
+            } 
+            // Jika sudah di step terakhir (Finish)
+            else {
+                console.log("🚀 Submitting form...");
+                console.log("📎 Final eviden value:", evidenInput.value);
+                
+                // Validasi: pastikan eviden tidak kosong jika wajib
+                if (uploadedFiles.length === 0) {
+                    alert("⚠ Silakan upload minimal 1 file eviden!");
+                    return false;
+                }
+                
+                // Submit form
+                msform.submit();
+            }
+        });
+    }
+
+    // Tombol Back
+    const prevBtn = document.querySelector('.prev-btn');
     if (prevBtn) {
         prevBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            
-            const totalSteps = fieldsets.length;
             
             if (currentStep > 0) {
                 fieldsets[currentStep].classList.remove('active');
                 currentStep--;
                 fieldsets[currentStep].classList.add('active');
                 
+                // Update progress
+                const totalSteps = fieldsets.length;
                 const percent = ((currentStep + 1) / totalSteps) * 100;
-                if (document.getElementById('progressBar')) {
-                    document.getElementById('progressBar').style.width = percent + '%';
-                }
-                if (document.getElementById('currentStep')) {
-                    document.getElementById('currentStep').textContent = currentStep + 1;
-                }
+                document.getElementById('progressBar').style.width = percent + '%';
+                document.getElementById('currentStep').textContent = currentStep + 1;
                 
                 prevBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
-                if (nextBtn) {
-                    nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
-                }
+                nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
             }
         });
     }
-
-    // Cek jika ada file yang sudah diupload saat halaman dimuat
-    function checkInitialUpload() {
-        try {
-            const currentValue = evidenInput.value;
-            if (currentValue && currentValue !== "[]" && currentValue !== "") {
-                const parsed = JSON.parse(currentValue);
-                if (Array.isArray(parsed) && parsed.length > 0) {
-                    // Reconstruct uploadedFiles array dari existing value
-                    parsed.forEach(url => {
-                        uploadedFiles.push({
-                            url: url,
-                            name: url.split('/').pop().split('?')[0],
-                            size: null,
-                            mimeType: null
-                        });
-                    });
-                    updateFilesDisplay();
-                }
-            }
-        } catch (e) {
-            console.error("Error parsing initial eviden value:", e);
-        }
-    }
-
-    // Panggil fungsi pengecekan saat halaman dimuat
-    setTimeout(checkInitialUpload, 500);
 });
 
 // ========================================
-// INTEGRASI DENGAN MULTI-STEP FORM
+// DEBUG HELPER - CEK ISI FORM SEBELUM SUBMIT
 // ========================================
-$(document).ready(function() {
-    // PERBAIKAN: Gunakan endpoint yang sesuai dengan route yang ada
-    $('#msform').attr('action', '<?= site_url("surat/submit") ?>');
-    $('#msform').attr('method', 'POST');
+document.getElementById("msform").addEventListener("submit", function(e) {
+    const evidenValue = document.getElementById("eviden").value;
+    console.log("📤 Form akan di-submit dengan eviden:", evidenValue);
     
-    // Override next button behavior untuk step 3
-    $('.next-btn').off('click').on('click', function(e) {
-        const currentStep = $('fieldset.active').index();
-        
-        if (currentStep === 2) { // Step 3 - Trigger submit form
-            // Biarkan form submission handler yang menangani
-            return true;
+    // Cek apakah eviden kosong
+    try {
+        const parsed = JSON.parse(evidenValue);
+        if (!Array.isArray(parsed) || parsed.length === 0) {
+            console.warn("⚠ WARNING: Eviden kosong!");
         } else {
-            // Logic untuk step 1 dan 2
-            e.preventDefault();
-            
-            if (currentStep < 2) {
-                $('fieldset').eq(currentStep).removeClass('active');
-                $('fieldset').eq(currentStep + 1).addClass('active');
-                
-                // Update progress bar
-                const progress = ((currentStep + 2) / 3) * 100;
-                $('#progressBar').css('width', progress + '%');
-                $('#currentStep').text(currentStep + 2);
-                
-                // Update button text untuk step terakhir
-                if (currentStep + 1 === 2) {
-                    $('.next-btn').text('Finish');
-                }
-                
-                // Toggle back button
-                $('.prev-btn').show();
-            }
+            console.log("✅ Eviden berisi", parsed.length, "file(s)");
         }
-    });
-    
-    // Back button behavior
-    $('.prev-btn').on('click', function(e) {
-        e.preventDefault();
-        const currentStep = $('fieldset.active').index();
-        
-        if (currentStep > 0) {
-            $('fieldset').eq(currentStep).removeClass('active');
-            $('fieldset').eq(currentStep - 1).addClass('active');
-            
-            // Update progress bar
-            const progress = ((currentStep) / 3) * 100;
-            $('#progressBar').css('width', progress + '%');
-            $('#currentStep').text(currentStep);
-            
-            // Update button text
-            $('.next-btn').text('Continue');
-            
-            // Hide back button di step 1
-            if (currentStep - 1 === 0) {
-                $('.prev-btn').hide();
-            }
-        }
-    });
+    } catch (err) {
+        console.error("❌ ERROR: Format eviden tidak valid!", err);
+    }
 });
-
-// Add animations CSS
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
 </script>
 </div>
 </form>
