@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Penugasan</title>
+    <title>Surat Penugasan Dosen 2</title>
 
     <style>
         @page {
@@ -21,9 +21,9 @@
         /* === HEADER === */
         .header {
             position: fixed;
-            top: -100px;
+            top: -70px;
             left: 0;
-            right: 0;
+            right: -90px;
             height: 100px;
             text-align: right;
             padding-right: 40px;
@@ -34,43 +34,14 @@
             margin-top: 10px;
         }
 
-      /* === FOOTER CONTAINER === */
+        /* === FOOTER CONTAINER === */
         .footer {
-    position: fixed;
-    left: -80px;  /* Disesuaikan dengan margin left @page */
-    right: -80px; /* Disesuaikan dengan margin right @page */
-    bottom: -120px;
-    height: 180px;
-    width: calc(100% + 160px); /* 80px kiri + 80px kanan = 160px */
-}
-
-            /* Footer Text - Info Kampus */
-            .footer-info {
-                position: absolute;
-                bottom: 80px;
-                left: 40px;
-                right: 40px;
-                font-size: 8px;
-                line-height: 1.4;
-                text-align: center;
-                color: #333;
-                font-family: Arial, sans-serif;
-            }
-
-        .footer-info strong {
-            font-weight: bold;
-        }
-
-        .footer-info .campus-name {
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-
-        .footer-website {
-            font-weight: bold;
-            font-size: 9px;
-            margin-top: 5px;
-            color: #000;
+            position: fixed;
+            left: -80px;
+            right: -80px;
+            bottom: -120px;
+            height: 90px;
+            width: calc(100% + 160px);
         }
 
         /* Footer Text as Image */
@@ -83,18 +54,18 @@
             max-width: 95%;
             height: 85px;
             object-fit: contain;
+            margin-bottom: -20px;
         }
 
         /* Footer Wave Background */
         .footer-wave {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 65px;
-        object-fit: fill;
-    }
-
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            object-fit: fill;
+        }
         /* === CONTENT === */
         .content {
             margin: 0;
@@ -104,19 +75,20 @@
 
         /* Judul Surat */
         .surat-title {
-            text-align: center;
-            text-transform: uppercase;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            letter-spacing: 2px;
-        }
-
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 25px;        /* sedikit lebih besar */
+        font-weight: bold;
+        margin-bottom: 2px;     /* lebih rapat ke nomor */
+        text-decoration: underline; 
+        text-underline-offset: 4px;   /* jarak garis ke teks */
+    }
         .surat-number {
-            text-align: center;
-            font-size: 12px;
-            margin-bottom: 25px;
-        }
+        text-align: center;
+        font-size: 13px;        /* sedikit lebih besar dari sebelumnya */
+        margin-top: -2px;       /* menaikkan sedikit agar lebih dekat */
+        margin-bottom: 25px;    /* jarak ke isi */
+    }
 
         /* Paragraf styling - TANPA INDENT */
         .content p {
@@ -204,19 +176,22 @@
         }
 
         /* Tanda tangan */
-        .signature-section {
-            margin-top: 40px;
-            position: relative;
+        .signature-bottom-text {
+        margin-top: 5px;
+        font-weight: bold;
+        text-decoration: underline;
+        line-height: 1;      /* jarak vertikal lebih rapat */
+        margin-bottom: 2px;   
         }
+        .signature-position {
+        margin-top: 2px;
+        font-weight: bold;
+    }
 
-        .signature-text {
-            text-align: left;
-            line-height: 1.6;
-        }
-
-        .signature-name {
-            text-decoration: underline;
-            font-weight: bold;
+        .qr-centered {
+            width: 90px;
+            margin-bottom: 6px; /* jarak QR ke nama */
+            margin-top: 20px;
         }
 
         .qr-box {
@@ -224,6 +199,15 @@
             right: 0;
             top: 0;
             width: 100px;
+            page-break-inside: avoid;
+        }
+        .qr-bottom-box {
+        margin-top: 5px;
+        }
+
+        .qr-bottom {
+            width: 90px;   /* ukuran sama seperti QR atas */
+            margin-bottom: 6px;
         }
 
         img.qr-img {
@@ -266,7 +250,7 @@ function tgl_indo($tanggal) {
         <?php if (!empty($logo_base64)): ?>
             <img src="data:image/jpeg;base64,<?= $logo_base64 ?>" class="header-logo" alt="Telkom University Logo">
         <?php else: ?>
-            <img src="<?= base_url('assets/Tel-U_logo.jpg') ?>" class="header-logo" alt="Telkom University Logo">
+            <img src="<?= base_url('assets/Tel-U_logo.png') ?>" class="header-logo" alt="Telkom University Logo">
         <?php endif; ?>
     </div>
 
@@ -285,7 +269,7 @@ function tgl_indo($tanggal) {
             <img src="<?= base_url('assets/footer_asset.jpg') ?>" class="footer-wave" alt="Footer Wave">
         <?php endif; ?>
     </div>
-
+    <br><br><br>
     <!-- CONTENT -->
     <div class="content">
         <!-- Judul Surat -->
@@ -294,15 +278,10 @@ function tgl_indo($tanggal) {
 
         <!-- Pembukaan -->
         <p>
-            Pada hari <b>Jumat</b> tanggal <b>17</b> bulan <b>Oktober</b> tahun <b>2025</b> 
-            bertempat di <b>Fakultas Industri Kreatif (FIK) Universitas Telkom</b>, dengan 
+            Pada hari Jumat tanggal 17 bulan Oktober tahun 2025 
+            bertempat di Fakultas Industri Kreatif (FIK) Universitas Telkom, dengan 
             mempertimbangkan hal-hal sebagai berikut :
         </p>
-
-        <!-- Poin Pertimbangan -->
-        <p class="list-item">a)&nbsp;&nbsp;Tri dharma Perguruan Tinggi meliputi Pendidikan, Penelitian, Pengabdian Masyarakat wajib dilakukan oleh setiap dosen;</p>
-        <p class="list-item">b)&nbsp;&nbsp;Permohonan Surat Tugas dari Wakil Dekan Bidang Akademik dan Dukungan Penelitian FIK melalui NDE nomor <b>ND.22127/UM04/YPT-TUN/2025</b> tanggal <b><?= tgl_indo($surat->created_at ?? '-') ?></b>.</p>
-
         <!-- Penandatangan -->
         <p>Saya yang bertanda tangan di bawah ini :</p>
         
@@ -310,17 +289,17 @@ function tgl_indo($tanggal) {
             <div class="identity-row">
                 <div class="identity-label">Nama</div>
                 <div class="identity-separator">:</div>
-                <div class="identity-value"><b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b></div>
+                <div class="identity-value">Dandi Yunidar, S.Sn., M.Ds., Ph.D.</div>
             </div>
             <div class="identity-row">
                 <div class="identity-label">NIP</div>
                 <div class="identity-separator">:</div>
-                <div class="identity-value"><b>14760039</b></div>
+                <div class="identity-value">14760039</div>
             </div>
             <div class="identity-row">
                 <div class="identity-label">Jabatan</div>
                 <div class="identity-separator">:</div>
-                <div class="identity-value"><b>Dekan Fakultas Industri Kreatif</b></div>
+                <div class="identity-value">Dekan Fakultas Industri Kreatif</div>
             </div>
         </div>
 
@@ -370,21 +349,28 @@ function tgl_indo($tanggal) {
         <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
 
         <!-- Tanggal -->
-        <p class="date">Bandung, 17 Oktober 2025</p><br>
+        <p class="date">Bandung, 17 Oktober 2025</p>
 
-        <!-- SIGNATURE + QR -->
-        <div class="signature-section">
-            <?php if (!empty($qr_base64)): ?>
-            <div class="qr-box">
-                <img class="qr-img" src="data:image/png;base64,<?= $qr_base64 ?>" alt="QR Code">
-            </div>
-            <?php endif; ?>
+         <!-- SIGNATURE + QR -->
+         <div class="signature-bottom">
 
-            <div class="signature-text">
-                <span class="signature-name">Dandi Yunidar, S.Sn., M.Ds., Ph.D.</span><br>
-                <b>Dekan Fakultas Industri Kreatif</b>
-            </div>
+        <?php if (!empty($qr_base64)): ?>
+        <div class="qr-bottom-box">
+            <img class="qr-bottom" src="data:image/png;base64,<?= $qr_base64 ?>" alt="QR Code">
         </div>
+        <?php endif; ?>
+
+        <div class="signature-bottom-text">
+            <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
+        </div>
+            <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
     </div>
+    <p>
+    <b>Tembusan</b><br>
+1.	Wakil Dekan Bidang Akaademik dan Dukungan Peneliltian FIK<br>
+2.	Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
+3.	Kaprodi S1 Desain Produk
+</p>
+        </div>
 </body>
 </html>

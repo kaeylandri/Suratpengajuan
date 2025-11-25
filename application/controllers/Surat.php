@@ -1074,7 +1074,7 @@ class Surat extends CI_Controller
     $dompdf->loadHtml($html);
     $dompdf->setPaper('A4', 'portrait');
 
-    ini_set("memory_limit", "4096M");
+    ini_set("memory_limit", "8192M");
     ini_set("pcre.backtrack_limit", "30000000");
 
     $dompdf->render();
