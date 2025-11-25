@@ -341,4 +341,182 @@ class Sekretariat extends CI_Controller {
         $this->session->set_flashdata('success', 'Surat berhasil ditolak Sekretariat.');
         redirect('sekretariat');
     }
+
+    /* ================================
+   BULK APPROVE - MULTI APPROVE
+================================= */
+public function bulk_approve()
+{
+    // Check jika request adalah POST
+    if ($this->input->server('REQUEST_METHOD') === 'POST') {
+        $ids = $this->input->post('ids');
+        $nomor_surat_data = $this->input->post('nomor_surat');
+        
+        // Validasi input
+        if (empty($ids)) {
+            $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
+            redirect('sekretariat/pending');
+        }
+        
+        // Convert string IDs to array
+        $id_array = explode(',', $ids);
+        
+        $success_count = 0;
+        $error_count = 0;
+        $error_messages = [];
+        
+        foreach ($id_array as $id) {
+            $id = trim($id);
+            
+            // Validasi nomor surat untuk setiap item
+            if (!isset($nomor_surat_data[$id]) || empty($nomor_surat_data[$id])) {
+                $error_count++;
+                $error_messages[] = "Nomor surat harus diisi untuk ID: $id";
+                continue;
+            }
+            
+            $nomor_surat = $nomor_surat_data[$id];
+            
+            // Cek apakah nomor surat sudah digunakan (kecuali untuk surat yang sama)
+            $this->db->where('nomor_surat', $nomor_surat);
+            $this->db->where('id !=', $id);
+            $existing = $this->db->get('surat')->row();
+            
+            if ($existing) {
+                $error_count++;
+                $error_messages[] = "Nomor surat '$nomor_surat' sudah digunakan (ID: $id)";
+                continue;
+            }
+            
+            // Ambil data surat
+            $surat = $this->db->get_where('surat', ['id' => $id])->row();
+            
+            if (!$surat) {
+                $error_count++;
+                $error_messages[] = "Data tidak ditemukan (ID: $id)";
+                continue;
+            }
+            
+            // Update approval status
+            $approval = json_decode($surat->approval_status, true);
+            $approval['sekretariat'] = date("Y-m-d H:i:s");
+            
+            // Update database
+            $update_data = [
+                'status' => 'disetujui sekretariat',
+                'approval_status' => json_encode($approval),
+                'nomor_surat' => $nomor_surat,
+            ];
+            
+            $this->db->where('id', $id);
+            if ($this->db->update('surat', $update_data)) {
+                $success_count++;
+            } else {
+                $error_count++;
+                $error_messages[] = "Gagal update database (ID: $id)";
+            }
+        }
+        
+        // Set flash message berdasarkan hasil
+        if ($success_count > 0) {
+            $message = "Berhasil menyetujui $success_count pengajuan.";
+            if ($error_count > 0) {
+                $message .= " $error_count pengajuan gagal.";
+            }
+            $this->session->set_flashdata('success', $message);
+        } else {
+            $this->session->set_flashdata('error', "Gagal menyetujui semua pengajuan: " . implode(', ', $error_messages));
+        }
+        
+        redirect('sekretariat/pending');
+    } else {
+        // Jika bukan POST request, redirect ke halaman pending
+        redirect('sekretariat/pending');
+    }
+}
+
+/* ================================
+   BULK REJECT - MULTI REJECT
+================================= */
+public function bulk_reject()
+{
+    // Check jika request adalah POST
+    if ($this->input->server('REQUEST_METHOD') === 'POST') {
+        $ids = $this->input->post('ids');
+        $rejection_notes_data = $this->input->post('rejection_notes');
+        
+        // Validasi input
+        if (empty($ids)) {
+            $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
+            redirect('sekretariat/pending');
+        }
+        
+        // Convert string IDs to array
+        $id_array = explode(',', $ids);
+        
+        $success_count = 0;
+        $error_count = 0;
+        $error_messages = [];
+        
+        foreach ($id_array as $id) {
+            $id = trim($id);
+            
+            // Validasi rejection notes untuk setiap item
+            if (!isset($rejection_notes_data[$id]) || empty($rejection_notes_data[$id])) {
+                $error_count++;
+                $error_messages[] = "Alasan penolakan harus diisi untuk ID: $id";
+                continue;
+            }
+            
+            $rejection_notes = $rejection_notes_data[$id];
+            
+            // Ambil data surat
+            $surat = $this->db->get_where('surat', ['id' => $id])->row();
+            
+            if (!$surat) {
+                $error_count++;
+                $error_messages[] = "Data tidak ditemukan (ID: $id)";
+                continue;
+            }
+            
+            // Update approval status
+            $approval = json_decode($surat->approval_status, true);
+            if (!is_array($approval)) {
+                $approval = [];
+            }
+            $approval['sekretariat'] = date("Y-m-d H:i:s");
+            
+            // Update database
+            $update_data = [
+                'status' => 'ditolak sekretariat',
+                'approval_status' => json_encode($approval),
+                'catatan_penolakan' => $rejection_notes,
+            ];
+            
+            $this->db->where('id', $id);
+            if ($this->db->update('surat', $update_data)) {
+                $success_count++;
+            } else {
+                $error_count++;
+                $error_messages[] = "Gagal update database (ID: $id)";
+            }
+        }
+        
+        // Set flash message berdasarkan hasil
+        if ($success_count > 0) {
+            $message = "Berhasil menolak $success_count pengajuan.";
+            if ($error_count > 0) {
+                $message .= " $error_count pengajuan gagal.";
+            }
+            $this->session->set_flashdata('success', $message);
+        } else {
+            $this->session->set_flashdata('error', "Gagal menolak semua pengajuan: " . implode(', ', $error_messages));
+        }
+        
+        redirect('sekretariat/pending');
+    } else {
+        // Jika bukan POST request, redirect ke halaman pending
+        redirect('sekretariat/pending');
+    }
+}
 }

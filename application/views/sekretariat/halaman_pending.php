@@ -315,6 +315,123 @@
     .reject-info-box strong{color:#e74c3c;display:block;margin-bottom:5px}
     .reject-info-box span{color:#2c3e50;font-weight:600}
     
+    /* Bulk Action Styles */
+    .bulk-actions {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        align-items: center;
+    }
+    
+    .bulk-select-info {
+        color: #495057;
+        font-size: 14px;
+        margin-right: auto;
+    }
+    
+    .bulk-btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .bulk-btn-approve {
+        background: #27ae60;
+        color: white;
+    }
+    
+    .bulk-btn-approve:hover {
+        background: #229954;
+        transform: translateY(-2px);
+    }
+    
+    .bulk-btn-reject {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .bulk-btn-reject:hover {
+        background: #c0392b;
+        transform: translateY(-2px);
+    }
+    
+    .bulk-btn:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .select-all-checkbox {
+        margin-right: 10px;
+    }
+    
+    /* Checkbox Styles */
+    .row-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+    
+    /* Individual Input Styles for Bulk Actions */
+    .bulk-item {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .bulk-item-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .bulk-item-title {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 14px;
+    }
+    
+    .bulk-item-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .remove-item {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+    
+    .bulk-items-container {
+        max-height: 400px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+    }
+    
     /* Responsive */
     @media (max-width:768px){
         .detail-grid{grid-template-columns:1fr}
@@ -349,6 +466,22 @@
             text-align: left;
             max-width: none;
             flex: 1;
+        }
+        .bulk-actions {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .bulk-select-info {
+            margin-right: 0;
+            margin-bottom: 10px;
+        }
+        .bulk-item-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .bulk-item-actions {
+            align-self: flex-end;
         }
     }
 </style>
@@ -394,6 +527,23 @@
             <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Menunggu Persetujuan</h3>
         </div>
         
+        <!-- Bulk Actions -->
+        <div class="bulk-actions">
+            <div>
+                <input type="checkbox" id="selectAll" class="select-all-checkbox" onchange="toggleSelectAll()">
+                <label for="selectAll">Pilih Semua</label>
+            </div>
+            <div class="bulk-select-info">
+                <span id="selectedCount">0</span> item terpilih
+            </div>
+            <button class="bulk-btn bulk-btn-approve" id="bulkApproveBtn" onclick="showBulkApproveModal()" disabled>
+                <i class="fa-solid fa-check"></i> Setujui Terpilih
+            </button>
+            <button class="bulk-btn bulk-btn-reject" id="bulkRejectBtn" onclick="showBulkRejectModal()" disabled>
+                <i class="fa-solid fa-times"></i> Tolak Terpilih
+            </button>
+        </div>
+        
         <!-- Info Jumlah Data -->
         <div class="data-count-info">
             <i class="fa-solid fa-info-circle"></i> 
@@ -432,6 +582,9 @@
             <table>
                 <thead>
                     <tr>
+                        <th style="width:30px">
+                            <input type="checkbox" id="tableSelectAll" class="row-checkbox" onchange="toggleTableSelectAll()">
+                        </th>
                         <th>No</th>
                         <th>Nama Kegiatan</th>
                         <th>Penyelenggara</th>
@@ -451,6 +604,9 @@
                             $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
                     ?>
                     <tr>
+                        <td>
+                            <input type="checkbox" class="row-checkbox row-select" value="<?= $s->id ?>" data-nama="<?= htmlspecialchars($s->nama_kegiatan ?? '') ?>" onchange="updateSelectedCount()">
+                        </td>
                         <td><?= $no++ ?></td>
                         <td><strong><?= htmlspecialchars($s->nama_kegiatan ?? '-') ?></strong></td>
                         <td><?= htmlspecialchars($s->penyelenggara ?? '-') ?></td>
@@ -484,7 +640,7 @@
                     
                     else: ?>
                     <tr>
-                        <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
+                        <td colspan="9" style="text-align:center;padding:40px;color:#7f8c8d">
                             <i class="fa-solid fa-clock" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
                             <strong>
                                 <?php if(!isset($surat_list)): ?>
@@ -637,6 +793,40 @@
     </div>
 </div>
 
+<!-- Bulk Approve Modal -->
+<div id="bulkApproveModal" class="modal" onclick="modalClickOutside(event,'bulkApproveModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-check-circle"></i> Setujui Pengajuan Terpilih</h3>
+            <button class="close-modal" onclick="closeModal('bulkApproveModal')">&times;</button>
+        </div>
+        <div class="detail-content">
+            <div class="approve-info-box">
+                <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong>
+                <span id="bulkApproveCount">0 pengajuan</span> akan disetujui. Silakan isi nomor surat untuk masing-masing pengajuan.
+            </div>
+            
+            <form id="bulkApproveForm" method="POST" action="<?= base_url('sekretariat/bulk_approve') ?>">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                <input type="hidden" name="ids" id="bulkApproveIds" value="">
+                
+                <div class="bulk-items-container" id="bulkApproveItems">
+                    <!-- Items will be dynamically added here -->
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-close" onclick="closeModal('bulkApproveModal')">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="button" class="modal-btn modal-btn-approve" onclick="confirmBulkApprove()">
+                        <i class="fa-solid fa-check"></i> Setujui Semua
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Reject Modal -->
 <div id="rejectModal" class="modal" onclick="modalClickOutside(event,'rejectModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
@@ -681,9 +871,315 @@
     </div>
 </div>
 
+<!-- Bulk Reject Modal -->
+<div id="bulkRejectModal" class="modal" onclick="modalClickOutside(event,'bulkRejectModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-ban"></i> Tolak Pengajuan Terpilih</h3>
+            <button class="close-modal" onclick="closeModal('bulkRejectModal')">&times;</button>
+        </div>
+        <div class="detail-content">
+            <div class="detail-section">
+                <div class="detail-section-title">
+                    <i class="fa-solid fa-exclamation-triangle"></i> Konfirmasi Penolakan Massal
+                </div>
+                <div class="approve-info-box">
+                    <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong>
+                    <span id="bulkRejectCount">0 pengajuan</span> akan ditolak. Silakan berikan alasan penolakan untuk masing-masing pengajuan.
+                </div>
+                
+                <div class="bulk-items-container" id="bulkRejectItems">
+                    <!-- Items will be dynamically added here -->
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-close" onclick="closeModal('bulkRejectModal')">
+                    <i class="fa-solid fa-times"></i> Batal
+                </button>
+                <button class="modal-btn modal-btn-reject" onclick="confirmBulkReject()">
+                    <i class="fa-solid fa-paper-plane"></i> Tolak Semua
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let currentRejectId = null;
 let currentApproveId = null;
+let selectedIds = [];
+let selectedItems = [];
+
+// Bulk Selection Functions
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.row-select');
+    const tableSelectAll = document.getElementById('tableSelectAll');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+    tableSelectAll.checked = selectAll.checked;
+    
+    updateSelectedCount();
+}
+
+function toggleTableSelectAll() {
+    const tableSelectAll = document.getElementById('tableSelectAll');
+    const checkboxes = document.querySelectorAll('.row-select');
+    const selectAll = document.getElementById('selectAll');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = tableSelectAll.checked;
+    });
+    selectAll.checked = tableSelectAll.checked;
+    
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const checkboxes = document.querySelectorAll('.row-select:checked');
+    const selectedCount = checkboxes.length;
+    
+    document.getElementById('selectedCount').textContent = selectedCount;
+    
+    // Enable/disable bulk action buttons
+    const bulkApproveBtn = document.getElementById('bulkApproveBtn');
+    const bulkRejectBtn = document.getElementById('bulkRejectBtn');
+    
+    if (selectedCount > 0) {
+        bulkApproveBtn.disabled = false;
+        bulkRejectBtn.disabled = false;
+    } else {
+        bulkApproveBtn.disabled = true;
+        bulkRejectBtn.disabled = true;
+    }
+    
+    // Update selected IDs array and items data
+    selectedIds = [];
+    selectedItems = [];
+    
+    checkboxes.forEach(checkbox => {
+        selectedIds.push(checkbox.value);
+        selectedItems.push({
+            id: checkbox.value,
+            nama: checkbox.getAttribute('data-nama')
+        });
+    });
+}
+
+function showBulkApproveModal() {
+    if (selectedIds.length === 0) return;
+    
+    document.getElementById('bulkApproveCount').textContent = selectedIds.length + ' pengajuan';
+    document.getElementById('bulkApproveIds').value = selectedIds.join(',');
+    
+    const container = document.getElementById('bulkApproveItems');
+    container.innerHTML = '';
+    
+    selectedItems.forEach((item, index) => {
+        const itemHtml = `
+            <div class="bulk-item" id="approve-item-${item.id}">
+                <div class="bulk-item-header">
+                    <div class="bulk-item-title">${item.nama}</div>
+                    <div class="bulk-item-actions">
+                        <button type="button" class="remove-item" onclick="removeBulkItem('${item.id}', 'approve')">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="nomor_surat_${item.id}">
+                        <i class="fa-solid fa-file-alt"></i> Nomor Surat <span style="color:#e74c3c">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nomor_surat_${item.id}" 
+                        name="nomor_surat[${item.id}]" 
+                        class="form-control" 
+                        placeholder="Contoh: 001/SKT/FT/2025" 
+                        required
+                        autocomplete="off"
+                    >
+                    <div class="form-hint">
+                        <i class="fa-solid fa-exclamation-circle"></i> Format: 001/SKT/FT/Tahun
+                    </div>
+                </div>
+            </div>
+        `;
+        container.innerHTML += itemHtml;
+    });
+    
+    document.getElementById('bulkApproveModal').classList.add('show');
+}
+
+function confirmBulkApprove() {
+    const form = document.getElementById('bulkApproveForm');
+    const inputs = form.querySelectorAll('input[name^="nomor_surat"]');
+    
+    // Validasi semua input
+    let allValid = true;
+    const errorMessages = [];
+    
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            allValid = false;
+            const itemId = input.name.match(/\[(.*?)\]/)[1];
+            const itemElement = document.getElementById(`approve-item-${itemId}`);
+            const itemName = itemElement ? itemElement.querySelector('.bulk-item-title').textContent : 'Unknown';
+            errorMessages.push(`Nomor surat harus diisi untuk: ${itemName}`);
+        }
+    });
+    
+    if (!allValid) {
+        alert('Error:\n' + errorMessages.join('\n'));
+        return;
+    }
+    
+    // Submit form
+    form.submit();
+}
+
+function showBulkRejectModal() {
+    if (selectedIds.length === 0) return;
+    
+    document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
+    const container = document.getElementById('bulkRejectItems');
+    container.innerHTML = '';
+    
+    selectedItems.forEach((item, index) => {
+        const itemHtml = `
+            <div class="bulk-item" id="reject-item-${item.id}">
+                <div class="bulk-item-header">
+                    <div class="bulk-item-title">${item.nama}</div>
+                    <div class="bulk-item-actions">
+                        <button type="button" class="remove-item" onclick="removeBulkItem('${item.id}', 'reject')">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="rejection_notes_${item.id}">
+                        <i class="fa-solid fa-comment-dots"></i> Alasan Penolakan <span style="color:#e74c3c">*</span>
+                    </label>
+                    <textarea 
+                        id="rejection_notes_${item.id}" 
+                        name="rejection_notes[${item.id}]" 
+                        rows="3" 
+                        class="form-control" 
+                        placeholder="Masukkan alasan penolakan untuk ${item.nama}..."
+                        style="resize:vertical"
+                        required
+                    ></textarea>
+                    <div class="form-hint">
+                        <i class="fa-solid fa-exclamation-circle"></i> Alasan penolakan akan dikirimkan kepada pengaju
+                    </div>
+                </div>
+            </div>
+        `;
+        container.innerHTML += itemHtml;
+    });
+    
+    document.getElementById('bulkRejectModal').classList.add('show');
+}
+
+function removeBulkItem(itemId, type) {
+    // Remove from UI
+    const itemElement = document.getElementById(`${type}-item-${itemId}`);
+    if (itemElement) {
+        itemElement.remove();
+    }
+    
+    // Remove from selected arrays
+    selectedIds = selectedIds.filter(id => id !== itemId);
+    selectedItems = selectedItems.filter(item => item.id !== itemId);
+    
+    // Update count
+    document.getElementById('selectedCount').textContent = selectedIds.length;
+    
+    // Update modal count
+    if (type === 'approve') {
+        document.getElementById('bulkApproveCount').textContent = selectedIds.length + ' pengajuan';
+        document.getElementById('bulkApproveIds').value = selectedIds.join(',');
+    } else {
+        document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
+    }
+    
+    // Update checkbox state
+    const checkbox = document.querySelector(`.row-select[value="${itemId}"]`);
+    if (checkbox) {
+        checkbox.checked = false;
+    }
+    
+    // Disable buttons if no items left
+    if (selectedIds.length === 0) {
+        document.getElementById('bulkApproveBtn').disabled = true;
+        document.getElementById('bulkRejectBtn').disabled = true;
+        if (type === 'approve') {
+            closeModal('bulkApproveModal');
+        } else {
+            closeModal('bulkRejectModal');
+        }
+    }
+}
+
+// ✅ FUNCTION confirmBulkReject YANG DIPERBAIKI
+function confirmBulkReject() {
+    // Validasi semua textarea rejection notes
+    const textareas = document.querySelectorAll('textarea[name^="rejection_notes"]');
+    let allValid = true;
+    const errorMessages = [];
+    
+    textareas.forEach(textarea => {
+        if (!textarea.value.trim()) {
+            allValid = false;
+            const itemId = textarea.name.match(/\[(.*?)\]/)[1];
+            const itemElement = document.getElementById(`reject-item-${itemId}`);
+            const itemName = itemElement ? itemElement.querySelector('.bulk-item-title').textContent : 'Unknown';
+            errorMessages.push(`Alasan penolakan harus diisi untuk: ${itemName}`);
+        }
+    });
+    
+    if (!allValid) {
+        alert('Error:\n' + errorMessages.join('\n'));
+        return;
+    }
+    
+    // Create form dan submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= base_url("sekretariat/bulk_reject") ?>';
+    
+    // CSRF Token
+    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
+    const inpCsrf = document.createElement('input');
+    inpCsrf.type = 'hidden'; 
+    inpCsrf.name = csrfName; 
+    inpCsrf.value = csrfHash;
+    form.appendChild(inpCsrf);
+    
+    // Add IDs
+    const inpIds = document.createElement('input');
+    inpIds.type = 'hidden'; 
+    inpIds.name = 'ids'; 
+    inpIds.value = selectedIds.join(',');
+    form.appendChild(inpIds);
+    
+    // Add rejection notes
+    textareas.forEach(textarea => {
+        const itemId = textarea.name.match(/\[(.*?)\]/)[1];
+        const inpNote = document.createElement('input');
+        inpNote.type = 'hidden'; 
+        inpNote.name = `rejection_notes[${itemId}]`; 
+        inpNote.value = textarea.value.trim();
+        form.appendChild(inpNote);
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+}
 
 // Status Modal Functions
 function showStatusModal(suratId) {
@@ -1042,6 +1538,9 @@ document.addEventListener('DOMContentLoaded', function() {
             searchInput.setSelectionRange(searchValue.length, searchValue.length);
         }
     }
+    
+    // Initialize selected count
+    updateSelectedCount();
 });
 </script>
 </body>
