@@ -201,6 +201,48 @@ function tgl_indo($tanggal) {
     }
     return $tanggal;
 }
+
+// Function untuk format tanggal berdasarkan jenis_date
+function format_tanggal_surat($surat) {
+    $jenis_date = $surat->jenis_date ?? 'custom';
+    
+    if ($jenis_date === 'periode') {
+        // Untuk periode, tampilkan periode_value
+        return $surat->periode_value ?? '-';
+    } else {
+        // Untuk custom, tampilkan tanggal_kegiatan dan akhir_kegiatan
+        $tanggal_mulai = tgl_indo($surat->tanggal_kegiatan ?? '-');
+        $tanggal_akhir = tgl_indo($surat->akhir_kegiatan ?? '-');
+        
+        if ($tanggal_akhir && $tanggal_akhir !== '-' && $tanggal_akhir !== $tanggal_mulai) {
+            return $tanggal_mulai . ' sampai dengan ' . $tanggal_akhir;
+        } else {
+            return $tanggal_mulai;
+        }
+    }
+}
+
+// Function untuk format periode penugasan
+function format_periode_penugasan($surat) {
+    $jenis_date = $surat->jenis_date ?? 'custom';
+    
+    if ($jenis_date === 'periode') {
+        // Untuk periode, tampilkan periode_value
+        return 'selama periode ' . ($surat->periode_value ?? '-');
+    } else {
+        // Untuk custom, tampilkan periode_penugasan dan akhir_periode_penugasan
+        $periode_mulai = tgl_indo($surat->periode_penugasan ?? '-');
+        $periode_akhir = tgl_indo($surat->akhir_periode_penugasan ?? '-');
+        
+        if ($periode_akhir && $periode_akhir !== '-' && $periode_akhir !== $periode_mulai) {
+            return 'pada tanggal ' . $periode_mulai . ' sampai dengan ' . $periode_akhir;
+        } else if ($periode_mulai && $periode_mulai !== '-') {
+            return 'pada tanggal ' . $periode_mulai;
+        } else {
+            return 'sesuai dengan tanggal kegiatan';
+        }
+    }
+}
 ?>
 
 <body>
@@ -293,14 +335,25 @@ function tgl_indo($tanggal) {
         <p>
             sebagai <b><?= $surat->jenis_penugasan_kelompok ?? 'menghadiri' ?></b> dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
             yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
-            pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b> 
-            <?php if (!empty($surat->akhir_kegiatan)): ?>
-            sampai dengan <b><?= tgl_indo($surat->akhir_kegiatan) ?></b> 
+            <?php if (($surat->jenis_date ?? 'custom') === 'periode'): ?>
+                selama periode <b><?= $surat->periode_value ?? '-' ?></b>
+            <?php else: ?>
+                pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b> 
+                <?php if (!empty($surat->akhir_kegiatan) && $surat->akhir_kegiatan !== '-'): ?>
+                sampai dengan <b><?= tgl_indo($surat->akhir_kegiatan) ?></b> 
+                <?php endif; ?>
             <?php endif; ?>
             di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
         </p>
 
+        <!-- Periode Penugasan -->
+        <?php if (($surat->jenis_date ?? 'custom') === 'custom' && (!empty($surat->periode_penugasan) && $surat->periode_penugasan !== '-')): ?>
+        <p>
+            Penugasan ini berlaku <?= format_periode_penugasan($surat) ?>.
+        </p>
+        <?php else: ?>
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
+        <?php endif; ?>
 
         <!-- Penutup -->
         <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
