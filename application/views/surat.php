@@ -18,9 +18,9 @@
     <!-- Lab. FIK Main Style -->
     <link rel="stylesheet" href="https://ifik.telkomuniversity.ac.id/assets/css/style.css">
 
-
-
-
+    <!-- Google Fonts - Sama seperti views kedua -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- JQuery 3.3.1 -->
     <script src="https://ifik.telkomuniversity.ac.id/assets/vendor/jquery.min.js"></script>
@@ -47,6 +47,7 @@
             padding: 35px;
             position: relative;
             overflow: hidden;
+            font-family: 'Poppins', sans-serif;
         }
 
         /* Progressbar container */
@@ -92,6 +93,7 @@
             font-weight: 600;
             text-transform: uppercase;
             transition: all 0.3s;
+            font-family: 'Poppins', sans-serif;
         }
 
         .action-btn:hover {
@@ -102,6 +104,7 @@
             border: 1px solid #ccc;
             background: transparent;
             color: #555;
+            font-family: 'Poppins', sans-serif;
         }
 
         .btn-secondary:hover {
@@ -128,8 +131,8 @@
             
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out, all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
         }
-
 
         .nice-select.open {
             border-color: #FB8C00;
@@ -140,6 +143,7 @@
             border-radius: 8px;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
             border-color: #e5e7eb;
+            font-family: 'Poppins', sans-serif;
         }
 
         .nice-select .option.focus,
@@ -153,6 +157,7 @@
             font-weight: 600;
             color: #6c757d;
             margin-bottom: 15px;
+            font-family: 'Poppins', sans-serif;
         }
 
         /* Static button area inside form */
@@ -169,6 +174,303 @@
                 flex-direction: column;
                 align-items: center;
             }
+        }
+
+        /* Font untuk semua elemen - sama seperti views kedua */
+        h1, h2, h3, h4, h5, h6, p, span, div, input, textarea, select, button, label, a {
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        /* Font untuk navbar */
+        .navbar, .fik-navbar-menu, .fik-username, .fik-login-dropdown, .dropdown-menu {
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        /* Font untuk modal */
+        .modal, .modal-title, .modal-body, .modal-footer {
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        /* Font untuk side menu */
+        .fik-db-side-menu, .card, .btn {
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        /* Font untuk form */
+        .custom-form, .form-group, .form-control, .form-check, .form-check-label {
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        /* Font untuk table */
+        table, th, td, .table, .badge {
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        /* Font untuk footer */
+        .footer, .fik-footer, .credit {
+            font-family: 'Poppins', sans-serif !important;
+        }
+
+        /* Form group styling */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+
+        /* wrapper periode */
+        #periode_section {
+            position: relative;
+            z-index: 9999 !important;
+            transition: margin-bottom 0.3s ease;
+        }
+
+        /* dropdown nice-select */
+        .nice-select {
+            z-index: 99999 !important;
+        }
+
+        /* dropdown saat open = paling depan */
+        .nice-select.open {
+            z-index: 999999 !important;
+        }
+
+        /* Tambah margin yang lebih besar saat dropdown dibuka */
+        #periode_section.open-margin {
+            margin-bottom: 250px !important;
+        }
+
+        /* Tambah padding bottom untuk memberikan ruang lebih */
+        #periode_section .nice-select.open + .list {
+            margin-bottom: 20px;
+        }
+
+        /* sembunyikan select asli */
+        .has-select select.nice-original {
+          display: none !important;
+        }
+
+        /* Pastikan list dropdown tidak terpotong */
+        .nice-select .list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Animasi smooth untuk spacing */
+        #periode_section {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Style untuk error message */
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.has-error input {
+            border-color: #dc3545;
+        }
+
+        /* Style untuk info message */
+        .info-message {
+            color: #0d6efd;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Style untuk success message */
+        .success-message {
+            color: #198754;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Style untuk disabled dates di datepicker */
+        .ui-datepicker td.ui-state-disabled {
+            opacity: 0.3;
+        }
+
+        .ui-datepicker td.ui-state-disabled span {
+            cursor: not-allowed !important;
+        }
+
+        /* Highlight untuk tanggal yang valid */
+        .ui-datepicker td.valid-date a {
+            background-color: #e8f5e8 !important;
+            color: #198754 !important;
+            font-weight: bold;
+        }
+
+        /* Style untuk tanggal yang melebihi batas */
+        .ui-datepicker td.over-limit-date a {
+            background-color: #fff3cd !important;
+            color: #856404 !important;
+            text-decoration: line-through;
+        }
+
+        /* tambahan visual warning kelas */
+        .ui-datepicker td.warning a {
+            box-shadow: 0 0 0 1px #ffc107 inset;
+        }
+
+        /* Style untuk tanggal yang benar-benar tidak bisa dipilih */
+        .ui-datepicker td.force-disabled a {
+            background-color: #f8d7da !important;
+            color: #721c24 !important;
+            text-decoration: line-through;
+            cursor: not-allowed !important;
+        }
+
+        /* Button cell styling */
+        .button-cell { display: none; justify-content: center; align-items: center; }
+        .add-row-btn, .remove-row-btn { width: 35px; height: 35px; border-radius: 50%; padding: 0; }
+        .panitia-row { transition: all 0.3s ease; opacity: 1; transform: translateY(0); }
+        .panitia-row.removing { opacity: 0; transform: translateX(20px); }
+
+        /* Google-style Autocomplete */
+        .autocomplete-box-fixed {
+            position: fixed;
+            background: #fff;
+            border: none;
+            z-index: 9999999;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 4px 6px rgba(32,33,36,0.28);
+            border-radius: 24px;
+            font-size: 14px;
+            padding: 8px 0;
+            margin-top: 8px;
+            font-family: 'Poppins', sans-serif;
+            min-width: 300px;
+        }
+
+        .autocomplete-item {
+            padding: 0;
+            cursor: pointer;
+            transition: background-color 0.1s ease;
+            border: none;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.active {
+            background: #f8f9fa;
+        }
+
+        .autocomplete-icon {
+            width: 20px;
+            height: 20px;
+            margin-left: 16px;
+            flex-shrink: 0;
+            opacity: 0.54;
+        }
+
+        .autocomplete-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: #5f6368;
+        }
+
+        .autocomplete-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 12px 16px 12px 0;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .autocomplete-item .item-primary {
+            font-size: 14px;
+            color: #202124;
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .autocomplete-item .item-secondary {
+            font-size: 12px;
+            color: #70757a;
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .query-match {
+            font-weight: 600;
+        }
+
+        .autocomplete-item:first-child {
+            border-left: 3px solid #1a73e8;
+        }
+
+        .autocomplete-loading,
+        .autocomplete-empty {
+            padding: 16px 20px;
+            text-align: center;
+            color: #70757a;
+            font-size: 13px;
+        }
+
+        .autocomplete-box-fixed::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .autocomplete-box-fixed::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .autocomplete-box-fixed::-webkit-scrollbar-thumb {
+            background: #dadce0;
+            border-radius: 10px;
+            border: 2px solid #fff;
+        }
+
+        .autocomplete-box-fixed::-webkit-scrollbar-thumb:hover {
+            background: #bdc1c6;
+        }
+
+        .multi-step-form, fieldset, .container {
+            overflow: visible !important;
+        }
+
+        /* Perbaikan untuk tampilan form */
+        .form-group.has-select {
+            margin-bottom: 1rem;
+        }
+
+        .form-control.custom-form-control {
+            margin-top: 12px;
+        }
+
+        .panitia-row {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .panitia-row:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
