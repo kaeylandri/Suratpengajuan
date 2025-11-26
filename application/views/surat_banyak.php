@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Penugasan Banyak Panitia</title>
+    <title><?= $surat->nama_kegiatan ?? '-' ?></title>
 
     <style>
         @page {
