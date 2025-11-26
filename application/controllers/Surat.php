@@ -41,57 +41,58 @@ class Surat extends CI_Controller
         return (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
     }
 
-    /* ===========================================
-       GET DOSEN DATA BY NIP - FUNCTION BARU
-    ============================================*/
-    private function get_dosen_by_nip($nip_array)
-    {
-        if (empty($nip_array)) return [];
-        
-        // Decode jika masih JSON string
-        if (is_string($nip_array)) {
-            $nip_array = json_decode($nip_array, true);
-        }
-        
-        // Pastikan array
-        if (!is_array($nip_array)) {
-            $nip_array = [$nip_array];
-        }
-        
-        // Clean and filter NIP array
-        $nip_array = array_filter(array_map('trim', $nip_array));
-        
-        if (empty($nip_array)) return [];
-        
-        // Query ke tabel list_dosen
-        $this->db->select('nip, nama_dosen, jabatan, divisi');
-        $this->db->from('list_dosen');
-        $this->db->where_in('nip', $nip_array);
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0) {
-            $results = $query->result_array();
-            
-            // Create associative array with NIP as key untuk mapping
-            $dosen_data = [];
-            foreach ($results as $row) {
-                $dosen_data[$row['nip']] = $row;
-            }
-            
-            // Return data dalam urutan yang sama dengan input NIP array
-            $ordered_data = [];
-            foreach ($nip_array as $nip) {
-                if (isset($dosen_data[$nip])) {
-                    $ordered_data[] = $dosen_data[$nip];
-                }
-            }
-            
-            return $ordered_data;
-        }
-        
+    // Helper function untuk get dosen by NIP - FIXED VERSION
+private function get_dosen_by_nip($nip_data) {
+    // Handle berbagai tipe data input
+    if (empty($nip_data)) {
         return [];
     }
-
+    
+    $nip_array = [];
+    
+    // Jika sudah array, langsung gunakan
+    if (is_array($nip_data)) {
+        $nip_array = $nip_data;
+    } 
+    // Jika string JSON, decode
+    elseif (is_string($nip_data) && $nip_data !== '[]' && $nip_data !== '-') {
+        $decoded = json_decode($nip_data, true);
+        $nip_array = is_array($decoded) ? $decoded : [];
+    }
+    
+    if (empty($nip_array)) {
+        return [];
+    }
+    
+    $dosen_data = [];
+    
+    foreach ($nip_array as $nip) {
+        if (!empty($nip) && $nip !== '-') {
+            // Cari dosen berdasarkan NIP dari tabel list_dosen
+            $this->db->where('nip', $nip);
+            $dosen = $this->db->get('list_dosen')->row();
+            
+            if ($dosen) {
+                $dosen_data[] = [
+                    'nip' => $dosen->nip,
+                    'nama_dosen' => $dosen->nama_dosen,
+                    'jabatan' => $dosen->jabatan,
+                    'divisi' => $dosen->divisi
+                ];
+            } else {
+                // Fallback jika tidak ditemukan di list_dosen
+                $dosen_data[] = [
+                    'nip' => $nip,
+                    'nama_dosen' => '',
+                    'jabatan' => '',
+                    'divisi' => ''
+                ];
+            }
+        }
+    }
+    
+    return $dosen_data;
+}
     /* ===========================================
        AUTOCOMPLETE NIP - UNTUK FORM PANITIA
     ============================================*/
@@ -518,25 +519,55 @@ class Surat extends CI_Controller
     }
 
     foreach ($eviden_urls as $url) {
-        if (empty($url)) continue;
+    if (empty($url)) continue;
 
-        // Ambil nama file
-        $file_ext = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
-        if (!$file_ext) $file_ext = "jpg";
+    // ===============================
+    // 1. Coba ambil ekstensi dari URL
+    // ===============================
+    $path = parse_url($url, PHP_URL_PATH);
+    $file_ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 
-        $filename = "eviden_" . time() . "_" . rand(1000,9999) . "." . $file_ext;
+    // ===========================================
+    // 2. Jika tidak ada ekstensi → deteksi MIME
+    // ===========================================
+    if (!$file_ext) {
 
-        // Path tempat file disimpan
-        $save_path = $upload_dir . $filename;
+        // Ambil header untuk membaca MIME
+        $headers = @get_headers($url, 1);
+        $mime = isset($headers["Content-Type"]) ? $headers["Content-Type"] : "application/octet-stream";
 
-        // Download file dari Uploadcare
-        $file_data = @file_get_contents($url);
+        // Mapping MIME → EXT
+        $mime_to_ext = [
+            "image/jpeg" => "jpg",
+            "image/png" => "png",
+            "image/webp" => "webp",
+            "image/gif" => "gif",
+            "application/pdf" => "pdf",
+            "application/msword" => "doc",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => "docx",
+        ];
 
-        if ($file_data !== false) {
-            file_put_contents($save_path, $file_data);
-            $saved_filenames[] = $filename;
-        }
+        $file_ext = isset($mime_to_ext[$mime]) ? $mime_to_ext[$mime] : "bin";  
     }
+
+    // ===============================
+    // 3. Buat nama file final
+    // ===============================
+    $filename = "eviden_" . time() . "_" . rand(1000,9999) . "." . $file_ext;
+
+    $save_path = $upload_dir . $filename;
+
+    // ===============================
+    // 4. Download file
+    // ===============================
+    $file_data = @file_get_contents($url);
+
+    if ($file_data !== false) {
+        file_put_contents($save_path, $file_data);
+        $saved_filenames[] = $filename;
+    }
+}
+
 
     /* ======================================================
        🔥 END PROSES EVIDEN
@@ -718,16 +749,16 @@ public function get_eviden_url($eviden_data)
     /* ===========================================
        EDIT DATA (UPDATED)
     ============================================*/
-    public function edit($id)
-    {
-        $surat = $this->Surat_model->get_by_id($id);
+   public function edit($id)
+{
+    $surat = $this->Surat_model->get_by_id($id);
 
-        if (!$surat) show_404();
+    if (!$surat) show_404();
 
-        $data['surat'] = (array)$surat;
-        
-        // TAMBAHAN: Get dosen data untuk ditampilkan
-        $data['dosen_data'] = $this->get_dosen_by_nip($surat->nip);
+    $data['surat'] = (array)$surat;
+    
+    // TAMBAHAN: Get dosen data untuk ditampilkan - FIXED
+    $data['dosen_data'] = $this->get_dosen_by_nip($surat->nip);
         
         $eviden_raw = $surat->eviden ?? "[]";
         
@@ -961,47 +992,49 @@ public function get_eviden_url($eviden_data)
         }
     }
 
-    /* ===========================================
-       MULTI EDIT (UPDATED)
-    ============================================*/
     public function multi_edit()
-    {
-        $ids = $this->input->get('ids');
+{
+    $ids = $this->input->get('ids');
 
-        if (!$ids) {
-            $this->session->set_flashdata('error', 'Tidak ada data yang dipilih untuk di-edit.');
-            redirect('surat');
-            return;
-        }
-
-        $idArray = explode(',', $ids);
-        
-        $idArray = array_filter(array_map('intval', $idArray), function($id) {
-            return $id > 0;
-        });
-
-        if (empty($idArray)) {
-            $this->session->set_flashdata('error', 'ID yang diberikan tidak valid.');
-            redirect('surat');
-            return;
-        }
-
-        $data['surat_list'] = $this->Surat_model->getMultiByIds($idArray);
-
-        if (empty($data['surat_list'])) {
-            $this->session->set_flashdata('error', 'Data tidak ditemukan untuk ID: ' . implode(', ', $idArray));
-            redirect('surat');
-            return;
-        }
-
-        // TAMBAHAN: Enrich dengan data dosen
-        foreach ($data['surat_list'] as &$surat) {
-            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
-        }
-
-        $this->load->view('multi_edit_surat', $data);
+    if (!$ids) {
+        $this->session->set_flashdata('error', 'Tidak ada data yang dipilih untuk di-edit.');
+        redirect('surat');
+        return;
     }
 
+    $idArray = explode(',', $ids);
+    
+    $idArray = array_filter(array_map('intval', $idArray), function($id) {
+        return $id > 0;
+    });
+
+    if (empty($idArray)) {
+        $this->session->set_flashdata('error', 'ID yang diberikan tidak valid.');
+        redirect('surat');
+        return;
+    }
+
+    $data['surat_list'] = $this->Surat_model->getMultiByIds($idArray);
+
+    if (empty($data['surat_list'])) {
+        $this->session->set_flashdata('error', 'Data tidak ditemukan untuk ID: ' . implode(', ', $idArray));
+        redirect('surat');
+        return;
+    }
+
+    // TAMBAHAN: Enrich dengan data dosen dari list_dosen - FIXED
+    foreach ($data['surat_list'] as &$surat) {
+        // Pastikan kita memproses field nip dengan benar
+        $nip_data = $surat->nip;
+        
+        // Debug log untuk melihat tipe data
+        log_message('debug', 'NIP data type: ' . gettype($nip_data) . ' value: ' . print_r($nip_data, true));
+        
+        $surat->dosen_data = $this->get_dosen_by_nip($nip_data);
+    }
+
+    $this->load->view('multi_edit_surat', $data);
+}
     /* ===========================================
        SAVE MULTI EDIT (UPDATED)
     ============================================*/

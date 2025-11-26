@@ -346,6 +346,147 @@ if (!isset($surat_list) || !is_array($surat_list)) {
             text-align: center;
         }
     }
+/* Google-style Autocomplete */
+.autocomplete-box-fixed {
+    position: fixed;
+    background: #fff;
+    border: none;
+    z-index: 9999999;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(32,33,36,0.28);
+    border-radius: 12px;
+    font-size: 14px;
+    padding: 8px 0;
+    margin-top: 8px;
+    font-family: 'Montserrat', sans-serif;
+    min-width: 350px;
+}
+
+.autocomplete-item {
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    position: relative;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background: #f8f9fa;
+    transform: translateX(2px);
+}
+
+.autocomplete-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.autocomplete-item .item-primary {
+    font-size: 14px;
+    color: #202124;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-item .item-secondary {
+    font-size: 12px;
+    color: #5f6368;
+    font-weight: 400;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.autocomplete-item .item-badge {
+    font-size: 11px;
+    color: #ff8c00;
+    font-weight: 500;
+    background: #fff8f0;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-top: 2px;
+    border: 1px solid #ffe0b2;
+}
+
+.query-match {
+    font-weight: 700;
+    color: #ff6b00;
+}
+
+.autocomplete-item:first-child {
+    border-left: 3px solid #ff8c00;
+}
+
+.autocomplete-loading,
+.autocomplete-empty {
+    padding: 20px;
+    text-align: center;
+    color: #70757a;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.autocomplete-box-fixed::-webkit-scrollbar {
+    width: 8px;
+}
+
+.autocomplete-box-fixed::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.autocomplete-box-fixed::-webkit-scrollbar-thumb {
+    background: #dadce0;
+    border-radius: 10px;
+    border: 2px solid #fff;
+}
+
+.autocomplete-box-fixed::-webkit-scrollbar-thumb:hover {
+    background: #bdc1c6;
+}
+
+/* Style untuk input dengan autocomplete */
+.nip-input, .nama-dosen-input, .jabatan-input, .divisi-input {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.nip-input:focus, .nama-dosen-input:focus, .jabatan-input:focus, .divisi-input:focus {
+    border-color: #ff8c00;
+    box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Placeholder style */
+.nip-input::placeholder, 
+.nama-dosen-input::placeholder, 
+.jabatan-input::placeholder, 
+.divisi-input::placeholder {
+    color: #9e9e9e;
+    font-size: 13px;
+}
+
+/* Highlight untuk row yang sedang aktif */
+.dosen-row:focus-within {
+    background-color: #fffaf5 !important;
+    box-shadow: 0 2px 8px rgba(255, 140, 0, 0.1);
+}
     </style>
 </head>
 
@@ -535,45 +676,95 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                 </div>
             </div>
 
-            <div class="form-section-title"><i class="fas fa-users"></i> Dosen Terkait</div>
+           <div class="form-section-title"><i class="fas fa-users"></i> Dosen Terkait</div>
 
-            <div class="table-responsive">
-                <table class="table-custom dosen-table" data-index="<?= $index ?>">
-                    <thead>
-                        <tr>
-                            <th>NIP</th>
-                            <th>Nama Dosen</th>
-                            <th>Jabatan</th>
-                            <th>Divisi</th>
-                            <th width="80">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                    <?php if (!empty($nip_array)): ?>
-                        <?php foreach ($nip_array as $i => $nip): ?>
-                            <tr>
-                                <td><input type="text" class="form-control" name="items[<?= $index ?>][nip][]" value="<?= htmlspecialchars($nip) ?>"></td>
-                                <td><input type="text" class="form-control" name="items[<?= $index ?>][nama_dosen][]" value="<?= htmlspecialchars(isset($nama_array[$i]) ? $nama_array[$i] : '') ?>"></td>
-                                <td><input type="text" class="form-control" name="items[<?= $index ?>][jabatan][]" value="<?= htmlspecialchars(isset($jabatan_array[$i]) ? $jabatan_array[$i] : '') ?>"></td>
-                                <td><input type="text" class="form-control" name="items[<?= $index ?>][divisi][]" value="<?= htmlspecialchars(isset($divisi_array[$i]) ? $divisi_array[$i] : '') ?>"></td>
-                                <td class="text-center"><span class="remove-row">&times;</span></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td><input type="text" class="form-control" name="items[<?= $index ?>][nip][]"></td>
-                            <td><input type="text" class="form-control" name="items[<?= $index ?>][nama_dosen][]"></td>
-                            <td><input type="text" class="form-control" name="items[<?= $index ?>][jabatan][]"></td>
-                            <td><input type="text" class="form-control" name="items[<?= $index ?>][divisi][]"></td>
-                            <td class="text-center"><span class="remove-row">&times;</span></td>
-                        </tr>
-                    <?php endif ?>
-
-                    </tbody>
-                </table>
-            </div>
-
+<div class="table-responsive">
+    <table class="table-custom dosen-table" data-index="<?= $index ?>">
+        <thead>
+            <tr>
+                <th>NIP</th>
+                <th>Nama Dosen</th>
+                <th>Jabatan</th>
+                <th>Divisi</th>
+                <th width="80">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php 
+        $dosen_data = $surat->dosen_data ?? [];
+        if (!empty($dosen_data)): 
+            foreach ($dosen_data as $i => $dosen): 
+        ?>
+            <tr class="dosen-row">
+                <td>
+                    <input type="text" 
+                           class="form-control nip-input" 
+                           name="items[<?= $index ?>][nip][]" 
+                           value="<?= htmlspecialchars($dosen['nip'] ?? '') ?>" 
+                           autocomplete="off"
+                           required>
+                </td>
+                <td>
+                    <input type="text" 
+                           class="form-control nama-dosen-input" 
+                           name="items[<?= $index ?>][nama_dosen][]" 
+                           value="<?= htmlspecialchars($dosen['nama_dosen'] ?? '') ?>" 
+                           autocomplete="off"
+                           required>
+                </td>
+                <td>
+                    <input type="text" 
+                           class="form-control jabatan-input" 
+                           name="items[<?= $index ?>][jabatan][]" 
+                           value="<?= htmlspecialchars($dosen['jabatan'] ?? '') ?>" 
+                           autocomplete="off">
+                </td>
+                <td>
+                    <input type="text" 
+                           class="form-control divisi-input" 
+                           name="items[<?= $index ?>][divisi][]" 
+                           value="<?= htmlspecialchars($dosen['divisi'] ?? '') ?>" 
+                           autocomplete="off">
+                </td>
+                <td class="text-center"><span class="remove-row">&times;</span></td>
+            </tr>
+        <?php 
+            endforeach; 
+        else: 
+        ?>
+            <tr class="dosen-row">
+                <td>
+                    <input type="text" 
+                           class="form-control nip-input" 
+                           name="items[<?= $index ?>][nip][]" 
+                           autocomplete="off"
+                           required>
+                </td>
+                <td>
+                    <input type="text" 
+                           class="form-control nama-dosen-input" 
+                           name="items[<?= $index ?>][nama_dosen][]" 
+                           autocomplete="off"
+                           required>
+                </td>
+                <td>
+                    <input type="text" 
+                           class="form-control jabatan-input" 
+                           name="items[<?= $index ?>][jabatan][]" 
+                           autocomplete="off">
+                </td>
+                <td>
+                    <input type="text" 
+                           class="form-control divisi-input" 
+                           name="items[<?= $index ?>][divisi][]" 
+                           autocomplete="off">
+                </td>
+                <td class="text-center"><span class="remove-row">&times;</span></td>
+            </tr>
+        <?php endif ?>
+        </tbody>
+    </table>
+</div>
             <button type="button" class="btn-add-row" data-index="<?= $index ?>">
                 <i class="fa fa-plus"></i> Tambah Dosen
             </button>
@@ -635,14 +826,19 @@ $(document).ready(() => {
         const tbody = $('.dosen-table[data-index="'+i+'"] tbody');
         const row = `
             <tr>
-                <td><input type="text" class="form-control" name="items[${i}][nip][]"></td>
-                <td><input type="text" class="form-control" name="items[${i}][nama_dosen][]"></td>
-                <td><input type="text" class="form-control" name="items[${i}][jabatan][]"></td>
-                <td><input type="text" class="form-control" name="items[${i}][divisi][]"></td>
+                <td><input type="text" class="form-control nip-input" name="items[${i}][nip][]"></td>
+                <td><input type="text" class="form-control nama-dosen-input" name="items[${i}][nama_dosen][]"></td>
+                <td><input type="text" class="form-control jabatan-input" name="items[${i}][jabatan][]"></td>
+                <td><input type="text" class="form-control divisi-input" name="items[${i}][divisi][]"></td>
                 <td class="text-center"><span class="remove-row">&times;</span></td>
             </tr>
         `;
         tbody.append(row);
+        
+        // Initialize autocomplete untuk row baru
+        setTimeout(() => {
+            initAutocompleteForRow(tbody.find('tr').last()[0]);
+        }, 10);
     });
 
     $(document).on('click', '.remove-row', function() {
@@ -848,8 +1044,176 @@ $(document).ready(() => {
         }
     });
 
+    // ============================================
+    //     AUTOCOMPLETE UNTUK SEMUA KOLOM
+    // ============================================
+    const BASE_URL = '<?= rtrim(base_url(), "/") ?>';
+
+    // Debounce function
+    function debounce(fn, delay = 300) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    // Fetch suggestions
+    async function fetchSuggestions(query, fieldType = 'nip') {
+        if (!query) return [];
+        
+        try {
+            const response = await fetch(`${BASE_URL}/surat/autocomplete_nip?q=${encodeURIComponent(query)}&field=${fieldType}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+            return Array.isArray(data) ? data : [];
+        } catch (error) {
+            console.error('Autocomplete error:', error);
+            return [];
+        }
+    }
+
+    // Fill row data
+    function fillRowData(item, row) {
+        if (!item || !row) return;
+        
+        const nipInput = row.querySelector('.nip-input');
+        const namaInput = row.querySelector('.nama-dosen-input');
+        const jabatanInput = row.querySelector('.jabatan-input');
+        const divisiInput = row.querySelector('.divisi-input');
+        
+        if (nipInput) nipInput.value = item.nip || '';
+        if (namaInput) namaInput.value = item.nama_dosen || '';
+        if (jabatanInput) jabatanInput.value = item.jabatan || '';
+        if (divisiInput) divisiInput.value = item.divisi || '';
+    }
+
+       // Show autocomplete
+    function showAutocomplete(inputEl, items, fieldType) {
+        // Remove existing autocomplete
+        const existingBox = document.querySelector('.autocomplete-active');
+        if (existingBox) existingBox.remove();
+
+        if (!items || !items.length) return;
+
+        const rect = inputEl.getBoundingClientRect();
+        const box = document.createElement('div');
+        box.className = 'autocomplete-box-fixed autocomplete-active';
+        box.style.left = rect.left + 'px';
+        box.style.top = (rect.bottom + 4) + 'px';
+        box.style.width = Math.max(rect.width, 300) + 'px';
+
+        items.forEach((item) => {
+            const option = document.createElement('div');
+            option.className = 'autocomplete-item';
+            
+            let primaryText = '';
+            let secondaryText = '';
+            
+            switch(fieldType) {
+                case 'nip':
+                    primaryText = `${item.nip || '-'}`;
+                    secondaryText = `${item.nama_dosen || '-'}`;
+                    break;
+                case 'nama_dosen':
+                    primaryText = `${item.nama_dosen || '-'}`;
+                    secondaryText = `NIP: ${item.nip || '-'}`;
+                    break;
+                case 'jabatan':
+                    primaryText = `${item.jabatan || '-'}`;
+                    secondaryText = `${item.nama_dosen || '-'} (NIP: ${item.nip || '-'})`;
+                    break;
+                case 'divisi':
+                    primaryText = `${item.divisi || '-'}`;
+                    secondaryText = `${item.nama_dosen || '-'} (NIP: ${item.nip || '-'})`;
+                    break;
+            }
+            
+            // Info tambahan untuk badge
+            const badges = [];
+            if (item.jabatan && item.jabatan !== '-') badges.push(item.jabatan);
+            if (item.divisi && item.divisi !== '-') badges.push(item.divisi);
+            const badgeText = badges.length > 0 ? badges.join(' • ') : '';
+            
+            option.innerHTML = `
+                <div class="autocomplete-content">
+                    <div class="item-primary">${primaryText}</div>
+                    <div class="item-secondary">${secondaryText}</div>
+                    ${badgeText ? `<div class="item-badge">${badgeText}</div>` : ''}
+                </div>
+            `;
+            
+            option.addEventListener('click', () => {
+                fillRowData(item, inputEl.closest('tr'));
+                box.remove();
+            });
+            
+            box.appendChild(option);
+        });
+
+        document.body.appendChild(box);
+
+        // Close on outside click
+        const clickHandler = (e) => {
+            if (!box.contains(e.target) && e.target !== inputEl) {
+                box.remove();
+                document.removeEventListener('click', clickHandler);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', clickHandler), 10);
+    }
+
+    // Initialize autocomplete untuk sebuah input
+    function initAutocompleteForInput(inputEl, fieldType) {
+        if (!inputEl) return;
+
+        // Input event handler
+        const handler = debounce(async function() {
+            const val = this.value.trim();
+            if (val.length < 1) return;
+            
+            const suggestions = await fetchSuggestions(val, fieldType);
+            showAutocomplete(this, suggestions, fieldType);
+        }, 300);
+
+        inputEl.addEventListener('input', handler);
+        
+        // Focus handler untuk menampilkan placeholder
+        inputEl.addEventListener('focus', function() {
+            let placeholderText = '';
+            switch(fieldType) {
+                case 'nip': placeholderText = 'Ketik NIP...'; break;
+                case 'nama_dosen': placeholderText = 'Ketik nama dosen...'; break;
+                case 'jabatan': placeholderText = 'Ketik jabatan...'; break;
+                case 'divisi': placeholderText = 'Ketik divisi...'; break;
+            }
+            this.setAttribute('placeholder', placeholderText);
+        });
+        
+        inputEl.addEventListener('blur', function() {
+            this.removeAttribute('placeholder');
+        });
+    }
+
+    // Initialize autocomplete untuk seluruh row
+    function initAutocompleteForRow(row) {
+        const nipInput = row.querySelector('.nip-input');
+        const namaInput = row.querySelector('.nama-dosen-input');
+        const jabatanInput = row.querySelector('.jabatan-input');
+        const divisiInput = row.querySelector('.divisi-input');
+
+        if (nipInput) initAutocompleteForInput(nipInput, 'nip');
+        if (namaInput) initAutocompleteForInput(namaInput, 'nama_dosen');
+        if (jabatanInput) initAutocompleteForInput(jabatanInput, 'jabatan');
+        if (divisiInput) initAutocompleteForInput(divisiInput, 'divisi');
+    }
+
+    // Initialize autocomplete untuk semua row yang sudah ada saat page load
+    $('.dosen-row').each(function() {
+        initAutocompleteForRow(this);
+    });
+
 });
 </script>
-
 </body>
 </html>

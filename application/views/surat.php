@@ -3,6 +3,7 @@
 
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
 <head>
@@ -14,6 +15,8 @@
     <!-- Bootstrap & Nice Select -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/jquery-nice-select@1.1.0/css/nice-select.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <!-- Lab. FIK Main Style -->
     <link rel="stylesheet" href="https://ifik.telkomuniversity.ac.id/assets/css/style.css">
@@ -472,6 +475,41 @@
         .panitia-row:last-child {
             border-bottom: none;
         }
+        /* PERBAIKAN FONT AWESOME */
+.fas, .far, .fab, .fa {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900;
+}
+
+/* Pastikan icon tidak disembunyikan */
+[class*="fa-"]:before {
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Override any hiding styles */
+i[class*="fa-"] {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Icon colors untuk berbagai konteks */
+.input-group-text i {
+    color: #6c757d;
+    width: 16px;
+}
+
+.btn i {
+    margin-right: 5px;
+}
+
+.step-counter i {
+    color: #FB8C00;
+}
     </style>
 </head>
 
@@ -551,6 +589,9 @@
                 <b>PIC MEDCRAFT</b>
                 <span>pic kk</span>
             </div>
+             <!-- FONT AWESOME - HARUS DITARUH DI ATAS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
             <div class="divider show-mobile" style="margin-top:20px"></div>
             <div class="card">
                 <a href="<?= base_url('list-surat-tugas') ?>" class="btn"><span class="fas fa-palette"></span> List Surat Tugas</a>
@@ -2547,7 +2588,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <!-- ===== UPLOADCARE CDN ===== -->
 <script>
-UPLOADCARE_PUBLIC_KEY = "demopublickey";
+UPLOADCARE_PUBLIC_KEY = "94b5f419bb48e969b290";
 </script>
 <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
@@ -2649,7 +2690,7 @@ document.addEventListener("DOMContentLoaded", function () {
         multiple: true,
         previewStep: true,
         tabs: "file url camera dropbox gdrive",
-        publicKey: "demopublickey"
+        publicKey: "94b5f419bb48e969b290"
     });
 
     // Event ketika user selesai upload file
