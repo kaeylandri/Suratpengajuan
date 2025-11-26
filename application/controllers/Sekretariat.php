@@ -216,16 +216,37 @@ class Sekretariat extends CI_Controller {
     }
 
     /* ================================
-       DETAIL MODAL (AJAX)
+       DETAIL MODAL (AJAX) - PERBAIKAN UTAMA
     ================================= */
     public function getDetailPengajuan($id) {
         $this->db->where('id', $id);
         $pengajuan = $this->db->get('surat')->row();
         
         if ($pengajuan) {
+            // PERBAIKAN UTAMA: Ambil data dosen dari tabel list_dosen berdasarkan NIP
+            $dosen_data = $this->get_dosen_data_from_nip($pengajuan->nip);
+            
+            // Gabungkan data pengajuan dengan data dosen yang sudah diformat
+            $response_data = array(
+                'id' => $pengajuan->id,
+                'nama_kegiatan' => $pengajuan->nama_kegiatan,
+                'status' => $pengajuan->status,
+                'jenis_pengajuan' => $pengajuan->jenis_pengajuan,
+                'lingkup_penugasan' => $pengajuan->lingkup_penugasan,
+                'penyelenggara' => $pengajuan->penyelenggara,
+                'tanggal_kegiatan' => $pengajuan->tanggal_kegiatan,
+                'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
+                'created_at' => $pengajuan->created_at,
+                'eviden' => $pengajuan->eviden,
+                'nomor_surat' => $pengajuan->nomor_surat,
+                'catatan_penolakan' => $pengajuan->catatan_penolakan,
+                // Data dosen dengan struktur yang konsisten
+                'dosen_data' => $dosen_data
+            );
+            
             echo json_encode([
                 'success' => true,
-                'data' => $pengajuan
+                'data' => $response_data
             ]);
         } else {
             echo json_encode([
@@ -233,6 +254,95 @@ class Sekretariat extends CI_Controller {
                 'message' => 'Data tidak ditemukan'
             ]);
         }
+    }
+
+    /* ================================
+       FUNGSI BARU: Ambil data dosen dari tabel list_dosen berdasarkan NIP
+    ================================= */
+    private function get_dosen_data_from_nip($nip_data) {
+        $dosen_data = array();
+        
+        if (empty($nip_data)) {
+            // Jika tidak ada NIP, return data default
+            return [array(
+                'nama' => 'Data dosen tidak tersedia',
+                'nip' => '-',
+                'jabatan' => '-',
+                'divisi' => '-'
+            )];
+        }
+        
+        // Decode NIP jika masih JSON
+        if (is_string($nip_data)) {
+            $nip_array = json_decode($nip_data, true);
+        } else {
+            $nip_array = $nip_data;
+        }
+        
+        // Pastikan array
+        if (!is_array($nip_array)) {
+            $nip_array = [$nip_array];
+        }
+        
+        // Filter NIP yang valid
+        $nip_array = array_filter(array_map('trim', $nip_array));
+        
+        if (empty($nip_array)) {
+            return [array(
+                'nama' => 'Data dosen tidak tersedia',
+                'nip' => '-',
+                'jabatan' => '-',
+                'divisi' => '-'
+            )];
+        }
+        
+        // Ambil data dosen dari tabel list_dosen
+        $this->db->select('nip, nama_dosen, jabatan, divisi');
+        $this->db->from('list_dosen');
+        $this->db->where_in('nip', $nip_array);
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            $results = $query->result_array();
+            
+            // Buat array asosiatif dengan NIP sebagai key
+            $dosen_by_nip = [];
+            foreach ($results as $row) {
+                $dosen_by_nip[$row['nip']] = array(
+                    'nama' => $row['nama_dosen'],
+                    'nip' => $row['nip'],
+                    'jabatan' => $row['jabatan'],
+                    'divisi' => $row['divisi']
+                );
+            }
+            
+            // Return data dalam urutan yang sama dengan input NIP array
+            foreach ($nip_array as $nip) {
+                if (isset($dosen_by_nip[$nip])) {
+                    $dosen_data[] = $dosen_by_nip[$nip];
+                } else {
+                    // Fallback untuk NIP yang tidak ditemukan
+                    $dosen_data[] = array(
+                        'nama' => 'Data tidak ditemukan (NIP: ' . $nip . ')',
+                        'nip' => $nip,
+                        'jabatan' => '-',
+                        'divisi' => '-'
+                    );
+                }
+            }
+        } else {
+            // Jika tidak ada data di list_dosen, buat dari NIP saja
+            foreach ($nip_array as $nip) {
+                $dosen_data[] = array(
+                    'nama' => 'Data dari NIP: ' . $nip,
+                    'nip' => $nip,
+                    'jabatan' => '-',
+                    'divisi' => '-'
+                );
+            }
+        }
+        
+        return $dosen_data;
     }
 
     /* ================================

@@ -71,6 +71,11 @@ class Dekan extends CI_Controller
                                ->get('surat')
                                ->result_array();
 
+        // PERBAIKAN: Proses data dosen untuk setiap surat
+        foreach ($data['surat_list'] as &$surat) {
+            $surat['dosen_data'] = $this->get_dosen_data($surat);
+        }
+
         // Statistik untuk card - hanya data yang relevan untuk dekan
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
@@ -163,6 +168,11 @@ class Dekan extends CI_Controller
                                ->get('surat')
                                ->result_array();
 
+        // PERBAIKAN: Proses data dosen untuk setiap surat
+        foreach ($data['surat_list'] as &$surat) {
+            $surat['dosen_data'] = $this->get_dosen_data($surat);
+        }
+
         // Statistik - hanya data yang relevan untuk dekan
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
@@ -236,6 +246,11 @@ class Dekan extends CI_Controller
                                ->get('surat')
                                ->result_array();
 
+        // PERBAIKAN: Proses data dosen untuk setiap surat
+        foreach ($data['surat_list'] as &$surat) {
+            $surat['dosen_data'] = $this->get_dosen_data($surat);
+        }
+
         // Statistik - hanya data yang relevan untuk dekan
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
@@ -284,6 +299,11 @@ class Dekan extends CI_Controller
                                ->get('surat')
                                ->result_array();
 
+        // PERBAIKAN: Proses data dosen untuk setiap surat
+        foreach ($data['surat_list'] as &$surat) {
+            $surat['dosen_data'] = $this->get_dosen_data($surat);
+        }
+
         // Statistik - hanya data yang relevan untuk dekan
         $this->db->where('YEAR(created_at)', $tahun);
         $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
@@ -331,6 +351,11 @@ class Dekan extends CI_Controller
                                ->order_by('created_at', 'DESC')
                                ->get('surat')
                                ->result_array();
+
+        // PERBAIKAN: Proses data dosen untuk setiap surat
+        foreach ($data['surat_list'] as &$surat) {
+            $surat['dosen_data'] = $this->get_dosen_data($surat);
+        }
 
         // Statistik - hanya data yang relevan untuk dekan
         $this->db->where('YEAR(created_at)', $tahun);
@@ -623,6 +648,11 @@ class Dekan extends CI_Controller
                                ->get("surat")
                                ->result_array();
 
+        // PERBAIKAN: Proses data dosen untuk setiap surat
+        foreach ($data['surat_list'] as &$surat) {
+            $surat['dosen_data'] = $this->get_dosen_data($surat);
+        }
+
         // Statistik - hanya data yang relevan untuk dekan
         $data['approved_count'] = $this->db->where('status', 'disetujui dekan')->count_all_results('surat');
         $data['pending_count'] = $this->db->where('status', 'disetujui sekretariat')->count_all_results('surat');
@@ -658,42 +688,8 @@ class Dekan extends CI_Controller
             show_404();
         }
 
-        // DEBUG: Tampilkan struktur data untuk troubleshooting
-        // echo "<pre>"; print_r($data['surat']); echo "</pre>"; die();
-
-        // PERBAIKAN: Ambil data dosen berdasarkan NIP dari tabel surat
-        $nip = $data['surat']['nip'];
-        
-        // Cek apakah NIP ada dan tidak kosong
-        if (!empty($nip)) {
-            // Jika NIP adalah JSON array, decode dulu
-            if (is_json($nip)) {
-                $nip_list = json_decode($nip, true);
-                if (is_array($nip_list)) {
-                    $this->db->where_in('nip', $nip_list);
-                } else {
-                    $this->db->where('nip', $nip);
-                }
-            } else {
-                $this->db->where('nip', $nip);
-            }
-            
-            $data['dosen_list'] = $this->db->get('list_dosen')->result_array();
-        } else {
-            $data['dosen_list'] = [];
-        }
-
-        // Jika tidak ada data dosen, buat data fallback dari field nama_dosen di tabel surat
-        if (empty($data['dosen_list']) && !empty($data['surat']['nama_dosen'])) {
-            $data['dosen_list'] = [
-                [
-                    'nama' => $data['surat']['nama_dosen'],
-                    'nip' => $data['surat']['nip'],
-                    'jabatan' => '-',
-                    'divisi' => '-'
-                ]
-            ];
-        }
+        // PERBAIKAN: Ambil data dosen menggunakan fungsi yang sama
+        $data['surat']['dosen_data'] = $this->get_dosen_data($data['surat']);
 
         $this->load->view('dekan/detail_surat', $data);
     }
@@ -705,48 +701,14 @@ class Dekan extends CI_Controller
         $surat = $this->db->get_where('surat', ['id' => $id])->row_array();
 
         if (!$surat) {
-            echo json_encode(['error' => 'Data tidak ditemukan']);
+            echo json_encode(['success' => false, 'message' => 'Data tidak ditemukan']);
             return;
         }
 
-        // PERBAIKAN: Ambil data dosen berdasarkan NIP
-        $nip = $surat['nip'];
-        $dosen_data = [];
+        // PERBAIKAN: Ambil data dosen menggunakan fungsi yang sama
+        $surat['dosen_data'] = $this->get_dosen_data($surat);
 
-        if (!empty($nip)) {
-            // Handle NIP yang berupa JSON array
-            if (is_json($nip)) {
-                $nip_list = json_decode($nip, true);
-                if (is_array($nip_list)) {
-                    $this->db->where_in('nip', $nip_list);
-                    $dosen_result = $this->db->get('list_dosen')->result_array();
-                    $dosen_data = $dosen_result;
-                }
-            } else {
-                // NIP tunggal
-                $dosen = $this->db->get_where('list_dosen', ['nip' => $nip])->row_array();
-                if ($dosen) {
-                    $dosen_data = [$dosen];
-                }
-            }
-        }
-
-        // Gabungkan data
-        $surat['dosen_data'] = $dosen_data;
-
-        // Jika tidak ada data dosen dari list_dosen, gunakan data dari field nama_dosen di surat
-        if (empty($dosen_data) && !empty($surat['nama_dosen'])) {
-            $surat['dosen_data'] = [
-                [
-                    'nama' => $surat['nama_dosen'],
-                    'nip' => $surat['nip'],
-                    'jabatan' => '-',
-                    'divisi' => '-'
-                ]
-            ];
-        }
-
-        echo json_encode($surat);
+        echo json_encode(['success' => true, 'data' => $surat]);
     }
 
     // Filter laporan
@@ -770,6 +732,11 @@ class Dekan extends CI_Controller
         $data['surat_list'] = $this->db->select('*')
                                ->get("surat")
                                ->result_array();
+
+        // PERBAIKAN: Proses data dosen untuk setiap surat
+        foreach ($data['surat_list'] as &$surat) {
+            $surat['dosen_data'] = $this->get_dosen_data($surat);
+        }
                                
         $data['current_filter'] = $status;
 
@@ -812,11 +779,94 @@ class Dekan extends CI_Controller
         // Contoh sederhana log
         log_message('info', "Notifikasi: Pengajuan {$surat->nama_kegiatan} telah disetujui Dekan");
     }
-}
 
-// PERBAIKAN: Tambahkan helper function untuk cek JSON
-if (!function_exists('is_json')) {
-    function is_json($string) {
+    // PERBAIKAN UTAMA: Method baru untuk mendapatkan data dosen
+    private function get_dosen_data($surat)
+    {
+        $dosen_data = [];
+        $nip = $surat['nip'] ?? '';
+        $nama_dosen = $surat['nama_dosen'] ?? '';
+
+        // Debug: Tampilkan data mentah
+        log_message('debug', 'Dekan - Raw NIP: ' . $nip);
+        log_message('debug', 'Dekan - Raw Nama Dosen: ' . $nama_dosen);
+
+        // Cek apakah NIP adalah JSON array
+        if (!empty($nip) && $this->_is_json($nip)) {
+            try {
+                $nip_list = json_decode($nip, true);
+                log_message('debug', 'Dekan - Decoded NIP List: ' . print_r($nip_list, true));
+                
+                if (is_array($nip_list) && !empty($nip_list)) {
+                    // Ambil data dosen dari tabel list_dosen berdasarkan NIP array
+                    $this->db->where_in('nip', $nip_list);
+                    $dosen_result = $this->db->get('list_dosen')->result_array();
+                    
+                    if (!empty($dosen_result)) {
+                        $dosen_data = $dosen_result;
+                        log_message('debug', 'Dekan - Dosen dari list_dosen: ' . print_r($dosen_data, true));
+                    } else {
+                        // Jika tidak ditemukan di list_dosen, buat data dari nama_dosen
+                        if (!empty($nama_dosen)) {
+                            foreach ($nip_list as $nip_item) {
+                                $dosen_data[] = [
+                                    'nama' => $nama_dosen,
+                                    'nip' => $nip_item,
+                                    'jabatan' => '-',
+                                    'divisi' => '-'
+                                ];
+                            }
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                log_message('error', 'Dekan - Error decoding NIP JSON: ' . $e->getMessage());
+            }
+        } 
+        // Cek jika NIP adalah string biasa (bukan JSON)
+        elseif (!empty($nip)) {
+            // Coba ambil dari list_dosen berdasarkan NIP
+            $dosen_result = $this->db->get_where('list_dosen', ['nip' => $nip])->result_array();
+            
+            if (!empty($dosen_result)) {
+                $dosen_data = $dosen_result;
+            } else {
+                // Jika tidak ditemukan, buat data dari field nama_dosen
+                if (!empty($nama_dosen)) {
+                    $dosen_data[] = [
+                        'nama' => $nama_dosen,
+                        'nip' => $nip,
+                        'jabatan' => '-',
+                        'divisi' => '-'
+                    ];
+                }
+            }
+        }
+        // Fallback: jika tidak ada NIP tapi ada nama_dosen
+        elseif (!empty($nama_dosen)) {
+            $dosen_data[] = [
+                'nama' => $nama_dosen,
+                'nip' => $nip ?: '-',
+                'jabatan' => '-',
+                'divisi' => '-'
+            ];
+        }
+        // Ultimate fallback
+        else {
+            $dosen_data[] = [
+                'nama' => 'Data dosen tidak tersedia',
+                'nip' => '-',
+                'jabatan' => '-',
+                'divisi' => '-'
+            ];
+        }
+
+        log_message('debug', 'Dekan - Final Dosen Data: ' . print_r($dosen_data, true));
+        return $dosen_data;
+    }
+
+    // PERBAIKAN: Method helper untuk cek JSON (dipindahkan ke dalam class)
+    private function _is_json($string) {
         if (!is_string($string)) {
             return false;
         }
