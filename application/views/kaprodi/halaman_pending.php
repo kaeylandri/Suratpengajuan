@@ -203,32 +203,6 @@
     .rejection-notes .detail-label{color:#dc3545;font-weight:700}
     .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:14px;line-height:1.5;min-height:auto;padding:12px}
     
-    /* Nomor Surat Styles */
-    .nomor-surat-container {
-        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-        border: 2px solid #8E44AD;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    
-    .nomor-surat-label {
-        font-size: 14px;
-        font-weight: 600;
-        color: #8E44AD;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .nomor-surat-value {
-        font-size: 18px;
-        font-weight: 700;
-        color: #6c3483;
-        font-family: 'Courier New', monospace;
-    }
-    
     /* Bulk Action Styles */
     .bulk-actions {
         display: flex;
@@ -826,21 +800,21 @@
         </div>
         <div class="approve-modal-body">
             <div class="approve-info-box">
-                <strong><i class="fa-solid fa-info-circle"></i> Informasi: Surat ini masih dalam bentuk pengajuan</strong>
+                <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong>
                 <span id="approveNamaKegiatan"></span>
             </div>
             
-            <p style="margin-bottom:20px;color:#7f8c8d">Apakah Anda yakin ingin menyetujui pengajuan ini?</p>
-            
             <form id="approveForm" method="POST" action="">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <!-- BAGIAN NOMOR SURAT TELAH DIHAPUS -->
                 
                 <div class="approve-modal-actions">
                     <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
                     <button type="submit" class="approve-btn approve-btn-submit">
-                        <i class="fa-solid fa-check"></i> Ya, Setujui
+                        <i class="fa-solid fa-check"></i> Setujui
                     </button>
                 </div>
             </form>
@@ -1710,14 +1684,8 @@ function retryLoadDetail() {
 function showApproveModal(id, namaKegiatan) {
     currentApproveId = id;
     document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
-    document.getElementById('nomorSurat').value = '';
     document.getElementById('approveForm').action = '<?= base_url("kaprodi/approve/") ?>' + id;
     document.getElementById('approveModal').classList.add('show');
-    
-    // Auto focus ke input nomor surat
-    setTimeout(() => {
-        document.getElementById('nomorSurat').focus();
-    }, 300);
 }
 
 function showRejectModal(id) {

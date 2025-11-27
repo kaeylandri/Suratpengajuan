@@ -13,7 +13,7 @@ $route['translate_uri_dashes'] = FALSE;
 
 /*
 | -------------------------------------------------------------------------
-| SURAT ROUTES - FIXED
+| SURAT ROUTES
 | -------------------------------------------------------------------------
 */
 
@@ -31,7 +31,7 @@ $route['surat/multi_delete'] = 'surat/multi_delete';
 $route['surat/multi_edit'] = 'surat/multi_edit';
 $route['surat/save_multi_edit'] = 'surat/save_multi_edit';
 
-// CRUD ROUTES - FIXED
+// CRUD ROUTES
 $route['surat'] = 'surat/index';
 $route['surat/index'] = 'surat/index';
 $route['surat/create'] = 'surat/create';
@@ -40,24 +40,24 @@ $route['surat/edit/(:num)'] = 'surat/edit/$1';
 $route['surat/delete/(:num)'] = 'surat/delete/$1';
 $route['surat/cetak/(:num)'] = 'surat/cetak/$1';
 
-// LIST SURAT TUGAS ROUTES - DIPERBAIKI
+// LIST SURAT TUGAS ROUTES
 $route['surat/list-surat-tugas'] = 'surat/list_surat_tugas';
 $route['list-surat-tugas'] = 'surat/list_surat_tugas';
 $route['surat/list_surat_tugas'] = 'surat/list_surat_tugas';
 
-// STATS GRID ROUTES - UPDATED TO MATCH CONTROLLER
+// STATS GRID ROUTES
 $route['surat/total'] = 'surat/halaman_total';
 $route['surat/disetujui'] = 'surat/halaman_disetujui';
 $route['surat/ditolak'] = 'surat/halaman_ditolak';
 $route['surat/pending'] = 'surat/halaman_pending';
 
-// COMPATIBILITY ROUTES - KEEP EXISTING FOR BACKWARD COMPATIBILITY
+// COMPATIBILITY ROUTES
 $route['surat/semua'] = 'surat/halaman_total';
 $route['surat/menunggu'] = 'surat/halaman_pending';
 
 /*
 | -------------------------------------------------------------------------
-| SEKRETARIAT SURAT ROUTES - NEWLY ADDED
+| SEKRETARIAT SURAT ROUTES
 | -------------------------------------------------------------------------
 */
 $route['surat/sekretariat/semua'] = 'surat/semua_sekretariat';
@@ -91,7 +91,7 @@ $route['surat/debug_eviden/(:num)'] = 'surat/debug_eviden/$1';
 | -------------------------------------------------------------------------
 */
 
-// Dekan routes - UPDATED WITH NEW PAGES
+// Dekan routes
 $route['dekan'] = 'dekan/index';
 $route['dekan/dashboard'] = 'dekan/index';
 $route['dekan/index'] = 'dekan/index';
@@ -108,7 +108,7 @@ $route['dekan/list_surat_tugas'] = 'dekan/list_surat_tugas';
 $route['dekan/filter/(:any)'] = 'dekan/filter/$1';
 $route['dekan/test'] = 'dekan/test';
 
-// Kaprodi routes - UPDATED WITH MULTI APPROVE/REJECT ROUTES
+// ✅ FIXED: Kaprodi routes dengan method yang benar
 $route['kaprodi'] = 'kaprodi/index';
 $route['kaprodi/dashboard'] = 'kaprodi/index';
 $route['kaprodi/index'] = 'kaprodi/index';
@@ -117,21 +117,22 @@ $route['kaprodi/disetujui'] = 'kaprodi/disetujui';
 $route['kaprodi/ditolak'] = 'kaprodi/ditolak';
 $route['kaprodi/pending'] = 'kaprodi/pending';
 $route['kaprodi/rejected'] = 'kaprodi/rejected';
+
+// Single approve/reject
 $route['kaprodi/approve/(:num)'] = 'kaprodi/approve/$1';
 $route['kaprodi/reject/(:num)'] = 'kaprodi/reject/$1';
+
+// Detail
 $route['kaprodi/getDetailPengajuan/(:num)'] = 'kaprodi/getDetailPengajuan/$1';
 
-// ✅ NEW MULTI APPROVE/REJECT ROUTES FOR KAPRODI
-$route['kaprodi/multi_approve'] = 'kaprodi/multi_approve';
-$route['kaprodi/multi_reject'] = 'kaprodi/multi_reject';
+// ✅ FIXED: Multi approve/reject routes - sesuai dengan method di controller
 $route['kaprodi/process_multi_approve'] = 'kaprodi/process_multi_approve';
 $route['kaprodi/process_multi_reject'] = 'kaprodi/process_multi_reject';
 
-// ✅ UPDATED LIST ROUTES FOR KAPRODI
-$route['kaprodi/disetujui_list'] = 'kaprodi/disetujui_list';
-$route['kaprodi/ditolak_list'] = 'kaprodi/ditolak_list';
+// Dashboard counts
+$route['kaprodi/get_dashboard_counts'] = 'kaprodi/get_dashboard_counts';
 
-// Sekretariat routes - UPDATED WITH BULK ACTIONS
+// Sekretariat routes
 $route['sekretariat'] = 'sekretariat/index';
 $route['sekretariat/dashboard'] = 'sekretariat/index';
 $route['sekretariat/index'] = 'sekretariat/index';
@@ -146,7 +147,6 @@ $route['sekretariat/reject/(:num)'] = 'sekretariat/reject/$1';
 $route['sekretariat/getDetailPengajuan/(:num)'] = 'sekretariat/getDetailPengajuan/$1';
 $route['sekretariat/get_dashboard_counts'] = 'sekretariat/get_dashboard_counts';
 
-
 /*
 | -------------------------------------------------------------------------
 | API ROUTES
@@ -157,10 +157,10 @@ $route['api/surat/status/(:num)'] = 'surat/get_status/$1';
 $route['api/surat/list'] = 'surat/index';
 $route['api/surat/detail/(:num)'] = 'surat/get_status/$1';
 
-// ✅ API ROUTES FOR KAPRODI
+// API Routes for Kaprodi
 $route['api/kaprodi/detail/(:num)'] = 'kaprodi/getDetailPengajuan/$1';
 
-// ✅ API ROUTES FOR SEKRETARIAT
+// API Routes for Sekretariat
 $route['api/sekretariat/detail/(:num)'] = 'sekretariat/getDetailPengajuan/$1';
 $route['api/sekretariat/dashboard_counts'] = 'sekretariat/get_dashboard_counts';
 
@@ -176,7 +176,7 @@ $route['auth/process_login'] = 'auth/process_login';
 
 /*
 | -------------------------------------------------------------------------
-| CATCH-ALL ROUTE - HARUS DI BAWAH
+| CATCH-ALL ROUTE
 | -------------------------------------------------------------------------
 */
 

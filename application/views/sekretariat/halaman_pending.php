@@ -1179,7 +1179,7 @@ function showBulkApproveModal() {
     
     document.getElementById('bulkApproveModal').classList.add('show');
 }
-
+// ✅ FUNCTION confirmBulkApprove YANG DIPERBAIKI
 function confirmBulkApprove() {
     const form = document.getElementById('bulkApproveForm');
     const inputs = form.querySelectorAll('input[name^="nomor_surat"]');
@@ -1203,100 +1203,19 @@ function confirmBulkApprove() {
         return;
     }
     
-    // Submit form
+    // ✅ PERBAIKAN: Submit form yang sudah ada (bukan buat baru)
+    // Form sudah memiliki semua input yang diperlukan
     form.submit();
-}
-
-function showBulkRejectModal() {
-    if (selectedIds.length === 0) return;
-    
-    document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
-    const container = document.getElementById('bulkRejectItems');
-    container.innerHTML = '';
-    
-    selectedItems.forEach((item, index) => {
-        const itemHtml = `
-            <div class="bulk-item" id="reject-item-${item.id}">
-                <div class="bulk-item-header">
-                    <div class="bulk-item-title">${item.nama}</div>
-                    <div class="bulk-item-actions">
-                        <button type="button" class="remove-item" onclick="removeBulkItem('${item.id}', 'reject')">
-                            <i class="fa-solid fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="rejection_notes_${item.id}">
-                        <i class="fa-solid fa-comment-dots"></i> Alasan Penolakan <span style="color:#e74c3c">*</span>
-                    </label>
-                    <textarea 
-                        id="rejection_notes_${item.id}" 
-                        name="rejection_notes[${item.id}]" 
-                        rows="3" 
-                        class="form-control" 
-                        placeholder="Masukkan alasan penolakan untuk ${item.nama}..."
-                        style="resize:vertical"
-                        required
-                    ></textarea>
-                    <div class="form-hint">
-                        <i class="fa-solid fa-exclamation-circle"></i> Alasan penolakan akan dikirimkan kepada pengaju
-                    </div>
-                </div>
-            </div>
-        `;
-        container.innerHTML += itemHtml;
-    });
-    
-    document.getElementById('bulkRejectModal').classList.add('show');
-}
-
-function removeBulkItem(itemId, type) {
-    // Remove from UI
-    const itemElement = document.getElementById(`${type}-item-${itemId}`);
-    if (itemElement) {
-        itemElement.remove();
-    }
-    
-    // Remove from selected arrays
-    selectedIds = selectedIds.filter(id => id !== itemId);
-    selectedItems = selectedItems.filter(item => item.id !== itemId);
-    
-    // Update count
-    document.getElementById('selectedCount').textContent = selectedIds.length;
-    
-    // Update modal count
-    if (type === 'approve') {
-        document.getElementById('bulkApproveCount').textContent = selectedIds.length + ' pengajuan';
-        document.getElementById('bulkApproveIds').value = selectedIds.join(',');
-    } else {
-        document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
-    }
-    
-    // Update checkbox state
-    const checkbox = document.querySelector(`.row-select[value="${itemId}"]`);
-    if (checkbox) {
-        checkbox.checked = false;
-    }
-    
-    // Disable buttons if no items left
-    if (selectedIds.length === 0) {
-        document.getElementById('bulkApproveBtn').disabled = true;
-        document.getElementById('bulkRejectBtn').disabled = true;
-        if (type === 'approve') {
-            closeModal('bulkApproveModal');
-        } else {
-            closeModal('bulkRejectModal');
-        }
-    }
 }
 
 // ✅ FUNCTION confirmBulkReject YANG DIPERBAIKI
 function confirmBulkReject() {
-    // Validasi semua textarea rejection notes
+    // Ambil semua textarea rejection notes
     const textareas = document.querySelectorAll('textarea[name^="rejection_notes"]');
     let allValid = true;
     const errorMessages = [];
     
+    // Validasi semua textarea
     textareas.forEach(textarea => {
         if (!textarea.value.trim()) {
             allValid = false;
@@ -1312,12 +1231,12 @@ function confirmBulkReject() {
         return;
     }
     
-    // Create form dan submit
+    // ✅ PERBAIKAN: Buat form dan submit dengan data yang benar
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '<?= base_url("sekretariat/bulk_reject") ?>';
     
-    // CSRF Token
+    // Add CSRF Token
     const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
     const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
     const inpCsrf = document.createElement('input');
@@ -1326,14 +1245,14 @@ function confirmBulkReject() {
     inpCsrf.value = csrfHash;
     form.appendChild(inpCsrf);
     
-    // Add IDs
+    // Add IDs (comma-separated string)
     const inpIds = document.createElement('input');
     inpIds.type = 'hidden'; 
     inpIds.name = 'ids'; 
     inpIds.value = selectedIds.join(',');
     form.appendChild(inpIds);
     
-    // Add rejection notes
+    // ✅ PERBAIKAN: Add rejection notes untuk setiap item
     textareas.forEach(textarea => {
         const itemId = textarea.name.match(/\[(.*?)\]/)[1];
         const inpNote = document.createElement('input');
@@ -1343,8 +1262,169 @@ function confirmBulkReject() {
         form.appendChild(inpNote);
     });
     
+    // Submit form
     document.body.appendChild(form);
     form.submit();
+}
+
+// ✅ FUNCTION showBulkApproveModal YANG DIPERBAIKI
+function showBulkApproveModal() {
+    if (selectedIds.length === 0) return;
+    
+    document.getElementById('bulkApproveCount').textContent = selectedIds.length + ' pengajuan';
+    document.getElementById('bulkApproveIds').value = selectedIds.join(',');
+    
+    const container = document.getElementById('bulkApproveItems');
+    container.innerHTML = '';
+    
+    selectedItems.forEach((item, index) => {
+        const itemHtml = `
+            <div class="bulk-item" id="approve-item-${item.id}">
+                <div class="bulk-item-header">
+                    <div class="bulk-item-title">${escapeHtml(item.nama)}</div>
+                    <div class="bulk-item-actions">
+                        <button type="button" class="remove-item" onclick="removeBulkItem('${item.id}', 'approve')">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="nomor_surat_${item.id}">
+                        <i class="fa-solid fa-file-alt"></i> Nomor Surat <span style="color:#e74c3c">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nomor_surat_${item.id}" 
+                        name="nomor_surat[${item.id}]" 
+                        class="form-control" 
+                        placeholder="Contoh: 001/SKT/FT/2025" 
+                        required
+                        autocomplete="off"
+                    >
+                    <div class="form-hint">
+                        <i class="fa-solid fa-exclamation-circle"></i> Format: 001/SKT/FT/Tahun
+                    </div>
+                </div>
+            </div>
+        `;
+        container.innerHTML += itemHtml;
+    });
+    
+    document.getElementById('bulkApproveModal').classList.add('show');
+    
+    // ✅ Auto focus ke input pertama
+    setTimeout(() => {
+        const firstInput = document.querySelector('#bulkApproveItems input[type="text"]');
+        if (firstInput) firstInput.focus();
+    }, 300);
+}
+
+// ✅ FUNCTION showBulkRejectModal YANG DIPERBAIKI
+function showBulkRejectModal() {
+    if (selectedIds.length === 0) return;
+    
+    document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
+    const container = document.getElementById('bulkRejectItems');
+    container.innerHTML = '';
+    
+    selectedItems.forEach((item, index) => {
+        const itemHtml = `
+            <div class="bulk-item" id="reject-item-${item.id}">
+                <div class="bulk-item-header">
+                    <div class="bulk-item-title">${escapeHtml(item.nama)}</div>
+                    <div class="bulk-item-actions">
+                        <button type="button" class="remove-item" onclick="removeBulkItem('${item.id}', 'reject')">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="rejection_notes_${item.id}">
+                        <i class="fa-solid fa-comment-dots"></i> Alasan Penolakan <span style="color:#e74c3c">*</span>
+                    </label>
+                    <textarea 
+                        id="rejection_notes_${item.id}" 
+                        name="rejection_notes[${item.id}]" 
+                        rows="3" 
+                        class="form-control" 
+                        placeholder="Masukkan alasan penolakan untuk ${escapeHtml(item.nama)}..."
+                        style="resize:vertical"
+                        required
+                    ></textarea>
+                    <div class="form-hint">
+                        <i class="fa-solid fa-exclamation-circle"></i> Alasan penolakan akan dikirimkan kepada pengaju
+                    </div>
+                </div>
+            </div>
+        `;
+        container.innerHTML += itemHtml;
+    });
+    
+    document.getElementById('bulkRejectModal').classList.add('show');
+    
+    // ✅ Auto focus ke textarea pertama
+    setTimeout(() => {
+        const firstTextarea = document.querySelector('#bulkRejectItems textarea');
+        if (firstTextarea) firstTextarea.focus();
+    }, 300);
+}
+
+// ✅ FUNCTION removeBulkItem YANG DIPERBAIKI
+function removeBulkItem(itemId, type) {
+    // Remove from UI
+    const itemElement = document.getElementById(`${type}-item-${itemId}`);
+    if (itemElement) {
+        itemElement.remove();
+    }
+    
+    // Remove from selected arrays
+    selectedIds = selectedIds.filter(id => id !== itemId);
+    selectedItems = selectedItems.filter(item => item.id !== itemId);
+    
+    // Update count
+    document.getElementById('selectedCount').textContent = selectedIds.length;
+    
+    // Update modal count and hidden input
+    if (type === 'approve') {
+        document.getElementById('bulkApproveCount').textContent = selectedIds.length + ' pengajuan';
+        document.getElementById('bulkApproveIds').value = selectedIds.join(',');
+    } else {
+        document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
+    }
+    
+    // Update checkbox state
+    const checkbox = document.querySelector(`.row-select[value="${itemId}"]`);
+    if (checkbox) {
+        checkbox.checked = false;
+    }
+    
+    // Update selectAll checkbox states
+    const selectAll = document.getElementById('selectAll');
+    const tableSelectAll = document.getElementById('tableSelectAll');
+    const allCheckboxes = document.querySelectorAll('.row-select');
+    const checkedCheckboxes = document.querySelectorAll('.row-select:checked');
+    
+    if (checkedCheckboxes.length === 0) {
+        selectAll.checked = false;
+        tableSelectAll.checked = false;
+    } else if (checkedCheckboxes.length === allCheckboxes.length) {
+        selectAll.checked = true;
+        tableSelectAll.checked = true;
+    } else {
+        selectAll.checked = false;
+        tableSelectAll.checked = false;
+    }
+    
+    // Disable buttons if no items left
+    if (selectedIds.length === 0) {
+        document.getElementById('bulkApproveBtn').disabled = true;
+        document.getElementById('bulkRejectBtn').disabled = true;
+        if (type === 'approve') {
+            closeModal('bulkApproveModal');
+        } else {
+            closeModal('bulkRejectModal');
+        }
+    }
 }
 
 // Status Modal Functions
