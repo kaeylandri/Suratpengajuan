@@ -288,7 +288,7 @@ function tgl_indo($tanggal) {
         <p class="section-title">Menugaskan kepada Dosen dan TPA yang tercantum dalam lampiran surat tugas ini, sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b> di kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b></p>
 
         <p>Surat tugas ini berlaku mulai tanggal sesuai tanggal kegiatan.</p>
-        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
+        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p><br>
 
         <p class="date">Bandung, 17 Oktober 2025</p>
 
@@ -304,7 +304,7 @@ function tgl_indo($tanggal) {
                 <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
             </div>
             <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
-        </div>
+        </div><br><br>
 
         <p>
             <b>Tembusan</b><br>
@@ -312,7 +312,7 @@ function tgl_indo($tanggal) {
             2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
             3. Kaprodi S1 Desain Produk
         </p>
-        
+        <br><br>
         <p><b>Lampiran Surat Tugas Nomor <?= $surat->nomor_surat ?? '-' ?></b></p>
     </div>
 

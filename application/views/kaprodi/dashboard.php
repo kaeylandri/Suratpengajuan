@@ -366,32 +366,6 @@
         padding: 30px;
     }
     
-    /* Nomor Surat Styles */
-    .nomor-surat-container {
-        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
-        border: 2px solid #8E44AD;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    
-    .nomor-surat-label {
-        font-size: 14px;
-        font-weight: 600;
-        color: #8E44AD;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .nomor-surat-value {
-        font-size: 18px;
-        font-weight: 700;
-        color: #6c3483;
-        font-family: 'Courier New', monospace;
-    }
-    
     /* Responsive */
     @media (max-width:768px){
         .detail-grid{grid-template-columns:1fr}
@@ -628,37 +602,21 @@
         </div>
         <div class="approve-modal-body">
             <div class="approve-info-box">
-                <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong>
+                <strong><i class="fa-solid fa-info-circle"></i> Informasi: Surat ini masih dalam bentuk pengajuan</strong>
                 <span id="approveNamaKegiatan"></span>
             </div>
+            
+            <p style="margin-bottom:20px;color:#7f8c8d">Apakah Anda yakin ingin menyetujui pengajuan ini?</p>
             
             <form id="approveForm" method="POST" action="">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
                 
-                <div class="form-group">
-                    <label for="nomorSurat">
-                        <i class="fa-solid fa-file-alt"></i> Nomor Surat <span style="color:#e74c3c">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        id="nomorSurat" 
-                        name="nomor_surat" 
-                        class="form-control" 
-                        placeholder="Contoh: 001/SKT/FT/2025" 
-                        required
-                        autocomplete="off"
-                    >
-                    <div class="form-hint">
-                        <i class="fa-solid fa-exclamation-circle"></i> Format: 001/SKT/FT/Tahun
-                    </div>
-                </div>
-
                 <div class="approve-modal-actions">
                     <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
                     <button type="submit" class="approve-btn approve-btn-submit">
-                        <i class="fa-solid fa-check"></i> Setujui
+                        <i class="fa-solid fa-check"></i> Ya, Setujui
                     </button>
                 </div>
             </form>
@@ -1157,15 +1115,6 @@ async function showDetail(id) {
         }
 
         const content = `
-            <!-- NOMOR SURAT DARI SEKRETARIAT -->
-            ${getVal('nomor_surat') && getVal('nomor_surat') !== '-' ? `
-            <div class="nomor-surat-container">
-                <div class="nomor-surat-label">
-                    <i class="fa-solid fa-file-signature"></i> Nomor Surat
-                </div>
-                <div class="nomor-surat-value">${escapeHtml(getVal('nomor_surat'))}</div>
-            </div>
-            ` : ''}
 
             <div class="detail-section">
                 <div class="detail-section-title">
@@ -1302,7 +1251,6 @@ async function showDetail(id) {
 function showApproveModal(id, namaKegiatan) {
     currentApproveId = id;
     document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
-    document.getElementById('nomorSurat').value = '';
     document.getElementById('approveForm').action = '<?= base_url("kaprodi/approve/") ?>' + id;
     document.getElementById('approveModal').classList.add('show');
     
@@ -1387,24 +1335,22 @@ const fusionStyle3DPlugin = {
                     if (height <= 1) return;
                     const offsetX = 15, offsetY = -15;
                     ctx.save();
-                    
                     const rightGradient = ctx.createLinearGradient(x + width/2, y, x + width/2 + offsetX, y + offsetY);
-                    let darkColor = datasetIndex === 0 ? 'rgba(0, 177, 253, 0.6)' : 
-                                   (datasetIndex === 1 ? 'rgba(46, 204, 113, 0.7)' : 'rgba(231, 76, 60, 0.7)');
+                    let darkColor = datasetIndex === 0 ? 'rgba(0, 177, 253, 0.6)' : (datasetIndex === 1 ? 'rgba(46, 204, 113, 0.85)' : 'rgba(192, 57, 43, 0.6)');
                     rightGradient.addColorStop(0, darkColor);
                     rightGradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
                     ctx.fillStyle = rightGradient;
                     ctx.beginPath();
                     ctx.moveTo(x + width/2, y);
+                    ctx.lineTo(x + width/2 + offsetX, y + offsetY);
+                    ctx.lineTo(x + width/2 + offsetX, base + offsetY);
                     ctx.lineTo(x + width/2, base);
                     ctx.closePath();
                     ctx.fill();
-                    
                     const topGradient = ctx.createLinearGradient(x - width/2, y, x + width/2 + offsetX, y + offsetY);
-                    let lightColor = datasetIndex === 0 ? 'rgba(162, 217, 206, 0.9)' : 
-                                    (datasetIndex === 1 ? 'rgba(200, 247, 197, 0.95)' : 'rgba(245, 183, 177, 0.95)');
+                    let lightColor = datasetIndex === 0 ? 'rgba(162, 217, 206, 0.9)' : (datasetIndex === 1 ? 'rgba(200, 247, 197, 0.9)' : 'rgba(245, 183, 177, 0.9)');
                     topGradient.addColorStop(0, lightColor);
-                    topGradient.addColorStop(1, 'rgba(255, 255, 255, 0.3)');
+                    topGradient.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
                     ctx.fillStyle = topGradient;
                     ctx.beginPath();
                     ctx.moveTo(x - width/2, y);
@@ -1425,62 +1371,16 @@ new Chart(ctx, {
     data: {
         labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
         datasets: [
-            {
-                label: "Total", 
-                data: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>, 
-                backgroundColor: 'rgba(0, 177, 253, 0.6)', 
-                borderColor: 'rgba(4, 146, 207, 0.6)', 
-                borderWidth: 2, 
-                borderRadius: 6
-            },
-            {
-                label: "Disetujui", 
-                data: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>, 
-                backgroundColor: 'rgba(46, 204, 113, 0.85)', 
-                borderColor: 'rgba(46, 204, 113, 1)', 
-                borderWidth: 2, 
-                borderRadius: 6
-            },
-            {
-                label: "Ditolak", 
-                data: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>, 
-                backgroundColor: 'rgba(231, 76, 60, 0.85)', 
-                borderColor: 'rgba(231, 76, 60, 1)', 
-                borderWidth: 2, 
-                borderRadius: 6
-            }
+            {label: "Total", data: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(0, 177, 253, 0.6)', borderColor: 'rgba(4, 146, 207, 0.6)', borderWidth: 2, borderRadius: 6},
+            {label: "Disetujui", data: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(46, 204, 113, 0.85)', borderColor: 'rgba(46, 204, 113, 1)', borderWidth: 2, borderRadius: 6},
+            {label: "Ditolak", data: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(231, 76, 60, 0.85)', borderColor: 'rgba(231, 76, 60, 1)', borderWidth: 2, borderRadius: 6}
         ]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'top', 
-                labels: {
-                    padding: 20, 
-                    font: {size: 14, weight: '700'}, 
-                    color: '#2c3e50'
-                }
-            }, 
-            tooltip: {
-                backgroundColor: 'rgba(44, 62, 80, 0.95)', 
-                padding: 16,
-                titleFont: {size: 14, weight: '700'},
-                bodyFont: {size: 13}
-            }
-        },
-        scales: {
-            x: {
-                grid: {display: false}, 
-                ticks: {color: '#2c3e50', font: {size: 12, weight: '600'}}
-            }, 
-            y: {
-                beginAtZero: true, 
-                grid: {color: 'rgba(149, 165, 166, 0.15)'}, 
-                ticks: {color: '#7f8c8d', font: {size: 12}}
-            }
-        },
+        plugins: {legend: {position: 'top', labels: {padding: 20, font: {size: 14, weight: '700'}, color: '#000000ff'}}, tooltip: {backgroundColor: 'rgba(44, 62, 80, 0.95)', padding: 16}},
+        scales: {x: {grid: {display: false}, ticks: {color: '#000000ff'}}, y: {beginAtZero: true, grid: {color: 'rgba(12, 7, 7, 0.08)'}, ticks: {color: '#95a5a6'}}},
         animation: {duration: 1800, easing: 'easeInOutQuart'}
     },
     plugins: [fusionStyle3DPlugin]

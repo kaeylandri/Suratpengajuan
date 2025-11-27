@@ -430,17 +430,6 @@
         <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
     </a>
 
-    <!-- Header Status -->
-    <div class="status-header">
-        <div class="status-icon rejected">
-            <i class="fa-solid fa-times"></i>
-        </div>
-        <div class="status-info">
-            <h1>DITOLAK</h1>
-            <p><?= isset($total_surat) ? $total_surat : '0' ?> Pengajuan</p>
-        </div>
-    </div>
-
     <?php if($this->session->flashdata('success')): ?>
     <div class="card" style="border-left:4px solid #27ae60;margin-bottom:18px">
         <div style="color:#155724;font-weight:700"><?php echo $this->session->flashdata('success'); ?></div>

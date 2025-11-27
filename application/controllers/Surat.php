@@ -873,7 +873,7 @@ public function get_eviden_url($eviden_data)
         $this->Surat_model->update_surat($id, $update);
 
         $this->session->set_flashdata('success', 'Data berhasil diperbarui!');
-        redirect('surat');
+        redirect('list-surat-tugas');
     }
 
     /* ===========================================
@@ -897,7 +897,7 @@ public function get_eviden_url($eviden_data)
         
         $this->Surat_model->delete_surat($id);
         $this->session->set_flashdata('success', 'Data berhasil dihapus!');
-        redirect('surat');
+        redirect('list-surat-tugas');
     }
 
     /* ===========================================
@@ -999,7 +999,7 @@ public function get_eviden_url($eviden_data)
 
     if (!$ids) {
         $this->session->set_flashdata('error', 'Tidak ada data yang dipilih untuk di-edit.');
-        redirect('surat');
+        redirect('list-surat-tugas');
         return;
     }
 
@@ -1011,7 +1011,7 @@ public function get_eviden_url($eviden_data)
 
     if (empty($idArray)) {
         $this->session->set_flashdata('error', 'ID yang diberikan tidak valid.');
-        redirect('surat');
+        redirect('list-surat-tugas');
         return;
     }
 
@@ -1019,7 +1019,7 @@ public function get_eviden_url($eviden_data)
 
     if (empty($data['surat_list'])) {
         $this->session->set_flashdata('error', 'Data tidak ditemukan untuk ID: ' . implode(', ', $idArray));
-        redirect('surat');
+        redirect('list-surat-tugas');
         return;
     }
 
@@ -1043,7 +1043,7 @@ public function get_eviden_url($eviden_data)
     {
         if (!$this->input->post()) {
             $this->session->set_flashdata('error', 'Tidak ada data yang dikirim.');
-            redirect('surat');
+            redirect('list-surat-tugas');
             return;
         }
 
@@ -1051,7 +1051,7 @@ public function get_eviden_url($eviden_data)
         
         if (!isset($post['items']) || !is_array($post['items'])) {
             $this->session->set_flashdata('error', 'Format data tidak valid.');
-            redirect('surat');
+            redirect('list-surat-tugas');
             return;
         }
 
@@ -1087,7 +1087,6 @@ public function get_eviden_url($eviden_data)
                 'penyelenggara' => $item['penyelenggara'] ?? $existing->penyelenggara,
                 'jenis_pengajuan' => $item['jenis_pengajuan'] ?? $existing->jenis_pengajuan,
                 'lingkup_penugasan' => $item['lingkup_penugasan'] ?? $existing->lingkup_penugasan,
-                'format' => $item['format'] ?? $existing->format,
                 'jenis_penugasan_perorangan' => $item['jenis_penugasan_perorangan'] ?? $existing->jenis_penugasan_perorangan,
                 'penugasan_lainnya_perorangan' => $item['penugasan_lainnya_perorangan'] ?? $existing->penugasan_lainnya_perorangan,
                 'jenis_penugasan_kelompok' => $item['jenis_penugasan_kelompok'] ?? $existing->jenis_penugasan_kelompok,
@@ -1116,7 +1115,7 @@ public function get_eviden_url($eviden_data)
             $this->session->set_flashdata('error', 'Tidak ada data yang berhasil diupdate.');
         }
 
-        redirect('surat');
+        redirect('list-surat-tugas');
     }
     
 

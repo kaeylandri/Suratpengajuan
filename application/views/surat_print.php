@@ -345,7 +345,7 @@ function tgl_indo($tanggal) {
             sampai dengan <b><?= tgl_indo($surat->akhir_kegiatan ?? '-') ?></b>
         <?php endif; ?>
     <?php else: ?>
-        pada <b>Periode <?= $surat->periode_value ?? '-' ?></b>
+        selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
     <?php endif; ?>
     di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
 </p>

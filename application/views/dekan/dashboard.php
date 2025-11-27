@@ -1293,7 +1293,7 @@ const fusionStyle3DPlugin = {
                     const offsetX = 15, offsetY = -15;
                     ctx.save();
                     const rightGradient = ctx.createLinearGradient(x + width/2, y, x + width/2 + offsetX, y + offsetY);
-                    let darkColor = datasetIndex === 0 ? 'rgba(0, 177, 253, 0.6)' : (datasetIndex === 1 ? 'rgba(0, 177, 253, 0.6)' : 'rgba(192, 57, 43, 0.6)');
+                    let darkColor = datasetIndex === 0 ? 'rgba(0, 177, 253, 0.6)' : (datasetIndex === 1 ? 'rgba(46, 204, 113, 0.85)' : 'rgba(192, 57, 43, 0.6)');
                     rightGradient.addColorStop(0, darkColor);
                     rightGradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
                     ctx.fillStyle = rightGradient;

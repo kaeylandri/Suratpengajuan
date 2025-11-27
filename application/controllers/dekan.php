@@ -805,7 +805,7 @@ class Dekan extends CI_Controller
                             } else {
                                 foreach ($nip_list as $nip_item) {
                                     $dosen_data[] = [
-                                        'nama' => 'Data tidak tersedia',
+                                        'nama' => $nama_dosen,
                                         'nip' => $nip_item,
                                         'jabatan' => 'Dosen',
                                         'divisi' => $this->get_divisi_from_nip($nip_item)

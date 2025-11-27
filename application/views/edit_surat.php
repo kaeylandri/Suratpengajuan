@@ -1,5 +1,5 @@
 <?php
-// edit_surat.php - Revisi lengkap dengan preview eviden
+// edit_surat.php - Revisi lengkap dengan preview eviden dan tambahan Lingkup Penugasan/Status Kepegawaian
 // Pastikan controller mengirim $surat (array) dan $eviden (array) ke view.
 ?>
 <!DOCTYPE html>
@@ -260,6 +260,16 @@ foreach($years as $y){
 <select name="jenis_pengajuan" id="jenis_pengajuan" class="form-control">
 <option value="Perorangan" <?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan']=='Perorangan') ? 'selected' : '' ?>>Perorangan</option>
 <option value="Kelompok" <?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan']=='Kelompok') ? 'selected' : '' ?>>Kelompok</option>
+</select>
+</div>
+
+<!-- Lingkup Penugasan -->
+<div class="form-group">
+<label>Lingkup Penugasan</label>
+<select name="lingkup_penugasan" class="form-control">
+<option value="Dosen" <?= (isset($surat['lingkup_penugasan']) && $surat['lingkup_penugasan']=='Dosen') ? 'selected' : '' ?>>Dosen</option>
+<option value="TPA" <?= (isset($surat['lingkup_penugasan']) && $surat['lingkup_penugasan']=='TPA') ? 'selected' : '' ?>>TPA</option>
+<option value="Dosen dan TPA" <?= (isset($surat['lingkup_penugasan']) && $surat['lingkup_penugasan']=='Dosen dan TPA') ? 'selected' : '' ?>>Dosen dan TPA</option>
 </select>
 </div>
 

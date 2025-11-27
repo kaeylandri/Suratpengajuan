@@ -416,16 +416,6 @@
         <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
     </a>
 
-    <!-- Header Status -->
-    <div class="status-header">
-        <div class="status-icon rejected">
-            <i class="fa-solid fa-times"></i>
-        </div>
-        <div class="status-info">
-            <h1>DITOLAK</h1>
-            <p><?= isset($total_surat) ? $total_surat : '2' ?> Pengajuan</p>
-        </div>
-    </div>
 
     <?php if($this->session->flashdata('success')): ?>
     <div class="card" style="border-left:4px solid #27ae60;margin-bottom:18px">
@@ -972,7 +962,7 @@ function showDetail(id) {
             </div>
         </div>
 
-        <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
+        <!-- Tampilan Dosen yang Diperbaiki (SAMA DENGAN DASHBOARD KAPRODI) -->
         <div class="detail-section">
             <div class="detail-section-title">
                 <i class="fa-solid fa-user-tie"></i> Dosen Terkait
@@ -980,7 +970,7 @@ function showDetail(id) {
             </div>
             <div class="dosen-list">
                 ${dosenData.map((dosen, index) => {
-                    const nama = dosen.nama || 'Data tidak tersedia';
+                    const nama = dosen.nama_dosen || 'Data tidak tersedia';
                     const initial = nama && nama !== 'Data tidak tersedia' ? nama.charAt(0).toUpperCase() : '?';
                     const nip = dosen.nip || '-';
                     const jabatan = dosen.jabatan || '-';

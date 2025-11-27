@@ -417,17 +417,6 @@
         <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
     </a>
 
-    <!-- Header Status -->
-    <div class="status-header">
-        <div class="status-icon approved">
-            <i class="fa-solid fa-check"></i>
-        </div>
-        <div class="status-info">
-            <h1>DISETUJUI</h1>
-            <p><?= isset($total_surat) ? $total_surat : '5' ?> Pengajuan</p>
-        </div>
-    </div>
-
     <?php if($this->session->flashdata('success')): ?>
     <div class="card" style="border-left:4px solid #27ae60;margin-bottom:18px">
         <div style="color:#155724;font-weight:700"><?php echo $this->session->flashdata('success'); ?></div>
@@ -975,7 +964,7 @@ function showDetail(id) {
             </div>
             <div class="dosen-list">
                 ${dosenData.map((dosen, index) => {
-                    const nama = dosen.nama || 'Data tidak tersedia';
+                    const nama = dosen.nama_dosen || 'Data tidak tersedia';
                     const initial = nama && nama !== 'Data tidak tersedia' ? nama.charAt(0).toUpperCase() : '?';
                     const nip = dosen.nip || '-';
                     const jabatan = dosen.jabatan || '-';

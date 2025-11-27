@@ -417,24 +417,6 @@
         <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
     </a>
 
-    <!-- Header Status -->
-    <div class="status-header">
-        <div class="status-icon approved">
-            <i class="fa-solid fa-check"></i>
-        </div>
-        <div class="status-info">
-            <h1>DISETUJUI</h1>
-            <p>
-                <?php 
-                $total_count = 0;
-                if(isset($surat_list) && is_array($surat_list) && !empty($surat_list)) {
-                    $total_count = count($surat_list);
-                }
-                echo $total_count . ' Pengajuan';
-                ?>
-            </p>
-        </div>
-    </div>
 
     <?php if($this->session->flashdata('success')): ?>
     <div class="card" style="border-left:4px solid #27ae60;margin-bottom:18px">
@@ -1082,37 +1064,36 @@ async function showDetail(id) {
                     </div>
                 </div>
             </div>
-
-            <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
-            <div class="detail-section">
-                <div class="detail-section-title">
-                    <i class="fa-solid fa-user-tie"></i> Dosen Terkait
-                    <span style="font-size:12px;color:#6c757d;margin-left:auto">(${dosenData.length} dosen)</span>
-                </div>
-                <div class="dosen-list">
-                    ${dosenData.map((dosen, index) => {
-                        const nama = dosen.nama || 'Data tidak tersedia';
-                        const initial = nama && nama !== 'Data tidak tersedia' ? nama.charAt(0).toUpperCase() : '?';
-                        const nip = dosen.nip || '-';
-                        const jabatan = dosen.jabatan || '-';
-                        const divisi = dosen.divisi || '-';
-                        
-                        return `
-                        <div class="dosen-item">
-                            <div class="dosen-avatar">${initial}</div>
-                            <div class="dosen-info">
-                                <div class="dosen-name">${escapeHtml(nama)}</div>
-                                <div class="dosen-details">
-                                    NIP: ${escapeHtml(nip)} | 
-                                    Jabatan: ${escapeHtml(jabatan)} | 
-                                    Divisi: ${escapeHtml(divisi)}
-                                </div>
+<!-- Tampilan Dosen yang Diperbaiki (SAMA DENGAN DASHBOARD KAPRODI) -->
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-user-tie"></i> Dosen Terkait
+                <span style="font-size:12px;color:#6c757d;margin-left:auto">(${dosenData.length} dosen)</span>
+            </div>
+            <div class="dosen-list">
+                ${dosenData.map((dosen, index) => {
+                    const nama = dosen.nama || 'Data tidak tersedia';
+                    const initial = nama && nama !== 'Data tidak tersedia' ? nama.charAt(0).toUpperCase() : '?';
+                    const nip = dosen.nip || '-';
+                    const jabatan = dosen.jabatan || '-';
+                    const divisi = dosen.divisi || '-';
+                    
+                    return `
+                    <div class="dosen-item">
+                        <div class="dosen-avatar">${initial}</div>
+                        <div class="dosen-info">
+                            <div class="dosen-name">${escapeHtml(nama)}</div>
+                            <div class="dosen-details">
+                                NIP: ${escapeHtml(nip)} | 
+                                Jabatan: ${escapeHtml(jabatan)} | 
+                                Divisi: ${escapeHtml(divisi)}
                             </div>
                         </div>
-                        `;
-                    }).join('')}
-                </div>
+                    </div>
+                    `;
+                }).join('')}
             </div>
+        </div>
 
             <div class="detail-section">
                 <div class="detail-section-title">

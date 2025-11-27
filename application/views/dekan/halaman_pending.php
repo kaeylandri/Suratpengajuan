@@ -614,16 +614,6 @@
     </div>
     <?php endif; ?>
 
-    <!-- Header Status -->
-    <div class="status-header">
-        <div class="status-icon pending">
-            <i class="fa-solid fa-clock"></i>
-        </div>
-        <div class="status-info">
-            <h1>MENUNGGU PERSETUJUAN</h1>
-            <p><?= isset($total_surat) ? $total_surat : '2' ?> Pengajuan</p>
-        </div>
-    </div>
 
     <!-- Tabel Total Pengajuan -->
     <div class="card">
@@ -1448,7 +1438,7 @@ function showDetail(id) {
             </div>
             <div class="dosen-list">
                 ${dosenData.map((dosen, index) => {
-                    const nama = dosen.nama || 'Data tidak tersedia';
+                    const nama = dosen.nama_dosen || 'Data tidak tersedia';
                     const initial = nama && nama !== 'Data tidak tersedia' ? nama.charAt(0).toUpperCase() : '?';
                     const nip = dosen.nip || '-';
                     const jabatan = dosen.jabatan || '-';
