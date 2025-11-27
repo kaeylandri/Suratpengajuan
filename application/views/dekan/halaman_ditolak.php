@@ -416,7 +416,6 @@
         <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
     </a>
 
-
     <?php if($this->session->flashdata('success')): ?>
     <div class="card" style="border-left:4px solid #27ae60;margin-bottom:18px">
         <div style="color:#155724;font-weight:700"><?php echo $this->session->flashdata('success'); ?></div>
@@ -455,7 +454,7 @@
                 </button>
                 
                 <?php if($this->input->get('search')): ?>
-                <a href="<?= base_url('dekan/ditolak') ?>" class="btn-cari" style="background:#95a5a6">
+                <a href="<?= base_url('dekan/halaman_ditolak') ?>" class="btn-cari" style="background:#95a5a6">
                     <i class="fa-solid fa-refresh"></i> Reset
                 </a>
                 <?php endif; ?>
@@ -468,6 +467,7 @@
                     <tr>
                         <th>No</th>
                         <th>Nama Kegiatan</th>
+                        <th>Nama Dosen</th>
                         <th>Penyelenggara</th>
                         <th>Tanggal Pengajuan</th>
                         <th>Tanggal Kegiatan</th>
@@ -541,6 +541,7 @@
                     <tr data-status="rejected">
                         <td><?= $no++ ?></td>
                         <td><strong><?= htmlspecialchars($s['nama_kegiatan'] ?? '-') ?></strong></td>
+                        <td><strong><?= htmlspecialchars($s['nama_dosen'] ?? '-') ?></strong></td>
                         <td><?= htmlspecialchars($s['penyelenggara'] ?? '-') ?></td>
                         <td><?= $tgl_pengajuan ?></td>
                         <td><?= $tgl_kegiatan ?></td>
@@ -568,7 +569,7 @@
                     </tr>
                     <?php endforeach; else: ?>
                     <tr>
-                        <td colspan="9" style="text-align:center;padding:40px;color:#7f8c8d">
+                        <td colspan="10" style="text-align:center;padding:40px;color:#7f8c8d">
                             <i class="fa-solid fa-times-circle" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
                             <strong>
                                 <?php if(!isset($surat_list)): ?>
@@ -771,6 +772,7 @@ function closePreviewModal() {
     document.getElementById('previewModal').classList.remove('show');
 }
 
+// Fungsi utama untuk menampilkan detail - DIPERBAIKI
 function showDetail(id) {
     console.log('Mencari data dengan ID:', id);
     console.log('Data yang tersedia:', suratList);
@@ -813,16 +815,60 @@ function showDetail(id) {
     const status = getVal('status');
     let statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak</span>';
 
+    // PERBAIKAN UTAMA: Ambil data dosen dari AJAX endpoint dekan
+    // Tampilkan loading terlebih dahulu
+    const loadingContent = `
+        <div style="text-align:center;padding:40px;">
+            <i class="fas fa-spinner fa-spin" style="font-size:48px;color:#8E44AD;"></i>
+            <p style="margin-top:15px;color:#6c757d;">Memuat data dosen...</p>
+        </div>
+    `;
+    
+    document.getElementById('detailContent').innerHTML = loadingContent;
+    document.getElementById('detailModal').classList.add('show');
+    
+    // Panggil endpoint dekan untuk mendapatkan data dosen yang lengkap
+    fetch('<?= site_url("dekan/getDetailPengajuan/") ?>' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Data dosen dari endpoint dekan:', data.data);
+                renderDetailContent(data.data, statusBadge, formatDate, escapeHtml);
+            } else {
+                console.error('Gagal mengambil data dosen:', data.message);
+                // Fallback ke data lokal jika gagal
+                renderDetailContent(item, statusBadge, formatDate, escapeHtml);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching dosen data:', error);
+            // Fallback ke data lokal jika error
+            renderDetailContent(item, statusBadge, formatDate, escapeHtml);
+        });
+}
+
+// Fungsi untuk render content setelah data dosen didapatkan
+function renderDetailContent(item, statusBadge, formatDate, escapeHtml) {
+    const getVal = (k) => (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+    
     // PERBAIKAN UTAMA: Struktur dosen data yang sama dengan dashboard kaprodi
     let dosenData = [];
     
     if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
         // Struktur 1: dosen_data dari AJAX response (format baru)
         dosenData = item.dosen_data;
-    } else {
-        // Fallback: gunakan data default
+    } else if (item.nama_dosen && item.nama_dosen !== '-') {
+        // Fallback: gunakan data dari field nama_dosen
         dosenData = [{
-            nama: getVal('nama_dosen') !== '-' ? getVal('nama_dosen') : 'Data dosen tidak tersedia',
+            nama: getVal('nama_dosen'),
+            nip: getVal('nip'),
+            jabatan: '-',
+            divisi: '-'
+        }];
+    } else {
+        // Fallback: data default
+        dosenData = [{
+            nama: 'Data dosen tidak tersedia',
             nip: getVal('nip') !== '-' ? getVal('nip') : '-',
             jabatan: '-',
             divisi: '-'
@@ -948,7 +994,7 @@ function showDetail(id) {
                 <div class="detail-row">
                     <div class="detail-label">Status Pengajuan</div>
                     <div class="detail-value" style="display:flex;align-items:center">
-                        ${escapeHtml(status)} ${statusBadge}
+                        ${escapeHtml(getVal('status'))} ${statusBadge}
                     </div>
                 </div>
                 <div class="detail-row">
@@ -962,7 +1008,7 @@ function showDetail(id) {
             </div>
         </div>
 
-        <!-- Tampilan Dosen yang Diperbaiki (SAMA DENGAN DASHBOARD KAPRODI) -->
+        <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
         <div class="detail-section">
             <div class="detail-section-title">
                 <i class="fa-solid fa-user-tie"></i> Dosen Terkait
@@ -970,7 +1016,8 @@ function showDetail(id) {
             </div>
             <div class="dosen-list">
                 ${dosenData.map((dosen, index) => {
-                    const nama = dosen.nama_dosen || 'Data tidak tersedia';
+                    // PERBAIKAN: Handle kedua struktur data (dosen_data dan nama_dosen langsung)
+                    const nama = dosen.nama || dosen.nama_dosen || 'Data tidak tersedia';
                     const initial = nama && nama !== 'Data tidak tersedia' ? nama.charAt(0).toUpperCase() : '?';
                     const nip = dosen.nip || '-';
                     const jabatan = dosen.jabatan || '-';
@@ -1039,7 +1086,6 @@ function showDetail(id) {
     `;
     
     document.getElementById('detailContent').innerHTML = content;
-    document.getElementById('detailModal').classList.add('show');
 }
 
 function closeModal(id) {

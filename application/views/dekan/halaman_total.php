@@ -718,6 +718,23 @@
 const suratList = <?= isset($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
 
+// PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
+function getSuratDetail(id) {
+    return fetch('<?= site_url("dekan/getDetailPengajuan/") ?>' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.data;
+            } else {
+                throw new Error(data.message || 'Gagal memuat data');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching detail:', error);
+            throw error;
+        });
+}
+
 // Preview File Functions
 function previewFile(fileUrl, fileName) {
     console.log('Preview File:', {
@@ -787,11 +804,7 @@ function closePreviewModal() {
     document.getElementById('previewModal').classList.remove('show');
 }
 
-// Detail functions
-function findSuratById(id) {
-    return suratList.find(s => Number(s.id) === Number(id));
-}
-
+// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki
 async function showDetail(id) {
     try {
         // Tampilkan loading
@@ -803,122 +816,19 @@ async function showDetail(id) {
         `;
         document.getElementById('detailModal').classList.add('show');
 
-        // Ambil data detail
-        const item = findSuratById(id);
+        // PERBAIKAN: Ambil data detail via AJAX (bukan dari suratList)
+        const item = await getSuratDetail(id);
+        
         if (!item) {
             alert('Data tidak ditemukan');
             closeModal('detailModal');
             return;
         }
 
-        // Helper functions
-        const getVal = (k) => (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
-        const formatDate = (dateString) => {
-            if (!dateString || dateString === '-') return '-';
-            const date = new Date(dateString);
-            return date.toLocaleDateString('id-ID', { 
-                day: '2-digit', 
-                month: 'short', 
-                year: 'numeric' 
-            });
+        // Fungsi helper untuk mendapatkan value
+        const getVal = (k) => {
+            return (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
         };
-        const escapeHtml = (unsafe) => {
-            if (unsafe === null || unsafe === undefined) return '-';
-            return String(unsafe)
-               .replace(/&/g, "&amp;")
-               .replace(/</g, "&lt;")
-               .replace(/>/g, "&gt;")
-               .replace(/"/g, "&quot;")
-               .replace(/'/g, "&#039;");
-        };
-        
-        // PERBAIKAN UTAMA: Fungsi untuk memproses data dosen dengan berbagai format
-        const processDosenData = () => {
-            let dosenData = [];
-            
-            console.log('Raw item data:', item); // Debug
-            
-            // Format 1: Data dosen dari field terpisah (nama_dosen dan nip sebagai string)
-            if (getVal('nama_dosen') !== '-' && getVal('nama_dosen') !== 'Data dosen tidak tersedia') {
-                const namaDosen = getVal('nama_dosen');
-                const nipDosen = getVal('nip');
-                
-                // Jika NIP adalah array JSON string
-                if (typeof nipDosen === 'string' && nipDosen.startsWith('[')) {
-                    try {
-                        const nipArray = JSON.parse(nipDosen);
-                        dosenData = nipArray.map((nip, index) => ({
-                            nama: namaDosen,
-                            nip: nip,
-                            jabatan: '-',
-                            divisi: '-'
-                        }));
-                    } catch (e) {
-                        // Jika parsing gagal, gunakan sebagai string biasa
-                        dosenData = [{
-                            nama: namaDosen,
-                            nip: nipDosen,
-                            jabatan: '-',
-                            divisi: '-'
-                        }];
-                    }
-                } else {
-                    // Data dosen individual
-                    dosenData = [{
-                        nama: namaDosen,
-                        nip: nipDosen,
-                        jabatan: '-',
-                        divisi: '-'
-                    }];
-                }
-            }
-            // Format 2: Data dosen dari array dosen_data
-            else if (item.dosen_data && Array.isArray(item.dosen_data)) {
-                if (item.dosen_data.length > 0 && typeof item.dosen_data[0] === 'object') {
-                    // Array of objects
-                    dosenData = item.dosen_data.map(dosen => ({
-                        nama: dosen.nama || dosen.nama_dosen || 'Data tidak tersedia',
-                        nip: dosen.nip || '-',
-                        jabatan: dosen.jabatan || '-',
-                        divisi: dosen.divisi || '-'
-                    }));
-                } else if (item.dosen_data.length > 0 && typeof item.dosen_data[0] === 'string') {
-                    // Array of strings (NIP)
-                    dosenData = item.dosen_data.map(nip => ({
-                        nama: 'Data dosen tidak tersedia',
-                        nip: nip,
-                        jabatan: '-',
-                        divisi: '-'
-                    }));
-                }
-            }
-            // Format 3: NIP sebagai array
-            else if (Array.isArray(item.nip)) {
-                dosenData = item.nip.map(nip => ({
-                    nama: 'Data dosen tidak tersedia',
-                    nip: nip,
-                    jabatan: '-',
-                    divisi: '-'
-                }));
-            }
-            // Format 4: Fallback - data default
-            else {
-                dosenData = [{
-                    nama: getVal('nama_dosen') !== '-' ? getVal('nama_dosen') : 'Data dosen tidak tersedia',
-                    nip: getVal('nip') !== '-' ? getVal('nip') : '-',
-                    jabatan: '-',
-                    divisi: '-'
-                }];
-            }
-            
-            return dosenData;
-        };
-
-        // PERBAIKAN: Proses data dosen dengan fungsi baru
-        const dosenData = processDosenData();
-        
-        // Debug: Tampilkan data dosen di console
-        console.log('Processed Dosen Data:', dosenData);
 
         // Format status dengan badge
         const status = getVal('status');
@@ -933,8 +843,24 @@ async function showDetail(id) {
             statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
         }
 
-        // Tentukan apakah menampilkan tombol aksi
-        const showActions = status.toLowerCase() === 'disetujui sekretariat';
+        // PERBAIKAN UTAMA: Gunakan langsung dosen_data dari response AJAX
+        let dosenData = [];
+        
+        if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
+            // Struktur 1: dosen_data dari AJAX response (format baru)
+            dosenData = item.dosen_data;
+        } else {
+            // Fallback: gunakan data default
+            dosenData = [{
+                nama: getVal('nama_dosen') !== '-' ? getVal('nama_dosen') : 'Data dosen tidak tersedia',
+                nip: getVal('nip') !== '-' ? getVal('nip') : '-',
+                jabatan: '-',
+                divisi: '-'
+            }];
+        }
+
+        // Debug: Tampilkan data dosen di console
+        console.log('Dosen Data untuk ID', id, ':', dosenData);
 
         // Generate file evidence HTML
         let fileEvidenceHtml = '';
@@ -944,6 +870,7 @@ async function showDetail(id) {
             let evidenFiles = [];
             
             try {
+                // Try to parse as JSON first (for multiple files)
                 if (evidenValue.startsWith('[') || evidenValue.startsWith('{')) {
                     const parsed = JSON.parse(evidenValue);
                     if (Array.isArray(parsed)) {
@@ -952,9 +879,11 @@ async function showDetail(id) {
                         evidenFiles = [parsed.url];
                     }
                 } else {
+                    // Single file path or URL
                     evidenFiles = [evidenValue];
                 }
             } catch (e) {
+                // If not JSON, treat as single file path
                 evidenFiles = [evidenValue];
             }
             
@@ -967,20 +896,27 @@ async function showDetail(id) {
                     <div class="file-evidence">`;
                 
                 evidenFiles.forEach((file, index) => {
+                    // Extract filename dari path/URL
                     let fileName = file;
                     let fileUrl = file;
                     
+                    // Jika file adalah path lokal (tidak mengandung http/https)
                     if (!file.startsWith('http://') && !file.startsWith('https://')) {
+                        // Ambil hanya nama file dari path
                         fileName = file.split('/').pop();
+                        // Buat URL lengkap ke folder uploads/eviden
                         fileUrl = '<?= base_url("uploads/eviden/") ?>' + fileName;
                     } else {
+                        // Jika sudah URL lengkap (dari Uploadcare dll)
                         fileName = file.split('/').pop();
                     }
                     
+                    // Get file extension untuk menentukan tipe file
                     const ext = fileName.split('.').pop().toLowerCase();
                     let fileIcon = 'fa-file';
                     let canPreview = false;
                     
+                    // Tentukan file type dan kemampuan preview
                     if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
                         fileIcon = 'fa-file-image';
                         canPreview = true;
@@ -1059,7 +995,7 @@ async function showDetail(id) {
                 </div>
             </div>
 
-            <!-- Tampilan Dosen yang Diperbaiki -->
+            <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-user-tie"></i> Dosen Terkait
@@ -1128,19 +1064,25 @@ async function showDetail(id) {
             </div>
             ` : ''}
 
+            ${ (item.status && item.status.toLowerCase() === 'disetujui sekretariat') ? `
             <div class="modal-actions">
-                ${showActions ? `
-                    <button class="modal-btn modal-btn-approve" onclick="approveSurat(${item.id}); closeModal('detailModal')">
-                        <i class="fa-solid fa-check"></i> Setujui
-                    </button>
-                    <button class="modal-btn modal-btn-reject" onclick="showRejectModal(${item.id}); closeModal('detailModal')">
-                        <i class="fa-solid fa-times"></i> Tolak
-                    </button>
-                ` : ''}
+                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+                <button class="modal-btn modal-btn-reject" onclick="showRejectModal(${item.id}); closeModal('detailModal')">
+                    <i class="fa-solid fa-times"></i> Tolak
+                </button>
+                <button class="modal-btn modal-btn-approve" onclick="approveSurat(${item.id}); closeModal('detailModal')">
+                    <i class="fa-solid fa-check"></i> Setujui
+                </button>
+            </div>
+            ` : `
+            <div class="modal-actions">
                 <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
             </div>
+            ` }
         `;
         
         document.getElementById('detailContent').innerHTML = content;
@@ -1218,8 +1160,25 @@ function modalClickOutside(evt, id) {
     if (evt.target && evt.target.id === id) closeModal(id);
 }
 
+// Helper functions
+function formatDate(d) {
+    if (!d || d === '-') return '-';
+    const t = new Date(d);
+    if (isNaN(t)) return d;
+    return t.toLocaleDateString('id-ID', { day:'2-digit', month: 'short', year:'numeric' });
+}
+
+function escapeHtml(unsafe) {
+    if (unsafe === null || unsafe === undefined) return '-';
+    return String(unsafe)
+       .replace(/&/g, "&amp;")
+       .replace(/</g, "&lt;")
+       .replace(/>/g, "&gt;")
+       .replace(/"/g, "&quot;")
+       .replace(/'/g, "&#039;");
+}
+
 // Status Modal Functions
-// Tampilkan modal dan load data
 function showStatusModal(suratId) {
     const modal = document.getElementById('statusModal');
     modal.style.display = 'flex';
@@ -1227,7 +1186,6 @@ function showStatusModal(suratId) {
     loadStatusData(suratId);
 }
 
-// Reset seluruh tampilan sebelum load data baru
 function resetAllStatus() {
     for (let i = 1; i <= 4; i++) {
         const step = document.getElementById(`step${i}`);
@@ -1254,7 +1212,6 @@ function resetAllStatus() {
     desc.style.color = "black";
 }
 
-// Load status dari server (AJAX)
 function loadStatusData(suratId) {
     fetch('<?= site_url("surat/get_status/") ?>' + suratId)
         .then(response => response.json())
@@ -1272,7 +1229,6 @@ function loadStatusData(suratId) {
         });
 }
 
-// Update tampilan status
 function updateStatusDisplay(statusData) {
     const steps = statusData.steps;
 
@@ -1344,7 +1300,6 @@ function updateStatusDisplay(statusData) {
     }
 }
 
-// Update estimasi waktu
 function updateEstimasiWaktu(statusData) {
     const d = statusData.durasi;
     document.getElementById("est1").textContent = d.durasi_1 || "-";

@@ -676,6 +676,7 @@
                         </th>
                         <th>No</th>
                         <th>Nama Kegiatan</th>
+                        <th>Nama Dosen</th>
                         <th>Penyelenggara</th>
                         <th>Tanggal Pengajuan</th>
                         <th>Tanggal Kegiatan</th>
@@ -718,6 +719,7 @@
                         </td>
                         <td><?= $i ?></td>
                         <td><strong><?= htmlspecialchars($s['nama_kegiatan'] ?? '-') ?></strong></td>
+                        <td><strong><?= htmlspecialchars($s['nama_dosen'] ?? '-') ?></strong></td>
                         <td><?= htmlspecialchars($s['penyelenggara'] ?? '-') ?></td>
                         <td><?= $tgl_pengajuan ?></td>
                         <td><?= $tgl_kegiatan ?></td>
@@ -745,7 +747,7 @@
                     <?php $i++; endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="9" style="text-align:center;padding:40px;color:#7f8c8d">
+                            <td colspan="10" style="text-align:center;padding:40px;color:#7f8c8d">
                                 <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
                                 <strong>Belum ada pengajuan</strong>
                             </td>
@@ -1199,18 +1201,47 @@ function closePreviewModal() {
     document.getElementById('previewModal').classList.remove('show');
 }
 
-// Detail functions - DIPERBAIKI untuk handle data dosen dari controller
-function findSuratById(id) {
-    return suratList.find(s => Number(s.id) === Number(id));
-}
-
+// Fungsi utama untuk menampilkan detail - DIPERBAIKI untuk handle data dosen dari controller
 function showDetail(id) {
-    const item = findSuratById(id);
+    const item = suratList.find(s => Number(s.id) === Number(id));
     if (!item) { 
         alert('Data tidak ditemukan'); 
         return; 
     }
 
+    // Tampilkan loading terlebih dahulu
+    const loadingContent = `
+        <div style="text-align:center;padding:40px;">
+            <i class="fas fa-spinner fa-spin" style="font-size:48px;color:#FB8C00;"></i>
+            <p style="margin-top:15px;color:#6c757d;">Memuat data dosen...</p>
+        </div>
+    `;
+    
+    document.getElementById('detailContent').innerHTML = loadingContent;
+    document.getElementById('detailModal').classList.add('show');
+    
+    // Panggil endpoint dekan untuk mendapatkan data dosen yang lengkap
+    fetch('<?= site_url("dekan/getDetailPengajuan/") ?>' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Data dosen dari endpoint dekan:', data.data);
+                renderDetailContent(data.data);
+            } else {
+                console.error('Gagal mengambil data dosen:', data.message);
+                // Fallback ke data lokal jika gagal
+                renderDetailContent(item);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching dosen data:', error);
+            // Fallback ke data lokal jika error
+            renderDetailContent(item);
+        });
+}
+
+// Fungsi untuk render content setelah data dosen didapatkan
+function renderDetailContent(item) {
     const getVal = (k) => (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
     
     // Helper functions
@@ -1237,61 +1268,25 @@ function showDetail(id) {
         statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
     }
 
-    // PERBAIKAN UTAMA: Handle data dosen dari controller
+    // PERBAIKAN UTAMA: Struktur dosen data yang sama dengan dashboard kaprodi
     let dosenData = [];
     
-    // Cek apakah ada data dosen dari controller
     if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
-        // Gunakan data dosen dari controller yang sudah diproses
+        // Struktur 1: dosen_data dari AJAX response (format baru)
         dosenData = item.dosen_data;
-        console.log('Using dosen_data from controller:', dosenData);
+    } else if (item.nama_dosen && item.nama_dosen !== '-') {
+        // Fallback: gunakan data dari field nama_dosen
+        dosenData = [{
+            nama: getVal('nama_dosen'),
+            nip: getVal('nip'),
+            jabatan: '-',
+            divisi: '-'
+        }];
     } else {
-        // Fallback: coba parse data dari field individual
-        const nip = getVal('nip');
-        const nama_dosen = getVal('nama_dosen');
-        
-        // Cek apakah NIP adalah JSON array
-        if (nip && nip.startsWith('[')) {
-            try {
-                const nipList = JSON.parse(nip);
-                const namaList = nama_dosen && nama_dosen.startsWith('[') ? JSON.parse(nama_dosen) : [nama_dosen];
-                
-                if (Array.isArray(nipList)) {
-                    nipList.forEach((nipItem, index) => {
-                        dosenData.push({
-                            nama: namaList[index] || 'Data tidak tersedia',
-                            nip: nipItem || '-',
-                            jabatan: '-',
-                            divisi: '-'
-                        });
-                    });
-                }
-            } catch (e) {
-                console.error('Error parsing JSON data:', e);
-                // Fallback ke data dasar
-                dosenData = [{
-                    nama: nama_dosen !== '-' ? nama_dosen : 'Data tidak tersedia',
-                    nip: nip !== '-' ? nip : '-',
-                    jabatan: '-',
-                    divisi: '-'
-                }];
-            }
-        } else {
-            // Data dosen tunggal
-            dosenData = [{
-                nama: nama_dosen !== '-' ? nama_dosen : 'Data tidak tersedia',
-                nip: nip !== '-' ? nip : '-',
-                jabatan: '-',
-                divisi: '-'
-            }];
-        }
-    }
-
-    // Jika masih kosong, gunakan ultimate fallback
-    if (dosenData.length === 0) {
+        // Fallback: data default
         dosenData = [{
             nama: 'Data dosen tidak tersedia',
-            nip: '-',
+            nip: getVal('nip') !== '-' ? getVal('nip') : '-',
             jabatan: '-',
             divisi: '-'
         }];
@@ -1416,7 +1411,7 @@ function showDetail(id) {
                 <div class="detail-row">
                     <div class="detail-label">Status Pengajuan</div>
                     <div class="detail-value" style="display:flex;align-items:center">
-                        ${escapeHtml(status)} ${statusBadge}
+                        ${escapeHtml(getVal('status'))} ${statusBadge}
                     </div>
                 </div>
                 <div class="detail-row">
@@ -1430,7 +1425,7 @@ function showDetail(id) {
             </div>
         </div>
 
-        <!-- Tampilan Dosen yang Diperbaiki (SAMA DENGAN DASHBOARD KAPRODI) -->
+        <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
         <div class="detail-section">
             <div class="detail-section-title">
                 <i class="fa-solid fa-user-tie"></i> Dosen Terkait
@@ -1438,7 +1433,8 @@ function showDetail(id) {
             </div>
             <div class="dosen-list">
                 ${dosenData.map((dosen, index) => {
-                    const nama = dosen.nama_dosen || 'Data tidak tersedia';
+                    // PERBAIKAN: Handle kedua struktur data (dosen_data dan nama_dosen langsung)
+                    const nama = dosen.nama || dosen.nama_dosen || 'Data tidak tersedia';
                     const initial = nama && nama !== 'Data tidak tersedia' ? nama.charAt(0).toUpperCase() : '?';
                     const nip = dosen.nip || '-';
                     const jabatan = dosen.jabatan || '-';
@@ -1490,10 +1486,10 @@ function showDetail(id) {
         ${getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-' ? `
         <div class="detail-section rejection-notes">
             <div class="detail-section-title">
-                <i class="fa-solid fa-exclamation-triangle"></i> Catatan Penolakan
+                <i class="fa-solid fa-exclamation-triangle"></i> Alasan Penolakan
             </div>
             <div class="detail-row">
-                <div class="detail-label">Alasan Penolakan</div>
+                <div class="detail-label">Catatan Penolakan</div>
                 <div class="detail-value">${escapeHtml(getVal('catatan_penolakan'))}</div>
             </div>
         </div>
@@ -1521,7 +1517,6 @@ function showDetail(id) {
     `;
     
     document.getElementById('detailContent').innerHTML = content;
-    document.getElementById('detailModal').classList.add('show');
 }
 
 function showRejectModal(id) {

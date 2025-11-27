@@ -240,11 +240,53 @@ if (!isset($surat_list) || !is_array($surat_list)) {
             border: 1px solid #ddd;
             transition: all 0.3s;
             font-size: 14px;
+            min-height: 48px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ff8c00' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 16px;
+            padding-right: 40px;
+            position: relative;
+            z-index: 1;
         }
 
         .form-control:focus {
             border-color: #ff8c00;
             box-shadow: 0 0 0 0.2rem rgba(255, 140, 0, 0.25);
+            outline: none;
+        }
+
+        /* PERBAIKAN UTAMA: Dropdown Container */
+        .dropdown-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-container .form-control {
+            width: 100%;
+        }
+
+        /* Style untuk option dropdown */
+        .form-control option {
+            padding: 12px 15px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            border-bottom: 1px solid #f0f0f0;
+            background: white;
+            color: #333;
+        }
+
+        .form-control option:hover {
+            background: #fff8f0;
+            color: #ff8c00;
+        }
+
+        .form-control option:checked {
+            background: #ff8c00;
+            color: white;
         }
 
         label {
@@ -388,6 +430,10 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                 flex-direction: column;
                 gap: 20px;
                 text-align: center;
+            }
+            
+            .form-control {
+                font-size: 16px; /* Mencegah zoom pada iOS */
             }
         }
 
@@ -538,6 +584,82 @@ if (!isset($surat_list) || !is_array($surat_list)) {
             background-color: #fffaf5 !important;
             box-shadow: 0 2px 8px rgba(255, 140, 0, 0.1);
         }
+
+        /* PERBAIKAN UTAMA: Dropdown Styles */
+        .dropdown-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-wrapper::after {
+            content: '';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ff8c00' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        select.form-control {
+            position: relative;
+            z-index: 1;
+            background: transparent;
+        }
+
+        /* Style untuk dropdown yang terbuka */
+        select.form-control:focus {
+            background-color: white;
+        }
+
+        /* PERBAIKAN: Dropdown options styling */
+        select.form-control option {
+            padding: 12px 15px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            background: white;
+            color: #333;
+            border: none;
+            margin: 2px 0;
+        }
+
+        select.form-control option:hover {
+            background: linear-gradient(to right, #fff8f0, #fff4e6);
+            color: #ff8c00;
+        }
+
+        select.form-control option:checked {
+            background: linear-gradient(to right, #ff8c00, #ff6b00);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* PERBAIKAN: Container untuk dropdown yang lebih baik */
+        .select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .select-container select {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* Style khusus untuk dropdown periode */
+        .periode-dropdown .form-control {
+            background-color: #fff8f0;
+            border-color: #ffd8b2;
+        }
+
+        /* Style untuk dropdown yang lebih panjang */
+        .long-dropdown {
+            min-height: 120px;
+        }
     </style>
 </head>
 
@@ -604,11 +726,13 @@ if (!isset($surat_list) || !is_array($surat_list)) {
 
                         <div class="col-md-6 mb-3">
                             <label>Jenis Tanggal</label>
-                            <select class="form-control jenis-date-select" data-index="<?= $index ?>"
-                                name="items[<?= $index ?>][jenis_date]">
-                                <option value="custom" <?= isset($surat->jenis_date) && $surat->jenis_date == 'custom' ? 'selected' : '' ?>>Custom</option>
-                                <option value="periode" <?= isset($surat->jenis_date) && $surat->jenis_date == 'periode' ? 'selected' : '' ?>>Periode</option>
-                            </select>
+                            <div class="select-container">
+                                <select class="form-control jenis-date-select" data-index="<?= $index ?>"
+                                    name="items[<?= $index ?>][jenis_date]">
+                                    <option value="custom" <?= isset($surat->jenis_date) && $surat->jenis_date == 'custom' ? 'selected' : '' ?>>Custom</option>
+                                    <option value="periode" <?= isset($surat->jenis_date) && $surat->jenis_date == 'periode' ? 'selected' : '' ?>>Periode</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
@@ -651,18 +775,20 @@ if (!isset($surat_list) || !is_array($surat_list)) {
 
                     <div id="periode_<?= $index ?>" style="<?= (isset($surat->jenis_date) && $surat->jenis_date == 'periode') ? '' : 'display:none' ?>" class="mt-3">
                         <label>Pilih Periode</label>
-                        <select class="form-control" name="items[<?= $index ?>][periode_value]">
-                            <?php
-                            $years = ["2024/2025", "2025/2026", "2026/2027", "2027/2028", "2028/2029", "2029/2030"];
-                            foreach ($years as $y):
-                                foreach (["Ganjil", "Genap"] as $smt):
-                                    $val = $y . ' ' . $smt;
-                                    $sel = (isset($surat->periode_value) && $surat->periode_value == $val) ? 'selected' : '';
-                                    echo "<option value='" . htmlspecialchars($val) . "' $sel>" . htmlspecialchars($val) . "</option>";
+                        <div class="select-container">
+                            <select class="form-control long-dropdown" name="items[<?= $index ?>][periode_value]">
+                                <?php
+                                $years = ["2024/2025", "2025/2026", "2026/2027", "2027/2028", "2028/2029", "2029/2030"];
+                                foreach ($years as $y):
+                                    foreach (["Ganjil", "Genap"] as $smt):
+                                        $val = $y . ' ' . $smt;
+                                        $sel = (isset($surat->periode_value) && $surat->periode_value == $val) ? 'selected' : '';
+                                        echo "<option value='" . htmlspecialchars($val) . "' $sel>" . htmlspecialchars($val) . "</option>";
+                                    endforeach;
                                 endforeach;
-                            endforeach;
-                            ?>
-                        </select>
+                                ?>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="form-section-title"><i class="fas fa-file-alt"></i> Jenis Pengajuan</div>
@@ -670,34 +796,40 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label>Jenis Pengajuan</label>
-                            <select class="form-control jenis-pengajuan-select" data-index="<?= $index ?>"
-                                name="items[<?= $index ?>][jenis_pengajuan]">
-                                <option value="Perorangan" <?= isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan == 'Perorangan' ? 'selected' : '' ?>>Perorangan</option>
-                                <option value="Kelompok" <?= isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan == 'Kelompok' ? 'selected' : '' ?>>Kelompok</option>
-                            </select>
+                            <div class="select-container">
+                                <select class="form-control jenis-pengajuan-select" data-index="<?= $index ?>"
+                                    name="items[<?= $index ?>][jenis_pengajuan]">
+                                    <option value="Perorangan" <?= isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan == 'Perorangan' ? 'selected' : '' ?>>Perorangan</option>
+                                    <option value="Kelompok" <?= isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan == 'Kelompok' ? 'selected' : '' ?>>Kelompok</option>
+                                </select>
+                            </div>
                         </div>
 
                         <!-- STATUS KEPEGAWAIAN - MENGANTI FORMAT -->
                         <div class="col-md-6 mb-3">
                             <label>Status Kepegawaian</label>
-                            <select class="form-control" name="items[<?= $index ?>][lingkup_penugasan]">
-                                <option value="Dosen" <?= isset($surat->lingkup_penugasan) && $surat->lingkup_penugasan == 'Dosen' ? 'selected' : '' ?>>Dosen</option>
-                                <option value="TPA" <?= isset($surat->lingkup_penugasan) && $surat->lingkup_penugasan == 'TPA' ? 'selected' : '' ?>>TPA</option>
-                                <option value="Dosen dan TPA" <?= isset($surat->lingkup_penugasan) && $surat->lingkup_penugasan == 'Dosen dan TPA' ? 'selected' : '' ?>>Dosen dan TPA</option>
-                            </select>
+                            <div class="select-container">
+                                <select class="form-control" name="items[<?= $index ?>][lingkup_penugasan]">
+                                    <option value="Dosen" <?= isset($surat->lingkup_penugasan) && $surat->lingkup_penugasan == 'Dosen' ? 'selected' : '' ?>>Dosen</option>
+                                    <option value="TPA" <?= isset($surat->lingkup_penugasan) && $surat->lingkup_penugasan == 'TPA' ? 'selected' : '' ?>>TPA</option>
+                                    <option value="Dosen dan TPA" <?= isset($surat->lingkup_penugasan) && $surat->lingkup_penugasan == 'Dosen dan TPA' ? 'selected' : '' ?>>Dosen dan TPA</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
                     <div id="perorangan_<?= $index ?>" style="<?= (isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan == 'Perorangan') ? '' : 'display:none' ?>" class="mt-3">
                         <label>Jenis Penugasan (Perorangan)</label>
-                        <select class="form-control jenis-penugasan-per-select mb-3" data-index="<?= $index ?>"
-                            name="items[<?= $index ?>][jenis_penugasan_perorangan]">
-                            <?php foreach (["Juri", "Pembicara", "Narasumber", "Lainnya"] as $o):
-                                $sel = (isset($surat->jenis_penugasan_perorangan) && $surat->jenis_penugasan_perorangan == $o) ? 'selected' : '';
-                            ?>
-                                <option value="<?= htmlspecialchars($o) ?>" <?= $sel ?>><?= htmlspecialchars($o) ?></option>
-                            <?php endforeach ?>
-                        </select>
+                        <div class="select-container">
+                            <select class="form-control jenis-penugasan-per-select mb-3" data-index="<?= $index ?>"
+                                name="items[<?= $index ?>][jenis_penugasan_perorangan]">
+                                <?php foreach (["Juri", "Pembicara", "Narasumber", "Lainnya"] as $o):
+                                    $sel = (isset($surat->jenis_penugasan_perorangan) && $surat->jenis_penugasan_perorangan == $o) ? 'selected' : '';
+                                ?>
+                                    <option value="<?= htmlspecialchars($o) ?>" <?= $sel ?>><?= htmlspecialchars($o) ?></option>
+                                <?php endforeach ?>
+                            </select>
+                        </div>
 
                         <div id="lainnya_per_<?= $index ?>" class="mt-2"
                             style="<?= (isset($surat->jenis_penugasan_perorangan) && $surat->jenis_penugasan_perorangan == 'Lainnya') ? '' : 'display:none' ?>">
@@ -710,14 +842,16 @@ if (!isset($surat_list) || !is_array($surat_list)) {
 
                     <div id="kelompok_<?= $index ?>" style="<?= (isset($surat->jenis_pengajuan) && $surat->jenis_pengajuan == 'Kelompok') ? '' : 'display:none' ?>" class="mt-3">
                         <label>Jenis Penugasan (Kelompok)</label>
-                        <select class="form-control jenis-penugasan-kel-select" data-index="<?= $index ?>"
-                            name="items[<?= $index ?>][jenis_penugasan_kelompok]">
-                            <?php foreach (["Tim", "Kepanitiaan", "Lainnya"] as $o):
-                                $sel = (isset($surat->jenis_penugasan_kelompok) && $surat->jenis_penugasan_kelompok == $o) ? 'selected' : '';
-                            ?>
-                                <option value="<?= htmlspecialchars($o) ?>" <?= $sel ?>><?= htmlspecialchars($o) ?></option>
-                            <?php endforeach ?>
-                        </select>
+                        <div class="select-container">
+                            <select class="form-control jenis-penugasan-kel-select" data-index="<?= $index ?>"
+                                name="items[<?= $index ?>][jenis_penugasan_kelompok]">
+                                <?php foreach (["Tim", "Kepanitiaan", "Lainnya"] as $o):
+                                    $sel = (isset($surat->jenis_penugasan_kelompok) && $surat->jenis_penugasan_kelompok == $o) ? 'selected' : '';
+                                ?>
+                                    <option value="<?= htmlspecialchars($o) ?>" <?= $sel ?>><?= htmlspecialchars($o) ?></option>
+                                <?php endforeach ?>
+                            </select>
+                        </div>
 
                         <div id="lainnya_kel_<?= $index ?>" class="mt-2"
                             style="<?= (isset($surat->jenis_penugasan_kelompok) && $surat->jenis_penugasan_kelompok == 'Lainnya') ? '' : 'display:none' ?>">
