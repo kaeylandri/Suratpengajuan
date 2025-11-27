@@ -557,14 +557,6 @@
                                 <button class="btn btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s['id']; ?>)">
                                     <i class="fas fa-tasks"></i>
                                 </button>
-                                <?php if ($st_l === 'disetujui sekretariat'): ?>
-                                    <button class="btn btn-approve" onclick="approveSurat(<?= (int)$s['id'] ?>)" title="Setujui">
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-reject" onclick="showRejectModal(<?= (int)$s['id'] ?>)" title="Tolak">
-                                        <i class="fa-solid fa-times"></i>
-                                    </button>
-                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>

@@ -826,37 +826,21 @@
         </div>
         <div class="approve-modal-body">
             <div class="approve-info-box">
-                <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong>
+                <strong><i class="fa-solid fa-info-circle"></i> Informasi: Surat ini masih dalam bentuk pengajuan</strong>
                 <span id="approveNamaKegiatan"></span>
             </div>
+            
+            <p style="margin-bottom:20px;color:#7f8c8d">Apakah Anda yakin ingin menyetujui pengajuan ini?</p>
             
             <form id="approveForm" method="POST" action="">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
                 
-                <div class="form-group">
-                    <label for="nomorSurat">
-                        <i class="fa-solid fa-file-alt"></i> Nomor Surat <span style="color:#e74c3c">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        id="nomorSurat" 
-                        name="nomor_surat" 
-                        class="form-control" 
-                        placeholder="Contoh: 001/SKT/FT/2025" 
-                        required
-                        autocomplete="off"
-                    >
-                    <div class="form-hint">
-                        <i class="fa-solid fa-exclamation-circle"></i> Format: 001/SKT/FT/Tahun
-                    </div>
-                </div>
-
                 <div class="approve-modal-actions">
                     <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
                     <button type="submit" class="approve-btn approve-btn-submit">
-                        <i class="fa-solid fa-check"></i> Setujui
+                        <i class="fa-solid fa-check"></i> Ya, Setujui
                     </button>
                 </div>
             </form>

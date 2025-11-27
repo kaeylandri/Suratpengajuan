@@ -550,14 +550,6 @@
                                 <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?? 0 ?>)" title="Lihat Detail">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
-                                <?php if(($s->status ?? '') == 'pengajuan'): ?>
-                                    <button class="btn btn-approve" onclick="showApproveModal(<?= $s->id ?? 0 ?>)" title="Setujui">
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?? 0 ?>)" title="Tolak">
-                                        <i class="fa-solid fa-times"></i>
-                                    </button>
-                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
