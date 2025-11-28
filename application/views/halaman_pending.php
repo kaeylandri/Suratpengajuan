@@ -586,6 +586,72 @@
             margin: 10px 0;
         }
     }
+    /* Individual Rejection Styles - DENGAN SCROLLBAR */
+.individual-rejection-container {
+    max-height: 400px; /* ✅ Batasi tinggi maksimal */
+    overflow-y: auto; /* ✅ Tambah scrollbar vertikal */
+    padding-right: 10px; /* Ruang untuk scrollbar */
+    margin-bottom: 15px;
+}
+
+.individual-rejection {
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.individual-rejection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.individual-rejection-title {
+    font-weight: 600;
+    color: #495057;
+    flex-grow: 1;
+}
+
+.individual-rejection-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    font-size: 14px;
+}
+
+.individual-rejection-textarea:focus {
+    outline: none;
+    border-color: #5b5b5bff;
+    box-shadow: 0 0 0 2px rgba(142,68,173,0.1);
+}
+
+/* ✅ STYLING SCROLLBAR (Optional - untuk tampilan lebih bagus) */
+.individual-rejection-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.individual-rejection-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.individual-rejection-container::-webkit-scrollbar-thumb {
+    background: #5b5b5bff;
+    border-radius: 10px;
+}
+
+.individual-rejection-container::-webkit-scrollbar-thumb:hover {
+    background: #5b5b5bff;
+}
 </style>
 </head>
 <body>
@@ -841,7 +907,7 @@
     </div>
 </div>
 
-<!-- Bulk Reject Modal -->
+<!-- Bulk Reject Modal - DENGAN SCROLLBAR -->
 <div id="bulkRejectModal" class="modal" onclick="modalClickOutside(event,'bulkRejectModal')">
     <div class="bulk-modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -859,7 +925,8 @@
                 Berikan alasan penolakan untuk masing-masing pengajuan:
             </div>
             
-            <div id="individualRejectionContainer">
+            <!-- ✅ PERBAIKAN: Tambah class individual-rejection-container -->
+            <div id="individualRejectionContainer" class="individual-rejection-container">
                 <!-- Container untuk individual rejection notes -->
             </div>
             

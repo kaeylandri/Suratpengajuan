@@ -1063,19 +1063,7 @@ i[class*="fa-"] {
             });
         });
     </script>
-    <script src="https://cdn.tiny.cloud/1/q9tneu2aax9fp91cvqlh7mqvx44p6ph4jb63xq6lax2ybita/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-    <script>
-        tinymce.init({
-            selector: 'textarea.mytextarea1',
-            plugins: 'save autosave preview autolink lists media table print',
-            toolbar: 'export table bold italic underline bullist numlist alignleft aligncenter alignright alignjustify fontsizeselect forecolor lineheight h1 h2 h3 h4 h5 ',
-            toolbar_mode: 'floating',
-            tinycomments_mode: 'embedded',
-            height: '450',
 
-            // he
-        });
-    </script>
     <main class="akun-container">
         <div class="fik-section-title2"></div>
         <section class="multi-step-form">
@@ -3152,19 +3140,6 @@ document.getElementById("msform").addEventListener("submit", function(e) {
                     jQuery("#selectformat").hide()
                 }
             });
-        });
-    </script>
-    <script src="https://cdn.tiny.cloud/1/q9tneu2aax9fp91cvqlh7mqvx44p6ph4jb63xq6lax2ybita/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-    <script>
-        tinymce.init({
-            selector: 'textarea',
-            plugins: 'save autosave preview autolink lists media table print',
-            toolbar: 'export table bold italic underline bullist numlist alignleft aligncenter alignright alignjustify fontsizeselect forecolor lineheight h1 h2 h3 h4 h5 h6 ',
-            toolbar_mode: 'floating',
-            tinycomments_mode: 'embedded',
-            height: '450',
-
-            // he
         });
     </script>
     <script>

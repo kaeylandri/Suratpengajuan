@@ -36,7 +36,7 @@ class Kaprodi extends CI_Controller
         $data['approved_count'] = $this->db->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
+        $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan']);
         $data['rejected_count'] = $this->db->count_all_results('surat');
 
         $total     = array_fill(0, 12, 0);

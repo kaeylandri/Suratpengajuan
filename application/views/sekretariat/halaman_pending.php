@@ -968,7 +968,7 @@
     </div>
 </div>
 
-<!-- Bulk Reject Modal -->
+<!-- Bulk Reject Modal - FINAL VERSION -->
 <div id="bulkRejectModal" class="modal" onclick="modalClickOutside(event,'bulkRejectModal')">
     <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
         <div class="modal-header">
@@ -976,38 +976,98 @@
             <button class="close-modal" onclick="closeModal('bulkRejectModal')">&times;</button>
         </div>
         <div class="detail-content">
-            <div class="detail-section">
-                <div class="detail-section-title">
-                    <i class="fa-solid fa-exclamation-triangle"></i> Konfirmasi Penolakan Massal
-                </div>
-                <div class="approve-info-box">
-                    <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong>
-                    <span id="bulkRejectCount">0 pengajuan</span> akan ditolak. Silakan berikan alasan penolakan untuk masing-masing pengajuan.
-                </div>
+            <div class="approve-info-box">
+                <strong><i class="fa-solid fa-info-circle"></i> Informasi:</strong>
+                <span id="bulkRejectCount">0 pengajuan</span> akan ditolak. Silakan berikan alasan penolakan untuk masing-masing pengajuan.
+            </div>
+            
+            <!-- Form -->
+            <form id="bulkRejectForm" method="POST" action="<?= base_url('sekretariat/bulk_reject') ?>">
+                <!-- CSRF Token -->
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
                 
+                <!-- Hidden Input IDs -->
+                <input type="hidden" name="ids" id="bulkRejectIds" value="">
+                
+                <!-- Items Container -->
                 <div class="bulk-items-container" id="bulkRejectItems">
-                    <!-- Items will be dynamically added here -->
+                    <!-- Dynamically filled by JavaScript -->
                 </div>
-            </div>
 
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-close" onclick="closeModal('bulkRejectModal')">
-                    <i class="fa-solid fa-times"></i> Batal
-                </button>
-                <button class="modal-btn modal-btn-reject" onclick="confirmBulkReject()">
-                    <i class="fa-solid fa-paper-plane"></i> Tolak Semua
-                </button>
-            </div>
+                <!-- Action Buttons -->
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-close" onclick="closeModal('bulkRejectModal')">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <!-- ✅ Gunakan onclick, bukan type="submit" -->
+                    <button type="button" class="modal-btn modal-btn-reject" onclick="submitBulkReject()">
+                        <i class="fa-solid fa-paper-plane"></i> Tolak Semua
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
 <script>
 let currentRejectId = null;
 let currentApproveId = null;
 let selectedIds = [];
 let selectedItems = [];
-
+// ✅ FUNCTION submitBulkReject - CLEAN & SIMPLE
+function submitBulkReject() {
+    console.log('=== SUBMIT BULK REJECT ===');
+    
+    const form = document.getElementById('bulkRejectForm');
+    const idsInput = document.getElementById('bulkRejectIds');
+    
+    // Validasi form
+    if (!form) {
+        alert('Error: Form tidak ditemukan!');
+        return;
+    }
+    
+    // Set IDs jika kosong
+    if (!idsInput.value || idsInput.value.trim() === '') {
+        if (selectedIds.length === 0) {
+            alert('Error: Tidak ada pengajuan yang dipilih!');
+            return;
+        }
+        idsInput.value = selectedIds.join(',');
+    }
+    
+    console.log('IDs Value:', idsInput.value);
+    
+    // Validasi textarea
+    const textareas = form.querySelectorAll('textarea[name^="rejection_notes"]');
+    let allValid = true;
+    const errorMessages = [];
+    
+    textareas.forEach((textarea) => {
+        if (!textarea.value.trim()) {
+            allValid = false;
+            const itemId = textarea.name.match(/\[(.*?)\]/)[1];
+            const itemElement = document.getElementById(`reject-item-${itemId}`);
+            const itemName = itemElement ? itemElement.querySelector('.bulk-item-title').textContent : 'ID: ' + itemId;
+            errorMessages.push(`• ${itemName}`);
+        }
+    });
+    
+    if (!allValid) {
+        alert('Alasan penolakan harus diisi untuk:\n\n' + errorMessages.join('\n'));
+        return;
+    }
+    
+    // Log form data untuk debug
+    console.log('=== FORM DATA ===');
+    const formData = new FormData(form);
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+    
+    // Submit form
+    console.log('Submitting form to:', form.action);
+    form.submit();
+}
 // Preview File Functions
 function previewFile(fileUrl, fileName) {
     console.log('Preview File:', {
@@ -1203,70 +1263,264 @@ function confirmBulkApprove() {
         return;
     }
     
-    // ✅ PERBAIKAN: Submit form yang sudah ada (bukan buat baru)
-    // Form sudah memiliki semua input yang diperlukan
+    // ✅ Submit form yang sudah ada
     form.submit();
 }
 
-// ✅ FUNCTION confirmBulkReject YANG DIPERBAIKI
-function confirmBulkReject() {
-    // Ambil semua textarea rejection notes
-    const textareas = document.querySelectorAll('textarea[name^="rejection_notes"]');
+/// ✅ FUNCTION confirmBulkReject - TANPA CONFIRM DIALOG
+function confirmBulkReject(event) {
+    console.log('=== CONFIRM BULK REJECT ===');
+    
+    if (event) {
+        event.preventDefault();
+    }
+    
+    const form = document.getElementById('bulkRejectForm');
+    if (!form) {
+        alert('Error: Form tidak ditemukan!');
+        return false;
+    }
+    
+    const idsInput = document.getElementById('bulkRejectIds');
+    console.log('IDs Input Element:', idsInput);
+    console.log('IDs Input Value:', idsInput ? idsInput.value : 'NULL');
+    
+    // ✅ Jika hidden input kosong, set ulang dari selectedIds
+    if (!idsInput.value || idsInput.value.trim() === '') {
+        console.warn('Hidden input kosong! Mencoba set ulang dari selectedIds...');
+        
+        if (selectedIds.length === 0) {
+            alert('Error: Tidak ada pengajuan yang dipilih!\n\nSilakan tutup modal dan pilih pengajuan lagi.');
+            return false;
+        }
+        
+        idsInput.value = selectedIds.join(',');
+        console.log('Hidden input di-set ulang ke:', idsInput.value);
+    }
+    
+    const textareas = form.querySelectorAll('textarea[name^="rejection_notes"]');
+    console.log('Total Textareas:', textareas.length);
+    
+    // Validasi textarea
     let allValid = true;
     const errorMessages = [];
     
-    // Validasi semua textarea
-    textareas.forEach(textarea => {
+    textareas.forEach((textarea) => {
         if (!textarea.value.trim()) {
             allValid = false;
             const itemId = textarea.name.match(/\[(.*?)\]/)[1];
             const itemElement = document.getElementById(`reject-item-${itemId}`);
-            const itemName = itemElement ? itemElement.querySelector('.bulk-item-title').textContent : 'Unknown';
+            const itemName = itemElement ? itemElement.querySelector('.bulk-item-title').textContent : 'ID: ' + itemId;
             errorMessages.push(`Alasan penolakan harus diisi untuk: ${itemName}`);
         }
     });
     
     if (!allValid) {
         alert('Error:\n' + errorMessages.join('\n'));
+        return false;
+    }
+    
+    // ✅ HAPUS CONFIRM DIALOG - Langsung submit
+    console.log('=== SUBMITTING FORM ===');
+    console.log('Form Action:', form.action);
+    console.log('Form Method:', form.method);
+    console.log('IDs to submit:', idsInput.value);
+    
+    // Log all form data
+    const formData = new FormData(form);
+    console.log('=== FORM DATA ===');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+    
+    // Submit form
+    form.submit();
+    return false;
+}
+// ✅ FUNCTION showBulkRejectModal - PERBAIKAN FINAL
+function showBulkRejectModal() {
+    console.log('=== OPENING BULK REJECT MODAL ===');
+    
+    // ✅ PENTING: Update selected data DULU
+    const checkboxes = document.querySelectorAll('.row-select:checked');
+    
+    selectedIds = [];
+    selectedItems = [];
+    
+    checkboxes.forEach(checkbox => {
+        const id = checkbox.value;
+        const nama = checkbox.getAttribute('data-nama');
+        
+        selectedIds.push(id);
+        selectedItems.push({
+            id: id,
+            nama: nama
+        });
+    });
+    
+    console.log('Selected IDs:', selectedIds);
+    console.log('Selected Items:', selectedItems);
+    
+    // Validasi
+    if (selectedIds.length === 0) {
+        alert('Tidak ada pengajuan yang dipilih!');
         return;
     }
     
-    // ✅ PERBAIKAN: Buat form dan submit dengan data yang benar
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<?= base_url("sekretariat/bulk_reject") ?>';
+    // ✅ CRITICAL: Set hidden input VALUE
+    const idsString = selectedIds.join(',');
+    const hiddenInput = document.getElementById('bulkRejectIds');
     
-    // Add CSRF Token
-    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
-    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
-    const inpCsrf = document.createElement('input');
-    inpCsrf.type = 'hidden'; 
-    inpCsrf.name = csrfName; 
-    inpCsrf.value = csrfHash;
-    form.appendChild(inpCsrf);
+    if (!hiddenInput) {
+        alert('Error: Hidden input "bulkRejectIds" tidak ditemukan!');
+        console.error('Hidden input bulkRejectIds not found in DOM');
+        return;
+    }
     
-    // Add IDs (comma-separated string)
-    const inpIds = document.createElement('input');
-    inpIds.type = 'hidden'; 
-    inpIds.name = 'ids'; 
-    inpIds.value = selectedIds.join(',');
-    form.appendChild(inpIds);
+    hiddenInput.value = idsString;
     
-    // ✅ PERBAIKAN: Add rejection notes untuk setiap item
-    textareas.forEach(textarea => {
-        const itemId = textarea.name.match(/\[(.*?)\]/)[1];
-        const inpNote = document.createElement('input');
-        inpNote.type = 'hidden'; 
-        inpNote.name = `rejection_notes[${itemId}]`; 
-        inpNote.value = textarea.value.trim();
-        form.appendChild(inpNote);
+    // Verify
+    console.log('IDs String:', idsString);
+    console.log('Hidden Input Value AFTER SET:', hiddenInput.value);
+    console.log('Hidden Input Element:', hiddenInput);
+    
+    // Update count display
+    document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
+    
+    // Build items HTML
+    const container = document.getElementById('bulkRejectItems');
+    container.innerHTML = '';
+    
+    selectedItems.forEach((item) => {
+        const itemHtml = `
+            <div class="bulk-item" id="reject-item-${item.id}">
+                <div class="bulk-item-header">
+                    <div class="bulk-item-title">${escapeHtml(item.nama)}</div>
+                    <div class="bulk-item-actions">
+                        <button type="button" class="remove-item" onclick="removeBulkItem('${item.id}', 'reject')">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="rejection_notes_${item.id}">
+                        <i class="fa-solid fa-comment-dots"></i> Alasan Penolakan <span style="color:#e74c3c">*</span>
+                    </label>
+                    <textarea 
+                        id="rejection_notes_${item.id}" 
+                        name="rejection_notes[${item.id}]" 
+                        rows="3" 
+                        class="form-control" 
+                        placeholder="Masukkan alasan penolakan untuk ${escapeHtml(item.nama)}..."
+                        style="resize:vertical"
+                        required
+                    ></textarea>
+                    <div class="form-hint">
+                        <i class="fa-solid fa-exclamation-circle"></i> Alasan penolakan akan dikirimkan kepada pengaju
+                    </div>
+                </div>
+            </div>
+        `;
+        container.innerHTML += itemHtml;
     });
     
-    // Submit form
-    document.body.appendChild(form);
-    form.submit();
+    // Show modal
+    document.getElementById('bulkRejectModal').classList.add('show');
+    
+    // ✅ VERIFY AGAIN setelah modal terbuka
+    setTimeout(() => {
+        const verifyInput = document.getElementById('bulkRejectIds');
+        console.log('VERIFICATION - Hidden Input Value:', verifyInput ? verifyInput.value : 'NOT FOUND');
+        
+        const firstTextarea = document.querySelector('#bulkRejectItems textarea');
+        if (firstTextarea) {
+            firstTextarea.focus();
+        }
+    }, 100);
 }
 
+// ✅ TAMBAH FUNCTION BARU: Update Selected Data
+function updateSelectedData() {
+    const checkboxes = document.querySelectorAll('.row-select:checked');
+    
+    selectedIds = [];
+    selectedItems = [];
+    
+    checkboxes.forEach(checkbox => {
+        const id = checkbox.value;
+        const nama = checkbox.getAttribute('data-nama');
+        
+        selectedIds.push(id);
+        selectedItems.push({
+            id: id,
+            nama: nama
+        });
+    });
+    
+    console.log('Updated selected data:', {
+        ids: selectedIds,
+        items: selectedItems
+    });
+}
+
+// ✅ FUNCTION removeBulkItem YANG SUDAH ADA (pastikan update untuk reject juga)
+function removeBulkItem(itemId, type) {
+    // Remove from UI
+    const itemElement = document.getElementById(`${type}-item-${itemId}`);
+    if (itemElement) {
+        itemElement.remove();
+    }
+    
+    // Remove from selected arrays
+    selectedIds = selectedIds.filter(id => id !== itemId);
+    selectedItems = selectedItems.filter(item => item.id !== itemId);
+    
+    // Update count
+    document.getElementById('selectedCount').textContent = selectedIds.length;
+    
+    // Update modal count and hidden input
+    if (type === 'approve') {
+        document.getElementById('bulkApproveCount').textContent = selectedIds.length + ' pengajuan';
+        document.getElementById('bulkApproveIds').value = selectedIds.join(',');
+    } else {
+        document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
+        document.getElementById('bulkRejectIds').value = selectedIds.join(',');
+    }
+    
+    // Update checkbox state
+    const checkbox = document.querySelector(`.row-select[value="${itemId}"]`);
+    if (checkbox) {
+        checkbox.checked = false;
+    }
+    
+    // Update selectAll checkbox states
+    const selectAll = document.getElementById('selectAll');
+    const tableSelectAll = document.getElementById('tableSelectAll');
+    const allCheckboxes = document.querySelectorAll('.row-select');
+    const checkedCheckboxes = document.querySelectorAll('.row-select:checked');
+    
+    if (checkedCheckboxes.length === 0) {
+        selectAll.checked = false;
+        tableSelectAll.checked = false;
+    } else if (checkedCheckboxes.length === allCheckboxes.length) {
+        selectAll.checked = true;
+        tableSelectAll.checked = true;
+    } else {
+        selectAll.checked = false;
+        tableSelectAll.checked = false;
+    }
+    
+    // Disable buttons if no items left
+    if (selectedIds.length === 0) {
+        document.getElementById('bulkApproveBtn').disabled = true;
+        document.getElementById('bulkRejectBtn').disabled = true;
+        if (type === 'approve') {
+            closeModal('bulkApproveModal');
+        } else {
+            closeModal('bulkRejectModal');
+        }
+    }
+}
 // ✅ FUNCTION showBulkApproveModal YANG DIPERBAIKI
 function showBulkApproveModal() {
     if (selectedIds.length === 0) return;
@@ -1367,64 +1621,6 @@ function showBulkRejectModal() {
         const firstTextarea = document.querySelector('#bulkRejectItems textarea');
         if (firstTextarea) firstTextarea.focus();
     }, 300);
-}
-
-// ✅ FUNCTION removeBulkItem YANG DIPERBAIKI
-function removeBulkItem(itemId, type) {
-    // Remove from UI
-    const itemElement = document.getElementById(`${type}-item-${itemId}`);
-    if (itemElement) {
-        itemElement.remove();
-    }
-    
-    // Remove from selected arrays
-    selectedIds = selectedIds.filter(id => id !== itemId);
-    selectedItems = selectedItems.filter(item => item.id !== itemId);
-    
-    // Update count
-    document.getElementById('selectedCount').textContent = selectedIds.length;
-    
-    // Update modal count and hidden input
-    if (type === 'approve') {
-        document.getElementById('bulkApproveCount').textContent = selectedIds.length + ' pengajuan';
-        document.getElementById('bulkApproveIds').value = selectedIds.join(',');
-    } else {
-        document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
-    }
-    
-    // Update checkbox state
-    const checkbox = document.querySelector(`.row-select[value="${itemId}"]`);
-    if (checkbox) {
-        checkbox.checked = false;
-    }
-    
-    // Update selectAll checkbox states
-    const selectAll = document.getElementById('selectAll');
-    const tableSelectAll = document.getElementById('tableSelectAll');
-    const allCheckboxes = document.querySelectorAll('.row-select');
-    const checkedCheckboxes = document.querySelectorAll('.row-select:checked');
-    
-    if (checkedCheckboxes.length === 0) {
-        selectAll.checked = false;
-        tableSelectAll.checked = false;
-    } else if (checkedCheckboxes.length === allCheckboxes.length) {
-        selectAll.checked = true;
-        tableSelectAll.checked = true;
-    } else {
-        selectAll.checked = false;
-        tableSelectAll.checked = false;
-    }
-    
-    // Disable buttons if no items left
-    if (selectedIds.length === 0) {
-        document.getElementById('bulkApproveBtn').disabled = true;
-        document.getElementById('bulkRejectBtn').disabled = true;
-        if (type === 'approve') {
-            closeModal('bulkApproveModal');
-        } else {
-            closeModal('bulkRejectModal');
-        }
-    }
 }
 
 // Status Modal Functions

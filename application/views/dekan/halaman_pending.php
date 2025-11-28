@@ -588,6 +588,73 @@
             flex: 1;
         }
     }
+    /* Individual Rejection Container - DENGAN SCROLLBAR */
+#individualRejectionContainer {
+    max-height: 400px; /* ✅ Batasi tinggi maksimal */
+    overflow-y: auto; /* ✅ Tambah scrollbar vertikal */
+    padding-right: 10px; /* Ruang untuk scrollbar */
+    margin-bottom: 15px;
+}
+
+/* Individual Rejection Styles */
+.individual-rejection {
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.individual-rejection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.individual-rejection-title {
+    font-weight: 600;
+    color: #495057;
+    flex-grow: 1;
+}
+
+.individual-rejection-textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    font-size: 14px;
+}
+
+.individual-rejection-textarea:focus {
+    outline: none;
+    border-color: #FB8C00;
+    box-shadow: 0 0 0 2px rgba(251,140,0,0.1);
+}
+
+/* ✅ STYLING SCROLLBAR (Optional - untuk tampilan lebih bagus) */
+#individualRejectionContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#individualRejectionContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#individualRejectionContainer::-webkit-scrollbar-thumb {
+    background: #FB8C00;
+    border-radius: 10px;
+}
+
+#individualRejectionContainer::-webkit-scrollbar-thumb:hover {
+    background: #e67e22;
+}
 </style>
 </head>
 <body>
@@ -818,7 +885,7 @@
             <button class="close-modal" onclick="closeModal('bulkRejectModal')">&times;</button>
         </div>
         <div style="padding:25px">
-            <div style="background:#fef7e0;border:1px solid #FB8C00;border-radius:8px;padding:15px;margin-bottom:20px">
+            <div style="background:#fef7e0;border:1px solid #5b5b5bff;border-radius:8px;padding:15px;margin-bottom:20px">
                 <strong><i class="fa-solid fa-info-circle"></i> Anda akan menolak:</strong>
                 <span id="bulkRejectCount">0 pengajuan</span>
             </div>
@@ -828,6 +895,7 @@
                 Berikan alasan penolakan untuk masing-masing pengajuan:
             </div>
             
+            <!-- ✅ CONTAINER DENGAN ID YANG BENAR -->
             <div id="individualRejectionContainer">
                 <!-- Container untuk individual rejection notes -->
             </div>
@@ -840,7 +908,6 @@
         </div>
     </div>
 </div>
-
 <!-- Status Modal -->
 <div id="statusModal" class="status-modal">
     <div class="status-content">
