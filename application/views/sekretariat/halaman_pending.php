@@ -91,7 +91,7 @@
     .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
     .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
     .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
-    .detail-value-empty{color:#6c757d;font-style:italic}
+    .detail-value-empty{color:#6c757d;font-style:italic;background:#f8f9fa !important}
     
     /* Dosen list in detail - NEW STYLES */
     .dosen-list {
@@ -592,8 +592,6 @@
         <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
     </a>
 
-    <!-- Header Status -->
-
     <?php if($this->session->flashdata('success')): ?>
     <div class="card" style="border-left:4px solid #27ae60;margin-bottom:18px">
         <div style="color:#155724;font-weight:700"><?php echo $this->session->flashdata('success'); ?></div>
@@ -968,7 +966,7 @@
     </div>
 </div>
 
-<!-- Bulk Reject Modal - FINAL VERSION -->
+<!-- Bulk Reject Modal -->
 <div id="bulkRejectModal" class="modal" onclick="modalClickOutside(event,'bulkRejectModal')">
     <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
         <div class="modal-header">
@@ -981,26 +979,19 @@
                 <span id="bulkRejectCount">0 pengajuan</span> akan ditolak. Silakan berikan alasan penolakan untuk masing-masing pengajuan.
             </div>
             
-            <!-- Form -->
             <form id="bulkRejectForm" method="POST" action="<?= base_url('sekretariat/bulk_reject') ?>">
-                <!-- CSRF Token -->
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                
-                <!-- Hidden Input IDs -->
                 <input type="hidden" name="ids" id="bulkRejectIds" value="">
                 
-                <!-- Items Container -->
                 <div class="bulk-items-container" id="bulkRejectItems">
-                    <!-- Dynamically filled by JavaScript -->
+                    <!-- Items will be dynamically added here -->
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="modal-actions">
                     <button type="button" class="modal-btn modal-btn-close" onclick="closeModal('bulkRejectModal')">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
-                    <!-- ✅ Gunakan onclick, bukan type="submit" -->
-                    <button type="button" class="modal-btn modal-btn-reject" onclick="submitBulkReject()">
+                    <button type="button" class="modal-btn modal-btn-reject" onclick="confirmBulkReject()">
                         <i class="fa-solid fa-paper-plane"></i> Tolak Semua
                     </button>
                 </div>
@@ -1008,66 +999,30 @@
         </div>
     </div>
 </div>
+
 <script>
 let currentRejectId = null;
 let currentApproveId = null;
 let selectedIds = [];
 let selectedItems = [];
-// ✅ FUNCTION submitBulkReject - CLEAN & SIMPLE
-function submitBulkReject() {
-    console.log('=== SUBMIT BULK REJECT ===');
-    
-    const form = document.getElementById('bulkRejectForm');
-    const idsInput = document.getElementById('bulkRejectIds');
-    
-    // Validasi form
-    if (!form) {
-        alert('Error: Form tidak ditemukan!');
-        return;
-    }
-    
-    // Set IDs jika kosong
-    if (!idsInput.value || idsInput.value.trim() === '') {
-        if (selectedIds.length === 0) {
-            alert('Error: Tidak ada pengajuan yang dipilih!');
-            return;
-        }
-        idsInput.value = selectedIds.join(',');
-    }
-    
-    console.log('IDs Value:', idsInput.value);
-    
-    // Validasi textarea
-    const textareas = form.querySelectorAll('textarea[name^="rejection_notes"]');
-    let allValid = true;
-    const errorMessages = [];
-    
-    textareas.forEach((textarea) => {
-        if (!textarea.value.trim()) {
-            allValid = false;
-            const itemId = textarea.name.match(/\[(.*?)\]/)[1];
-            const itemElement = document.getElementById(`reject-item-${itemId}`);
-            const itemName = itemElement ? itemElement.querySelector('.bulk-item-title').textContent : 'ID: ' + itemId;
-            errorMessages.push(`• ${itemName}`);
-        }
-    });
-    
-    if (!allValid) {
-        alert('Alasan penolakan harus diisi untuk:\n\n' + errorMessages.join('\n'));
-        return;
-    }
-    
-    // Log form data untuk debug
-    console.log('=== FORM DATA ===');
-    const formData = new FormData(form);
-    for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-    }
-    
-    // Submit form
-    console.log('Submitting form to:', form.action);
-    form.submit();
+
+// PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
+function getSuratDetail(id) {
+    return fetch('<?= site_url("sekretariat/getDetailPengajuan/") ?>' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.data;
+            } else {
+                throw new Error(data.message || 'Gagal memuat data');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching detail:', error);
+            throw error;
+        });
 }
+
 // Preview File Functions
 function previewFile(fileUrl, fileName) {
     console.log('Preview File:', {
@@ -1208,7 +1163,7 @@ function showBulkApproveModal() {
         const itemHtml = `
             <div class="bulk-item" id="approve-item-${item.id}">
                 <div class="bulk-item-header">
-                    <div class="bulk-item-title">${item.nama}</div>
+                    <div class="bulk-item-title">${escapeHtml(item.nama)}</div>
                     <div class="bulk-item-actions">
                         <button type="button" class="remove-item" onclick="removeBulkItem('${item.id}', 'approve')">
                             <i class="fa-solid fa-times"></i>
@@ -1239,7 +1194,7 @@ function showBulkApproveModal() {
     
     document.getElementById('bulkApproveModal').classList.add('show');
 }
-// ✅ FUNCTION confirmBulkApprove YANG DIPERBAIKI
+
 function confirmBulkApprove() {
     const form = document.getElementById('bulkApproveForm');
     const inputs = form.querySelectorAll('input[name^="nomor_surat"]');
@@ -1263,135 +1218,19 @@ function confirmBulkApprove() {
         return;
     }
     
-    // ✅ Submit form yang sudah ada
     form.submit();
 }
 
-/// ✅ FUNCTION confirmBulkReject - TANPA CONFIRM DIALOG
-function confirmBulkReject(event) {
-    console.log('=== CONFIRM BULK REJECT ===');
-    
-    if (event) {
-        event.preventDefault();
-    }
-    
-    const form = document.getElementById('bulkRejectForm');
-    if (!form) {
-        alert('Error: Form tidak ditemukan!');
-        return false;
-    }
-    
-    const idsInput = document.getElementById('bulkRejectIds');
-    console.log('IDs Input Element:', idsInput);
-    console.log('IDs Input Value:', idsInput ? idsInput.value : 'NULL');
-    
-    // ✅ Jika hidden input kosong, set ulang dari selectedIds
-    if (!idsInput.value || idsInput.value.trim() === '') {
-        console.warn('Hidden input kosong! Mencoba set ulang dari selectedIds...');
-        
-        if (selectedIds.length === 0) {
-            alert('Error: Tidak ada pengajuan yang dipilih!\n\nSilakan tutup modal dan pilih pengajuan lagi.');
-            return false;
-        }
-        
-        idsInput.value = selectedIds.join(',');
-        console.log('Hidden input di-set ulang ke:', idsInput.value);
-    }
-    
-    const textareas = form.querySelectorAll('textarea[name^="rejection_notes"]');
-    console.log('Total Textareas:', textareas.length);
-    
-    // Validasi textarea
-    let allValid = true;
-    const errorMessages = [];
-    
-    textareas.forEach((textarea) => {
-        if (!textarea.value.trim()) {
-            allValid = false;
-            const itemId = textarea.name.match(/\[(.*?)\]/)[1];
-            const itemElement = document.getElementById(`reject-item-${itemId}`);
-            const itemName = itemElement ? itemElement.querySelector('.bulk-item-title').textContent : 'ID: ' + itemId;
-            errorMessages.push(`Alasan penolakan harus diisi untuk: ${itemName}`);
-        }
-    });
-    
-    if (!allValid) {
-        alert('Error:\n' + errorMessages.join('\n'));
-        return false;
-    }
-    
-    // ✅ HAPUS CONFIRM DIALOG - Langsung submit
-    console.log('=== SUBMITTING FORM ===');
-    console.log('Form Action:', form.action);
-    console.log('Form Method:', form.method);
-    console.log('IDs to submit:', idsInput.value);
-    
-    // Log all form data
-    const formData = new FormData(form);
-    console.log('=== FORM DATA ===');
-    for (let [key, value] of formData.entries()) {
-        console.log(`${key}: ${value}`);
-    }
-    
-    // Submit form
-    form.submit();
-    return false;
-}
-// ✅ FUNCTION showBulkRejectModal - PERBAIKAN FINAL
 function showBulkRejectModal() {
-    console.log('=== OPENING BULK REJECT MODAL ===');
+    if (selectedIds.length === 0) return;
     
-    // ✅ PENTING: Update selected data DULU
-    const checkboxes = document.querySelectorAll('.row-select:checked');
-    
-    selectedIds = [];
-    selectedItems = [];
-    
-    checkboxes.forEach(checkbox => {
-        const id = checkbox.value;
-        const nama = checkbox.getAttribute('data-nama');
-        
-        selectedIds.push(id);
-        selectedItems.push({
-            id: id,
-            nama: nama
-        });
-    });
-    
-    console.log('Selected IDs:', selectedIds);
-    console.log('Selected Items:', selectedItems);
-    
-    // Validasi
-    if (selectedIds.length === 0) {
-        alert('Tidak ada pengajuan yang dipilih!');
-        return;
-    }
-    
-    // ✅ CRITICAL: Set hidden input VALUE
-    const idsString = selectedIds.join(',');
-    const hiddenInput = document.getElementById('bulkRejectIds');
-    
-    if (!hiddenInput) {
-        alert('Error: Hidden input "bulkRejectIds" tidak ditemukan!');
-        console.error('Hidden input bulkRejectIds not found in DOM');
-        return;
-    }
-    
-    hiddenInput.value = idsString;
-    
-    // Verify
-    console.log('IDs String:', idsString);
-    console.log('Hidden Input Value AFTER SET:', hiddenInput.value);
-    console.log('Hidden Input Element:', hiddenInput);
-    
-    // Update count display
     document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
+    document.getElementById('bulkRejectIds').value = selectedIds.join(',');
     
-    // Build items HTML
     const container = document.getElementById('bulkRejectItems');
     container.innerHTML = '';
     
-    selectedItems.forEach((item) => {
+    selectedItems.forEach((item, index) => {
         const itemHtml = `
             <div class="bulk-item" id="reject-item-${item.id}">
                 <div class="bulk-item-header">
@@ -1424,46 +1263,35 @@ function showBulkRejectModal() {
         container.innerHTML += itemHtml;
     });
     
-    // Show modal
     document.getElementById('bulkRejectModal').classList.add('show');
+}
+
+function confirmBulkReject() {
+    const form = document.getElementById('bulkRejectForm');
+    const textareas = form.querySelectorAll('textarea[name^="rejection_notes"]');
     
-    // ✅ VERIFY AGAIN setelah modal terbuka
-    setTimeout(() => {
-        const verifyInput = document.getElementById('bulkRejectIds');
-        console.log('VERIFICATION - Hidden Input Value:', verifyInput ? verifyInput.value : 'NOT FOUND');
-        
-        const firstTextarea = document.querySelector('#bulkRejectItems textarea');
-        if (firstTextarea) {
-            firstTextarea.focus();
+    // Validasi semua textarea
+    let allValid = true;
+    const errorMessages = [];
+    
+    textareas.forEach(textarea => {
+        if (!textarea.value.trim()) {
+            allValid = false;
+            const itemId = textarea.name.match(/\[(.*?)\]/)[1];
+            const itemElement = document.getElementById(`reject-item-${itemId}`);
+            const itemName = itemElement ? itemElement.querySelector('.bulk-item-title').textContent : 'Unknown';
+            errorMessages.push(`Alasan penolakan harus diisi untuk: ${itemName}`);
         }
-    }, 100);
-}
-
-// ✅ TAMBAH FUNCTION BARU: Update Selected Data
-function updateSelectedData() {
-    const checkboxes = document.querySelectorAll('.row-select:checked');
-    
-    selectedIds = [];
-    selectedItems = [];
-    
-    checkboxes.forEach(checkbox => {
-        const id = checkbox.value;
-        const nama = checkbox.getAttribute('data-nama');
-        
-        selectedIds.push(id);
-        selectedItems.push({
-            id: id,
-            nama: nama
-        });
     });
     
-    console.log('Updated selected data:', {
-        ids: selectedIds,
-        items: selectedItems
-    });
+    if (!allValid) {
+        alert('Error:\n' + errorMessages.join('\n'));
+        return;
+    }
+    
+    form.submit();
 }
 
-// ✅ FUNCTION removeBulkItem YANG SUDAH ADA (pastikan update untuk reject juga)
 function removeBulkItem(itemId, type) {
     // Remove from UI
     const itemElement = document.getElementById(`${type}-item-${itemId}`);
@@ -1520,107 +1348,6 @@ function removeBulkItem(itemId, type) {
             closeModal('bulkRejectModal');
         }
     }
-}
-// ✅ FUNCTION showBulkApproveModal YANG DIPERBAIKI
-function showBulkApproveModal() {
-    if (selectedIds.length === 0) return;
-    
-    document.getElementById('bulkApproveCount').textContent = selectedIds.length + ' pengajuan';
-    document.getElementById('bulkApproveIds').value = selectedIds.join(',');
-    
-    const container = document.getElementById('bulkApproveItems');
-    container.innerHTML = '';
-    
-    selectedItems.forEach((item, index) => {
-        const itemHtml = `
-            <div class="bulk-item" id="approve-item-${item.id}">
-                <div class="bulk-item-header">
-                    <div class="bulk-item-title">${escapeHtml(item.nama)}</div>
-                    <div class="bulk-item-actions">
-                        <button type="button" class="remove-item" onclick="removeBulkItem('${item.id}', 'approve')">
-                            <i class="fa-solid fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="nomor_surat_${item.id}">
-                        <i class="fa-solid fa-file-alt"></i> Nomor Surat <span style="color:#e74c3c">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        id="nomor_surat_${item.id}" 
-                        name="nomor_surat[${item.id}]" 
-                        class="form-control" 
-                        placeholder="Contoh: 001/SKT/FT/2025" 
-                        required
-                        autocomplete="off"
-                    >
-                    <div class="form-hint">
-                        <i class="fa-solid fa-exclamation-circle"></i> Format: 001/SKT/FT/Tahun
-                    </div>
-                </div>
-            </div>
-        `;
-        container.innerHTML += itemHtml;
-    });
-    
-    document.getElementById('bulkApproveModal').classList.add('show');
-    
-    // ✅ Auto focus ke input pertama
-    setTimeout(() => {
-        const firstInput = document.querySelector('#bulkApproveItems input[type="text"]');
-        if (firstInput) firstInput.focus();
-    }, 300);
-}
-
-// ✅ FUNCTION showBulkRejectModal YANG DIPERBAIKI
-function showBulkRejectModal() {
-    if (selectedIds.length === 0) return;
-    
-    document.getElementById('bulkRejectCount').textContent = selectedIds.length + ' pengajuan';
-    const container = document.getElementById('bulkRejectItems');
-    container.innerHTML = '';
-    
-    selectedItems.forEach((item, index) => {
-        const itemHtml = `
-            <div class="bulk-item" id="reject-item-${item.id}">
-                <div class="bulk-item-header">
-                    <div class="bulk-item-title">${escapeHtml(item.nama)}</div>
-                    <div class="bulk-item-actions">
-                        <button type="button" class="remove-item" onclick="removeBulkItem('${item.id}', 'reject')">
-                            <i class="fa-solid fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="rejection_notes_${item.id}">
-                        <i class="fa-solid fa-comment-dots"></i> Alasan Penolakan <span style="color:#e74c3c">*</span>
-                    </label>
-                    <textarea 
-                        id="rejection_notes_${item.id}" 
-                        name="rejection_notes[${item.id}]" 
-                        rows="3" 
-                        class="form-control" 
-                        placeholder="Masukkan alasan penolakan untuk ${escapeHtml(item.nama)}..."
-                        style="resize:vertical"
-                        required
-                    ></textarea>
-                    <div class="form-hint">
-                        <i class="fa-solid fa-exclamation-circle"></i> Alasan penolakan akan dikirimkan kepada pengaju
-                    </div>
-                </div>
-            </div>
-        `;
-        container.innerHTML += itemHtml;
-    });
-    
-    document.getElementById('bulkRejectModal').classList.add('show');
-    
-    // ✅ Auto focus ke textarea pertama
-    setTimeout(() => {
-        const firstTextarea = document.querySelector('#bulkRejectItems textarea');
-        if (firstTextarea) firstTextarea.focus();
-    }, 300);
 }
 
 // Status Modal Functions
@@ -1773,7 +1500,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki
+// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki dengan PERIODE
 async function showDetail(id) {
     try {
         // Tampilkan loading
@@ -1786,20 +1513,19 @@ async function showDetail(id) {
         document.getElementById('detailModal').classList.add('show');
 
         // Ambil data detail via AJAX
-        const response = await fetch(`<?= base_url('sekretariat/getDetailPengajuan/') ?>${id}`);
-        const data = await response.json();
+        const item = await getSuratDetail(id);
         
-        if (!data.success) {
+        if (!item) {
             alert('Data tidak ditemukan');
             closeModal('detailModal');
             return;
         }
 
-        const item = data.data;
-        
         // Fungsi helper untuk mendapatkan value
         const getVal = (k) => {
-            return (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+            const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+            console.log(`Field ${k}:`, value); // Debug setiap field
+            return value;
         };
 
         // Format status dengan badge
@@ -1819,10 +1545,8 @@ async function showDetail(id) {
         let dosenData = [];
         
         if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
-            // Struktur 1: dosen_data dari AJAX response (format baru)
             dosenData = item.dosen_data;
         } else {
-            // Fallback: gunakan data default
             dosenData = [{
                 nama: getVal('nama_dosen') !== '-' ? getVal('nama_dosen') : 'Data dosen tidak tersedia',
                 nip: getVal('nip') !== '-' ? getVal('nip') : '-',
@@ -1830,9 +1554,6 @@ async function showDetail(id) {
                 divisi: '-'
             }];
         }
-
-        // Debug: Tampilkan data dosen di console
-        console.log('Dosen Data untuk ID', id, ':', dosenData);
 
         // Generate file evidence HTML
         let fileEvidenceHtml = '';
@@ -1842,7 +1563,6 @@ async function showDetail(id) {
             let evidenFiles = [];
             
             try {
-                // Try to parse as JSON first (for multiple files)
                 if (evidenValue.startsWith('[') || evidenValue.startsWith('{')) {
                     const parsed = JSON.parse(evidenValue);
                     if (Array.isArray(parsed)) {
@@ -1851,11 +1571,9 @@ async function showDetail(id) {
                         evidenFiles = [parsed.url];
                     }
                 } else {
-                    // Single file path or URL
                     evidenFiles = [evidenValue];
                 }
             } catch (e) {
-                // If not JSON, treat as single file path
                 evidenFiles = [evidenValue];
             }
             
@@ -1868,27 +1586,20 @@ async function showDetail(id) {
                     <div class="file-evidence">`;
                 
                 evidenFiles.forEach((file, index) => {
-                    // Extract filename dari path/URL
                     let fileName = file;
                     let fileUrl = file;
                     
-                    // Jika file adalah path lokal (tidak mengandung http/https)
                     if (!file.startsWith('http://') && !file.startsWith('https://')) {
-                        // Ambil hanya nama file dari path
                         fileName = file.split('/').pop();
-                        // Buat URL lengkap ke folder uploads/eviden
                         fileUrl = '<?= base_url("uploads/eviden/") ?>' + fileName;
                     } else {
-                        // Jika sudah URL lengkap (dari Uploadcare dll)
                         fileName = file.split('/').pop();
                     }
                     
-                    // Get file extension untuk menentukan tipe file
                     const ext = fileName.split('.').pop().toLowerCase();
                     let fileIcon = 'fa-file';
                     let canPreview = false;
                     
-                    // Tentukan file type dan kemampuan preview
                     if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
                         fileIcon = 'fa-file-image';
                         canPreview = true;
@@ -1930,9 +1641,50 @@ async function showDetail(id) {
             }
         }
 
+        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date - SAMA SEPERTI DI DASHBOARD
+        const jenisDate = getVal('jenis_date');
+        const periodeKegiatan = getVal('periode_kegiatan');
+        const tanggalKegiatan = getVal('tanggal_kegiatan');
+        const akhirKegiatan = getVal('akhir_kegiatan');
+        
+        // DEBUG: Tampilkan data periode di console
+        console.log('=== DEBUG PERIODE FRONTEND ===');
+        console.log('Jenis Date:', jenisDate);
+        console.log('Periode Kegiatan:', periodeKegiatan);
+        console.log('Tanggal Kegiatan:', tanggalKegiatan);
+        console.log('Akhir Kegiatan:', akhirKegiatan);
+        console.log('Full item data untuk debugging:', item);
+
+        // Tentukan tampilan untuk Periode Kegiatan - SAMA SEPERTI DI DASHBOARD
+        let periodeDisplay = '-';
+
+        if (jenisDate === 'Periode') {
+            // Jika memilih Periode, tampilkan nilai periode yang dipilih
+            periodeDisplay = (periodeKegiatan && periodeKegiatan !== '-' && periodeKegiatan !== '') ? periodeKegiatan : '-';
+            console.log('Periode Display (Periode):', periodeDisplay);
+        } else if (jenisDate === 'Custom') {
+            // Jika memilih Custom, tampilkan range tanggal
+            if (tanggalKegiatan !== '-' && akhirKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan) + ' - ' + formatDate(akhirKegiatan);
+            } else if (tanggalKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan);
+            }
+            console.log('Periode Display (Custom):', periodeDisplay);
+        } else {
+            // Default case - tampilkan tanggal tunggal jika ada
+            if (tanggalKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan);
+            }
+            console.log('Periode Display (Default):', periodeDisplay);
+        }
+
+        // Format tanggal mulai
+        const tanggalMulaiDisplay = (tanggalKegiatan !== '-' && tanggalKegiatan !== '0000-00-00') ? formatDate(tanggalKegiatan) : '-';
+
+        // Tampilkan sesuai dengan format yang sama seperti di dashboard
         const content = `
             <!-- NOMOR SURAT DARI SEKRETARIAT -->
-            ${getVal('nomor_surat') && getVal('nomor_surat') !== '-' ? `
+            ${getVal('nomor_surat') && getVal('nomor_surat') !== '' ? `
             <div class="nomor-surat-container">
                 <div class="nomor-surat-label">
                     <i class="fa-solid fa-file-signature"></i> Nomor Surat
@@ -1967,7 +1719,6 @@ async function showDetail(id) {
                 </div>
             </div>
 
-            <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-user-tie"></i> Dosen Terkait
@@ -2008,16 +1759,26 @@ async function showDetail(id) {
                         <div class="detail-value">${formatDate(getVal('created_at'))}</div>
                     </div>
                     <div class="detail-row">
-                        <div class="detail-label">Tanggal Kegiatan</div>
-                        <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                        <div class="detail-label">Jenis Tanggal</div>
+                        <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Periode Kegiatan</div>
+                        <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">
+                            ${escapeHtml(periodeDisplay)}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Mulai</div>
+                        <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Penyelenggara</div>
-                        <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+                        <div class="detail-value ${getVal('penyelenggara') === '-' ? 'detail-value-empty' : ''}">${escapeHtml(getVal('penyelenggara'))}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tempat Kegiatan</div>
-                        <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+                        <div class="detail-value ${getVal('tempat_kegiatan') === '-' ? 'detail-value-empty' : ''}">${escapeHtml(getVal('tempat_kegiatan'))}</div>
                     </div>
                 </div>
             </div>
@@ -2132,7 +1893,7 @@ function modalClickOutside(evt, id) {
 
 // Helper functions
 function formatDate(d) {
-    if (!d || d === '-') return '-';
+    if (!d || d === '-' || d === '0000-00-00') return '-';
     const t = new Date(d);
     if (isNaN(t)) return d;
     return t.toLocaleDateString('id-ID', { day:'2-digit', month: 'short', year:'numeric' });

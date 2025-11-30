@@ -6,6 +6,7 @@
 <title>Pengajuan Menunggu - Dashboard Kaprodi</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
+    /* Semua style CSS tetap sama seperti sebelumnya */
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f5f7fa;}
     .navbar{background:#8E44AD;color:white;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
@@ -1451,7 +1452,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki
+// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki dengan PERIODE
 async function showDetail(id) {
     try {
         currentDetailId = id;
@@ -1613,6 +1614,35 @@ async function showDetail(id) {
             }
         }
 
+        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date
+        const jenisDate = getVal('jenis_date');
+        const periodeKegiatan = getVal('periode_kegiatan');
+        const tanggalKegiatan = getVal('tanggal_kegiatan');
+        const akhirKegiatan = getVal('akhir_kegiatan');
+        
+        // DEBUG: Tampilkan data periode di console
+        console.log('Jenis Date:', jenisDate);
+        console.log('Periode Kegiatan:', periodeKegiatan);
+        console.log('Tanggal Kegiatan:', tanggalKegiatan);
+        console.log('Akhir Kegiatan:', akhirKegiatan);
+        
+        // Tentukan tampilan untuk Periode Kegiatan
+        let periodeDisplay = '-';
+        if (jenisDate === 'Periode') {
+            // Jika memilih Periode, tampilkan nilai periode yang dipilih
+            periodeDisplay = periodeKegiatan !== '-' ? periodeKegiatan : '-';
+            console.log('Periode Display (Periode):', periodeDisplay);
+        } else if (jenisDate === 'Custom') {
+            // Jika memilih Custom, tampilkan range tanggal
+            if (tanggalKegiatan !== '-' && akhirKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan) + ' - ' + formatDate(akhirKegiatan);
+            }
+            console.log('Periode Display (Custom):', periodeDisplay);
+        }
+
+        // Format tanggal mulai
+        const tanggalMulaiDisplay = tanggalKegiatan !== '-' ? formatDate(tanggalKegiatan) : '-';
+
         const content = `
             <div class="detail-section">
                 <div class="detail-section-title">
@@ -1671,6 +1701,7 @@ async function showDetail(id) {
                 </div>
             </div>
 
+            <!-- PERBAIKAN UTAMA: Bagian Informasi Waktu & Tempat yang disamakan dengan dashboard -->
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
@@ -1681,8 +1712,16 @@ async function showDetail(id) {
                         <div class="detail-value">${formatDate(getVal('created_at'))}</div>
                     </div>
                     <div class="detail-row">
-                        <div class="detail-label">Tanggal Kegiatan</div>
-                        <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                        <div class="detail-label">Jenis Tanggal</div>
+                        <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Periode Kegiatan</div>
+                        <div class="detail-value">${escapeHtml(periodeDisplay)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Mulai</div>
+                        <div class="detail-value">${tanggalMulaiDisplay}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Penyelenggara</div>

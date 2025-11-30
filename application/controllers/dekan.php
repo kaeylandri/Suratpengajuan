@@ -353,7 +353,7 @@ class Dekan extends CI_Controller
     }
 
     /* ================================
-       DETAIL MODAL (AJAX) - DIPERBAIKI DENGAN PROGRESS BAR
+       DETAIL MODAL (AJAX) - DIPERBAIKI DENGAN PERIODE KEGIATAN
     ================================= */
     public function getDetailPengajuan($id)
     {
@@ -367,6 +367,46 @@ class Dekan extends CI_Controller
             // Ambil progress timeline yang lengkap
             $progress_timeline = $this->getProgressTimeline($id);
             
+            // Ambil semua field yang berkaitan dengan periode
+            $jenis_date = $pengajuan->jenis_date ?? null;
+            $periode_kegiatan = $pengajuan->periode_kegiatan ?? null;
+            $periode_value = $pengajuan->periode_value ?? null;
+            $tanggal_kegiatan = $pengajuan->tanggal_kegiatan ?? null;
+            $akhir_kegiatan = $pengajuan->akhir_kegiatan ?? null;
+            
+            // Tentukan nilai periode yang akan ditampilkan
+            $periode_display = '-';
+            
+            if ($jenis_date === 'Custom') {
+                // FORMAT CUSTOM: "30 Nov 2025 - 01 Des 2025"
+                if ($tanggal_kegiatan && $akhir_kegiatan) {
+                    // Format tanggal Indonesia
+                    $bulan_indonesia = [
+                        'Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mar', 'Apr' => 'Apr',
+                        'May' => 'Mei', 'Jun' => 'Jun', 'Jul' => 'Jul', 'Aug' => 'Ags',
+                        'Sep' => 'Sep', 'Oct' => 'Okt', 'Nov' => 'Nov', 'Dec' => 'Des'
+                    ];
+                    
+                    $format_tanggal = function($date) use ($bulan_indonesia) {
+                        $day = date('d', strtotime($date));
+                        $month_en = date('M', strtotime($date));
+                        $month_id = $bulan_indonesia[$month_en] ?? $month_en;
+                        $year = date('Y', strtotime($date));
+                        return $day . ' ' . $month_id . ' ' . $year;
+                    };
+                    
+                    $start_formatted = $format_tanggal($tanggal_kegiatan);
+                    $end_formatted = $format_tanggal($akhir_kegiatan);
+                    $periode_display = $start_formatted . ' - ' . $end_formatted;
+                } elseif ($tanggal_kegiatan) {
+                    // Jika hanya ada tanggal mulai
+                    $periode_display = date('d M Y', strtotime($tanggal_kegiatan));
+                }
+            } elseif ($jenis_date === 'Periode') {
+                // Untuk jenis Periode, gunakan periode_kegiatan atau periode_value
+                $periode_display = $periode_kegiatan ?: $periode_value ?: '-';
+            }
+            
             $response_data = array(
                 'id' => $pengajuan->id,
                 'nama_kegiatan' => $pengajuan->nama_kegiatan,
@@ -374,7 +414,10 @@ class Dekan extends CI_Controller
                 'jenis_pengajuan' => $pengajuan->jenis_pengajuan,
                 'lingkup_penugasan' => $pengajuan->lingkup_penugasan,
                 'penyelenggara' => $pengajuan->penyelenggara,
-                'tanggal_kegiatan' => $pengajuan->tanggal_kegiatan,
+                'tanggal_kegiatan' => $tanggal_kegiatan,
+                'akhir_kegiatan' => $akhir_kegiatan,
+                'periode_kegiatan' => $periode_display,  // Nilai yang sudah diformat
+                'jenis_date' => $jenis_date,
                 'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
                 'created_at' => $pengajuan->created_at,
                 'eviden' => $pengajuan->eviden,

@@ -59,9 +59,9 @@
     .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
     .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
     .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
-    .detail-value-empty{color:#6c757d;font-style:italic}
+    .detail-value-empty{color:#6c757d;font-style:italic;background:#f8f9fa !important}
     
-    /* Dosen list in detail - NEW STYLES */
+    /* Dosen list in detail */
     .dosen-list {
         display: flex;
         flex-direction: column;
@@ -1010,7 +1010,7 @@ function updateTahun(year) {
     window.location.href = "<?= base_url('sekretariat?tahun=') ?>" + year;
 }
 
-// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki
+// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki dengan PERIODE
 async function showDetail(id) {
     try {
         // Tampilkan loading
@@ -1033,7 +1033,9 @@ async function showDetail(id) {
 
         // Fungsi helper untuk mendapatkan value
         const getVal = (k) => {
-            return (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+            const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+            console.log(`Field ${k}:`, value); // Debug setiap field
+            return value;
         };
 
         // Format status dengan badge
@@ -1053,20 +1055,15 @@ async function showDetail(id) {
         let dosenData = [];
         
         if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
-            // Struktur 1: dosen_data dari AJAX response (format baru)
             dosenData = item.dosen_data;
         } else {
-            // Fallback: gunakan data default
             dosenData = [{
-                nama: 'Data dosen tidak tersedia',
-                nip: '-',
+                nama: getVal('nama_dosen') !== '-' ? getVal('nama_dosen') : 'Data dosen tidak tersedia',
+                nip: getVal('nip') !== '-' ? getVal('nip') : '-',
                 jabatan: '-',
                 divisi: '-'
             }];
         }
-
-        // Debug: Tampilkan data dosen di console
-        console.log('Dosen Data untuk ID', id, ':', dosenData);
 
         // Generate file evidence HTML
         let fileEvidenceHtml = '';
@@ -1076,7 +1073,6 @@ async function showDetail(id) {
             let evidenFiles = [];
             
             try {
-                // Try to parse as JSON first (for multiple files)
                 if (evidenValue.startsWith('[') || evidenValue.startsWith('{')) {
                     const parsed = JSON.parse(evidenValue);
                     if (Array.isArray(parsed)) {
@@ -1085,11 +1081,9 @@ async function showDetail(id) {
                         evidenFiles = [parsed.url];
                     }
                 } else {
-                    // Single file path or URL
                     evidenFiles = [evidenValue];
                 }
             } catch (e) {
-                // If not JSON, treat as single file path
                 evidenFiles = [evidenValue];
             }
             
@@ -1102,27 +1096,20 @@ async function showDetail(id) {
                     <div class="file-evidence">`;
                 
                 evidenFiles.forEach((file, index) => {
-                    // Extract filename dari path/URL
                     let fileName = file;
                     let fileUrl = file;
                     
-                    // Jika file adalah path lokal (tidak mengandung http/https)
                     if (!file.startsWith('http://') && !file.startsWith('https://')) {
-                        // Ambil hanya nama file dari path
                         fileName = file.split('/').pop();
-                        // Buat URL lengkap ke folder uploads/eviden
                         fileUrl = '<?= base_url("uploads/eviden/") ?>' + fileName;
                     } else {
-                        // Jika sudah URL lengkap (dari Uploadcare dll)
                         fileName = file.split('/').pop();
                     }
                     
-                    // Get file extension untuk menentukan tipe file
                     const ext = fileName.split('.').pop().toLowerCase();
                     let fileIcon = 'fa-file';
                     let canPreview = false;
                     
-                    // Tentukan file type dan kemampuan preview
                     if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
                         fileIcon = 'fa-file-image';
                         canPreview = true;
@@ -1164,16 +1151,57 @@ async function showDetail(id) {
             }
         }
 
+        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date - SAMA SEPERTI DI KAPRODI
+        const jenisDate = getVal('jenis_date');
+        const periodeKegiatan = getVal('periode_kegiatan');
+        const tanggalKegiatan = getVal('tanggal_kegiatan');
+        const akhirKegiatan = getVal('akhir_kegiatan');
+        
+        // DEBUG: Tampilkan data periode di console
+        console.log('=== DEBUG PERIODE FRONTEND ===');
+        console.log('Jenis Date:', jenisDate);
+        console.log('Periode Kegiatan:', periodeKegiatan);
+        console.log('Tanggal Kegiatan:', tanggalKegiatan);
+        console.log('Akhir Kegiatan:', akhirKegiatan);
+        console.log('Full item data untuk debugging:', item);
+
+        // Tentukan tampilan untuk Periode Kegiatan - SAMA SEPERTI DI KAPRODI
+        let periodeDisplay = '-';
+
+        if (jenisDate === 'Periode') {
+            // Jika memilih Periode, tampilkan nilai periode yang dipilih
+            periodeDisplay = (periodeKegiatan && periodeKegiatan !== '-' && periodeKegiatan !== '') ? periodeKegiatan : '-';
+            console.log('Periode Display (Periode):', periodeDisplay);
+        } else if (jenisDate === 'Custom') {
+            // Jika memilih Custom, tampilkan range tanggal
+            if (tanggalKegiatan !== '-' && akhirKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan) + ' - ' + formatDate(akhirKegiatan);
+            } else if (tanggalKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan);
+            }
+            console.log('Periode Display (Custom):', periodeDisplay);
+        } else {
+            // Default case - tampilkan tanggal tunggal jika ada
+            if (tanggalKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan);
+            }
+            console.log('Periode Display (Default):', periodeDisplay);
+        }
+
+        // Format tanggal mulai
+        const tanggalMulaiDisplay = (tanggalKegiatan !== '-' && tanggalKegiatan !== '0000-00-00') ? formatDate(tanggalKegiatan) : '-';
+
+        // Tampilkan sesuai dengan format yang sama seperti di dashboard kaprodi
         const content = `
-           // NOMOR SURAT DARI SEKRETARIAT
-${getVal('nomor_surat') && getVal('nomor_surat') !== '' ? `
-<div class="nomor-surat-container">
-    <div class="nomor-surat-label">
-        <i class="fa-solid fa-file-signature"></i> Nomor Surat
-    </div>
-    <div class="nomor-surat-value">${escapeHtml(getVal('nomor_surat'))}</div>
-</div>
-` : ''}
+            <!-- NOMOR SURAT DARI SEKRETARIAT -->
+            ${getVal('nomor_surat') && getVal('nomor_surat') !== '' ? `
+            <div class="nomor-surat-container">
+                <div class="nomor-surat-label">
+                    <i class="fa-solid fa-file-signature"></i> Nomor Surat
+                </div>
+                <div class="nomor-surat-value">${escapeHtml(getVal('nomor_surat'))}</div>
+            </div>
+            ` : ''}
 
             <div class="detail-section">
                 <div class="detail-section-title">
@@ -1201,7 +1229,6 @@ ${getVal('nomor_surat') && getVal('nomor_surat') !== '' ? `
                 </div>
             </div>
 
-            <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-user-tie"></i> Dosen Terkait
@@ -1242,16 +1269,26 @@ ${getVal('nomor_surat') && getVal('nomor_surat') !== '' ? `
                         <div class="detail-value">${formatDate(getVal('created_at'))}</div>
                     </div>
                     <div class="detail-row">
-                        <div class="detail-label">Tanggal Kegiatan</div>
-                        <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                        <div class="detail-label">Jenis Tanggal</div>
+                        <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Periode Kegiatan</div>
+                        <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">
+                            ${escapeHtml(periodeDisplay)}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Mulai</div>
+                        <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Penyelenggara</div>
-                        <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+                        <div class="detail-value ${getVal('penyelenggara') === '-' ? 'detail-value-empty' : ''}">${escapeHtml(getVal('penyelenggara'))}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tempat Kegiatan</div>
-                        <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+                        <div class="detail-value ${getVal('tempat_kegiatan') === '-' ? 'detail-value-empty' : ''}">${escapeHtml(getVal('tempat_kegiatan'))}</div>
                     </div>
                 </div>
             </div>
@@ -1365,7 +1402,7 @@ function modalClickOutside(evt, id) {
 
 // Helper functions
 function formatDate(d) {
-    if (!d || d === '-') return '-';
+    if (!d || d === '-' || d === '0000-00-00') return '-';
     const t = new Date(d);
     if (isNaN(t)) return d;
     return t.toLocaleDateString('id-ID', { day:'2-digit', month: 'short', year:'numeric' });

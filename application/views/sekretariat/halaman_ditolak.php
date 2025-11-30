@@ -70,24 +70,24 @@
     .modal.show{display:flex}
     .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-header{background:#e74c3c;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
+    .modal-header{background:#16A085;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
     .modal-header h3{margin:0;font-size:18px;font-weight:600}
     .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
     .close-modal:hover{background:rgba(255,255,255,0.2)}
     
-    /* Detail Content Styles - IMPROVED */
+    /* Detail Content Styles - IMPROVED (SAMA DENGAN DASHBOARD) */
     .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
     .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
     .detail-section:last-child{margin-bottom:0}
-    .detail-section-title{font-size:16px;font-weight:700;color:#e74c3c;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #e74c3c;display:flex;align-items:center;gap:10px}
+    .detail-section-title{font-size:16px;font-weight:700;color:#16A085;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #16A085;display:flex;align-items:center;gap:10px}
     .detail-section-title i{font-size:18px}
     .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
     .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
     .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
     .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
-    .detail-value-empty{color:#6c757d;font-style:italic}
+    .detail-value-empty{color:#6c757d;font-style:italic;background:#f8f9fa !important}
     
-    /* Dosen list in detail - NEW STYLES */
+    /* Dosen list in detail - NEW STYLES (SAMA DENGAN DASHBOARD) */
     .dosen-list {
         display: flex;
         flex-direction: column;
@@ -108,7 +108,7 @@
         width: 32px;
         height: 32px;
         border-radius: 50%;
-        background: #e74c3c;
+        background: #16A085;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -132,27 +132,27 @@
         color: #6c757d;
     }
     
-    /* File Evidence Styles */
+    /* File Evidence Styles (SAMA DENGAN DASHBOARD) */
     .file-evidence{margin-top:10px}
     .file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
-    .file-item:hover{background:#fdf2f2;border-color:#e74c3c}
-    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#e74c3c;font-size:16px}
+    .file-item:hover{background:#e8f6f3;border-color:#16A085}
+    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#16A085;font-size:16px}
     .file-info{flex:1}
     .file-name{font-weight:600;color:#212529;font-size:14px;cursor:pointer}
-    .file-name:hover{color:#e74c3c}
+    .file-name:hover{color:#16A085}
     .file-size{font-size:12px;color:#6c757d}
     .preview-btn{background:#3498db;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
     .preview-btn:hover{background:#2980b9;color:white;text-decoration:none}
     .preview-btn.disabled{background:#bdc3c7;cursor:not-allowed;opacity:0.6}
     .preview-btn.disabled:hover{background:#bdc3c7}
-    .download-btn{background:#e74c3c;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
-    .download-btn:hover{background:#c0392b;color:white;text-decoration:none}
+    .download-btn{background:#16A085;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+    .download-btn:hover{background:#138D75;color:white;text-decoration:none}
 
     /* Preview Modal Styles */
     .preview-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;justify-content:center;align-items:center;padding:20px}
     .preview-modal.show{display:flex}
     .preview-content{background:white;border-radius:12px;width:90%;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
-    .preview-header{background:#e74c3c;color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
+    .preview-header{background:#16A085;color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
     .preview-header h3{margin:0;font-size:16px;font-weight:600}
     .preview-close{background:none;border:none;color:white;font-size:24px;cursor:pointer;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
     .preview-close:hover{background:rgba(255,255,255,0.2)}
@@ -160,15 +160,15 @@
     .preview-iframe{width:100%;height:70vh;border:none}
     .preview-image{max-width:100%;max-height:70vh;object-fit:contain}
     .preview-unsupported{text-align:center;padding:40px;color:#6c757d}
-    .preview-unsupported i{font-size:48px;margin-bottom:15px;color:#e74c3c}
+    .preview-unsupported i{font-size:48px;margin-bottom:15px;color:#16A085}
     
-    /* Action Buttons in Modal */
+    /* Action Buttons in Modal (SAMA DENGAN DASHBOARD) */
     .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef}
     .modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
     .modal-btn-close{background:#6c757d;color:white}
     .modal-btn-close:hover{background:#5a6268;transform:translateY(-2px)}
     
-    /* Rejection Notes Styles */
+    /* Rejection Notes Styles (SAMA DENGAN DASHBOARD) */
     .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:20px;margin-top:15px}
     .rejection-notes .detail-label{color:#dc3545;font-weight:700}
     .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:14px;line-height:1.5;min-height:auto;padding:12px}
@@ -341,6 +341,32 @@
 
     .status-body {
         padding: 30px;
+    }
+    
+    /* Nomor Surat Styles (SAMA DENGAN DASHBOARD) */
+    .nomor-surat-container {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border: 2px solid #2196f3;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .nomor-surat-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1565c0;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .nomor-surat-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0d47a1;
+        font-family: 'Courier New', monospace;
     }
     
     /* Responsive */
@@ -625,7 +651,7 @@ function previewFile(fileUrl, fileName) {
     previewTitle.textContent = 'Preview: ' + fileName;
     previewBody.innerHTML = `
         <div style="text-align: center; padding: 40px;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #e74c3c;"></i>
+            <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #16A085;"></i>
             <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
         </div>
     `;
@@ -829,13 +855,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki
+// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki - SAMA SEPERTI DI DASHBOARD
 async function showDetail(id) {
     try {
         // Tampilkan loading
         document.getElementById('detailContent').innerHTML = `
             <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#e74c3c"></i>
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#16A085"></i>
                 <p style="margin-top:10px;color:#7f8c8d">Memuat data...</p>
             </div>
         `;
@@ -984,7 +1010,58 @@ async function showDetail(id) {
             }
         }
 
+        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date - SAMA SEPERTI DI DASHBOARD
+        const jenisDate = getVal('jenis_date');
+        const periodeKegiatan = getVal('periode_kegiatan');
+        const tanggalKegiatan = getVal('tanggal_kegiatan');
+        const akhirKegiatan = getVal('akhir_kegiatan');
+        
+        // DEBUG: Tampilkan data periode di console
+        console.log('=== DEBUG PERIODE FRONTEND ===');
+        console.log('Jenis Date:', jenisDate);
+        console.log('Periode Kegiatan:', periodeKegiatan);
+        console.log('Tanggal Kegiatan:', tanggalKegiatan);
+        console.log('Akhir Kegiatan:', akhirKegiatan);
+        console.log('Full item data untuk debugging:', item);
+
+        // Tentukan tampilan untuk Periode Kegiatan - SAMA SEPERTI DI DASHBOARD
+        let periodeDisplay = '-';
+
+        if (jenisDate === 'Periode') {
+            // Jika memilih Periode, tampilkan nilai periode yang dipilih
+            periodeDisplay = (periodeKegiatan && periodeKegiatan !== '-' && periodeKegiatan !== '') ? periodeKegiatan : '-';
+            console.log('Periode Display (Periode):', periodeDisplay);
+        } else if (jenisDate === 'Custom') {
+            // Jika memilih Custom, tampilkan range tanggal
+            if (tanggalKegiatan !== '-' && akhirKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan) + ' - ' + formatDate(akhirKegiatan);
+            } else if (tanggalKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan);
+            }
+            console.log('Periode Display (Custom):', periodeDisplay);
+        } else {
+            // Default case - tampilkan tanggal tunggal jika ada
+            if (tanggalKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan);
+            }
+            console.log('Periode Display (Default):', periodeDisplay);
+        }
+
+        // Format tanggal mulai
+        const tanggalMulaiDisplay = (tanggalKegiatan !== '-' && tanggalKegiatan !== '0000-00-00') ? formatDate(tanggalKegiatan) : '-';
+
+        // PERBAIKAN UTAMA: Tampilan detail yang sama dengan dashboard
         const content = `
+            <!-- NOMOR SURAT DARI SEKRETARIAT (SAMA DENGAN DASHBOARD) -->
+            ${getVal('nomor_surat') && getVal('nomor_surat') !== '' ? `
+            <div class="nomor-surat-container">
+                <div class="nomor-surat-label">
+                    <i class="fa-solid fa-file-signature"></i> Nomor Surat
+                </div>
+                <div class="nomor-surat-value">${escapeHtml(getVal('nomor_surat'))}</div>
+            </div>
+            ` : ''}
+
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-info-circle"></i> Informasi Utama
@@ -1011,7 +1088,7 @@ async function showDetail(id) {
                 </div>
             </div>
 
-            <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
+            <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki (SAMA DENGAN DASHBOARD) -->
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-user-tie"></i> Dosen Terkait
@@ -1052,16 +1129,26 @@ async function showDetail(id) {
                         <div class="detail-value">${formatDate(getVal('created_at'))}</div>
                     </div>
                     <div class="detail-row">
-                        <div class="detail-label">Tanggal Kegiatan</div>
-                        <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                        <div class="detail-label">Jenis Tanggal</div>
+                        <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Periode Kegiatan</div>
+                        <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">
+                            ${escapeHtml(periodeDisplay)}
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Mulai</div>
+                        <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Penyelenggara</div>
-                        <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+                        <div class="detail-value ${getVal('penyelenggara') === '-' ? 'detail-value-empty' : ''}">${escapeHtml(getVal('penyelenggara'))}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tempat Kegiatan</div>
-                        <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+                        <div class="detail-value ${getVal('tempat_kegiatan') === '-' ? 'detail-value-empty' : ''}">${escapeHtml(getVal('tempat_kegiatan'))}</div>
                     </div>
                 </div>
             </div>
@@ -1113,7 +1200,7 @@ function modalClickOutside(evt, id) {
 
 // Helper functions
 function formatDate(d) {
-    if (!d || d === '-') return '-';
+    if (!d || d === '-' || d === '0000-00-00') return '-';
     const t = new Date(d);
     if (isNaN(t)) return d;
     return t.toLocaleDateString('id-ID', { day:'2-digit', month: 'short', year:'numeric' });

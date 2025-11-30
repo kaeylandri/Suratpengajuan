@@ -195,7 +195,7 @@ class Kaprodi extends CI_Controller
     }
 
     /* ================================
-       GET DETAIL PENGAJUAN (AJAX)
+       GET DETAIL PENGAJUAN (AJAX) - REVISI PERBAIKAN
     ================================= */
     public function getDetailPengajuan($id)
     {
@@ -205,6 +205,25 @@ class Kaprodi extends CI_Controller
         if ($pengajuan) {
             $dosen_data = $this->get_dosen_data_from_nip_fixed($pengajuan->nip);
             
+            // PERBAIKAN: Ambil semua field yang berkaitan dengan periode
+            $jenis_date = $pengajuan->jenis_date ?? null;
+            $periode_kegiatan = $pengajuan->periode_kegiatan ?? null;
+            $periode_value = $pengajuan->periode_value ?? null; // Coba field alternatif
+            $tanggal_kegiatan = $pengajuan->tanggal_kegiatan ?? null;
+            $akhir_kegiatan = $pengajuan->akhir_kegiatan ?? null;
+            
+            // Debug: Tampilkan semua field untuk troubleshooting
+            error_log("DEBUG - ID: $id, Jenis Date: " . $jenis_date . ", Periode Kegiatan: " . $periode_kegiatan . ", Periode Value: " . $periode_value);
+            
+            // Tentukan nilai periode yang akan ditampilkan
+            $periode_display = '-';
+            if ($jenis_date === 'Periode') {
+                // Prioritaskan periode_kegiatan, jika kosong coba periode_value
+                $periode_display = $periode_kegiatan ?: $periode_value ?: '-';
+            } elseif ($jenis_date === 'Custom' && $tanggal_kegiatan && $akhir_kegiatan) {
+                $periode_display = date('d M Y', strtotime($tanggal_kegiatan)) . ' - ' . date('d M Y', strtotime($akhir_kegiatan));
+            }
+            
             $response_data = array(
                 'id' => $pengajuan->id,
                 'nama_kegiatan' => $pengajuan->nama_kegiatan,
@@ -212,7 +231,10 @@ class Kaprodi extends CI_Controller
                 'jenis_pengajuan' => $pengajuan->jenis_pengajuan,
                 'lingkup_penugasan' => $pengajuan->lingkup_penugasan,
                 'penyelenggara' => $pengajuan->penyelenggara,
-                'tanggal_kegiatan' => $pengajuan->tanggal_kegiatan,
+                'tanggal_kegiatan' => $tanggal_kegiatan,
+                'akhir_kegiatan' => $akhir_kegiatan,
+                'periode_kegiatan' => $periode_display,  // Nilai yang sudah diformat
+                'jenis_date' => $jenis_date,
                 'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
                 'created_at' => $pengajuan->created_at,
                 'eviden' => $pengajuan->eviden,
@@ -605,5 +627,29 @@ class Kaprodi extends CI_Controller
 
         header('Content-Type: application/json');
         echo json_encode($counts);
+    }
+
+    /* ================================
+       DEBUG: CEK STRUKTUR TABEL SURAT
+    ================================= */
+    public function debug_table_structure()
+    {
+        // Cek struktur tabel surat untuk memastikan field yang ada
+        $query = $this->db->query("DESCRIBE surat");
+        $structure = $query->result();
+        
+        echo "<h3>Struktur Tabel Surat:</h3>";
+        echo "<pre>";
+        foreach ($structure as $field) {
+            echo "Field: " . $field->Field . " | Type: " . $field->Type . " | Null: " . $field->Null . " | Key: " . $field->Key . "<br>";
+        }
+        echo "</pre>";
+        
+        // Cek data contoh untuk debugging
+        $sample = $this->db->get('surat')->row();
+        echo "<h3>Data Contoh:</h3>";
+        echo "<pre>";
+        print_r($sample);
+        echo "</pre>";
     }
 }

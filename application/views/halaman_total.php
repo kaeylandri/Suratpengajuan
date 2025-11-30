@@ -1066,7 +1066,7 @@ function resetFilter() {
     filterTable();
 }
 
-// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki
+// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki dengan PERIODE
 async function showDetail(id) {
     try {
         // Tampilkan loading
@@ -1087,9 +1087,14 @@ async function showDetail(id) {
             return;
         }
 
+        // DEBUG: Tampilkan semua data di console untuk troubleshooting
+        console.log('Data detail untuk ID', id, ':', item);
+
         // Fungsi helper untuk mendapatkan value
         const getVal = (k) => {
-            return (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+            const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+            console.log(`Field ${k}:`, value); // Debug setiap field
+            return value;
         };
 
         // Format status dengan badge
@@ -1109,10 +1114,8 @@ async function showDetail(id) {
         let dosenData = [];
         
         if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
-            // Struktur 1: dosen_data dari AJAX response (format baru)
             dosenData = item.dosen_data;
         } else {
-            // Fallback: gunakan data default
             dosenData = [{
                 nama: getVal('nama_dosen') !== '-' ? getVal('nama_dosen') : 'Data dosen tidak tersedia',
                 nip: getVal('nip') !== '-' ? getVal('nip') : '-',
@@ -1120,9 +1123,6 @@ async function showDetail(id) {
                 divisi: '-'
             }];
         }
-
-        // Debug: Tampilkan data dosen di console
-        console.log('Dosen Data untuk ID', id, ':', dosenData);
 
         // Generate file evidence HTML
         let fileEvidenceHtml = '';
@@ -1132,7 +1132,6 @@ async function showDetail(id) {
             let evidenFiles = [];
             
             try {
-                // Try to parse as JSON first (for multiple files)
                 if (evidenValue.startsWith('[') || evidenValue.startsWith('{')) {
                     const parsed = JSON.parse(evidenValue);
                     if (Array.isArray(parsed)) {
@@ -1141,11 +1140,9 @@ async function showDetail(id) {
                         evidenFiles = [parsed.url];
                     }
                 } else {
-                    // Single file path or URL
                     evidenFiles = [evidenValue];
                 }
             } catch (e) {
-                // If not JSON, treat as single file path
                 evidenFiles = [evidenValue];
             }
             
@@ -1158,27 +1155,20 @@ async function showDetail(id) {
                     <div class="file-evidence">`;
                 
                 evidenFiles.forEach((file, index) => {
-                    // Extract filename dari path/URL
                     let fileName = file;
                     let fileUrl = file;
                     
-                    // Jika file adalah path lokal (tidak mengandung http/https)
                     if (!file.startsWith('http://') && !file.startsWith('https://')) {
-                        // Ambil hanya nama file dari path
                         fileName = file.split('/').pop();
-                        // Buat URL lengkap ke folder uploads/eviden
                         fileUrl = '<?= base_url("uploads/eviden/") ?>' + fileName;
                     } else {
-                        // Jika sudah URL lengkap (dari Uploadcare dll)
                         fileName = file.split('/').pop();
                     }
                     
-                    // Get file extension untuk menentukan tipe file
                     const ext = fileName.split('.').pop().toLowerCase();
                     let fileIcon = 'fa-file';
                     let canPreview = false;
                     
-                    // Tentukan file type dan kemampuan preview
                     if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
                         fileIcon = 'fa-file-image';
                         canPreview = true;
@@ -1220,6 +1210,35 @@ async function showDetail(id) {
             }
         }
 
+        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date
+        const jenisDate = getVal('jenis_date');
+        const periodeKegiatan = getVal('periode_kegiatan');
+        const tanggalKegiatan = getVal('tanggal_kegiatan');
+        const akhirKegiatan = getVal('akhir_kegiatan');
+        
+        // DEBUG: Tampilkan data periode di console
+        console.log('Jenis Date:', jenisDate);
+        console.log('Periode Kegiatan:', periodeKegiatan);
+        console.log('Tanggal Kegiatan:', tanggalKegiatan);
+        console.log('Akhir Kegiatan:', akhirKegiatan);
+        
+        // Tentukan tampilan untuk Periode Kegiatan
+        let periodeDisplay = '-';
+        if (jenisDate === 'Periode') {
+            // Jika memilih Periode, tampilkan nilai periode yang dipilih
+            periodeDisplay = periodeKegiatan !== '-' ? periodeKegiatan : '-';
+            console.log('Periode Display (Periode):', periodeDisplay);
+        } else if (jenisDate === 'Custom') {
+            // Jika memilih Custom, tampilkan range tanggal
+            if (tanggalKegiatan !== '-' && akhirKegiatan !== '-') {
+                periodeDisplay = formatDate(tanggalKegiatan) + ' - ' + formatDate(akhirKegiatan);
+            }
+            console.log('Periode Display (Custom):', periodeDisplay);
+        }
+
+        // Format tanggal mulai
+        const tanggalMulaiDisplay = tanggalKegiatan !== '-' ? formatDate(tanggalKegiatan) : '-';
+
         const content = `
             <!-- NOMOR SURAT DARI SEKRETARIAT -->
             ${getVal('nomor_surat') && getVal('nomor_surat') !== '-' ? `
@@ -1257,7 +1276,6 @@ async function showDetail(id) {
                 </div>
             </div>
 
-            <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-user-tie"></i> Dosen Terkait
@@ -1288,6 +1306,7 @@ async function showDetail(id) {
                 </div>
             </div>
 
+            <!-- PERBAIKAN UTAMA: Bagian Informasi Waktu & Tempat yang disamakan dengan dashboard -->
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
@@ -1298,8 +1317,16 @@ async function showDetail(id) {
                         <div class="detail-value">${formatDate(getVal('created_at'))}</div>
                     </div>
                     <div class="detail-row">
-                        <div class="detail-label">Tanggal Kegiatan</div>
-                        <div class="detail-value">${formatDate(getVal('tanggal_kegiatan'))}</div>
+                        <div class="detail-label">Jenis Tanggal</div>
+                        <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Periode Kegiatan</div>
+                        <div class="detail-value">${escapeHtml(periodeDisplay)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Mulai</div>
+                        <div class="detail-value">${tanggalMulaiDisplay}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Penyelenggara</div>
