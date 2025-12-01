@@ -510,6 +510,62 @@ i[class*="fa-"] {
 .step-counter i {
     color: #FB8C00;
 }
+/* ===== LOADING SCREEN ===== */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 999999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.loading-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    border-top-color: #FB8C00;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.loading-text {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 20px;
+    text-align: center;
+}
+
+.loading-details {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.5;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
     </style>
 </head>
 
@@ -3363,11 +3419,348 @@ $(document).ready(function() {
     });
 
 });
+
+// ========================================
+// 1. FUNGSI LOADING SCREEN
+// ========================================
+function showLoadingScreen(message = 'Mengirim Pengajuan Surat Tugas...') {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.querySelector('.loading-text').textContent = message;
+        loadingOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        console.log('🔄 Loading screen aktif:', message);
+    }
+}
+
+function hideLoadingScreen() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+        console.log('✅ Loading screen non-aktif');
+    }
+}
+
+// ========================================
+// 2. HAPUS PESAN "LEAVE SITE?"
+// ========================================
+window.onbeforeunload = null;
+
+// ========================================
+// 4. MULTI-STEP NAVIGATION DENGAN VALIDASI
+// ========================================
+let currentStep = 0;
+const fieldsets = $('fieldset');
+const totalSteps = fieldsets.length;
+let isSubmitting = false;
+
+function updateProgress() {
+    const percent = ((currentStep + 1) / totalSteps) * 100;
+    $('#progressBar').css('width', percent + '%');
+    $('#currentStep').text(currentStep + 1);
+    $('#totalSteps').text(totalSteps);
+    
+    // Toggle tombol Back
+    $('.prev-btn').toggle(currentStep > 0);
+    
+    // Update teks tombol Next
+    const nextBtn = $('.next-btn');
+    if (currentStep === totalSteps - 1) {
+        nextBtn.text('Finish');
+        nextBtn.removeClass('btn-primary').addClass('btn-success');
+    } else {
+        nextBtn.text('Continue');
+        nextBtn.removeClass('btn-success').addClass('btn-primary');
+    }
+}
+
+// Tombol Back
+$('.prev-btn').off('click').on('click', function(e) {
+    e.preventDefault();
+    
+    if (currentStep > 0) {
+        fieldsets.eq(currentStep).removeClass('active');
+        currentStep--;
+        fieldsets.eq(currentStep).addClass('active');
+        updateProgress();
+        
+        // Scroll ke atas form
+        $('html, body').animate({
+            scrollTop: $('.multi-step-form').offset().top - 100
+        }, 300);
+    }
+});
+
+// ========================================
+// 5. AJAX FORM SUBMIT DENGAN LOADING SCREEN
+// ========================================
+$('#msform').off('submit').on('submit', function(e) {
+    e.preventDefault();
+    
+    console.log('🚀 Form submit diproses...');
+    
+    // Cegah double submit
+    if (isSubmitting) {
+        console.log('⚠ Form sedang diproses, tunggu...');
+        return false;
+    }
+
+    isSubmitting = true;
+    
+    // Tampilkan loading screen
+    showLoadingScreen('Mengirim pengajuan surat tugas...');
+    
+    // Siapkan form data
+    const formData = new FormData(this);
+    
+    // Debug: log data yang akan dikirim
+    console.log('📤 Data yang akan dikirim:');
+    for (let pair of formData.entries()) {
+        if (pair[0] === 'eviden') {
+            console.log('📎 Eviden:', pair[1]);
+        } else {
+            console.log(pair[0] + ': ' + pair[1]);
+        }
+    }
+    
+    // Kirim via AJAX
+    $.ajax({
+        url: $(this).attr('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        timeout: 30000, // 30 detik timeout
+        beforeSend: function() {
+            console.log('🔄 Mengirim request ke server...');
+        },
+        success: function(response, status, xhr) {
+            console.log('✅ Response sukses:', response);
+            hideLoadingScreen();
+            isSubmitting = false;
+            
+            // Cek jika response adalah JSON
+            let responseData;
+            try {
+                responseData = typeof response === 'string' ? JSON.parse(response) : response;
+            } catch (e) {
+                responseData = { success: true, message: 'Pengajuan berhasil dikirim!' };
+            }
+            
+            // Tampilkan pesan sukses
+            if (responseData.success) {
+                // Redirect ke halaman list surat tugas
+                setTimeout(function() {
+                    window.location.href = "<?= base_url('list-surat-tugas') ?>?success=1&id=" + (responseData.id || '');
+                }, 1500);
+                
+                // Tampilkan pesan sementara
+                $('.multi-step-form').html(`
+                    <div class="text-center py-5">
+                        <div style="font-size: 80px; color: #28a745; margin-bottom: 20px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3 class="text-success">Pengajuan Berhasil!</h3>
+                        <p class="text-muted">Surat tugas Anda telah berhasil diajukan.</p>
+                        <p class="text-muted"><small>Mengalihkan ke halaman daftar surat...</small></p>
+                    </div>
+                `);
+            } else {
+                alert('❌ ' + (responseData.message || 'Terjadi kesalahan pada server'));
+                hideLoadingScreen();
+                isSubmitting = false;
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('❌ Error AJAX:', status, error);
+            hideLoadingScreen();
+            isSubmitting = false;
+            
+            let errorMessage = 'Terjadi kesalahan saat mengirim pengajuan. ';
+            
+            if (xhr.status === 0) {
+                errorMessage += 'Koneksi internet terputus atau server tidak merespon.';
+            } else if (xhr.status === 400) {
+                errorMessage += 'Data yang dikirim tidak valid.';
+            } else if (xhr.status === 500) {
+                errorMessage += 'Terjadi kesalahan internal server.';
+            } else {
+                errorMessage += 'Error ' + xhr.status + ': ' + (xhr.responseText || error);
+            }
+            
+            alert('❌ ' + errorMessage);
+            
+            // Enable form kembali
+            $('button[type="submit"]').prop('disabled', false);
+        },
+        complete: function() {
+            console.log('✅ Request selesai');
+        }
+    });
+});
+
+// ========================================
+// 6. INITIAL SETUP SAAT DOM READY
+// ========================================
+$(document).ready(function() {
+    console.log('📄 Document ready, initializing form...');
+    
+    // Inisialisasi progress
+    updateProgress();
+    
+    // Hapus beforeunload handler
+    window.onbeforeunload = null;
+    
+    // Setup Nice Select
+    if ($.fn.niceSelect) {
+        $('select.nice').niceSelect();
+    }
+    
+    // Inisialisasi datepicker (jika belum)
+    if ($.fn.datepicker) {
+        $('.datepicker').datepicker({
+            dateFormat: 'yy-mm-dd',
+            autoclose: true
+        });
+    }
+    
+    // Setup event untuk jenis_date
+    $('#jenis_date').on('change', function() {
+        const value = $(this).val();
+        const periodeSection = $('#periode_section');
+        const customDateSection = $('.row .col-md-3.mt-3');
+        
+        if (value === 'Periode') {
+            periodeSection.show();
+            customDateSection.hide();
+        } else if (value === 'Custom') {
+            periodeSection.hide();
+            customDateSection.show();
+        }
+    });
+    
+    // Setup event untuk jenis_pengajuan
+    $('#jenis_pengajuan').on('change', function() {
+        const value = $(this).val();
+        const buttonCells = $('.button-cell');
+        
+        if (value === 'Kelompok') {
+            buttonCells.css('display', 'flex');
+            $('#jenis_penugasan_kelompok_container').show();
+            $('#jenis_penugasan_perorangan_container').hide();
+        } else {
+            buttonCells.css('display', 'none');
+            $('#jenis_penugasan_kelompok_container').hide();
+            $('#jenis_penugasan_perorangan_container').show();
+        }
+    });
+    
+    // Setup untuk "Lainnya" option
+    $('#jenis_penugasan_perorangan, #jenis_penugasan_kelompok').on('change', function() {
+        const value = $(this).val();
+        const isPerorangan = $(this).attr('id') === 'jenis_penugasan_perorangan';
+        const lainnyaInput = isPerorangan ? $('#penugasan_lainnya_perorangan') : $('#penugasan_lainnya_kelompok');
+        
+        if (value === 'Penugasan Lainnya') {
+            lainnyaInput.show().focus();
+        } else {
+            lainnyaInput.hide().val('');
+        }
+    });
+    
+    // Sembunyikan loading jika ada pesan dari session
+    <?php if ($this->session->flashdata('error') || $this->session->flashdata('success')): ?>
+        setTimeout(function() {
+            hideLoadingScreen();
+            isSubmitting = false;
+        }, 100);
+    <?php endif; ?>
+    
+    console.log('✅ Form initialization complete');
+});
+
+// ========================================
+// 8. HANDLE UPLOADCARE SUCCESS
+// ========================================
+// Fungsi ini akan dipanggil oleh Uploadcare ketika upload selesai
+window.updateEvidenList = function(files) {
+    console.log('📁 File diupload:', files);
+    
+    // Update display
+    const uploadedFiles = [];
+    const filesList = $('#files-list');
+    filesList.empty();
+    
+    files.forEach((file, index) => {
+        uploadedFiles.push(file.cdnUrl);
+        
+        const fileName = file.name || `File ${index + 1}`;
+        const fileSize = file.size ? `(${(file.size / 1024 / 1024).toFixed(2)} MB)` : '';
+        
+        const fileItem = $(`
+            <div class="file-item mb-2 p-2 border rounded" style="background: #f8f9fa;">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-file-alt text-muted me-2"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">${fileName}</div>
+                        <small class="text-muted">${fileSize}</small>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button type="button" class="btn btn-sm btn-danger remove-file" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+        
+        filesList.append(fileItem);
+    });
+    
+    // Update hidden input
+    $('#eviden').val(JSON.stringify(uploadedFiles));
+    
+    // Tampilkan container jika ada file
+    if (uploadedFiles.length > 0) {
+        $('#uploaded-files-display').show();
+    }
+    
+    // Event untuk tombol hapus
+    $('.remove-file').off('click').on('click', function() {
+        const index = $(this).data('index');
+        files.splice(index, 1);
+        window.updateEvidenList(files);
+    });
+};
+
+// ========================================
+// 9. RESET FORM FLAG JIKA PAGE DIBUKA KEMBALI
+// ========================================
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        // Page di-load dari cache (back/forward)
+        hideLoadingScreen();
+        isSubmitting = false;
+        console.log('🔄 Page di-load dari cache, reset flag');
+    }
+});
 </script>
 
-
-
-
+<!-- ============================ -->
+<!-- LOADING SCREEN HTML          -->
+<!-- ============================ -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Mengirim Pengajuan Surat Tugas</div>
+    <div class="loading-details">
+        <p><i class="fas fa-sync-alt fa-spin"></i> Mohon tunggu sejenak. Pengajuan surat tugas sedang diproses.</p>
+        <p><i class="fas fa-exclamation-circle"></i> Jangan tutup atau refresh halaman ini.</p>
+        <p><small>Proses mungkin memakan waktu beberapa detik...</small></p>
+    </div>
+</div>
 <!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
