@@ -179,12 +179,81 @@ label { font-weight: 600; }
 .autocomplete-box-fixed::-webkit-scrollbar-thumb:hover {
     background: #bdc1c6;
 }
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Disabled button style */
+.btn-icon-action[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+.btn-icon-action[disabled]:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
 </style>
 </head>
 <body>
 
 <div class="container mt-4 mb-5">
 <div class="header-title">Edit Pengajuan Surat</div>
+<?php 
+// Cek apakah ini adalah revisi setelah penolakan
+$is_revision = false;
+$rejected_by = '';
+$current_status = isset($surat['status']) ? strtolower($surat['status']) : '';
+
+if ($current_status === 'ditolak kk') {
+    $is_revision = true;
+    $rejected_by = 'Kepala Kelompok (Kaprodi)';
+} elseif ($current_status === 'ditolak sekretariat') {
+    $is_revision = true;
+    $rejected_by = 'Sekretariat';
+} elseif ($current_status === 'ditolak dekan') {
+    $is_revision = true;
+    $rejected_by = 'Dekan';
+}
+?>
+
+<?php if ($is_revision): ?>
+<div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2); animation: fadeIn 0.5s ease;">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="background: #ffc107; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i class="fas fa-exclamation-triangle" style="color: white; font-size: 24px;"></i>
+        </div>
+        <div style="flex: 1;">
+            <h4 style="margin: 0 0 8px 0; color: #856404; font-size: 18px; font-weight: 700;">
+                <i class="fas fa-redo-alt"></i> Mode Revisi - Pengajuan Ulang
+            </h4>
+            <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
+                <strong>Surat ini ditolak oleh <?= $rejected_by; ?>.</strong><br>
+                Setelah Anda mengedit dan menyimpan, pengajuan akan <strong>dikirim kembali ke <?= $rejected_by; ?></strong> untuk disetujui ulang.
+            </p>
+            
+            <?php if (!empty($surat['catatan_penolakan'])): ?>
+            <div style="margin-top: 12px; padding: 12px; background: white; border-radius: 8px; border-left: 4px solid #dc3545;">
+                <strong style="color: #dc3545; display: block; margin-bottom: 5px;">
+                    <i class="fas fa-comment-dots"></i> Alasan Penolakan:
+                </strong>
+                <p style="margin: 0; color: #666; font-size: 13px; font-style: italic;">
+                    "<?= htmlspecialchars($surat['catatan_penolakan']); ?>"
+                </p>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 <form action="<?= site_url('surat/edit/' . (isset($surat['id']) ? $surat['id'] : '')); ?>" method="post" enctype="multipart/form-data">
 
 <!-- Informasi Kegiatan -->

@@ -338,7 +338,7 @@ private function get_dosen_by_nip($nip_data) {
             $progress_percentage = 100;
             break;
 
-        case 'ditolak kk':
+        case 'ditolak KK':
             $steps[] = [
                 'step_name'=>'Ditolak Kaprodi',
                 'status'=>'rejected',
@@ -407,7 +407,7 @@ private function get_dosen_by_nip($nip_data) {
         'disetujui sekretariat'  => '⏳ Menunggu persetujuan Dekan.',
         'disetujui dekan','selesai','completed'
                                  => '✅ Semua persetujuan selesai.',
-        'ditolak kk'             => '❌ Ditolak oleh Kepala Kelompok (KK).',
+        'ditolak KK'             => '❌ Ditolak oleh Kepala Kelompok (KK).',
         'ditolak sekretariat'    => '❌ Ditolak oleh Sekretariat.',
         'ditolak dekan'          => '❌ Ditolak oleh Dekan.',
         default                  => '⏳ Pengajuan sedang dalam proses.',
@@ -747,7 +747,7 @@ public function get_eviden_url($eviden_data)
     return $urls;
 }
 
-    public function edit($id)
+   public function edit($id)
 {
     $surat = $this->Surat_model->get_by_id($id);
 
@@ -757,7 +757,7 @@ public function get_eviden_url($eviden_data)
     // 🔥 CEK APAKAH STATUS DITOLAK
     // ========================================
     $status_lower = strtolower($surat->status);
-    $is_rejected = in_array($status_lower, ['ditolak kk', 'ditolak sekretariat', 'ditolak dekan']);
+    $is_rejected = in_array($status_lower, ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan']);
     
     if (!$is_rejected) {
         $this->session->set_flashdata('error', '⚠️ Edit hanya dapat dilakukan untuk surat yang ditolak! Status surat ini: ' . $surat->status);
@@ -893,7 +893,7 @@ public function get_eviden_url($eviden_data)
     $rejector_name = '';
     
     switch ($status_lower) {
-        case 'ditolak kk':
+        case 'ditolak KK':
             // Reset approval KK, tapi tetap simpan history lainnya
             $approval_status['kk'] = null;
             $new_status = 'pengajuan'; // Kembali ke awal untuk review KK
@@ -947,7 +947,7 @@ public function get_eviden_url($eviden_data)
     }
     
     redirect('list-surat-tugas');
-}   /* ===========================================
+}  /* ===========================================
        DELETE DATA
     ============================================*/
     public function delete($id)
@@ -1064,7 +1064,7 @@ public function get_eviden_url($eviden_data)
         }
     }
 
-    public function multi_edit()
+   public function multi_edit()
 {
     $ids = $this->input->get('ids');
 
@@ -1094,102 +1094,228 @@ public function get_eviden_url($eviden_data)
         return;
     }
 
-    // TAMBAHAN: Enrich dengan data dosen dari list_dosen - FIXED
+    // ========================================
+    // 🔥 FILTER HANYA SURAT YANG DITOLAK
+    // ========================================
+    $original_count = count($data['surat_list']);
+    $data['surat_list'] = array_filter($data['surat_list'], function($surat) {
+        $status_lower = strtolower($surat->status ?? '');
+        return in_array($status_lower, ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan']);
+    });
+
+    if (empty($data['surat_list'])) {
+        $this->session->set_flashdata('error', "⚠️ Multi edit hanya dapat dilakukan untuk surat yang ditolak!");
+        redirect('list-surat-tugas');
+        return;
+    }
+
+    // Reset array keys
+    $data['surat_list'] = array_values($data['surat_list']);
+
+    // TAMBAHAN: Enrich dengan data dosen dari list_dosen
     foreach ($data['surat_list'] as &$surat) {
-        // Pastikan kita memproses field nip dengan benar
         $nip_data = $surat->nip;
-        
-        // Debug log untuk melihat tipe data
-        log_message('debug', 'NIP data type: ' . gettype($nip_data) . ' value: ' . print_r($nip_data, true));
-        
         $surat->dosen_data = $this->get_dosen_by_nip($nip_data);
     }
 
     $this->load->view('multi_edit_surat', $data);
 }
-    /* ===========================================
-       SAVE MULTI EDIT (UPDATED)
-    ============================================*/
     public function save_multi_edit()
-    {
-        if (!$this->input->post()) {
-            $this->session->set_flashdata('error', 'Tidak ada data yang dikirim.');
-            redirect('list-surat-tugas');
-            return;
-        }
-
-        $post = $this->input->post();
-        
-        if (!isset($post['items']) || !is_array($post['items'])) {
-            $this->session->set_flashdata('error', 'Format data tidak valid.');
-            redirect('list-surat-tugas');
-            return;
-        }
-
-        $success_count = 0;
-        $failed_count = 0;
-
-        foreach ($post['items'] as $item) {
-            if (!isset($item['id']) || empty($item['id'])) {
-                continue;
-            }
-
-            $id = intval($item['id']);
-            if ($id <= 0) {
-                $failed_count++;
-                continue;
-            }
-
-            $existing = $this->Surat_model->get_by_id($id);
-            if (!$existing) {
-                $failed_count++;
-                continue;
-            }
-
-            $update_data = [
-                'nama_kegiatan' => $item['nama_kegiatan'] ?? $existing->nama_kegiatan,
-                'jenis_date' => $item['jenis_date'] ?? $existing->jenis_date,
-                'tanggal_kegiatan' => $this->safe_date($item['tanggal_kegiatan'] ?? null),
-                'akhir_kegiatan' => $this->safe_date($item['akhir_kegiatan'] ?? null),
-                'periode_penugasan' => $this->safe_date($item['periode_penugasan'] ?? null),
-                'akhir_periode_penugasan' => $this->safe_date($item['akhir_periode_penugasan'] ?? null),
-                'periode_value' => $item['periode_value'] ?? $existing->periode_value,
-                'tempat_kegiatan' => $item['tempat_kegiatan'] ?? $existing->tempat_kegiatan,
-                'penyelenggara' => $item['penyelenggara'] ?? $existing->penyelenggara,
-                'jenis_pengajuan' => $item['jenis_pengajuan'] ?? $existing->jenis_pengajuan,
-                'lingkup_penugasan' => $item['lingkup_penugasan'] ?? $existing->lingkup_penugasan,
-                'jenis_penugasan_perorangan' => $item['jenis_penugasan_perorangan'] ?? $existing->jenis_penugasan_perorangan,
-                'penugasan_lainnya_perorangan' => $item['penugasan_lainnya_perorangan'] ?? $existing->penugasan_lainnya_perorangan,
-                'jenis_penugasan_kelompok' => $item['jenis_penugasan_kelompok'] ?? $existing->jenis_penugasan_kelompok,
-                'penugasan_lainnya_kelompok' => $item['penugasan_lainnya_kelompok'] ?? $existing->penugasan_lainnya_kelompok,
-                
-                // PERUBAHAN: HANYA UPDATE NIP
-                'nip' => isset($item['nip']) ? json_encode($item['nip']) : $existing->nip,
-            ];
-
-            $result = $this->Surat_model->update_surat($id, $update_data);
-            
-            if ($result) {
-                $success_count++;
-            } else {
-                $failed_count++;
-            }
-        }
-
-        if ($success_count > 0) {
-            $message = "Berhasil mengupdate {$success_count} data.";
-            if ($failed_count > 0) {
-                $message .= " Gagal update {$failed_count} data.";
-            }
-            $this->session->set_flashdata('success', $message);
-        } else {
-            $this->session->set_flashdata('error', 'Tidak ada data yang berhasil diupdate.');
-        }
-
+{
+    if (!$this->input->post()) {
+        $this->session->set_flashdata('error', 'Tidak ada data yang dikirim.');
         redirect('list-surat-tugas');
+        return;
     }
-    
 
+    $post = $this->input->post();
+    
+    if (!isset($post['items']) || !is_array($post['items'])) {
+        $this->session->set_flashdata('error', 'Format data tidak valid.');
+        redirect('list-surat-tugas');
+        return;
+    }
+
+    $success_count = 0;
+    $failed_count = 0;
+    $rejected_items = []; // Track items yang ditolak
+
+    foreach ($post['items'] as $item) {
+        if (!isset($item['id']) || empty($item['id'])) {
+            continue;
+        }
+
+        $id = intval($item['id']);
+        if ($id <= 0) {
+            $failed_count++;
+            continue;
+        }
+
+        $existing = $this->Surat_model->get_by_id($id);
+        if (!$existing) {
+            $failed_count++;
+            continue;
+        }
+
+        // ========================================
+        // 🔥 CEK APAKAH STATUS DITOLAK
+        // ========================================
+        $status_lower = strtolower($existing->status);
+        $is_rejected = in_array($status_lower, ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan']);
+        
+        if (!$is_rejected) {
+            $failed_count++;
+            continue; // Skip item yang tidak ditolak
+        }
+
+        // DATA UPDATE DASAR
+        $update_data = [
+            'nama_kegiatan' => $item['nama_kegiatan'] ?? $existing->nama_kegiatan,
+            'jenis_date' => $item['jenis_date'] ?? $existing->jenis_date,
+            'tanggal_kegiatan' => $this->safe_date($item['tanggal_kegiatan'] ?? null),
+            'akhir_kegiatan' => $this->safe_date($item['akhir_kegiatan'] ?? null),
+            'periode_penugasan' => $this->safe_date($item['periode_penugasan'] ?? null),
+            'akhir_periode_penugasan' => $this->safe_date($item['akhir_periode_penugasan'] ?? null),
+            'periode_value' => $item['periode_value'] ?? $existing->periode_value,
+            'tempat_kegiatan' => $item['tempat_kegiatan'] ?? $existing->tempat_kegiatan,
+            'penyelenggara' => $item['penyelenggara'] ?? $existing->penyelenggara,
+            'jenis_pengajuan' => $item['jenis_pengajuan'] ?? $existing->jenis_pengajuan,
+            'lingkup_penugasan' => $item['lingkup_penugasan'] ?? $existing->lingkup_penugasan,
+            'jenis_penugasan_perorangan' => $item['jenis_penugasan_perorangan'] ?? $existing->jenis_penugasan_perorangan,
+            'penugasan_lainnya_perorangan' => $item['penugasan_lainnya_perorangan'] ?? $existing->penugasan_lainnya_perorangan,
+            'jenis_penugasan_kelompok' => $item['jenis_penugasan_kelompok'] ?? $existing->jenis_penugasan_kelompok,
+            'penugasan_lainnya_kelompok' => $item['penugasan_lainnya_kelompok'] ?? $existing->penugasan_lainnya_kelompok,
+            'nip' => isset($item['nip']) ? json_encode($item['nip']) : $existing->nip,
+        ];
+
+        // ========================================
+        // 🔥 FITUR: RESET STATUS & APPROVAL_STATUS
+        // ========================================
+        
+        // CEK: Apakah sudah ada approval_status sebelumnya?
+        $existing_approval = $existing->approval_status ?? null;
+        $has_approval_history = false;
+        
+        if ($existing_approval && $existing_approval !== '' && $existing_approval !== 'null') {
+            $decoded = json_decode($existing_approval, true);
+            if (is_array($decoded)) {
+                // Cek apakah ada data approval yang terisi
+                $has_approval_history = !empty($decoded['kk']) || !empty($decoded['sekretariat']) || !empty($decoded['dekan']);
+            }
+        }
+        
+        // HANYA update approval_status jika memang sudah ada history approval sebelumnya
+        if ($has_approval_history) {
+            // Ambil approval_status saat ini
+            $approval_status = json_decode($existing->approval_status, true);
+            if (!is_array($approval_status)) {
+                $approval_status = [
+                    'kk' => null,
+                    'sekretariat' => null,
+                    'dekan' => null
+                ];
+            }
+            
+            // Tentukan status baru berdasarkan siapa yang menolak
+            $new_status = 'pengajuan';
+            $rejector_name = '';
+            
+            switch ($status_lower) {
+                case 'ditolak KK':
+                    // Reset approval KK saja, sisanya tetap
+                    $approval_status['kk'] = null;
+                    $new_status = 'pengajuan';
+                    $rejector_name = 'KK';
+                    break;
+                    
+                case 'ditolak sekretariat':
+                    // Reset approval sekretariat saja, KK tetap
+                    $approval_status['sekretariat'] = null;
+                    $new_status = 'disetujui KK';
+                    $rejector_name = 'Sekretariat';
+                    break;
+                    
+                case 'ditolak dekan':
+                    // Reset approval dekan saja, KK dan Sekretariat tetap
+                    $approval_status['dekan'] = null;
+                    $new_status = 'disetujui sekretariat';
+                    $rejector_name = 'Dekan';
+                    break;
+            }
+            
+            // Update status dan approval_status
+            $update_data['status'] = $new_status;
+            $update_data['approval_status'] = json_encode($approval_status);
+        } else {
+            // JIKA BELUM ADA APPROVAL HISTORY
+            // Hanya reset status ke pengajuan, TIDAK update approval_status
+            $new_status = 'pengajuan';
+            $rejector_name = match($status_lower) {
+                'ditolak KK' => 'KK',
+                'ditolak sekretariat' => 'Sekretariat',
+                'ditolak dekan' => 'Dekan',
+                default => 'pihak terkait'
+            };
+            
+            $update_data['status'] = $new_status;
+            // TIDAK menambahkan approval_status ke $update_data
+            // Biarkan kosong atau NULL di database
+        }
+        
+        // Hapus catatan penolakan
+        $update_data['catatan_penolakan'] = null;
+        
+        // Update timestamp
+        $update_data['updated_at'] = date('Y-m-d H:i:s');
+
+        // EKSEKUSI UPDATE
+        $result = $this->Surat_model->update_surat($id, $update_data);
+        
+        if ($result) {
+            $success_count++;
+            $rejected_items[] = [
+                'id' => $id,
+                'nama' => $item['nama_kegiatan'] ?? 'Surat #' . $id,
+                'rejector' => $rejector_name
+            ];
+            
+            // Log activity
+            log_message('info', "Multi Edit: Surat ID {$id} direvisi dan diajukan ulang ke {$rejector_name}");
+        } else {
+            $failed_count++;
+        }
+    }
+
+    // ========================================
+    // 🔥 FLASHDATA DENGAN DETAIL LENGKAP
+    // ========================================
+    if ($success_count > 0) {
+        $rejector_summary = [];
+        foreach ($rejected_items as $item) {
+            if (!isset($rejector_summary[$item['rejector']])) {
+                $rejector_summary[$item['rejector']] = 0;
+            }
+            $rejector_summary[$item['rejector']]++;
+        }
+        
+        $summary_text = [];
+        foreach ($rejector_summary as $rejector => $count) {
+            $summary_text[] = "{$count} ke {$rejector}";
+        }
+        
+        $message = "✅ Berhasil memperbarui {$success_count} surat! Pengajuan telah dikirim ulang: " . implode(', ', $summary_text) . ".";
+        
+        if ($failed_count > 0) {
+            $message .= " {$failed_count} item gagal diproses.";
+        }
+        
+        $this->session->set_flashdata('success', $message);
+    } else {
+        $this->session->set_flashdata('error', '❌ Tidak ada data yang berhasil diupdate. Pastikan hanya memilih surat dengan status ditolak.');
+    }
+
+    redirect('list-surat-tugas');
+}
    public function cetak($id)
 {
     $surat = $this->Surat_model->get_by_id($id);

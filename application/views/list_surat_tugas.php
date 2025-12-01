@@ -792,6 +792,19 @@
         background: #fb8c00;
         transform: scale(1.05);
     }
+    /* Disabled button style */
+.btn-edit-disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: auto !important; /* Allow click for alert */
+    background: #6c757d !important;
+}
+
+.btn-edit-disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    background: #6c757d !important;
+}
 
     .btn-delete {
         background: #ef5350;
@@ -1753,6 +1766,17 @@
             gap: 3px;
         }
     }
+    /* Disabled button style */
+.btn-icon-action[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+.btn-icon-action[disabled]:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
     </style>
 </head>
 
@@ -1857,6 +1881,23 @@
 
     <!-- Main Content -->
     <div class="main-content">
+        <?php if ($this->session->flashdata('success')): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px; border-left: 5px solid #28a745;">
+            <i class="fas fa-check-circle"></i> <?= $this->session->flashdata('success'); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($this->session->flashdata('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 12px; border-left: 5px solid #dc3545;">
+            <i class="fas fa-exclamation-circle"></i> <?= $this->session->flashdata('error'); ?>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <?php endif; ?>
         <!-- Header Actions -->
         <div class="header-actions">
             <h1 class="page-title">List Surat Tugas</h1>
@@ -2114,21 +2155,46 @@
                     </td>
                     <td><?= isset($s->created_at) && $s->created_at ? htmlspecialchars($s->created_at) : '-'; ?></td>
                     <td>
-                        <div class="action-buttons">
-                            <button class="btn-icon-action btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s->id; ?>)">
-                                <i class="fas fa-tasks"></i>
-                            </button>
-                            <a href="<?= site_url('surat/edit/'.$s->id); ?>" class="btn-icon-action btn-edit" title="Edit">
+                    <div class="action-buttons">
+                        <button class="btn-icon-action btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s->id; ?>)">
+                            <i class="fas fa-tasks"></i>
+                        </button>
+                        
+                        <?php 
+                        // Cek apakah status ditolak
+                        $status_lower = strtolower($s->status);
+                        $is_rejected = in_array($status_lower, ['ditolak kk', 'ditolak sekretariat', 'ditolak dekan']);
+                        ?>
+                        
+                        <?php if ($is_rejected): ?>
+                            <a href="<?= site_url('surat/edit/'.$s->id); ?>" 
+                            class="btn-icon-action btn-edit" 
+                            title="Edit & Ajukan Ulang - Ditolak">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="<?= base_url('surat/cetak/' . $s->id) ?>" target="_blank" class="btn-icon-action btn-print" title="Cetak">
-                                <i class="fas fa-print"></i>
-                            </a>
-                            <a href="<?= site_url('surat/delete/'.$s->id); ?>" class="btn-icon-action btn-delete" title="Hapus" onclick="return confirm('Hapus data ini?')">
-                                <i class="fas fa-trash"></i>
-                            </a>
-                        </div>
-                    </td>
+                        <?php else: ?>
+                            <button class="btn-icon-action btn-edit btn-edit-disabled" 
+                                    title="Edit hanya untuk surat ditolak" 
+                                    disabled 
+                                    style="opacity: 0.5; cursor: not-allowed;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        <?php endif; ?>
+                        
+                        <a href="<?= base_url('surat/cetak/' . $s->id) ?>" 
+                        target="_blank" 
+                        class="btn-icon-action btn-print" 
+                        title="Cetak">
+                            <i class="fas fa-print"></i>
+                        </a>
+                        <a href="<?= site_url('surat/delete/'.$s->id); ?>" 
+                        class="btn-icon-action btn-delete" 
+                        title="Hapus" 
+                        onclick="return confirm('Hapus data ini?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -2345,6 +2411,26 @@ document.addEventListener('DOMContentLoaded', function() {
 // ===== JQUERY DOCUMENT READY =====
 $(document).ready(function () {
     const BASE_URL = '<?= rtrim(base_url(), "/"); ?>';
+    // Handle click pada tombol edit yang disabled
+$(document).on('click', '.btn-edit-disabled', function(e) {
+    e.preventDefault();
+    const row = $(this).closest('tr');
+    const status = row.find('td').eq(7).text().trim(); // Sesuaikan index kolom status jika berbeda
+    
+    Swal.fire({
+        icon: 'warning',
+        title: 'Edit Tidak Diizinkan',
+        html: `
+            <p>Tombol edit hanya dapat digunakan untuk surat yang <strong>ditolak</strong>.</p>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                <strong>Status surat ini:</strong> ${status}
+            </div>
+        `,
+        confirmButtonText: 'Mengerti',
+        confirmButtonColor: '#FB8C00'
+    });
+    return false;
+});
 
     // Inisialisasi DataTable dengan konfigurasi responsif
     let table = $('#tabelSurat').DataTable({

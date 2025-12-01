@@ -8,6 +8,31 @@ function safe_json($data)
     return (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
 }
 
+// ========================================
+// 🔥 PENGECEKAN STATUS DITOLAK
+// ========================================
+// Filter hanya surat yang ditolak
+if (isset($surat_list) && is_array($surat_list)) {
+    $original_count = count($surat_list);
+    $surat_list = array_filter($surat_list, function($surat) {
+        $status_lower = strtolower($surat->status ?? '');
+        return in_array($status_lower, ['ditolak kk', 'ditolak sekretariat', 'ditolak dekan']);
+    });
+    
+    // Jika tidak ada surat yang ditolak
+    if (empty($surat_list)) {
+        // Redirect dengan pesan error
+        if (isset($CI) && method_exists($CI, 'session')) {
+            $CI->session->set_flashdata('error', '⚠️ Multi edit hanya dapat dilakukan untuk surat yang ditolak! Tidak ada surat dengan status ditolak dari ' . $original_count . ' pengajuan yang dipilih.');
+        }
+        header('Location: ' . site_url('list-surat-tugas'));
+        exit;
+    }
+    
+    // Reset array keys
+    $surat_list = array_values($surat_list);
+}
+
 // Pastikan $surat_list selalu terdefinisi (hindari warning)
 if (!isset($surat_list) || !is_array($surat_list)) {
     $surat_list = [];
@@ -660,6 +685,36 @@ if (!isset($surat_list) || !is_array($surat_list)) {
         .long-dropdown {
             min-height: 120px;
         }
+        @keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header {
+    animation: slideInDown 0.5s ease;
+}
+
+/* Status badge animation */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 8px rgba(220, 53, 69, 0);
+    }
+}
+
+.card-subtitle span[style*="background: #dc3545"] {
+    animation: pulse 2s infinite;
+}
     </style>
 </head>
 
@@ -667,14 +722,66 @@ if (!isset($surat_list) || !is_array($surat_list)) {
 
     <div class="container-custom">
 
-        <div class="header">
-            <h1><i class="fa fa-edit"></i> Multi Edit Surat
-                <span class="badge"><?= count($surat_list); ?> Item</span>
-            </h1>
-            <div>
-                <a href="<?= site_url('surat'); ?>" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Kembali</a>
+       <div class="header">
+    <h1><i class="fa fa-edit"></i> Multi Edit Surat - Mode Revisi
+        <span class="badge"><?= count($surat_list); ?> Item Ditolak</span>
+    </h1>
+    <div>
+        <a href="<?= site_url('list-surat-tugas'); ?>" class="btn btn-secondary"><i class="fa fa-arrow-left"></i> Kembali</a>
+    </div>
+</div>
+
+<!-- Banner Peringatan Revisi -->
+<div style="background: linear-gradient(135deg, #fff3cd 0%, #ffe5b4 100%); border: 2px solid #ffc107; border-radius: 16px; padding: 25px; margin-bottom: 25px; box-shadow: 0 6px 20px rgba(255, 193, 7, 0.25); position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(to right, #ff8c00, #ffc107, #ff8c00);"></div>
+    
+    <div style="display: flex; align-items: flex-start; gap: 20px;">
+        <div style="background: #ffc107; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);">
+            <i class="fas fa-exclamation-triangle" style="color: white; font-size: 28px;"></i>
+        </div>
+        
+        <div style="flex: 1;">
+            <h3 style="margin: 0 0 12px 0; color: #856404; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-redo-alt"></i> Mode Revisi Multi Edit - Pengajuan Ulang Otomatis
+            </h3>
+            
+            <div style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #ff8c00;">
+                <p style="margin: 0 0 10px 0; color: #333; font-size: 14px; line-height: 1.8;">
+                    <strong style="color: #ff8c00;">Anda sedang mengedit <?= count($surat_list); ?> surat yang ditolak.</strong> 
+                    Setelah perubahan disimpan, setiap surat akan <strong>secara otomatis dikirim kembali</strong> ke pihak yang menolak untuk persetujuan ulang:
+                </p>
+                
+                <ul style="margin: 10px 0; padding-left: 25px; color: #666; font-size: 13px; line-height: 1.8;">
+                    <li><strong>Ditolak KK</strong> → Dikirim ulang ke <strong>Kepala Kelompok (Kaprodi)</strong></li>
+                    <li><strong>Ditolak Sekretariat</strong> → Dikirim ulang ke <strong>Sekretariat</strong></li>
+                    <li><strong>Ditolak Dekan</strong> → Dikirim ulang ke <strong>Dekan</strong></li>
+                </ul>
+            </div>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px; background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; border: 1px solid #ffd8b2;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                        <i class="fas fa-info-circle" style="color: #ff8c00;"></i>
+                        <strong style="color: #856404; font-size: 13px;">Status Approval:</strong>
+                    </div>
+                    <p style="margin: 0; color: #666; font-size: 12px; line-height: 1.6;">
+                        Persetujuan sebelumnya tetap tersimpan. Hanya approval pihak yang menolak yang akan di-reset.
+                    </p>
+                </div>
+                
+                <div style="flex: 1; min-width: 200px; background: rgba(255, 255, 255, 0.7); padding: 12px; border-radius: 8px; border: 1px solid #ffd8b2;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;">
+                        <i class="fas fa-eraser" style="color: #ff8c00;"></i>
+                        <strong style="color: #856404; font-size: 13px;">Catatan Penolakan:</strong>
+                    </div>
+                    <p style="margin: 0; color: #666; font-size: 12px; line-height: 1.6;">
+                        Semua catatan penolakan akan dihapus karena ini adalah pengajuan baru.
+                    </p>
+                </div>
             </div>
         </div>
+    </div>
+</div>
 
         <div class="info-box">
             <p><strong><i class="fa fa-info-circle"></i> Panduan Multi Edit:</strong></p>
@@ -702,15 +809,50 @@ if (!isset($surat_list) || !is_array($surat_list)) {
                     <div class="card-number"><?= $index + 1 ?></div>
 
                     <div class="card-header-custom">
-                        <div>
-                            <div class="card-title"><?= htmlspecialchars($surat->nama_kegiatan ?? '-'); ?></div>
-                            <div class="card-subtitle">
-                                <i class="fa fa-file-alt"></i> <?= htmlspecialchars($surat->jenis_pengajuan ?? '-'); ?> •
-                                <i class="fa fa-calendar"></i> <?= !empty($surat->created_at) && $surat->created_at !== '-' ? date('d M Y', strtotime($surat->created_at)) : '-'; ?>
-                            </div>
+                    <div>
+                        <div class="card-title"><?= htmlspecialchars($surat->nama_kegiatan ?? '-'); ?></div>
+                        <div class="card-subtitle">
+                            <i class="fa fa-file-alt"></i> <?= htmlspecialchars($surat->jenis_pengajuan ?? '-'); ?> •
+                            <i class="fa fa-calendar"></i> <?= !empty($surat->created_at) && $surat->created_at !== '-' ? date('d M Y', strtotime($surat->created_at)) : '-'; ?>
+                            
+                            <?php 
+                            // Tampilkan status penolakan dengan badge
+                            $status_lower = strtolower($surat->status ?? '');
+                            $status_badge = '';
+                            $status_color = '';
+                            
+                            if ($status_lower === 'ditolak kk') {
+                                $status_badge = 'Ditolak KK';
+                                $status_color = '#dc3545';
+                            } elseif ($status_lower === 'ditolak sekretariat') {
+                                $status_badge = 'Ditolak Sekretariat';
+                                $status_color = '#fd7e14';
+                            } elseif ($status_lower === 'ditolak dekan') {
+                                $status_badge = 'Ditolak Dekan';
+                                $status_color = '#e83e8c';
+                            }
+                            ?>
+                            
+                            <?php if ($status_badge): ?>
+                            <span style="display: inline-flex; align-items: center; gap: 5px; background: <?= $status_color ?>; color: white; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-left: 8px;">
+                                <i class="fas fa-times-circle"></i> <?= $status_badge ?>
+                            </span>
+                            <?php endif; ?>
                         </div>
-                        <div class="item-id">ID: <?= htmlspecialchars($surat->id); ?></div>
+                        
+                        <?php if (!empty($surat->catatan_penolakan)): ?>
+                        <div style="margin-top: 10px; padding: 10px; background: #fff8f0; border-left: 3px solid #dc3545; border-radius: 6px;">
+                            <strong style="color: #dc3545; font-size: 12px; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                <i class="fas fa-comment-dots"></i> Alasan Penolakan:
+                            </strong>
+                            <p style="margin: 0; color: #666; font-size: 12px; font-style: italic; line-height: 1.5;">
+                                "<?= htmlspecialchars($surat->catatan_penolakan); ?>"
+                            </p>
+                        </div>
+                        <?php endif; ?>
                     </div>
+                    <div class="item-id">ID: <?= htmlspecialchars($surat->id); ?></div>
+                </div>
 
                     <input type="hidden" name="items[<?= $index ?>][id]" value="<?= htmlspecialchars($surat->id); ?>">
 
