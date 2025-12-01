@@ -509,7 +509,10 @@ i[class*="fa-"] {
 
 .step-counter i {
     color: #FB8C00;
+
 }
+
+
     </style>
 </head>
 
