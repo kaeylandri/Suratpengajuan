@@ -80,6 +80,7 @@ $route['surat/generate_qr/(:num)'] = 'surat/generate_qr/$1';
 // AJAX ROUTES
 $route['surat/get_dosen_by_nip'] = 'surat/get_dosen_by_nip';
 $route['surat/autocomplete_nip'] = 'surat/autocomplete_nip';
+$route['sekretariat/autocomplete_nip'] = 'sekretariat/autocomplete_nip';
 
 // DEBUG ROUTES
 $route['surat/test_path'] = 'surat/test_path';
@@ -181,3 +182,5 @@ $route['auth/process_login'] = 'auth/process_login';
 */
 
 $route['(:any)'] = 'errors/page_404';
+$route['sekretariat/edit_surat/(:num)'] = 'sekretariat/edit_surat/$1';
+$route['sekretariat/update_surat/(:num)'] = 'sekretariat/update_surat/$1';
