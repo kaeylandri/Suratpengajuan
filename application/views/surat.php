@@ -2576,7 +2576,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <!-- ===== UPLOADCARE CDN ===== -->
 <script>
-UPLOADCARE_PUBLIC_KEY = "94b5f419bb48e969b290";
+UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
 </script>
 <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
@@ -2678,7 +2678,7 @@ document.addEventListener("DOMContentLoaded", function () {
         multiple: true,
         previewStep: true,
         tabs: "file url camera dropbox gdrive",
-        publicKey: "94b5f419bb48e969b290"
+        publicKey: "3438a2ee1b7dd183914c"
     });
 
     // Event ketika user selesai upload file

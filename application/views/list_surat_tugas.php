@@ -845,7 +845,31 @@
         background: #4caf50;
         transform: scale(1.05);
     }
+/* Tambahkan di bagian CSS yang sesuai (setelah .btn-print) */
+.btn-print-disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important; /* Tidak bisa diklik */
+    background: #6c757d !important; /* Warna abu-abu */
+}
 
+.btn-print-disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    background: #6c757d !important;
+}
+
+/* Atau gunakan selector attribute */
+.btn-icon-action[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+.btn-icon-action[disabled]:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
     /* Status Modal Styles */
     .status-modal {
         display: none;
@@ -2155,45 +2179,57 @@
                     </td>
                     <td><?= isset($s->created_at) && $s->created_at ? htmlspecialchars($s->created_at) : '-'; ?></td>
                     <td>
-                    <div class="action-buttons">
-                        <button class="btn-icon-action btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s->id; ?>)">
-                            <i class="fas fa-tasks"></i>
+                    <!-- Di dalam bagian action buttons (sekitar baris 700-750) -->
+                <div class="action-buttons">
+                    <button class="btn-icon-action btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s->id; ?>)">
+                        <i class="fas fa-tasks"></i>
+                    </button>
+                    
+                    <?php 
+                    // Cek apakah status ditolak
+                    $status_lower = strtolower($s->status);
+                    $is_rejected = in_array($status_lower, ['ditolak kk', 'ditolak sekretariat', 'ditolak dekan']);
+                    $is_approved_dekan = ($s->status === 'disetujui dekan');
+                    ?>
+                    
+                    <?php if ($is_rejected): ?>
+                        <a href="<?= site_url('surat/edit/'.$s->id); ?>" 
+                        class="btn-icon-action btn-edit" 
+                        title="Edit & Ajukan Ulang - Ditolak">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    <?php else: ?>
+                        <button class="btn-icon-action btn-edit btn-edit-disabled" 
+                                title="Edit hanya untuk surat ditolak" 
+                                disabled 
+                                style="opacity: 0.5; cursor: not-allowed;">
+                            <i class="fas fa-edit"></i>
                         </button>
-                        
-                        <?php 
-                        // Cek apakah status ditolak
-                        $status_lower = strtolower($s->status);
-                        $is_rejected = in_array($status_lower, ['ditolak kk', 'ditolak sekretariat', 'ditolak dekan']);
-                        ?>
-                        
-                        <?php if ($is_rejected): ?>
-                            <a href="<?= site_url('surat/edit/'.$s->id); ?>" 
-                            class="btn-icon-action btn-edit" 
-                            title="Edit & Ajukan Ulang - Ditolak">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                        <?php else: ?>
-                            <button class="btn-icon-action btn-edit btn-edit-disabled" 
-                                    title="Edit hanya untuk surat ditolak" 
-                                    disabled 
-                                    style="opacity: 0.5; cursor: not-allowed;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        <?php endif; ?>
-                        
+                    <?php endif; ?>
+                    
+                    <?php if ($is_approved_dekan): ?>
                         <a href="<?= base_url('surat/cetak/' . $s->id) ?>" 
                         target="_blank" 
                         class="btn-icon-action btn-print" 
-                        title="Cetak">
+                        title="Cetak Surat Tugas">
                             <i class="fas fa-print"></i>
                         </a>
-                        <a href="<?= site_url('surat/delete/'.$s->id); ?>" 
-                        class="btn-icon-action btn-delete" 
-                        title="Hapus" 
-                        onclick="return confirm('Hapus data ini?')">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </div>
+                    <?php else: ?>
+                        <button class="btn-icon-action btn-print btn-print-disabled" 
+                                title="Cetak hanya untuk surat disetujui dekan" 
+                                onclick="showPrintAlert('<?= $s->status ?>')"
+                                style="opacity: 0.5; cursor: not-allowed;">
+                            <i class="fas fa-print"></i>
+                        </button>
+                    <?php endif; ?>
+                    
+                    <a href="<?= site_url('surat/delete/'.$s->id); ?>" 
+                    class="btn-icon-action btn-delete" 
+                    title="Hapus" 
+                    onclick="return confirm('Hapus data ini?')">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
                 </td>
                 </tr>
                 <?php endforeach; ?>
@@ -3149,6 +3185,27 @@ $(document).on('click', '.btn-edit-disabled', function(e) {
         // Biarkan link/button berfungsi normal
     });
 });
+// Tambahkan di bagian JavaScript (setelah fungsi lainnya)
+function showPrintAlert(status) {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Cetak Tidak Diizinkan',
+        html: `
+            <p>Tombol cetak hanya dapat digunakan untuk surat yang sudah <strong>disetujui dekan</strong>.</p>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                <strong>Status surat ini:</strong> ${status}
+            </div>
+            <div style="margin-top: 15px; font-size: 14px; color: #6c757d;">
+                <i class="fas fa-info-circle"></i> Silakan tunggu persetujuan dekan terlebih dahulu.
+            </div>
+        `,
+        confirmButtonText: 'Mengerti',
+        confirmButtonColor: '#FB8C00'
+    });
+}
+
+// Jika menggunakan SweetAlert2, pastikan sudah diinclude di header
+// <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </script>
 </body>
 </html>
