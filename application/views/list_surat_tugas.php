@@ -21,6 +21,7 @@
         font-family: 'Poppins', sans-serif;
         margin: 0;
         padding: 0;
+        overflow-x: hidden; /* Mencegah scroll horizontal di seluruh halaman */
     }
 
     /* HEADER/NAVBAR */
@@ -254,6 +255,8 @@
         padding: 30px;
         transition: margin-left 0.3s ease;
         min-height: 100vh;
+        width: calc(100% - 260px); /* Pastikan konten tidak melebihi lebar viewport */
+        box-sizing: border-box; /* Agar padding tidak menambah lebar */
     }
 
     /* Header Action Buttons */
@@ -263,6 +266,8 @@
         align-items: center;
         margin-bottom: 20px;
         padding: 0 10px;
+        flex-wrap: wrap;
+        gap: 15px;
     }
 
     .page-title {
@@ -573,9 +578,9 @@
         background:#e53935;
     }
 
-    /* Table styles */
+    /* Table styles - PERBAIKAN UTAMA DI SINI */
     #tabelSurat{
-        width:100%;
+        width:100% !important; /* Pastikan tabel tidak melebihi kontainer */
         border-collapse:collapse;
         background:white;
         border-radius:8px;
@@ -583,6 +588,14 @@
         font-size:14px;
         box-shadow:0 4px 12px rgba(0,0,0,0.1);
         font-family: 'Montserrat', sans-serif;
+        table-layout: auto; /* Gunakan auto untuk fleksibilitas */
+        max-width: 100%; /* Pastikan tidak melebihi kontainer */
+    }
+
+    #tabelSurat_wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important; /* Hanya aktifkan scroll horizontal jika benar-benar diperlukan */
     }
 
     #tabelSurat thead{
@@ -595,11 +608,74 @@
         border:1px solid #eee;
         vertical-align:middle;
         text-align: center;
+        overflow: hidden; /* Tambahkan untuk mencegah konten meluber */
+        white-space: normal; /* Izinkan bungkus teks */
+        word-wrap: break-word; /* Pecah kata panjang */
     }
 
-    #tabelSurat td:nth-child(5),#tabelSurat td:nth-child(6){
-        min-width:180px;
-        max-width:280px;
+    /* PERBAIKAN UTAMA: Atur lebar kolom dengan persentase agar responsif */
+    #tabelSurat th:nth-child(1),
+    #tabelSurat td:nth-child(1) {
+        width: 4%; /* Checkbox */
+        max-width: 50px;
+    }
+    
+    #tabelSurat th:nth-child(2),
+    #tabelSurat td:nth-child(2) {
+        width: 5%; /* No */
+        max-width: 60px;
+    }
+    
+    #tabelSurat th:nth-child(3),
+    #tabelSurat td:nth-child(3) {
+        width: 25%; /* Nama Kegiatan */
+        min-width: 200px;
+        text-align: left; /* Rata kiri untuk keterbacaan */
+    }
+    
+    #tabelSurat th:nth-child(4),
+    #tabelSurat td:nth-child(4) {
+        width: 12%; /* Jenis Pengajuan */
+        min-width: 120px;
+    }
+    
+    #tabelSurat th:nth-child(5),
+    #tabelSurat td:nth-child(5) {
+        width: 20%; /* Nama Dosen */
+        min-width: 180px;
+    }
+    
+    #tabelSurat th:nth-child(6),
+    #tabelSurat td:nth-child(6) {
+        width: 12%; /* Divisi */
+        min-width: 120px;
+    }
+    
+    #tabelSurat th:nth-child(7),
+    #tabelSurat td:nth-child(7) {
+        width: 12%; /* Tanggal Pengajuan */
+        min-width: 120px;
+    }
+    
+    #tabelSurat th:nth-child(8),
+    #tabelSurat td:nth-child(8) {
+        width: 10%; /* Aksi */
+        min-width: 150px;
+    }
+
+    /* PERBAIKAN: Atur perilaku teks panjang dengan bungkus */
+    #tabelSurat td:nth-child(3) {
+        white-space: normal; /* Izinkan teks membungkus */
+        overflow: visible; /* Tampilkan semua teks */
+        text-overflow: clip; /* Tidak ada ellipsis */
+        cursor: pointer; /* Memberikan petunjuk bahwa teks bisa dilihat lengkap */
+        max-height: 60px; /* Batasi tinggi maksimal */
+        overflow-y: hidden; /* Sembunyikan overflow vertikal jika terlalu tinggi */
+    }
+    
+    /* Tooltip untuk menampilkan teks lengkap saat hover */
+    #tabelSurat td:nth-child(3):hover {
+        background-color: #fffaf5; /* Highlight saat hover */
     }
 
     #tabelSurat tbody tr.row-detail {
@@ -635,6 +711,7 @@
         gap:5px;
         align-items:center;
         justify-content: center;
+        max-width: 100%; /* Batasi lebar maksimum */
     }
 
     .nama-dosen-badge{
@@ -678,6 +755,9 @@
         font-size:12px;
         border:1px solid #2196F3;
         white-space:nowrap;
+        max-width: 150px; /* Batasi lebar badge divisi */
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     /* Action buttons with icons */
@@ -686,6 +766,7 @@
         gap: 8px;
         justify-content: center;
         align-items: center;
+        flex-wrap: wrap; /* Izinkan bungkus tombol jika perlu */
     }
 
     .btn-icon-action {
@@ -699,6 +780,7 @@
         cursor: pointer;
         transition: all 0.2s;
         font-size: 14px;
+        flex-shrink: 0; /* Jangan biarkan tombol menyusut */
     }
 
     .btn-edit {
@@ -732,24 +814,24 @@
     }
 
     .btn-status {
-    background: #66bb6a;
-    color: white;
-    border: none;
-    padding: 10px 14px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 15px;
-    cursor: pointer;
-    transition: 0.2s;
-}
+        background: #66bb6a;
+        color: white;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: 0.2s;
+        flex-shrink: 0;
+    }
 
-.btn-status:hover {
-    background: #4caf50;
-    transform: scale(1.05);
-}
-
+    .btn-status:hover {
+        background: #4caf50;
+        transform: scale(1.05);
+    }
 
     /* Status Modal Styles */
     .status-modal {
@@ -1387,22 +1469,37 @@
         color: #777;
     }
 
-    /* Responsive */
-    @media (max-width:880px){
-        .progress-track {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 30px;
-            padding: 0 10px;
+    /* Responsive - PERBAIKAN UTAMA */
+    @media (max-width: 1200px) {
+        .main-content {
+            padding: 20px;
+            margin-left: 260px;
+            width: calc(100% - 260px);
+        }
+        
+        /* Sesuaikan lebar kolom untuk layar sedang */
+        #tabelSurat th:nth-child(3),
+        #tabelSurat td:nth-child(3) {
+            width: 22%;
+            min-width: 180px;
+        }
+        
+        #tabelSurat th:nth-child(5),
+        #tabelSurat td:nth-child(5) {
+            width: 18%;
+            min-width: 160px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .main-content {
+            margin-left: 0;
+            width: 100%;
+            padding: 15px;
         }
         
         .fik-db-side-menu.active {
             transform: translateX(0);
-        }
-        
-        .main-content {
-            margin-left: 0;
-            margin-top: 70px;
         }
         
         .db-menu-trigger {
@@ -1427,7 +1524,7 @@
         }
         
         .action-buttons {
-            flex-direction: column;
+            flex-direction: row;
             gap: 5px;
         }
         
@@ -1543,6 +1640,117 @@
         .download-btn, .preview-btn {
             flex: 1;
             justify-content: center;
+        }
+        
+        /* PERBAIKAN RESPONSIVE: Atur ulang lebar kolom untuk tablet */
+        #tabelSurat th:nth-child(1),
+        #tabelSurat td:nth-child(1) {
+            width: 5%;
+            max-width: 40px;
+        }
+        
+        #tabelSurat th:nth-child(2),
+        #tabelSurat td:nth-child(2) {
+            width: 6%;
+            max-width: 50px;
+        }
+        
+        #tabelSurat th:nth-child(3),
+        #tabelSurat td:nth-child(3) {
+            width: 25%;
+            min-width: 150px;
+        }
+        
+        #tabelSurat th:nth-child(4),
+        #tabelSurat td:nth-child(4) {
+            width: 15%;
+            min-width: 100px;
+        }
+        
+        #tabelSurat th:nth-child(5),
+        #tabelSurat td:nth-child(5) {
+            width: 20%;
+            min-width: 140px;
+        }
+        
+        #tabelSurat th:nth-child(8),
+        #tabelSurat td:nth-child(8) {
+            width: 12%;
+            min-width: 130px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-content {
+            padding: 10px;
+        }
+        
+        #tabelSurat {
+            font-size: 11px;
+        }
+        
+        #tabelSurat td, #tabelSurat th {
+            padding: 6px 4px;
+        }
+        
+        /* Untuk layar kecil, gunakan scroll horizontal yang minimal */
+        #tabelSurat_wrapper {
+            overflow-x: auto;
+        }
+        
+        .nama-dosen-badge {
+            max-width: 120px;
+            font-size: 10px;
+            padding: 4px 8px;
+        }
+        
+        .divisi-badge {
+            max-width: 100px;
+            font-size: 10px;
+            padding: 4px 8px;
+        }
+        
+        .btn-icon-action {
+            width: 28px;
+            height: 28px;
+            font-size: 10px;
+        }
+        
+        /* Kompres kolom pada layar sangat kecil */
+        #tabelSurat th:nth-child(6),
+        #tabelSurat td:nth-child(6) {
+            display: none; /* Sembunyikan kolom divisi di mobile sangat kecil */
+        }
+        
+        #tabelSurat th:nth-child(7),
+        #tabelSurat td:nth-child(7) {
+            width: 15%;
+            min-width: 90px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        /* Untuk mobile sangat kecil, sembunyikan beberapa kolom */
+        #tabelSurat th:nth-child(4),
+        #tabelSurat td:nth-child(4) {
+            display: none; /* Sembunyikan kolom Jenis Pengajuan */
+        }
+        
+        #tabelSurat th:nth-child(3),
+        #tabelSurat td:nth-child(3) {
+            width: 35%;
+            min-width: 120px;
+        }
+        
+        #tabelSurat th:nth-child(5),
+        #tabelSurat td:nth-child(5) {
+            width: 25%;
+            min-width: 100px;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 3px;
         }
     }
     </style>
@@ -1865,7 +2073,10 @@
                 <tr class="row-detail" data-detail='<?= $data_detail_attr; ?>' data-id="<?= $s->id; ?>">
                     <td><input type="checkbox" class="row-checkbox" data-id="<?= $s->id; ?>"></td>
                     <td><?= $no++; ?></td>
-                    <td><?= htmlspecialchars($s->nama_kegiatan); ?></td>
+                    <!-- PERBAIKAN: Tampilkan teks utuh dengan bungkus alami -->
+                    <td>
+                        <?= htmlspecialchars($s->nama_kegiatan); ?>
+                    </td>
                     <td><?= htmlspecialchars($s->jenis_pengajuan); ?></td>
                     <td>
                         <div class="dosen-container">
@@ -1893,7 +2104,7 @@
                                 // Get unique divisions
                                 $divisions = array_unique(array_column($dosen_data, 'divisi'));
                                 foreach ($divisions as $div) {
-                                    echo '<span class="divisi-badge">' . htmlspecialchars($div) . '</span>';
+                                    echo '<span class="divisi-badge" title="' . htmlspecialchars($div) . '">' . htmlspecialchars($div) . '</span>';
                                 }
                             } else {
                                 echo '-';
@@ -2135,15 +2346,40 @@ document.addEventListener('DOMContentLoaded', function() {
 $(document).ready(function () {
     const BASE_URL = '<?= rtrim(base_url(), "/"); ?>';
 
+    // Inisialisasi DataTable dengan konfigurasi responsif
     let table = $('#tabelSurat').DataTable({
-        responsive:true,
-        pageLength:5,
-        dom:'rtp',
-        columnDefs:[
-            {orderable:false, targets:[0, -1]},
-            {className: 'dt-center', targets: [0, 1]}
+        responsive: true,
+        pageLength: 5,
+        dom: 'rtp',
+        scrollX: false, // Nonaktifkan scroll horizontal
+        autoWidth: false, // Nonaktifkan auto width
+        columnDefs: [
+            { orderable: false, targets: [0, -1] },
+            { className: 'dt-center', targets: [0, 1, 4, 5, 6, 7] },
+            { className: 'dt-left', targets: [2, 3] }, // Rata kiri untuk nama kegiatan dan jenis
+            { width: '4%', targets: 0 }, // Checkbox
+            { width: '5%', targets: 1 }, // No
+            { width: '25%', targets: 2 }, // Nama Kegiatan
+            { width: '12%', targets: 3 }, // Jenis Pengajuan
+            { width: '20%', targets: 4 }, // Nama Dosen
+            { width: '12%', targets: 5 }, // Divisi
+            { width: '12%', targets: 6 }, // Tanggal Pengajuan
+            { width: '10%', targets: 7 } // Aksi
         ],
-        order: [[1, 'asc']]
+        order: [[1, 'asc']],
+        language: {
+            search: "Cari:",
+            lengthMenu: "Tampilkan _MENU_ entri",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+            infoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
+            infoFiltered: "(disaring dari _MAX_ total entri)",
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "Selanjutnya",
+                previous: "Sebelumnya"
+            }
+        }
     });
 
     // ===== MULTI-SELECT FUNCTIONALITY =====
@@ -2825,127 +3061,6 @@ $(document).ready(function () {
     $(document).on('click', '.download-btn, .preview-btn', function(e) {
         e.stopPropagation();
         // Biarkan link/button berfungsi normal
-    });
-});
-// ===== PERBAIKAN FUNGSI getFileUrl() =====
-function getFileUrl(file, baseUrl = BASE_URL) {
-    let url = '';
-
-    // CASE 1: Jika string
-    if (typeof file === 'string') {
-        // PERBAIKAN: Cek apakah sudah URL lengkap (dari Uploadcare CDN)
-        if (file.match(/^https?:\/\//i)) {
-            // Sudah URL lengkap, langsung return
-            return file;
-        }
-        
-        // PERBAIKAN: Cek apakah URL Uploadcare tanpa protokol
-        if (file.includes('ucarecdn.com') || file.includes('uploadcare.com')) {
-            // Tambahkan https jika belum ada
-            return file.startsWith('//') ? 'https:' + file : 'https://' + file;
-        }
-        
-        // Jika nama file lokal, tambahkan path uploads/eviden
-        url = baseUrl + '/uploads/eviden/' + file;
-        return url;
-    }
-
-    // CASE 2: Jika object (dari dropzone/uploadcare)
-    if (typeof file === 'object' && file !== null) {
-        // Priority: cdnUrl > url > path
-        url = file.cdnUrl || file.url || file.path || '';
-        
-        // Jika sudah URL lengkap, return langsung
-        if (url && url.match(/^https?:\/\//i)) {
-            return url;
-        }
-        
-        // Cek apakah URL Uploadcare
-        if (url && (url.includes('ucarecdn.com') || url.includes('uploadcare.com'))) {
-            url = url.startsWith('//') ? 'https:' + url : 'https://' + url;
-        }
-    }
-
-    // Fix URL jika tidak lengkap
-    if (url && !url.match(/^https?:\/\//i) && !url.startsWith('data:')) {
-        // Cek apakah URL Uploadcare
-        if (url.includes('ucarecdn.com') || url.includes('uploadcare.com')) {
-            url = url.startsWith('//') ? 'https:' + url : 'https://' + url;
-        } else {
-            // File lokal
-            url = baseUrl + (url.startsWith('/') ? '' : '/') + url;
-        }
-    }
-
-    return url;
-}
-
-// ===== FUNGSI DOWNLOAD - DIPERBAIKI =====
-function downloadFile(fileUrl, fileName) {
-    // Jika URL dari Uploadcare, buka di tab baru (browser akan handle download)
-    if (fileUrl.includes('ucarecdn.com') || fileUrl.includes('uploadcare.com')) {
-        window.open(fileUrl, '_blank');
-        return;
-    }
-    
-    // Untuk file lokal, gunakan metode download biasa
-    const a = document.createElement('a');
-    a.href = fileUrl;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-}
-
-// ===== UPDATE FILE ITEM GENERATION =====
-// Ganti bagian download button di file-item dengan:
-html += `
-    <div class="file-actions">
-        ${canPreview ? `
-            <button class="preview-btn" onclick="previewFile('${escapeHtml(fileUrl)}', '${escapeHtml(fileName)}', '${fileType}')">
-                <i class="fas fa-eye"></i> Preview
-            </button>
-        ` : `
-            <button class="preview-btn disabled" disabled title="Preview tidak tersedia untuk file ini">
-                <i class="fas fa-eye-slash"></i> Preview
-            </button>
-        `}
-        <button class="download-btn" onclick="downloadFile('${escapeHtml(fileUrl)}', '${escapeHtml(fileName)}')">
-            <i class="fas fa-download"></i> Download
-        </button>
-    </div>
-`;
-
-// ===== DEBUGGING HELPER =====
-// Tambahkan ini di document ready untuk cek data eviden
-$(document).ready(function() {
-    // ... existing code ...
-    
-    // DEBUG: Log semua eviden data saat table di-render
-    $('#tabelSurat tbody tr').each(function() {
-        const rawData = $(this).attr('data-detail');
-        if (rawData) {
-            try {
-                const data = JSON.parse(rawData);
-                if (data.eviden && data.eviden.length > 0) {
-                    console.log('📁 Eviden data untuk row:', data.id);
-                    console.log('- Jumlah file:', data.eviden.length);
-                    console.log('- Files:', data.eviden);
-                    
-                    // Cek tipe setiap file
-                    data.eviden.forEach((file, idx) => {
-                        const processedUrl = getFileUrl(file);
-                        console.log(`  File ${idx + 1}:`, {
-                            original: file,
-                            processed: processedUrl,
-                            isUploadcare: processedUrl.includes('ucarecdn.com')
-                        });
-                    });
-                }
-            } catch (e) {
-                console.error('Error parsing data-detail:', e);
-            }
-        }
     });
 });
 </script>
