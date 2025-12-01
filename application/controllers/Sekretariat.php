@@ -216,7 +216,7 @@ class Sekretariat extends CI_Controller {
     }
 
   /* ================================
-DETAIL MODAL (AJAX) - MENGAMBIL DARI KAPRODI YANG BERHASIL
+   GET DETAIL PENGAJUAN (AJAX) - PERBAIKAN FINAL SEKRETARIAT
 ================================= */
 public function getDetailPengajuan($id)
 {
@@ -226,44 +226,45 @@ public function getDetailPengajuan($id)
     if ($pengajuan) {
         $dosen_data = $this->get_dosen_data_from_nip_fixed($pengajuan->nip);
         
-        // Ambil semua field yang berkaitan dengan periode
+        // PERBAIKAN: Ambil semua field yang diperlukan
         $jenis_date = $pengajuan->jenis_date ?? null;
-        $periode_kegiatan = $pengajuan->periode_kegiatan ?? null;
         $periode_value = $pengajuan->periode_value ?? null;
         $tanggal_kegiatan = $pengajuan->tanggal_kegiatan ?? null;
         $akhir_kegiatan = $pengajuan->akhir_kegiatan ?? null;
         
-        // Tentukan nilai periode yang akan ditampilkan
-        $periode_display = '-';
+        // Debug log
+        error_log("DEBUG SEKRETARIAT - ID: $id");
+        error_log("Jenis Date: " . $jenis_date);
+        error_log("Periode Value: " . $periode_value);
+        error_log("Tanggal Kegiatan: " . $tanggal_kegiatan);
+        error_log("Akhir Kegiatan: " . $akhir_kegiatan);
         
-        if ($jenis_date === 'Custom') {
-            // FORMAT CUSTOM: "30 Nov 2025 - 01 Des 2025"
-            if ($tanggal_kegiatan && $akhir_kegiatan) {
-                // Format tanggal Indonesia
-                $bulan_indonesia = [
-                    'Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mar', 'Apr' => 'Apr',
-                    'May' => 'Mei', 'Jun' => 'Jun', 'Jul' => 'Jul', 'Aug' => 'Ags',
-                    'Sep' => 'Sep', 'Oct' => 'Okt', 'Nov' => 'Nov', 'Dec' => 'Des'
-                ];
-                
-                $format_tanggal = function($date) use ($bulan_indonesia) {
-                    $day = date('d', strtotime($date));
-                    $month_en = date('M', strtotime($date));
-                    $month_id = $bulan_indonesia[$month_en] ?? $month_en;
-                    $year = date('Y', strtotime($date));
-                    return $day . ' ' . $month_id . ' ' . $year;
-                };
-                
-                $start_formatted = $format_tanggal($tanggal_kegiatan);
-                $end_formatted = $format_tanggal($akhir_kegiatan);
-                $periode_display = $start_formatted . ' - ' . $end_formatted;
+        // LOGIKA SAMA SEPERTI KAPRODI:
+        // Jika jenis_date = "Periode" -> tampilkan periode_value, kosongkan tanggal
+        // Jika jenis_date = "Custom" -> tampilkan tanggal, kosongkan periode
+        
+        $periode_display = null;
+        $tanggal_display = null;
+        $akhir_display = null;
+        
+        if ($jenis_date === 'Periode') {
+            // Tampilkan periode, kosongkan tanggal
+            $periode_display = $periode_value;
+            $tanggal_display = null;
+            $akhir_display = null;
+        } elseif ($jenis_date === 'Custom') {
+            // Tampilkan tanggal, kosongkan periode
+            $periode_display = null;
+            $tanggal_display = $tanggal_kegiatan;
+            $akhir_display = $akhir_kegiatan;
+        } else {
+            // Fallback jika jenis_date tidak diset
+            if ($periode_value) {
+                $periode_display = $periode_value;
             } elseif ($tanggal_kegiatan) {
-                // Jika hanya ada tanggal mulai
-                $periode_display = date('d M Y', strtotime($tanggal_kegiatan));
+                $tanggal_display = $tanggal_kegiatan;
+                $akhir_display = $akhir_kegiatan;
             }
-        } elseif ($jenis_date === 'Periode') {
-            // Untuk jenis Periode, gunakan periode_kegiatan atau periode_value
-            $periode_display = $periode_kegiatan ?: $periode_value ?: '-';
         }
         
         $response_data = array(
@@ -273,9 +274,9 @@ public function getDetailPengajuan($id)
             'jenis_pengajuan' => $pengajuan->jenis_pengajuan,
             'lingkup_penugasan' => $pengajuan->lingkup_penugasan,
             'penyelenggara' => $pengajuan->penyelenggara,
-            'tanggal_kegiatan' => $tanggal_kegiatan,
-            'akhir_kegiatan' => $akhir_kegiatan,
-            'periode_kegiatan' => $periode_display,  // Nilai yang sudah diformat
+            'tanggal_kegiatan' => $tanggal_display,      // NULL jika Periode
+            'akhir_kegiatan' => $akhir_display,          // NULL jika Periode
+            'periode_value' => $periode_display,         // NULL jika Custom
             'jenis_date' => $jenis_date,
             'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
             'created_at' => $pengajuan->created_at,
@@ -296,7 +297,6 @@ public function getDetailPengajuan($id)
         ]);
     }
 }
-
     /* ================================
     GET DOSEN DATA FROM NIP - MENGAMBIL DARI KAPRODI YANG BERHASIL
     ================================= */

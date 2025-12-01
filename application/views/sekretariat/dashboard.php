@@ -1010,7 +1010,7 @@ function updateTahun(year) {
     window.location.href = "<?= base_url('sekretariat?tahun=') ?>" + year;
 }
 
-// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki dengan PERIODE
+// PERBAIKAN FUNGSI showDetail - SEKRETARIAT (SAMA SEPERTI KAPRODI)
 async function showDetail(id) {
     try {
         // Tampilkan loading
@@ -1031,10 +1031,12 @@ async function showDetail(id) {
             return;
         }
 
+        // DEBUG: Tampilkan data di console
+        console.log('Data detail lengkap:', item);
+
         // Fungsi helper untuk mendapatkan value
         const getVal = (k) => {
             const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
-            console.log(`Field ${k}:`, value); // Debug setiap field
             return value;
         };
 
@@ -1042,18 +1044,19 @@ async function showDetail(id) {
         const status = getVal('status');
         let statusBadge = '';
         if (status.toLowerCase() === 'disetujui dekan') {
-            statusBadge = '<span class="badge badge-completed" style="margin-left:10px">Disetujui</span>';
+            statusBadge = '<span class="badge badge-completed" style="margin-left:10px">Disetujui Dekan</span>';
         } else if (status.toLowerCase() === 'disetujui sekretariat') {
             statusBadge = '<span class="badge badge-approved" style="margin-left:10px">Disetujui Sekretariat</span>';
+        } else if (status.toLowerCase() === 'disetujui kk') {
+            statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu Sekretariat</span>';
         } else if (status.toLowerCase().includes('ditolak')) {
             statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak</span>';
         } else {
             statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
         }
 
-        // PERBAIKAN UTAMA: Gunakan langsung dosen_data dari response
+        // Generate dosen data
         let dosenData = [];
-        
         if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
             dosenData = item.dosen_data;
         } else {
@@ -1151,57 +1154,64 @@ async function showDetail(id) {
             }
         }
 
-        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date - SAMA SEPERTI DI KAPRODI
+        // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date (SAMA SEPERTI KAPRODI)
         const jenisDate = getVal('jenis_date');
-        const periodeKegiatan = getVal('periode_kegiatan');
+        const periodeValue = getVal('periode_value');
         const tanggalKegiatan = getVal('tanggal_kegiatan');
         const akhirKegiatan = getVal('akhir_kegiatan');
         
-        // DEBUG: Tampilkan data periode di console
-        console.log('=== DEBUG PERIODE FRONTEND ===');
+        console.log('=== DEBUG PERIODE SEKRETARIAT ===');
         console.log('Jenis Date:', jenisDate);
-        console.log('Periode Kegiatan:', periodeKegiatan);
+        console.log('Periode Value:', periodeValue);
         console.log('Tanggal Kegiatan:', tanggalKegiatan);
         console.log('Akhir Kegiatan:', akhirKegiatan);
-        console.log('Full item data untuk debugging:', item);
-
-        // Tentukan tampilan untuk Periode Kegiatan - SAMA SEPERTI DI KAPRODI
+        
+        // Tentukan tampilan untuk Periode dan Tanggal Mulai
         let periodeDisplay = '-';
-
+        let tanggalMulaiDisplay = '-';
+        let tanggalAkhirDisplay = '-';
+        
         if (jenisDate === 'Periode') {
-            // Jika memilih Periode, tampilkan nilai periode yang dipilih
-            periodeDisplay = (periodeKegiatan && periodeKegiatan !== '-' && periodeKegiatan !== '') ? periodeKegiatan : '-';
-            console.log('Periode Display (Periode):', periodeDisplay);
+            // Jika Periode: tampilkan periode_value, kosongkan tanggal
+            periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
+            tanggalMulaiDisplay = '-';
+            tanggalAkhirDisplay = '-';
         } else if (jenisDate === 'Custom') {
-            // Jika memilih Custom, tampilkan range tanggal
-            if (tanggalKegiatan !== '-' && akhirKegiatan !== '-') {
-                periodeDisplay = formatDate(tanggalKegiatan) + ' - ' + formatDate(akhirKegiatan);
-            } else if (tanggalKegiatan !== '-') {
-                periodeDisplay = formatDate(tanggalKegiatan);
+            // Jika Custom: tampilkan tanggal, kosongkan periode
+            periodeDisplay = '-';
+            if (tanggalKegiatan !== '-' && tanggalKegiatan) {
+                tanggalMulaiDisplay = formatDate(tanggalKegiatan);
             }
-            console.log('Periode Display (Custom):', periodeDisplay);
+            if (akhirKegiatan !== '-' && akhirKegiatan) {
+                tanggalAkhirDisplay = formatDate(akhirKegiatan);
+            }
         } else {
-            // Default case - tampilkan tanggal tunggal jika ada
-            if (tanggalKegiatan !== '-') {
-                periodeDisplay = formatDate(tanggalKegiatan);
+            // Fallback jika jenis_date tidak ada (data lama)
+            if (periodeValue && periodeValue !== '-') {
+                periodeDisplay = periodeValue;
+            } else if (tanggalKegiatan && tanggalKegiatan !== '-') {
+                tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+                if (akhirKegiatan && akhirKegiatan !== '-') {
+                    tanggalAkhirDisplay = formatDate(akhirKegiatan);
+                }
             }
-            console.log('Periode Display (Default):', periodeDisplay);
         }
 
-        // Format tanggal mulai
-        const tanggalMulaiDisplay = (tanggalKegiatan !== '-' && tanggalKegiatan !== '0000-00-00') ? formatDate(tanggalKegiatan) : '-';
-
-        // Tampilkan sesuai dengan format yang sama seperti di dashboard kaprodi
-        const content = `
-            <!-- NOMOR SURAT DARI SEKRETARIAT -->
-            ${getVal('nomor_surat') && getVal('nomor_surat') !== '' ? `
+        // Tampilkan Nomor Surat jika sudah ada
+        let nomorSuratHtml = '';
+        const nomorSurat = getVal('nomor_surat');
+        if (nomorSurat && nomorSurat !== '-') {
+            nomorSuratHtml = `
             <div class="nomor-surat-container">
                 <div class="nomor-surat-label">
                     <i class="fa-solid fa-file-signature"></i> Nomor Surat
                 </div>
-                <div class="nomor-surat-value">${escapeHtml(getVal('nomor_surat'))}</div>
-            </div>
-            ` : ''}
+                <div class="nomor-surat-value">${escapeHtml(nomorSurat)}</div>
+            </div>`;
+        }
+
+        const content = `
+            ${nomorSuratHtml}
 
             <div class="detail-section">
                 <div class="detail-section-title">
@@ -1274,21 +1284,25 @@ async function showDetail(id) {
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Periode Kegiatan</div>
-                        <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">
-                            ${escapeHtml(periodeDisplay)}
-                        </div>
+                        <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">${escapeHtml(periodeDisplay)}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tanggal Mulai</div>
                         <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
                     </div>
+                    ${tanggalAkhirDisplay !== '-' ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Akhir</div>
+                        <div class="detail-value">${tanggalAkhirDisplay}</div>
+                    </div>
+                    ` : ''}
                     <div class="detail-row">
                         <div class="detail-label">Penyelenggara</div>
-                        <div class="detail-value ${getVal('penyelenggara') === '-' ? 'detail-value-empty' : ''}">${escapeHtml(getVal('penyelenggara'))}</div>
+                        <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tempat Kegiatan</div>
-                        <div class="detail-value ${getVal('tempat_kegiatan') === '-' ? 'detail-value-empty' : ''}">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+                        <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
                     </div>
                 </div>
             </div>

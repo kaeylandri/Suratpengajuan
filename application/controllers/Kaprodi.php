@@ -194,67 +194,88 @@ class Kaprodi extends CI_Controller
         $this->load->view('kaprodi/halaman_total', $data);
     }
 
-    /* ================================
-       GET DETAIL PENGAJUAN (AJAX) - REVISI PERBAIKAN
-    ================================= */
-    public function getDetailPengajuan($id)
-    {
-        $this->db->where('id', $id);
-        $pengajuan = $this->db->get('surat')->row();
+   /* ================================
+   GET DETAIL PENGAJUAN (AJAX) - PERBAIKAN FINAL
+================================= */
+public function getDetailPengajuan($id)
+{
+    $this->db->where('id', $id);
+    $pengajuan = $this->db->get('surat')->row();
+    
+    if ($pengajuan) {
+        $dosen_data = $this->get_dosen_data_from_nip_fixed($pengajuan->nip);
         
-        if ($pengajuan) {
-            $dosen_data = $this->get_dosen_data_from_nip_fixed($pengajuan->nip);
-            
-            // PERBAIKAN: Ambil semua field yang berkaitan dengan periode
-            $jenis_date = $pengajuan->jenis_date ?? null;
-            $periode_kegiatan = $pengajuan->periode_kegiatan ?? null;
-            $periode_value = $pengajuan->periode_value ?? null; // Coba field alternatif
-            $tanggal_kegiatan = $pengajuan->tanggal_kegiatan ?? null;
-            $akhir_kegiatan = $pengajuan->akhir_kegiatan ?? null;
-            
-            // Debug: Tampilkan semua field untuk troubleshooting
-            error_log("DEBUG - ID: $id, Jenis Date: " . $jenis_date . ", Periode Kegiatan: " . $periode_kegiatan . ", Periode Value: " . $periode_value);
-            
-            // Tentukan nilai periode yang akan ditampilkan
-            $periode_display = '-';
-            if ($jenis_date === 'Periode') {
-                // Prioritaskan periode_kegiatan, jika kosong coba periode_value
-                $periode_display = $periode_kegiatan ?: $periode_value ?: '-';
-            } elseif ($jenis_date === 'Custom' && $tanggal_kegiatan && $akhir_kegiatan) {
-                $periode_display = date('d M Y', strtotime($tanggal_kegiatan)) . ' - ' . date('d M Y', strtotime($akhir_kegiatan));
-            }
-            
-            $response_data = array(
-                'id' => $pengajuan->id,
-                'nama_kegiatan' => $pengajuan->nama_kegiatan,
-                'status' => $pengajuan->status,
-                'jenis_pengajuan' => $pengajuan->jenis_pengajuan,
-                'lingkup_penugasan' => $pengajuan->lingkup_penugasan,
-                'penyelenggara' => $pengajuan->penyelenggara,
-                'tanggal_kegiatan' => $tanggal_kegiatan,
-                'akhir_kegiatan' => $akhir_kegiatan,
-                'periode_kegiatan' => $periode_display,  // Nilai yang sudah diformat
-                'jenis_date' => $jenis_date,
-                'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
-                'created_at' => $pengajuan->created_at,
-                'eviden' => $pengajuan->eviden,
-                'nomor_surat' => $pengajuan->nomor_surat,
-                'catatan_penolakan' => $pengajuan->catatan_penolakan,
-                'dosen_data' => $dosen_data
-            );
-            
-            echo json_encode([
-                'success' => true,
-                'data' => $response_data
-            ]);
+        // PERBAIKAN: Ambil semua field yang diperlukan
+        $jenis_date = $pengajuan->jenis_date ?? null;
+        $periode_value = $pengajuan->periode_value ?? null;
+        $tanggal_kegiatan = $pengajuan->tanggal_kegiatan ?? null;
+        $akhir_kegiatan = $pengajuan->akhir_kegiatan ?? null;
+        
+        // Debug log
+        error_log("DEBUG - ID: $id");
+        error_log("Jenis Date: " . $jenis_date);
+        error_log("Periode Value: " . $periode_value);
+        error_log("Tanggal Kegiatan: " . $tanggal_kegiatan);
+        error_log("Akhir Kegiatan: " . $akhir_kegiatan);
+        
+        // LOGIKA BARU:
+        // Jika jenis_date = "Periode" -> tampilkan periode_value, kosongkan tanggal
+        // Jika jenis_date = "Custom" -> tampilkan tanggal, kosongkan periode
+        
+        $periode_display = null;
+        $tanggal_display = null;
+        $akhir_display = null;
+        
+        if ($jenis_date === 'Periode') {
+            // Tampilkan periode, kosongkan tanggal
+            $periode_display = $periode_value;
+            $tanggal_display = null;
+            $akhir_display = null;
+        } elseif ($jenis_date === 'Custom') {
+            // Tampilkan tanggal, kosongkan periode
+            $periode_display = null;
+            $tanggal_display = $tanggal_kegiatan;
+            $akhir_display = $akhir_kegiatan;
         } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Data tidak ditemukan'
-            ]);
+            // Fallback jika jenis_date tidak diset
+            if ($periode_value) {
+                $periode_display = $periode_value;
+            } elseif ($tanggal_kegiatan) {
+                $tanggal_display = $tanggal_kegiatan;
+                $akhir_display = $akhir_kegiatan;
+            }
         }
+        
+        $response_data = array(
+            'id' => $pengajuan->id,
+            'nama_kegiatan' => $pengajuan->nama_kegiatan,
+            'status' => $pengajuan->status,
+            'jenis_pengajuan' => $pengajuan->jenis_pengajuan,
+            'lingkup_penugasan' => $pengajuan->lingkup_penugasan,
+            'penyelenggara' => $pengajuan->penyelenggara,
+            'tanggal_kegiatan' => $tanggal_display,      // NULL jika Periode
+            'akhir_kegiatan' => $akhir_display,          // NULL jika Periode
+            'periode_value' => $periode_display,         // NULL jika Custom
+            'jenis_date' => $jenis_date,
+            'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
+            'created_at' => $pengajuan->created_at,
+            'eviden' => $pengajuan->eviden,
+            'nomor_surat' => $pengajuan->nomor_surat,
+            'catatan_penolakan' => $pengajuan->catatan_penolakan,
+            'dosen_data' => $dosen_data
+        );
+        
+        echo json_encode([
+            'success' => true,
+            'data' => $response_data
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Data tidak ditemukan'
+        ]);
     }
-
+}
     /* ================================
        GET DOSEN DATA FROM NIP
     ================================= */

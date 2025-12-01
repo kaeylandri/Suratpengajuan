@@ -690,12 +690,12 @@
                     <span id="est3">-</span>
                 </div>
 
-                <!-- Step 4: Persetujuan Kaprodi -->
+                <!-- Step 4: Persetujuan Dekan -->
                 <div class="progress-step status-pending" id="step4">
                     <div class="step-icon">
                         <i class="fas fa-clock" id="step4-icon"></i>
                     </div>
-                    <div class="step-text" id="step4-text">Persetujuan Kaprodi</div>
+                    <div class="step-text" id="step4-text">Persetujuan Dekan</div>
                     <div class="step-date" id="step4-date">-</div>
                 </div>
             </div>
@@ -827,7 +827,7 @@ function resetAllStatus() {
             'Mengirim',
             'Persetujuan KK',
             'Persetujuan Sekretariat',
-            'Persetujuan Kaprodi'
+            'Persetujuan Dekan'
         ];
         text.textContent = defaultTexts[i-1];
         date.textContent = '-';
@@ -840,7 +840,7 @@ function resetAllStatus() {
 }
 
 function loadStatusData(suratId) {
-    fetch('<?= site_url("kaprodi/get_status/") ?>' + suratId)
+    fetch('<?= site_url("surat/get_status/") ?>' + suratId)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -902,7 +902,7 @@ function updateStatusDisplay(statusData) {
     const desc = document.getElementById("status-description");
     const finalStatus = statusData.current_status.toLowerCase();
 
-    if (finalStatus === "disetujui kaprodi") {
+    if (finalStatus === "disetujui dekan") {
         desc.textContent = "Pengajuan ini sudah disetujui.";
         desc.style.color = "green";
     }
@@ -955,12 +955,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+
 // Existing Functions
 function updateTahun(year) {
     window.location.href = "<?= base_url('kaprodi?tahun=') ?>" + year;
 }
 
-// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki dengan PERIODE
+// PERBAIKAN FUNGSI showDetail - FINAL VERSION
 async function showDetail(id) {
     try {
         // Tampilkan loading
@@ -981,13 +982,12 @@ async function showDetail(id) {
             return;
         }
 
-        // DEBUG: Tampilkan semua data di console untuk troubleshooting
-        console.log('Data detail untuk ID', id, ':', item);
+        // DEBUG: Tampilkan data di console
+        console.log('Data detail lengkap:', item);
 
         // Fungsi helper untuk mendapatkan value
         const getVal = (k) => {
             const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
-            console.log(`Field ${k}:`, value); // Debug setiap field
             return value;
         };
 
@@ -1004,9 +1004,8 @@ async function showDetail(id) {
             statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
         }
 
-        // PERBAIKAN UTAMA: Gunakan langsung dosen_data dari response
+        // Generate dosen data
         let dosenData = [];
-        
         if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
             dosenData = item.dosen_data;
         } else {
@@ -1104,34 +1103,47 @@ async function showDetail(id) {
             }
         }
 
-        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date
+        // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date
         const jenisDate = getVal('jenis_date');
-        const periodeKegiatan = getVal('periode_kegiatan');
+        const periodeValue = getVal('periode_value');
         const tanggalKegiatan = getVal('tanggal_kegiatan');
         const akhirKegiatan = getVal('akhir_kegiatan');
         
-        // DEBUG: Tampilkan data periode di console
         console.log('Jenis Date:', jenisDate);
-        console.log('Periode Kegiatan:', periodeKegiatan);
+        console.log('Periode Value:', periodeValue);
         console.log('Tanggal Kegiatan:', tanggalKegiatan);
         console.log('Akhir Kegiatan:', akhirKegiatan);
         
-        // Tentukan tampilan untuk Periode Kegiatan
+        // Tentukan tampilan untuk Periode dan Tanggal Mulai
         let periodeDisplay = '-';
+        let tanggalMulaiDisplay = '-';
+        let tanggalAkhirDisplay = '-';
+        
         if (jenisDate === 'Periode') {
-            // Jika memilih Periode, tampilkan nilai periode yang dipilih
-            periodeDisplay = periodeKegiatan !== '-' ? periodeKegiatan : '-';
-            console.log('Periode Display (Periode):', periodeDisplay);
+            // Jika Periode: tampilkan periode_value, kosongkan tanggal
+            periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
+            tanggalMulaiDisplay = '-';
+            tanggalAkhirDisplay = '-';
         } else if (jenisDate === 'Custom') {
-            // Jika memilih Custom, tampilkan range tanggal
-            if (tanggalKegiatan !== '-' && akhirKegiatan !== '-') {
-                periodeDisplay = formatDate(tanggalKegiatan) + ' - ' + formatDate(akhirKegiatan);
+            // Jika Custom: tampilkan tanggal, kosongkan periode
+            periodeDisplay = '-';
+            if (tanggalKegiatan !== '-' && tanggalKegiatan) {
+                tanggalMulaiDisplay = formatDate(tanggalKegiatan);
             }
-            console.log('Periode Display (Custom):', periodeDisplay);
+            if (akhirKegiatan !== '-' && akhirKegiatan) {
+                tanggalAkhirDisplay = formatDate(akhirKegiatan);
+            }
+        } else {
+            // Fallback jika jenis_date tidak ada (data lama)
+            if (periodeValue && periodeValue !== '-') {
+                periodeDisplay = periodeValue;
+            } else if (tanggalKegiatan && tanggalKegiatan !== '-') {
+                tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+                if (akhirKegiatan && akhirKegiatan !== '-') {
+                    tanggalAkhirDisplay = formatDate(akhirKegiatan);
+                }
+            }
         }
-
-        // Format tanggal mulai
-        const tanggalMulaiDisplay = tanggalKegiatan !== '-' ? formatDate(tanggalKegiatan) : '-';
 
         const content = `
             <div class="detail-section">
@@ -1205,12 +1217,18 @@ async function showDetail(id) {
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Periode Kegiatan</div>
-                        <div class="detail-value">${escapeHtml(periodeDisplay)}</div>
+                        <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">${escapeHtml(periodeDisplay)}</div>
                     </div>
                     <div class="detail-row">
                         <div class="detail-label">Tanggal Mulai</div>
-                        <div class="detail-value">${tanggalMulaiDisplay}</div>
+                        <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
                     </div>
+                    ${tanggalAkhirDisplay !== '-' ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Akhir</div>
+                        <div class="detail-value">${tanggalAkhirDisplay}</div>
+                    </div>
+                    ` : ''}
                     <div class="detail-row">
                         <div class="detail-label">Penyelenggara</div>
                         <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
@@ -1272,7 +1290,6 @@ async function showDetail(id) {
         `;
     }
 }
-
 function showApproveModal(id, namaKegiatan) {
     currentApproveId = id;
     document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
