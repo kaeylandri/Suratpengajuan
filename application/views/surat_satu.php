@@ -348,9 +348,8 @@ function format_periode_penugasan($surat) {
 
         <!-- Periode Penugasan -->
         <?php if (($surat->jenis_date ?? 'custom') === 'custom' && (!empty($surat->periode_penugasan) && $surat->periode_penugasan !== '-')): ?>
-        <p>
-            Penugasan ini berlaku <?= format_periode_penugasan($surat) ?>.
-        </p>
+            <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
+    
         <?php else: ?>
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
         <?php endif; ?>

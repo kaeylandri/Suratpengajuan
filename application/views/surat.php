@@ -3683,7 +3683,6 @@ $(document).ready(function() {
 // ========================================
 // 8. HANDLE UPLOADCARE SUCCESS
 // ========================================
-// Fungsi ini akan dipanggil oleh Uploadcare ketika upload selesai
 window.updateEvidenList = function(files) {
     console.log('📁 File diupload:', files);
     

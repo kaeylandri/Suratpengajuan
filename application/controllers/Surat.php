@@ -1215,23 +1215,48 @@ public function get_eviden_url($eviden_data)
         force_download($file_path, NULL);
     }
 
-    /* ===========================================
-       VALIDASI (UPDATED)
-    ============================================*/
-    public function validasi($id)
-    {
-        $surat = $this->Surat_model->get_by_id($id);
-        if (!$surat) {
-            $data['found'] = false;
+/* ===========================================
+   VALIDASI (UPDATED WITH DOSEN LIST)
+============================================*/
+public function validasi($id)
+{
+    $surat = $this->Surat_model->get_by_id($id);
+    
+    if (!$surat) {
+        $data['found'] = false;
+        $data['surat'] = null;
+        $data['dosen_list'] = [];
+        $data['dosen_penandatangan'] = null;
+        $data['logo_base64'] = '';
+    } else {
+        $data['found'] = true;
+        $data['surat'] = $surat;
+        
+        // AMBIL SEMUA DOSEN YANG TERLIBAT DALAM PENGAJUAN INI
+        $data['dosen_list'] = $this->get_dosen_by_nip($surat->nip);
+        
+        // Ambil data dosen penandatangan (dekan)
+        $data['dosen_penandatangan'] = $this->db
+            ->select('nama_dosen, jabatan, divisi')
+            ->from('list_dosen')
+            ->where('jabatan LIKE', '%Dekan%')
+            ->or_where('divisi LIKE', '%Dekan%')
+            ->limit(1)
+            ->get()
+            ->row();
+        
+        // Load logo untuk header
+        $logo_path = FCPATH . 'assets/Tel-U_logo.png';
+        if (file_exists($logo_path)) {
+            $logo_data = file_get_contents($logo_path);
+            $data['logo_base64'] = base64_encode($logo_data);
         } else {
-            // TAMBAHAN: Get dosen data untuk halaman validasi
-            $surat->dosen_data = $this->get_dosen_by_nip($surat->nip);
-            $data['found'] = true;
-            $data['surat'] = $surat;
+            $data['logo_base64'] = '';
         }
-
-        $this->load->view('surat_validasi', $data);
     }
+
+    $this->load->view('surat_validasi', $data);
+}
     private function get_dosen_detail($surat)
 {
     // NIP sudah array → tidak perlu json_decode
