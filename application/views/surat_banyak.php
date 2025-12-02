@@ -261,7 +261,26 @@ function tgl_indo($tanggal) {
         <div class="surat-number">Nomor : <?= $surat->nomor_surat ?? '-' ?></div>
 
         <p>
-            Pada hari Jumat tanggal 17 bulan Oktober tahun 2025 bertempat di Fakultas Industri Kreatif
+            Pada tanggal <?php
+        // Default tanggal
+        $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
+        
+        // Jika approval_status berisi data mentah seperti contoh
+        if (!empty($surat->approval_status)) {
+            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
+            if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
+                $tanggalPengesahan = $matches[1];
+            }
+        }
+         // Format tanggal
+        $timestamp = strtotime($tanggalPengesahan);
+        $bulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
+        ?> bertempat di Fakultas Industri Kreatif
             (FIK) Universitas Telkom, dengan mempertimbangkan hal-hal sebagai berikut :
         </p>
 
@@ -290,7 +309,26 @@ function tgl_indo($tanggal) {
         <p>Surat tugas ini berlaku mulai tanggal sesuai tanggal kegiatan.</p>
         <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p><br>
 
-        <p class="date">Bandung, 17 Oktober 2025</p>
+        <p class="date">Bandung, <?php
+        // Default tanggal
+        $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
+        
+        // Jika approval_status berisi data mentah seperti contoh
+        if (!empty($surat->approval_status)) {
+            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
+            if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
+                $tanggalPengesahan = $matches[1];
+            }
+        }
+         // Format tanggal
+        $timestamp = strtotime($tanggalPengesahan);
+        $bulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
+        ?></p>
 
         <!-- SIGNATURE + QR -->
         <div class="signature-bottom">
@@ -352,7 +390,26 @@ function tgl_indo($tanggal) {
             </tbody>
         </table>
 
-        <p class="date">Bandung, <?= tgl_indo($surat->created_at ?? date('Y-m-d')) ?></p>
+        <p class="date">Bandung, <?php
+        // Default tanggal
+        $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
+        
+        // Jika approval_status berisi data mentah seperti contoh
+        if (!empty($surat->approval_status)) {
+            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
+            if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
+                $tanggalPengesahan = $matches[1];
+            }
+        }
+         // Format tanggal
+        $timestamp = strtotime($tanggalPengesahan);
+        $bulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
+        ?></p>
 
         <div class="signature-bottom">
             <?php if (!empty($qr_base64)): ?>

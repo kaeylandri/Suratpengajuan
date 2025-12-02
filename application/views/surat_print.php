@@ -278,7 +278,26 @@ function tgl_indo($tanggal) {
 
         <!-- Pembukaan -->
         <p>
-            Pada hari Jumat tanggal 17 bulan Oktober tahun 2025 
+            Pada tanggal <?php
+        // Default tanggal
+        $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
+        
+        // Jika approval_status berisi data mentah seperti contoh
+        if (!empty($surat->approval_status)) {
+            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
+            if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
+                $tanggalPengesahan = $matches[1];
+            }
+        }
+         // Format tanggal
+        $timestamp = strtotime($tanggalPengesahan);
+        $bulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
+        ?>
             bertempat di Fakultas Industri Kreatif (FIK) Universitas Telkom, dengan 
             mempertimbangkan hal-hal sebagai berikut :
         </p>
