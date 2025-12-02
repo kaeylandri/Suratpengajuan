@@ -398,6 +398,87 @@
         font-family: 'Courier New', monospace;
     }
     
+    /* PAGINATION STYLES */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .pagination-btn {
+        min-width: 36px;
+        height: 36px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: #495057;
+        transition: all 0.2s;
+    }
+    
+    .pagination-btn:hover {
+        background: #f8f9fa;
+        border-color: #8E44AD;
+        color: #8E44AD;
+    }
+    
+    .pagination-btn.active {
+        background: #8E44AD;
+        border-color: #8E44AD;
+        color: white;
+    }
+    
+    .pagination-btn.disabled {
+        background: #f8f9fa;
+        color: #adb5bd;
+        cursor: not-allowed;
+        border-color: #e9ecef;
+    }
+    
+    .pagination-btn.disabled:hover {
+        background: #f8f9fa;
+        color: #adb5bd;
+        border-color: #e9ecef;
+    }
+    
+    .page-info {
+        font-size: 14px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .pagination-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: white;
+        color: #495057;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .pagination-select:focus {
+        outline: none;
+        border-color: #8E44AD;
+        box-shadow: 0 0 0 2px rgba(142,68,173,0.1);
+    }
+    
     /* Responsive */
     @media (max-width:768px){
         .detail-grid{grid-template-columns:1fr}
@@ -431,6 +512,17 @@
             text-align: left;
             max-width: none;
             flex: 1;
+        }
+        .pagination-container {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+        }
+        .page-info {
+            text-align: center;
+        }
+        .pagination {
+            justify-content: center;
         }
     }
 </style>
@@ -534,8 +626,8 @@
                             $tgl_pengajuan = isset($s->created_at) && $s->created_at? date('d M Y', strtotime($s->created_at)) : '-';
                             $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
                     ?>
-                    <tr data-status="<?= $st_key ?>" data-nama="<?= strtolower(htmlspecialchars($s->nama_kegiatan ?? '')) ?>" data-penyelenggara="<?= strtolower(htmlspecialchars($s->penyelenggara ?? '')) ?>" data-jenis="<?= strtolower(htmlspecialchars($s->jenis_pengajuan ?? '')) ?>">
-                        <td><?= $no++ ?></td>
+                    <tr class="data-row" data-status="<?= $st_key ?>" data-nama="<?= strtolower(htmlspecialchars($s->nama_kegiatan ?? '')) ?>" data-penyelenggara="<?= strtolower(htmlspecialchars($s->penyelenggara ?? '')) ?>" data-jenis="<?= strtolower(htmlspecialchars($s->jenis_pengajuan ?? '')) ?>">
+                        <td class="row-number"><?= $no++ ?></td>
                         <td><strong><?= htmlspecialchars($s->nama_kegiatan ?? '-') ?></strong></td>
                         <td><?= htmlspecialchars($s->penyelenggara ?? '-') ?></td>
                         <td><?= $tgl_pengajuan ?></td>
@@ -554,7 +646,7 @@
                         </td>
                     </tr>
                     <?php endforeach; else: ?>
-                    <tr>
+                    <tr id="emptyRow">
                         <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
                             <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
                             <strong>Tidak ada data pengajuan</strong>
@@ -565,8 +657,38 @@
             </table>
         </div>
 
-        <div class="pagination-info" id="paginationInfo">
-            Menampilkan: Semua Data (<?= isset($total_surat) ? $total_surat : '0' ?> data)
+        <!-- PAGINATION -->
+        <div class="pagination-container">
+            <div class="page-info">
+                <span id="pageInfoText">Menampilkan 0-0 dari 0 data</span>
+            </div>
+            
+            <div class="pagination">
+                <select id="pageSizeSelect" class="pagination-select">
+                    <option value="10">10 per halaman</option>
+                    <option value="25">25 per halaman</option>
+                    <option value="50">50 per halaman</option>
+                    <option value="100">100 per halaman</option>
+                </select>
+                
+                <button class="pagination-btn" onclick="changePage(1)" id="firstPageBtn" title="Halaman Pertama">
+                    <i class="fa-solid fa-angles-left"></i>
+                </button>
+                <button class="pagination-btn" onclick="prevPage()" id="prevPageBtn" title="Halaman Sebelumnya">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                
+                <div id="pageNumbers" style="display: flex; gap: 5px;">
+                    <!-- Page numbers will be generated here -->
+                </div>
+                
+                <button class="pagination-btn" onclick="nextPage()" id="nextPageBtn" title="Halaman Selanjutnya">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <button class="pagination-btn" onclick="changePage(totalPages)" id="lastPageBtn" title="Halaman Terakhir">
+                    <i class="fa-solid fa-angles-right"></i>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -736,7 +858,241 @@
 const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
 let currentApproveId = null;
+
+// PAGINATION VARIABLES
+let currentPage = 1;
+let totalPages = 1;
+let pageSize = 10;
+let filteredData = [];
 let allRows = [];
+
+// Initialize Pagination
+document.addEventListener('DOMContentLoaded', function() {
+    initializePagination();
+    setupEventListeners();
+});
+
+function initializePagination() {
+    // Get all data rows
+    allRows = Array.from(document.querySelectorAll('#tableBody tr.data-row'));
+    filteredData = [...allRows];
+    
+    // Set page size from select or default
+    pageSize = parseInt(document.getElementById('pageSizeSelect').value) || 10;
+    
+    // Calculate total pages
+    totalPages = Math.ceil(allRows.length / pageSize);
+    
+    // Show first page
+    updateTable();
+    updatePaginationControls();
+}
+
+function setupEventListeners() {
+    const searchInput = document.getElementById('searchInput');
+    const statusSelect = document.getElementById('statusSelect');
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    
+    // Search input with debounce
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentPage = 1; // Reset to first page on search
+            filterTable();
+        }, 300);
+    });
+    
+    // Status filter
+    statusSelect.addEventListener('change', function() {
+        currentPage = 1; // Reset to first page on filter change
+        filterTable();
+    });
+    
+    // Page size change
+    pageSizeSelect.addEventListener('change', function() {
+        pageSize = parseInt(this.value);
+        currentPage = 1; // Reset to first page on size change
+        totalPages = Math.ceil(filteredData.length / pageSize);
+        updateTable();
+        updatePaginationControls();
+    });
+}
+
+function filterTable() {
+    const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
+    const statusValue = document.getElementById('statusSelect').value;
+    
+    filteredData = allRows.filter(row => {
+        const rowStatus = row.getAttribute('data-status');
+        const rowNama = row.getAttribute('data-nama');
+        const rowPenyelenggara = row.getAttribute('data-penyelenggara');
+        const rowJenis = row.getAttribute('data-jenis');
+        
+        // Check status filter
+        const statusMatch = !statusValue || rowStatus === statusValue;
+        
+        // Check search filter
+        const searchMatch = !searchValue || 
+            rowNama.includes(searchValue) || 
+            rowPenyelenggara.includes(searchValue) || 
+            rowJenis.includes(searchValue);
+        
+        return statusMatch && searchMatch;
+    });
+    
+    totalPages = Math.ceil(filteredData.length / pageSize);
+    if (currentPage > totalPages) {
+        currentPage = totalPages || 1;
+    }
+    
+    updateTable();
+    updatePaginationControls();
+}
+
+function updateTable() {
+    // Hide all rows
+    allRows.forEach(row => row.style.display = 'none');
+    
+    // Show empty message if no data
+    const emptyRow = document.getElementById('emptyRow');
+    if (filteredData.length === 0) {
+        if (emptyRow) emptyRow.style.display = '';
+        return;
+    }
+    
+    if (emptyRow) emptyRow.style.display = 'none';
+    
+    // Calculate start and end index for current page
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, filteredData.length);
+    
+    // Show only rows for current page
+    for (let i = startIndex; i < endIndex; i++) {
+        const row = filteredData[i];
+        if (row) {
+            row.style.display = '';
+            // Update row number
+            const rowNumberCell = row.querySelector('.row-number');
+            if (rowNumberCell) {
+                rowNumberCell.textContent = i + 1;
+            }
+        }
+    }
+}
+
+function updatePaginationControls() {
+    const pageNumbers = document.getElementById('pageNumbers');
+    const pageInfoText = document.getElementById('pageInfoText');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const firstPageBtn = document.getElementById('firstPageBtn');
+    const lastPageBtn = document.getElementById('lastPageBtn');
+    
+    // Update page info
+    const startIndex = (currentPage - 1) * pageSize + 1;
+    const endIndex = Math.min(currentPage * pageSize, filteredData.length);
+    const totalData = filteredData.length;
+    
+    pageInfoText.textContent = filteredData.length > 0 
+        ? `Menampilkan ${startIndex}-${endIndex} dari ${totalData} data` 
+        : 'Tidak ada data';
+    
+    // Update button states
+    prevPageBtn.disabled = currentPage <= 1;
+    prevPageBtn.classList.toggle('disabled', currentPage <= 1);
+    nextPageBtn.disabled = currentPage >= totalPages;
+    nextPageBtn.classList.toggle('disabled', currentPage >= totalPages);
+    firstPageBtn.disabled = currentPage <= 1;
+    firstPageBtn.classList.toggle('disabled', currentPage <= 1);
+    lastPageBtn.disabled = currentPage >= totalPages;
+    lastPageBtn.classList.toggle('disabled', currentPage >= totalPages);
+    
+    // Generate page number buttons
+    pageNumbers.innerHTML = '';
+    
+    // Always show first page
+    pageNumbers.appendChild(createPageButton(1));
+    
+    // Calculate range of pages to show
+    let startPage = Math.max(2, currentPage - 2);
+    let endPage = Math.min(totalPages - 1, currentPage + 2);
+    
+    // Adjust if near start
+    if (currentPage <= 3) {
+        endPage = Math.min(5, totalPages - 1);
+    }
+    
+    // Adjust if near end
+    if (currentPage >= totalPages - 2) {
+        startPage = Math.max(2, totalPages - 4);
+    }
+    
+    // Add ellipsis after first page if needed
+    if (startPage > 2) {
+        const ellipsis = document.createElement('span');
+        ellipsis.className = 'pagination-btn disabled';
+        ellipsis.textContent = '...';
+        ellipsis.style.cursor = 'default';
+        pageNumbers.appendChild(ellipsis);
+    }
+    
+    // Add middle pages
+    for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.appendChild(createPageButton(i));
+    }
+    
+    // Add ellipsis before last page if needed
+    if (endPage < totalPages - 1) {
+        const ellipsis = document.createElement('span');
+        ellipsis.className = 'pagination-btn disabled';
+        ellipsis.textContent = '...';
+        ellipsis.style.cursor = 'default';
+        pageNumbers.appendChild(ellipsis);
+    }
+    
+    // Always show last page if there is more than one page
+    if (totalPages > 1) {
+        pageNumbers.appendChild(createPageButton(totalPages));
+    }
+}
+
+function createPageButton(pageNum) {
+    const button = document.createElement('button');
+    button.className = 'pagination-btn';
+    if (pageNum === currentPage) {
+        button.classList.add('active');
+    }
+    button.textContent = pageNum;
+    button.onclick = () => changePage(pageNum);
+    return button;
+}
+
+function changePage(page) {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    currentPage = page;
+    updateTable();
+    updatePaginationControls();
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        changePage(currentPage - 1);
+    }
+}
+
+function nextPage() {
+    if (currentPage < totalPages) {
+        changePage(currentPage + 1);
+    }
+}
+
+function resetFilter() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('statusSelect').value = '';
+    currentPage = 1;
+    filterTable();
+}
 
 // PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
 function getSuratDetail(id) {
@@ -973,98 +1329,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-// Initialize Search & Filter
-document.addEventListener('DOMContentLoaded', function() {
-    allRows = Array.from(document.querySelectorAll('#tableBody tr[data-status]'));
-    
-    const searchInput = document.getElementById('searchInput');
-    const statusSelect = document.getElementById('statusSelect');
-    
-    // Search input dengan debounce
-    let searchTimeout;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(filterTable, 300);
-    });
-    
-    // Status filter
-    statusSelect.addEventListener('change', filterTable);
-});
-
-function filterTable() {
-    const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
-    const statusValue = document.getElementById('statusSelect').value;
-    
-    let visibleCount = 0;
-    let rowNumber = 1;
-    
-    allRows.forEach(row => {
-        const rowStatus = row.getAttribute('data-status');
-        const rowNama = row.getAttribute('data-nama');
-        const rowPenyelenggara = row.getAttribute('data-penyelenggara');
-        const rowJenis = row.getAttribute('data-jenis');
-        
-        // Check status filter
-        const statusMatch = !statusValue || rowStatus === statusValue;
-        
-        // Check search filter
-        const searchMatch = !searchValue || 
-            rowNama.includes(searchValue) || 
-            rowPenyelenggara.includes(searchValue) || 
-            rowJenis.includes(searchValue);
-        
-        if (statusMatch && searchMatch) {
-            row.style.display = '';
-            row.cells[0].textContent = rowNumber++;
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
-    });
-    
-    // Update pagination info
-    updatePaginationInfo(visibleCount, searchValue, statusValue);
-    
-    // Show/hide empty message
-    showEmptyMessage(visibleCount === 0);
-}
-
-function updatePaginationInfo(count, search, status) {
-    let filterInfo = 'Semua Data';
-    if (status === 'pending') filterInfo = 'Menunggu';
-    if (status === 'approved') filterInfo = 'Disetujui';
-    if (status === 'rejected') filterInfo = 'Ditolak';
-    
-    let searchInfo = search ? ` (Hasil pencarian: "${search}")` : '';
-    
-    document.getElementById('paginationInfo').textContent = 
-        `Menampilkan: ${filterInfo} (${count} data)${searchInfo}`;
-}
-
-function showEmptyMessage(show) {
-    const tbody = document.getElementById('tableBody');
-    let emptyRow = tbody.querySelector('.empty-message-row');
-    
-    if (show && !emptyRow) {
-        emptyRow = tbody.insertRow(0);
-        emptyRow.className = 'empty-message-row';
-        const cell = emptyRow.insertCell(0);
-        cell.colSpan = 8;
-        cell.style.textAlign = 'center';
-        cell.style.padding = '40px';
-        cell.style.color = '#7f8c8d';
-        cell.innerHTML = '<i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i><strong>Tidak ada data yang sesuai dengan filter</strong>';
-    } else if (!show && emptyRow) {
-        emptyRow.remove();
-    }
-}
-
-function resetFilter() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('statusSelect').value = '';
-    filterTable();
-}
 
 // PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki dengan PERIODE
 async function showDetail(id) {

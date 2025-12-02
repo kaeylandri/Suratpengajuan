@@ -311,7 +311,7 @@
         box-sizing: border-box;
     }
 
-    /* Header Action Buttons */
+    /* ===== REVISI: Header Action Buttons ===== */
     .header-actions {
         display: flex;
         justify-content: space-between;
@@ -329,12 +329,52 @@
         margin: 0;
     }
 
+    /* REVISI: Action buttons group dengan layout baru */
     .action-buttons-group {
         display: flex;
         gap: 12px;
+        align-items: center;
     }
 
-    .btn-action {
+    /* REVISI: Tombol Tambah Surat - lebih mencolok */
+    .btn-add-surat {
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 15px;
+        background: linear-gradient(135deg, #FB8C00 0%, #FF9800 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(251, 140, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-add-surat:hover {
+        background: linear-gradient(135deg, #e67e00 0%, #F57C00 100%);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(251, 140, 0, 0.4);
+        text-decoration: none;
+    }
+
+    .btn-add-surat:active {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 10px rgba(251, 140, 0, 0.3);
+    }
+
+    .btn-add-surat i {
+        font-size: 16px;
+    }
+
+    /* REVISI: Tombol Kembali di pojok kanan */
+    .btn-back {
         padding: 10px 20px;
         border-radius: 8px;
         font-weight: 600;
@@ -346,9 +386,6 @@
         border: none;
         cursor: pointer;
         font-size: 14px;
-    }
-
-    .btn-back {
         background: #6c757d;
         color: white;
     }
@@ -358,18 +395,7 @@
         color: white;
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    .btn-add {
-        background: #FB8C00;
-        color: white;
-    }
-
-    .btn-add:hover {
-        background: #e67e00;
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        text-decoration: none;
     }
 
     /* ===== TABLE FILTER STYLES ===== */
@@ -576,60 +602,9 @@
         background: #e67e00;
     }
 
-    /* Multi-action buttons */
+    /* ===== REVISI: Multi-action buttons (disembunyikan) ===== */
     .multi-actions {
-        display: none;
-        background: #ffffff;
-        padding: 12px 14px;
-        border-radius: 12px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 14px;
-        border: 1px solid #f0f0f0;
-    }
-
-    .multi-actions.show {
-        display: flex;
-    }
-
-    .multi-actions .selected-count {
-        font-size: 14px;
-        font-weight: 600;
-        color: #333;
-        margin-right: 8px;
-    }
-
-    .btn-multi {
-        height: 40px;
-        padding: 0 16px;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        font-size: 14px;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-weight: 600;
-        transition: all 0.2s;
-    }
-
-    .btn-multi-edit {
-        background: #ffa726;
-        color: white;
-    }
-
-    .btn-multi-edit:hover {
-        background: #fb8c00;
-    }
-
-    .btn-multi-delete {
-        background: #ef5350;
-        color: white;
-    }
-
-    .btn-multi-delete:hover {
-        background: #e53935;
+        display: none !important;
     }
 
     /* Table styles */
@@ -667,7 +642,7 @@
         word-wrap: break-word;
     }
 
-    /* Column widths */
+    /* ===== REVISI: Column widths (dengan perubahan kolom) ===== */
     #tabelSurat th:nth-child(1),
     #tabelSurat td:nth-child(1) {
         width: 4%;
@@ -699,12 +674,14 @@
         min-width: 180px;
     }
     
+    /* REVISI: Kolom 6: Status (menggantikan Divisi) */
     #tabelSurat th:nth-child(6),
     #tabelSurat td:nth-child(6) {
-        width: 12%;
-        min-width: 120px;
+        width: 15%;
+        min-width: 150px;
     }
     
+    /* REVISI: Kolom 7: Tanggal Kegiatan (menggantikan Tanggal Pengajuan) */
     #tabelSurat th:nth-child(7),
     #tabelSurat td:nth-child(7) {
         width: 12%;
@@ -713,7 +690,7 @@
     
     #tabelSurat th:nth-child(8),
     #tabelSurat td:nth-child(8) {
-        width: 10%;
+        width: 12%;
         min-width: 150px;
     }
 
@@ -757,13 +734,40 @@
         accent-color: #FB8C00;
     }
 
-    .dosen-container, .divisi-container {
+    /* ===== REVISI: Styling khusus untuk kolom nama dosen ===== */
+    .dosen-container {
         display: flex;
         flex-wrap: wrap;
         gap: 5px;
         align-items: center;
         justify-content: center;
         max-width: 100%;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        padding: 8px;
+        border-radius: 8px;
+    }
+
+    .dosen-container:hover {
+        background-color: #fff4e6;
+        transform: translateY(-1px);
+    }
+
+    .dosen-container.clickable {
+        cursor: pointer;
+        position: relative;
+    }
+
+    .dosen-container.clickable::after {
+        content: '👁️';
+        font-size: 10px;
+        margin-left: 5px;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+
+    .dosen-container.clickable:hover::after {
+        opacity: 1;
     }
 
     .nama-dosen-badge {
@@ -778,6 +782,14 @@
         max-width: 250px;
         overflow: hidden;
         text-overflow: ellipsis;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .dosen-container:hover .nama-dosen-badge {
+        background: #FB8C00;
+        color: white;
+        box-shadow: 0 2px 5px rgba(251, 140, 0, 0.2);
     }
 
     .nama-dosen-more {
@@ -796,36 +808,268 @@
     .nama-dosen-more:hover {
         transform: scale(1.03);
         background: #e67e00;
+        box-shadow: 0 3px 8px rgba(230, 126, 0, 0.3);
     }
 
-    .divisi-badge {
+    /* ===== REVISI: Modal Popup Detail Dosen - NEW STYLE ===== */
+    .dosen-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9998;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .dosen-modal.show {
+        display: flex;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .dosen-modal-content {
+        background: white;
+        border-radius: 16px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        transform: translateY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .dosen-modal.show .dosen-modal-content {
+        animation: slideUp 0.4s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(30px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .dosen-modal-header {
+        background: linear-gradient(135deg, #FB8C00 0%, #FF9800 100%);
+        color: white;
+        padding: 20px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .dosen-modal-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dosen-modal-title i {
+        font-size: 20px;
+    }
+
+    .dosen-modal-close {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.2s;
+    }
+
+    .dosen-modal-close:hover {
+        background: rgba(255,255,255,0.3);
+        transform: rotate(90deg);
+    }
+
+    .dosen-modal-body {
+        padding: 25px;
+        overflow-y: auto;
+        max-height: 60vh;
+    }
+
+    /* ===== NEW STYLE: Format seperti contoh image.png ===== */
+    .dosen-section {
+        margin-bottom: 25px;
+    }
+
+    .dosen-section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #FB8C00;
+        margin-bottom: 20px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #FB8C00;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dosen-section-title i {
+        font-size: 20px;
+    }
+
+    .dosen-item {
+        margin-bottom: 20px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #FB8C00;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .dosen-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(251, 140, 0, 0.15);
+    }
+
+    .dosen-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
+    .dosen-details {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .dosen-detail-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        color: #495057;
+        line-height: 1.5;
+    }
+
+    .dosen-detail-item i {
+        width: 20px;
+        text-align: center;
+        color: #FB8C00;
+        font-size: 16px;
+    }
+
+    .dosen-detail-label {
+        font-weight: 600;
+        color: #495057;
+        min-width: 60px;
+    }
+
+    .dosen-detail-value {
+        color: #212529;
+    }
+
+    .no-dosen {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+
+    .no-dosen i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: #adb5bd;
+    }
+
+    .no-dosen h4 {
+        font-size: 18px;
+        margin-bottom: 10px;
+        color: #495057;
+    }
+
+    .dosen-modal-footer {
+        padding: 15px 25px;
+        background: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        text-align: center;
+    }
+
+    .dosen-total {
+        font-size: 14px;
+        color: #6c757d;
+        font-weight: 600;
+    }
+
+    .dosen-total strong {
+        color: #FB8C00;
+        font-size: 16px;
+    }
+
+    /* ===== REVISI: Status Badge Styles ===== */
+    .status-badge {
         display: inline-block;
-        background: #e3f2fd;
-        color: #0d47a1;
         padding: 6px 12px;
         border-radius: 15px;
         font-size: 12px;
-        border: 1px solid #2196F3;
+        font-weight: 600;
+        text-align: center;
+        min-width: 100px;
         white-space: nowrap;
-        max-width: 150px;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
-    /* ===== REVISI: Action buttons dengan layout 2x2 ===== */
-    .action-buttons-container {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
+    .status-disetujui {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
     }
 
-    .action-row {
+    .status-ditolak {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+
+    .status-proses {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    /* ===== REVISI: Action buttons dengan layout baru ===== */
+    .action-buttons-container {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         justify-content: center;
+        align-items: center;
         width: 100%;
     }
 
@@ -841,6 +1085,12 @@
         transition: all 0.2s;
         font-size: 14px;
         flex-shrink: 0;
+        text-decoration: none;
+    }
+
+    .btn-icon-action:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     .btn-edit {
@@ -850,7 +1100,6 @@
 
     .btn-edit:hover {
         background: #fb8c00;
-        transform: scale(1.05);
     }
 
     .btn-edit-disabled {
@@ -873,7 +1122,6 @@
 
     .btn-delete:hover {
         background: #e53935;
-        transform: scale(1.05);
     }
 
     .btn-print {
@@ -883,27 +1131,15 @@
 
     .btn-print:hover {
         background: #039be5;
-        transform: scale(1.05);
     }
 
     .btn-status {
         background: #66bb6a;
         color: white;
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 14px;
     }
 
     .btn-status:hover {
         background: #4caf50;
-        transform: scale(1.05);
     }
 
     .btn-print-disabled {
@@ -1799,6 +2035,32 @@
         .detail-value {
             width: 100%;
         }
+        
+        /* Responsive Dosen Modal */
+        .dosen-modal-content {
+            width: 95%;
+            margin: 10px;
+        }
+        
+        .dosen-modal-body {
+            padding: 15px;
+        }
+        
+        .dosen-item {
+            padding: 15px;
+        }
+        
+        .dosen-name {
+            font-size: 15px;
+        }
+        
+        .dosen-detail-item {
+            font-size: 13px;
+        }
+        
+        .nama-dosen-badge {
+            max-width: 180px;
+        }
     }
 
     @media (max-width: 576px) {
@@ -1865,6 +2127,32 @@
             padding-left: 20px;
             text-align: center;
         }
+        
+        /* Responsive Dosen Modal */
+        .dosen-modal-header {
+            padding: 15px;
+        }
+        
+        .dosen-modal-title {
+            font-size: 16px;
+        }
+        
+        .dosen-section-title {
+            font-size: 16px;
+        }
+        
+        .dosen-name {
+            font-size: 14px;
+        }
+        
+        .dosen-detail-item {
+            font-size: 12px;
+        }
+        
+        .nama-dosen-badge {
+            max-width: 150px;
+            font-size: 11px;
+        }
     }
     
     /* ===== RESPONSIVE STYLES ===== */
@@ -1885,6 +2173,12 @@
         #tabelSurat td:nth-child(5) {
             width: 18%;
             min-width: 160px;
+        }
+        
+        #tabelSurat th:nth-child(6),
+        #tabelSurat td:nth-child(6) {
+            width: 14%;
+            min-width: 130px;
         }
     }
 
@@ -1939,11 +2233,7 @@
         
         /* Responsive action buttons */
         .action-buttons-container {
-            gap: 6px;
-        }
-        
-        .action-row {
-            gap: 6px;
+            gap: 4px;
         }
         
         .btn-icon-action {
@@ -2092,10 +2382,22 @@
             min-width: 140px;
         }
         
+        #tabelSurat th:nth-child(6),
+        #tabelSurat td:nth-child(6) {
+            width: 16%;
+            min-width: 120px;
+        }
+        
+        #tabelSurat th:nth-child(7),
+        #tabelSurat td:nth-child(7) {
+            width: 12%;
+            min-width: 100px;
+        }
+        
         #tabelSurat th:nth-child(8),
         #tabelSurat td:nth-child(8) {
-            width: 12%;
-            min-width: 130px;
+            width: 11%;
+            min-width: 120px;
         }
 
         /* Responsive file items */
@@ -2113,6 +2415,16 @@
         .download-btn, .preview-btn {
             flex: 1;
             justify-content: center;
+        }
+        
+        /* Responsive Dosen Container */
+        .dosen-container {
+            padding: 6px;
+        }
+        
+        .nama-dosen-badge {
+            max-width: 180px;
+            font-size: 11px;
         }
     }
 
@@ -2139,8 +2451,8 @@
             padding: 4px 8px;
         }
         
-        .divisi-badge {
-            max-width: 100px;
+        .status-badge {
+            min-width: 80px;
             font-size: 10px;
             padding: 4px 8px;
         }
@@ -2151,25 +2463,35 @@
             font-size: 10px;
         }
         
-        /* Hide divisi column on small mobile */
-        #tabelSurat th:nth-child(6),
-        #tabelSurat td:nth-child(6) {
+        /* Hide checkbox column on small mobile */
+        #tabelSurat th:nth-child(1),
+        #tabelSurat td:nth-child(1) {
             display: none;
         }
         
-        #tabelSurat th:nth-child(7),
-        #tabelSurat td:nth-child(7) {
-            width: 15%;
-            min-width: 90px;
+        /* Hide jenis pengajuan column on small mobile */
+        #tabelSurat th:nth-child(4),
+        #tabelSurat td:nth-child(4) {
+            display: none;
         }
         
         /* Action buttons layout for mobile */
         .action-buttons-container {
-            gap: 4px;
+            flex-direction: column;
+            gap: 3px;
         }
         
-        .action-row {
-            gap: 4px;
+        /* Dosen Modal adjustments */
+        .dosen-modal {
+            padding: 10px;
+        }
+        
+        .dosen-modal-body {
+            max-height: 70vh;
+        }
+        
+        .dosen-section-title {
+            font-size: 15px;
         }
     }
 
@@ -2185,31 +2507,26 @@
             max-width: calc(100% - 85%);
         }
         
-        /* Hide jenis pengajuan column */
-        #tabelSurat th:nth-child(4),
-        #tabelSurat td:nth-child(4) {
-            display: none;
-        }
-        
-        #tabelSurat th:nth-child(3),
-        #tabelSurat td:nth-child(3) {
-            width: 35%;
-            min-width: 120px;
-        }
-        
         #tabelSurat th:nth-child(5),
         #tabelSurat td:nth-child(5) {
             width: 25%;
             min-width: 100px;
         }
         
-        .action-buttons-container {
-            flex-direction: row;
-            gap: 3px;
+        #tabelSurat th:nth-child(6),
+        #tabelSurat td:nth-child(6) {
+            width: 18%;
+            min-width: 90px;
         }
         
-        .action-row {
-            flex-direction: column;
+        #tabelSurat th:nth-child(7),
+        #tabelSurat td:nth-child(7) {
+            width: 15%;
+            min-width: 80px;
+        }
+        
+        .action-buttons-container {
+            flex-direction: row;
             gap: 3px;
         }
         
@@ -2225,6 +2542,18 @@
         .fik-db-side-menu .collapse ul li a {
             padding-left: 50px;
             font-size: 11px;
+        }
+        
+        /* Dosen container untuk mobile sangat kecil */
+        .dosen-container {
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .nama-dosen-badge {
+            max-width: 100px;
+            font-size: 9px;
         }
     }
 
@@ -2403,16 +2732,19 @@
         </div>
         <?php endif; ?>
         
-        <!-- Header Actions -->
+        <!-- REVISI: Header Actions dengan layout baru -->
         <div class="header-actions">
             <h1 class="page-title">List Surat Tugas</h1>
             <div class="action-buttons-group">
-                <button class="btn-action btn-back" onclick="goBack()">
+                <!-- REVISI: Tombol Tambah Surat - lebih mencolok -->
+                <a href="<?= site_url('surat/') ?>" class="btn-add-surat">
+                    <i class="fas fa-plus-circle"></i> Tambah Surat Tugas
+                </a>
+                
+                <!-- REVISI: Tombol Kembali di pojok kanan -->
+                <button class="btn-back" onclick="goBack()">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </button>
-                <a href="<?= site_url('surat/') ?>" class="btn-action btn-add">
-                    <i class="fas fa-plus"></i> Tambah Surat
-                </a>
             </div>
         </div>
 
@@ -2422,8 +2754,8 @@
                 <select id="filterCategory" class="btn-small">
                     <option value="jenis" selected>Jenis Pengajuan</option>
                     <option value="dosen">Nama Dosen</option>
-                    <option value="divisi">Divisi</option>
-                    <option value="tanggal">Tanggal Pengajuan</option>
+                    <option value="status">Status</option>
+                    <option value="tanggal">Tanggal Kegiatan</option>
                 </select>
 
                 <button id="btnAddFilterRow" class="btn-small btn-small-add" title="Tambah baris filter">
@@ -2443,15 +2775,41 @@
 
         <div id="filterBuilder" class="filter-builder"></div>
 
-        <!-- Multi-Action Bar -->
+        <!-- REVISI: Multi-Action Bar (disembunyikan) ===== -->
         <div id="multiActions" class="multi-actions">
             <span class="selected-count"><span id="selectedCount">0</span> item terpilih</span>
             <button id="btnMultiEdit" class="btn-multi btn-multi-edit">
                 <i class="fa fa-edit"></i> Multi Edit
             </button>
-            <button id="btnMultiDelete" class="btn-multi btn-multi-delete">
-                <i class="fa fa-trash"></i> Multi Hapus
-            </button>
+        </div>
+
+        <!-- ===== REVISI: Modal Popup Detail Dosen ===== -->
+        <div id="dosenModal" class="dosen-modal">
+            <div class="dosen-modal-content">
+                <div class="dosen-modal-header">
+                    <h3 class="dosen-modal-title">
+                        <i class="fas fa-user-graduate"></i>
+                        <span id="dosenModalTitle">Dosen Terkait</span>
+                    </h3>
+                    <button class="dosen-modal-close" id="closeDosenModal">&times;</button>
+                </div>
+                <div class="dosen-modal-body">
+                    <div class="dosen-section">
+                        <div class="dosen-section-title">
+                            <i class="fas fa-users"></i>
+                            Daftar Dosen
+                        </div>
+                        <div id="dosenListContainer">
+                            <!-- Dosen list akan diisi oleh JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                <div class="dosen-modal-footer">
+                    <div class="dosen-total">
+                        Total: <strong id="dosenTotalCount">0</strong> Dosen
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Modal Detail -->
@@ -2560,8 +2918,10 @@
                     <th>Nama Kegiatan</th>
                     <th>Jenis Pengajuan</th>
                     <th>Nama Dosen</th>
-                    <th>Divisi</th>
-                    <th>Tanggal Pengajuan</th>
+                    <!-- REVISI: Kolom Divisi diganti Status -->
+                    <th>Status</th>
+                    <!-- REVISI: Kolom Tanggal Pengajuan diganti Tanggal Kegiatan -->
+                    <th>Tanggal Kegiatan</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -2614,26 +2974,36 @@
                     $detail['eviden'] = $eviden_data;
                     
                     $data_detail_attr = htmlspecialchars(json_encode($detail, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES), ENT_QUOTES,'UTF-8');
+                    
+                    // REVISI: Tentukan class status berdasarkan nilai status
+                    $status_class = 'status-proses';
+                    $status_lower = strtolower($s->status);
+                    if (strpos($status_lower, 'disetujui') !== false) {
+                        $status_class = 'status-disetujui';
+                    } elseif (strpos($status_lower, 'ditolak') !== false) {
+                        $status_class = 'status-ditolak';
+                    } elseif (strpos($status_lower, 'pending') !== false || strpos($status_lower, 'menunggu') !== false) {
+                        $status_class = 'status-pending';
+                    }
                 ?>
                 <tr class="row-detail" data-detail='<?= $data_detail_attr; ?>' data-id="<?= $s->id; ?>">
                     <td><input type="checkbox" class="row-checkbox" data-id="<?= $s->id; ?>"></td>
                     <td><?= $no++; ?></td>
-                    <!-- PERBAIKAN: Tampilkan teks utuh dengan bungkus alami -->
                     <td>
                         <?= htmlspecialchars($s->nama_kegiatan); ?>
                     </td>
                     <td><?= htmlspecialchars($s->jenis_pengajuan); ?></td>
+                    <!-- ===== REVISI: Kolom Nama Dosen dengan Click Handler ===== -->
                     <td>
-                        <div class="dosen-container">
+                        <div class="dosen-container clickable" onclick="showDosenModal(event, <?= htmlspecialchars(json_encode($dosen_data), ENT_QUOTES, 'UTF-8') ?>, '<?= htmlspecialchars($s->nama_kegiatan, ENT_QUOTES, 'UTF-8') ?>')">
                             <?php
-                            // === PERUBAHAN: Tampilkan dari dosen_data ===
                             if (!empty($dosen_data)) {
                                 $nama = $dosen_data[0]['nama_dosen'] ?? '-';
                                 $short = strlen($nama) > 30 ? substr($nama, 0, 30) . '...' : $nama;
-                                echo '<span class="nama-dosen-badge" title="' . htmlspecialchars($nama) . '">' . htmlspecialchars($short) . '</span>';
+                                echo '<span class="nama-dosen-badge" title="' . htmlspecialchars($nama) . ' (Klik untuk lihat semua)">' . htmlspecialchars($short) . '</span>';
                                 
                                 if (count($dosen_data) > 1) {
-                                    echo '<span class="nama-dosen-more" title="Klik row untuk lihat semua dosen">+' . (count($dosen_data) - 1) . '</span>';
+                                    echo '<span class="nama-dosen-more" title="Klik untuk lihat semua dosen">+' . (count($dosen_data) - 1) . ' lainnya</span>';
                                 }
                             } else {
                                 echo '-';
@@ -2641,80 +3011,74 @@
                             ?>
                         </div>
                     </td>
+                    <!-- REVISI: Kolom Status -->
                     <td>
-                        <div class="divisi-container">
-                            <?php
-                            // === PERUBAHAN: Tampilkan dari dosen_data ===
-                            if (!empty($dosen_data)) {
-                                // Get unique divisions
-                                $divisions = array_unique(array_column($dosen_data, 'divisi'));
-                                foreach ($divisions as $div) {
-                                    echo '<span class="divisi-badge" title="' . htmlspecialchars($div) . '">' . htmlspecialchars($div) . '</span>';
-                                }
-                            } else {
-                                echo '-';
-                            }
-                            ?>
-                        </div>
+                        <span class="status-badge <?= $status_class ?>">
+                            <?= htmlspecialchars($s->status); ?>
+                        </span>
                     </td>
-                    <td><?= isset($s->created_at) && $s->created_at ? htmlspecialchars($s->created_at) : '-'; ?></td>
+                    <!-- REVISI: Kolom Tanggal Kegiatan -->
                     <td>
-                        <!-- ===== REVISI: Button aksi dengan layout 2x2 ===== -->
+                        <?php
+                        // Cek jika ada tanggal_kegiatan, jika tidak gunakan tanggal_mulai atau created_at
+                        $tanggal_kegiatan = '';
+                        if (isset($s->tanggal_kegiatan) && !empty($s->tanggal_kegiatan)) {
+                            $tanggal_kegiatan = $s->tanggal_kegiatan;
+                        } elseif (isset($s->tanggal_mulai) && !empty($s->tanggal_mulai)) {
+                            $tanggal_kegiatan = $s->tanggal_mulai;
+                        } elseif (isset($s->created_at) && !empty($s->created_at)) {
+                            $tanggal_kegiatan = $s->created_at;
+                        }
+                        echo htmlspecialchars($tanggal_kegiatan ?: '-');
+                        ?>
+                    </td>
+                    <td>
+                        <!-- REVISI: Button aksi dengan layout baru -->
                         <div class="action-buttons-container">
-                            <!-- Baris pertama: Status & Edit -->
-                            <div class="action-row">
-                                <button class="btn-icon-action btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s->id; ?>)">
-                                    <i class="fas fa-tasks"></i>
-                                </button>
-                                
-                                <?php 
-                                // Cek apakah status ditolak
-                                $status_lower = strtolower($s->status);
-                                $is_rejected = in_array($status_lower, ['ditolak kk', 'ditolak sekretariat', 'ditolak dekan']);
-                                $is_approved_dekan = ($s->status === 'disetujui dekan');
-                                ?>
-                                
-                                <?php if ($is_rejected): ?>
-                                    <a href="<?= site_url('surat/edit/'.$s->id); ?>" 
-                                    class="btn-icon-action btn-edit" 
-                                    title="Edit & Ajukan Ulang - Ditolak">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                <?php else: ?>
-                                    <button class="btn-icon-action btn-edit btn-edit-disabled" 
-                                            title="Edit hanya untuk surat ditolak" 
-                                            onclick="showEditAlert('<?= $s->status ?>')"
-                                            style="opacity: 0.5; cursor: not-allowed;">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
+                            <?php 
+                            // Cek apakah status ditolak
+                            $status_lower = strtolower($s->status);
+                            $is_rejected = in_array($status_lower, ['ditolak kk', 'ditolak sekretariat', 'ditolak dekan']);
+                            $is_approved_dekan = ($s->status === 'disetujui dekan');
+                            ?>
                             
-                            <!-- Baris kedua: Print & Delete -->
-                            <div class="action-row">
-                                <?php if ($is_approved_dekan): ?>
-                                    <a href="<?= base_url('surat/cetak/' . $s->id) ?>" 
-                                    target="_blank" 
-                                    class="btn-icon-action btn-print" 
-                                    title="Cetak Surat Tugas">
-                                        <i class="fas fa-print"></i>
-                                    </a>
-                                <?php else: ?>
-                                    <button class="btn-icon-action btn-print btn-print-disabled" 
-                                            title="Cetak hanya untuk surat disetujui dekan" 
-                                            onclick="showPrintAlert('<?= $s->status ?>')"
-                                            style="opacity: 0.5; cursor: not-allowed;">
-                                        <i class="fas fa-print"></i>
-                                    </button>
-                                <?php endif; ?>
-                                
-                                <a href="<?= site_url('surat/delete/'.$s->id); ?>" 
-                                class="btn-icon-action btn-delete" 
-                                title="Hapus" 
-                                onclick="return confirm('Hapus data ini?')">
-                                    <i class="fas fa-trash"></i>
+                            <!-- Tombol Status -->
+                            <button class="btn-icon-action btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s->id; ?>)">
+                                <i class="fas fa-tasks"></i>
+                            </button>
+                            
+                            <!-- Tombol Edit -->
+                            <?php if ($is_rejected): ?>
+                                <a href="<?= site_url('surat/edit/'.$s->id); ?>" 
+                                class="btn-icon-action btn-edit" 
+                                title="Edit & Ajukan Ulang - Ditolak">
+                                    <i class="fas fa-edit"></i>
                                 </a>
-                            </div>
+                            <?php else: ?>
+                                <button class="btn-icon-action btn-edit btn-edit-disabled" 
+                                        title="Edit hanya untuk surat ditolak" 
+                                        onclick="showEditAlert('<?= $s->status ?>')"
+                                        style="opacity: 0.5; cursor: not-allowed;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            <?php endif; ?>
+                            
+                            <!-- Tombol Print -->
+                            <?php if ($is_approved_dekan): ?>
+                                <a href="<?= base_url('surat/cetak/' . $s->id) ?>" 
+                                target="_blank" 
+                                class="btn-icon-action btn-print" 
+                                title="Cetak Surat Tugas">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                            <?php else: ?>
+                                <button class="btn-icon-action btn-print btn-print-disabled" 
+                                        title="Cetak hanya untuk surat disetujui dekan" 
+                                        onclick="showPrintAlert('<?= $s->status ?>')"
+                                        style="opacity: 0.5; cursor: not-allowed;">
+                                    <i class="fas fa-print"></i>
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>
@@ -2775,6 +3139,88 @@
     function goBack() {
         window.location.href = '<?= base_url() ?>';
     }
+
+    // ===== REVISI: FUNGSI MODAL DETAIL DOSEN - FIXED =====
+    function showDosenModal(event, dosenData, namaKegiatan) {
+        event.stopPropagation(); // Mencegah event bubbling ke row
+        
+        // Validasi data dosen
+        if (!dosenData || dosenData.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Tidak Ada Dosen',
+                text: 'Tidak ada data dosen untuk surat tugas ini.',
+                confirmButtonColor: '#FB8C00'
+            });
+            return;
+        }
+        
+        const modal = document.getElementById('dosenModal');
+        const title = document.getElementById('dosenModalTitle');
+        const listContainer = document.getElementById('dosenListContainer');
+        const totalCount = document.getElementById('dosenTotalCount');
+        
+        // Set title modal
+        const shortName = namaKegiatan.length > 30 ? namaKegiatan.substring(0, 30) + '...' : namaKegiatan;
+        title.textContent = `Dosen Terkait - ${shortName}`;
+        
+        // Clear container
+        listContainer.innerHTML = '';
+        
+        // Tambahkan setiap dosen ke dalam modal sesuai format image.png
+        dosenData.forEach((dosen, index) => {
+            // Format data dosen
+            const nama = dosen.nama_dosen || 'Nama tidak tersedia';
+            const nip = dosen.nip || 'NIP tidak tersedia';
+            const jabatan = dosen.jabatan || 'Jabatan tidak tersedia';
+            const divisi = dosen.divisi || 'Divisi tidak tersedia';
+            
+            const dosenItem = document.createElement('div');
+            dosenItem.className = 'dosen-item';
+            
+            dosenItem.innerHTML = `
+                <div class="dosen-name">${escapeHtml(nama)}</div>
+                <div class="dosen-details">
+                    <div class="dosen-detail-item">
+                        <i class="fas fa-id-card"></i>
+                        <span class="dosen-detail-label">NIP:</span>
+                        <span class="dosen-detail-value">${escapeHtml(nip)}</span>
+                    </div>
+                    <div class="dosen-detail-item">
+                        <i class="fas fa-briefcase"></i>
+                        <span class="dosen-detail-label">Jabatan:</span>
+                        <span class="dosen-detail-value">${escapeHtml(jabatan)}</span>
+                    </div>
+                    <div class="dosen-detail-item">
+                        <i class="fas fa-building"></i>
+                        <span class="dosen-detail-label">Divisi:</span>
+                        <span class="dosen-detail-value">${escapeHtml(divisi)}</span>
+                    </div>
+                </div>
+            `;
+            
+            listContainer.appendChild(dosenItem);
+        });
+        
+        // Update total count
+        totalCount.textContent = dosenData.length;
+        
+        // Show modal
+        modal.classList.add('show');
+    }
+
+    // Fungsi untuk menutup modal dosen
+    document.getElementById('closeDosenModal').addEventListener('click', function() {
+        document.getElementById('dosenModal').classList.remove('show');
+    });
+
+    // Tutup modal dosen saat klik di luar
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('dosenModal');
+        if (event.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
 
     // Tampilkan modal dan load data
     function showStatusModal(suratId) {
@@ -2988,9 +3434,9 @@
                 { width: '25%', targets: 2 },
                 { width: '12%', targets: 3 },
                 { width: '20%', targets: 4 },
-                { width: '12%', targets: 5 },
+                { width: '15%', targets: 5 },
                 { width: '12%', targets: 6 },
-                { width: '10%', targets: 7 }
+                { width: '12%', targets: 7 }
             ],
             order: [[1, 'asc']],
             language: {
@@ -3008,7 +3454,7 @@
             }
         });
 
-        // ===== MULTI-SELECT FUNCTIONALITY =====
+        // ===== REVISI: MULTI-SELECT FUNCTIONALITY (hanya edit) =====
         let selectedIds = [];
 
         function updateMultiActions() {
@@ -3019,11 +3465,8 @@
             
             $('#selectedCount').text(selectedIds.length);
             
-            if(selectedIds.length > 0) {
-                $('#multiActions').addClass('show');
-            } else {
-                $('#multiActions').removeClass('show');
-            }
+            // REVISI: Sembunyikan multi actions
+            $('#multiActions').removeClass('show');
             
             const totalCheckboxes = $('.row-checkbox').length;
             const checkedCheckboxes = $('.row-checkbox:checked').length;
@@ -3056,6 +3499,7 @@
             e.stopPropagation();
         });
 
+        // REVISI: Hapus fungsi multi delete
         $('#btnMultiEdit').click(function(){
             if(selectedIds.length === 0) {
                 alert('Pilih minimal 1 item untuk di-edit');
@@ -3063,62 +3507,6 @@
             }
             window.location.href = '<?= site_url("surat/multi_edit"); ?>?ids=' + selectedIds.join(',');
         });
-
-        $('#btnMultiDelete').click(function(){
-            if(selectedIds.length === 0) {
-                alert('Pilih minimal 1 item untuk dihapus');
-                return;
-            }
-            
-            const confirmed = confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' item yang dipilih?');
-            if(!confirmed) return;
-            
-            deleteMultipleSurat(selectedIds);
-        });
-
-        // Fungsi untuk menghapus multiple surat
-        function deleteMultipleSurat(ids) {
-            let successCount = 0;
-            let errorCount = 0;
-            const total = ids.length;
-            
-            const originalText = $('#btnMultiDelete').html();
-            $('#btnMultiDelete').html('<i class="fa fa-spinner fa-spin"></i> Menghapus...').prop('disabled', true);
-            
-            ids.forEach((id, index) => {
-                setTimeout(() => {
-                    $.ajax({
-                        url: '<?= site_url("surat/delete/") ?>' + id,
-                        method: 'GET',
-                        success: function(response) {
-                            successCount++;
-                            $(`tr[data-id="${id}"]`).fadeOut(300, function(){
-                                $(this).remove();
-                            });
-                            
-                            if (successCount + errorCount === total) {
-                                $('#btnMultiDelete').html(originalText).prop('disabled', false);
-                                
-                                if (successCount > 0) {
-                                    alert(successCount + ' data berhasil dihapus' + (errorCount > 0 ? ', ' + errorCount + ' gagal' : ''));
-                                    updateMultiActions();
-                                }
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            errorCount++;
-                            console.error('Error deleting ID ' + id + ':', error);
-                            
-                            if (successCount + errorCount === total) {
-                                $('#btnMultiDelete').html(originalText).prop('disabled', false);
-                                alert(successCount + ' data berhasil dihapus, ' + errorCount + ' gagal');
-                                updateMultiActions();
-                            }
-                        }
-                    });
-                }, index * 200);
-            });
-        }
 
         // ===== FILTER FUNCTIONALITY - UPDATED =====
         const filterData = {
@@ -3129,7 +3517,7 @@
                 echo json_encode(array_values($jenis_list));
             ?>,
             dosen: <?php 
-                // === PERUBAHAN: Ambil dari dosen_data ===
+                // Ambil dari dosen_data
                 $dosen_list = [];
                 foreach ($surat_list as $s) {
                     if (isset($s->dosen_data) && !empty($s->dosen_data)) {
@@ -3141,18 +3529,12 @@
                 $dosen_list = array_unique($dosen_list);
                 echo json_encode(array_values($dosen_list));
             ?>,
-            divisi: <?php 
-                // === PERUBAHAN: Ambil dari dosen_data ===
-                $divisi_list = [];
-                foreach ($surat_list as $s) {
-                    if (isset($s->dosen_data) && !empty($s->dosen_data)) {
-                        foreach ($s->dosen_data as $dosen) {
-                            $divisi_list[] = $dosen['divisi'];
-                        }
-                    }
-                }
-                $divisi_list = array_unique($divisi_list);
-                echo json_encode(array_values($divisi_list));
+            status: <?php 
+                // Ambil status unik
+                $status_list = array_unique(array_map(function($s){ 
+                    return $s->status; 
+                }, $surat_list));
+                echo json_encode(array_values($status_list));
             ?>
         };
 
@@ -3181,8 +3563,8 @@
             const $cat = $(`<select class="row-cat">
                 <option value="jenis">Jenis Pengajuan</option>
                 <option value="dosen">Nama Dosen</option>
-                <option value="divisi">Divisi</option>
-                <option value="tanggal">Tanggal Pengajuan</option>
+                <option value="status">Status</option>
+                <option value="tanggal">Tanggal Kegiatan</option>
             </select>`);
 
             const $btnAdd = $(`<button class="row-btn add" title="Tambah baris"><i class="fa fa-plus"></i></button>`);
@@ -3312,7 +3694,12 @@
                     continue;
                 }
 
-                const colIndex = (r.category === 'jenis') ? 3 : (r.category === 'dosen' ? 4 : 5);
+                const colIndex = (r.category === 'jenis') ? 3 : 
+                                (r.category === 'dosen') ? 4 : 
+                                (r.category === 'status') ? 5 : -1;
+                
+                if(colIndex === -1) continue;
+                
                 const cellRaw = (data[colIndex] || '').toLowerCase();
 
                 if(!r.text || String(r.text).trim() === '') continue;
@@ -3431,6 +3818,11 @@
 
         // ===== POPUP DETAIL - FORM-LIKE STYLE (DENGAN PERBAIKAN EVIDEN) =====
         $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
+            // Mencegah trigger jika klik di kolom nama dosen
+            if ($(e.target).closest('.dosen-container').length) {
+                return;
+            }
+            
             if($(e.target).closest('input, a, button').length) return;
             
             let raw=$(this).attr('data-detail')||'{}';
@@ -3450,8 +3842,8 @@
                     </div>
                     
                     <div class="detail-row">
-                        <div class="detail-label">Tanggal Pengajuan</div>
-                        <div class="detail-value">${escapeHtml(data.created_at || '-')}</div>
+                        <div class="detail-label">Tanggal Kegiatan</div>
+                        <div class="detail-value">${escapeHtml(data.tanggal_kegiatan || data.tanggal_mulai || data.created_at || '-')}</div>
                     </div>
                     
                     <div class="detail-row">
@@ -3489,6 +3881,11 @@
                     <div class="detail-row">
                         <div class="detail-label">Jenis Penugasan</div>
                         <div class="detail-value">${escapeHtml(data.jenis_penugasan || data.jenis_penugasan_kelompok || '-')}</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">${escapeHtml(data.status || '-')}</div>
                     </div>
                 </div>
             `;
