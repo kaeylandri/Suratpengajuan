@@ -509,6 +509,7 @@ i[class*="fa-"] {
 
 .step-counter i {
     color: #FB8C00;
+
 }
 /* ===== LOADING SCREEN ===== */
 .loading-overlay {
