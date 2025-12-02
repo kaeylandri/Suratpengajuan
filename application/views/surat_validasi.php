@@ -149,6 +149,20 @@
         font-size: 20px;
     }
     
+    /* New style for dosen list like penandatangan */
+    .dosen-list-item {
+        margin-bottom: 10px;
+    }
+    
+    .dosen-nama-value {
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+    
+    .dosen-nip-value {
+        color: #666;
+        font-size: 14px;
+    }
 </style>
 </head>
 <body>
@@ -235,24 +249,19 @@
         <span class="info-value"><?= ($surat->nama_kegiatan) ?></span>
     </div>
 
-    <!-- DOSEN TERKAIT SECTION -->
+    <!-- DOSEN TERKAIT SECTION (UPDATED FORMAT) -->
     <?php if (!empty($dosen_list) && count($dosen_list) > 0): ?>
-    <div class="dosen-section">
-        <div class="section-title">
-            <span>Dosen Terkait</span>
-        </div>
-        
-        <?php foreach ($dosen_list as $index => $dosen): ?>
-        <div class="dosen-card">
-            <div class="dosen-avatar">
-                <?= strtoupper(substr($dosen['nama_dosen'] ?? 'D', 0, 1)) ?>
+    <div class="info-row">
+        <span class="info-label">Dosen Terkait</span>
+        <span class="info-separator">:</span>
+        <span class="info-value">
+            <?php foreach ($dosen_list as $index => $dosen): ?>
+            <div class="dosen-list-item">
+                <div class="dosen-nama-value"><?= ($dosen['nama_dosen']) ?></div>
+                <div class="dosen-nip-value">NIP: <?= ($dosen['nip']) ?></div>
             </div>
-            <div class="dosen-info">
-                <div class="dosen-nama"><?= ($dosen['nama_dosen']) ?></div>
-                <div class="dosen-nip">NIP: <?= ($dosen['nip']) ?></div>
-            </div>
-        </div>
-        <?php endforeach; ?>
+            <?php endforeach; ?>
+        </span>
     </div>
     <?php endif; ?>
 
