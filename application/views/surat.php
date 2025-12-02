@@ -2805,9 +2805,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     alert("⚠ Silakan upload minimal 1 file eviden!");
                     return false;
                 }
-                
-                // Submit form
-                msform.submit();
             }
         });
     }

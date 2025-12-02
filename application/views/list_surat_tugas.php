@@ -1042,7 +1042,7 @@
         background: #4caf50;
         z-index: 2;
         transform: translateY(-50%);
-        transition: width 0.5s ease;
+        transition: width 1.5s ease;
         border-radius: 2px;
     }
 
@@ -1592,6 +1592,72 @@
 
     .preview-modal.show {
         display: flex;
+    }
+
+    /* Loading Screen Styles */
+    .loading-screen {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 99999;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .loading-screen.show {
+        display: flex;
+    }
+
+    .loading-content {
+        text-align: center;
+        color: white;
+    }
+
+    .loading-spinner {
+        width: 80px;
+        height: 80px;
+        border: 8px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #FB8C00;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 30px;
+    }
+
+    .loading-text {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: white;
+    }
+
+    .loading-subtext {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+        margin-top: 10px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Animated dots */
+    .loading-dots::after {
+        content: '';
+        animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+        0%, 20% { content: ''; }
+        40% { content: '.'; }
+        60% { content: '..'; }
+        80%, 100% { content: '...'; }
     }
 
     .preview-content {
@@ -2468,7 +2534,14 @@
                 </div>
             </div>
         </div>
-
+            <!-- Loading Screen -->
+<div id="loadingScreen" class="loading-screen">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Menyiapkan Surat Tugas<span class="loading-dots"></span></div>
+        <div class="loading-subtext">Mohon tunggu sebentar</div>
+    </div>
+</div>
         <!-- Preview Modal -->
         <div id="previewModal" class="preview-modal">
             <div class="preview-content">
@@ -2481,7 +2554,14 @@
                 </div>
             </div>
         </div>
-
+<!-- Loading Screen -->
+<div id="loadingScreen" class="loading-screen">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Menyiapkan Surat Tugas<span class="loading-dots"></span></div>
+        <div class="loading-subtext">Mohon tunggu sebentar</div>
+    </div>
+</div>
         <!-- Status Modal -->
         <div id="statusModal" class="status-modal">
             <div class="status-content">
@@ -2693,12 +2773,13 @@
                             <!-- Baris kedua: Print & Delete -->
                             <div class="action-row">
                                 <?php if ($is_approved_dekan): ?>
-                                    <a href="<?= base_url('surat/cetak/' . $s->id) ?>" 
+                                 <a href="<?= base_url('surat/cetak/' . $s->id) ?>" 
                                     target="_blank" 
-                                    class="btn-icon-action btn-print" 
+                                    class="btn-icon-action btn-print btn-print-surat" 
+                                    data-id="<?= $s->id ?>"
                                     title="Cetak Surat Tugas">
                                         <i class="fas fa-print"></i>
-                                    </a>
+                                       </a>
                                 <?php else: ?>
                                     <button class="btn-icon-action btn-print btn-print-disabled" 
                                             title="Cetak hanya untuk surat disetujui dekan" 
@@ -2871,10 +2952,19 @@
             textElement.textContent = step.step_name;
             dateElement.textContent = step.date;
         });
+        let progressPercentage = statusData.progress_percentage || 0;
+    
+    // Jika sudah sampai/selesai di Dekan, tetap 75%
+    if (progressPercentage >= 100) {
+        progressPercentage = 75;
+    }
+    // Jika masih di step sebelum Dekan, batasi maksimal sesuai posisi
+    else if (progressPercentage > 75) {
+        progressPercentage = 75;
+    }
 
         // Update progress bar panjang
-        document.getElementById('progressLine').style.width = 
-            (statusData.progress_percentage || 0) + '%';
+       document.getElementById('progressLine').style.width = progressPercentage + '%';
 
         // UPDATE INFORMASI STATUS
         const desc = document.getElementById("status-description");
@@ -3075,6 +3165,35 @@
             
             deleteMultipleSurat(selectedIds);
         });
+        // ===== LOADING SCREEN UNTUK CETAK SURAT =====
+$(document).on('click', '.btn-print-surat', function(e) {
+    e.preventDefault();
+    
+    const printUrl = $(this).attr('href');
+    const suratId = $(this).data('id');
+    
+    // Tampilkan loading screen
+    $('#loadingScreen').addClass('show');
+    
+    // Buka window baru
+    const printWindow = window.open(printUrl, '_blank');
+    
+    // Set timeout untuk menutup loading (2 detik)
+    setTimeout(function() {
+        $('#loadingScreen').removeClass('show');
+    }, 2000);
+    
+    // Jika window gagal dibuka (popup blocker)
+    if (!printWindow || printWindow.closed || typeof printWindow.closed == 'undefined') {
+        $('#loadingScreen').removeClass('show');
+        Swal.fire({
+            icon: 'warning',
+            title: 'Popup Diblokir',
+            text: 'Mohon izinkan popup untuk mencetak surat. Silakan cek pengaturan browser Anda.',
+            confirmButtonColor: '#FB8C00'
+        });
+    }
+});
 
         // Fungsi untuk menghapus multiple surat
         function deleteMultipleSurat(ids) {
@@ -3488,7 +3607,7 @@
                     
                     <div class="detail-row">
                         <div class="detail-label">Jenis Penugasan</div>
-                        <div class="detail-value">${escapeHtml(data.jenis_penugasan || data.jenis_penugasan_kelompok || '-')}</div>
+                        <div class="detail-value">${escapeHtml(data.jenis_penugasan_perorangan || data.jenis_penugasan_kelompok || data.penugasan_lainnya_perorangan || data.penugasan_lainnya_kelompok || '-')}</div>
                     </div>
                 </div>
             `;

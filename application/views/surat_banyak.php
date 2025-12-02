@@ -255,34 +255,11 @@ function tgl_indo($tanggal) {
     </div>
 
     <!-- CONTENT -->
-    <br><br><br>
+    <br><br>
     <div class="content">
         <div class="surat-title">SURAT TUGAS</div>
         <div class="surat-number">Nomor : <?= $surat->nomor_surat ?? '-' ?></div>
 
-        <p>
-            Pada tanggal <?php
-        // Default tanggal
-        $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
-        
-        // Jika approval_status berisi data mentah seperti contoh
-        if (!empty($surat->approval_status)) {
-            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
-            if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
-                $tanggalPengesahan = $matches[1];
-            }
-        }
-         // Format tanggal
-        $timestamp = strtotime($tanggalPengesahan);
-        $bulan = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-        ];
-        echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
-        ?> bertempat di Fakultas Industri Kreatif
-            (FIK) Universitas Telkom, dengan mempertimbangkan hal-hal sebagai berikut :
-        </p>
 
         <p>Saya yang bertanda tangan di bawah ini :</p>
         
@@ -290,17 +267,17 @@ function tgl_indo($tanggal) {
             <div class="identity-row">
                 <div class="identity-label">Nama</div>
                 <div class="identity-separator">:</div>
-                <div class="identity-value"><b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b></div>
+                <div class="identity-value">Dandi Yunidar, S.Sn., M.Ds., Ph.D.</div>
             </div>
             <div class="identity-row">
                 <div class="identity-label">NIP</div>
                 <div class="identity-separator">:</div>
-                <div class="identity-value"><b>14760039</b></div>
+                <div class="identity-value">14760039</div>
             </div>
             <div class="identity-row">
                 <div class="identity-label">Jabatan</div>
                 <div class="identity-separator">:</div>
-                <div class="identity-value"><b>Dekan Fakultas Industri Kreatif</b></div>
+                <div class="identity-value">Dekan Fakultas Industri Kreatif</div>
             </div>
         </div>
 
@@ -368,7 +345,7 @@ function tgl_indo($tanggal) {
                     <th>NIP</th>
                     <th>Nama</th>
                     <th>Jabatan</th>
-                    <th>Divisi</th>
+                    <th>Prodi/Unit</th>
                 </tr>
             </thead>
             <tbody>

@@ -6,653 +6,274 @@
 <title>Pengajuan Menunggu - Dashboard Kaprodi</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
-    /* Semua style CSS tetap sama seperti sebelumnya */
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f5f7fa;}
-    .navbar{background:#8E44AD;color:white;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
-    .navbar h2{font-size:20px;}
-    .container{max-width:1200px;margin:30px auto;padding:0 20px;}
-    .card{background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px}
-    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee}
-    table{width:100%;border-collapse:collapse}
-    thead{background:#f4f6f7}
-    th,td{padding:12px;border-bottom:1px solid #ecf0f1;text-align:left;font-size:14px}
-    tbody tr:hover{background:#fbfcfd}
-    .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
-    .badge-pending{background:#fff3cd;color:#856404}
-    .badge-approved{background:#d4edda;color:#155724}
-    .badge-rejected{background:#f8d7da;color:#721c24}
-    .badge-completed{background:#d1ecf1;color:#0c5460}
-    .btn{padding:6px 10px;border-radius:6px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s}
-    .btn:hover{transform:scale(1.05)}
-    .btn-approve{background:#27ae60;color:#fff}
-    .btn-approve:hover{background:#229954}
-    .btn-reject{background:#e74c3c;color:#fff}
-    .btn-reject:hover{background:#c0392b}
-    .btn-detail{background:#3498db;color:#fff}
-    .btn-detail:hover{background:#2980b9}
-    .search-container{display:flex;align-items:center;gap:15px;margin-bottom:20px;flex-wrap:wrap;background:#f8f9fa;padding:15px;border-radius:10px;border:1px solid #e9ecef}
-    .search-box{position:relative;flex:1;min-width:300px}
-    .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;transition:all 0.3s;background:white}
-    .search-input:focus{outline:none;border-color:#8E44AD;box-shadow:0 0 0 2px rgba(142,68,173,0.1)}
-    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d}
-    .btn-secondary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff;text-decoration:none}
-    .btn-secondary:hover{background:#7f8c8d}
-    .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
-    .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#3498db;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
-    .back-btn:hover{background:#2980b9;transform:translateY(-2px)}
-    .status-header{display:flex;align-items:center;gap:15px;margin-bottom:20px;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.06)}
-    .status-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
-    .status-icon.pending{background:#fff3cd;color:#f39c12}
-    .status-info h1{margin:0;color:#2c3e50;font-size:28px}
-    .status-info p{margin:5px 0 0 0;color:#7f8c8d;font-size:16px}
+    /* Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    /* Tombol status hijau */
-    .btn-status {
-        background: #66bb6a !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 5px !important;
-        padding: 6px 10px !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        transition: 0.2s ease-in-out;
-        font-size: 14px;
-        height: 32px;
-    }
-
-    .btn-status i {
-        font-size: 14px;
-    }
-
-    .btn-status:hover {
-        background: #4caf50 !important;
-        transform: scale(1.05);
-    }
+    /* Body */
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; }
     
-    /* Modal Styles */
-    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
-    .modal.show{display:flex}
-    .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-    @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
-    .modal-header{background:#8E44AD;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
-    .modal-header h3{margin:0;font-size:18px;font-weight:600}
-    .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
-    .close-modal:hover{background:rgba(255,255,255,0.2)}
+    /* Navbar */
+    .navbar { background: #8E44AD; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .navbar h2 { font-size: 20px; }
     
-    /* Detail Content Styles - IMPROVED */
-    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
-    .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
-    .detail-section:last-child{margin-bottom:0}
-    .detail-section-title{font-size:16px;font-weight:700;color:#8E44AD;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #8E44AD;display:flex;align-items:center;gap:10px}
-    .detail-section-title i{font-size:18px}
-    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-    .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
-    .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
-    .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
-    .detail-value-empty{color:#6c757d;font-style:italic}
+    /* Container */
+    .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
     
-    /* Dosen list in detail - NEW STYLES */
-    .dosen-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .dosen-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 12px;
-        background: white;
-        border: 1px solid #e9ecef;
-        border-radius: 6px;
-    }
-
-    .dosen-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #8E44AD;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .dosen-info {
-        flex: 1;
-    }
-
-    .dosen-name {
-        font-weight: 600;
-        color: #212529;
-        font-size: 14px;
-    }
-
-    .dosen-details {
-        font-size: 12px;
-        color: #6c757d;
-    }
+    /* Card */
+    .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #eee; }
     
-    /* File Evidence Styles */
-    .file-evidence{margin-top:10px}
-    .file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
-    .file-item:hover{background:#f5eef8;border-color:#8E44AD}
-    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#8E44AD;font-size:16px}
-    .file-info{flex:1}
-    .file-name{font-weight:600;color:#212529;font-size:14px;cursor:pointer}
-    .file-name:hover{color:#8E44AD}
-    .file-size{font-size:12px;color:#6c757d}
-    .preview-btn{background:#3498db;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
-    .preview-btn:hover{background:#2980b9;color:white;text-decoration:none}
-    .preview-btn.disabled{background:#bdc3c7;cursor:not-allowed;opacity:0.6}
-    .preview-btn.disabled:hover{background:#bdc3c7}
-    .download-btn{background:#8E44AD;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
-    .download-btn:hover{background:#7D3C98;color:white;text-decoration:none}
-
-    /* Preview Modal Styles */
-    .preview-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;justify-content:center;align-items:center;padding:20px}
-    .preview-modal.show{display:flex}
-    .preview-content{background:white;border-radius:12px;width:90%;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
-    .preview-header{background:#8E44AD;color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
-    .preview-header h3{margin:0;font-size:16px;font-weight:600}
-    .preview-close{background:none;border:none;color:white;font-size:24px;cursor:pointer;padding:0;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
-    .preview-close:hover{background:rgba(255,255,255,0.2)}
-    .preview-body{flex:1;padding:0;display:flex;justify-content:center;align-items:center;background:#f8f9fa;min-height:400px}
-    .preview-iframe{width:100%;height:70vh;border:none}
-    .preview-image{max-width:100%;max-height:70vh;object-fit:contain}
-    .preview-unsupported{text-align:center;padding:40px;color:#6c757d}
-    .preview-unsupported i{font-size:48px;margin-bottom:15px;color:#8E44AD}
+    /* Table */
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #f4f6f7; }
+    th, td { padding: 12px; border-bottom: 1px solid #ecf0f1; text-align: left; font-size: 14px; }
+    tbody tr:hover { background: #fbfcfd; }
+    
+    /* Badges */
+    .badge { display: inline-block; padding: 6px 10px; border-radius: 999px; font-weight: 600; font-size: 12px; }
+    .badge-pending { background: #fff3cd; color: #856404; }
+    .badge-approved { background: #d4edda; color: #155724; }
+    .badge-rejected { background: #f8d7da; color: #721c24; }
+    .badge-completed { background: #d1ecf1; color: #0c5460; }
+    
+    /* Buttons */
+    .btn { padding: 6px 10px; border-radius: 6px; border: 0; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+    .btn:hover { transform: scale(1.05); }
+    .btn-approve { background: #27ae60; color: #fff; }
+    .btn-approve:hover { background: #229954; }
+    .btn-reject { background: #e74c3c; color: #fff; }
+    .btn-reject:hover { background: #c0392b; }
+    .btn-detail { background: #3498db; color: #fff; }
+    .btn-detail:hover { background: #2980b9; }
+    .btn-status { background: #66bb6a !important; color: white !important; border: none !important; border-radius: 5px !important; padding: 6px 10px !important; display: inline-flex; align-items: center; justify-content: center; gap: 5px; transition: 0.2s ease-in-out; font-size: 14px; height: 32px; }
+    .btn-status i { font-size: 14px; }
+    .btn-status:hover { background: #4caf50 !important; transform: scale(1.05); }
+    
+    /* Search */
+    .search-container { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #f8f9fa; padding: 15px; border-radius: 10px; border: 1px solid #e9ecef; }
+    .search-box { position: relative; flex: 1; min-width: 300px; }
+    .search-input { width: 100%; padding: 12px 45px 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; transition: all 0.3s; background: white; }
+    .search-input:focus { outline: none; border-color: #8E44AD; box-shadow: 0 0 0 2px rgba(142,68,173,0.1); }
+    .search-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #6c757d; }
+    
+    /* Secondary Button */
+    .btn-secondary { padding: 10px 20px; border-radius: 8px; border: 0; cursor: pointer; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; background: #95a5a6; color: #fff; text-decoration: none; }
+    .btn-secondary:hover { background: #7f8c8d; }
+    
+    /* Pagination Info */
+    .pagination-info { margin-top: 15px; color: #7f8c8d; font-size: 14px; text-align: right; }
+    
+    /* Back Button */
+    .back-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s; margin-bottom: 20px; }
+    .back-btn:hover { background: #2980b9; transform: translateY(-2px); }
+    
+    /* Status Header */
+    .status-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .status-icon { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .status-icon.pending { background: #fff3cd; color: #f39c12; }
+    .status-info h1 { margin: 0; color: #2c3e50; font-size: 28px; }
+    .status-info p { margin: 5px 0 0 0; color: #7f8c8d; font-size: 16px; }
+    
+    /* Modal */
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; }
+    .modal.show { display: flex; }
+    .modal-content { background: white; padding: 0; border-radius: 15px; max-width: 800px; width: 95%; max-height: 85vh; overflow: hidden; animation: slideIn 0.3s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-header { background: #8E44AD; color: white; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; border-radius: 15px 15px 0 0; }
+    .modal-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
+    .close-modal { background: none; border: 0; color: white; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+    .close-modal:hover { background: rgba(255,255,255,0.2); }
+    
+    /* Detail Content */
+    .detail-content { padding: 25px; max-height: calc(85vh - 80px); overflow-y: auto; }
+    .detail-section { margin-bottom: 25px; background: #f8f9fa; border-radius: 12px; padding: 20px; border: 1px solid #e9ecef; }
+    .detail-section:last-child { margin-bottom: 0; }
+    .detail-section-title { font-size: 16px; font-weight: 700; color: #8E44AD; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #8E44AD; display: flex; align-items: center; gap: 10px; }
+    .detail-section-title i { font-size: 18px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .detail-row { display: flex; flex-direction: column; margin-bottom: 12px; }
+    .detail-label { font-weight: 600; color: #495057; font-size: 13px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .detail-value { color: #212529; font-size: 14px; background: white; padding: 10px 15px; border-radius: 8px; border: 1px solid #e9ecef; min-height: 40px; display: flex; align-items: center; }
+    .detail-value-empty { color: #6c757d; font-style: italic; }
+    
+    /* Dosen List */
+    .dosen-list { display: flex; flex-direction: column; gap: 8px; }
+    .dosen-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: white; border: 1px solid #e9ecef; border-radius: 6px; }
+    .dosen-avatar { width: 32px; height: 32px; border-radius: 50%; background: #8E44AD; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; }
+    .dosen-info { flex: 1; }
+    .dosen-name { font-weight: 600; color: #212529; font-size: 14px; }
+    .dosen-details { font-size: 12px; color: #6c757d; }
+    
+    /* File Evidence */
+    .file-evidence { margin-top: 10px; }
+    .file-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; background: white; border: 1px solid #e9ecef; border-radius: 8px; transition: all 0.2s; }
+    .file-item:hover { background: #f5eef8; border-color: #8E44AD; }
+    .file-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #8E44AD; font-size: 16px; }
+    .file-info { flex: 1; }
+    .file-name { font-weight: 600; color: #212529; font-size: 14px; cursor: pointer; }
+    .file-name:hover { color: #8E44AD; }
+    .file-size { font-size: 12px; color: #6c757d; }
+    .preview-btn { background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.2s; display: flex; align-items: center; gap: 6px; text-decoration: none; }
+    .preview-btn:hover { background: #2980b9; color: white; text-decoration: none; }
+    .preview-btn.disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.6; }
+    .preview-btn.disabled:hover { background: #bdc3c7; }
+    .download-btn { background: #8E44AD; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: background 0.2s; display: flex; align-items: center; gap: 6px; text-decoration: none; }
+    .download-btn:hover { background: #7D3C98; color: white; text-decoration: none; }
+    
+    /* Preview Modal */
+    .preview-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; padding: 20px; }
+    .preview-modal.show { display: flex; }
+    .preview-content { background: white; border-radius: 12px; width: 90%; max-width: 900px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+    .preview-header { background: #8E44AD; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .preview-header h3 { margin: 0; font-size: 16px; font-weight: 600; }
+    .preview-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+    .preview-close:hover { background: rgba(255,255,255,0.2); }
+    .preview-body { flex: 1; padding: 0; display: flex; justify-content: center; align-items: center; background: #f8f9fa; min-height: 400px; }
+    .preview-iframe { width: 100%; height: 70vh; border: none; }
+    .preview-image { max-width: 100%; max-height: 70vh; object-fit: contain; }
+    .preview-unsupported { text-align: center; padding: 40px; color: #6c757d; }
+    .preview-unsupported i { font-size: 48px; margin-bottom: 15px; color: #8E44AD; }
     
     /* Action Buttons in Modal */
-    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef}
-    .modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
-    .modal-btn-close{background:#6c757d;color:white}
-    .modal-btn-close:hover{background:#5a6268;transform:translateY(-2px)}
-    .modal-btn-approve{background:#27ae60;color:white}
-    .modal-btn-approve:hover{background:#229954;transform:translateY(-2px)}
-    .modal-btn-reject{background:#e74c3c;color:white}
-    .modal-btn-reject:hover{background:#c0392b;transform:translateY(-2px)}
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e9ecef; }
+    .modal-btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+    .modal-btn-close { background: #6c757d; color: white; }
+    .modal-btn-close:hover { background: #5a6268; transform: translateY(-2px); }
+    .modal-btn-approve { background: #27ae60; color: white; }
+    .modal-btn-approve:hover { background: #229954; transform: translateY(-2px); }
+    .modal-btn-reject { background: #e74c3c; color: white; }
+    .modal-btn-reject:hover { background: #c0392b; transform: translateY(-2px); }
     
-    /* Approve Modal Styles */
-    .approve-modal-content{background:white;padding:0;border-radius:15px;max-width:550px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-    .approve-modal-body{padding:25px}
-    .approve-modal-header{background:#8E44AD;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
-    .approve-modal-header h3{margin:0;font-size:18px;font-weight:600}
-    .approve-info-box{background:#f5eef8;border:1px solid #8E44AD;border-radius:8px;padding:15px;margin-bottom:20px}
-    .approve-info-box strong{color:#8E44AD;display:block;margin-bottom:5px}
-    .approve-info-box span{color:#2c3e50;font-weight:600}
-    .form-group{margin-bottom:20px}
-    .form-group label{display:block;margin-bottom:8px;font-weight:600;color:#2c3e50;font-size:14px}
-    .form-control{width:100%;padding:12px 15px;border:2px solid #ddd;border-radius:8px;font-family:inherit;font-size:14px;transition:border-color 0.2s}
-    .form-control:focus{outline:none;border-color:#3498db;box-shadow:0 0 0 3px rgba(52, 152, 219, 0.2)}
-    .form-hint{color:#7f8c8d;font-size:12px;margin-top:5px;display:flex;align-items:center;gap:5px}
-    .approve-modal-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:25px;padding-top:20px;border-top:1px solid #e9ecef}
-    .approve-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
-    .approve-btn-cancel{background:#95a5a6;color:white}
-    .approve-btn-cancel:hover{background:#7f8c8d;transform:translateY(-2px)}
-    .approve-btn-submit{background:#27ae60;color:white}
-    .approve-btn-submit:hover{background:#229954;transform:translateY(-2px)}
+    /* Approve Modal */
+    .approve-modal-content { background: white; padding: 0; border-radius: 15px; max-width: 550px; width: 95%; max-height: 85vh; overflow: hidden; animation: slideIn 0.3s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .approve-modal-body { padding: 25px; }
+    .approve-modal-header { background: #8E44AD; color: white; padding: 20px 25px; display: flex; justify-content: space-between; align-items: center; border-radius: 15px 15px 0 0; }
+    .approve-modal-header h3 { margin: 0; font-size: 18px; font-weight: 600; }
+    .approve-info-box { background: #f5eef8; border: 1px solid #8E44AD; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+    .approve-info-box strong { color: #8E44AD; display: block; margin-bottom: 5px; }
+    .approve-info-box span { color: #2c3e50; font-weight: 600; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; font-size: 14px; }
+    .form-control { width: 100%; padding: 12px 15px; border: 2px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; transition: border-color 0.2s; }
+    .form-control:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); }
+    .form-hint { color: #7f8c8d; font-size: 12px; margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+    .approve-modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; padding-top: 20px; border-top: 1px solid #e9ecef; }
+    .approve-btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 14px; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+    .approve-btn-cancel { background: #95a5a6; color: white; }
+    .approve-btn-cancel:hover { background: #7f8c8d; transform: translateY(-2px); }
+    .approve-btn-submit { background: #27ae60; color: white; }
+    .approve-btn-submit:hover { background: #229954; transform: translateY(-2px); }
     
-    /* Rejection Notes Styles */
-    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:20px;margin-top:15px}
-    .rejection-notes .detail-label{color:#dc3545;font-weight:700}
-    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:14px;line-height:1.5;min-height:auto;padding:12px}
+    /* Rejection Notes */
+    .rejection-notes { background: #fff5f5; border: 1px solid #f8d7da; border-radius: 8px; padding: 20px; margin-top: 15px; }
+    .rejection-notes .detail-label { color: #dc3545; font-weight: 700; }
+    .rejection-notes .detail-value { background: #fff5f5; border-color: #f8d7da; color: #721c24; font-size: 14px; line-height: 1.5; min-height: auto; padding: 12px; }
     
-    /* Bulk Action Styles */
-    .bulk-actions {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-        align-items: center;
-    }
+    /* Bulk Actions */
+    .bulk-actions { display: flex; gap: 10px; margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; align-items: center; }
+    .bulk-checkbox { margin-right: 10px; transform: scale(1.2); }
+    .bulk-info { flex-grow: 1; color: #495057; font-size: 14px; }
+    .btn-bulk { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-bulk-approve { background: #27ae60; color: white; }
+    .btn-bulk-approve:hover { background: #229954; }
+    .btn-bulk-reject { background: #e74c3c; color: white; }
+    .btn-bulk-reject:hover { background: #c0392b; }
+    .btn-bulk:disabled { background: #bdc3c7; cursor: not-allowed; transform: none; }
     
-    .bulk-checkbox {
-        margin-right: 10px;
-        transform: scale(1.2);
-    }
+    /* Bulk Modal */
+    .bulk-modal-content { background: white; padding: 0; border-radius: 15px; max-width: 600px; width: 95%; max-height: 85vh; overflow: hidden; animation: slideIn 0.3s ease; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .bulk-list { max-height: 300px; overflow-y: auto; margin: 15px 0; border: 1px solid #e9ecef; border-radius: 8px; padding: 10px; }
+    .bulk-item { padding: 10px; border-bottom: 1px solid #f1f1f1; display: flex; align-items: center; }
+    .bulk-item:last-child { border-bottom: none; }
+    .bulk-item-name { flex-grow: 1; }
     
-    .bulk-info {
-        flex-grow: 1;
-        color: #495057;
-        font-size: 14px;
-    }
+    /* Individual Rejection */
+    .individual-rejection-container { max-height: 400px; overflow-y: auto; padding-right: 10px; margin-bottom: 15px; }
+    .individual-rejection { margin-bottom: 15px; padding: 15px; border: 1px solid #e9ecef; border-radius: 8px; background: #f8f9fa; }
+    .individual-rejection-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #dee2e6; }
+    .individual-rejection-title { font-weight: 600; color: #495057; flex-grow: 1; }
+    .individual-rejection-textarea { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-family: inherit; resize: vertical; min-height: 80px; font-size: 14px; }
+    .individual-rejection-textarea:focus { outline: none; border-color: #5b5b5bff; box-shadow: 0 0 0 2px rgba(142,68,173,0.1); }
     
-    .btn-bulk {
-        padding: 8px 16px;
-        border-radius: 6px;
-        border: none;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
+    /* Scrollbar */
+    .individual-rejection-container::-webkit-scrollbar { width: 8px; }
+    .individual-rejection-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    .individual-rejection-container::-webkit-scrollbar-thumb { background: #5b5b5bff; border-radius: 10px; }
+    .individual-rejection-container::-webkit-scrollbar-thumb:hover { background: #5b5b5bff; }
     
-    .btn-bulk-approve {
-        background: #27ae60;
-        color: white;
-    }
+    /* Status Modal */
+    .status-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; }
+    .status-modal.show { display: flex; }
+    .status-content { background: white; border-radius: 12px; width: 90%; max-width: 600px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+    .status-header { background: #8E44AD; color: white; padding: 20px; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; }
+    .status-header h3 { margin: 0; font-size: 18px; }
+    .close-status { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
     
-    .btn-bulk-approve:hover {
-        background: #229954;
-    }
+    /* Progress Bar */
+    .progress-track { display: flex; justify-content: space-between; position: relative; margin: 40px 0; }
+    .progress-track::before { content: ''; position: absolute; top: 20px; left: 0; width: 100%; height: 4px; background: #e0e0e0; z-index: 1; }
+    .progress-step { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; }
+    .step-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 10px; border: 3px solid #e0e0e0; background: white; }
+    .step-text { font-size: 12px; text-align: center; max-width: 100px; color: #666; }
+    .step-date { font-size: 11px; color: #999; margin-top: 5px; display: none !important; }
+    .progress-line { position: absolute; top: 20px; left: 0; height: 4px; background: #4caf50; z-index: 2; transition: width 0.5s ease; }
+    .progress-step.completed .step-icon { background-color: #28a745; border-color: #28a745; color: white; }
+    .progress-step.status-completed i { color: white !important; }
+    .progress-step.in-progress .step-icon { background: #ffc107; border-color: #ffc107; color: white; }
+    .progress-step.rejected .step-icon { background: #dc3545; border-color: #dc3545; color: white; }
+    .progress-step.pending .step-icon { background: #e0e0e0; border-color: #e0e0e0; color: #666; }
+    .progress-estimasi { width: 100%; text-align: center; margin-top: 5px; font-size: 12px; color: #777; }
+    .rejection-reason { background: #fff5f5; border: 1px solid #f8cccc; padding: 15px; border-radius: 10px; margin-top: 15px; }
+    .rejection-reason h6 { color: #e63946; font-weight: 700; margin-bottom: 8px; }
     
-    .btn-bulk-reject {
-        background: #e74c3c;
-        color: white;
-    }
+    /* Success Modal Styles - NEW */
+    .success-item { display: flex; align-items: center; padding: 12px 15px; background: white; border: 1px solid #d4edda; border-radius: 8px; margin-bottom: 10px; transition: all 0.2s; }
+    .success-item:hover { background: #f0fff4; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(39, 174, 96, 0.1); }
+    .success-item-icon { width: 40px; height: 40px; background: #d4edda; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px; color: #155724; font-size: 16px; }
+    .success-item-info { flex: 1; }
+    .success-item-name { font-weight: 600; color: #2c3e50; font-size: 14px; margin-bottom: 4px; }
+    .success-item-details { display: flex; gap: 15px; font-size: 12px; color: #6c757d; }
+    .success-item-detail { display: flex; align-items: center; gap: 5px; }
+    .success-item-detail i { font-size: 11px; }
+    .success-badge { background: #d4edda; color: #155724; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-left: 10px; }
+    .empty-approved { text-align: center; padding: 40px 20px; color: #6c757d; }
+    .empty-approved i { font-size: 48px; margin-bottom: 15px; color: #27ae60; opacity: 0.3; }
     
-    .btn-bulk-reject:hover {
-        background: #c0392b;
-    }
+    /* Success Modal Animation */
+    @keyframes slideInSuccess { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .success-item { animation: slideInSuccess 0.3s ease; animation-fill-mode: both; }
+    .success-item:nth-child(1) { animation-delay: 0.1s; }
+    .success-item:nth-child(2) { animation-delay: 0.2s; }
+    .success-item:nth-child(3) { animation-delay: 0.3s; }
+    .success-item:nth-child(4) { animation-delay: 0.4s; }
+    .success-item:nth-child(5) { animation-delay: 0.5s; }
     
-    .btn-bulk:disabled {
-        background: #bdc3c7;
-        cursor: not-allowed;
-        transform: none;
-    }
+    /* Loading Spinner */
+    .loading-spinner { display: none; text-align: center; padding: 40px; color: #8E44AD; }
+    .loading-spinner i { font-size: 48px; margin-bottom: 15px; }
     
-    /* Bulk Modal Styles */
-    .bulk-modal-content {
-        background: white;
-        padding: 0;
-        border-radius: 15px;
-        max-width: 600px;
-        width: 95%;
-        max-height: 85vh;
-        overflow: hidden;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    
-    .bulk-list {
-        max-height: 300px;
-        overflow-y: auto;
-        margin: 15px 0;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 10px;
-    }
-    
-    .bulk-item {
-        padding: 10px;
-        border-bottom: 1px solid #f1f1f1;
-        display: flex;
-        align-items: center;
-    }
-    
-    .bulk-item:last-child {
-        border-bottom: none;
-    }
-    
-    .bulk-item-name {
-        flex-grow: 1;
-    }
-    
-    /* Individual Rejection Styles */
-    .individual-rejection {
-        margin-bottom: 15px;
-        padding: 15px;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        background: #f8f9fa;
-    }
-    
-    .individual-rejection-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    .individual-rejection-title {
-        font-weight: 600;
-        color: #495057;
-        flex-grow: 1;
-    }
-    
-    .individual-rejection-textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        font-family: inherit;
-        resize: vertical;
-        min-height: 80px;
-        font-size: 14px;
-    }
-    
-    .individual-rejection-textarea:focus {
-        outline: none;
-        border-color: #8E44AD;
-        box-shadow: 0 0 0 2px rgba(142,68,173,0.1);
-    }
-    
-    .bulk-notes-info {
-        background: #e7f3ff;
-        border: 1px solid #b3d7ff;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 15px;
-        font-size: 14px;
-        color: #0066cc;
-    }
-    
-    .bulk-notes-info i {
-        margin-right: 8px;
-    }
-    
-    /* Status Modal Styles */
-    .status-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 9999;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .status-modal.show {
-        display: flex;
-    }
-
-    .status-content {
-        background: white;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 600px;
-        padding: 0;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-
-    .status-header {
-        background: #8E44AD;
-        color: white;
-        padding: 20px;
-        border-radius: 12px 12px 0 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .status-header h3 {
-        margin: 0;
-        font-size: 18px;
-    }
-
-    .close-status {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-    }
-
-    .status-body {
-        padding: 30px;
-    }
-    
-    /* Progress Bar Styles */
-    .progress-track {
-        display: flex;
-        justify-content: space-between;
-        position: relative;
-        margin: 40px 0;
-    }
-
-    .progress-track::before {
-        content: '';
-        position: absolute;
-        top: 20px;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: #e0e0e0;
-        z-index: 1;
-    }
-
-    .progress-step {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        z-index: 2;
-    }
-
-    .step-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        margin-bottom: 10px;
-        border: 3px solid #e0e0e0;
-        background: white;
-    }
-
-    .step-text {
-        font-size: 12px;
-        text-align: center;
-        max-width: 100px;
-        color: #666;
-    }
-
-    .step-date {
-        font-size: 11px;
-        color: #999;
-        margin-top: 5px;
-        display: none !important;
-    }
-
-    /* Progress Line */
-    .progress-line {
-        position: absolute;
-        top: 20px;
-        left: 0;
-        height: 4px;
-        background: #4caf50;
-        z-index: 2;
-        transition: width 0.5s ease;
-    }
-
-    /* Status Colors */
-    .progress-step.completed .step-icon {
-        background-color: #28a745;
-        border-color: #28a745;
-        color: white;
-    }
-
-    .progress-step.status-completed i {
-        color: white !important;
-    }
-
-    .progress-step.in-progress .step-icon {
-        background: #ffc107;
-        border-color: #ffc107;
-        color: white;
-    }
-
-    .progress-step.rejected .step-icon {
-        background: #dc3545;
-        border-color: #dc3545;
-        color: white;
-    }
-
-    .progress-step.pending .step-icon {
-        background: #e0e0e0;
-        border-color: #e0e0e0;
-        color: #666;
-    }
-
-    .progress-estimasi {
-        width: 100%;
-        text-align: center;
-        margin-top: 5px;
-        font-size: 12px;
-        color: #777;
-    }
-
-    .rejection-reason {
-        background: #fff5f5;
-        border: 1px solid #f8cccc;
-        padding: 15px;
-        border-radius: 10px;
-        margin-top: 15px;
-    }
-
-    .rejection-reason h6 {
-        color: #e63946;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-    
-    /* Loading spinner */
-    .loading-spinner {
-        display: none;
-        text-align: center;
-        padding: 40px;
-        color: #8E44AD;
-    }
-    .loading-spinner i {
-        font-size: 48px;
-        margin-bottom: 15px;
-    }
-    
-    /* Error message */
-    .error-message {
-        text-align: center;
-        padding: 40px;
-        color: #e74c3c;
-    }
-    .error-message i {
-        font-size: 48px;
-        margin-bottom: 15px;
-    }
+    /* Error Message */
+    .error-message { text-align: center; padding: 40px; color: #e74c3c; }
+    .error-message i { font-size: 48px; margin-bottom: 15px; }
     
     /* Responsive */
-    @media (max-width:768px){
-        .detail-grid{grid-template-columns:1fr}
-        .modal-content{width:95%;margin:10px}
-        .detail-content{padding:15px}
-        .modal-actions{flex-direction:column}
-        .modal-btn{justify-content:center}
-        .approve-modal-content{width:95%;margin:10px}
-        .approve-modal-body{padding:15px}
-        .approve-modal-actions{flex-direction:column}
-        .approve-btn{justify-content:center}
-        .progress-track {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 30px;
-            padding: 0 10px;
-        }
-        .progress-track::before {
-            display: none;
-        }
-        .progress-step {
-            flex-direction: row;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-        }
-        .step-text {
-            text-align: left;
-            max-width: none;
-            flex: 1;
-        }
-        .bulk-actions {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .bulk-info {
-            margin: 10px 0;
-        }
+    @media (max-width: 768px) {
+        .detail-grid { grid-template-columns: 1fr; }
+        .modal-content, .approve-modal-content { width: 95%; margin: 10px; }
+        .detail-content { padding: 15px; }
+        .modal-actions, .approve-modal-actions { flex-direction: column; }
+        .modal-btn, .approve-btn { justify-content: center; }
+        .progress-track { flex-direction: column; align-items: flex-start; gap: 30px; padding: 0 10px; }
+        .progress-track::before { display: none; }
+        .progress-step { flex-direction: row; align-items: center; gap: 15px; width: 100%; }
+        .step-text { text-align: left; max-width: none; flex: 1; }
+        .bulk-actions { flex-direction: column; align-items: flex-start; }
+        .bulk-info { margin: 10px 0; }
+        .success-item-details { flex-direction: column; gap: 5px; }
+        .success-item { padding: 10px; }
+        .success-item-icon { width: 35px; height: 35px; margin-right: 10px; }
+        .search-box { min-width: 100%; }
     }
-    /* Individual Rejection Styles - DENGAN SCROLLBAR */
-.individual-rejection-container {
-    max-height: 400px; /* ✅ Batasi tinggi maksimal */
-    overflow-y: auto; /* ✅ Tambah scrollbar vertikal */
-    padding-right: 10px; /* Ruang untuk scrollbar */
-    margin-bottom: 15px;
-}
-
-.individual-rejection {
-    margin-bottom: 15px;
-    padding: 15px;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    background: #f8f9fa;
-}
-
-.individual-rejection-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.individual-rejection-title {
-    font-weight: 600;
-    color: #495057;
-    flex-grow: 1;
-}
-
-.individual-rejection-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
-    font-family: inherit;
-    resize: vertical;
-    min-height: 80px;
-    font-size: 14px;
-}
-
-.individual-rejection-textarea:focus {
-    outline: none;
-    border-color: #5b5b5bff;
-    box-shadow: 0 0 0 2px rgba(142,68,173,0.1);
-}
-
-/* ✅ STYLING SCROLLBAR (Optional - untuk tampilan lebih bagus) */
-.individual-rejection-container::-webkit-scrollbar {
-    width: 8px;
-}
-
-.individual-rejection-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.individual-rejection-container::-webkit-scrollbar-thumb {
-    background: #5b5b5bff;
-    border-radius: 10px;
-}
-
-.individual-rejection-container::-webkit-scrollbar-thumb:hover {
-    background: #5b5b5bff;
-}
 </style>
 </head>
 <body>
@@ -685,7 +306,7 @@
             <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Menunggu Persetujuan</h3>
         </div>
         
-        <!-- Bulk Actions (untuk inline selection) -->
+        <!-- Bulk Actions -->
         <div class="bulk-actions" id="bulkActions" style="display: none;">
             <input type="checkbox" id="selectAll" class="bulk-checkbox" onchange="toggleSelectAll()">
             <div class="bulk-info" id="selectedCount">0 item dipilih</div>
@@ -858,7 +479,7 @@
     </div>
 </div>
 
-<!-- Approve Modal -->
+<!-- Approve Modal (SINGLE APPROVE) -->
 <div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
     <div class="approve-modal-content" onclick="event.stopPropagation()">
         <div class="approve-modal-header">
@@ -873,8 +494,6 @@
             
             <form id="approveForm" method="POST" action="">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                
-                <!-- BAGIAN NOMOR SURAT TELAH DIHAPUS -->
                 
                 <div class="approve-modal-actions">
                     <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
@@ -908,7 +527,7 @@
     </div>
 </div>
 
-<!-- Bulk Reject Modal - DENGAN SCROLLBAR -->
+<!-- Bulk Reject Modal -->
 <div id="bulkRejectModal" class="modal" onclick="modalClickOutside(event,'bulkRejectModal')">
     <div class="bulk-modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -926,7 +545,6 @@
                 Berikan alasan penolakan untuk masing-masing pengajuan:
             </div>
             
-            <!-- ✅ PERBAIKAN: Tambah class individual-rejection-container -->
             <div id="individualRejectionContainer" class="individual-rejection-container">
                 <!-- Container untuk individual rejection notes -->
             </div>
@@ -1009,14 +627,96 @@
     </div>
 </div>
 
+<!-- Success Approval Modal -->
+<div id="successModal" class="modal" onclick="modalClickOutside(event,'successModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 700px;">
+        <div class="modal-header" style="background: #27ae60;">
+            <h3><i class="fa-solid fa-check-circle"></i> Pengajuan Berhasil Disetujui</h3>
+            <button class="close-modal" onclick="closeModal('successModal')">&times;</button>
+        </div>
+        <div class="detail-content" style="padding: 25px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 80px; height: 80px; background: #d4edda; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                    <i class="fa-solid fa-check" style="font-size: 36px; color: #155724;"></i>
+                </div>
+                <h4 style="color: #155724; margin-bottom: 5px;">Berhasil Disetujui</h4>
+                <p style="color: #7f8c8d; font-size: 13px; margin-top: 5px;">
+                    <i class="fa-solid fa-clock"></i> Disetujui pada: 
+                    <span id="approvalTime" style="font-weight: 600;"></span>
+                </p>
+            </div>
+            
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h5 style="color: #2c3e50; margin: 0;">Daftar Pengajuan</h5>
+                    <span id="approvalCount" style="background: #27ae60; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; font-weight: 600;">0 item</span>
+                </div>
+                
+                <div id="approvedList" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Daftar approved items akan diisi oleh JavaScript -->
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
+                <button class="modal-btn modal-btn-approve" onclick="closeModal('successModal'); location.reload();">
+                    <i class="fa-solid fa-refresh"></i> Refresh Halaman
+                </button>
+                <button class="modal-btn modal-btn-close" onclick="closeModal('successModal')">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Confirm Modal -->
+<div id="bulkConfirmModal" class="modal" onclick="modalClickOutside(event,'bulkConfirmModal')">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-question-circle"></i> Konfirmasi Multi Approve</h3>
+            <button class="close-modal" onclick="closeModal('bulkConfirmModal')">&times;</button>
+        </div>
+        <div class="detail-content" style="padding: 25px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 60px; height: 60px; background: #fff3cd; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                    <i class="fa-solid fa-exclamation" style="font-size: 28px; color: #856404;"></i>
+                </div>
+                <h4 style="color: #856404; margin-bottom: 5px;">Konfirmasi Multi Approve</h4>
+                <p style="color: #7f8c8d; font-size: 14px; margin-top: 5px;">
+                    Anda akan menyetujui <strong id="confirmCount">0</strong> pengajuan sekaligus
+                </p>
+            </div>
+            
+            <div style="background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                <h5 style="color: #2c3e50; margin: 0 0 10px 0; font-size: 15px;">
+                    <i class="fa-solid fa-list-check"></i> Daftar Pengajuan yang Akan Disetujui:
+                </h5>
+                <div id="confirmList" style="max-height: 200px; overflow-y: auto;">
+                    <!-- Daftar konfirmasi akan diisi oleh JavaScript -->
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px;">
+                <button class="modal-btn modal-btn-close" onclick="closeModal('bulkConfirmModal')">
+                    <i class="fa-solid fa-times"></i> Batal
+                </button>
+                <button class="modal-btn modal-btn-approve" onclick="confirmBulkApprove()">
+                    <i class="fa-solid fa-check"></i> Ya, Setujui Semua
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
 let currentApproveId = null;
 let currentDetailId = null;
 let selectedIds = [];
+let isSubmitting = false;
 
-// PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
+// Fungsi untuk mengambil data detail via AJAX
 function getSuratDetail(id) {
     return fetch('<?= site_url("kaprodi/getDetailPengajuan/") ?>' + id)
         .then(response => response.json())
@@ -1035,12 +735,6 @@ function getSuratDetail(id) {
 
 // Preview File Functions
 function previewFile(fileUrl, fileName) {
-    console.log('Preview File:', {
-        fileName: fileName,
-        fileUrl: fileUrl,
-        fullUrl: fileUrl
-    });
-    
     const previewModal = document.getElementById('previewModal');
     const previewTitle = document.getElementById('previewTitle');
     const previewBody = document.getElementById('previewBody');
@@ -1063,11 +757,9 @@ function previewFile(fileUrl, fileName) {
         if (imageExtensions.includes(fileExtension)) {
             const img = new Image();
             img.onload = function() {
-                console.log('Image loaded successfully');
                 previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
             };
             img.onerror = function() {
-                console.error('Error loading image:', fileUrl);
                 showUnsupportedPreview(fileUrl, fileName);
             };
             img.src = fileUrl;
@@ -1144,7 +836,6 @@ function updateBulkActions() {
         bulkActions.style.display = 'flex';
         selectedCount.textContent = `${selectedIds.length} item dipilih`;
         
-        // Update select all checkboxes
         const allChecked = selectedIds.length === checkboxes.length;
         selectAllHeader.checked = allChecked;
         selectAllBulk.checked = allChecked;
@@ -1163,15 +854,150 @@ function clearSelection() {
     updateBulkActions();
 }
 
-// Bulk Approve Function
-function processBulkApprove() {
-    if (selectedIds.length === 0) {
-        alert('Tidak ada pengajuan yang dipilih');
+// Function untuk menampilkan modal success dengan daftar pengajuan yang disetujui
+function showSuccessModal(approvedItems, isMulti = false) {
+    const modal = document.getElementById('successModal');
+    const countElement = document.getElementById('approvalCount');
+    const listElement = document.getElementById('approvedList');
+    const timeElement = document.getElementById('approvalTime');
+    
+    // Update waktu approval
+    if (timeElement) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        const timeStr = now.toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        timeElement.textContent = `${dateStr}, ${timeStr} WIB`;
+    }
+    
+    // Update judul modal berdasarkan apakah single atau multi
+    if (isMulti) {
+        modal.querySelector('h3').innerHTML = '<i class="fa-solid fa-check-double"></i> Pengajuan Berhasil Disetujui (Multiple)';
+    } else {
+        modal.querySelector('h3').innerHTML = '<i class="fa-solid fa-check-circle"></i> Pengajuan Berhasil Disetujui';
+    }
+    
+    // Update count
+    countElement.textContent = `${approvedItems.length} item`;
+    
+    // Populate list
+    if (approvedItems.length > 0) {
+        let html = '';
+        approvedItems.forEach((item, index) => {
+            const tglKegiatan = item.tanggal_kegiatan ? formatDate(item.tanggal_kegiatan) : '-';
+            const jenis = item.jenis_pengajuan || '-';
+            const penyelenggara = item.penyelenggara || '-';
+            
+            html += `
+                <div class="success-item">
+                    <div class="success-item-icon">
+                        <i class="fa-solid ${isMulti ? 'fa-check-double' : 'fa-check'}"></i>
+                    </div>
+                    <div class="success-item-info">
+                        <div class="success-item-name">
+                            ${escapeHtml(item.nama_kegiatan || 'Pengajuan')}
+                            <span class="success-badge">${isMulti ? 'Disetujui (Multi)' : 'Disetujui'}</span>
+                        </div>
+                        <div class="success-item-details">
+                            <div class="success-item-detail">
+                                <i class="fa-solid fa-calendar"></i>
+                                <span>${tglKegiatan}</span>
+                            </div>
+                            <div class="success-item-detail">
+                                <i class="fa-solid fa-tag"></i>
+                                <span>${escapeHtml(jenis)}</span>
+                            </div>
+                            <div class="success-item-detail">
+                                <i class="fa-solid fa-building"></i>
+                                <span>${escapeHtml(penyelenggara)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        listElement.innerHTML = html;
+    } else {
+        listElement.innerHTML = `
+            <div class="empty-approved">
+                <i class="fa-solid fa-inbox"></i>
+                <p>Tidak ada data pengajuan</p>
+            </div>
+        `;
+    }
+    
+    // Tampilkan modal
+    modal.classList.add('show');
+}
+
+// PERBAIKAN UTAMA: Function untuk submit single approval (dari modal approve) - DENGAN DUA POPUP
+function submitSingleApprove() {
+    if (isSubmitting || !currentApproveId) return;
+    
+    isSubmitting = true;
+    
+    // Temukan item yang disetujui
+    const selectedItem = suratList.find(s => Number(s.id) === Number(currentApproveId));
+    if (!selectedItem) {
+        alert('Data pengajuan tidak ditemukan');
+        isSubmitting = false;
         return;
     }
     
-    if (confirm(`Apakah Anda yakin ingin menyetujui ${selectedIds.length} pengajuan terpilih?`)) {
-        // Buat form dan submit secara tradisional (bukan AJAX)
+    // Tampilkan popup success terlebih dahulu
+    showSuccessModal([selectedItem], false);
+    
+    // Tutup modal approve
+    closeModal('approveModal');
+    
+    // Tunggu 3 detik agar user bisa melihat modal success, baru submit form
+    setTimeout(() => {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '<?= base_url("kaprodi/approve/") ?>' + currentApproveId;
+        
+        // CSRF Token
+        const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+        const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
+        const inpCsrf = document.createElement('input');
+        inpCsrf.type = 'hidden'; 
+        inpCsrf.name = csrfName; 
+        inpCsrf.value = csrfHash;
+        form.appendChild(inpCsrf);
+        
+        document.body.appendChild(form);
+        form.submit();
+        
+        // Reset isSubmitting setelah form submit
+        setTimeout(() => {
+            isSubmitting = false;
+        }, 100);
+    }, 3000); // 3 detik delay untuk melihat modal
+}
+
+// PERBAIKAN UTAMA: Function untuk submit bulk approval - DENGAN DUA POPUP
+function confirmBulkApprove() {
+    if (isSubmitting) return;
+    
+    isSubmitting = true;
+    
+    // Kumpulkan data pengajuan yang akan disetujui
+    const selectedSurat = suratList.filter(s => selectedIds.includes(String(s.id)));
+    
+    // Tutup modal konfirmasi
+    closeModal('bulkConfirmModal');
+    
+    // Tampilkan popup success terlebih dahulu
+    showSuccessModal(selectedSurat, true);
+    
+    // Tunggu 3 detik agar user bisa melihat modal success, baru submit form
+    setTimeout(() => {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '<?= base_url("kaprodi/process_multi_approve") ?>';
@@ -1196,8 +1022,93 @@ function processBulkApprove() {
         
         document.body.appendChild(form);
         form.submit();
-    }
+        
+        // Reset isSubmitting setelah form submit
+        setTimeout(() => {
+            isSubmitting = false;
+        }, 100);
+    }, 3000); // 3 detik delay untuk melihat modal
 }
+
+// PERBAIKAN UTAMA: Bulk Approve Function - Kini memiliki DUA POPUP KONFIRMASI
+function processBulkApprove() {
+    if (isSubmitting) return;
+    
+    if (selectedIds.length === 0) {
+        alert('Tidak ada pengajuan yang dipilih');
+        return;
+    }
+    
+    // Tampilkan modal konfirmasi bulk approve
+    showBulkConfirmModal();
+}
+
+// PERBAIKAN UTAMA: Single Approve - Klik tombol approve di baris tabel
+function showApproveModal(id, namaKegiatan) {
+    currentApproveId = id;
+    document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
+    document.getElementById('approveModal').classList.add('show');
+}
+
+// TAMPILKAN MODAL KONFIRMASI untuk multi approve
+function showBulkConfirmModal() {
+    if (selectedIds.length === 0) {
+        alert('Tidak ada pengajuan yang dipilih');
+        return;
+    }
+    
+    // Kumpulkan data pengajuan yang akan disetujui
+    const selectedSurat = suratList.filter(s => selectedIds.includes(String(s.id)));
+    
+    // Update modal konfirmasi
+    document.getElementById('confirmCount').textContent = selectedIds.length;
+    
+    const confirmList = document.getElementById('confirmList');
+    let confirmHtml = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+    
+    selectedSurat.forEach((surat, index) => {
+        confirmHtml += `
+            <div style="display: flex; align-items: center; padding: 10px; background: white; border-radius: 6px; border: 1px solid #e9ecef;">
+                <div style="width: 24px; height: 24px; background: #f5eef8; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 12px; font-weight: 600; color: #8E44AD;">
+                    ${index + 1}
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #2c3e50; font-size: 14px;">${escapeHtml(surat.nama_kegiatan || 'Pengajuan')}</div>
+                    <div style="font-size: 12px; color: #6c757d; display: flex; gap: 10px; margin-top: 4px;">
+                        <span><i class="fa-solid fa-building"></i> ${escapeHtml(surat.penyelenggara || '-')}</span>
+                        <span><i class="fa-solid fa-tag"></i> ${escapeHtml(surat.jenis_pengajuan || '-')}</span>
+                    </div>
+                </div>
+                <div class="badge badge-pending" style="font-size: 11px;">Menunggu</div>
+            </div>
+        `;
+    });
+    
+    confirmHtml += '</div>';
+    confirmList.innerHTML = confirmHtml;
+    
+    // Tampilkan modal konfirmasi
+    document.getElementById('bulkConfirmModal').classList.add('show');
+}
+
+// PERBAIKAN UTAMA: Event listener untuk form approve (SINGLE APPROVE)
+document.addEventListener('DOMContentLoaded', function() {
+    const approveForm = document.getElementById('approveForm');
+    if (approveForm) {
+        approveForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Selalu cegah submit default
+            
+            // Validasi apakah ada currentApproveId
+            if (!currentApproveId) {
+                alert('Tidak ada ID pengajuan yang valid');
+                return;
+            }
+            
+            // Panggil fungsi untuk submit single approval
+            submitSingleApprove();
+        });
+    }
+});
 
 // Bulk Reject Functions
 function showBulkRejectModal() {
@@ -1240,6 +1151,8 @@ function showBulkRejectModal() {
 }
 
 function confirmBulkReject() {
+    if (isSubmitting) return;
+    
     // Validasi semua textarea
     const textareas = document.querySelectorAll('.individual-rejection-textarea');
     let allFilled = true;
@@ -1265,6 +1178,12 @@ function confirmBulkReject() {
         alert('Semua alasan penolakan harus diisi');
         return;
     }
+    
+    if (!confirm(`Apakah Anda yakin ingin menolak ${rejectionData.length} pengajuan terpilih?`)) {
+        return;
+    }
+    
+    isSubmitting = true;
     
     // Tutup modal terlebih dahulu
     closeModal('bulkRejectModal');
@@ -1300,6 +1219,10 @@ function confirmBulkReject() {
     
     document.body.appendChild(form);
     form.submit();
+    
+    setTimeout(() => {
+        isSubmitting = false;
+    }, 2000);
 }
 
 // Status Modal Functions
@@ -1452,7 +1375,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-// PERBAIKAN UTAMA: Function showDetail yang sudah diperbaiki dengan PERIODE
+// Function showDetail yang sudah diperbaiki dengan PERIODE
 async function showDetail(id) {
     try {
         currentDetailId = id;
@@ -1499,14 +1422,12 @@ async function showDetail(id) {
             statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
         }
 
-        // PERBAIKAN UTAMA: Gunakan langsung dosen_data dari response
+        // Gunakan langsung dosen_data dari response
         let dosenData = [];
         
         if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
-            // Struktur 1: dosen_data dari AJAX response (format baru)
             dosenData = item.dosen_data;
         } else {
-            // Fallback: gunakan data default
             dosenData = [{
                 nama: getVal('nama_dosen') !== '-' ? getVal('nama_dosen') : 'Data dosen tidak tersedia',
                 nip: getVal('nip') !== '-' ? getVal('nip') : '-',
@@ -1514,9 +1435,6 @@ async function showDetail(id) {
                 divisi: '-'
             }];
         }
-
-        // Debug: Tampilkan data dosen di console
-        console.log('Dosen Data untuk ID', id, ':', dosenData);
 
         // Generate file evidence HTML
         let fileEvidenceHtml = '';
@@ -1526,7 +1444,6 @@ async function showDetail(id) {
             let evidenFiles = [];
             
             try {
-                // Try to parse as JSON first (for multiple files)
                 if (evidenValue.startsWith('[') || evidenValue.startsWith('{')) {
                     const parsed = JSON.parse(evidenValue);
                     if (Array.isArray(parsed)) {
@@ -1535,11 +1452,9 @@ async function showDetail(id) {
                         evidenFiles = [parsed.url];
                     }
                 } else {
-                    // Single file path or URL
                     evidenFiles = [evidenValue];
                 }
             } catch (e) {
-                // If not JSON, treat as single file path
                 evidenFiles = [evidenValue];
             }
             
@@ -1552,27 +1467,20 @@ async function showDetail(id) {
                     <div class="file-evidence">`;
                 
                 evidenFiles.forEach((file, index) => {
-                    // Extract filename dari path/URL
                     let fileName = file;
                     let fileUrl = file;
                     
-                    // Jika file adalah path lokal (tidak mengandung http/https)
                     if (!file.startsWith('http://') && !file.startsWith('https://')) {
-                        // Ambil hanya nama file dari path
                         fileName = file.split('/').pop();
-                        // Buat URL lengkap ke folder uploads/eviden
                         fileUrl = '<?= base_url("uploads/eviden/") ?>' + fileName;
                     } else {
-                        // Jika sudah URL lengkap (dari Uploadcare dll)
                         fileName = file.split('/').pop();
                     }
                     
-                    // Get file extension untuk menentukan tipe file
                     const ext = fileName.split('.').pop().toLowerCase();
                     let fileIcon = 'fa-file';
                     let canPreview = false;
                     
-                    // Tentukan file type dan kemampuan preview
                     if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
                         fileIcon = 'fa-file-image';
                         canPreview = true;
@@ -1614,33 +1522,21 @@ async function showDetail(id) {
             }
         }
 
-        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date
+        // Format Periode Kegiatan berdasarkan jenis_date
         const jenisDate = getVal('jenis_date');
         const periodeKegiatan = getVal('periode_kegiatan');
         const tanggalKegiatan = getVal('tanggal_kegiatan');
         const akhirKegiatan = getVal('akhir_kegiatan');
         
-        // DEBUG: Tampilkan data periode di console
-        console.log('Jenis Date:', jenisDate);
-        console.log('Periode Kegiatan:', periodeKegiatan);
-        console.log('Tanggal Kegiatan:', tanggalKegiatan);
-        console.log('Akhir Kegiatan:', akhirKegiatan);
-        
-        // Tentukan tampilan untuk Periode Kegiatan
         let periodeDisplay = '-';
         if (jenisDate === 'Periode') {
-            // Jika memilih Periode, tampilkan nilai periode yang dipilih
             periodeDisplay = periodeKegiatan !== '-' ? periodeKegiatan : '-';
-            console.log('Periode Display (Periode):', periodeDisplay);
         } else if (jenisDate === 'Custom') {
-            // Jika memilih Custom, tampilkan range tanggal
             if (tanggalKegiatan !== '-' && akhirKegiatan !== '-') {
                 periodeDisplay = formatDate(tanggalKegiatan) + ' - ' + formatDate(akhirKegiatan);
             }
-            console.log('Periode Display (Custom):', periodeDisplay);
         }
 
-        // Format tanggal mulai
         const tanggalMulaiDisplay = tanggalKegiatan !== '-' ? formatDate(tanggalKegiatan) : '-';
 
         const content = `
@@ -1670,7 +1566,6 @@ async function showDetail(id) {
                 </div>
             </div>
 
-            <!-- PERBAIKAN UTAMA: Tampilan Dosen yang Diperbaiki -->
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-user-tie"></i> Dosen Terkait
@@ -1701,7 +1596,6 @@ async function showDetail(id) {
                 </div>
             </div>
 
-            <!-- PERBAIKAN UTAMA: Bagian Informasi Waktu & Tempat yang disamakan dengan dashboard -->
             <div class="detail-section">
                 <div class="detail-section-title">
                     <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
@@ -1787,13 +1681,6 @@ function retryLoadDetail() {
     }
 }
 
-function showApproveModal(id, namaKegiatan) {
-    currentApproveId = id;
-    document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
-    document.getElementById('approveForm').action = '<?= base_url("kaprodi/approve/") ?>' + id;
-    document.getElementById('approveModal').classList.add('show');
-}
-
 function showRejectModal(id) {
     currentRejectId = id;
     document.getElementById('rejectionNotes').value = '';
@@ -1801,11 +1688,19 @@ function showRejectModal(id) {
 }
 
 function confirmReject() {
+    if (isSubmitting) return;
+    
     const notes = document.getElementById('rejectionNotes').value.trim();
     if (!notes) { 
         alert('Alasan penolakan harus diisi'); 
         return; 
     }
+    
+    if (!confirm('Apakah Anda yakin ingin menolak pengajuan ini?')) {
+        return;
+    }
+    
+    isSubmitting = true;
     
     const form = document.createElement('form');
     form.method = 'POST';
@@ -1827,6 +1722,10 @@ function confirmReject() {
     
     document.body.appendChild(form);
     form.submit();
+    
+    setTimeout(() => {
+        isSubmitting = false;
+    }, 2000);
 }
 
 function closeModal(id) { 
@@ -1863,9 +1762,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Prevent form submission when pressing Enter in search input
     if (searchForm) {
         searchForm.addEventListener('submit', function(e) {
-            // Biarkan form submit normal jika ada nilai search
             if (!searchInput.value.trim()) {
-                e.preventDefault(); // Cegah submit jika search kosong
+                e.preventDefault();
             }
         });
     }
