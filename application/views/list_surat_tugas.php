@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
    <style>
     /* ===== NAVBAR & SIDEBAR STYLES ===== */
@@ -811,13 +812,21 @@
         text-overflow: ellipsis;
     }
 
-    /* Action buttons with icons */
-    .action-buttons {
+    /* ===== REVISI: Action buttons dengan layout 2x2 ===== */
+    .action-buttons-container {
         display: flex;
+        flex-direction: column;
         gap: 8px;
         justify-content: center;
         align-items: center;
-        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .action-row {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        width: 100%;
     }
 
     .btn-icon-action {
@@ -880,16 +889,16 @@
     .btn-status {
         background: #66bb6a;
         color: white;
-        border: none;
-        padding: 10px 14px;
+        width: 36px;
+        height: 36px;
         border-radius: 8px;
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 15px;
+        justify-content: center;
+        border: none;
         cursor: pointer;
-        transition: 0.2s;
-        flex-shrink: 0;
+        transition: all 0.2s;
+        font-size: 14px;
     }
 
     .btn-status:hover {
@@ -921,944 +930,944 @@
         box-shadow: none !important;
     }
 
-  /* Status Modal Styles */
-.status-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-.status-modal.show {
-    display: flex;
-}
-
-.status-content {
-    background: white;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 600px;
-    padding: 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.status-header {
-    background: #FB8C00;
-    color: white;
-    padding: 20px;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.status-header h3 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.close-status {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background 0.2s;
-}
-
-.close-status:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.status-body {
-    padding: 30px;
-}
-
-/* Progress Bar Container */
-.progress-container {
-    position: relative;
-    padding: 20px 0 40px;
-    margin: 20px 0;
-}
-
-/* Progress Track - Fixed */
-.progress-track {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
-    margin: 0;
-    padding: 0 15px;
-}
-
-.progress-track::before {
-    content: '';
-    position: absolute;
-    top: 25px;
-    left: 50px;
-    right: 50px;
-    height: 4px;
-    background: #e0e0e0;
-    z-index: 1;
-    transform: translateY(-50%);
-    border-radius: 2px;
-}
-
-/* Progress Line */
-.progress-line {
-    position: absolute;
-    top: 25px;
-    left: 50px;
-    height: 4px;
-    background: #4caf50;
-    z-index: 2;
-    transform: translateY(-50%);
-    transition: width 0.5s ease;
-    border-radius: 2px;
-}
-
-/* Progress Step - Fixed Layout */
-.progress-step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    z-index: 3;
-    min-width: 100px;
-    flex: 1;
-    padding: 0 5px;
-}
-
-.step-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    margin-bottom: 10px;
-    border: 3px solid #e0e0e0;
-    background: white;
-    position: relative;
-    z-index: 4;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-}
-
-.step-text {
-    font-size: 12px;
-    text-align: center;
-    color: #666;
-    font-weight: 500;
-    margin-bottom: 5px;
-    line-height: 1.3;
-    max-width: 100px;
-    word-wrap: break-word;
-}
-
-.step-date {
-    font-size: 11px;
-    color: #999;
-    text-align: center;
-    display: block;
-    font-style: italic;
-    margin-top: 3px;
-}
-
-/* Status Colors */
-.progress-step.completed .step-icon {
-    background-color: #28a745;
-    border-color: #28a745;
-    color: white;
-}
-
-.progress-step.in-progress .step-icon {
-    background: #ffc107;
-    border-color: #ffc107;
-    color: white;
-    animation: pulse 2s infinite;
-}
-
-.progress-step.rejected .step-icon {
-    background: #dc3545;
-    border-color: #dc3545;
-    color: white;
-}
-
-.progress-step.pending .step-icon {
-    background: #e0e0e0;
-    border-color: #e0e0e0;
-    color: #999;
-}
-
-/* Progress Step Status Colors */
-.progress-step.status-completed .step-icon {
-    background: #4caf50;
-    border-color: #4caf50;
-    color: white;
-}
-
-.progress-step.status-in-progress .step-icon {
-    background: #ff9800;
-    border-color: #ff9800;
-    color: white;
-}
-
-.progress-step.status-rejected .step-icon {
-    background: #f44336;
-    border-color: #f44336;
-    color: white;
-}
-
-.progress-step.status-pending .step-icon {
-    background: #ffc107;
-    border-color: #ffc107;
-    color: white;
-}
-
-/* Status Icons */
-.progress-step.completed .step-icon i,
-.progress-step.status-completed .step-icon i {
-    color: white !important;
-}
-
-.progress-step.in-progress .step-icon i,
-.progress-step.status-in-progress .step-icon i {
-    color: white !important;
-}
-
-.progress-step.rejected .step-icon i,
-.progress-step.status-rejected .step-icon i {
-    color: white !important;
-}
-
-.progress-step.pending .step-icon i,
-.progress-step.status-pending .step-icon i {
-    color: #666 !important;
-}
-
-/* Animation for in-progress */
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+    /* Status Modal Styles */
+    .status-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
     }
-    70% {
-        box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+
+    .status-modal.show {
+        display: flex;
     }
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
-    }
-}
 
-/* Status Information */
-.status-info {
-    margin-top: 30px;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    border: 1px solid #e9ecef;
-}
-
-.status-info h5 {
-    color: #FB8C00;
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.status-info h5 i {
-    font-size: 18px;
-}
-
-.status-info p {
-    color: #495057;
-    font-size: 14px;
-    line-height: 1.6;
-    margin: 0;
-}
-
-/* Rejection Reason */
-.rejection-reason {
-    background: #fff5f5;
-    border: 1px solid #f8cccc;
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 15px;
-}
-
-.rejection-reason h6 {
-    color: #e63946;
-    font-weight: 700;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-}
-
-.rejection-reason h6 i {
-    font-size: 16px;
-}
-
-.rejection-reason p {
-    color: #495057;
-    font-size: 13px;
-    line-height: 1.5;
-    margin: 0;
-}
-
-/* Progress Estimation */
-.progress-estimasi {
-    text-align: center;
-    margin-top: 5px;
-    font-size: 11px;
-    color: #777;
-    font-style: italic;
-    display: block;
-}
-
-/* Detail Modal Styles */
-.modal-detail {
-    display: none !important;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 9999;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.modal-detail.show {
-    display: flex !important;
-}
-
-.modal-content-detail {
-    width: 90%;
-    max-width: 800px;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.modal-header-detail {
-    background: #FB8C00;
-    padding: 20px;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.modal-body-detail {
-    padding: 30px;
-    background: #f8f9fa;
-}
-
-/* Form-like detail styles */
-.detail-section {
-    background: white;
-    border-radius: 10px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e9ecef;
-}
-
-.detail-section-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #FB8C00;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #FB8C00;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.detail-section-title i {
-    font-size: 18px;
-}
-
-.detail-row {
-    display: flex;
-    margin-bottom: 15px;
-    align-items: flex-start;
-}
-
-.detail-label {
-    width: 200px;
-    font-weight: 600;
-    color: #495057;
-    font-size: 14px;
-    flex-shrink: 0;
-}
-
-.detail-value {
-    flex: 1;
-    color: #212529;
-    font-size: 14px;
-    background: #f8f9fa;
-    padding: 10px 15px;
-    border-radius: 8px;
-    border: 1px solid #e9ecef;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-}
-
-.detail-value-empty {
-    color: #6c757d;
-    font-style: italic;
-}
-
-/* Dosen list in detail */
-.dosen-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.dosen-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    background: white;
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-}
-
-.dosen-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #FB8C00;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.dosen-info {
-    flex: 1;
-}
-
-.dosen-name {
-    font-weight: 600;
-    color: #212529;
-    font-size: 14px;
-}
-
-.dosen-details {
-    font-size: 12px;
-    color: #6c757d;
-}
-
-/* ===== FILE EVIDENCE STYLES ===== */
-.file-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.file-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 15px;
-    background: white;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    transition: all 0.2s;
-    border-left: 4px solid #FB8C00;
-}
-
-.file-item:hover {
-    background: #fffaf5;
-    border-color: #FB8C00;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.file-icon {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 16px;
-    border-radius: 6px;
-    flex-shrink: 0;
-}
-
-.file-icon-pdf {
-    background: #e74c3c;
-}
-
-.file-icon-image {
-    background: #3498db;
-}
-
-.file-icon-doc {
-    background: #2980b9;
-}
-
-.file-icon-xls {
-    background: #27ae60;
-}
-
-.file-icon-ppt {
-    background: #e67e22;
-}
-
-.file-icon-zip {
-    background: #8e44ad;
-}
-
-.file-icon-unknown {
-    background: #95a5a6;
-}
-
-.file-info {
-    flex: 1;
-    min-width: 0;
-    cursor: pointer;
-}
-
-.file-name {
-    font-weight: 600;
-    color: #212529;
-    font-size: 14px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-bottom: 4px;
-}
-
-.file-details {
-    display: flex;
-    gap: 15px;
-    font-size: 12px;
-    color: #6c757d;
-}
-
-.file-type {
-    background: #e9ecef;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: 600;
-}
-
-.file-size {
-    color: #6c757d;
-}
-
-.file-actions {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.download-btn {
-    background: #FB8C00;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 600;
-    transition: background 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    text-decoration: none;
-}
-
-.download-btn:hover {
-    background: #e67e00;
-    text-decoration: none;
-    color: white;
-    transform: translateY(-1px);
-}
-
-.preview-btn {
-    background: #3498db;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: 600;
-    transition: background 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    text-decoration: none;
-}
-
-.preview-btn:hover {
-    background: #2980b9;
-    text-decoration: none;
-    color: white;
-    transform: translateY(-1px);
-}
-
-.preview-btn.disabled {
-    background: #bdc3c7;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.preview-btn.disabled:hover {
-    background: #bdc3c7;
-    transform: none;
-}
-
-/* No files message */
-.no-files {
-    text-align: center;
-    padding: 30px;
-    color: #6c757d;
-    background: #f8f9fa;
-    border-radius: 8px;
-    border: 2px dashed #dee2e6;
-}
-
-.no-files i {
-    font-size: 48px;
-    margin-bottom: 10px;
-    color: #adb5bd;
-}
-
-/* Preview Modal Styles */
-.preview-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 10000;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.preview-modal.show {
-    display: flex;
-}
-
-.preview-content {
-    background: white;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 900px;
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.preview-header {
-    background: #FB8C00;
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.preview-header h3 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.preview-close {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background 0.2s;
-}
-
-.preview-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.preview-body {
-    flex: 1;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #f8f9fa;
-    min-height: 400px;
-}
-
-.preview-iframe {
-    width: 100%;
-    height: 70vh;
-    border: none;
-}
-
-.preview-image {
-    max-width: 100%;
-    max-height: 70vh;
-    object-fit: contain;
-}
-
-.preview-unsupported {
-    text-align: center;
-    padding: 40px;
-    color: #6c757d;
-}
-
-.preview-unsupported i {
-    font-size: 48px;
-    margin-bottom: 15px;
-    color: #FB8C00;
-}
-
-.close-modal {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: background 0.2s;
-}
-
-.close-modal:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.hide-mobile {
-    display: block;
-}
-
-.show-mobile {
-    display: none;
-}
-
-/* Footer */
-.footer {
-    margin-top: 40px;
-    padding: 20px 0;
-    background-color: #f8f8fa;
-    border-top: 1px solid #ddd;
-}
-
-.fik-footer {
-    text-align: left;
-    padding-left: 285px;
-    transition: padding-left 0.3s ease;
-}
-
-.credit {
-    color: #666;
-    font-size: 14px;
-}
-
-/* Responsive Fixes for Status Modal */
-@media (max-width: 768px) {
     .status-content {
-        width: 95%;
-        margin: 10px;
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        padding: 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        max-height: 90vh;
+        overflow-y: auto;
     }
-    
+
+    .status-header {
+        background: #FB8C00;
+        color: white;
+        padding: 20px;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .status-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .close-status {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+
+    .close-status:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
     .status-body {
-        padding: 20px;
+        padding: 30px;
     }
-    
+
+    /* Progress Bar Container */
+    .progress-container {
+        position: relative;
+        padding: 20px 0 40px;
+        margin: 20px 0;
+    }
+
+    /* Progress Track - Fixed */
+    .progress-track {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin: 0;
+        padding: 0 15px;
+    }
+
     .progress-track::before {
-        left: 40px;
-        right: 40px;
+        content: '';
+        position: absolute;
+        top: 25px;
+        left: 50px;
+        right: 50px;
+        height: 4px;
+        background: #e0e0e0;
+        z-index: 1;
+        transform: translateY(-50%);
+        border-radius: 2px;
     }
-    
+
+    /* Progress Line */
     .progress-line {
-        left: 40px;
+        position: absolute;
+        top: 25px;
+        left: 50px;
+        height: 4px;
+        background: #4caf50;
+        z-index: 2;
+        transform: translateY(-50%);
+        transition: width 0.5s ease;
+        border-radius: 2px;
     }
-    
+
+    /* Progress Step - Fixed Layout */
     .progress-step {
-        min-width: 70px;
-        padding: 0 3px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 3;
+        min-width: 100px;
+        flex: 1;
+        padding: 0 5px;
     }
-    
+
     .step-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-        margin-bottom: 8px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        margin-bottom: 10px;
+        border: 3px solid #e0e0e0;
+        background: white;
+        position: relative;
+        z-index: 4;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
     }
-    
+
     .step-text {
-        font-size: 10px;
-        max-width: 70px;
+        font-size: 12px;
+        text-align: center;
+        color: #666;
+        font-weight: 500;
+        margin-bottom: 5px;
+        line-height: 1.3;
+        max-width: 100px;
+        word-wrap: break-word;
     }
-    
+
     .step-date {
-        font-size: 9px;
+        font-size: 11px;
+        color: #999;
+        text-align: center;
+        display: block;
+        font-style: italic;
+        margin-top: 3px;
     }
-    
-    .progress-estimasi {
-        font-size: 9px;
+
+    /* Status Colors */
+    .progress-step.completed .step-icon {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: white;
     }
-    
+
+    .progress-step.in-progress .step-icon {
+        background: #ffc107;
+        border-color: #ffc107;
+        color: white;
+        animation: pulse 2s infinite;
+    }
+
+    .progress-step.rejected .step-icon {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: white;
+    }
+
+    .progress-step.pending .step-icon {
+        background: #e0e0e0;
+        border-color: #e0e0e0;
+        color: #999;
+    }
+
+    /* Progress Step Status Colors */
+    .progress-step.status-completed .step-icon {
+        background: #4caf50;
+        border-color: #4caf50;
+        color: white;
+    }
+
+    .progress-step.status-in-progress .step-icon {
+        background: #ff9800;
+        border-color: #ff9800;
+        color: white;
+    }
+
+    .progress-step.status-rejected .step-icon {
+        background: #f44336;
+        border-color: #f44336;
+        color: white;
+    }
+
+    .progress-step.status-pending .step-icon {
+        background: #ffc107;
+        border-color: #ffc107;
+        color: white;
+    }
+
+    /* Status Icons */
+    .progress-step.completed .step-icon i,
+    .progress-step.status-completed .step-icon i {
+        color: white !important;
+    }
+
+    .progress-step.in-progress .step-icon i,
+    .progress-step.status-in-progress .step-icon i {
+        color: white !important;
+    }
+
+    .progress-step.rejected .step-icon i,
+    .progress-step.status-rejected .step-icon i {
+        color: white !important;
+    }
+
+    .progress-step.pending .step-icon i,
+    .progress-step.status-pending .step-icon i {
+        color: #666 !important;
+    }
+
+    /* Animation for in-progress */
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+        }
+    }
+
+    /* Status Information */
+    .status-info {
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border: 1px solid #e9ecef;
+    }
+
     .status-info h5 {
-        font-size: 15px;
+        color: #FB8C00;
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
-    
+
+    .status-info h5 i {
+        font-size: 18px;
+    }
+
     .status-info p {
+        color: #495057;
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Rejection Reason */
+    .rejection-reason {
+        background: #fff5f5;
+        border: 1px solid #f8cccc;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+    }
+
+    .rejection-reason h6 {
+        color: #e63946;
+        font-weight: 700;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .rejection-reason h6 i {
+        font-size: 16px;
+    }
+
+    .rejection-reason p {
+        color: #495057;
         font-size: 13px;
+        line-height: 1.5;
+        margin: 0;
     }
-    
-    .modal-content-detail {
-        width: 95%;
-        margin: 10px;
+
+    /* Progress Estimation */
+    .progress-estimasi {
+        text-align: center;
+        margin-top: 5px;
+        font-size: 11px;
+        color: #777;
+        font-style: italic;
+        display: block;
     }
-    
-    .modal-body-detail {
+
+    /* Detail Modal Styles */
+    .modal-detail {
+        display: none !important;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
         padding: 20px;
     }
-    
-    .detail-section {
-        padding: 15px;
+
+    .modal-detail.show {
+        display: flex !important;
     }
-    
+
+    .modal-content-detail {
+        width: 90%;
+        max-width: 800px;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header-detail {
+        background: #FB8C00;
+        padding: 20px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .modal-body-detail {
+        padding: 30px;
+        background: #f8f9fa;
+    }
+
+    /* Form-like detail styles */
+    .detail-section {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+    }
+
+    .detail-section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #FB8C00;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #FB8C00;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .detail-section-title i {
+        font-size: 18px;
+    }
+
     .detail-row {
+        display: flex;
+        margin-bottom: 15px;
+        align-items: flex-start;
+    }
+
+    .detail-label {
+        width: 200px;
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .detail-value {
+        flex: 1;
+        color: #212529;
+        font-size: 14px;
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+    }
+
+    .detail-value-empty {
+        color: #6c757d;
+        font-style: italic;
+    }
+
+    /* Dosen list in detail */
+    .dosen-list {
+        display: flex;
         flex-direction: column;
         gap: 8px;
     }
-    
-    .detail-label {
-        width: 100%;
-    }
-    
-    .detail-value {
-        width: 100%;
-    }
-}
 
-@media (max-width: 576px) {
-    .progress-track::before {
-        display: none;
-    }
-    
-    .progress-line {
-        display: none;
-    }
-    
-    .progress-track {
-        flex-direction: column;
-        gap: 25px;
-        align-items: flex-start;
-        padding: 0;
-    }
-    
-    .progress-step {
-        flex-direction: row;
+    .dosen-item {
+        display: flex;
         align-items: center;
-        gap: 15px;
-        width: 100%;
-        min-width: auto;
-        padding: 0;
+        gap: 10px;
+        padding: 8px 12px;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 6px;
     }
-    
-    .step-icon {
-        margin-bottom: 0;
-        flex-shrink: 0;
+
+    .dosen-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #FB8C00;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .dosen-info {
+        flex: 1;
+    }
+
+    .dosen-name {
+        font-weight: 600;
+        color: #212529;
+        font-size: 14px;
+    }
+
+    .dosen-details {
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+    /* ===== FILE EVIDENCE STYLES ===== */
+    .file-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .file-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        transition: all 0.2s;
+        border-left: 4px solid #FB8C00;
+    }
+
+    .file-item:hover {
+        background: #fffaf5;
+        border-color: #FB8C00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .file-icon {
         width: 40px;
         height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 16px;
+        border-radius: 6px;
+        flex-shrink: 0;
     }
-    
-    .step-text {
-        text-align: left;
-        max-width: none;
-        font-size: 13px;
-        margin-bottom: 2px;
-    }
-    
-    .step-date {
-        text-align: left;
-        font-size: 11px;
-        margin-top: 0;
-    }
-    
-    .progress-estimasi {
-        text-align: left;
-        margin-left: 0;
-        margin-top: 2px;
-        font-size: 10px;
-    }
-    
-    .hide-mobile {
-        display: none !important;
-    }
-    
-    .show-mobile {
-        display: block !important;
-    }
-    
-    .fik-footer {
-        padding-left: 20px;
-        text-align: center;
-    }
-}
-    /* ===== RESPONSIVE STYLES ===== */
 
+    .file-icon-pdf {
+        background: #e74c3c;
+    }
+
+    .file-icon-image {
+        background: #3498db;
+    }
+
+    .file-icon-doc {
+        background: #2980b9;
+    }
+
+    .file-icon-xls {
+        background: #27ae60;
+    }
+
+    .file-icon-ppt {
+        background: #e67e22;
+    }
+
+    .file-icon-zip {
+        background: #8e44ad;
+    }
+
+    .file-icon-unknown {
+        background: #95a5a6;
+    }
+
+    .file-info {
+        flex: 1;
+        min-width: 0;
+        cursor: pointer;
+    }
+
+    .file-name {
+        font-weight: 600;
+        color: #212529;
+        font-size: 14px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-bottom: 4px;
+    }
+
+    .file-details {
+        display: flex;
+        gap: 15px;
+        font-size: 12px;
+        color: #6c757d;
+    }
+
+    .file-type {
+        background: #e9ecef;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    .file-size {
+        color: #6c757d;
+    }
+
+    .file-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .download-btn {
+        background: #FB8C00;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+    }
+
+    .download-btn:hover {
+        background: #e67e00;
+        text-decoration: none;
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .preview-btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        text-decoration: none;
+    }
+
+    .preview-btn:hover {
+        background: #2980b9;
+        text-decoration: none;
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .preview-btn.disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .preview-btn.disabled:hover {
+        background: #bdc3c7;
+        transform: none;
+    }
+
+    /* No files message */
+    .no-files {
+        text-align: center;
+        padding: 30px;
+        color: #6c757d;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 2px dashed #dee2e6;
+    }
+
+    .no-files i {
+        font-size: 48px;
+        margin-bottom: 10px;
+        color: #adb5bd;
+    }
+
+    /* Preview Modal Styles */
+    .preview-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .preview-modal.show {
+        display: flex;
+    }
+
+    .preview-content {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .preview-header {
+        background: #FB8C00;
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .preview-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .preview-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+
+    .preview-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .preview-body {
+        flex: 1;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #f8f9fa;
+        min-height: 400px;
+    }
+
+    .preview-iframe {
+        width: 100%;
+        height: 70vh;
+        border: none;
+    }
+
+    .preview-image {
+        max-width: 100%;
+        max-height: 70vh;
+        object-fit: contain;
+    }
+
+    .preview-unsupported {
+        text-align: center;
+        padding: 40px;
+        color: #6c757d;
+    }
+
+    .preview-unsupported i {
+        font-size: 48px;
+        margin-bottom: 15px;
+        color: #FB8C00;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+
+    .close-modal:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .hide-mobile {
+        display: block;
+    }
+
+    .show-mobile {
+        display: none;
+    }
+
+    /* Footer */
+    .footer {
+        margin-top: 40px;
+        padding: 20px 0;
+        background-color: #f8f8fa;
+        border-top: 1px solid #ddd;
+    }
+
+    .fik-footer {
+        text-align: left;
+        padding-left: 285px;
+        transition: padding-left 0.3s ease;
+    }
+
+    .credit {
+        color: #666;
+        font-size: 14px;
+    }
+
+    /* Responsive Fixes for Status Modal */
+    @media (max-width: 768px) {
+        .status-content {
+            width: 95%;
+            margin: 10px;
+        }
+        
+        .status-body {
+            padding: 20px;
+        }
+        
+        .progress-track::before {
+            left: 40px;
+            right: 40px;
+        }
+        
+        .progress-line {
+            left: 40px;
+        }
+        
+        .progress-step {
+            min-width: 70px;
+            padding: 0 3px;
+        }
+        
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+        
+        .step-text {
+            font-size: 10px;
+            max-width: 70px;
+        }
+        
+        .step-date {
+            font-size: 9px;
+        }
+        
+        .progress-estimasi {
+            font-size: 9px;
+        }
+        
+        .status-info h5 {
+            font-size: 15px;
+        }
+        
+        .status-info p {
+            font-size: 13px;
+        }
+        
+        .modal-content-detail {
+            width: 95%;
+            margin: 10px;
+        }
+        
+        .modal-body-detail {
+            padding: 20px;
+        }
+        
+        .detail-section {
+            padding: 15px;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .detail-label {
+            width: 100%;
+        }
+        
+        .detail-value {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .progress-track::before {
+            display: none;
+        }
+        
+        .progress-line {
+            display: none;
+        }
+        
+        .progress-track {
+            flex-direction: column;
+            gap: 25px;
+            align-items: flex-start;
+            padding: 0;
+        }
+        
+        .progress-step {
+            flex-direction: row;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            min-width: auto;
+            padding: 0;
+        }
+        
+        .step-icon {
+            margin-bottom: 0;
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .step-text {
+            text-align: left;
+            max-width: none;
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+        
+        .step-date {
+            text-align: left;
+            font-size: 11px;
+            margin-top: 0;
+        }
+        
+        .progress-estimasi {
+            text-align: left;
+            margin-left: 0;
+            margin-top: 2px;
+            font-size: 10px;
+        }
+        
+        .hide-mobile {
+            display: none !important;
+        }
+        
+        .show-mobile {
+            display: block !important;
+        }
+        
+        .fik-footer {
+            padding-left: 20px;
+            text-align: center;
+        }
+    }
+    
+    /* ===== RESPONSIVE STYLES ===== */
     @media (max-width: 1200px) {
         .main-content {
             padding: 20px;
@@ -1928,9 +1937,13 @@
             text-align: center;
         }
         
-        .action-buttons {
-            flex-direction: row;
-            gap: 5px;
+        /* Responsive action buttons */
+        .action-buttons-container {
+            gap: 6px;
+        }
+        
+        .action-row {
+            gap: 6px;
         }
         
         .btn-icon-action {
@@ -2149,6 +2162,15 @@
             width: 15%;
             min-width: 90px;
         }
+        
+        /* Action buttons layout for mobile */
+        .action-buttons-container {
+            gap: 4px;
+        }
+        
+        .action-row {
+            gap: 4px;
+        }
     }
 
     @media (max-width: 576px) {
@@ -2181,7 +2203,12 @@
             min-width: 100px;
         }
         
-        .action-buttons {
+        .action-buttons-container {
+            flex-direction: row;
+            gap: 3px;
+        }
+        
+        .action-row {
             flex-direction: column;
             gap: 3px;
         }
@@ -2272,90 +2299,89 @@
         </div>
     </nav>
 
-  <!-- Sidebar -->
-<div class="fik-db-side-menu" id="sidebar">
-    <!-- Overlay untuk mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-    
-    <div id="accordion">
-        <!-- Profile Section (mobile only) -->
-        <div class="card show-mobile profil">
-            <div class="img-wrapper">
-                <img src="https://ifik.telkomuniversity.ac.id/assets/img/profile/default.jpg" alt="Profile">
+    <!-- Sidebar -->
+    <div class="fik-db-side-menu" id="sidebar">
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+        
+        <div id="accordion">
+            <!-- Profile Section (mobile only) -->
+            <div class="card show-mobile profil">
+                <div class="img-wrapper">
+                    <img src="https://ifik.telkomuniversity.ac.id/assets/img/profile/default.jpg" alt="Profile">
+                </div>
+                <b>PIC MEDCRAFT</b>
+                <span>pic kk</span>
             </div>
-            <b>PIC MEDCRAFT</b>
-            <span>pic kk</span>
-        </div>
-        <div class="divider show-mobile" style="margin-top:20px"></div>
-        
-        <!-- Menu Items -->
-        <div class="card">
-            <a href="<?= base_url('list-surat-tugas') ?>" class="btn active">
-                <span class="fas fa-palette"></span> 
-                <span class="menu-text">List Surat Tugas</span>
-            </a>
-        </div>
-        
-        <div class="card">
-            <a href="https://ifik.telkomuniversity.ac.id/Pic_kk/input_surat" class="btn">
-                <span class="fas fa-envelope-open-text"></span> 
-                <span class="menu-text">Surat Tugas</span>
-            </a>
-        </div>
-        
-        <div class="divider"></div>
-        
-        <!-- Peminjaman Ruangan (Collapsible) -->
-        <div class="card">
-            <a href="#" class="btn collapsed" data-bs-toggle="collapse" data-bs-target="#collapse2" 
-               aria-expanded="false" aria-controls="collapse2">
-                <span class="fas fa-door-open"></span> 
-                <span class="menu-text">Peminjaman Ruangan</span>
-                <span class="collapse-arrow fas fa-chevron-down"></span>
-            </a>
-            <div id="collapse2" class="collapse" data-bs-parent="#accordion">
-                <ul>
-                    <li><a href="#" data-bs-toggle="modal" data-bs-target="#termcondition">Buat Peminjaman</a></li>
-                    <li><a href="https://ifik.telkomuniversity.ac.id/users/daftarsemuatempat">Daftar Ruangan</a></li>
-                    <li><a href="https://ifik.telkomuniversity.ac.id/Pic_kk/riwayat">Riwayat</a></li>
-                </ul>
+            <div class="divider show-mobile" style="margin-top:20px"></div>
+            
+            <!-- Menu Items -->
+            <div class="card">
+                <a href="<?= base_url('list-surat-tugas') ?>" class="btn active">
+                    <span class="fas fa-palette"></span> 
+                    <span class="menu-text">List Surat Tugas</span>
+                </a>
             </div>
-        </div>
-        
-        <!-- Ticketing (Collapsible) -->
-        <div class="card">
-            <a href="#" class="btn collapsed" data-bs-toggle="collapse" data-bs-target="#ticketing" 
-               aria-expanded="false" aria-controls="ticketing">
-                <span class="fas fa-door-open"></span> 
-                <span class="menu-text">Ticketing</span>
-                <span class="collapse-arrow fas fa-chevron-down"></span>
-            </a>
-            <div id="ticketing" class="collapse" data-bs-parent="#accordion">
-                <ul>
-                    <li><a href="#" data-bs-toggle="modal" data-bs-target="#maketicketing">Input ticketing</a></li>
-                    <li><a href="https://ifik.telkomuniversity.ac.id/users/daftarsemuatempat">Daftar Ruangan</a></li>
-                    <li><a href="https://ifik.telkomuniversity.ac.id/pic_kk/riwayat_ticketing">Riwayat</a></li>
-                </ul>
+            
+            <div class="card">
+                <a href="https://ifik.telkomuniversity.ac.id/Pic_kk/input_surat" class="btn">
+                    <span class="fas fa-envelope-open-text"></span> 
+                    <span class="menu-text">Surat Tugas</span>
+                </a>
             </div>
-        </div>
-        
-        <!-- Helpdesk (mobile only) -->
-        <div class="card show-mobile">
-            <a href="https://ifik.telkomuniversity.ac.id/main/helpdesk" class="btn">
-                <span class="fas fa-life-ring"></span> 
-                <span class="menu-text">Helpdesk</span>
-            </a>
-        </div>
-        
-        <!-- Logout -->
-        <div class="card logout">
-            <button class="btn" data-bs-toggle="modal" data-bs-target="#logout">
-                <span class="fas fa-sign-out-alt"></span> 
-                <span class="menu-text">Logout</span>
-            </button>
+            
+            <div class="divider"></div>
+            
+            <!-- Peminjaman Ruangan (Collapsible) -->
+            <div class="card">
+                <a href="#" class="btn collapsed" data-bs-toggle="collapse" data-bs-target="#collapse2" 
+                   aria-expanded="false" aria-controls="collapse2">
+                    <span class="fas fa-door-open"></span> 
+                    <span class="menu-text">Peminjaman Ruangan</span>
+                    <span class="collapse-arrow fas fa-chevron-down"></span>
+                </a>
+                <div id="collapse2" class="collapse" data-bs-parent="#accordion">
+                    <ul>
+                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#termcondition">Buat Peminjaman</a></li>
+                        <li><a href="https://ifik.telkomuniversity.ac.id/users/daftarsemuatempat">Daftar Ruangan</a></li>
+                        <li><a href="https://ifik.telkomuniversity.ac.id/Pic_kk/riwayat">Riwayat</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Ticketing (Collapsible) -->
+            <div class="card">
+                <a href="#" class="btn collapsed" data-bs-toggle="collapse" data-bs-target="#ticketing" 
+                   aria-expanded="false" aria-controls="ticketing">
+                    <span class="fas fa-door-open"></span> 
+                    <span class="menu-text">Ticketing</span>
+                    <span class="collapse-arrow fas fa-chevron-down"></span>
+                </a>
+                <div id="ticketing" class="collapse" data-bs-parent="#accordion">
+                    <ul>
+                        <li><a href="#" data-bs-toggle="modal" data-bs-target="#maketicketing">Input ticketing</a></li>
+                        <li><a href="https://ifik.telkomuniversity.ac.id/users/daftarsemuatempat">Daftar Ruangan</a></li>
+                        <li><a href="https://ifik.telkomuniversity.ac.id/pic_kk/riwayat_ticketing">Riwayat</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Helpdesk (mobile only) -->
+            <div class="card show-mobile">
+                <a href="https://ifik.telkomuniversity.ac.id/main/helpdesk" class="btn">
+                    <span class="fas fa-life-ring"></span> 
+                    <span class="menu-text">Helpdesk</span>
+                </a>
+            </div>
+            
+            <!-- Logout -->
+            <div class="card logout">
+                <button class="btn" data-bs-toggle="modal" data-bs-target="#logout">
+                    <span class="fas fa-sign-out-alt"></span> 
+                    <span class="menu-text">Logout</span>
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -2376,6 +2402,7 @@
             </button>
         </div>
         <?php endif; ?>
+        
         <!-- Header Actions -->
         <div class="header-actions">
             <h1 class="page-title">List Surat Tugas</h1>
@@ -2464,54 +2491,53 @@
                 </div>
                 <div class="status-body">
                     <div class="progress-track">
-                    <div class="progress-line" id="progressLine"></div>
+                        <div class="progress-line" id="progressLine"></div>
 
-                    <!-- Step 1: Mengirim -->
-                    <div class="progress-step status-completed" id="step1">
-                        <div class="step-icon">
-                            <i class="fas fa-check" id="step1-icon"></i>
+                        <!-- Step 1: Mengirim -->
+                        <div class="progress-step status-completed" id="step1">
+                            <div class="step-icon">
+                                <i class="fas fa-check" id="step1-icon"></i>
+                            </div>
+                            <div class="step-text" id="step1-text">Mengirim</div>
+                            <div class="step-date" id="step1-date">-</div>
                         </div>
-                        <div class="step-text" id="step1-text">Mengirim</div>
-                        <div class="step-date" id="step1-date">-</div>
-                    </div>
-                    <div class="progress-estimasi">
-                    <span id="est1">-</span>
-                </div>
-
-                    <!-- Step 2: Persetujuan KK -->
-                    <div class="progress-step status-in-progress" id="step2">
-                        <div class="step-icon">
-                            <i class="fas fa-clock" id="step2-icon"></i>
+                        <div class="progress-estimasi">
+                            <span id="est1">-</span>
                         </div>
-                        <div class="step-text" id="step2-text">Persetujuan KK</div>
-                        <div class="step-date" id="step2-date">-</div>
-                    </div>
-                    <div class="progress-estimasi">
-                    <span id="est2">-</span>
-                </div>
 
-                    <!-- Step 3: Persetujuan Sekretariat -->
-                    <div class="progress-step status-pending" id="step3">
-                        <div class="step-icon">
-                            <i class="fas fa-clock" id="step3-icon"></i>
+                        <!-- Step 2: Persetujuan KK -->
+                        <div class="progress-step status-in-progress" id="step2">
+                            <div class="step-icon">
+                                <i class="fas fa-clock" id="step2-icon"></i>
+                            </div>
+                            <div class="step-text" id="step2-text">Persetujuan KK</div>
+                            <div class="step-date" id="step2-date">-</div>
                         </div>
-                        <div class="step-text" id="step3-text">Persetujuan Sekretariat</div>
-                        <div class="step-date" id="step3-date">-</div>
-                    </div>
-                    <div class="progress-estimasi">
-                    <span id="est3">-</span>
-                </div>
-
-                    <!-- Step 4: Persetujuan Dekan -->
-                    <div class="progress-step status-pending" id="step4">
-                        <div class="step-icon">
-                            <i class="fas fa-clock" id="step4-icon"></i>
+                        <div class="progress-estimasi">
+                            <span id="est2">-</span>
                         </div>
-                        <div class="step-text" id="step4-text">Persetujuan Dekan</div>
-                        <div class="step-date" id="step4-date">-</div>
-                    </div>
-                </div>
 
+                        <!-- Step 3: Persetujuan Sekretariat -->
+                        <div class="progress-step status-pending" id="step3">
+                            <div class="step-icon">
+                                <i class="fas fa-clock" id="step3-icon"></i>
+                            </div>
+                            <div class="step-text" id="step3-text">Persetujuan Sekretariat</div>
+                            <div class="step-date" id="step3-date">-</div>
+                        </div>
+                        <div class="progress-estimasi">
+                            <span id="est3">-</span>
+                        </div>
+
+                        <!-- Step 4: Persetujuan Dekan -->
+                        <div class="progress-step status-pending" id="step4">
+                            <div class="step-icon">
+                                <i class="fas fa-clock" id="step4-icon"></i>
+                            </div>
+                            <div class="step-text" id="step4-text">Persetujuan Dekan</div>
+                            <div class="step-date" id="step4-date">-</div>
+                        </div>
+                    </div>
                     
                     <div class="status-info mt-4">
                         <h5>Informasi Status:</h5>
@@ -2633,58 +2659,64 @@
                     </td>
                     <td><?= isset($s->created_at) && $s->created_at ? htmlspecialchars($s->created_at) : '-'; ?></td>
                     <td>
-                    <!-- Di dalam bagian action buttons (sekitar baris 700-750) -->
-                <div class="action-buttons">
-                    <button class="btn-icon-action btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s->id; ?>)">
-                        <i class="fas fa-tasks"></i>
-                    </button>
-                    
-                    <?php 
-                    // Cek apakah status ditolak
-                    $status_lower = strtolower($s->status);
-                    $is_rejected = in_array($status_lower, ['ditolak kk', 'ditolak sekretariat', 'ditolak dekan']);
-                    $is_approved_dekan = ($s->status === 'disetujui dekan');
-                    ?>
-                    
-                    <?php if ($is_rejected): ?>
-                        <a href="<?= site_url('surat/edit/'.$s->id); ?>" 
-                        class="btn-icon-action btn-edit" 
-                        title="Edit & Ajukan Ulang - Ditolak">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                    <?php else: ?>
-                        <button class="btn-icon-action btn-edit btn-edit-disabled" 
-                                title="Edit hanya untuk surat ditolak" 
-                                disabled 
-                                style="opacity: 0.5; cursor: not-allowed;">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    <?php endif; ?>
-                    
-                    <?php if ($is_approved_dekan): ?>
-                        <a href="<?= base_url('surat/cetak/' . $s->id) ?>" 
-                        target="_blank" 
-                        class="btn-icon-action btn-print" 
-                        title="Cetak Surat Tugas">
-                            <i class="fas fa-print"></i>
-                        </a>
-                    <?php else: ?>
-                        <button class="btn-icon-action btn-print btn-print-disabled" 
-                                title="Cetak hanya untuk surat disetujui dekan" 
-                                onclick="showPrintAlert('<?= $s->status ?>')"
-                                style="opacity: 0.5; cursor: not-allowed;">
-                            <i class="fas fa-print"></i>
-                        </button>
-                    <?php endif; ?>
-                    
-                    <a href="<?= site_url('surat/delete/'.$s->id); ?>" 
-                    class="btn-icon-action btn-delete" 
-                    title="Hapus" 
-                    onclick="return confirm('Hapus data ini?')">
-                        <i class="fas fa-trash"></i>
-                    </a>
-                </div>
-                </td>
+                        <!-- ===== REVISI: Button aksi dengan layout 2x2 ===== -->
+                        <div class="action-buttons-container">
+                            <!-- Baris pertama: Status & Edit -->
+                            <div class="action-row">
+                                <button class="btn-icon-action btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s->id; ?>)">
+                                    <i class="fas fa-tasks"></i>
+                                </button>
+                                
+                                <?php 
+                                // Cek apakah status ditolak
+                                $status_lower = strtolower($s->status);
+                                $is_rejected = in_array($status_lower, ['ditolak kk', 'ditolak sekretariat', 'ditolak dekan']);
+                                $is_approved_dekan = ($s->status === 'disetujui dekan');
+                                ?>
+                                
+                                <?php if ($is_rejected): ?>
+                                    <a href="<?= site_url('surat/edit/'.$s->id); ?>" 
+                                    class="btn-icon-action btn-edit" 
+                                    title="Edit & Ajukan Ulang - Ditolak">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <button class="btn-icon-action btn-edit btn-edit-disabled" 
+                                            title="Edit hanya untuk surat ditolak" 
+                                            onclick="showEditAlert('<?= $s->status ?>')"
+                                            style="opacity: 0.5; cursor: not-allowed;">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <!-- Baris kedua: Print & Delete -->
+                            <div class="action-row">
+                                <?php if ($is_approved_dekan): ?>
+                                    <a href="<?= base_url('surat/cetak/' . $s->id) ?>" 
+                                    target="_blank" 
+                                    class="btn-icon-action btn-print" 
+                                    title="Cetak Surat Tugas">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                <?php else: ?>
+                                    <button class="btn-icon-action btn-print btn-print-disabled" 
+                                            title="Cetak hanya untuk surat disetujui dekan" 
+                                            onclick="showPrintAlert('<?= $s->status ?>')"
+                                            style="opacity: 0.5; cursor: not-allowed;">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                <?php endif; ?>
+                                
+                                <a href="<?= site_url('surat/delete/'.$s->id); ?>" 
+                                class="btn-icon-action btn-delete" 
+                                title="Hapus" 
+                                onclick="return confirm('Hapus data ini?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -2720,946 +2752,943 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-// Toggle Sidebar for Mobile
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('active');
-}
-
-// Close sidebar when clicking outside on mobile
-$(document).click(function(e) {
-    if ($(window).width() <= 992) {
-        if (!$(e.target).closest('.fik-db-side-menu, .db-menu-trigger').length) {
-            $('#sidebar').removeClass('active');
-        }
-    }
-});
-
-// Fungsi untuk tombol Kembali
-function goBack() {
-    window.location.href = '<?= base_url() ?>';
-}
-
-// Tampilkan modal dan load data
-function showStatusModal(suratId) {
-    const modal = document.getElementById('statusModal');
-    modal.style.display = 'flex';
-
-    resetAllStatus();
-    loadStatusData(suratId);
-}
-
-// Reset seluruh tampilan sebelum load data baru
-function resetAllStatus() {
-    for (let i = 1; i <= 4; i++) {
-        const step = document.getElementById(`step${i}`);
-        const icon = document.getElementById(`step${i}-icon`);
-        const text = document.getElementById(`step${i}-text`);
-        const date = document.getElementById(`step${i}-date`);
-        
-        step.className = 'progress-step pending';
-        icon.className = 'fas fa-clock';
-
-        const defaultTexts = [
-            'Mengirim',
-            'Persetujuan KK',
-            'Persetujuan Sekretariat',
-            'Persetujuan Dekan'
-        ];
-        text.textContent = defaultTexts[i-1];
-        date.textContent = '-';
+    <script>
+    // Toggle Sidebar for Mobile
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
     }
 
-    document.getElementById('progressLine').style.width = '0%';
-
-    // Reset informasi status
-    const desc = document.getElementById("status-description");
-    desc.textContent = "Memuat informasi status...";
-    desc.style.color = "black";
-}
-
-// Load status dari server (AJAX)
-function loadStatusData(suratId) {
-    fetch('<?= site_url("surat/get_status/") ?>' + suratId)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                updateStatusDisplay(data.data);
-                updateEstimasiWaktu(data.data);
-            } else {
-                alert('Gagal memuat status: ' + (data.message || 'Unknown error'));
+    // Close sidebar when clicking outside on mobile
+    $(document).click(function(e) {
+        if ($(window).width() <= 992) {
+            if (!$(e.target).closest('.fik-db-side-menu, .db-menu-trigger').length) {
+                $('#sidebar').removeClass('active');
             }
-        })
-        .catch(error => {
-            console.error('Error loading status data:', error);
-            alert('Terjadi kesalahan saat memuat status');
-        });
-}
-
-// UPDATE STATUS DISPLAY
-function updateStatusDisplay(statusData) {
-    const steps = statusData.steps;
-
-    steps.forEach((step, index) => {
-        const stepNumber = index + 1;
-        const stepElement = document.getElementById(`step${stepNumber}`);
-        const iconElement = document.getElementById(`step${stepNumber}-icon`);
-        const textElement = document.getElementById(`step${stepNumber}-text`);
-        const dateElement = document.getElementById(`step${stepNumber}-date`);
-
-        stepElement.className = 'progress-step';
-
-        // STATUS WARNA
-        switch (step.status) {
-            case 'completed':
-            case 'approved':
-                stepElement.classList.add('completed');
-                iconElement.className = 'fas fa-check';
-                break;
-
-            case 'rejected':
-                stepElement.classList.add('rejected');
-                iconElement.className = 'fas fa-times';
-                break;
-
-            case 'in-progress':
-                stepElement.classList.add('in-progress');
-                iconElement.className = 'fas fa-spinner fa-spin';
-                break;
-
-            default:
-                stepElement.classList.add('pending');
-                iconElement.className = 'fas fa-clock';
         }
-
-        textElement.textContent = step.step_name;
-        dateElement.textContent = step.date;
     });
 
-    // Update progress bar panjang
-    document.getElementById('progressLine').style.width = 
-        (statusData.progress_percentage || 0) + '%';
-
-    // UPDATE INFORMASI STATUS
-    const desc = document.getElementById("status-description");
-    const finalStatus = statusData.current_status.toLowerCase();
-
-    if (finalStatus === "disetujui dekan") {
-        desc.textContent = "Pengajuan ini sudah disetujui.";
-        desc.style.color = "green";
+    // Fungsi untuk tombol Kembali
+    function goBack() {
+        window.location.href = '<?= base_url() ?>';
     }
-    else if (finalStatus.includes("ditolak")) {
-        desc.textContent = "Pengajuan ini tidak disetujui.";
-        desc.style.color = "red";
+
+    // Tampilkan modal dan load data
+    function showStatusModal(suratId) {
+        const modal = document.getElementById('statusModal');
+        modal.style.display = 'flex';
+
+        resetAllStatus();
+        loadStatusData(suratId);
     }
-    else {
-        desc.textContent = "Pengajuan ini masih dalam proses persetujuan.";
+
+    // Reset seluruh tampilan sebelum load data baru
+    function resetAllStatus() {
+        for (let i = 1; i <= 4; i++) {
+            const step = document.getElementById(`step${i}`);
+            const icon = document.getElementById(`step${i}-icon`);
+            const text = document.getElementById(`step${i}-text`);
+            const date = document.getElementById(`step${i}-date`);
+            
+            step.className = 'progress-step pending';
+            icon.className = 'fas fa-clock';
+
+            const defaultTexts = [
+                'Mengirim',
+                'Persetujuan KK',
+                'Persetujuan Sekretariat',
+                'Persetujuan Dekan'
+            ];
+            text.textContent = defaultTexts[i-1];
+            date.textContent = '-';
+        }
+
+        document.getElementById('progressLine').style.width = '0%';
+
+        // Reset informasi status
+        const desc = document.getElementById("status-description");
+        desc.textContent = "Memuat informasi status...";
         desc.style.color = "black";
     }
-    
-    // TAMPILKAN ALASAN PENOLAKAN
-    const rejectionBox = document.getElementById("rejection-reason");
-    const rejectionText = document.getElementById("rejection-text");
 
-    if (finalStatus.includes("ditolak")) {
-        rejectionBox.style.display = "block";
-        rejectionText.textContent = statusData.catatan_penolakan || "Tidak ada catatan penolakan.";
-    } else {
-        rejectionBox.style.display = "none";
-    }
-}
-
-function updateEstimasiWaktu(statusData) {
-    const d = statusData.durasi;
-
-    document.getElementById("est1").textContent = d.durasi_1 || "-";
-    document.getElementById("est2").textContent = d.durasi_2 || "-";
-    document.getElementById("est3").textContent = d.durasi_3 || "-";
-}
-
-// EVENT: CLOSE MODAL
-document.addEventListener('DOMContentLoaded', function() {
-    const closeBtn = document.querySelector('.close-status');
-    const modal = document.getElementById('statusModal');
-    
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
+    // Load status dari server (AJAX)
+    function loadStatusData(suratId) {
+        fetch('<?= site_url("surat/get_status/") ?>' + suratId)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateStatusDisplay(data.data);
+                    updateEstimasiWaktu(data.data);
+                } else {
+                    alert('Gagal memuat status: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error loading status data:', error);
+                alert('Terjadi kesalahan saat memuat status');
+            });
     }
 
-    window.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-});
+    // UPDATE STATUS DISPLAY
+    function updateStatusDisplay(statusData) {
+        const steps = statusData.steps;
 
-// ===== JQUERY DOCUMENT READY =====
-$(document).ready(function () {
-    const BASE_URL = '<?= rtrim(base_url(), "/"); ?>';
-    // Handle click pada tombol edit yang disabled
-$(document).on('click', '.btn-edit-disabled', function(e) {
-    e.preventDefault();
-    const row = $(this).closest('tr');
-    const status = row.find('td').eq(7).text().trim(); // Sesuaikan index kolom status jika berbeda
-    
-    Swal.fire({
-        icon: 'warning',
-        title: 'Edit Tidak Diizinkan',
-        html: `
-            <p>Tombol edit hanya dapat digunakan untuk surat yang <strong>ditolak</strong>.</p>
-            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 10px;">
-                <strong>Status surat ini:</strong> ${status}
-            </div>
-        `,
-        confirmButtonText: 'Mengerti',
-        confirmButtonColor: '#FB8C00'
-    });
-    return false;
-});
+        steps.forEach((step, index) => {
+            const stepNumber = index + 1;
+            const stepElement = document.getElementById(`step${stepNumber}`);
+            const iconElement = document.getElementById(`step${stepNumber}-icon`);
+            const textElement = document.getElementById(`step${stepNumber}-text`);
+            const dateElement = document.getElementById(`step${stepNumber}-date`);
 
-    // Inisialisasi DataTable dengan konfigurasi responsif
-    let table = $('#tabelSurat').DataTable({
-        responsive: true,
-        pageLength: 5,
-        dom: 'rtp',
-        scrollX: false, // Nonaktifkan scroll horizontal
-        autoWidth: false, // Nonaktifkan auto width
-        columnDefs: [
-            { orderable: false, targets: [0, -1] },
-            { className: 'dt-center', targets: [0, 1, 4, 5, 6, 7] },
-            { className: 'dt-left', targets: [2, 3] }, // Rata kiri untuk nama kegiatan dan jenis
-            { width: '4%', targets: 0 }, // Checkbox
-            { width: '5%', targets: 1 }, // No
-            { width: '25%', targets: 2 }, // Nama Kegiatan
-            { width: '12%', targets: 3 }, // Jenis Pengajuan
-            { width: '20%', targets: 4 }, // Nama Dosen
-            { width: '12%', targets: 5 }, // Divisi
-            { width: '12%', targets: 6 }, // Tanggal Pengajuan
-            { width: '10%', targets: 7 } // Aksi
-        ],
-        order: [[1, 'asc']],
-        language: {
-            search: "Cari:",
-            lengthMenu: "Tampilkan _MENU_ entri",
-            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
-            infoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
-            infoFiltered: "(disaring dari _MAX_ total entri)",
-            paginate: {
-                first: "Pertama",
-                last: "Terakhir",
-                next: "Selanjutnya",
-                previous: "Sebelumnya"
+            stepElement.className = 'progress-step';
+
+            // STATUS WARNA
+            switch (step.status) {
+                case 'completed':
+                case 'approved':
+                    stepElement.classList.add('completed');
+                    iconElement.className = 'fas fa-check';
+                    break;
+
+                case 'rejected':
+                    stepElement.classList.add('rejected');
+                    iconElement.className = 'fas fa-times';
+                    break;
+
+                case 'in-progress':
+                    stepElement.classList.add('in-progress');
+                    iconElement.className = 'fas fa-spinner fa-spin';
+                    break;
+
+                default:
+                    stepElement.classList.add('pending');
+                    iconElement.className = 'fas fa-clock';
             }
-        }
-    });
 
-    // ===== MULTI-SELECT FUNCTIONALITY =====
-    let selectedIds = [];
-
-    function updateMultiActions() {
-        selectedIds = [];
-        $('.row-checkbox:checked').each(function(){
-            selectedIds.push($(this).data('id'));
+            textElement.textContent = step.step_name;
+            dateElement.textContent = step.date;
         });
-        
-        $('#selectedCount').text(selectedIds.length);
-        
-        if(selectedIds.length > 0) {
-            $('#multiActions').addClass('show');
-        } else {
-            $('#multiActions').removeClass('show');
+
+        // Update progress bar panjang
+        document.getElementById('progressLine').style.width = 
+            (statusData.progress_percentage || 0) + '%';
+
+        // UPDATE INFORMASI STATUS
+        const desc = document.getElementById("status-description");
+        const finalStatus = statusData.current_status.toLowerCase();
+
+        if (finalStatus === "disetujui dekan") {
+            desc.textContent = "Pengajuan ini sudah disetujui.";
+            desc.style.color = "green";
+        }
+        else if (finalStatus.includes("ditolak")) {
+            desc.textContent = "Pengajuan ini tidak disetujui.";
+            desc.style.color = "red";
+        }
+        else {
+            desc.textContent = "Pengajuan ini masih dalam proses persetujuan.";
+            desc.style.color = "black";
         }
         
-        const totalCheckboxes = $('.row-checkbox').length;
-        const checkedCheckboxes = $('.row-checkbox:checked').length;
-        $('#checkAll').prop('checked', totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0);
+        // TAMPILKAN ALASAN PENOLAKAN
+        const rejectionBox = document.getElementById("rejection-reason");
+        const rejectionText = document.getElementById("rejection-text");
+
+        if (finalStatus.includes("ditolak")) {
+            rejectionBox.style.display = "block";
+            rejectionText.textContent = statusData.catatan_penolakan || "Tidak ada catatan penolakan.";
+        } else {
+            rejectionBox.style.display = "none";
+        }
     }
 
-    $('#checkAll').on('change', function(){
-        const isChecked = $(this).is(':checked');
-        $('.row-checkbox').prop('checked', isChecked);
-        if(isChecked) {
-            $('tr.row-detail').addClass('selected');
-        } else {
-            $('tr.row-detail').removeClass('selected');
-        }
-        updateMultiActions();
-    });
+    function updateEstimasiWaktu(statusData) {
+        const d = statusData.durasi;
 
-    $(document).on('change', '.row-checkbox', function(e){
-        e.stopPropagation();
-        const $row = $(this).closest('tr');
-        if($(this).is(':checked')) {
-            $row.addClass('selected');
-        } else {
-            $row.removeClass('selected');
-        }
-        updateMultiActions();
-    });
+        document.getElementById("est1").textContent = d.durasi_1 || "-";
+        document.getElementById("est2").textContent = d.durasi_2 || "-";
+        document.getElementById("est3").textContent = d.durasi_3 || "-";
+    }
 
-    $(document).on('click', '.row-checkbox', function(e){
-        e.stopPropagation();
-    });
-
-    $('#btnMultiEdit').click(function(){
-        if(selectedIds.length === 0) {
-            alert('Pilih minimal 1 item untuk di-edit');
-            return;
-        }
-        window.location.href = '<?= site_url("surat/multi_edit"); ?>?ids=' + selectedIds.join(',');
-    });
-
-    $('#btnMultiDelete').click(function(){
-        if(selectedIds.length === 0) {
-            alert('Pilih minimal 1 item untuk dihapus');
-            return;
-        }
+    // EVENT: CLOSE MODAL
+    document.addEventListener('DOMContentLoaded', function() {
+        const closeBtn = document.querySelector('.close-status');
+        const modal = document.getElementById('statusModal');
         
-        const confirmed = confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' item yang dipilih?');
-        if(!confirmed) return;
-        
-        deleteMultipleSurat(selectedIds);
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+        }
+
+        window.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
     });
 
-    // Fungsi untuk menghapus multiple surat
-    function deleteMultipleSurat(ids) {
-        let successCount = 0;
-        let errorCount = 0;
-        const total = ids.length;
+    // ===== FUNGSI ALERT UNTUK BUTTON DISABLED =====
+    function showEditAlert(status) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Edit Tidak Diizinkan',
+            html: `
+                <p>Tombol edit hanya dapat digunakan untuk surat yang <strong>ditolak</strong>.</p>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                    <strong>Status surat ini:</strong> ${status}
+                </div>
+                <div style="margin-top: 15px; font-size: 14px; color: #6c757d;">
+                    <i class="fas fa-info-circle"></i> Hanya surat yang ditolak yang dapat diedit dan diajukan ulang.
+                </div>
+            `,
+            confirmButtonText: 'Mengerti',
+            confirmButtonColor: '#FB8C00'
+        });
+    }
+
+    function showPrintAlert(status) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Cetak Tidak Diizinkan',
+            html: `
+                <p>Tombol cetak hanya dapat digunakan untuk surat yang sudah <strong>disetujui dekan</strong>.</p>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 10px;">
+                    <strong>Status surat ini:</strong> ${status}
+                </div>
+                <div style="margin-top: 15px; font-size: 14px; color: #6c757d;">
+                    <i class="fas fa-info-circle"></i> Silakan tunggu persetujuan dekan terlebih dahulu.
+                </div>
+            `,
+            confirmButtonText: 'Mengerti',
+            confirmButtonColor: '#FB8C00'
+        });
+    }
+
+    // ===== JQUERY DOCUMENT READY =====
+    $(document).ready(function () {
+        const BASE_URL = '<?= rtrim(base_url(), "/"); ?>';
         
-        const originalText = $('#btnMultiDelete').html();
-        $('#btnMultiDelete').html('<i class="fa fa-spinner fa-spin"></i> Menghapus...').prop('disabled', true);
-        
-        ids.forEach((id, index) => {
-            setTimeout(() => {
-                $.ajax({
-                    url: '<?= site_url("surat/delete/") ?>' + id,
-                    method: 'GET',
-                    success: function(response) {
-                        successCount++;
-                        $(`tr[data-id="${id}"]`).fadeOut(300, function(){
-                            $(this).remove();
-                        });
-                        
-                        if (successCount + errorCount === total) {
-                            $('#btnMultiDelete').html(originalText).prop('disabled', false);
+        // Inisialisasi DataTable dengan konfigurasi responsif
+        let table = $('#tabelSurat').DataTable({
+            responsive: true,
+            pageLength: 5,
+            dom: 'rtp',
+            scrollX: false,
+            autoWidth: false,
+            columnDefs: [
+                { orderable: false, targets: [0, -1] },
+                { className: 'dt-center', targets: [0, 1, 4, 5, 6, 7] },
+                { className: 'dt-left', targets: [2, 3] },
+                { width: '4%', targets: 0 },
+                { width: '5%', targets: 1 },
+                { width: '25%', targets: 2 },
+                { width: '12%', targets: 3 },
+                { width: '20%', targets: 4 },
+                { width: '12%', targets: 5 },
+                { width: '12%', targets: 6 },
+                { width: '10%', targets: 7 }
+            ],
+            order: [[1, 'asc']],
+            language: {
+                search: "Cari:",
+                lengthMenu: "Tampilkan _MENU_ entri",
+                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                infoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
+                infoFiltered: "(disaring dari _MAX_ total entri)",
+                paginate: {
+                    first: "Pertama",
+                    last: "Terakhir",
+                    next: "Selanjutnya",
+                    previous: "Sebelumnya"
+                }
+            }
+        });
+
+        // ===== MULTI-SELECT FUNCTIONALITY =====
+        let selectedIds = [];
+
+        function updateMultiActions() {
+            selectedIds = [];
+            $('.row-checkbox:checked').each(function(){
+                selectedIds.push($(this).data('id'));
+            });
+            
+            $('#selectedCount').text(selectedIds.length);
+            
+            if(selectedIds.length > 0) {
+                $('#multiActions').addClass('show');
+            } else {
+                $('#multiActions').removeClass('show');
+            }
+            
+            const totalCheckboxes = $('.row-checkbox').length;
+            const checkedCheckboxes = $('.row-checkbox:checked').length;
+            $('#checkAll').prop('checked', totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0);
+        }
+
+        $('#checkAll').on('change', function(){
+            const isChecked = $(this).is(':checked');
+            $('.row-checkbox').prop('checked', isChecked);
+            if(isChecked) {
+                $('tr.row-detail').addClass('selected');
+            } else {
+                $('tr.row-detail').removeClass('selected');
+            }
+            updateMultiActions();
+        });
+
+        $(document).on('change', '.row-checkbox', function(e){
+            e.stopPropagation();
+            const $row = $(this).closest('tr');
+            if($(this).is(':checked')) {
+                $row.addClass('selected');
+            } else {
+                $row.removeClass('selected');
+            }
+            updateMultiActions();
+        });
+
+        $(document).on('click', '.row-checkbox', function(e){
+            e.stopPropagation();
+        });
+
+        $('#btnMultiEdit').click(function(){
+            if(selectedIds.length === 0) {
+                alert('Pilih minimal 1 item untuk di-edit');
+                return;
+            }
+            window.location.href = '<?= site_url("surat/multi_edit"); ?>?ids=' + selectedIds.join(',');
+        });
+
+        $('#btnMultiDelete').click(function(){
+            if(selectedIds.length === 0) {
+                alert('Pilih minimal 1 item untuk dihapus');
+                return;
+            }
+            
+            const confirmed = confirm('Apakah Anda yakin ingin menghapus ' + selectedIds.length + ' item yang dipilih?');
+            if(!confirmed) return;
+            
+            deleteMultipleSurat(selectedIds);
+        });
+
+        // Fungsi untuk menghapus multiple surat
+        function deleteMultipleSurat(ids) {
+            let successCount = 0;
+            let errorCount = 0;
+            const total = ids.length;
+            
+            const originalText = $('#btnMultiDelete').html();
+            $('#btnMultiDelete').html('<i class="fa fa-spinner fa-spin"></i> Menghapus...').prop('disabled', true);
+            
+            ids.forEach((id, index) => {
+                setTimeout(() => {
+                    $.ajax({
+                        url: '<?= site_url("surat/delete/") ?>' + id,
+                        method: 'GET',
+                        success: function(response) {
+                            successCount++;
+                            $(`tr[data-id="${id}"]`).fadeOut(300, function(){
+                                $(this).remove();
+                            });
                             
-                            if (successCount > 0) {
-                                alert(successCount + ' data berhasil dihapus' + (errorCount > 0 ? ', ' + errorCount + ' gagal' : ''));
+                            if (successCount + errorCount === total) {
+                                $('#btnMultiDelete').html(originalText).prop('disabled', false);
+                                
+                                if (successCount > 0) {
+                                    alert(successCount + ' data berhasil dihapus' + (errorCount > 0 ? ', ' + errorCount + ' gagal' : ''));
+                                    updateMultiActions();
+                                }
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            errorCount++;
+                            console.error('Error deleting ID ' + id + ':', error);
+                            
+                            if (successCount + errorCount === total) {
+                                $('#btnMultiDelete').html(originalText).prop('disabled', false);
+                                alert(successCount + ' data berhasil dihapus, ' + errorCount + ' gagal');
                                 updateMultiActions();
                             }
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        errorCount++;
-                        console.error('Error deleting ID ' + id + ':', error);
-                        
-                        if (successCount + errorCount === total) {
-                            $('#btnMultiDelete').html(originalText).prop('disabled', false);
-                            alert(successCount + ' data berhasil dihapus, ' + errorCount + ' gagal');
-                            updateMultiActions();
+                    });
+                }, index * 200);
+            });
+        }
+
+        // ===== FILTER FUNCTIONALITY - UPDATED =====
+        const filterData = {
+            jenis: <?php 
+                $jenis_list = array_unique(array_map(function($s){ 
+                    return $s->jenis_pengajuan; 
+                }, $surat_list));
+                echo json_encode(array_values($jenis_list));
+            ?>,
+            dosen: <?php 
+                // === PERUBAHAN: Ambil dari dosen_data ===
+                $dosen_list = [];
+                foreach ($surat_list as $s) {
+                    if (isset($s->dosen_data) && !empty($s->dosen_data)) {
+                        foreach ($s->dosen_data as $dosen) {
+                            $dosen_list[] = $dosen['nama_dosen'];
                         }
                     }
-                });
-            }, index * 200);
-        });
-    }
-
-    // ===== FILTER FUNCTIONALITY - UPDATED =====
-    const filterData = {
-        jenis: <?php 
-            $jenis_list = array_unique(array_map(function($s){ 
-                return $s->jenis_pengajuan; 
-            }, $surat_list));
-            echo json_encode(array_values($jenis_list));
-        ?>,
-        dosen: <?php 
-            // === PERUBAHAN: Ambil dari dosen_data ===
-            $dosen_list = [];
-            foreach ($surat_list as $s) {
-                if (isset($s->dosen_data) && !empty($s->dosen_data)) {
-                    foreach ($s->dosen_data as $dosen) {
-                        $dosen_list[] = $dosen['nama_dosen'];
+                }
+                $dosen_list = array_unique($dosen_list);
+                echo json_encode(array_values($dosen_list));
+            ?>,
+            divisi: <?php 
+                // === PERUBAHAN: Ambil dari dosen_data ===
+                $divisi_list = [];
+                foreach ($surat_list as $s) {
+                    if (isset($s->dosen_data) && !empty($s->dosen_data)) {
+                        foreach ($s->dosen_data as $dosen) {
+                            $divisi_list[] = $dosen['divisi'];
+                        }
                     }
                 }
-            }
-            $dosen_list = array_unique($dosen_list);
-            echo json_encode(array_values($dosen_list));
-        ?>,
-        divisi: <?php 
-            // === PERUBAHAN: Ambil dari dosen_data ===
-            $divisi_list = [];
-            foreach ($surat_list as $s) {
-                if (isset($s->dosen_data) && !empty($s->dosen_data)) {
-                    foreach ($s->dosen_data as $dosen) {
-                        $divisi_list[] = $dosen['divisi'];
-                    }
-                }
-            }
-            $divisi_list = array_unique($divisi_list);
-            echo json_encode(array_values($divisi_list));
-        ?>
-    };
-
-    Object.keys(filterData).forEach(k=>{
-        filterData[k] = (filterData[k]||[]).map(x=>String(x||'').trim()).filter(x=>x!=='');
-        filterData[k] = Array.from(new Set(filterData[k])).sort((a,b)=>a.localeCompare(b));
-    });
-
-    let rows = [];
-    let uid = 0;
-    function nextId(){ return 'r'+(++uid); }
-
-    function makeRowDOM(r){
-        const $wr = $(`<div class="filter-row" data-id="${r.id}"></div>`);
-
-        const $filterRowActions = $(`<div class="filter-row-actions"></div>`);
-        const $filterRowSearch = $(`<div class="filter-row-search"></div>`);
-        const $search = $(`<input type="text" class="row-search" placeholder="Search..." />`);
-        const $searchIcon = $(`<i class="fa fa-search"></i>`);
-        
-        const $dateStart = $(`<input type="date" class="row-date-start" style="display:none" />`);
-        const $dateEnd = $(`<input type="date" class="row-date-end" style="display:none" />`);
-
-        $filterRowSearch.append($search).append($searchIcon);
-
-        const $cat = $(`<select class="row-cat">
-            <option value="jenis">Jenis Pengajuan</option>
-            <option value="dosen">Nama Dosen</option>
-            <option value="divisi">Divisi</option>
-            <option value="tanggal">Tanggal Pengajuan</option>
-        </select>`);
-
-        const $btnAdd = $(`<button class="row-btn add" title="Tambah baris"><i class="fa fa-plus"></i></button>`);
-        const $btnRemove = $(`<button class="row-btn remove" title="Hapus baris"><i class="fa fa-times"></i></button>`);
-
-        if(r.category) $cat.val(r.category);
-        if(r.text) $search.val(r.text);
-        if(r.dateStart) $dateStart.val(r.dateStart);
-        if(r.dateEnd) $dateEnd.val(r.dateEnd);
-
-        function refreshInputs(){
-            const catVal = $cat.val();
-            if(catVal === 'tanggal'){
-                $filterRowSearch.hide();
-                $dateStart.show();
-                $dateEnd.show();
-            } else {
-                $filterRowSearch.show();
-                $dateStart.hide();
-                $dateEnd.hide();
-            }
-        }
-        refreshInputs();
-
-        $search.on('input', function(){
-            const id = $wr.data('id');
-            const obj = rows.find(x=>x.id===id);
-            if(!obj) return;
-            obj.text = $(this).val() || '';
-            applyFilters();
-        });
-
-        $dateStart.on('change', function(){
-            const id = $wr.data('id');
-            const obj = rows.find(x=>x.id===id);
-            if(!obj) return;
-            obj.dateStart = $(this).val() || '';
-            applyFilters();
-        });
-        $dateEnd.on('change', function(){
-            const id = $wr.data('id');
-            const obj = rows.find(x=>x.id===id);
-            if(!obj) return;
-            obj.dateEnd = $(this).val() || '';
-            applyFilters();
-        });
-
-        $cat.on('change', function(){
-            const id = $wr.data('id');
-            const obj = rows.find(x=>x.id===id);
-            if(!obj) return;
-            obj.category = $(this).val();
-            obj.text = '';
-            obj.dateStart = '';
-            obj.dateEnd = '';
-            $search.val('');
-            $dateStart.val('');
-            $dateEnd.val('');
-            refreshInputs();
-            applyFilters();
-        });
-
-        $btnAdd.on('click', function(){
-            const id = $wr.data('id');
-            const idx = rows.findIndex(x=>x.id===id);
-            const cur = rows[idx] || {};
-            const newRow = { id: nextId(), category: cur.category || 'jenis', text:'', dateStart:'', dateEnd:'' };
-            if(idx >= 0 && idx < rows.length-1){
-                rows.splice(idx+1, 0, newRow);
-            } else {
-                rows.push(newRow);
-            }
-            renderRows();
-            applyFilters();
-        });
-
-        $btnRemove.on('click', function(){
-            const id = $wr.data('id');
-            rows = rows.filter(x=>x.id !== id);
-            renderRows();
-            applyFilters();
-        });
-
-        $filterRowActions.append($cat).append($btnAdd).append($btnRemove);
-        $wr.append($filterRowActions).append($filterRowSearch).append($dateStart).append($dateEnd);
-        return $wr;
-    }
-
-    function renderRows(){
-        const $b = $('#filterBuilder');
-        $b.empty();
-        rows.forEach(r=>{
-            $b.append(makeRowDOM(r));
-        });
-        $('#btnResetAll').prop('hidden', rows.length === 0 && $('#tableSearch').val().trim()==='');
-    }
-
-    $('#btnAddFilterRow').click(function(){
-        const cat = $('#filterCategory').val() || 'jenis';
-        rows.push({ id: nextId(), category: cat, text:'', dateStart:'', dateEnd:'' });
-        renderRows();
-        applyFilters();
-    });
-
-    $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(fn => fn.name !== 'customRowsFilter');
-
-    const customRowsFilter = function(settings, data){
-        const q = $('#tableSearch').val().trim().toLowerCase();
-        if(q){
-            const keywords = q.split(/\s+/).filter(x=>x);
-            const rowText = data.join(' ').toLowerCase();
-            const okText = keywords.every(k => rowText.indexOf(k) >= 0);
-            if(!okText) return false;
-        }
-
-        for(const r of rows){
-            if(!r || !r.category) continue;
-
-            if(r.category === 'tanggal'){
-                const cell = (data[6] || '').trim();
-                const start = r.dateStart || '';
-                const end = r.dateEnd || '';
-                if(!start && !end) continue;
-                if(!cell || cell === '-') return false;
-                if(start && cell < start) return false;
-                if(end && cell > end) return false;
-                continue;
-            }
-
-            const colIndex = (r.category === 'jenis') ? 3 : (r.category === 'dosen' ? 4 : 5);
-            const cellRaw = (data[colIndex] || '').toLowerCase();
-
-            if(!r.text || String(r.text).trim() === '') continue;
-
-            const needle = String(r.text).toLowerCase().trim();
-            if(cellRaw.indexOf(needle) === -1) return false;
-        }
-
-        return true;
-    };
-    Object.defineProperty(customRowsFilter, 'name', { value: 'customRowsFilter' });
-    $.fn.dataTable.ext.search.push(customRowsFilter);
-
-    function applyFilters(){
-        table.draw();
-        const anyFilterActive = rows.length>0 || $('#tableSearch').val().trim()!=='';
-        $('#btnResetAll').prop('hidden', !anyFilterActive);
-    }
-
-    let debounce = null;
-    $('#tableSearch').on('input', function(){
-        if(debounce) clearTimeout(debounce);
-        debounce = setTimeout(()=> applyFilters(), 180);
-    });
-
-    $('#btnResetAll').click(function(){
-        rows = [];
-        $('#tableSearch').val('');
-        renderRows();
-        applyFilters();
-    });
-
-    // ===== PERBAIKAN UTAMA: FUNGSI getFileUrl() YANG DIPERBAIKI =====
-    
-    // Function untuk mendapatkan file icon berdasarkan tipe file
-    function getFileIcon(filename) {
-        if (!filename) return 'fas fa-file file-icon-unknown';
-        
-        const ext = filename.split('.').pop().toLowerCase();
-        const iconMap = {
-            // PDF
-            'pdf': 'fas fa-file-pdf file-icon-pdf',
-            // Images
-            'jpg': 'fas fa-file-image file-icon-image',
-            'jpeg': 'fas fa-file-image file-icon-image',
-            'png': 'fas fa-file-image file-icon-image',
-            'gif': 'fas fa-file-image file-icon-image',
-            'bmp': 'fas fa-file-image file-icon-image',
-            'webp': 'fas fa-file-image file-icon-image',
-            'svg': 'fas fa-file-image file-icon-image',
-            // Documents
-            'doc': 'fas fa-file-word file-icon-doc',
-            'docx': 'fas fa-file-word file-icon-doc',
-            // Spreadsheets
-            'xls': 'fas fa-file-excel file-icon-xls',
-            'xlsx': 'fas fa-file-excel file-icon-xls',
-            // Presentations
-            'ppt': 'fas fa-file-powerpoint file-icon-ppt',
-            'pptx': 'fas fa-file-powerpoint file-icon-ppt',
-            // Archives
-            'zip': 'fas fa-file-archive file-icon-zip',
-            'rar': 'fas fa-file-archive file-icon-zip',
-            '7z': 'fas fa-file-archive file-icon-zip',
-            'tar': 'fas fa-file-archive file-icon-zip',
-            'gz': 'fas fa-file-archive file-icon-zip'
+                $divisi_list = array_unique($divisi_list);
+                echo json_encode(array_values($divisi_list));
+            ?>
         };
-        
-        return iconMap[ext] || 'fas fa-file file-icon-unknown';
-    }
 
-    // Function untuk mendapatkan tipe file yang bisa dipreview
-    function getPreviewableFileType(filename) {
-        if (!filename) return 'unknown';
-        
-        const ext = filename.split('.').pop().toLowerCase();
-        const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-        const documentTypes = ['pdf'];
-        
-        if (imageTypes.includes(ext)) return 'image';
-        if (documentTypes.includes(ext)) return 'document';
-        return 'unknown';
-    }
+        Object.keys(filterData).forEach(k=>{
+            filterData[k] = (filterData[k]||[]).map(x=>String(x||'').trim()).filter(x=>x!=='');
+            filterData[k] = Array.from(new Set(filterData[k])).sort((a,b)=>a.localeCompare(b));
+        });
 
-    // Function untuk mendapatkan nama file dari URL atau object
-    function getFileName(file) {
-        if (typeof file === 'string') {
-            return file.split('/').pop().split('?')[0] || 'File';
-        } else if (typeof file === 'object' && file !== null) {
-            return file.name || file.nama_asli || (file.url ? file.url.split('/').pop().split('?')[0] : 'File');
+        let rows = [];
+        let uid = 0;
+        function nextId(){ return 'r'+(++uid); }
+
+        function makeRowDOM(r){
+            const $wr = $(`<div class="filter-row" data-id="${r.id}"></div>`);
+
+            const $filterRowActions = $(`<div class="filter-row-actions"></div>`);
+            const $filterRowSearch = $(`<div class="filter-row-search"></div>`);
+            const $search = $(`<input type="text" class="row-search" placeholder="Search..." />`);
+            const $searchIcon = $(`<i class="fa fa-search"></i>`);
+            
+            const $dateStart = $(`<input type="date" class="row-date-start" style="display:none" />`);
+            const $dateEnd = $(`<input type="date" class="row-date-end" style="display:none" />`);
+
+            $filterRowSearch.append($search).append($searchIcon);
+
+            const $cat = $(`<select class="row-cat">
+                <option value="jenis">Jenis Pengajuan</option>
+                <option value="dosen">Nama Dosen</option>
+                <option value="divisi">Divisi</option>
+                <option value="tanggal">Tanggal Pengajuan</option>
+            </select>`);
+
+            const $btnAdd = $(`<button class="row-btn add" title="Tambah baris"><i class="fa fa-plus"></i></button>`);
+            const $btnRemove = $(`<button class="row-btn remove" title="Hapus baris"><i class="fa fa-times"></i></button>`);
+
+            if(r.category) $cat.val(r.category);
+            if(r.text) $search.val(r.text);
+            if(r.dateStart) $dateStart.val(r.dateStart);
+            if(r.dateEnd) $dateEnd.val(r.dateEnd);
+
+            function refreshInputs(){
+                const catVal = $cat.val();
+                if(catVal === 'tanggal'){
+                    $filterRowSearch.hide();
+                    $dateStart.show();
+                    $dateEnd.show();
+                } else {
+                    $filterRowSearch.show();
+                    $dateStart.hide();
+                    $dateEnd.hide();
+                }
+            }
+            refreshInputs();
+
+            $search.on('input', function(){
+                const id = $wr.data('id');
+                const obj = rows.find(x=>x.id===id);
+                if(!obj) return;
+                obj.text = $(this).val() || '';
+                applyFilters();
+            });
+
+            $dateStart.on('change', function(){
+                const id = $wr.data('id');
+                const obj = rows.find(x=>x.id===id);
+                if(!obj) return;
+                obj.dateStart = $(this).val() || '';
+                applyFilters();
+            });
+            $dateEnd.on('change', function(){
+                const id = $wr.data('id');
+                const obj = rows.find(x=>x.id===id);
+                if(!obj) return;
+                obj.dateEnd = $(this).val() || '';
+                applyFilters();
+            });
+
+            $cat.on('change', function(){
+                const id = $wr.data('id');
+                const obj = rows.find(x=>x.id===id);
+                if(!obj) return;
+                obj.category = $(this).val();
+                obj.text = '';
+                obj.dateStart = '';
+                obj.dateEnd = '';
+                $search.val('');
+                $dateStart.val('');
+                $dateEnd.val('');
+                refreshInputs();
+                applyFilters();
+            });
+
+            $btnAdd.on('click', function(){
+                const id = $wr.data('id');
+                const idx = rows.findIndex(x=>x.id===id);
+                const cur = rows[idx] || {};
+                const newRow = { id: nextId(), category: cur.category || 'jenis', text:'', dateStart:'', dateEnd:'' };
+                if(idx >= 0 && idx < rows.length-1){
+                    rows.splice(idx+1, 0, newRow);
+                } else {
+                    rows.push(newRow);
+                }
+                renderRows();
+                applyFilters();
+            });
+
+            $btnRemove.on('click', function(){
+                const id = $wr.data('id');
+                rows = rows.filter(x=>x.id !== id);
+                renderRows();
+                applyFilters();
+            });
+
+            $filterRowActions.append($cat).append($btnAdd).append($btnRemove);
+            $wr.append($filterRowActions).append($filterRowSearch).append($dateStart).append($dateEnd);
+            return $wr;
         }
-        return 'File';
-    }
 
-    // ===== PERBAIKAN UTAMA: FUNGSI getFileUrl() YANG DIPERBAIKI =====
-    function getFileUrl(file, baseUrl = BASE_URL) {
-        let url = '';
+        function renderRows(){
+            const $b = $('#filterBuilder');
+            $b.empty();
+            rows.forEach(r=>{
+                $b.append(makeRowDOM(r));
+            });
+            $('#btnResetAll').prop('hidden', rows.length === 0 && $('#tableSearch').val().trim()==='');
+        }
 
-        // PERBAIKAN UTAMA: Jika tipe string = nama file → tambahkan folder uploads/eviden
-        if (typeof file === 'string') {
-            url = baseUrl + '/uploads/eviden/' + file;
+        $('#btnAddFilterRow').click(function(){
+            const cat = $('#filterCategory').val() || 'jenis';
+            rows.push({ id: nextId(), category: cat, text:'', dateStart:'', dateEnd:'' });
+            renderRows();
+            applyFilters();
+        });
+
+        $.fn.dataTable.ext.search = $.fn.dataTable.ext.search.filter(fn => fn.name !== 'customRowsFilter');
+
+        const customRowsFilter = function(settings, data){
+            const q = $('#tableSearch').val().trim().toLowerCase();
+            if(q){
+                const keywords = q.split(/\s+/).filter(x=>x);
+                const rowText = data.join(' ').toLowerCase();
+                const okText = keywords.every(k => rowText.indexOf(k) >= 0);
+                if(!okText) return false;
+            }
+
+            for(const r of rows){
+                if(!r || !r.category) continue;
+
+                if(r.category === 'tanggal'){
+                    const cell = (data[6] || '').trim();
+                    const start = r.dateStart || '';
+                    const end = r.dateEnd || '';
+                    if(!start && !end) continue;
+                    if(!cell || cell === '-') return false;
+                    if(start && cell < start) return false;
+                    if(end && cell > end) return false;
+                    continue;
+                }
+
+                const colIndex = (r.category === 'jenis') ? 3 : (r.category === 'dosen' ? 4 : 5);
+                const cellRaw = (data[colIndex] || '').toLowerCase();
+
+                if(!r.text || String(r.text).trim() === '') continue;
+
+                const needle = String(r.text).toLowerCase().trim();
+                if(cellRaw.indexOf(needle) === -1) return false;
+            }
+
+            return true;
+        };
+        Object.defineProperty(customRowsFilter, 'name', { value: 'customRowsFilter' });
+        $.fn.dataTable.ext.search.push(customRowsFilter);
+
+        function applyFilters(){
+            table.draw();
+            const anyFilterActive = rows.length>0 || $('#tableSearch').val().trim()!=='';
+            $('#btnResetAll').prop('hidden', !anyFilterActive);
+        }
+
+        let debounce = null;
+        $('#tableSearch').on('input', function(){
+            if(debounce) clearTimeout(debounce);
+            debounce = setTimeout(()=> applyFilters(), 180);
+        });
+
+        $('#btnResetAll').click(function(){
+            rows = [];
+            $('#tableSearch').val('');
+            renderRows();
+            applyFilters();
+        });
+
+        // ===== FUNGSI UTILITAS UNTUK FILE =====
+        
+        // Function untuk mendapatkan file icon berdasarkan tipe file
+        function getFileIcon(filename) {
+            if (!filename) return 'fas fa-file file-icon-unknown';
+            
+            const ext = filename.split('.').pop().toLowerCase();
+            const iconMap = {
+                // PDF
+                'pdf': 'fas fa-file-pdf file-icon-pdf',
+                // Images
+                'jpg': 'fas fa-file-image file-icon-image',
+                'jpeg': 'fas fa-file-image file-icon-image',
+                'png': 'fas fa-file-image file-icon-image',
+                'gif': 'fas fa-file-image file-icon-image',
+                'bmp': 'fas fa-file-image file-icon-image',
+                'webp': 'fas fa-file-image file-icon-image',
+                'svg': 'fas fa-file-image file-icon-image',
+                // Documents
+                'doc': 'fas fa-file-word file-icon-doc',
+                'docx': 'fas fa-file-word file-icon-doc',
+                // Spreadsheets
+                'xls': 'fas fa-file-excel file-icon-xls',
+                'xlsx': 'fas fa-file-excel file-icon-xls',
+                // Presentations
+                'ppt': 'fas fa-file-powerpoint file-icon-ppt',
+                'pptx': 'fas fa-file-powerpoint file-icon-ppt',
+                // Archives
+                'zip': 'fas fa-file-archive file-icon-zip',
+                'rar': 'fas fa-file-archive file-icon-zip',
+                '7z': 'fas fa-file-archive file-icon-zip',
+                'tar': 'fas fa-file-archive file-icon-zip',
+                'gz': 'fas fa-file-archive file-icon-zip'
+            };
+            
+            return iconMap[ext] || 'fas fa-file file-icon-unknown';
+        }
+
+        // Function untuk mendapatkan tipe file yang bisa dipreview
+        function getPreviewableFileType(filename) {
+            if (!filename) return 'unknown';
+            
+            const ext = filename.split('.').pop().toLowerCase();
+            const imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+            const documentTypes = ['pdf'];
+            
+            if (imageTypes.includes(ext)) return 'image';
+            if (documentTypes.includes(ext)) return 'document';
+            return 'unknown';
+        }
+
+        // Function untuk mendapatkan nama file dari URL atau object
+        function getFileName(file) {
+            if (typeof file === 'string') {
+                return file.split('/').pop().split('?')[0] || 'File';
+            } else if (typeof file === 'object' && file !== null) {
+                return file.name || file.nama_asli || (file.url ? file.url.split('/').pop().split('?')[0] : 'File');
+            }
+            return 'File';
+        }
+
+        // ===== PERBAIKAN UTAMA: FUNGSI getFileUrl() YANG DIPERBAIKI =====
+        function getFileUrl(file, baseUrl = BASE_URL) {
+            let url = '';
+
+            // PERBAIKAN UTAMA: Jika tipe string = nama file → tambahkan folder uploads/eviden
+            if (typeof file === 'string') {
+                url = baseUrl + '/uploads/eviden/' + file;
+                return url;
+            }
+
+            // Jika object (dropzone) → pakai url bawaan
+            if (typeof file === 'object' && file !== null) {
+                url = file.cdnUrl || file.url || file.path || '';
+            }
+
+            // Fix URL jika tidak lengkap
+            if (url && !url.match(/^https?:\/\//i) && !url.startsWith('data:')) {
+                url = baseUrl + (url.startsWith('/') ? '' : '/') + url;
+            }
+
             return url;
         }
 
-        // Jika object (dropzone) → pakai url bawaan
-        if (typeof file === 'object' && file !== null) {
-            url = file.cdnUrl || file.url || file.path || '';
-        }
-
-        // Fix URL jika tidak lengkap
-        if (url && !url.match(/^https?:\/\//i) && !url.startsWith('data:')) {
-            url = baseUrl + (url.startsWith('/') ? '' : '/') + url;
-        }
-
-        return url;
-    }
-
-    // ===== POPUP DETAIL - FORM-LIKE STYLE (DENGAN PERBAIKAN EVIDEN) =====
-    $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
-        if($(e.target).closest('input, a, button').length) return;
-        
-        let raw=$(this).attr('data-detail')||'{}';
-        let data={};
-        try{ data=JSON.parse(raw);}catch(err){ console.error(err);}
-        
-        let html = `
-            <div class="detail-section">
-                <div class="detail-section-title">
-                    <i class="fas fa-info-circle"></i>
-                    Informasi Kegiatan
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Nama Kegiatan</div>
-                    <div class="detail-value">${escapeHtml(data.nama_kegiatan || '-')}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Tanggal Pengajuan</div>
-                    <div class="detail-value">${escapeHtml(data.created_at || '-')}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Jenis Tanggal</div>
-                    <div class="detail-value">${escapeHtml(data.jenis_date || '-')}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Tempat Kegiatan</div>
-                    <div class="detail-value">${escapeHtml(data.tempat_kegiatan || '-')}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Penyelenggara</div>
-                    <div class="detail-value">${escapeHtml(data.penyelenggara || '-')}</div>
-                </div>
-            </div>
-
-            <div class="detail-section">
-                <div class="detail-section-title">
-                    <i class="fas fa-users"></i>
-                    Informasi Pengajuan
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Jenis Pengajuan</div>
-                    <div class="detail-value">${escapeHtml(data.jenis_pengajuan || '-')}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Status Kepegawaian</div>
-                    <div class="detail-value">${escapeHtml(data.lingkup_penugasan || '-')}</div>
-                </div>
-                
-                <div class="detail-row">
-                    <div class="detail-label">Jenis Penugasan</div>
-                    <div class="detail-value">${escapeHtml(data.jenis_penugasan || data.jenis_penugasan_kelompok || '-')}</div>
-                </div>
-            </div>
-        `;
-
-        // === Dosen Section ===
-        if (data.nama_dosen && Array.isArray(data.nama_dosen) && data.nama_dosen.length > 0) {
-            html += `
+        // ===== POPUP DETAIL - FORM-LIKE STYLE (DENGAN PERBAIKAN EVIDEN) =====
+        $('#tabelSurat tbody').on('click','tr.row-detail',function(e){
+            if($(e.target).closest('input, a, button').length) return;
+            
+            let raw=$(this).attr('data-detail')||'{}';
+            let data={};
+            try{ data=JSON.parse(raw);}catch(err){ console.error(err);}
+            
+            let html = `
                 <div class="detail-section">
                     <div class="detail-section-title">
-                        <i class="fas fa-user-graduate"></i>
-                        Dosen Terkait
+                        <i class="fas fa-info-circle"></i>
+                        Informasi Kegiatan
                     </div>
-                    <div class="dosen-list">
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Nama Kegiatan</div>
+                        <div class="detail-value">${escapeHtml(data.nama_kegiatan || '-')}</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Pengajuan</div>
+                        <div class="detail-value">${escapeHtml(data.created_at || '-')}</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Jenis Tanggal</div>
+                        <div class="detail-value">${escapeHtml(data.jenis_date || '-')}</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Tempat Kegiatan</div>
+                        <div class="detail-value">${escapeHtml(data.tempat_kegiatan || '-')}</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Penyelenggara</div>
+                        <div class="detail-value">${escapeHtml(data.penyelenggara || '-')}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <div class="detail-section-title">
+                        <i class="fas fa-users"></i>
+                        Informasi Pengajuan
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Jenis Pengajuan</div>
+                        <div class="detail-value">${escapeHtml(data.jenis_pengajuan || '-')}</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Status Kepegawaian</div>
+                        <div class="detail-value">${escapeHtml(data.lingkup_penugasan || '-')}</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Jenis Penugasan</div>
+                        <div class="detail-value">${escapeHtml(data.jenis_penugasan || data.jenis_penugasan_kelompok || '-')}</div>
+                    </div>
+                </div>
             `;
-            
-            data.nama_dosen.forEach((nama, index) => {
-                const nip = (data.nip && data.nip[index]) ? data.nip[index] : '-';
-                const jabatan = (data.jabatan && data.jabatan[index]) ? data.jabatan[index] : '-';
-                const divisi = (data.divisi && data.divisi[index]) ? data.divisi[index] : '-';
-                const initial = nama ? nama.charAt(0).toUpperCase() : '?';
-                
+
+            // === Dosen Section ===
+            if (data.nama_dosen && Array.isArray(data.nama_dosen) && data.nama_dosen.length > 0) {
                 html += `
-                    <div class="dosen-item">
-                        <div class="dosen-avatar">${initial}</div>
-                        <div class="dosen-info">
-                            <div class="dosen-name">${escapeHtml(nama)}</div>
-                            <div class="dosen-details">
-                                NIP: ${escapeHtml(nip)} | Jabatan: ${escapeHtml(jabatan)} | Divisi: ${escapeHtml(divisi)}
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fas fa-user-graduate"></i>
+                            Dosen Terkait
+                        </div>
+                        <div class="dosen-list">
+                `;
+                
+                data.nama_dosen.forEach((nama, index) => {
+                    const nip = (data.nip && data.nip[index]) ? data.nip[index] : '-';
+                    const jabatan = (data.jabatan && data.jabatan[index]) ? data.jabatan[index] : '-';
+                    const divisi = (data.divisi && data.divisi[index]) ? data.divisi[index] : '-';
+                    const initial = nama ? nama.charAt(0).toUpperCase() : '?';
+                    
+                    html += `
+                        <div class="dosen-item">
+                            <div class="dosen-avatar">${initial}</div>
+                            <div class="dosen-info">
+                                <div class="dosen-name">${escapeHtml(nama)}</div>
+                                <div class="dosen-details">
+                                    NIP: ${escapeHtml(nip)} | Jabatan: ${escapeHtml(jabatan)} | Divisi: ${escapeHtml(divisi)}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div></div>`;
-        }
-
-        // ===== PERBAIKAN UTAMA: File Evidence Section =====
-        if (data.eviden && Array.isArray(data.eviden) && data.eviden.length > 0) {
-            html += `
-                <div class="detail-section">
-                    <div class="detail-section-title">
-                        <i class="fas fa-file-alt"></i>
-                        File Evidence (${data.eviden.length} file)
-                    </div>
-                    <div class="file-list">
-            `;
-            
-            data.eviden.forEach((file, index) => {
-                const fileName = getFileName(file);
-                const fileUrl = getFileUrl(file);
-                const fileIcon = getFileIcon(fileName);
-                const fileType = getPreviewableFileType(fileName);
-                const canPreview = fileType !== 'unknown';
+                    `;
+                });
                 
-                // Get file extension for display
-                const fileExt = fileName.split('.').pop().toUpperCase() || 'FILE';
-                
-                html += `
-                    <div class="file-item">
-                        <div class="${fileIcon}"></div>
-                        <div class="file-info">
-                            <div class="file-name" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</div>
-                            <div class="file-details">
-                                <span class="file-type">${fileExt}</span>
-                                <span class="file-size">File ${index + 1}</span>
-                            </div>
-                        </div>
-                        <div class="file-actions">
-                            ${canPreview ? `
-                                <button class="preview-btn" onclick="previewFile('${escapeHtml(fileUrl)}', '${escapeHtml(fileName)}', '${fileType}')">
-                                    <i class="fas fa-eye"></i> Preview
-                                </button>
-                            ` : `
-                                <button class="preview-btn disabled" disabled title="Preview tidak tersedia untuk file ini">
-                                    <i class="fas fa-eye-slash"></i> Preview
-                                </button>
-                            `}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `</div></div>`;
-        } else {
-            // Tampilkan pesan jika tidak ada file
-            html += `
-                <div class="detail-section">
-                    <div class="detail-section-title">
-                        <i class="fas fa-file-alt"></i>
-                        File Evidence
-                    </div>
-                    <div class="no-files">
-                        <i class="fas fa-file-exclamation"></i>
-                        <h4>Tidak Ada File Evidence</h4>
-                        <p>Belum ada file yang diupload untuk pengajuan ini.</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        $('#detailContent').html(html);
-        $('#modalDetail').addClass('show');
-    });
-
-    // Helper function untuk escape HTML
-    function escapeHtml(text) {
-        if (!text) return '-';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // Fungsi untuk preview file (diperbaiki)
-    window.previewFile = function(fileUrl, fileName, fileType) {
-        const previewModal = $('#previewModal');
-        const previewTitle = $('#previewTitle');
-        const previewBody = $('#previewBody');
-        
-        previewTitle.text('Preview: ' + fileName);
-        previewBody.empty();
-        
-        // Tampilkan loading
-        previewBody.html(`
-            <div style="text-align: center; padding: 40px;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FB8C00;"></i>
-                <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
-            </div>
-        `);
-        
-        previewModal.addClass('show');
-
-        // Set timeout untuk memastikan modal sudah terbuka
-        setTimeout(() => {
-            if (fileType === 'image') {
-                // Preview gambar
-                const img = new Image();
-                img.onload = function() {
-                    previewBody.html(`<img src="${fileUrl}" class="preview-image" alt="${fileName}">`);
-                };
-                img.onerror = function() {
-                    showUnsupportedPreview(previewBody, fileUrl, fileName);
-                };
-                img.src = fileUrl;
-            } else if (fileType === 'document') {
-                // Preview PDF
-                previewBody.html(`
-                    <iframe 
-                        src="${fileUrl}" 
-                        class="preview-iframe" 
-                        frameborder="0"
-                        onload="this.style.visibility='visible'"
-                        onerror="this.style.visibility='hidden'; document.getElementById('pdf-fallback').style.display='block'"
-                    ></iframe>
-                    <div id="pdf-fallback" style="display: none;">
-                        ${showUnsupportedPreview(previewBody, fileUrl, fileName)}
-                    </div>
-                `);
-            } else {
-                showUnsupportedPreview(previewBody, fileUrl, fileName);
+                html += `</div></div>`;
             }
-        }, 100);
-    };
 
-    function showUnsupportedPreview(previewBody, fileUrl, fileName) {
-        previewBody.html(`
-            <div class="preview-unsupported">
-                <i class="fas fa-eye-slash"></i>
-                <h4>Preview Tidak Tersedia</h4>
-                <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
-                <p style="font-size: 14px; color: #6c757d; margin-top: 10px;">
-                    Silakan download file untuk melihat isinya.
-                </p>
-                <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank" style="margin-top: 15px;">
-                    <i class="fas fa-download"></i> Download File
-                </a>
-            </div>
-        `);
-    }
+            // ===== PERBAIKAN UTAMA: File Evidence Section =====
+            if (data.eviden && Array.isArray(data.eviden) && data.eviden.length > 0) {
+                html += `
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fas fa-file-alt"></i>
+                            File Evidence (${data.eviden.length} file)
+                        </div>
+                        <div class="file-list">
+                `;
+                
+                data.eviden.forEach((file, index) => {
+                    const fileName = getFileName(file);
+                    const fileUrl = getFileUrl(file);
+                    const fileIcon = getFileIcon(fileName);
+                    const fileType = getPreviewableFileType(fileName);
+                    const canPreview = fileType !== 'unknown';
+                    
+                    // Get file extension for display
+                    const fileExt = fileName.split('.').pop().toUpperCase() || 'FILE';
+                    
+                    html += `
+                        <div class="file-item">
+                            <div class="${fileIcon}"></div>
+                            <div class="file-info">
+                                <div class="file-name" title="${escapeHtml(fileName)}">${escapeHtml(fileName)}</div>
+                                <div class="file-details">
+                                    <span class="file-type">${fileExt}</span>
+                                    <span class="file-size">File ${index + 1}</span>
+                                </div>
+                            </div>
+                            <div class="file-actions">
+                                ${canPreview ? `
+                                    <button class="preview-btn" onclick="previewFile('${escapeHtml(fileUrl)}', '${escapeHtml(fileName)}', '${fileType}')">
+                                        <i class="fas fa-eye"></i> Preview
+                                    </button>
+                                ` : `
+                                    <button class="preview-btn disabled" disabled title="Preview tidak tersedia untuk file ini">
+                                        <i class="fas fa-eye-slash"></i> Preview
+                                    </button>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+            } else {
+                // Tampilkan pesan jika tidak ada file
+                html += `
+                    <div class="detail-section">
+                        <div class="detail-section-title">
+                            <i class="fas fa-file-alt"></i>
+                            File Evidence
+                        </div>
+                        <div class="no-files">
+                            <i class="fas fa-file-exclamation"></i>
+                            <h4>Tidak Ada File Evidence</h4>
+                            <p>Belum ada file yang diupload untuk pengajuan ini.</p>
+                        </div>
+                    </div>
+                `;
+            }
 
-    // Close modals
-    $('.close-modal').click(function(){
-        $('#modalDetail').removeClass('show');
-    });
-    
-    $('.preview-close').click(function(){
-        $('#previewModal').removeClass('show');
-    });
-    
-    $(window).click(function(e){
-        if(e.target.id==='modalDetail') $('#modalDetail').removeClass('show');
-        if(e.target.id==='previewModal') $('#previewModal').removeClass('show');
-    });
+            $('#detailContent').html(html);
+            $('#modalDetail').addClass('show');
+        });
 
-    // Prevent download link dari menutup modal
-    $(document).on('click', '.download-btn, .preview-btn', function(e) {
-        e.stopPropagation();
-        // Biarkan link/button berfungsi normal
-    });
-});
-// Tambahkan di bagian JavaScript (setelah fungsi lainnya)
-function showPrintAlert(status) {
-    Swal.fire({
-        icon: 'warning',
-        title: 'Cetak Tidak Diizinkan',
-        html: `
-            <p>Tombol cetak hanya dapat digunakan untuk surat yang sudah <strong>disetujui dekan</strong>.</p>
-            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 10px;">
-                <strong>Status surat ini:</strong> ${status}
-            </div>
-            <div style="margin-top: 15px; font-size: 14px; color: #6c757d;">
-                <i class="fas fa-info-circle"></i> Silakan tunggu persetujuan dekan terlebih dahulu.
-            </div>
-        `,
-        confirmButtonText: 'Mengerti',
-        confirmButtonColor: '#FB8C00'
-    });
-}
+        // Helper function untuk escape HTML
+        function escapeHtml(text) {
+            if (!text) return '-';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
-// Jika menggunakan SweetAlert2, pastikan sudah diinclude di header
-// <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</script>
+        // Fungsi untuk preview file (diperbaiki)
+        window.previewFile = function(fileUrl, fileName, fileType) {
+            const previewModal = $('#previewModal');
+            const previewTitle = $('#previewTitle');
+            const previewBody = $('#previewBody');
+            
+            previewTitle.text('Preview: ' + fileName);
+            previewBody.empty();
+            
+            // Tampilkan loading
+            previewBody.html(`
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FB8C00;"></i>
+                    <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
+                </div>
+            `);
+            
+            previewModal.addClass('show');
+
+            // Set timeout untuk memastikan modal sudah terbuka
+            setTimeout(() => {
+                if (fileType === 'image') {
+                    // Preview gambar
+                    const img = new Image();
+                    img.onload = function() {
+                        previewBody.html(`<img src="${fileUrl}" class="preview-image" alt="${fileName}">`);
+                    };
+                    img.onerror = function() {
+                        showUnsupportedPreview(previewBody, fileUrl, fileName);
+                    };
+                    img.src = fileUrl;
+                } else if (fileType === 'document') {
+                    // Preview PDF
+                    previewBody.html(`
+                        <iframe 
+                            src="${fileUrl}" 
+                            class="preview-iframe" 
+                            frameborder="0"
+                            onload="this.style.visibility='visible'"
+                            onerror="this.style.visibility='hidden'; document.getElementById('pdf-fallback').style.display='block'"
+                        ></iframe>
+                        <div id="pdf-fallback" style="display: none;">
+                            ${showUnsupportedPreview(previewBody, fileUrl, fileName)}
+                        </div>
+                    `);
+                } else {
+                    showUnsupportedPreview(previewBody, fileUrl, fileName);
+                }
+            }, 100);
+        };
+
+        function showUnsupportedPreview(previewBody, fileUrl, fileName) {
+            previewBody.html(`
+                <div class="preview-unsupported">
+                    <i class="fas fa-eye-slash"></i>
+                    <h4>Preview Tidak Tersedia</h4>
+                    <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
+                    <p style="font-size: 14px; color: #6c757d; margin-top: 10px;">
+                        Silakan download file untuk melihat isinya.
+                    </p>
+                    <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank" style="margin-top: 15px;">
+                        <i class="fas fa-download"></i> Download File
+                    </a>
+                </div>
+            `);
+        }
+
+        // Close modals
+        $('.close-modal').click(function(){
+            $('#modalDetail').removeClass('show');
+        });
+        
+        $('.preview-close').click(function(){
+            $('#previewModal').removeClass('show');
+        });
+        
+        $(window).click(function(e){
+            if(e.target.id==='modalDetail') $('#modalDetail').removeClass('show');
+            if(e.target.id==='previewModal') $('#previewModal').removeClass('show');
+        });
+
+        // Prevent download link dari menutup modal
+        $(document).on('click', '.download-btn, .preview-btn', function(e) {
+            e.stopPropagation();
+            // Biarkan link/button berfungsi normal
+        });
+    });
+    </script>
 </body>
 </html>
