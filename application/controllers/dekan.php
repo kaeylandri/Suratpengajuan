@@ -1078,4 +1078,54 @@ class Dekan extends CI_Controller
         print_r($sample_dosen);
         echo "</pre>";
     }
+/* ================================
+   TAMPILKAN SURAT PENGAJUAN DALAM MODAL - DIPERBAIKI
+================================= */
+public function view_surat_pengajuan($id)
+{
+    $this->db->where('id', $id);
+    $data['surat'] = $this->db->get('surat')->row();
+    
+    if (!$data['surat']) {
+        show_404();
+        return;
+    }
+    
+    // Ambil data dosen lengkap dari list_dosen
+    $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($data['surat']->nip);
+    
+    // Load view surat_print2
+    $this->load->view('surat_print2', $data);
+}
+/* ================================
+   GET EVIDEN - UNTUK TOMBOL LIHAT EVIDEN
+================================= */
+public function getEviden($id)
+{
+    $this->db->where('id', $id);
+    $surat = $this->db->get('surat')->row();
+    
+    if ($surat && !empty($surat->eviden)) {
+        // Periksa apakah file exist
+        $file_path = FCPATH . $surat->eviden;
+        
+        if (file_exists($file_path)) {
+            echo json_encode([
+                'success' => true,
+                'eviden' => $surat->eviden,
+                'nama_kegiatan' => $surat->nama_kegiatan
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'File eviden tidak ditemukan di server'
+            ]);
+        }
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Tidak ada eviden untuk pengajuan ini'
+        ]);
+    }
+}
 }

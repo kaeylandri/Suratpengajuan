@@ -246,6 +246,7 @@ function format_periode_penugasan($surat) {
 ?>
 
 <body>
+    
     <!-- HEADER -->
     <div class="header">
         <?php if (!empty($logo_base64)): ?>
@@ -272,37 +273,12 @@ function format_periode_penugasan($surat) {
     </div>
 
     <!-- CONTENT -->
-     <br><br><br>
+     <br><br>
     <div class="content">
         <!-- Judul Surat -->
         <div class="surat-title">SURAT TUGAS</div>
         <div class="surat-number">Nomor : <?= $surat->nomor_surat ?? '-' ?></div>
 
-        <!-- Pembukaan -->
-        <p>
-            Pada tanggal <?php
-        // Default tanggal
-        $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
-        
-        // Jika approval_status berisi data mentah seperti contoh
-        if (!empty($surat->approval_status)) {
-            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
-            if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
-                $tanggalPengesahan = $matches[1];
-            }
-        }
-         // Format tanggal
-        $timestamp = strtotime($tanggalPengesahan);
-        $bulan = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-        ];
-        echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
-        ?>
-            bertempat di Fakultas Industri Kreatif (FIK) Universitas Telkom, dengan 
-            mempertimbangkan hal-hal sebagai berikut :
-        </p>
         <!-- Penandatangan -->
         <p>Saya yang bertanda tangan di bawah ini :</p>
         
@@ -345,6 +321,11 @@ function format_periode_penugasan($surat) {
                     <div class="identity-separator">:</div>
                     <div class="identity-value"><?= htmlspecialchars($dosen['jabatan'] ?? '-') ?></div>
                 </div>
+                <div class="identity-row">
+                    <div class="identity-label">Prodi/Unit</div>
+                    <div class="identity-separator">:</div>
+                    <div class="identity-value"><?= htmlspecialchars($dosen['divisi'] ?? '-') ?></div>
+                </div>
             </div>
         <?php else: ?>
             <p style="text-align:center;">Tidak ada data dosen</p>
@@ -352,7 +333,7 @@ function format_periode_penugasan($surat) {
 
         <!-- Untuk Menghadiri Kegiatan -->
         <p>
-            sebagai <b><?= $surat->jenis_penugasan_kelompok ?? 'menghadiri' ?></b> dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
+            sebagai <b><?= $surat->jenis_penugasan_perorangan ?? 'menghadiri' ?></b> dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
             yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
             <?php if (($surat->jenis_date ?? 'custom') === 'periode'): ?>
                 selama periode <b><?= $surat->periode_value ?? '-' ?></b>
@@ -419,5 +400,6 @@ function format_periode_penugasan($surat) {
 3.	Kaprodi S1 Desain Produk
 </p>
     </div>
+    
 </body>
 </html>

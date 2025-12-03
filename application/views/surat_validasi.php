@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Regulation Validation</title>
+<title>Letter Validation</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -287,7 +287,7 @@
     <?php else: ?>
         <img src="<?= base_url('assets/Tel-U_logo.png') ?>" class="header-logo" alt="Telkom University Logo">
     <?php endif; ?>
-    <h1 class="header-title">Regulation Validation</h1>
+    <h1 class="header-title">Letter Validation</h1>
 </div>
 
 <?php if (!$found): ?>
@@ -296,9 +296,9 @@
 <?php else: ?>
 
     <div class="info-row">
-        <span class="info-label">Nama Regulasi</span>
+        <span class="info-label">Judul</span>
         <span class="info-separator">:</span>
-        <span class="info-value">KEPUTUSAN DEKAN FAKULTAS INDUSTRI KREATIF UNIVERSITAS TELKOM</span>
+        <span class="info-value">SURAT TUGAS DEKAN FAKULTAS INDUSTRI KREATIF UNIVERSITAS TELKOM</span>
     </div>
 
     <div class="info-row">
@@ -388,9 +388,9 @@
 
     <!-- Pekerjaan Section -->
     <div class="info-row">
-        <span class="info-label">Pekerjaan</span>
+        <span class="info-label">Pemilik Proses</span>
         <span class="info-separator">:</span>
-        <span class="info-value">URUSAN AKADEMIK (FIK)</span>
+        <span class="info-value">Unit Sekretariat FIK</span>
     </div>
 
     <div class="footer-text">

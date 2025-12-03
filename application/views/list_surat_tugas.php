@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-   <style>
+  <style>
     /* ===== NAVBAR & SIDEBAR STYLES ===== */
     body {
         background-color: #f6f9fb;
@@ -1166,7 +1166,7 @@
         box-shadow: none !important;
     }
 
-    /* Status Modal Styles */
+    /* ===== PERBAIKAN: Status Modal Styles - NO SCROLL ===== */
     .status-modal {
         display: none;
         position: fixed;
@@ -1189,12 +1189,13 @@
     .status-content {
         background: white;
         border-radius: 12px;
-        width: 90%;
-        max-width: 600px;
+        width: 700px;
+        max-width: 700px;
         padding: 0;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        max-height: 90vh;
+        max-height: 85vh;
         overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .status-header {
@@ -1237,199 +1238,194 @@
     }
 
     .status-body {
-        padding: 30px;
+        padding: 25px;
     }
 
-    /* Progress Bar Container */
+    /* ===== REVISI: Progress Bar sesuai image.png ===== */
     .progress-container {
-        position: relative;
-        padding: 20px 0 40px;
-        margin: 20px 0;
+        margin: 20px 0 30px;
     }
 
-    /* Progress Track - Fixed */
     .progress-track {
         display: flex;
         justify-content: space-between;
         position: relative;
-        margin: 0;
-        padding: 0 15px;
+        margin-bottom: 15px;
+        min-width: 650px;
     }
 
+    /* Garis latar belakang - DIUBAH: dipindah ke tengah lingkaran */
     .progress-track::before {
         content: '';
         position: absolute;
-        top: 25px;
-        left: 50px;
-        right: 50px;
+        top: 40px; /* Sejajar dengan tengah lingkaran */
+        left: 60px;
+        right: 60px;
         height: 4px;
         background: #e0e0e0;
         z-index: 1;
-        transform: translateY(-50%);
         border-radius: 2px;
     }
 
-    /* Progress Line */
+    /* Garis progress aktif - DIUBAH: dipindah ke tengah lingkaran */
     .progress-line {
         position: absolute;
-        top: 25px;
-        left: 50px;
+        top: 40px; /* Sejajar dengan tengah lingkaran */
+        left: 60px;
         height: 4px;
-        background: #4caf50;
+        background: #4CAF50;
         z-index: 2;
-        transform: translateY(-50%);
-        transition: width 0.5s ease;
         border-radius: 2px;
+        transition: width 0.5s ease;
     }
 
-    /* Progress Step - Fixed Layout */
+    /* Step Container */
     .progress-step {
         display: flex;
         flex-direction: column;
         align-items: center;
         position: relative;
         z-index: 3;
-        min-width: 100px;
-        flex: 1;
-        padding: 0 5px;
+        width: 140px;
+        min-width: 140px;
+        flex-shrink: 0;
+    }
+
+    /* Step Icon Container */
+    .step-icon-container {
+        position: relative;
+        margin-bottom: 8px;
     }
 
     .step-icon {
-        width: 50px;
-        height: 50px;
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 18px;
-        margin-bottom: 10px;
+        font-size: 20px;
         border: 3px solid #e0e0e0;
         background: white;
         position: relative;
         z-index: 4;
         transition: all 0.3s ease;
-        flex-shrink: 0;
     }
 
+    /* Step Text */
     .step-text {
-        font-size: 12px;
+        font-size: 13px;
+        font-weight: 600;
         text-align: center;
-        color: #666;
-        font-weight: 500;
-        margin-bottom: 5px;
+        color: #333;
+        margin-bottom: 4px;
         line-height: 1.3;
-        max-width: 100px;
-        word-wrap: break-word;
+        min-height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
     }
 
     .step-date {
         font-size: 11px;
-        color: #999;
+        color: #666;
         text-align: center;
         display: block;
-        font-style: italic;
-        margin-top: 3px;
+        width: 100%;
+    }
+
+    /* Estimasi Waktu - DIUBAH: Dipindah ke atas lingkaran */
+    .step-estimasi {
+        position: absolute;
+        top: -25px; /* Di atas lingkaran */
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 10px;
+        color: #666;
+        border: 1px solid #e0e0e0;
+        white-space: nowrap;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        z-index: 5;
+        width: 100px;
+        text-align: center;
     }
 
     /* Status Colors */
     .progress-step.completed .step-icon {
-        background-color: #28a745;
-        border-color: #28a745;
+        background-color: #4CAF50;
+        border-color: #4CAF50;
         color: white;
     }
 
     .progress-step.in-progress .step-icon {
-        background: #ffc107;
-        border-color: #ffc107;
+        background: #FF9800;
+        border-color: #FF9800;
         color: white;
         animation: pulse 2s infinite;
     }
 
     .progress-step.rejected .step-icon {
-        background: #dc3545;
-        border-color: #dc3545;
+        background: #F44336;
+        border-color: #F44336;
         color: white;
     }
 
     .progress-step.pending .step-icon {
-        background: #e0e0e0;
+        background: white;
         border-color: #e0e0e0;
         color: #999;
     }
 
-    /* Progress Step Status Colors */
-    .progress-step.status-completed .step-icon {
-        background: #4caf50;
-        border-color: #4caf50;
+    /* Icon Colors */
+    .progress-step.completed .step-icon i {
         color: white;
     }
 
-    .progress-step.status-in-progress .step-icon {
-        background: #ff9800;
-        border-color: #ff9800;
+    .progress-step.in-progress .step-icon i {
         color: white;
     }
 
-    .progress-step.status-rejected .step-icon {
-        background: #f44336;
-        border-color: #f44336;
+    .progress-step.rejected .step-icon i {
         color: white;
     }
 
-    .progress-step.status-pending .step-icon {
-        background: #ffc107;
-        border-color: #ffc107;
-        color: white;
-    }
-
-    /* Status Icons */
-    .progress-step.completed .step-icon i,
-    .progress-step.status-completed .step-icon i {
-        color: white !important;
-    }
-
-    .progress-step.in-progress .step-icon i,
-    .progress-step.status-in-progress .step-icon i {
-        color: white !important;
-    }
-
-    .progress-step.rejected .step-icon i,
-    .progress-step.status-rejected .step-icon i {
-        color: white !important;
-    }
-
-    .progress-step.pending .step-icon i,
-    .progress-step.status-pending .step-icon i {
-        color: #666 !important;
+    .progress-step.pending .step-icon i {
+        color: #999;
     }
 
     /* Animation for in-progress */
     @keyframes pulse {
         0% {
-            box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+            box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
         }
         70% {
-            box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+            box-shadow: 0 0 0 6px rgba(255, 152, 0, 0);
         }
         100% {
-            box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+            box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
         }
     }
 
     /* Status Information */
     .status-info {
         margin-top: 30px;
-        padding: 20px;
+        padding: 18px;
         background: #f8f9fa;
         border-radius: 10px;
         border: 1px solid #e9ecef;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .status-info h5 {
         color: #FB8C00;
         font-size: 16px;
         font-weight: 600;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -1442,7 +1438,7 @@
     .status-info p {
         color: #495057;
         font-size: 14px;
-        line-height: 1.6;
+        line-height: 1.5;
         margin: 0;
     }
 
@@ -1450,18 +1446,20 @@
     .rejection-reason {
         background: #fff5f5;
         border: 1px solid #f8cccc;
-        padding: 15px;
-        border-radius: 10px;
-        margin-top: 15px;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 12px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .rejection-reason h6 {
         color: #e63946;
         font-weight: 700;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         font-size: 14px;
     }
 
@@ -1472,18 +1470,8 @@
     .rejection-reason p {
         color: #495057;
         font-size: 13px;
-        line-height: 1.5;
+        line-height: 1.4;
         margin: 0;
-    }
-
-    /* Progress Estimation */
-    .progress-estimasi {
-        text-align: center;
-        margin-top: 5px;
-        font-size: 11px;
-        color: #777;
-        font-style: italic;
-        display: block;
     }
 
     /* Detail Modal Styles */
@@ -1594,7 +1582,7 @@
         gap: 8px;
     }
 
-    .dosen-item {
+    .dosen-item-detail {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -1621,13 +1609,13 @@
         flex: 1;
     }
 
-    .dosen-name {
+    .dosen-name-detail {
         font-weight: 600;
         color: #212529;
         font-size: 14px;
     }
 
-    .dosen-details {
+    .dosen-details-detail {
         font-size: 12px;
         color: #6c757d;
     }
@@ -1957,49 +1945,80 @@
         font-size: 14px;
     }
 
-    /* Responsive Fixes for Status Modal */
+    /* ===== PERBAIKAN: Responsive Fixes for Status Modal ===== */
     @media (max-width: 768px) {
         .status-content {
             width: 95%;
+            max-width: 95%;
             margin: 10px;
+            max-height: 80vh;
         }
         
         .status-body {
             padding: 20px;
         }
         
-        .progress-track::before {
-            left: 40px;
-            right: 40px;
+        .progress-track {
+            min-width: 100%;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 10px;
+            justify-content: flex-start;
+            gap: 0;
         }
         
-        .progress-line {
-            left: 40px;
+        .progress-track::-webkit-scrollbar {
+            height: 4px;
+        }
+        
+        .progress-track::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 2px;
+        }
+        
+        .progress-track::-webkit-scrollbar-thumb {
+            background: #FB8C00;
+            border-radius: 2px;
         }
         
         .progress-step {
-            min-width: 70px;
-            padding: 0 3px;
+            width: 120px;
+            min-width: 120px;
         }
         
         .step-icon {
-            width: 40px;
-            height: 40px;
-            font-size: 16px;
-            margin-bottom: 8px;
+            width: 50px;
+            height: 50px;
+            font-size: 18px;
+            border-width: 2px;
         }
         
         .step-text {
-            font-size: 10px;
-            max-width: 70px;
+            font-size: 11px;
+            min-height: 30px;
         }
         
         .step-date {
-            font-size: 9px;
+            font-size: 10px;
         }
         
-        .progress-estimasi {
+        .step-estimasi {
             font-size: 9px;
+            top: -22px;
+            padding: 2px 6px;
+            width: 80px;
+        }
+        
+        .progress-track::before {
+            top: 35px; /* Diperbaiki untuk mobile */
+            left: 50px;
+            right: 50px;
+        }
+        
+        .progress-line {
+            top: 35px; /* Diperbaiki untuk mobile */
+            left: 50px;
         }
         
         .status-info h5 {
@@ -2064,55 +2083,44 @@
     }
 
     @media (max-width: 576px) {
-        .progress-track::before {
-            display: none;
-        }
-        
-        .progress-line {
-            display: none;
-        }
-        
         .progress-track {
-            flex-direction: column;
-            gap: 25px;
-            align-items: flex-start;
-            padding: 0;
+            min-width: 500px;
         }
         
         .progress-step {
-            flex-direction: row;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-            min-width: auto;
-            padding: 0;
+            width: 100px;
+            min-width: 100px;
         }
         
         .step-icon {
-            margin-bottom: 0;
-            flex-shrink: 0;
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
+            font-size: 16px;
         }
         
         .step-text {
-            text-align: left;
-            max-width: none;
-            font-size: 13px;
-            margin-bottom: 2px;
+            font-size: 10px;
         }
         
         .step-date {
-            text-align: left;
-            font-size: 11px;
-            margin-top: 0;
+            font-size: 9px;
         }
         
-        .progress-estimasi {
-            text-align: left;
-            margin-left: 0;
-            margin-top: 2px;
-            font-size: 10px;
+        .step-estimasi {
+            width: 70px;
+            font-size: 8px;
+            top: -20px;
+        }
+        
+        .progress-track::before {
+            top: 32px; /* Diperbaiki untuk mobile kecil */
+            left: 45px;
+            right: 45px;
+        }
+        
+        .progress-line {
+            top: 32px; /* Diperbaiki untuk mobile kecil */
+            left: 45px;
         }
         
         .hide-mobile {
@@ -2333,24 +2341,7 @@
         #tabelSurat td, #tabelSurat th {
             padding: 8px;
         }
-        
-        .progress-track::before {
-            display: none;
-        }
-        
-        .progress-step {
-            flex-direction: row;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-        }
-        
-        .step-text {
-            text-align: left;
-            max-width: none;
-            flex: 1;
-        }
-        
+
         /* Table column adjustments for tablet */
         #tabelSurat th:nth-child(1),
         #tabelSurat td:nth-child(1) {
@@ -2789,7 +2780,7 @@
                 <div class="dosen-modal-header">
                     <h3 class="dosen-modal-title">
                         <i class="fas fa-user-graduate"></i>
-                        <span id="dosenModalTitle">Dosen Terkait</span>
+                        <span id="dosenModalTitle">Detail Dosen</span>
                     </h3>
                     <button class="dosen-modal-close" id="closeDosenModal">&times;</button>
                 </div>
@@ -2797,7 +2788,7 @@
                     <div class="dosen-section">
                         <div class="dosen-section-title">
                             <i class="fas fa-users"></i>
-                            Daftar Dosen
+                            <span id="kegiatanTitle"></span>
                         </div>
                         <div id="dosenListContainer">
                             <!-- Dosen list akan diisi oleh JavaScript -->
@@ -2813,101 +2804,79 @@
         </div>
 
         <!-- Modal Detail -->
-        <div id="modalDetail" class="modal-detail">
-            <div class="modal-content-detail">
-                <div class="modal-header-detail">
-                    <span>Detail Surat Tugas</span>
-                    <button class="close-modal">&times;</button>
-                </div>
-                <div class="modal-body-detail">
-                    <div id="detailContent">
-                        <!-- Content akan diisi oleh JavaScript -->
-                    </div>
-                </div>
-            </div>
+       <!-- Status Modal - REVISED CLEAN DESIGN -->
+<div id="statusModal" class="status-modal">
+    <div class="status-content">
+        <div class="status-header">
+            <h3><i class="fas fa-tasks"></i> Status Pengajuan Surat Tugas</h3>
+            <button class="close-status">&times;</button>
         </div>
+        <div class="status-body">
+            <div class="progress-container">
+                <div class="progress-track">
+                    <div class="progress-line" id="progressLine"></div>
 
-        <!-- Preview Modal -->
-        <div id="previewModal" class="preview-modal">
-            <div class="preview-content">
-                <div class="preview-header">
-                    <h3 id="previewTitle">Preview File</h3>
-                    <button class="preview-close">&times;</button>
-                </div>
-                <div class="preview-body" id="previewBody">
-                    <!-- Preview content akan diisi oleh JavaScript -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Status Modal -->
-        <div id="statusModal" class="status-modal">
-            <div class="status-content">
-                <div class="status-header">
-                    <h3>Status Pengajuan Surat Tugas</h3>
-                    <button class="close-status">&times;</button>
-                </div>
-                <div class="status-body">
-                    <div class="progress-track">
-                        <div class="progress-line" id="progressLine"></div>
-
-                        <!-- Step 1: Mengirim -->
-                        <div class="progress-step status-completed" id="step1">
+                    <!-- Step 1: Mengirim -->
+                    <div class="progress-step completed" id="step1">
+                        <div class="step-estimasi" id="est1">0 hari 0 jam</div>
+                        <div class="step-icon-container">
                             <div class="step-icon">
                                 <i class="fas fa-check" id="step1-icon"></i>
                             </div>
-                            <div class="step-text" id="step1-text">Mengirim</div>
-                            <div class="step-date" id="step1-date">-</div>
                         </div>
-                        <div class="progress-estimasi">
-                            <span id="est1">-</span>
-                        </div>
-
-                        <!-- Step 2: Persetujuan KK -->
-                        <div class="progress-step status-in-progress" id="step2">
-                            <div class="step-icon">
-                                <i class="fas fa-clock" id="step2-icon"></i>
-                            </div>
-                            <div class="step-text" id="step2-text">Persetujuan KK</div>
-                            <div class="step-date" id="step2-date">-</div>
-                        </div>
-                        <div class="progress-estimasi">
-                            <span id="est2">-</span>
-                        </div>
-
-                        <!-- Step 3: Persetujuan Sekretariat -->
-                        <div class="progress-step status-pending" id="step3">
-                            <div class="step-icon">
-                                <i class="fas fa-clock" id="step3-icon"></i>
-                            </div>
-                            <div class="step-text" id="step3-text">Persetujuan Sekretariat</div>
-                            <div class="step-date" id="step3-date">-</div>
-                        </div>
-                        <div class="progress-estimasi">
-                            <span id="est3">-</span>
-                        </div>
-
-                        <!-- Step 4: Persetujuan Dekan -->
-                        <div class="progress-step status-pending" id="step4">
-                            <div class="step-icon">
-                                <i class="fas fa-clock" id="step4-icon"></i>
-                            </div>
-                            <div class="step-text" id="step4-text">Persetujuan Dekan</div>
-                            <div class="step-date" id="step4-date">-</div>
-                        </div>
+                        <div class="step-text" id="step1-text">Mengirim</div>
+                        <div class="step-date" id="step1-date">02 Dec 2025</div>
                     </div>
-                    
-                    <div class="status-info mt-4">
-                        <h5>Informasi Status:</h5>
-                        <p id="status-description">Memuat informasi status...</p>
-                        <div id="rejection-reason" class="rejection-reason" style="display: none;">
-                            <h6>Alasan Penolakan:</h6>
-                            <p id="rejection-text"></p>
+
+                    <!-- Step 2: Disetujui Kaprodi -->
+                    <div class="progress-step completed" id="step2">
+                        <div class="step-estimasi" id="est2">0 hari 1 jam</div>
+                        <div class="step-icon-container">
+                            <div class="step-icon">
+                                <i class="fas fa-check" id="step2-icon"></i>
+                            </div>
                         </div>
+                        <div class="step-text" id="step2-text">Disetujui Kaprodi</div>
+                        <div class="step-date" id="step2-date">02 Dec 2025</div>
+                    </div>
+
+                    <!-- Step 3: Disetujui Sekretariat -->
+                    <div class="progress-step completed" id="step3">
+                        <div class="step-estimasi" id="est3">0 hari 0 jam</div>
+                        <div class="step-icon-container">
+                            <div class="step-icon">
+                                <i class="fas fa-check" id="step3-icon"></i>
+                            </div>
+                        </div>
+                        <div class="step-text" id="step3-text">Disetujui Sekretariat</div>
+                        <div class="step-date" id="step3-date">02 Dec 2025</div>
+                    </div>
+
+                    <!-- Step 4: Disetujui Dekan -->
+                    <div class="progress-step completed" id="step4">
+                        <div class="step-estimasi" id="est4">0 hari 0 jam</div>
+                        <div class="step-icon-container">
+                            <div class="step-icon">
+                                <i class="fas fa-check" id="step4-icon"></i>
+                            </div>
+                        </div>
+                        <div class="step-text" id="step4-text">Disetujui Dekan</div>
+                        <div class="step-date" id="step4-date">02 Dec 2025</div>
                     </div>
                 </div>
             </div>
+            
+            <div class="status-info">
+                <h5><i class="fas fa-info-circle"></i> Informasi Status:</h5>
+                <p id="status-description">Pengajuan ini sudah disetujui.</p>
+                <div id="rejection-reason" class="rejection-reason" style="display: none;">
+                    <h6><i class="fas fa-times-circle"></i> Alasan Penolakan:</h6>
+                    <p id="rejection-text"></p>
+                </div>
+            </div>
         </div>
+    </div>
+</div>
 
         <!-- Table -->
         <table id="tabelSurat" class="display nowrap">
@@ -3157,45 +3126,61 @@
         
         const modal = document.getElementById('dosenModal');
         const title = document.getElementById('dosenModalTitle');
+        const kegiatanTitle = document.getElementById('kegiatanTitle');
         const listContainer = document.getElementById('dosenListContainer');
         const totalCount = document.getElementById('dosenTotalCount');
         
         // Set title modal
-        const shortName = namaKegiatan.length > 30 ? namaKegiatan.substring(0, 30) + '...' : namaKegiatan;
-        title.textContent = `Dosen Terkait - ${shortName}`;
+        title.textContent = `Detail Dosen`;
+        
+        // Set kegiatan title
+        const shortKegiatan = namaKegiatan.length > 50 ? namaKegiatan.substring(0, 50) + '...' : namaKegiatan;
+        kegiatanTitle.textContent = `Kegiatan: ${shortKegiatan}`;
         
         // Clear container
         listContainer.innerHTML = '';
         
-        // Tambahkan setiap dosen ke dalam modal sesuai format image.png
+        // Format data dosen sesuai contoh image.png
+        const dosenSections = {};
+        
+        // Kelompokkan dosen berdasarkan nama (tampilkan semua)
         dosenData.forEach((dosen, index) => {
-            // Format data dosen
             const nama = dosen.nama_dosen || 'Nama tidak tersedia';
             const nip = dosen.nip || 'NIP tidak tersedia';
             const jabatan = dosen.jabatan || 'Jabatan tidak tersedia';
             const divisi = dosen.divisi || 'Divisi tidak tersedia';
             
+            // Buat section untuk setiap dosen (semua dosen ditampilkan)
+            dosenSections[nama] = {
+                nama: nama,
+                detailItems: [
+                    { icon: 'fas fa-id-card', label: 'NIP', value: nip },
+                    { icon: 'fas fa-briefcase', label: 'Jabatan', value: jabatan },
+                    { icon: 'fas fa-building', label: 'Divisi', value: divisi }
+                ]
+            };
+        });
+        
+        // Tambahkan setiap dosen ke dalam modal
+        Object.values(dosenSections).forEach((dosen, index) => {
             const dosenItem = document.createElement('div');
             dosenItem.className = 'dosen-item';
             
+            let detailsHTML = '';
+            dosen.detailItems.forEach(item => {
+                detailsHTML += `
+                    <div class="dosen-detail-item">
+                        <i class="${item.icon}"></i>
+                        <span class="dosen-detail-label">${item.label}:</span>
+                        <span class="dosen-detail-value">${escapeHtml(item.value)}</span>
+                    </div>
+                `;
+            });
+            
             dosenItem.innerHTML = `
-                <div class="dosen-name">${escapeHtml(nama)}</div>
+                <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
                 <div class="dosen-details">
-                    <div class="dosen-detail-item">
-                        <i class="fas fa-id-card"></i>
-                        <span class="dosen-detail-label">NIP:</span>
-                        <span class="dosen-detail-value">${escapeHtml(nip)}</span>
-                    </div>
-                    <div class="dosen-detail-item">
-                        <i class="fas fa-briefcase"></i>
-                        <span class="dosen-detail-label">Jabatan:</span>
-                        <span class="dosen-detail-value">${escapeHtml(jabatan)}</span>
-                    </div>
-                    <div class="dosen-detail-item">
-                        <i class="fas fa-building"></i>
-                        <span class="dosen-detail-label">Divisi:</span>
-                        <span class="dosen-detail-value">${escapeHtml(divisi)}</span>
-                    </div>
+                    ${detailsHTML}
                 </div>
             `;
             
@@ -3203,7 +3188,7 @@
         });
         
         // Update total count
-        totalCount.textContent = dosenData.length;
+        totalCount.textContent = Object.keys(dosenSections).length;
         
         // Show modal
         modal.classList.add('show');
@@ -3238,18 +3223,20 @@
             const icon = document.getElementById(`step${i}-icon`);
             const text = document.getElementById(`step${i}-text`);
             const date = document.getElementById(`step${i}-date`);
+            const estimasi = document.getElementById(`est${i}`);
             
             step.className = 'progress-step pending';
             icon.className = 'fas fa-clock';
 
             const defaultTexts = [
                 'Mengirim',
-                'Persetujuan KK',
-                'Persetujuan Sekretariat',
-                'Persetujuan Dekan'
+                'Disetujui Kaprodi',
+                'Disetujui Sekretariat',
+                'Disetujui Dekan'
             ];
             text.textContent = defaultTexts[i-1];
             date.textContent = '-';
+            estimasi.textContent = '0 hari 0 jam';
         }
 
         document.getElementById('progressLine').style.width = '0%';
@@ -3314,8 +3301,8 @@
                     iconElement.className = 'fas fa-clock';
             }
 
-            textElement.textContent = step.step_name;
-            dateElement.textContent = step.date;
+            textElement.textContent = step.step_name || step.text;
+            dateElement.textContent = step.date || '-';
         });
 
         // Update progress bar panjang
@@ -3354,9 +3341,10 @@
     function updateEstimasiWaktu(statusData) {
         const d = statusData.durasi;
 
-        document.getElementById("est1").textContent = d.durasi_1 || "-";
-        document.getElementById("est2").textContent = d.durasi_2 || "-";
-        document.getElementById("est3").textContent = d.durasi_3 || "-";
+        document.getElementById("est1").textContent = d.durasi_1 || "0 hari 0 jam";
+        document.getElementById("est2").textContent = d.durasi_2 || "0 hari 0 jam";
+        document.getElementById("est3").textContent = d.durasi_3 || "0 hari 0 jam";
+        document.getElementById("est4").textContent = d.durasi_4 || "0 hari 0 jam";
     }
 
     // EVENT: CLOSE MODAL
@@ -3908,11 +3896,11 @@
                     const initial = nama ? nama.charAt(0).toUpperCase() : '?';
                     
                     html += `
-                        <div class="dosen-item">
+                        <div class="dosen-item-detail">
                             <div class="dosen-avatar">${initial}</div>
                             <div class="dosen-info">
-                                <div class="dosen-name">${escapeHtml(nama)}</div>
-                                <div class="dosen-details">
+                                <div class="dosen-name-detail">${escapeHtml(nama)}</div>
+                                <div class="dosen-details-detail">
                                     NIP: ${escapeHtml(nip)} | Jabatan: ${escapeHtml(jabatan)} | Divisi: ${escapeHtml(divisi)}
                                 </div>
                             </div>

@@ -1109,7 +1109,7 @@ async function showDetail(id) {
                                 <div class="dosen-details">
                                     NIP: ${escapeHtml(nip)} | 
                                     Jabatan: ${escapeHtml(jabatan)} | 
-                                    Divisi: ${escapeHtml(divisi)}
+                                    Prodi/Unit: ${escapeHtml(divisi)}
                                 </div>
                             </div>
                         </div>

@@ -245,30 +245,6 @@ function tgl_indo($tanggal) {
 ?>
 
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <?php if (!empty($logo_base64)): ?>
-            <img src="data:image/jpeg;base64,<?= $logo_base64 ?>" class="header-logo" alt="Telkom University Logo">
-        <?php else: ?>
-            <img src="<?= base_url('assets/Tel-U_logo.png') ?>" class="header-logo" alt="Telkom University Logo">
-        <?php endif; ?>
-    </div>
-
-    <!-- FOOTER dengan Text Info -->
-    <div class="footer">
-        <!-- Text Info Kampus -->
-        <?php if (!empty($footer_text_base64)): ?>
-            <img src="data:image/png;base64,<?= $footer_text_base64 ?>" class="footer-text-img" alt="Footer Text">
-        <?php else: ?>
-            <img src="<?= base_url('assets/footer_text.png') ?>" class="footer-text-img" alt="Footer text">
-        <?php endif; ?>
-        <!-- Wave Merah -->
-        <?php if (!empty($footer_bg_base64)): ?>
-            <img src="data:image/jpeg;base64,<?= $footer_bg_base64 ?>" class="footer-wave" alt="Footer Wave">
-        <?php else: ?>
-            <img src="<?= base_url('assets/footer_asset.jpg') ?>" class="footer-wave" alt="Footer Wave">
-        <?php endif; ?>
-    </div>
     <br><br>
     <!-- CONTENT -->
     <div class="content">
@@ -300,30 +276,31 @@ function tgl_indo($tanggal) {
         <!-- Menugaskan Kepada -->
         <p class="section-title">Menugaskan kepada :</p>
 
-        <table>
+        <!-- Tabel Dosen dari list_dosen -->
+        <table class="tabel-dosen">
             <thead>
                 <tr>
-                    <th class="table-number">No</th>
+                    <th>No</th>
                     <th>Nama</th>
-                    <th class="table-nip">NIP</th>
+                    <th>NIP</th>
                     <th>Jabatan</th>
-                    <th class="table-prodi">Prodi/Unit</th>
+                    <th>Prodi/Unit</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($surat->dosen_data)): ?>
-                    <?php foreach ($surat->dosen_data as $i => $d): ?>
-                    <tr>
-                        <td class="table-number"><?= $i + 1 ?></td>
-                        <td><?= htmlspecialchars($d['nama'] ?? '-') ?></td>
-                        <td class="table-nip"><?= htmlspecialchars($d['nip'] ?? '-') ?></td>
-                        <td><?= htmlspecialchars($d['jabatan'] ?? '-') ?></td>
-                        <td class="table-prodi"><?= htmlspecialchars($d['divisi'] ?? '-') ?></td>
-                    </tr>
+                <?php if (!empty($dosen_data)): ?>
+                    <?php $no = 1; foreach ($dosen_data as $dosen): ?>
+                        <tr>
+                            <td><?= $no++ ?></td>
+                            <td><?= htmlspecialchars($dosen['nama'] ?? 'Tidak ada data dosen') ?></td>
+                            <td><?= htmlspecialchars($dosen['nip'] ?? '-') ?></td>
+                            <td><?= htmlspecialchars($dosen['jabatan'] ?? '-') ?></td>
+                            <td><?= htmlspecialchars($dosen['divisi'] ?? '-') ?></td>
+                        </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" style="text-align:center;">Tidak ada data dosen</td>
+                        <td colspan="5" style="text-align: center;">Tidak ada data dosen</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
