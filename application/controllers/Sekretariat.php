@@ -11,82 +11,205 @@ class Sekretariat extends CI_Controller {
     }
 
     /* ================================
-    DASHBOARD
+    DASHBOARD - DIPERBAIKI DENGAN FILTER BULAN
     ================================= */
-    public function index() {
+    public function index($filter = 'all') {
         $tahun = $this->input->get('tahun') ?? date('Y');
+        $bulan = $this->input->get('bulan') ?? 'all';
+        $search = $this->input->get('search');
+        $status_filter = $this->input->get('status');
+        
         $data['tahun'] = $tahun;
+        $data['bulan'] = $bulan;
+        $data['current_filter'] = $filter;
 
         // Surat yang relevan bagi sekretariat
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where_in("status", ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
+        
+        // Filter bulan jika dipilih
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        
+        $this->db->where_in("status", ['disetujui KK', 'ditolak dekan']);
+        
+        // Filter search
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('nama_kegiatan', $search);
+            $this->db->or_like('penyelenggara', $search);
+            $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search);
+            $this->db->group_end();
+        }
+
+        // Filter status dari URL parameter
+        if (!empty($status_filter)) {
+            switch($status_filter) {
+                case 'pending':
+                    $this->db->where('status', 'disetujui KK');
+                    break;
+                case 'approved':
+                    $this->db->where('status', 'disetujui sekretariat');
+                    break;
+                case 'rejected':
+                    $this->db->where('status', 'ditolak sekretariat');
+                    break;
+                case 'dekan_approved':
+                    $this->db->where('status', 'disetujui dekan');
+                    break;
+                case 'dekan_rejected':
+                    $this->db->where('status', 'ditolak dekan');
+                    break;
+            }
+        } else {
+            // Filter berdasarkan parameter route
+            switch($filter) {
+                case 'pending':
+                    $this->db->where('status', 'disetujui KK');
+                    break;
+                case 'disetujui':
+                    $this->db->where('status', 'disetujui sekretariat');
+                    break;
+                case 'ditolak':
+                    $this->db->where('status', 'ditolak sekretariat');
+                    break;
+                case 'dekan_disetujui':
+                    $this->db->where('status', 'disetujui dekan');
+                    break;
+                case 'dekan_ditolak':
+                    $this->db->where('status', 'ditolak dekan');
+                    break;
+                default:
+                    break;
+            }
+        }
+
         $this->db->order_by("created_at", "DESC");
         $data['surat_list'] = $this->db->get("surat")->result();
 
-        // Statistik
+        // Statistik untuk card (dengan filter bulan)
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
-        // Pending (menunggu sekretariat)
+        // Pending count (disetujui KK)
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where('status', 'disetujui KK');
-        $data['pending_count'] = $this->db->count_all_results('surat');
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['pending_count'] = $this->db->where('status', 'disetujui KK')
+                                         ->count_all_results('surat');
 
-        // Disetujui oleh dekan
+        // Disetujui oleh sekretariat
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where('status', 'disetujui dekan');
-        $data['approved_count'] = $this->db->count_all_results('surat');
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
+                                          ->count_all_results('surat');
 
-        // Ditolak oleh dekan
+        // Ditolak oleh sekretariat
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where('status', 'ditolak dekan');
-        $data['rejected_count'] = $this->db->count_all_results('surat');
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['rejected_count'] = $this->db->where_in('status', ['ditolak sekretariat', 'ditolak KK'])
+                                          ->count_all_results('surat');
 
-        // Grafik
+        // Grafik data - dengan dukungan filter bulan
         $total     = array_fill(0, 12, 0);
+        $pending   = array_fill(0, 12, 0);
         $approved  = array_fill(0, 12, 0);
         $rejected  = array_fill(0, 12, 0);
-        $pending   = array_fill(0, 12, 0);
 
-        $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
-        $query = $this->db->get('surat')->result();
-
-        foreach ($query as $row) {
-            $month = (int)date('m', strtotime($row->created_at)) - 1;
-
-            $total[$month]++;
-
-            if ($row->status == 'disetujui KK') {
-                $pending[$month]++;
+        if ($bulan === 'all') {
+            // Jika semua bulan, ambil data 12 bulan
+            for ($i = 1; $i <= 12; $i++) {
+                $total[$i-1] = $this->countByMonthYear($i, $tahun);
+                $pending[$i-1] = $this->countPendingByMonthYear($i, $tahun);
+                $approved[$i-1] = $this->countApprovedByMonthYear($i, $tahun);
+                $rejected[$i-1] = $this->countRejectedByMonthYear($i, $tahun);
             }
-
-            if ($row->status == 'disetujui dekan') {
-                $approved[$month]++;
-            }
-
-            if ($row->status == 'ditolak dekan') {
-                $rejected[$month]++;
+        } else {
+            // Jika filter bulan spesifik, isi hanya bulan tersebut
+            $bulan_int = (int)$bulan;
+            for ($i = 1; $i <= 12; $i++) {
+                if ($i == $bulan_int) {
+                    $total[$i-1] = $this->countByMonthYear($i, $tahun);
+                    $pending[$i-1] = $this->countPendingByMonthYear($i, $tahun);
+                    $approved[$i-1] = $this->countApprovedByMonthYear($i, $tahun);
+                    $rejected[$i-1] = $this->countRejectedByMonthYear($i, $tahun);
+                } else {
+                    $total[$i-1] = 0;
+                    $pending[$i-1] = 0;
+                    $approved[$i-1] = 0;
+                    $rejected[$i-1] = 0;
+                }
             }
         }
 
         $data['chart_total']    = $total;
         $data['chart_approved'] = $approved;
         $data['chart_rejected'] = $rejected;
-        $data['chart_pending']  = $pending;
 
         $this->load->view('sekretariat/dashboard', $data);
     }
 
     /* ================================
-    PENDING (Disetujui KK)
+       HELPER FUNCTIONS UNTUK COUNT DATA PER BULAN
+    ================================= */
+    private function countByMonthYear($month, $year)
+    {
+        $this->db->where('YEAR(created_at)', $year);
+        $this->db->where('MONTH(created_at)', $month);
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+        return $this->db->count_all_results('surat');
+    }
+
+    private function countPendingByMonthYear($month, $year)
+    {
+        $this->db->where('YEAR(created_at)', $year);
+        $this->db->where('MONTH(created_at)', $month);
+        $this->db->where('status', 'disetujui KK');
+        return $this->db->count_all_results('surat');
+    }
+
+    private function countApprovedByMonthYear($month, $year)
+    {
+        $this->db->where('YEAR(created_at)', $year);
+        $this->db->where('MONTH(created_at)', $month);
+        $this->db->where('status', 'disetujui sekretariat');
+        return $this->db->count_all_results('surat');
+    }
+
+    private function countRejectedByMonthYear($month, $year)
+    {
+        $this->db->where('YEAR(created_at)', $year);
+        $this->db->where('MONTH(created_at)', $month);
+        $this->db->where('status', 'ditolak sekretariat');
+        return $this->db->count_all_results('surat');
+    }
+
+    /* ================================
+    PENDING (Disetujui KK) - DIPERBAIKI DENGAN FILTER BULAN
     ================================= */
     public function pending() {
-        $search = $this->input->get('search');
         $tahun = $this->input->get('tahun') ?? date('Y');
+        $bulan = $this->input->get('bulan') ?? 'all';
+        $search = $this->input->get('search');
         
+        $data['tahun'] = $tahun;
+        $data['bulan'] = $bulan;
+        $data['current_page'] = 'pending';
+
         $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
         $this->db->where('status', 'disetujui KK');
         
         if (!empty($search)) {
@@ -100,23 +223,55 @@ class Sekretariat extends CI_Controller {
         $this->db->order_by("created_at", "DESC");
         $data['surat_list'] = $this->db->get("surat")->result();
 
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Pengajuan Menunggu Persetujuan Sekretariat";
-        $data['role'] = "sekretariat";
-        $data['tahun'] = $tahun;
+        // Statistik (dengan filter bulan)
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+        $data['total_surat'] = $this->db->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['pending_count'] = $this->db->where('status', 'disetujui KK')
+                                         ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
+                                          ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
+                                          ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_pending', $data);
     }
 
     /* ================================
-    DISETUJUI DEKAN
+    DISETUJUI SEKRETARIAT - DIPERBAIKI DENGAN FILTER BULAN
     ================================= */
     public function disetujui() {
-        $search = $this->input->get('search');
         $tahun = $this->input->get('tahun') ?? date('Y');
+        $bulan = $this->input->get('bulan') ?? 'all';
+        $search = $this->input->get('search');
+
+        $data['tahun'] = $tahun;
+        $data['bulan'] = $bulan;
+        $data['current_page'] = 'disetujui';
 
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where('status', 'disetujui dekan');
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where('status', 'disetujui sekretariat');
 
         if (!empty($search)) {
             $this->db->group_start();
@@ -129,23 +284,55 @@ class Sekretariat extends CI_Controller {
         $this->db->order_by("created_at", "DESC");
         $data['surat_list'] = $this->db->get("surat")->result();
 
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Pengajuan Disetujui - Final Dekan";
-        $data['role'] = "sekretariat";
-        $data['tahun'] = $tahun;
+        // Statistik (dengan filter bulan)
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+        $data['total_surat'] = $this->db->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['pending_count'] = $this->db->where('status', 'disetujui KK')
+                                         ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
+                                          ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
+                                          ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_disetujui', $data);
     }
 
     /* ================================
-    DITOLAK DEKAN
+    DITOLAK SEKRETARIAT - DIPERBAIKI DENGAN FILTER BULAN
     ================================= */
     public function ditolak() {
-        $search = $this->input->get('search');
         $tahun = $this->input->get('tahun') ?? date('Y');
+        $bulan = $this->input->get('bulan') ?? 'all';
+        $search = $this->input->get('search');
+
+        $data['tahun'] = $tahun;
+        $data['bulan'] = $bulan;
+        $data['current_page'] = 'ditolak';
 
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where('status', 'ditolak dekan');
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where('status', 'ditolak sekretariat');
 
         if (!empty($search)) {
             $this->db->group_start();
@@ -158,42 +345,55 @@ class Sekretariat extends CI_Controller {
         $this->db->order_by("created_at", "DESC");
         $data['pengajuan_ditolak'] = $this->db->get("surat")->result();
 
-        $data['total_surat'] = count($data['pengajuan_ditolak']);
-        $data['judul'] = "Pengajuan Ditolak - Final Dekan";
-        $data['role'] = "sekretariat";
-        $data['tahun'] = $tahun;
+        // Statistik (dengan filter bulan)
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+        $data['total_surat'] = $this->db->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['pending_count'] = $this->db->where('status', 'disetujui KK')
+                                         ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
+                                          ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
+                                          ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_ditolak', $data);
     }
 
     /* ================================
-    TOTAL SEMUA PENGAJUAN
+    DISETUJUI DEKAN - DIPERBAIKI DENGAN FILTER BULAN
     ================================= */
-    public function semua() {
-        $search = $this->input->get('search');
-        $status_filter = $this->input->get('status');
+    public function disetujui_dekan() {
         $tahun = $this->input->get('tahun') ?? date('Y');
+        $bulan = $this->input->get('bulan') ?? 'all';
+        $search = $this->input->get('search');
+
+        $data['tahun'] = $tahun;
+        $data['bulan'] = $bulan;
+        $data['current_page'] = 'disetujui_dekan';
 
         $this->db->where('YEAR(created_at)', $tahun);
-
-        if (!empty($status_filter)) {
-            switch ($status_filter) {
-                case 'pending':
-                    $this->db->where('status', 'disetujui KK');
-                    break;
-                case 'approved':
-                    $this->db->where('status', 'disetujui dekan');
-                    break;
-                case 'rejected':
-                    $this->db->where('status', 'ditolak dekan');
-                    break;
-                default:
-                    $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
-                    break;
-            }
-        } else {
-            $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
         }
+        $this->db->where('status', 'disetujui dekan');
 
         if (!empty($search)) {
             $this->db->group_start();
@@ -206,17 +406,217 @@ class Sekretariat extends CI_Controller {
         $this->db->order_by("created_at", "DESC");
         $data['surat_list'] = $this->db->get("surat")->result();
 
-        $data['total_surat'] = count($data['surat_list']);
-        $data['judul'] = "Total Pengajuan - Sekretariat";
-        $data['role'] = "sekretariat";
+        // Statistik (dengan filter bulan)
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+        $data['total_surat'] = $this->db->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['pending_count'] = $this->db->where('status', 'disetujui KK')
+                                         ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
+                                          ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
+                                          ->count_all_results('surat');
+
+        $this->load->view('sekretariat/halaman_disetujui_dekan', $data);
+    }
+
+    /* ================================
+    DITOLAK DEKAN - DIPERBAIKI DENGAN FILTER BULAN
+    ================================= */
+    public function ditolak_dekan() {
+        $tahun = $this->input->get('tahun') ?? date('Y');
+        $bulan = $this->input->get('bulan') ?? 'all';
+        $search = $this->input->get('search');
+
         $data['tahun'] = $tahun;
-        $data['status_filter'] = $status_filter;
+        $data['bulan'] = $bulan;
+        $data['current_page'] = 'ditolak_dekan';
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where('status', 'ditolak dekan');
+
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('nama_kegiatan', $search);
+            $this->db->or_like('penyelenggara', $search);
+            $this->db->or_like('jenis_pengajuan', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by("created_at", "DESC");
+        $data['surat_list'] = $this->db->get("surat")->result();
+
+        // Statistik (dengan filter bulan)
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+        $data['total_surat'] = $this->db->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['pending_count'] = $this->db->where('status', 'disetujui KK')
+                                         ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
+                                          ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
+                                          ->count_all_results('surat');
+
+        $this->load->view('sekretariat/halaman_ditolak_dekan', $data);
+    }
+
+    /* ================================
+    TOTAL SEMUA PENGAJUAN - DIPERBAIKI DENGAN FILTER BULAN
+    ================================= */
+    public function semua() {
+        $tahun = $this->input->get('tahun') ?? date('Y');
+        $bulan = $this->input->get('bulan') ?? 'all';
+        $search = $this->input->get('search');
+        $status = $this->input->get('status');
+        
+        $data['tahun'] = $tahun;
+        $data['bulan'] = $bulan;
+        $data['current_page'] = 'semua';
+
+        // Ambil semua data yang relevan untuk sekretariat
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+
+        // Filter search
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('nama_kegiatan', $search);
+            $this->db->or_like('penyelenggara', $search);
+            $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search);
+            $this->db->group_end();
+        }
+
+        // Filter status
+        if (!empty($status)) {
+            switch($status) {
+                case 'pending':
+                    $this->db->where('status', 'disetujui KK');
+                    break;
+                case 'approved':
+                    $this->db->where('status', 'disetujui sekretariat');
+                    break;
+                case 'rejected':
+                    $this->db->where('status', 'ditolak sekretariat');
+                    break;
+                case 'dekan_approved':
+                    $this->db->where('status', 'disetujui dekan');
+                    break;
+                case 'dekan_rejected':
+                    $this->db->where('status', 'ditolak dekan');
+                    break;
+            }
+        }
+
+        $this->db->order_by("created_at", "DESC");
+        $data['surat_list'] = $this->db->get("surat")->result();
+
+        // Statistik (dengan filter bulan)
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+        
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('nama_kegiatan', $search);
+            $this->db->or_like('penyelenggara', $search);
+            $this->db->or_like('nip', $search);
+            $this->db->or_like('nama_dosen', $search);
+            $this->db->group_end();
+        }
+        
+        if (!empty($status)) {
+            switch($status) {
+                case 'pending':
+                    $this->db->where('status', 'disetujui KK');
+                    break;
+                case 'approved':
+                    $this->db->where('status', 'disetujui sekretariat');
+                    break;
+                case 'rejected':
+                    $this->db->where('status', 'ditolak sekretariat');
+                    break;
+                case 'dekan_approved':
+                    $this->db->where('status', 'disetujui dekan');
+                    break;
+                case 'dekan_rejected':
+                    $this->db->where('status', 'ditolak dekan');
+                    break;
+            }
+        }
+        
+        $data['total_surat'] = $this->db->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['pending_count'] = $this->db->where('status', 'disetujui KK')
+                                         ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
+                                          ->count_all_results('surat');
+
+        $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
+                                          ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_total', $data);
     }
 
     /* ================================
-    GET DETAIL PENGAJUAN (AJAX) - PERBAIKAN FINAL SEKRETARIAT
+    GET DETAIL PENGAJUAN (AJAX) - DIPERBAIKI SEPERTI DEKAN DENGAN PROGRESS BAR
     ================================= */
     public function getDetailPengajuan($id)
     {
@@ -224,47 +624,50 @@ class Sekretariat extends CI_Controller {
         $pengajuan = $this->db->get('surat')->row();
         
         if ($pengajuan) {
+            // Ambil data dosen
             $dosen_data = $this->get_dosen_data_from_nip_fixed($pengajuan->nip);
             
-            // PERBAIKAN: Ambil semua field yang diperlukan
+            // Ambil progress timeline yang lengkap
+            $progress_timeline = $this->getProgressTimeline($id);
+            
+            // Ambil semua field yang berkaitan dengan periode
             $jenis_date = $pengajuan->jenis_date ?? null;
+            $periode_kegiatan = $pengajuan->periode_kegiatan ?? null;
             $periode_value = $pengajuan->periode_value ?? null;
             $tanggal_kegiatan = $pengajuan->tanggal_kegiatan ?? null;
             $akhir_kegiatan = $pengajuan->akhir_kegiatan ?? null;
             
-            // Debug log
-            error_log("DEBUG SEKRETARIAT - ID: $id");
-            error_log("Jenis Date: " . $jenis_date);
-            error_log("Periode Value: " . $periode_value);
-            error_log("Tanggal Kegiatan: " . $tanggal_kegiatan);
-            error_log("Akhir Kegiatan: " . $akhir_kegiatan);
+            // Tentukan nilai periode yang akan ditampilkan
+            $periode_display = '-';
             
-            // LOGIKA SAMA SEPERTI KAPRODI:
-            // Jika jenis_date = "Periode" -> tampilkan periode_value, kosongkan tanggal
-            // Jika jenis_date = "Custom" -> tampilkan tanggal, kosongkan periode
-            
-            $periode_display = null;
-            $tanggal_display = null;
-            $akhir_display = null;
-            
-            if ($jenis_date === 'Periode') {
-                // Tampilkan periode, kosongkan tanggal
-                $periode_display = $periode_value;
-                $tanggal_display = null;
-                $akhir_display = null;
-            } elseif ($jenis_date === 'Custom') {
-                // Tampilkan tanggal, kosongkan periode
-                $periode_display = null;
-                $tanggal_display = $tanggal_kegiatan;
-                $akhir_display = $akhir_kegiatan;
-            } else {
-                // Fallback jika jenis_date tidak diset
-                if ($periode_value) {
-                    $periode_display = $periode_value;
+            if ($jenis_date === 'Custom') {
+                // FORMAT CUSTOM: "30 Nov 2025 - 01 Des 2025"
+                if ($tanggal_kegiatan && $akhir_kegiatan) {
+                    // Format tanggal Indonesia
+                    $bulan_indonesia = [
+                        'Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mar', 'Apr' => 'Apr',
+                        'May' => 'Mei', 'Jun' => 'Jun', 'Jul' => 'Jul', 'Aug' => 'Ags',
+                        'Sep' => 'Sep', 'Oct' => 'Okt', 'Nov' => 'Nov', 'Dec' => 'Des'
+                    ];
+                    
+                    $format_tanggal = function($date) use ($bulan_indonesia) {
+                        $day = date('d', strtotime($date));
+                        $month_en = date('M', strtotime($date));
+                        $month_id = $bulan_indonesia[$month_en] ?? $month_en;
+                        $year = date('Y', strtotime($date));
+                        return $day . ' ' . $month_id . ' ' . $year;
+                    };
+                    
+                    $start_formatted = $format_tanggal($tanggal_kegiatan);
+                    $end_formatted = $format_tanggal($akhir_kegiatan);
+                    $periode_display = $start_formatted . ' - ' . $end_formatted;
                 } elseif ($tanggal_kegiatan) {
-                    $tanggal_display = $tanggal_kegiatan;
-                    $akhir_display = $akhir_kegiatan;
+                    // Jika hanya ada tanggal mulai
+                    $periode_display = date('d M Y', strtotime($tanggal_kegiatan));
                 }
+            } elseif ($jenis_date === 'Periode') {
+                // Untuk jenis Periode, gunakan periode_kegiatan atau periode_value
+                $periode_display = $periode_kegiatan ?: $periode_value ?: '-';
             }
             
             $response_data = array(
@@ -272,18 +675,8 @@ class Sekretariat extends CI_Controller {
                 'nama_kegiatan' => $pengajuan->nama_kegiatan,
                 'status' => $pengajuan->status,
                 'jenis_pengajuan' => $pengajuan->jenis_pengajuan,
-                'lingkup_penugasan' => $pengajuan->lingkup_penugasan,
-                'penyelenggara' => $pengajuan->penyelenggara,
-                'tanggal_kegiatan' => $tanggal_display,      // NULL jika Periode
-                'akhir_kegiatan' => $akhir_display,          // NULL jika Periode
-                'periode_value' => $periode_display,         // NULL jika Custom
-                'jenis_date' => $jenis_date,
-                'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
-                'created_at' => $pengajuan->created_at,
                 'eviden' => $pengajuan->eviden,
-                'nomor_surat' => $pengajuan->nomor_surat,
-                'catatan_penolakan' => $pengajuan->catatan_penolakan,
-                'dosen_data' => $dosen_data
+                'dosen_data' => $dosen_data,
             );
             
             echo json_encode([
@@ -299,7 +692,125 @@ class Sekretariat extends CI_Controller {
     }
 
     /* ================================
-    GET DOSEN DATA FROM NIP - MENGAMBIL DARI KAPRODI YANG BERHASIL
+    FUNGSI UNTUK MENDAPATKAN PROGRESS TIMELINE - SEPERTI DI DEKAN
+    ================================= */
+    private function getProgressTimeline($id)
+    {
+        $this->db->where('id', $id);
+        $surat = $this->db->get('surat')->row();
+        
+        if (!$surat) {
+            return null;
+        }
+        
+        $approval = json_decode($surat->approval_status, true) ?? [];
+        
+        // Default timeline structure untuk sekretariat
+        $timeline = [
+            'mengirim' => [
+                'status' => 'completed',
+                'timestamp' => $surat->created_at,
+                'label' => 'Mengirim',
+                'display_time' => $this->formatDisplayTime($surat->created_at)
+            ],
+            'kaprodi' => [
+                'status' => 'pending',
+                'timestamp' => null,
+                'label' => 'Disetujui Kaprodi',
+                'display_time' => '-'
+            ],
+            'sekretariat' => [
+                'status' => 'pending', 
+                'timestamp' => null,
+                'label' => 'Disetujui Sekretariat',
+                'display_time' => '-'
+            ],
+            'dekan' => [
+                'status' => 'pending',
+                'timestamp' => null,
+                'label' => 'Disetujui Dekan',
+                'display_time' => '-'
+            ]
+        ];
+        
+        // Update dari approval status
+        foreach ($approval as $role => $data) {
+            if (isset($timeline[$role])) {
+                $status = 'pending';
+                if (isset($data['status'])) {
+                    if ($data['status'] == 'approved' || $data['status'] == 'completed') {
+                        $status = 'completed';
+                    } elseif ($data['status'] == 'rejected') {
+                        $status = 'rejected';
+                    }
+                } else {
+                    // Jika format lama (hanya timestamp)
+                    $status = 'completed';
+                }
+                
+                $timeline[$role]['status'] = $status;
+                $timeline[$role]['timestamp'] = is_array($data) ? ($data['timestamp'] ?? null) : $data;
+                $timeline[$role]['display_time'] = $timeline[$role]['timestamp'] ? 
+                    $this->formatDisplayTime($timeline[$role]['timestamp']) : '-';
+            }
+        }
+        
+        // Auto-complete previous steps if current step is completed
+        if ($timeline['sekretariat']['status'] == 'completed') {
+            $timeline['kaprodi']['status'] = 'completed';
+            
+            // Set default timestamps if not set
+            if (!$timeline['kaprodi']['timestamp']) {
+                $timeline['kaprodi']['timestamp'] = date('Y-m-d H:i:s', strtotime($surat->created_at . ' +1 hour'));
+                $timeline['kaprodi']['display_time'] = $this->formatDisplayTime($timeline['kaprodi']['timestamp']);
+            }
+        }
+        
+        if ($timeline['dekan']['status'] == 'completed') {
+            $timeline['kaprodi']['status'] = 'completed';
+            $timeline['sekretariat']['status'] = 'completed';
+            
+            // Set default timestamps if not set
+            if (!$timeline['kaprodi']['timestamp']) {
+                $timeline['kaprodi']['timestamp'] = date('Y-m-d H:i:s', strtotime($surat->created_at . ' +1 hour'));
+                $timeline['kaprodi']['display_time'] = $this->formatDisplayTime($timeline['kaprodi']['timestamp']);
+            }
+            
+            if (!$timeline['sekretariat']['timestamp']) {
+                $timeline['sekretariat']['timestamp'] = date('Y-m-d H:i:s', strtotime($timeline['kaprodi']['timestamp'] . ' +1 hour'));
+                $timeline['sekretariat']['display_time'] = $this->formatDisplayTime($timeline['sekretariat']['timestamp']);
+            }
+        }
+        
+        return $timeline;
+    }
+
+    /* ================================
+    FORMAT DISPLAY TIME - SEPERTI DI DEKAN
+    ================================= */
+    private function formatDisplayTime($timestamp)
+    {
+        if (!$timestamp) return '-';
+        
+        $time = strtotime($timestamp);
+        $now = time();
+        $diff = $now - $time;
+        
+        if ($diff < 60) {
+            return 'Baru saja';
+        } elseif ($diff < 3600) {
+            $minutes = floor($diff / 60);
+            return $minutes . ' menit yang lalu';
+        } elseif ($diff < 86400) {
+            $hours = floor($diff / 3600);
+            return $hours . ' jam yang lalu';
+        } else {
+            return date('d M Y H:i', $time);
+        }
+    }
+
+    /* ================================
+    FUNGSI AMBIL DATA DOSEN - SEPERTI DI DEKAN
     ================================= */
     private function get_dosen_data_from_nip_fixed($nip_data)
     {
@@ -314,6 +825,7 @@ class Sekretariat extends CI_Controller {
             )];
         }
         
+        // Handle berbagai format NIP
         $nip_array = array();
         
         if (is_string($nip_data)) {
@@ -354,6 +866,7 @@ class Sekretariat extends CI_Controller {
             )];
         }
         
+        // Ambil data dosen dari tabel list_dosen
         $this->db->select('nip, nama_dosen, jabatan, divisi');
         $this->db->from('list_dosen');
         
@@ -405,62 +918,214 @@ class Sekretariat extends CI_Controller {
         
         return $dosen_data;
     }
+
     /* ================================
-   GET DOSEN DETAIL UNTUK AUTOCOMPLETE
-================================= */
-private function get_dosen_detail_for_autocomplete($surat)
-{
-    $nip_list = is_array($surat->nip) ? $surat->nip : json_decode($surat->nip, true);
-    
-    if (!$nip_list) return [];
-    
-    $dosen_data = [];
-    
-    foreach ($nip_list as $nip) {
-        if (!empty($nip) && $nip !== '-') {
-            $this->db->where('nip', $nip);
-            $dosen = $this->db->get('list_dosen')->row();
-            
-            if ($dosen) {
-                $dosen_data[] = [
-                    'nip' => $dosen->nip,
-                    'nama_dosen' => $dosen->nama_dosen,
-                    'jabatan' => $dosen->jabatan,
-                    'divisi' => $dosen->divisi
-                ];
-            } else {
-                $dosen_data[] = [
-                    'nip' => $nip,
-                    'nama_dosen' => '',
-                    'jabatan' => '',
-                    'divisi' => ''
-                ];
-            }
+    APPROVE - DENGAN NOMOR SURAT & PROGRESS BAR
+    ================================= */
+    public function approve($id)
+    {
+        // Validasi nomor surat wajib diisi
+        $nomor_surat = $this->input->post('nomor_surat');
+        
+        if (empty($nomor_surat)) {
+            $this->session->set_flashdata('error', 'Nomor surat harus diisi!');
+            $this->redirectToPreviousPage();
+            return;
         }
+
+        // Cek apakah nomor surat sudah digunakan
+        $this->db->where('nomor_surat', $nomor_surat);
+        $this->db->where('id !=', $id);
+        $existing = $this->db->get('surat')->row();
+
+        if ($existing) {
+            $this->session->set_flashdata('error', 'Nomor surat sudah digunakan! Silakan gunakan nomor lain.');
+            $this->redirectToPreviousPage();
+            return;
+        }
+
+        // Ambil data surat
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+        
+        if (!$surat) {
+            $this->session->set_flashdata('error', 'Data surat tidak ditemukan');
+            $this->redirectToPreviousPage();
+            return;
+        }
+
+        // Validasi status
+        if ($surat->status !== 'disetujui KK') {
+            $this->session->set_flashdata('error', 'Status pengajuan tidak valid untuk disetujui. Status saat ini: ' . $surat->status);
+            $this->redirectToPreviousPage();
+            return;
+        }
+
+        // Update approval status dengan format yang mendukung progress bar
+        $approval = json_decode($surat->approval_status, true) ?? [];
+        
+        // Pastikan semua tahap sebelumnya ada
+        if (!isset($approval['pengirim'])) {
+            $approval['pengirim'] = date("Y-m-d H:i:s");
+        }
+        if (!isset($approval['kaprodi'])) {
+            $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+        }
+        
+        $approval['sekretariat'] = date("Y-m-d H:i:s");
+        
+        $update_data = [
+            'status' => 'disetujui sekretariat',
+            'approval_status' => json_encode($approval),
+            'nomor_surat' => $nomor_surat,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $result = $this->db->where('id', $id)->update('surat', $update_data);
+
+        if ($result) {
+            $this->session->set_flashdata('success', 'Surat berhasil disetujui dengan nomor: ' . $nomor_surat);
+        } else {
+            $this->session->set_flashdata('error', 'Gagal menyetujui surat.');
+        }
+        
+        $this->redirectToPreviousPage();
     }
     
-    return $dosen_data;
-}
     /* ================================
-    REALTIME DASHBOARD COUNTER
+    REJECT - DIPERBAIKI DENGAN PROGRESS BAR
+    ================================= */
+    public function reject($id)
+    {
+        $notes = $this->input->post('rejection_notes');
+        if (empty($notes)) {
+            $this->session->set_flashdata('error', 'Alasan penolakan harus diisi');
+            $this->redirectToPreviousPage();
+            return;
+        }
+
+        // Ambil data surat dari database
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+        
+        if (!$surat) {
+            $this->session->set_flashdata('error', 'Data surat tidak ditemukan');
+            $this->redirectToPreviousPage();
+            return;
+        }
+
+        // Validasi status
+        if ($surat->status !== 'disetujui KK') {
+            $this->session->set_flashdata('error', 'Status pengajuan tidak valid untuk ditolak. Status saat ini: ' . $surat->status);
+            $this->redirectToPreviousPage();
+            return;
+        }
+
+        // Update approval status dengan format yang mendukung progress bar
+        $approval = json_decode($surat->approval_status, true) ?? [];
+        
+        // Pastikan semua tahap sebelumnya ada
+        if (!isset($approval['pengirim'])) {
+            $approval['pengirim'] = date("Y-m-d H:i:s");
+        }
+        if (!isset($approval['kaprodi'])) {
+            $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+        }
+        
+        $approval['sekretariat'] = date("Y-m-d H:i:s");
+
+        $update_data = [
+            'status' => 'ditolak sekretariat',
+            'approval_status' => json_encode($approval),
+            'catatan_penolakan' => $notes,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $result = $this->db->where('id', $id)->update('surat', $update_data);
+
+        if ($result) {
+            $this->session->set_flashdata('success', 'Surat berhasil ditolak.');
+        } else {
+            $this->session->set_flashdata('error', 'Gagal menolak surat.');
+        }
+        
+        $this->redirectToPreviousPage();
+    }
+
+    /* ================================
+    HELPER FUNCTION UNTUK REDIRECT - SEPERTI DI DEKAN
+    ================================= */
+    private function redirectToPreviousPage()
+    {
+        $current_page = $this->input->get('from') ?? 'sekretariat';
+        $tahun = $this->input->get('tahun') ?? date('Y');
+        $bulan = $this->input->get('bulan') ?? 'all';
+        $search = $this->input->get('search');
+        $status = $this->input->get('status');
+        
+        $query_params = 'tahun=' . $tahun . '&bulan=' . $bulan;
+        if (!empty($search)) {
+            $query_params .= '&search=' . urlencode($search);
+        }
+        if (!empty($status)) {
+            $query_params .= '&status=' . $status;
+        }
+        
+        switch($current_page) {
+            case 'semua':
+                redirect('sekretariat/semua?' . $query_params);
+                break;
+            case 'disetujui':
+                redirect('sekretariat/disetujui?' . $query_params);
+                break;
+            case 'ditolak':
+                redirect('sekretariat/ditolak?' . $query_params);
+                break;
+            case 'pending':
+                redirect('sekretariat/pending?' . $query_params);
+                break;
+            case 'disetujui_dekan':
+                redirect('sekretariat/disetujui_dekan?' . $query_params);
+                break;
+            case 'ditolak_dekan':
+                redirect('sekretariat/ditolak_dekan?' . $query_params);
+                break;
+            default:
+                redirect('sekretariat?' . $query_params);
+        }
+    }
+
+    /* ================================
+    REALTIME DASHBOARD COUNTER - DIPERBAIKI DENGAN FILTER BULAN
     ================================= */
     public function get_dashboard_counts() {
         $tahun = $this->input->get('tahun') ?? date('Y');
+        $bulan = $this->input->get('bulan') ?? 'all';
 
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where_in('status', ['disetujui KK', 'disetujui dekan', 'ditolak dekan']);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
         $total = $this->db->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
         $this->db->where('status', 'disetujui KK');
         $pending = $this->db->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where('status', 'disetujui dekan');
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where('status', 'disetujui sekretariat');
         $approved = $this->db->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
-        $this->db->where('status', 'ditolak dekan');
+        if ($bulan !== 'all') {
+            $this->db->where('MONTH(created_at)', $bulan);
+        }
+        $this->db->where('status', 'ditolak sekretariat');
         $rejected = $this->db->count_all_results('surat');
 
         $counts = [
@@ -475,78 +1140,103 @@ private function get_dosen_detail_for_autocomplete($surat)
     }
 
     /* ================================
-    APPROVE - DENGAN NOMOR SURAT
+    FUNGSI DEBUG: Untuk troubleshooting
     ================================= */
-    public function approve($id)
+    public function debug_dosen_data($surat_id = null)
     {
-        // Validasi nomor surat wajib diisi
-        $nomor_surat = $this->input->post('nomor_surat');
-        
-        if (empty($nomor_surat)) {
-            $this->session->set_flashdata('error', 'Nomor surat harus diisi!');
-            redirect('sekretariat');
-            return;
+        if (!$surat_id) {
+            $this->db->where('nip IS NOT NULL');
+            $this->db->limit(1);
+            $sample_surat = $this->db->get('surat')->row();
+            $surat_id = $sample_surat ? $sample_surat->id : null;
         }
-
-        // Cek apakah nomor surat sudah digunakan
-        $this->db->where('nomor_surat', $nomor_surat);
-        $this->db->where('id !=', $id);
-        $existing = $this->db->get('surat')->row();
-
-        if ($existing) {
-            $this->session->set_flashdata('error', 'Nomor surat sudah digunakan! Silakan gunakan nomor lain.');
-            redirect('sekretariat');
-            return;
+        
+        echo "<h1>Debug Data Dosen - Sekretariat</h1>";
+        
+        if ($surat_id) {
+            $this->db->where('id', $surat_id);
+            $surat = $this->db->get('surat')->row();
+            
+            echo "<h2>Data Surat (ID: $surat_id)</h2>";
+            echo "<pre>";
+            print_r($surat);
+            echo "</pre>";
+            
+            echo "<h2>Proses get_dosen_data_from_nip_fixed</h2>";
+            $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
+            echo "<pre>";
+            print_r($dosen_data);
+            echo "</pre>";
+            
+            echo "<h2>Progress Timeline</h2>";
+            $progress_timeline = $this->getProgressTimeline($surat_id);
+            echo "<pre>";
+            print_r($progress_timeline);
+            echo "</pre>";
         }
-
-        // Ambil data surat
-        $surat = $this->db->get_where('surat', ['id' => $id])->row();
-        $approval = json_decode($surat->approval_status, true);
-
-        // Update approval status
-        $approval['sekretariat'] = date("Y-m-d H:i:s");
         
-        $this->db->where('id', $id)->update('surat', [
-            'status' => 'disetujui sekretariat',
-            'approval_status' => json_encode($approval),
-            'nomor_surat' => $nomor_surat,
-        ]);
-        
-        $this->session->set_flashdata('success', 'Surat berhasil disetujui dengan nomor: ' . $nomor_surat);
-        redirect('sekretariat');
+        echo "<h2>Sample Data list_dosen (5 records)</h2>";
+        $sample_dosen = $this->db->get('list_dosen', 5)->result();
+        echo "<pre>";
+        print_r($sample_dosen);
+        echo "</pre>";
     }
     
     /* ================================
-    REJECT
+    TAMPILKAN SURAT PENGAJUAN DALAM MODAL - SEPERTI DI DEKAN
     ================================= */
-    public function reject($id)
+    public function view_surat_pengajuan($id)
     {
-        $notes = $this->input->post('rejection_notes');
-
-        // Ambil data surat dari database
-        $surat = $this->db->get_where('surat', ['id' => $id])->row();
-
-        // Decode approval_status lama
-        $approval = json_decode($surat->approval_status, true);
-
-        // Jika null, jadikan array kosong agar tidak error
-        if (!is_array($approval)) {
-            $approval = [];
+        $this->db->where('id', $id);
+        $data['surat'] = $this->db->get('surat')->row();
+        
+        if (!$data['surat']) {
+            show_404();
+            return;
         }
-
-        // Tambahkan timestamp penolakan sekretariat
-        $approval['sekretariat'] = date("Y-m-d H:i:s");
-
-        // Update database
-        $this->db->where('id', $id)->update('surat', [
-            'status' => 'ditolak sekretariat',
-            'approval_status' => json_encode($approval),
-            'catatan_penolakan' => $notes,
-        ]);
-
-        $this->session->set_flashdata('success', 'Surat berhasil ditolak Sekretariat.');
-        redirect('sekretariat');
+        
+        // Ambil data dosen lengkap dari list_dosen
+        $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($data['surat']->nip);
+        
+        // Load view surat_print2
+        $this->load->view('surat_print2', $data);
     }
+    
+    /* ================================
+    GET EVIDEN - UNTUK TOMBOL LIHAT EVIDEN (SEPERTI DI DEKAN)
+    ================================= */
+    public function getEviden($id)
+    {
+        $this->db->where('id', $id);
+        $surat = $this->db->get('surat')->row();
+        
+        if ($surat && !empty($surat->eviden)) {
+            // Periksa apakah file exist
+            $file_path = FCPATH . $surat->eviden;
+            
+            if (file_exists($file_path)) {
+                echo json_encode([
+                    'success' => true,
+                    'eviden' => $surat->eviden,
+                    'nama_kegiatan' => $surat->nama_kegiatan
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'File eviden tidak ditemukan di server'
+                ]);
+            }
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Tidak ada eviden untuk pengajuan ini'
+            ]);
+        }
+    }
+
+    // ========================================================================
+    // FUNGSI-FUNGSI LAIN YANG TIDAK DIUBAH (KARENA SUDAH SESUAI)
+    // ========================================================================
 
     /* ================================
     BULK APPROVE - MULTI APPROVE
@@ -603,8 +1293,24 @@ private function get_dosen_detail_for_autocomplete($surat)
                     continue;
                 }
                 
-                // Update approval status
-                $approval = json_decode($surat->approval_status, true);
+                // Validasi status
+                if ($surat->status !== 'disetujui KK') {
+                    $error_count++;
+                    $error_messages[] = "Status tidak valid untuk ID: $id (Status: $surat->status)";
+                    continue;
+                }
+                
+                // Update approval status dengan format yang mendukung progress bar
+                $approval = json_decode($surat->approval_status, true) ?? [];
+                
+                // Pastikan semua tahap sebelumnya ada
+                if (!isset($approval['pengirim'])) {
+                    $approval['pengirim'] = date("Y-m-d H:i:s");
+                }
+                if (!isset($approval['kaprodi'])) {
+                    $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+                }
+                
                 $approval['sekretariat'] = date("Y-m-d H:i:s");
                 
                 // Update database
@@ -612,6 +1318,7 @@ private function get_dosen_detail_for_autocomplete($surat)
                     'status' => 'disetujui sekretariat',
                     'approval_status' => json_encode($approval),
                     'nomor_surat' => $nomor_surat,
+                    'updated_at' => date('Y-m-d H:i:s')
                 ];
                 
                 $this->db->where('id', $id);
@@ -685,18 +1392,32 @@ private function get_dosen_detail_for_autocomplete($surat)
                     continue;
                 }
                 
-                // Update approval status
-                $approval = json_decode($surat->approval_status, true);
-                if (!is_array($approval)) {
-                    $approval = [];
+                // Validasi status
+                if ($surat->status !== 'disetujui KK') {
+                    $error_count++;
+                    $error_messages[] = "Status tidak valid untuk ID: $id (Status: $surat->status)";
+                    continue;
                 }
-                $approval['sekretariat'] = date("Y-m-d H:i:s");
                 
+                // Update approval status dengan format yang mendukung progress bar
+                $approval = json_decode($surat->approval_status, true) ?? [];
+                
+                // Pastikan semua tahap sebelumnya ada
+                if (!isset($approval['pengirim'])) {
+                    $approval['pengirim'] = date("Y-m-d H:i:s");
+                }
+                if (!isset($approval['kaprodi'])) {
+                    $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+                }
+                
+                $approval['sekretariat'] = date("Y-m-d H:i:s");
+
                 // Update database
                 $update_data = [
                     'status' => 'ditolak sekretariat',
                     'approval_status' => json_encode($approval),
                     'catatan_penolakan' => $rejection_notes,
+                    'updated_at' => date('Y-m-d H:i:s')
                 ];
                 
                 $this->db->where('id', $id);
@@ -727,31 +1448,7 @@ private function get_dosen_detail_for_autocomplete($surat)
     }
 
     /* ================================
-    DEBUG: CEK STRUKTUR TABEL SURAT
-    ================================= */
-    public function debug_table_structure()
-    {
-        // Cek struktur tabel surat untuk memastikan field yang ada
-        $query = $this->db->query("DESCRIBE surat");
-        $structure = $query->result();
-        
-        echo "<h3>Struktur Tabel Surat:</h3>";
-        echo "<pre>";
-        foreach ($structure as $field) {
-            echo "Field: " . $field->Field . " | Type: " . $field->Type . " | Null: " . $field->Null . " | Key: " . $field->Key . "<br>";
-        }
-        echo "</pre>";
-        
-        // Cek data contoh untuk debugging
-        $sample = $this->db->get('surat')->row();
-        echo "<h3>Data Contoh:</h3>";
-        echo "<pre>";
-        print_r($sample);
-        echo "</pre>";
-    }
-
-    /* ================================
-    EDIT SURAT - HANYA UNTUK DITOLAK DEKAN (SESUAI DENGAN VIEW BARU)
+    EDIT SURAT - HANYA UNTUK DITOLAK DEKAN
     ================================= */
     public function edit_surat($id)
     {
@@ -776,7 +1473,7 @@ private function get_dosen_detail_for_autocomplete($surat)
         $data['surat'] = (array)$surat;
         
         // Get dosen data untuk ditampilkan
-        $data['dosen_data'] = $this->get_dosen_detail_for_autocomplete($surat);
+        $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat->nip);
         
         // Process eviden data
         $eviden_raw = $surat->eviden ?? "[]";
@@ -911,6 +1608,7 @@ private function get_dosen_detail_for_autocomplete($surat)
         // 🔥 PREPARE DATA UPDATE
         // ========================================
         $update = [
+            'nomor_surat' => $post['nomor_surat'] ?? $surat->nomor_surat,
             'nama_kegiatan' => $post['nama_kegiatan'] ?? $surat->nama_kegiatan,
             'jenis_date' => $post['jenis_date'] ?? $surat->jenis_date,
             'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan'] ?? null),
@@ -975,13 +1673,50 @@ private function get_dosen_detail_for_autocomplete($surat)
     }
 
     /* ================================
-    HELPER: SAFE DATE (SAMA DENGAN SURAT CONTROLLER)
+    HELPER: SAFE DATE
     ================================= */
     private function safe_date($val)
     {
         if (!$val || trim($val) === "" || $val === "-") return "-";
         $ts = strtotime($val);
         return $ts ? date('Y-m-d', $ts) : "";
+    }
+
+    /* ================================
+    GET DOSEN DETAIL UNTUK AUTOCOMPLETE
+    ================================= */
+    private function get_dosen_detail_for_autocomplete($surat)
+    {
+        $nip_list = is_array($surat->nip) ? $surat->nip : json_decode($surat->nip, true);
+        
+        if (!$nip_list) return [];
+        
+        $dosen_data = [];
+        
+        foreach ($nip_list as $nip) {
+            if (!empty($nip) && $nip !== '-') {
+                $this->db->where('nip', $nip);
+                $dosen = $this->db->get('list_dosen')->row();
+                
+                if ($dosen) {
+                    $dosen_data[] = [
+                        'nip' => $dosen->nip,
+                        'nama_dosen' => $dosen->nama_dosen,
+                        'jabatan' => $dosen->jabatan,
+                        'divisi' => $dosen->divisi
+                    ];
+                } else {
+                    $dosen_data[] = [
+                        'nip' => $nip,
+                        'nama_dosen' => '',
+                        'jabatan' => '',
+                        'divisi' => ''
+                    ];
+                }
+            }
+        }
+        
+        return $dosen_data;
     }
 
     /* ================================
@@ -1287,45 +2022,63 @@ private function get_dosen_detail_for_autocomplete($surat)
 
         return $diff->d . " hari " . $diff->h . " jam ";
     }
-   /* ================================
-   AUTOCOMPLETE NIP - SAMA SEPERTI DI SURAT CONTROLLER
-================================= */
-public function autocomplete_nip()
-{
-    header('Content-Type: application/json');
-    
-    $query = $this->input->get('q');
-    $field = $this->input->get('field');
-    
-    if (empty($query) || strlen($query) < 1) {
-        echo json_encode([]);
-        return;
-    }
-    
-    $allowed_fields = ['nip', 'nama_dosen', 'jabatan', 'divisi'];
-    if (!in_array($field, $allowed_fields)) {
-        $field = 'nip';
-    }
-    
-    try {
-        $this->db->select('nip, nama_dosen, jabatan, divisi');
-        $this->db->from('list_dosen');
-        $this->db->like($field, $query);
-        $this->db->limit(10);
-        $this->db->order_by($field, 'ASC');
+
+    /* ================================
+    AUTOCOMPLETE NIP
+    ================================= */
+    public function autocomplete_nip()
+    {
+        header('Content-Type: application/json');
         
-        $result = $this->db->get();
+        $query = $this->input->get('q');
+        $field = $this->input->get('field');
         
-        if ($result->num_rows() > 0) {
-            $data = $result->result_array();
-            echo json_encode($data);
-        } else {
+        if (empty($query) || strlen($query) < 1) {
             echo json_encode([]);
+            return;
         }
         
-    } catch (Exception $e) {
-        log_message('error', 'Autocomplete error: ' . $e->getMessage());
-        echo json_encode([]);
+        $allowed_fields = ['nip', 'nama_dosen', 'jabatan', 'divisi'];
+        if (!in_array($field, $allowed_fields)) {
+            $field = 'nip';
+        }
+        
+        try {
+            $this->db->select('nip, nama_dosen, jabatan, divisi');
+            $this->db->from('list_dosen');
+            $this->db->like($field, $query);
+            $this->db->limit(10);
+            $this->db->order_by($field, 'ASC');
+            
+            $result = $this->db->get();
+            
+            if ($result->num_rows() > 0) {
+                $data = $result->result_array();
+                echo json_encode($data);
+            } else {
+                echo json_encode([]);
+            }
+            
+        } catch (Exception $e) {
+            log_message('error', 'Autocomplete error: ' . $e->getMessage());
+            echo json_encode([]);
+        }
     }
+    public function set_disposisi()
+{
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    $id = $data["id"];
+    $disposisi = $data["disposisi"];
+    $catatan = $data["catatan"] ?? "";
+
+    $this->db->where("id", $id);
+    $this->db->update("surat", [
+        "disposisi_status" => $disposisi,
+        "disposisi_catatan" => $catatan,
+    ]);
+
+    echo json_encode(["success" => true]);
 }
+
 }

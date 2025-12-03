@@ -172,4 +172,27 @@ public function reject($id)
 
         $this->load->view('dekan/list_surat_tugas', $data);
     }
+    // Di Surat_model.php
+public function countByMonthYear($month, $year)
+{
+    $this->db->where('YEAR(created_at)', $year);
+    $this->db->where('MONTH(created_at)', $month);
+    return $this->db->count_all_results('surat_tugas');
+}
+
+public function countApprovedByMonthYear($month, $year)
+{
+    $this->db->where('YEAR(created_at)', $year);
+    $this->db->where('MONTH(created_at)', $month);
+    $this->db->where('status', 'disetujui');
+    return $this->db->count_all_results('surat_tugas');
+}
+
+public function countRejectedByMonthYear($month, $year)
+{
+    $this->db->where('YEAR(created_at)', $year);
+    $this->db->where('MONTH(created_at)', $month);
+    $this->db->where('status', 'ditolak');
+    return $this->db->count_all_results('surat_tugas');
+}
 }

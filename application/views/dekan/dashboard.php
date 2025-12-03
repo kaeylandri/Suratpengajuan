@@ -35,14 +35,14 @@
     .btn-reject:hover{background:#c0392b}
     .btn-detail{background:#3498db;color:#fff}
     .btn-detail:hover{background:#2980b9}
-    .chart-container{position:relative;height:450px;padding:20px}
+    .chart-container{position:relative;height:450px;padding:10px;}
     .filter-container{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap}
     .filter-select{padding:10px 15px;border-radius:8px;border:2px solid #ddd;font-weight:600;cursor:pointer;min-width:200px}
     
     /* Modal Styles */
     .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
     .modal.show{display:flex}
-    .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    .modal-content{background:white;padding:0;border-radius:15px;max-width:1100px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
     .modal-header{background:#FB8C00;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
     .modal-header h3{margin:0;font-size:18px;font-weight:600}
@@ -573,6 +573,36 @@
             flex: 1;
         }
     }
+    /* Tambahkan di bagian CSS halaman utama */
+.btn-bulk {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-bulk:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.bulk-modal-content {
+    background: white;
+    padding: 0;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 95%;
+    max-height: 85vh;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
 </style>
 </head>
 <body>
@@ -601,60 +631,140 @@
     $pending_count = isset($pending_count) ? (int)$pending_count : 0;
     ?>
 
-   <!-- Statistik -->
-<div class="stats-grid">
+  <!-- Statistik Grid yang Diperkecil -->
+<div class="stats-grid" style="gap: 10px; margin-bottom: 15px;">
     <!-- Total Pengajuan -->
-    <a href="<?= base_url('dekan/halaman_total') ?>" class="stat-card" style="border-left-color:#3498db;">
-        <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
-        <div class="number"><?= $total_all ?></div>
-    </a>
-    
-    <!-- Disetujui -->
-    <a href="<?= base_url('dekan/halaman_disetujui') ?>" class="stat-card" style="border-left-color:#27ae60;">
-        <h3><i class="fa-solid fa-check-circle"></i> Disetujui</h3>
-        <div class="number"><?= $approved_count ?></div>
-    </a>
-    
-    <!-- Ditolak -->
-    <a href="<?= base_url('dekan/halaman_ditolak') ?>" class="stat-card" style="border-left-color:#e74c3c;">
-        <h3><i class="fa-solid fa-times-circle"></i> Ditolak</h3>
-        <div class="number"><?= $rejected_count ?></div>
+    <a href="<?= base_url('dekan/halaman_total') ?>" class="stat-card" style="
+        border-left-color:#3498db;
+        padding: 12px 15px;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    ">
+        <h3 style="font-size: 10px; margin-bottom: 4px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-folder" style="font-size: 9px;"></i> TOTAL PENGAJUAN
+        </h3>
+        <div class="number" style="font-size: 20px; font-weight: 800; color: #5e5e5eff;">
+            <?= $total_all ?>
+        </div>
     </a>
     
     <!-- Menunggu Persetujuan -->
-    <a href="<?= base_url('dekan/halaman_pending') ?>" class="stat-card" style="border-left-color:#f39c12;">
-        <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
-        <div class="number"><?= $pending_count ?></div>
+    <a href="<?= base_url('dekan/halaman_pending') ?>" class="stat-card" style="
+        border-left-color:#f39c12;
+        padding: 12px 15px;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    ">
+        <h3 style="font-size: 10px; margin-bottom: 4px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-clock" style="font-size: 9px;"></i> MENUNGGU PERSETUJUAN
+        </h3>
+        <div class="number" style="font-size: 20px; font-weight: 800; color: #5e5e5eff;">
+            <?= $pending_count ?>
+        </div>
+    </a>
+    
+    <!-- Disetujui -->
+    <a href="<?= base_url('dekan/halaman_disetujui') ?>" class="stat-card" style="
+        border-left-color:#27ae60;
+        padding: 12px 15px;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    ">
+        <h3 style="font-size: 10px; margin-bottom: 4px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-check-circle" style="font-size: 9px;"></i> DISETUJUI
+        </h3>
+        <div class="number" style="font-size: 20px; font-weight: 800; color: #5e5e5eff;">
+            <?= $approved_count ?>
+        </div>
+    </a>
+    
+    <!-- Ditolak -->
+    <a href="<?= base_url('dekan/halaman_ditolak') ?>" class="stat-card" style="
+        border-left-color:#e74c3c;
+        padding: 12px 15px;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    ">
+        <h3 style="font-size: 10px; margin-bottom: 4px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-times-circle" style="font-size: 9px;"></i> DITOLAK
+        </h3>
+        <div class="number" style="font-size: 20px; font-weight: 800; color: #5e5e5eff;">
+            <?= $rejected_count ?>
+        </div>
     </a>
 </div>
-
     <!-- Filter -->
-    <div class="filter-container">
-        <div>
-            <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
-                <i class="fa-solid fa-calendar"></i> Filter Tahun
-            </label>
-            <select class="filter-select" id="tahunSelect" onchange="updateTahun(this.value)">
-                <?php 
-                    $currentYear = date('Y');
-                    $selectedYear = isset($tahun) ? $tahun : $currentYear;
-                    for ($y = $currentYear; $y >= $currentYear - 5; $y--): 
-                ?>
-                    <option value="<?= $y ?>" <?= ($selectedYear == $y ? 'selected' : '') ?>>Tahun <?= $y ?></option>
-                <?php endfor; ?>
-            </select>
-        </div>
+<div class="filter-container">
+    <div>
+        <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
+            <i class="fa-solid fa-calendar"></i> Filter Tahun
+        </label>
+        <select class="filter-select" id="tahunSelect" onchange="updateTahun(this.value)">
+            <?php 
+                $currentYear = date('Y');
+                $selectedYear = isset($tahun) ? $tahun : $currentYear;
+                for ($y = $currentYear; $y >= $currentYear - 5; $y--): 
+            ?>
+                <option value="<?= $y ?>" <?= ($selectedYear == $y ? 'selected' : '') ?>>Tahun <?= $y ?></option>
+            <?php endfor; ?>
+        </select>
     </div>
+    
+    <div>
+        <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
+            <i class="fa-solid fa-calendar-alt"></i> Filter Bulan
+        </label>
+        <select class="filter-select" id="bulanSelect" onchange="filterByBulan(this.value)">
+            <option value="all">Semua Bulan</option>
+            <option value="1" <?= (isset($bulan) && $bulan == 1 ? 'selected' : '') ?>>Januari</option>
+            <option value="2" <?= (isset($bulan) && $bulan == 2 ? 'selected' : '') ?>>Februari</option>
+            <option value="3" <?= (isset($bulan) && $bulan == 3 ? 'selected' : '') ?>>Maret</option>
+            <option value="4" <?= (isset($bulan) && $bulan == 4 ? 'selected' : '') ?>>April</option>
+            <option value="5" <?= (isset($bulan) && $bulan == 5 ? 'selected' : '') ?>>Mei</option>
+            <option value="6" <?= (isset($bulan) && $bulan == 6 ? 'selected' : '') ?>>Juni</option>
+            <option value="7" <?= (isset($bulan) && $bulan == 7 ? 'selected' : '') ?>>Juli</option>
+            <option value="8" <?= (isset($bulan) && $bulan == 8 ? 'selected' : '') ?>>Agustus</option>
+            <option value="9" <?= (isset($bulan) && $bulan == 9 ? 'selected' : '') ?>>September</option>
+            <option value="10" <?= (isset($bulan) && $bulan == 10 ? 'selected' : '') ?>>Oktober</option>
+            <option value="11" <?= (isset($bulan) && $bulan == 11 ? 'selected' : '') ?>>November</option>
+            <option value="12" <?= (isset($bulan) && $bulan == 12 ? 'selected' : '') ?>>Desember</option>
+        </select>
+    </div>
+</div>
 
-    <!-- Grafik 3D -->
-    <div class="card" style="background: linear-gradient(135deg, #ffffffff 0%, #f7f7f7ff 100%);">
-        <div class="card-header" style="border-bottom-color: rgba(16, 11, 11, 0.1)">
-            <strong style="color: #030707ff"><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan — Tahun <?= isset($tahun) ? $tahun : date('Y') ?></strong>
-        </div>
-        <div class="chart-container">
-            <canvas id="grafikSurat"></canvas>
-        </div>
+<!-- Grafik 3D -->
+<div class="card" style="background: linear-gradient(135deg, #ffffffff 0%, #f7f7f7ff 100%);">
+    <div class="card-header" style="border-bottom-color: rgba(16, 11, 11, 0.1)">
+        <strong style="color: #030707ff"><i class="fa-solid fa-chart-bar"></i> Grafik Pengajuan — 
+            <?php 
+                if(isset($bulan) && $bulan != 'all') {
+                    $namaBulan = [
+                        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                    ];
+                    echo $namaBulan[$bulan] . ' ';
+                }
+            ?>
+            Tahun <?= isset($tahun) ? $tahun : date('Y') ?>
+        </strong>
     </div>
+    <div class="chart-container">
+        <canvas id="grafikSurat"></canvas>
+    </div>
+</div>
 
     <!-- Tabel -->
     <div class="card">
@@ -825,8 +935,96 @@
         </div>
     </div>
 </div>
+<!-- Success Result Modal - DIUBAH SEPERTI DI HALAMAN PENDING -->
+<div id="successResultModal" class="modal" onclick="modalClickOutside(event,'successResultModal')">
+    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <div class="modal-header" style="background: #27ae60;">
+            <h3><i class="fa-solid fa-check-circle"></i> <span id="successResultTitle">Pengajuan Berhasil Disetujui</span></h3>
+            <button class="close-modal" onclick="closeModal('successResultModal')">&times;</button>
+        </div>
+        <div style="padding:25px;text-align:center">
+            <div style="width:100px;height:100px;border-radius:50%;background:#d4edda;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                <i class="fas fa-check" style="font-size:50px;color:#27ae60"></i>
+            </div>
+            
+            <h3 style="color:#27ae60;margin-bottom:10px">Berhasil Disetujui</h3>
+            <p style="color:#666;margin-bottom:5px">
+                <i class="fa-solid fa-clock"></i> Disetujui pada: <strong id="successTimestamp">-</strong>
+            </p>
+            
+            <div style="background:#d4edda;border:1px solid #c3e6cb;border-radius:8px;padding:15px;margin:20px 0">
+                <div style="font-weight:600;color:#155724;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+                    <span>Daftar Pengajuan</span>
+                    <span id="successItemCount" style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:12px">0 item</span>
+                </div>
+                <div id="successList" style="max-height:250px;overflow-y:auto;text-align:left">
+                    <!-- List akan diisi oleh JavaScript -->
+                </div>
+            </div>
+            
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+                <button class="btn-bulk" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
+                </button>
+                <button class="btn-bulk" onclick="closeModal('successResultModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Success Result Modal -->
+<div id="successResultModal" class="modal" onclick="modalClickOutside(event,'successResultModal')">
+    <div class="bulk-modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header" style="background: #27ae60;">
+            <h3><i class="fa-solid fa-check-circle"></i> <span id="successResultTitle">Pengajuan Berhasil Disetujui</span></h3>
+            <button class="close-modal" onclick="closeModal('successResultModal')">&times;</button>
+        </div>
+        <div style="padding:25px;text-align:center">
+            <div style="width:100px;height:100px;border-radius:50%;background:#d4edda;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                <i class="fas fa-check" style="font-size:50px;color:#27ae60"></i>
+            </div>
+            
+            <h3 style="color:#27ae60;margin-bottom:10px">Berhasil Disetujui</h3>
+            <p style="color:#666;margin-bottom:5px">
+                <i class="fa-solid fa-clock"></i> Disetujui pada: <strong id="successTimestamp">-</strong>
+            </p>
+            
+            <div style="background:#d4edda;border:1px solid #ffffffff;border-radius:8px;padding:15px;margin:20px 0">
+                <div style="font-weight:600;color:#155724;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+                    <span>Daftar Pengajuan</span>
+                    <span id="successItemCount" style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:12px">0 item</span>
+                </div>
+                <div id="successList" style="max-height:250px;overflow-y:auto">
+                    <!-- List akan diisi oleh JavaScript -->
+                </div>
+            </div>
+            
+            <div style="display:flex;gap:10px;justify-content:center">
+                <button class="btn-bulk" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px">
+                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
+                </button>
+                <button class="btn-bulk" onclick="closeModal('successResultModal')" style="background:#6c757d;color:white;padding:10px 24px">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Preview Modal (untuk single file preview) -->
+<div id="previewModal" class="preview-modal">
+    <div class="preview-content">
+        <div class="preview-header">
+            <h3 id="previewTitle">Preview File</h3>
+            <button class="preview-close" onclick="closePreviewModal()">&times;</button>
+        </div>
+        <div class="preview-body" id="previewBody">
+            <!-- Preview content akan diisi oleh JavaScript -->
+        </div>
+    </div>
+</div>
 
-<!-- Eviden Modal -->
+<!-- Eviden Modal (untuk multiple files) -->
 <div id="evidenModal" class="modal" onclick="modalClickOutside(event,'evidenModal')">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -935,160 +1133,212 @@ function closePreviewModal() {
 // Fungsi untuk menampilkan modal eviden
 async function showEvidenModal(suratId) {
     try {
-        // Tampilkan loading
-        document.getElementById('evidenContent').innerHTML = `
-            <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
-                <p style="margin-top:10px;color:#7f8c8d">Memuat eviden...</p>
-            </div>
-        `;
+        // Tampilkan loading kecil di tombol (optional)
         
-        document.getElementById('evidenModal').classList.add('show');
-
         // Ambil data detail via AJAX
         const item = await getSuratDetail(suratId);
         
         if (!item) {
             alert('Data tidak ditemukan');
-            closeModal('evidenModal');
             return;
         }
 
-        // Tampilkan eviden dengan format seperti dashboard sekretariat
-        const content = generateEvidenContent(item);
-        document.getElementById('evidenContent').innerHTML = content;
+        // Ambil dan proses data eviden
+        const evidenFiles = getEvidenFilesFromData(item);
+        
+        if (evidenFiles.length === 0) {
+            alert('Tidak ada file eviden untuk pengajuan ini.');
+            return;
+        }
+        
+        // LOGIKA BARU: Jika hanya 1 file, langsung preview
+        if (evidenFiles.length === 1) {
+            const file = evidenFiles[0];
+            previewFile(file.url, file.name);
+        } else {
+            // Jika lebih dari 1 file, tampilkan modal daftar file
+            showMultipleEvidenModal(item, evidenFiles);
+        }
         
     } catch (error) {
         console.error('Error loading eviden:', error);
-        document.getElementById('evidenContent').innerHTML = `
-            <div style="text-align:center;padding:40px;color:#e74c3c">
-                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
-                <p>Gagal memuat eviden: ${error.message}</p>
-                <button class="modal-btn modal-btn-close" onclick="closeModal('evidenModal')" style="margin-top:20px">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
+        alert('Gagal memuat eviden: ' + error.message);
     }
 }
 
-// Fungsi untuk generate konten eviden seperti dashboard sekretariat
-function generateEvidenContent(item) {
+// Fungsi helper untuk mendapatkan array file eviden dari data
+function getEvidenFilesFromData(item) {
+    const getVal = (k) => {
+        const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+        return value;
+    };
+
+    const evidenValue = getVal('eviden');
+    const baseUrl = '<?= base_url() ?>';
+    let evidenFiles = [];
+    
+    if (evidenValue && evidenValue !== '-') {
+        try {
+            // Coba parse JSON jika eviden adalah array
+            if (Array.isArray(evidenValue)) {
+                evidenValue.forEach(file => {
+                    if (file && file !== '-' && file !== 'null') {
+                        const fileName = getFileNameFromPath(file);
+                        const fileUrl = getFileUrl(file, baseUrl);
+                        evidenFiles.push({
+                            name: fileName,
+                            url: fileUrl,
+                            ext: fileName.split('.').pop().toLowerCase()
+                        });
+                    }
+                });
+            } else if (typeof evidenValue === 'string' && evidenValue.startsWith('[')) {
+                const parsed = JSON.parse(evidenValue);
+                if (Array.isArray(parsed)) {
+                    parsed.forEach(file => {
+                        if (file && file !== '-' && file !== 'null') {
+                            const fileName = getFileNameFromPath(file);
+                            const fileUrl = getFileUrl(file, baseUrl);
+                            evidenFiles.push({
+                                name: fileName,
+                                url: fileUrl,
+                                ext: fileName.split('.').pop().toLowerCase()
+                            });
+                        }
+                    });
+                }
+            } else {
+                // Single file string
+                const fileName = getFileNameFromPath(evidenValue);
+                const fileUrl = getFileUrl(evidenValue, baseUrl);
+                evidenFiles.push({
+                    name: fileName,
+                    url: fileUrl,
+                    ext: fileName.split('.').pop().toLowerCase()
+                });
+            }
+        } catch (e) {
+            // Fallback: treat as single file
+            const fileName = getFileNameFromPath(evidenValue);
+            const fileUrl = getFileUrl(evidenValue, baseUrl);
+            evidenFiles.push({
+                name: fileName,
+                url: fileUrl,
+                ext: fileName.split('.').pop().toLowerCase()
+            });
+        }
+    }
+    
+    return evidenFiles;
+}
+
+// Helper function untuk mendapatkan nama file dari path
+function getFileNameFromPath(path) {
+    if (!path) return 'file';
+    return path.split('/').pop().split('\\').pop();
+}
+
+// Helper function untuk mendapatkan URL file yang lengkap
+function getFileUrl(filePath, baseUrl) {
+    if (!filePath) return '#';
+    
+    // Jika sudah URL lengkap
+    if (filePath.startsWith('http://') || filePath.startsWith('https://') || filePath.startsWith('<?= base_url() ?>')) {
+        return filePath;
+    }
+    
+    // Coba beberapa kemungkinan path
+    const fileName = getFileNameFromPath(filePath);
+    const possiblePaths = [
+        'uploads/eviden/' + fileName,
+        'eviden/' + fileName,
+        'assets/eviden/' + fileName,
+        'uploads/' + fileName,
+        filePath  // original path
+    ];
+    
+    // Gunakan path pertama
+    return baseUrl + possiblePaths[0];
+}
+
+// Fungsi untuk menampilkan modal multiple eviden (lebih dari 1 file)
+function showMultipleEvidenModal(item, evidenFiles) {
+    // Tampilkan loading
+    document.getElementById('evidenContent').innerHTML = `
+        <div style="text-align:center;padding:40px;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
+            <p style="margin-top:10px;color:#7f8c8d">Memuat eviden...</p>
+        </div>
+    `;
+    
+    document.getElementById('evidenModal').classList.add('show');
+    
+    // Generate content
+    const content = generateMultipleEvidenContent(item, evidenFiles);
+    document.getElementById('evidenContent').innerHTML = content;
+}
+// Fungsi untuk generate konten multiple eviden (lebih dari 1 file)
+function generateMultipleEvidenContent(item, evidenFiles) {
     // Helper function
     const getVal = (k) => {
         const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
         return value;
     };
 
-    // Generate file evidence HTML
+    // Generate file evidence HTML untuk multiple files
     let fileEvidenceHtml = '';
-    const evidenValue = getVal('eviden');
     
-    if (evidenValue && evidenValue !== '-') {
-        const baseUrl = '<?= base_url() ?>';
+    if (evidenFiles.length > 0) {
+        fileEvidenceHtml = `
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-paperclip"></i> File Evidence (${evidenFiles.length} file)
+            </div>
+            <div class="file-evidence">`;
         
-        // Handle jika eviden adalah array atau string
-        let evidenFiles = [];
-        
-        try {
-            // Coba parse JSON jika eviden adalah array
-            if (Array.isArray(evidenValue)) {
-                evidenFiles = evidenValue;
-            } else if (typeof evidenValue === 'string' && evidenValue.startsWith('[')) {
-                evidenFiles = JSON.parse(evidenValue);
-            } else {
-                evidenFiles = [evidenValue];
-            }
-        } catch (e) {
-            evidenFiles = [evidenValue];
-        }
-        
-        // Filter hanya file yang valid
-        evidenFiles = evidenFiles.filter(file => file && file !== '-' && file !== 'null');
-        
-        if (evidenFiles.length > 0) {
-            fileEvidenceHtml = `
-            <div class="detail-section">
-                <div class="detail-section-title">
-                    <i class="fa-solid fa-paperclip"></i> File Evidence (${evidenFiles.length} file)
-                </div>
-                <div class="file-evidence">`;
+        evidenFiles.forEach((file, index) => {
+            const ext = file.ext;
+            let fileIcon = 'fa-file';
+            let canPreview = false;
             
-            evidenFiles.forEach((file, index) => {
-                let fileName = file;
-                let fileUrl = file;
-                
-                // Handle relative path
-                if (!file.startsWith('http://') && !file.startsWith('https://') && !file.startsWith('<?= base_url() ?>')) {
-                    fileName = file.split('/').pop();
-                    // Coba beberapa kemungkinan path
-                    const possiblePaths = [
-                        'uploads/eviden/' + fileName,
-                        'eviden/' + fileName,
-                        'assets/eviden/' + fileName,
-                        file  // original path
-                    ];
-                    
-                    // Gunakan path pertama yang valid
-                    fileUrl = baseUrl + possiblePaths[0];
-                } else {
-                    fileName = file.split('/').pop();
-                }
-                
-                const ext = fileName.split('.').pop().toLowerCase();
-                let fileIcon = 'fa-file';
-                let canPreview = false;
-                
-                if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
-                    fileIcon = 'fa-file-image';
-                    canPreview = true;
-                } else if (ext === 'pdf') {
-                    fileIcon = 'fa-file-pdf';
-                    canPreview = true;
-                } else if (['doc', 'docx'].includes(ext)) {
-                    fileIcon = 'fa-file-word';
-                } else if (['xls', 'xlsx'].includes(ext)) {
-                    fileIcon = 'fa-file-excel';
-                }
-                
-                fileEvidenceHtml += `
-                    <div class="file-item">
-                        <div class="file-icon">
-                            <i class="fa-solid ${fileIcon}"></i>
-                        </div>
-                        <div class="file-info" ${canPreview ? `onclick="previewFile('${fileUrl}', '${fileName}')" style="cursor: pointer;"` : ''}>
-                            <div class="file-name" ${canPreview ? 'title="Klik untuk preview"' : ''}>${escapeHtml(fileName)}</div>
-                            <div class="file-size">File ${index + 1} - ${ext.toUpperCase()}</div>
-                        </div>
-                        ${canPreview ? 
-                            `<button class="preview-btn" onclick="previewFile('${fileUrl}', '${fileName}')">
-                                <i class="fa-solid fa-eye"></i> Preview
-                            </button>` :
-                            `<button class="preview-btn disabled" disabled title="Preview tidak tersedia">
-                                <i class="fa-solid fa-eye-slash"></i> Preview
-                            </button>`
-                        }
-                        <a href="${fileUrl}" target="_blank" class="download-btn" download="${fileName}">
-                            <i class="fa-solid fa-download"></i> Download
-                        </a>
-                    </div>`;
-            });
+            if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) {
+                fileIcon = 'fa-file-image';
+                canPreview = true;
+            } else if (ext === 'pdf') {
+                fileIcon = 'fa-file-pdf';
+                canPreview = true;
+            } else if (['doc', 'docx'].includes(ext)) {
+                fileIcon = 'fa-file-word';
+            } else if (['xls', 'xlsx'].includes(ext)) {
+                fileIcon = 'fa-file-excel';
+            }
             
             fileEvidenceHtml += `
-                </div>
-            </div>`;
-        } else {
-            fileEvidenceHtml = `
-            <div class="detail-section">
-                <div class="detail-section-title">
-                    <i class="fa-solid fa-paperclip"></i> File Evidence
-                </div>
-                <div style="text-align:center;padding:40px;color:#6c757d">
-                    <i class="fa-solid fa-file" style="font-size:48px;margin-bottom:15px;opacity:0.3"></i>
-                    <p>Tidak ada file eviden untuk pengajuan ini.</p>
-                </div>
-            </div>`;
-        }
+                <div class="file-item">
+                    <div class="file-icon">
+                        <i class="fa-solid ${fileIcon}"></i>
+                    </div>
+                    <div class="file-info" ${canPreview ? `onclick="previewFile('${file.url}', '${file.name}')" style="cursor: pointer;"` : ''}>
+                        <div class="file-name" ${canPreview ? 'title="Klik untuk preview"' : ''}>${escapeHtml(file.name)}</div>
+                        <div class="file-size">File ${index + 1} - ${ext.toUpperCase()}</div>
+                    </div>
+                    ${canPreview ? 
+                        `<button class="preview-btn" onclick="previewFile('${file.url}', '${file.name}')">
+                            <i class="fa-solid fa-eye"></i> Preview
+                        </button>` :
+                        `<button class="preview-btn disabled" disabled title="Preview tidak tersedia">
+                            <i class="fa-solid fa-eye-slash"></i> Preview
+                        </button>`
+                    }
+                    <a href="${file.url}" target="_blank" class="download-btn" download="${file.name}">
+                        <i class="fa-solid fa-download"></i> Download
+                    </a>
+                </div>`;
+        });
+        
+        fileEvidenceHtml += `
+            </div>
+        </div>`;
     } else {
         fileEvidenceHtml = `
         <div class="detail-section">
@@ -1102,14 +1352,15 @@ function generateEvidenContent(item) {
         </div>`;
     }
 
-    // Tampilkan informasi surat juga
     return `       
         ${fileEvidenceHtml}
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-close" onclick="closeModal('evidenModal')">
+                <i class="fa-solid fa-times"></i> Tutup
+            </button>
+        </div>
     `;
-}
-// Existing Functions
-function updateTahun(year) {
-    window.location.href = "<?= base_url('dekan?tahun=') ?>" + year;
 }
 
 // REVISI: Function showDetail untuk menampilkan surat pengajuan
@@ -1222,8 +1473,10 @@ function escapeHtml(unsafe) {
        .replace(/'/g, "&#039;");
 }
 
-/// Grafik
-const ctx = document.getElementById('grafikSurat').getContext('2d');
+// Buat variabel global untuk chart
+let chartInstance = null;
+
+// Plugin untuk efek 3D - HARUS DITAMBAHKAN
 const fusionStyle3DPlugin = {
     id: 'fusionStyle3d',
     beforeDatasetsDraw: (chart) => {
@@ -1267,24 +1520,313 @@ const fusionStyle3DPlugin = {
     }
 };
 
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-        labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
+// Fungsi untuk membuat atau memperbarui grafik
+function initChart() {
+    const ctx = document.getElementById('grafikSurat');
+    
+    // Pastikan elemen canvas ada
+    if (!ctx) {
+        console.error('Canvas element #grafikSurat tidak ditemukan!');
+        return;
+    }
+    
+    // Pastikan context tersedia
+    const chartCtx = ctx.getContext('2d');
+    if (!chartCtx) {
+        console.error('Tidak bisa mendapatkan context dari canvas');
+        return;
+    }
+    
+    // Hapus chart sebelumnya jika ada
+    if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
+    
+    // Cek apakah ada filter bulan
+    const bulanSelect = document.getElementById('bulanSelect');
+    const selectedBulan = bulanSelect ? bulanSelect.value : 'all';
+    
+    // Data dari PHP (pastikan tidak null/undefined)
+    const chartTotal = <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>;
+    const chartApproved = <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>;
+    const chartRejected = <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>;
+    
+    console.log('Data Chart:', {
+        total: chartTotal,
+        approved: chartApproved,
+        rejected: chartRejected,
+        bulan: selectedBulan
+    });
+    
+    // Label bulan
+    const monthLabels = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    
+    // Jika filter bulan dipilih (bukan "all"), tampilkan hanya data bulan tersebut
+    let displayLabels = monthLabels;
+    let displayData = {
+        labels: displayLabels,
         datasets: [
-            {label: "Total", data: <?= json_encode(isset($chart_total) ? $chart_total : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(0, 177, 253, 0.6)', borderColor: 'rgba(4, 146, 207, 0.6)', borderWidth: 2, borderRadius: 6},
-            {label: "Disetujui", data: <?= json_encode(isset($chart_approved) ? $chart_approved : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(46, 204, 113, 0.85)', borderColor: 'rgba(46, 204, 113, 1)', borderWidth: 2, borderRadius: 6},
-            {label: "Ditolak", data: <?= json_encode(isset($chart_rejected) ? $chart_rejected : array_fill(0,12,0)) ?>, backgroundColor: 'rgba(231, 76, 60, 0.85)', borderColor: 'rgba(231, 76, 60, 1)', borderWidth: 2, borderRadius: 6}
+            {
+                label: "Total", 
+                data: chartTotal, 
+                backgroundColor: 'rgba(0, 177, 253, 0.6)', 
+                borderColor: 'rgba(4, 146, 207, 0.6)', 
+                borderWidth: 2, 
+                borderRadius: 6
+            },
+            {
+                label: "Disetujui", 
+                data: chartApproved, 
+                backgroundColor: 'rgba(46, 204, 113, 0.85)', 
+                borderColor: 'rgba(46, 204, 113, 1)', 
+                borderWidth: 2, 
+                borderRadius: 6
+            },
+            {
+                label: "Ditolak", 
+                data: chartRejected, 
+                backgroundColor: 'rgba(231, 76, 60, 0.85)', 
+                borderColor: 'rgba(231, 76, 60, 1)', 
+                borderWidth: 2, 
+                borderRadius: 6
+            }
         ]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {legend: {position: 'top', labels: {padding: 20, font: {size: 14, weight: '700'}, color: '#000000ff'}}, tooltip: {backgroundColor: 'rgba(44, 62, 80, 0.95)', padding: 16}},
-        scales: {x: {grid: {display: false}, ticks: {color: '#000000ff'}}, y: {beginAtZero: true, grid: {color: 'rgba(12, 7, 7, 0.08)'}, ticks: {color: '#95a5a6'}}},
-        animation: {duration: 1800, easing: 'easeInOutQuart'}
-    },
-    plugins: [fusionStyle3DPlugin]
+    };
+    
+    if (selectedBulan !== 'all') {
+        const bulanIndex = parseInt(selectedBulan) - 1; // Konversi ke index 0-based
+        
+        // Ambil data untuk bulan yang dipilih
+        const monthData = {
+            total: chartTotal[bulanIndex] || 0,
+            approved: chartApproved[bulanIndex] || 0,
+            rejected: chartRejected[bulanIndex] || 0
+        };
+        
+        // Buat data untuk satu bulan saja
+        displayLabels = [monthLabels[bulanIndex]];
+        displayData = {
+            labels: displayLabels,
+            datasets: [
+                {
+                    label: "Total", 
+                    data: [monthData.total], 
+                    backgroundColor: 'rgba(0, 177, 253, 0.6)', 
+                    borderColor: 'rgba(4, 146, 207, 0.6)', 
+                    borderWidth: 2, 
+                    borderRadius: 6,
+                },
+                {
+                    label: "Disetujui", 
+                    data: [monthData.approved], 
+                    backgroundColor: 'rgba(46, 204, 113, 0.85)', 
+                    borderColor: 'rgba(46, 204, 113, 1)', 
+                    borderWidth: 2, 
+                    borderRadius: 6
+                },
+                {
+                    label: "Ditolak", 
+                    data: [monthData.rejected], 
+                    backgroundColor: 'rgba(231, 76, 60, 0.85)', 
+                    borderColor: 'rgba(231, 76, 60, 1)', 
+                    borderWidth: 2, 
+                    borderRadius: 6
+                }
+            ]
+        };
+        
+        console.log('Filter Bulan:', {
+            bulanIndex: bulanIndex,
+            monthData: monthData,
+            displayData: displayData
+        });
+    }
+    
+    try {
+        // Buat chart baru
+        chartInstance = new Chart(chartCtx, {
+            type: 'bar',
+            data: displayData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top', 
+                        labels: {
+                            padding: 20, 
+                            font: {size: 14, weight: '700'}, 
+                            color: '#000000ff'
+                        }
+                    }, 
+                    tooltip: {
+                        backgroundColor: 'rgba(44, 62, 80, 0.95)', 
+                        padding: 16
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {display: false}, 
+                        ticks: {color: '#000000ff'},
+                    }, 
+                    y: {
+                        beginAtZero: true, 
+                        grid: {color: 'rgba(12, 7, 7, 0.08)'}, 
+                        ticks: {color: '#95a5a6'}
+                    }
+                },
+                animation: {
+                    duration: 1800, 
+                    easing: 'easeInOutQuart'
+                }
+            },
+            plugins: [fusionStyle3DPlugin]
+        });
+        
+        console.log('Chart berhasil dibuat!');
+    } catch (error) {
+        console.error('Error membuat chart:', error);
+        
+        // Fallback: tampilkan pesan error
+        const container = document.querySelector('.chart-container');
+        if (container) {
+            container.innerHTML = `
+                <div style="text-align:center;padding:40px;color:#e74c3c">
+                    <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
+                    <h4>Gagal Memuat Grafik</h4>
+                    <p>Error: ${error.message}</p>
+                    <p style="margin-top:10px;color:#7f8c8d">
+                        Data: Total=${JSON.stringify(chartTotal)}, 
+                        Disetujui=${JSON.stringify(chartApproved)}, 
+                        Ditolak=${JSON.stringify(chartRejected)}
+                    </p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Inisialisasi chart saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM siap, inisialisasi chart...');
+    setTimeout(initChart, 100); // Tunggu sedikit untuk memastikan semua element siap
+});
+
+// Fungsi untuk filter berdasarkan bulan
+function filterByBulan(bulan) {
+    const tahun = document.getElementById('tahunSelect').value;
+    
+    // Jika memilih "Semua Bulan", redirect ke URL tanpa parameter bulan
+    if (bulan === 'all') {
+        window.location.href = "<?= base_url('dekan?tahun=') ?>" + tahun;
+    } else {
+        // Redirect dengan parameter tahun dan bulan
+        window.location.href = "<?= base_url('dekan?tahun=') ?>" + tahun + "&bulan=" + bulan;
+    }
+}
+
+// Fungsi update tahun yang sudah ada, modifikasi untuk handle bulan
+function updateTahun(year) {
+    const bulan = document.getElementById('bulanSelect').value;
+    if (bulan === 'all') {
+        window.location.href = "<?= base_url('dekan?tahun=') ?>" + year;
+    } else {
+        window.location.href = "<?= base_url('dekan?tahun=') ?>" + year + "&bulan=" + bulan;
+    }
+}
+// ============================================
+// SUCCESS MODAL FUNCTIONS - UNTUK APPROVAL
+// ============================================
+
+function refreshPage() {
+    window.location.reload();
+}
+
+// Variabel untuk menyimpan ID approval sementara
+let pendingApproveId = null;
+
+// Process single approve WITH modal confirmation
+function approveSurat(id) {
+    pendingApproveId = id;
+    
+    // Cari data surat
+    const surat = suratList.find(s => Number(s.id) === Number(id));
+    
+    if (surat) {
+        document.getElementById('approveSingleName').textContent = surat.nama_kegiatan || '-';
+        document.getElementById('approveSingleDetails').textContent = 
+            `📅 ${formatDate(surat.tanggal_kegiatan)} | 📍 ${surat.penyelenggara || '-'}`;
+    }
+    
+    document.getElementById('approveConfirmModal').classList.add('show');
+}
+
+function confirmSingleApprove() {
+    if (!pendingApproveId) return;
+    
+    closeModal('approveConfirmModal');
+    
+    // Submit approval
+    window.location.href = `<?= base_url("dekan/approve/") ?>${pendingApproveId}`;
+}
+
+// Fungsi untuk menampilkan success modal (dipanggil dari controller via session)
+function showSuccessModal(count, items, isSingle = false) {
+    const modal = document.getElementById('successResultModal');
+    const title = document.getElementById('successResultTitle');
+    const timestamp = document.getElementById('successTimestamp');
+    const itemCount = document.getElementById('successItemCount');
+    const listContainer = document.getElementById('successList');
+    
+    title.textContent = isSingle ? 'Pengajuan Berhasil Disetujui' : 'Pengajuan Berhasil Disetujui (Multiple)';
+    
+    // Format timestamp
+    const now = new Date();
+    timestamp.textContent = now.toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) + ' WIB';
+    
+    itemCount.textContent = `${count} item`;
+    
+    // Populate list
+    listContainer.innerHTML = '';
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;background:white;border:1px solid #c3e6cb;border-radius:6px;margin-bottom:8px';
+        itemDiv.innerHTML = `
+            <i class="fas fa-check-circle" style="color:#27ae60;font-size:20px;flex-shrink:0"></i>
+            <div style="flex:1;text-align:left">
+                <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(item.nama)}</div>
+                <div style="font-size:12px;color:#6c757d">${item.details}</div>
+            </div>
+            <span class="badge badge-approved" style="flex-shrink:0">${isSingle ? 'Disetujui' : 'Disetujui (Multi)'}</span>
+        `;
+        listContainer.appendChild(itemDiv);
+    });
+    
+    modal.classList.add('show');
+}
+
+// Initialize - Check if there's success data from session
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM siap, inisialisasi chart...');
+    setTimeout(initChart, 100);
+    
+    // TAMBAHAN: Check for success modal data
+    <?php if($this->session->flashdata('approved_items')): ?>
+        const approvedItems = <?= json_encode($this->session->flashdata('approved_items')) ?>;
+        const isSingle = <?= json_encode($this->session->flashdata('is_single_approve')) ?>;
+        
+        // Tunggu sebentar agar page fully loaded
+        setTimeout(function() {
+            showSuccessModal(approvedItems.length, approvedItems, isSingle);
+        }, 500);
+    <?php endif; ?>
 });
 </script>
 </body>
