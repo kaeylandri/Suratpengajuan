@@ -695,6 +695,10 @@
         <div class="form-section">
             <h5><i class="fas fa-info-circle"></i> Informasi Kegiatan</h5>
             <div class="form-group">
+                <label>Nomor Surat <span style="color:#e74c3c">*</span></label>
+                <input type="text" name="nomor_surat" class="form-control" value="<?= htmlspecialchars($surat['nomor_surat'] ?? ''); ?>" required>
+            </div>
+            <div class="form-group">
                 <label>Nama Kegiatan <span style="color:#e74c3c">*</span></label>
                 <input type="text" name="nama_kegiatan" class="form-control" value="<?= htmlspecialchars($surat['nama_kegiatan'] ?? ''); ?>" required>
             </div>

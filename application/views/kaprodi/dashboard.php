@@ -425,31 +425,78 @@
     $rejected_count = isset($rejected_count) ? (int)$rejected_count : 0;
     $pending_count = isset($pending_count) ? (int)$pending_count : 0;
     ?>
-
-   <!-- Statistik -->
-<div class="stats-grid">
+<!-- Statistik Grid yang Diperkecil -->
+<div class="stats-grid" style="gap: 10px; margin-bottom: 15px;">
     <!-- Total Pengajuan -->
-    <a href="<?= base_url('surat/semua') ?>" class="stat-card" style="border-left-color:#3498db;">
-        <h3><i class="fa-solid fa-folder"></i> Total Pengajuan</h3>
-        <div class="number"><?= $total_all ?></div>
-    </a>
-    
-    <!-- Disetujui -->
-    <a href="<?= base_url('surat/disetujui') ?>" class="stat-card" style="border-left-color:#27ae60;">
-        <h3><i class="fa-solid fa-check-circle"></i> Disetujui</h3>
-        <div class="number"><?= $approved_count ?></div>
-    </a>
-    
-    <!-- Ditolak -->
-    <a href="<?= base_url('surat/ditolak') ?>" class="stat-card" style="border-left-color:#e74c3c;">
-        <h3><i class="fa-solid fa-times-circle"></i> Ditolak</h3>
-        <div class="number"><?= $rejected_count ?></div>
+    <a href="<?= base_url('surat/semua') ?>" class="stat-card" style="
+        border-left-color:#3498db;
+        padding: 12px 15px;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    ">
+        <h3 style="font-size: 10px; margin-bottom: 4px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-folder" style="font-size: 9px;"></i> TOTAL PENGAJUAN
+        </h3>
+        <div class="number" style="font-size: 20px; font-weight: 800; color: #5e5e5eff;">
+            <?= $total_all ?>
+        </div>
     </a>
     
     <!-- Menunggu Persetujuan -->
-    <a href="<?= base_url('surat/pending') ?>" class="stat-card" style="border-left-color:#f39c12;">
-        <h3><i class="fa-solid fa-clock"></i> Menunggu Persetujuan</h3>
-        <div class="number"><?= $pending_count ?></div>
+    <a href="<?= base_url('surat/pending') ?>" class="stat-card" style="
+        border-left-color:#f39c12;
+        padding: 12px 15px;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    ">
+        <h3 style="font-size: 10px; margin-bottom: 4px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-clock" style="font-size: 9px;"></i> MENUNGGU PERSETUJUAN
+        </h3>
+        <div class="number" style="font-size: 20px; font-weight: 800; color: #5e5e5eff;">
+            <?= $pending_count ?>
+        </div>
+    </a>
+    
+    <!-- Disetujui -->
+    <a href="<?= base_url('surat/disetujui') ?>" class="stat-card" style="
+        border-left-color:#27ae60;
+        padding: 12px 15px;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    ">
+        <h3 style="font-size: 10px; margin-bottom: 4px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-check-circle" style="font-size: 9px;"></i> DISETUJUI
+        </h3>
+        <div class="number" style="font-size: 20px; font-weight: 800; color: #5e5e5eff;">
+            <?= $approved_count ?>
+        </div>
+    </a>
+    
+    <!-- Ditolak -->
+    <a href="<?= base_url('surat/ditolak') ?>" class="stat-card" style="
+        border-left-color:#e74c3c;
+        padding: 12px 15px;
+        text-align: center;
+        min-height: 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    ">
+        <h3 style="font-size: 10px; margin-bottom: 4px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-times-circle" style="font-size: 9px;"></i> DITOLAK
+        </h3>
+        <div class="number" style="font-size: 20px; font-weight: 800; color: #5e5e5eff;">
+            <?= $rejected_count ?>
+        </div>
     </a>
 </div>
 
@@ -499,7 +546,7 @@
                         <th>Penyelenggara</th>
                         <th>Tanggal Pengajuan</th>
                         <th>Tanggal Kegiatan</th>
-                        <th>Jenis</th>
+                        <th>Nama Dosen terkait</th>
                         <th>Status</th>
                         <th>Aksi</th>
                     </tr>
@@ -536,9 +583,6 @@
                         <td><?= $badge ?></td>
                         <td>
                             <div style="display:flex;gap:6px">
-                                <button class="btn btn-sm btn-status" title="Lihat Status" onclick="showStatusModal(<?= $s->id; ?>)">
-                                    <i class="fas fa-tasks"></i>
-                                </button>
                                 <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?>)" title="Lihat Detail">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
@@ -643,75 +687,6 @@
     </div>
 </div>
 
-<!-- Status Modal -->
-<div id="statusModal" class="status-modal">
-    <div class="status-content">
-        <div class="status-header">
-            <h3>Status Pengajuan Surat Tugas</h3>
-            <button class="close-status">&times;</button>
-        </div>
-        <div class="status-body">
-            <div class="progress-track">
-                <div class="progress-line" id="progressLine"></div>
-
-                <!-- Step 1: Mengirim -->
-                <div class="progress-step status-completed" id="step1">
-                    <div class="step-icon">
-                        <i class="fas fa-check" id="step1-icon"></i>
-                    </div>
-                    <div class="step-text" id="step1-text">Mengirim</div>
-                    <div class="step-date" id="step1-date">-</div>
-                </div>
-                <div class="progress-estimasi">
-                    <span id="est1">-</span>
-                </div>
-
-                <!-- Step 2: Persetujuan KK -->
-                <div class="progress-step status-in-progress" id="step2">
-                    <div class="step-icon">
-                        <i class="fas fa-clock" id="step2-icon"></i>
-                    </div>
-                    <div class="step-text" id="step2-text">Persetujuan KK</div>
-                    <div class="step-date" id="step2-date">-</div>
-                </div>
-                <div class="progress-estimasi">
-                    <span id="est2">-</span>
-                </div>
-
-                <!-- Step 3: Persetujuan Sekretariat -->
-                <div class="progress-step status-pending" id="step3">
-                    <div class="step-icon">
-                        <i class="fas fa-clock" id="step3-icon"></i>
-                    </div>
-                    <div class="step-text" id="step3-text">Persetujuan Sekretariat</div>
-                    <div class="step-date" id="step3-date">-</div>
-                </div>
-                <div class="progress-estimasi">
-                    <span id="est3">-</span>
-                </div>
-
-                <!-- Step 4: Persetujuan Dekan -->
-                <div class="progress-step status-pending" id="step4">
-                    <div class="step-icon">
-                        <i class="fas fa-clock" id="step4-icon"></i>
-                    </div>
-                    <div class="step-text" id="step4-text">Persetujuan Dekan</div>
-                    <div class="step-date" id="step4-date">-</div>
-                </div>
-            </div>
-
-            <div class="status-info mt-4">
-                <h5>Informasi Status:</h5>
-                <p id="status-description">Memuat informasi status...</p>
-                <div id="rejection-reason" class="rejection-reason" style="display: none;">
-                    <h6>Alasan Penolakan:</h6>
-                    <p id="rejection-text"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 // Data dari controller
@@ -804,156 +779,6 @@ function showUnsupportedPreview(fileUrl, fileName) {
 function closePreviewModal() {
     document.getElementById('previewModal').classList.remove('show');
 }
-
-// Status Modal Functions
-function showStatusModal(suratId) {
-    const modal = document.getElementById('statusModal');
-    modal.style.display = 'flex';
-    resetAllStatus();
-    loadStatusData(suratId);
-}
-
-function resetAllStatus() {
-    for (let i = 1; i <= 4; i++) {
-        const step = document.getElementById(`step${i}`);
-        const icon = document.getElementById(`step${i}-icon`);
-        const text = document.getElementById(`step${i}-text`);
-        const date = document.getElementById(`step${i}-date`);
-        
-        step.className = 'progress-step pending';
-        icon.className = 'fas fa-clock';
-
-        const defaultTexts = [
-            'Mengirim',
-            'Persetujuan KK',
-            'Persetujuan Sekretariat',
-            'Persetujuan Dekan'
-        ];
-        text.textContent = defaultTexts[i-1];
-        date.textContent = '-';
-    }
-
-    document.getElementById('progressLine').style.width = '0%';
-    const desc = document.getElementById("status-description");
-    desc.textContent = "Memuat informasi status...";
-    desc.style.color = "black";
-}
-
-function loadStatusData(suratId) {
-    fetch('<?= site_url("surat/get_status/") ?>' + suratId)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                updateStatusDisplay(data.data);
-                updateEstimasiWaktu(data.data);
-            } else {
-                alert('Gagal memuat status: ' + (data.message || 'Unknown error'));
-            }
-        })
-        .catch(error => {
-            console.error('Error loading status data:', error);
-            alert('Terjadi kesalahan saat memuat status');
-        });
-}
-
-function updateStatusDisplay(statusData) {
-    const steps = statusData.steps;
-
-    steps.forEach((step, index) => {
-        const stepNumber = index + 1;
-        const stepElement = document.getElementById(`step${stepNumber}`);
-        const iconElement = document.getElementById(`step${stepNumber}-icon`);
-        const textElement = document.getElementById(`step${stepNumber}-text`);
-        const dateElement = document.getElementById(`step${stepNumber}-date`);
-
-        stepElement.className = 'progress-step';
-
-        // STATUS WARNA
-        switch (step.status) {
-            case 'completed':
-                stepElement.classList.add('completed');
-                iconElement.className = 'fas fa-check';
-                break;
-
-            case 'rejected':
-                stepElement.classList.add('rejected');
-                iconElement.className = 'fas fa-times';
-                break;
-
-            case 'in-progress':
-                stepElement.classList.add('in-progress');
-                iconElement.className = 'fas fa-spinner fa-spin';
-                break;
-
-            default:
-                stepElement.classList.add('pending');
-                iconElement.className = 'fas fa-clock';
-        }
-
-        textElement.textContent = step.step_name;
-        dateElement.textContent = step.date;
-    });
-
-    // Update progress bar panjang
-    document.getElementById('progressLine').style.width = 
-        (statusData.progress_percentage || 0) + '%';
-
-    // Update informasi status
-    const desc = document.getElementById("status-description");
-    const finalStatus = statusData.current_status.toLowerCase();
-
-    if (finalStatus === "disetujui dekan") {
-        desc.textContent = "Pengajuan ini sudah disetujui.";
-        desc.style.color = "green";
-    }
-    else if (finalStatus.includes("ditolak")) {
-        desc.textContent = "Pengajuan ini tidak disetujui.";
-        desc.style.color = "red";
-    }
-    else {
-        desc.textContent = "Pengajuan ini masih dalam proses persetujuan.";
-        desc.style.color = "black";
-    }
-    
-    // Tampilkan alasan penolakan
-    const rejectionBox = document.getElementById("rejection-reason");
-    const rejectionText = document.getElementById("rejection-text");
-
-    if (finalStatus.includes("ditolak")) {
-        rejectionBox.style.display = "block";
-        rejectionText.textContent = statusData.catatan_penolakan || "Tidak ada catatan penolakan.";
-    } else {
-        rejectionBox.style.display = "none";
-    }
-}
-
-function updateEstimasiWaktu(statusData) {
-    const d = statusData.durasi;
-    document.getElementById("est1").textContent = d.durasi_1 || "-";
-    document.getElementById("est2").textContent = d.durasi_2 || "-";
-    document.getElementById("est3").textContent = d.durasi_3 || "-";
-}
-
-// Event listener untuk close modal status
-document.addEventListener('DOMContentLoaded', function() {
-    const closeBtn = document.querySelector('.close-status');
-    const modal = document.getElementById('statusModal');
-    
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-        if (e.target.id === 'previewModal') {
-            closePreviewModal();
-        }
-    });
-});
 
 
 // Existing Functions
