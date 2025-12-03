@@ -573,7 +573,36 @@
             flex: 1;
         }
     }
-    
+    /* Tambahkan di bagian CSS halaman utama */
+.btn-bulk {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-bulk:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.bulk-modal-content {
+    background: white;
+    padding: 0;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 95%;
+    max-height: 85vh;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
 </style>
 </head>
 <body>
@@ -906,39 +935,39 @@
         </div>
     </div>
 </div>
-<!-- Approve Confirmation Modal -->
-<div id="approveConfirmModal" class="modal" onclick="modalClickOutside(event,'approveConfirmModal')">
-    <div class="bulk-modal-content" onclick="event.stopPropagation()">
+<!-- Success Result Modal - DIUBAH SEPERTI DI HALAMAN PENDING -->
+<div id="successResultModal" class="modal" onclick="modalClickOutside(event,'successResultModal')">
+    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #27ae60;">
-            <h3><i class="fa-solid fa-check-circle"></i> Konfirmasi Approve</h3>
-            <button class="close-modal" onclick="closeModal('approveConfirmModal')">&times;</button>
+            <h3><i class="fa-solid fa-check-circle"></i> <span id="successResultTitle">Pengajuan Berhasil Disetujui</span></h3>
+            <button class="close-modal" onclick="closeModal('successResultModal')">&times;</button>
         </div>
         <div style="padding:25px;text-align:center">
-            <div style="width:80px;height:80px;border-radius:50%;background:#fef5e7;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
-                <i class="fas fa-exclamation" style="font-size:40px;color:#f39c12"></i>
+            <div style="width:100px;height:100px;border-radius:50%;background:#d4edda;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                <i class="fas fa-check" style="font-size:50px;color:#27ae60"></i>
             </div>
             
-            <h3 style="color:#7d6608;margin-bottom:10px">Konfirmasi Approve</h3>
-            <p style="color:#666;margin-bottom:20px">Anda akan menyetujui <strong>1</strong> pengajuan sekaligus</p>
+            <h3 style="color:#27ae60;margin-bottom:10px">Berhasil Disetujui</h3>
+            <p style="color:#666;margin-bottom:5px">
+                <i class="fa-solid fa-clock"></i> Disetujui pada: <strong id="successTimestamp">-</strong>
+            </p>
             
-            <div style="background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:15px;margin-bottom:20px">
-                <div style="font-weight:600;color:#495057;margin-bottom:5px">📋 Daftar Pengajuan yang Akan Disetujui:</div>
-                <div style="display:flex;align-items:center;gap:10px;padding:10px;background:white;border-radius:6px;margin-top:10px">
-                    <span style="background:#27ae60;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600">1</span>
-                    <div style="flex:1;text-align:left">
-                        <div style="font-weight:600;color:#212529" id="approveSingleName">-</div>
-                        <div style="font-size:12px;color:#6c757d" id="approveSingleDetails">📅 - | 📍 -</div>
-                    </div>
-                    <span class="badge badge-pending">Menunggu</span>
+            <div style="background:#d4edda;border:1px solid #c3e6cb;border-radius:8px;padding:15px;margin:20px 0">
+                <div style="font-weight:600;color:#155724;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+                    <span>Daftar Pengajuan</span>
+                    <span id="successItemCount" style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:12px">0 item</span>
+                </div>
+                <div id="successList" style="max-height:250px;overflow-y:auto;text-align:left">
+                    <!-- List akan diisi oleh JavaScript -->
                 </div>
             </div>
             
-            <div style="display:flex;gap:10px;justify-content:center">
-                <button class="btn-bulk" onclick="closeModal('approveConfirmModal')" style="background:#95a5a6;color:white;padding:10px 24px">
-                    <i class="fa-solid fa-times"></i> Batal
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+                <button class="btn-bulk" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
                 </button>
-                <button class="btn-bulk btn-bulk-approve" onclick="confirmSingleApprove()" style="padding:10px 24px">
-                    <i class="fa-solid fa-check"></i> Ya, Setujui
+                <button class="btn-bulk" onclick="closeModal('successResultModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-times"></i> Tutup
                 </button>
             </div>
         </div>
@@ -961,7 +990,7 @@
                 <i class="fa-solid fa-clock"></i> Disetujui pada: <strong id="successTimestamp">-</strong>
             </p>
             
-            <div style="background:#d4edda;border:1px solid #c3e6cb;border-radius:8px;padding:15px;margin:20px 0">
+            <div style="background:#d4edda;border:1px solid #ffffffff;border-radius:8px;padding:15px;margin:20px 0">
                 <div style="font-weight:600;color:#155724;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
                     <span>Daftar Pengajuan</span>
                     <span id="successItemCount" style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:12px">0 item</span>
@@ -1706,6 +1735,99 @@ function updateTahun(year) {
         window.location.href = "<?= base_url('dekan?tahun=') ?>" + year + "&bulan=" + bulan;
     }
 }
+// ============================================
+// SUCCESS MODAL FUNCTIONS - UNTUK APPROVAL
+// ============================================
+
+function refreshPage() {
+    window.location.reload();
+}
+
+// Variabel untuk menyimpan ID approval sementara
+let pendingApproveId = null;
+
+// Process single approve WITH modal confirmation
+function approveSurat(id) {
+    pendingApproveId = id;
+    
+    // Cari data surat
+    const surat = suratList.find(s => Number(s.id) === Number(id));
+    
+    if (surat) {
+        document.getElementById('approveSingleName').textContent = surat.nama_kegiatan || '-';
+        document.getElementById('approveSingleDetails').textContent = 
+            `📅 ${formatDate(surat.tanggal_kegiatan)} | 📍 ${surat.penyelenggara || '-'}`;
+    }
+    
+    document.getElementById('approveConfirmModal').classList.add('show');
+}
+
+function confirmSingleApprove() {
+    if (!pendingApproveId) return;
+    
+    closeModal('approveConfirmModal');
+    
+    // Submit approval
+    window.location.href = `<?= base_url("dekan/approve/") ?>${pendingApproveId}`;
+}
+
+// Fungsi untuk menampilkan success modal (dipanggil dari controller via session)
+function showSuccessModal(count, items, isSingle = false) {
+    const modal = document.getElementById('successResultModal');
+    const title = document.getElementById('successResultTitle');
+    const timestamp = document.getElementById('successTimestamp');
+    const itemCount = document.getElementById('successItemCount');
+    const listContainer = document.getElementById('successList');
+    
+    title.textContent = isSingle ? 'Pengajuan Berhasil Disetujui' : 'Pengajuan Berhasil Disetujui (Multiple)';
+    
+    // Format timestamp
+    const now = new Date();
+    timestamp.textContent = now.toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) + ' WIB';
+    
+    itemCount.textContent = `${count} item`;
+    
+    // Populate list
+    listContainer.innerHTML = '';
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;background:white;border:1px solid #c3e6cb;border-radius:6px;margin-bottom:8px';
+        itemDiv.innerHTML = `
+            <i class="fas fa-check-circle" style="color:#27ae60;font-size:20px;flex-shrink:0"></i>
+            <div style="flex:1;text-align:left">
+                <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(item.nama)}</div>
+                <div style="font-size:12px;color:#6c757d">${item.details}</div>
+            </div>
+            <span class="badge badge-approved" style="flex-shrink:0">${isSingle ? 'Disetujui' : 'Disetujui (Multi)'}</span>
+        `;
+        listContainer.appendChild(itemDiv);
+    });
+    
+    modal.classList.add('show');
+}
+
+// Initialize - Check if there's success data from session
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM siap, inisialisasi chart...');
+    setTimeout(initChart, 100);
+    
+    // TAMBAHAN: Check for success modal data
+    <?php if($this->session->flashdata('approved_items')): ?>
+        const approvedItems = <?= json_encode($this->session->flashdata('approved_items')) ?>;
+        const isSingle = <?= json_encode($this->session->flashdata('is_single_approve')) ?>;
+        
+        // Tunggu sebentar agar page fully loaded
+        setTimeout(function() {
+            showSuccessModal(approvedItems.length, approvedItems, isSingle);
+        }, 500);
+    <?php endif; ?>
+});
 </script>
 </body>
 </html>

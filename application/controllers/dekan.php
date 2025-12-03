@@ -792,7 +792,7 @@ class Dekan extends CI_Controller
     $surat = $this->db->get_where('surat', ['id' => $id])->row();
     if (!$surat) {
         $this->session->set_flashdata('error', 'Data surat tidak ditemukan');
-        redirect('dekan/halaman_pending');
+        redirect('dekan/dashboard');
         return;
     }
 
@@ -801,7 +801,7 @@ class Dekan extends CI_Controller
     
     if (!in_array($surat->status, $allowed_statuses)) {
         $this->session->set_flashdata('error', 'Status pengajuan tidak dapat diproses. Status saat ini: ' . $surat->status);
-        redirect('dekan/halaman_pending');
+        redirect('dekan/dashboard');
         return;
     }
 
@@ -845,7 +845,7 @@ class Dekan extends CI_Controller
         $this->session->set_flashdata('error', 'Gagal menyetujui surat.');
     }
     
-    redirect('dekan/halaman_pending');
+    redirect('dekan/dashboard');
 }
     /* ================================
        REJECT - VERSI DIPERBAIKI DENGAN PROGRESS BAR

@@ -2001,8 +2001,7 @@ function showSuccessModal(count, items, isSingle = false) {
             <span class="badge badge-approved" style="flex-shrink:0">${isSingle ? 'Disetujui' : 'Disetujui (Multi)'}</span>
         `;
         listContainer.appendChild(itemDiv);
-    });
-    
+    });  
     modal.classList.add('show');
 }
 </script>

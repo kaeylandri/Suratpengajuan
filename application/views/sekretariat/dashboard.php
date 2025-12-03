@@ -668,6 +668,61 @@
 .btn-disposisi:hover {
     background: #0066d6;
 }
+/* Gaya tambahan untuk PIN */
+    .pin-input-container {
+        position: relative;
+        margin: 15px 0;
+    }
+
+    .pin-input-with-icon {
+        width: 100%;
+        padding: 12px 12px 12px 40px;
+        font-size: 20px;
+        letter-spacing: 6px;
+        text-align: center;
+        border: 2px solid #dadada;
+        border-radius: 8px;
+        outline: none;
+        transition: .2s;
+    }
+
+    .pin-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #666;
+        font-size: 20px;
+    }
+
+    .pin-input-with-icon:focus {
+        border-color: #0066ff;
+        box-shadow: 0 0 6px rgba(0,102,255,0.3);
+    }
+
+    /* Gaya untuk catatan panjang */
+    .catatan-container {
+        margin-top: 10px;
+    }
+
+    .catatan-content {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px;
+        max-height: 150px;
+        overflow-y: auto;
+        font-size: 14px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .catatan-panjang {
+        display: block;
+        max-height: none;
+        overflow-y: visible;
+    }
 
 </style>
 </head>
@@ -1102,19 +1157,42 @@
         </div>
     </div>
 </div>
+<!-- Modal PIN yang diperbarui -->
 <div id="pinModal" 
      style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
      background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:9999">
 
-    <div style="background:#fff;padding:20px;border-radius:8px;width:300px;text-align:center;">
-        <h3 style="margin-bottom:10px;">Masukkan PIN</h3>
-
-        <input type="password" id="pinInput" maxlength="4"
-               style="padding:8px;width:80%;margin-bottom:15px;text-align:center;font-size:18px">
-
-        <br>
-        <button onclick="checkPin()" class="btn btn-primary">Lanjut</button>
-        <button onclick="closePinModal()" class="btn btn-secondary">Batal</button>
+    <div style="background:#fff;padding:25px;border-radius:12px;width:350px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
+        <h3 style="margin-bottom:15px;color:#333;">
+            <i class="fas fa-lock" style="margin-right:8px;color:#16A085;"></i>Masukkan PIN
+        </h3>
+        
+        <div class="pin-input-container">
+            <i class="fas fa-key pin-icon"></i>
+            <input type="password" 
+                   id="pinInput" 
+                   maxlength="4"
+                   class="pin-input-with-icon"
+                   placeholder="••••"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        </div>
+        
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+            <button onclick="checkPin()" 
+                    class="btn btn-primary"
+                    style="background:#16A085;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:600;">
+                <i class="fas fa-check"></i> Lanjut
+            </button>
+            <button onclick="closePinModal()" 
+                    class="btn btn-secondary"
+                    style="background:#95a5a6;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:600;">
+                <i class="fas fa-times"></i> Batal
+            </button>
+        </div>
+        
+        <p style="margin-top:15px;font-size:12px;color:#7f8c8d;">
+            <i class="fas fa-info-circle"></i> PIN terdiri dari 4 digit angka
+        </p>
     </div>
 </div>
 
@@ -1980,26 +2058,43 @@ function checkPin() {
 
     closePinModal();
 }
-
 // PADA SAAT MEMILIH DISPOSISI
 function onDisposisiChange(id) {
-
     let val = document.getElementById("disposisiSelect" + id).value;
-    let catatan = document.getElementById("catatanDisposisi" + id);
+    let catatanLabel = document.getElementById("labelCatatan" + id);
+    let catatanTextarea = document.getElementById("catatanDisposisi" + id);
     let btnSave = document.getElementById("btnSaveDisposisi" + id);
 
     // Reset dulu
     btnSave.style.display = "none";
-    catatan.style.display = "none";
-
-    if (val === "Hold/Pending" || val === "Batal") {
-        catatan.style.display = "block";
-        btnSave.style.display = "inline-block";
-    } else if (val === "Lanjut Proses") {
-        catatan.style.display = "block";
-        btnSave.style.display = "inline-block";
+    catatanLabel.style.display = "none";
+    catatanTextarea.style.display = "none";
+    
+    // Kosongkan textarea setiap kali pilihan berubah
+    catatanTextarea.value = "";
+    
+    // Untuk disposisi yang memerlukan catatan
+    if (val === "Hold/Pending" || val === "Batal" || val === "Lanjut Proses") {
+        catatanLabel.style.display = "block";
+        catatanTextarea.style.display = "block";
+        btnSave.style.display = "block";
+        
+        // Set placeholder berdasarkan pilihan
+        if (val === "Hold/Pending") {
+            catatanTextarea.placeholder = "Berikan alasan mengapa perlu ditahan/ditunda...";
+        } else if (val === "Batal") {
+            catatanTextarea.placeholder = "Berikan alasan pembatalan...";
+        } else if (val === "Lanjut Proses") {
+            catatanTextarea.placeholder = "Tambahkan catatan jika diperlukan...";
+        }
+        
+        // Fokus ke textarea
+        setTimeout(() => {
+            catatanTextarea.focus();
+        }, 100);
     }
 }
+
 
 // SIMPAN DISPOSISI
 function saveDisposisi(id) {
