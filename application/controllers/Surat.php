@@ -335,7 +335,7 @@ private function get_dosen_by_nip($nip_data) {
                 'date'=> ($dek) ? date('d M Y', strtotime($dek)) : '-',
                 'label'=>'Disetujui'
             ];
-            $progress_percentage = 100;
+            $progress_percentage = 80;
             break;
 
         case 'ditolak kk':
