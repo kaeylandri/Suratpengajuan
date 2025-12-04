@@ -471,6 +471,7 @@
 
     <!-- Tabel Total Pengajuan -->
     <div class="card">
+        <!-- Di dalam card-header -->
         <div class="card-header">
             <h3><i class="fa-solid fa-table"></i> Total Pengajuan Surat - Sekretariat</h3>
             <div>
@@ -481,13 +482,32 @@
                     if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
                     if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
                     if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-                    echo $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
+                    
+                    // Filter Lingkup Penugasan
+                    $lingkup_info = "";
+                    if($this->input->get('lingkup_penugasan') == 'kelompok') {
+                        $lingkup_info = " (Kelompok)";
+                    } elseif($this->input->get('lingkup_penugasan') == 'perorangan') {
+                        $lingkup_info = " (Perorangan)";
+                    }
+                    
+                    // Filter Jenis Penugasan BARU
+                    $jenis_penugasan_info = "";
+                    if($this->input->get('jenis_penugasan') == 'perorangan') {
+                        $jenis_penugasan_info = " [Penugasan Perorangan]";
+                    } elseif($this->input->get('jenis_penugasan') == 'kelompok') {
+                        $jenis_penugasan_info = " [Penugasan Kelompok]";
+                    } elseif($this->input->get('jenis_penugasan') == 'lainnya') {
+                        $jenis_penugasan_info = " [Penugasan Lainnya]";
+                    }
+                    
+                    echo $filter_info . $lingkup_info . $jenis_penugasan_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
                     ?>
                 </span>
             </div>
         </div>
         
-        <!-- Search + Filter -->
+        <!-- Di bagian Search + Filter -->
         <form method="get" action="<?= base_url('sekretariat/semua') ?>">
             <div class="search-filter-container">
                 <div class="search-box">
@@ -503,11 +523,29 @@
                     </div>
                 </div>
                 
+                <!-- Filter Status -->
                 <select name="status" class="filter-select" onchange="this.form.submit()">
                     <option value="">Semua Status</option>
                     <option value="pending" <?= ($this->input->get('status')=='pending') ? 'selected' : '' ?>>Menunggu</option>
                     <option value="approved" <?= ($this->input->get('status')=='approved') ? 'selected' : '' ?>>Disetujui</option>
                     <option value="rejected" <?= ($this->input->get('status')=='rejected') ? 'selected' : '' ?>>Ditolak</option>
+                    <option value="dekan_approved" <?= ($this->input->get('status')=='dekan_approved') ? 'selected' : '' ?>>Disetujui Dekan</option>
+                    <option value="dekan_rejected" <?= ($this->input->get('status')=='dekan_rejected') ? 'selected' : '' ?>>Ditolak Dekan</option>
+                </select>
+                
+                <!-- Filter Lingkup Penugasan -->
+                <select name="lingkup_penugasan" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Lingkup</option>
+                    <option value="kelompok" <?= ($this->input->get('lingkup_penugasan')=='kelompok') ? 'selected' : '' ?>>Kelompok</option>
+                    <option value="perorangan" <?= ($this->input->get('lingkup_penugasan')=='perorangan') ? 'selected' : '' ?>>Perorangan</option>
+                </select>
+                
+                <!-- FILTER BARU: Jenis Penugasan -->
+                <select name="jenis_penugasan" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Jenis Penugasan</option>
+                    <option value="perorangan" <?= ($this->input->get('jenis_penugasan')=='perorangan') ? 'selected' : '' ?>>Penugasan Perorangan</option>
+                    <option value="kelompok" <?= ($this->input->get('jenis_penugasan')=='kelompok') ? 'selected' : '' ?>>Penugasan Kelompok</option>
+                    <option value="lainnya" <?= ($this->input->get('jenis_penugasan')=='lainnya') ? 'selected' : '' ?>>Penugasan Lainnya</option>
                 </select>
                 
                 <button type="submit" class="btn-primary" style="white-space:nowrap">
@@ -539,7 +577,7 @@
                     if(isset($surat_list) && is_array($surat_list) && !empty($surat_list)): 
                         $no = 1; 
                         foreach($surat_list as $s): 
-                            // ✅ LOGIKA STATUS YANG DIPERBAIKI - SEMUA STATUS DITANGANI DENGAN BENAR
+                            // LOGIKA STATUS YANG DIPERBAIKI
                             $status = $s->status ?? '';
                             
                             if ($status == 'disetujui KK') {
@@ -567,7 +605,6 @@
                                 $st_key = 'rejected';
                                 $badge = '<span class="badge badge-rejected">' . ucwords($status) . '</span>';
                             } else {
-                                // Fallback untuk status lain yang tidak dikenal
                                 $st_key = 'other';
                                 $badge = '<span class="badge badge-pending">' . ucwords($status) . '</span>';
                             }
@@ -623,6 +660,7 @@
             </table>
         </div>
 
+        <!-- PERBAIKAN: Ubah juga di bagian pagination info -->
         <div class="pagination-info">
             Menampilkan: 
             <?php 
@@ -630,7 +668,26 @@
             if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
             if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
             if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-            echo $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
+            
+            // Filter Lingkup Penugasan
+            $lingkup_info = "";
+            if($this->input->get('lingkup_penugasan') == 'kelompok') {
+                $lingkup_info = " (Kelompok)";
+            } elseif($this->input->get('lingkup_penugasan') == 'perorangan') {
+                $lingkup_info = " (Perorangan)";
+            }
+            
+            // Filter Jenis Penugasan BARU
+            $jenis_penugasan_info = "";
+            if($this->input->get('jenis_penugasan') == 'perorangan') {
+                $jenis_penugasan_info = " [Penugasan Perorangan]";
+            } elseif($this->input->get('jenis_penugasan') == 'kelompok') {
+                $jenis_penugasan_info = " [Penugasan Kelompok]";
+            } elseif($this->input->get('jenis_penugasan') == 'lainnya') {
+                $jenis_penugasan_info = " [Penugasan Lainnya]";
+            }
+            
+            echo $filter_info . $lingkup_info . $jenis_penugasan_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
             ?>
         </div>
     </div>
@@ -1201,27 +1258,18 @@ async function showDetail(id) {
             }
         }
 
-        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date - SAMA SEPERTI DI DASHBOARD
+        // PERBAIKAN UTAMA: Format Periode Kegiatan berdasarkan jenis_date
         const jenisDate = getVal('jenis_date');
         const periodeKegiatan = getVal('periode_kegiatan');
         const tanggalKegiatan = getVal('tanggal_kegiatan');
         const akhirKegiatan = getVal('akhir_kegiatan');
         
-        // DEBUG: Tampilkan data periode di console
-        console.log('=== DEBUG PERIODE FRONTEND ===');
-        console.log('Jenis Date:', jenisDate);
-        console.log('Periode Kegiatan:', periodeKegiatan);
-        console.log('Tanggal Kegiatan:', tanggalKegiatan);
-        console.log('Akhir Kegiatan:', akhirKegiatan);
-        console.log('Full item data untuk debugging:', item);
-
-        // Tentukan tampilan untuk Periode Kegiatan - SAMA SEPERTI DI DASHBOARD
+        // Tentukan tampilan untuk Periode Kegiatan
         let periodeDisplay = '-';
 
         if (jenisDate === 'Periode') {
             // Jika memilih Periode, tampilkan nilai periode yang dipilih
             periodeDisplay = (periodeKegiatan && periodeKegiatan !== '-' && periodeKegiatan !== '') ? periodeKegiatan : '-';
-            console.log('Periode Display (Periode):', periodeDisplay);
         } else if (jenisDate === 'Custom') {
             // Jika memilih Custom, tampilkan range tanggal
             if (tanggalKegiatan !== '-' && akhirKegiatan !== '-') {
@@ -1229,19 +1277,36 @@ async function showDetail(id) {
             } else if (tanggalKegiatan !== '-') {
                 periodeDisplay = formatDate(tanggalKegiatan);
             }
-            console.log('Periode Display (Custom):', periodeDisplay);
         } else {
             // Default case - tampilkan tanggal tunggal jika ada
             if (tanggalKegiatan !== '-') {
                 periodeDisplay = formatDate(tanggalKegiatan);
             }
-            console.log('Periode Display (Default):', periodeDisplay);
         }
 
         // Format tanggal mulai
         const tanggalMulaiDisplay = (tanggalKegiatan !== '-' && tanggalKegiatan !== '0000-00-00') ? formatDate(tanggalKegiatan) : '-';
 
-        // Tampilkan sesuai dengan format yang sama seperti di dashboard
+        // Tampilkan jenis penugasan dalam modal detail
+        const jenisPenugasanPerorangan = getVal('jenis_penugasan_perorangan');
+        const jenisPenugasanKelompok = getVal('jenis_penugasan_kelompok');
+        const penugasanLainnyaPerorangan = getVal('penugasan_lainnya_perorangan');
+        const penugasanLainnyaKelompok = getVal('penugasan_lainnya_kelompok');
+        
+        // Tentukan jenis penugasan yang akan ditampilkan
+        let jenisPenugasanDisplay = '-';
+        if (jenisPenugasanPerorangan !== '-') {
+            jenisPenugasanDisplay = 'Perorangan: ' + jenisPenugasanPerorangan;
+            if (penugasanLainnyaPerorangan !== '-') {
+                jenisPenugasanDisplay += ' - ' + penugasanLainnyaPerorangan;
+            }
+        } else if (jenisPenugasanKelompok !== '-') {
+            jenisPenugasanDisplay = 'Kelompok: ' + jenisPenugasanKelompok;
+            if (penugasanLainnyaKelompok !== '-') {
+                jenisPenugasanDisplay += ' - ' + penugasanLainnyaKelompok;
+            }
+        }
+
         const content = `
             <!-- NOMOR SURAT DARI SEKRETARIAT -->
             ${getVal('nomor_surat') && getVal('nomor_surat') !== '' ? `
@@ -1275,6 +1340,10 @@ async function showDetail(id) {
                     <div class="detail-row">
                         <div class="detail-label">Lingkup Penugasan</div>
                         <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Jenis Penugasan</div>
+                        <div class="detail-value">${escapeHtml(jenisPenugasanDisplay)}</div>
                     </div>
                 </div>
             </div>
