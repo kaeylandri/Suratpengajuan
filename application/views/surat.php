@@ -1998,7 +1998,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-<!-- Step 2 (Dulunya Step 1) -->
+<!-- Step 2 -->
 <fieldset>
   <div class="custom-form" style="position: relative; z-index: 1;">
     <input type="hidden" name="user_id" id="user_id" value="632045c808b1c">
@@ -2019,10 +2019,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     <!-- Form tanggal yang disederhanakan -->
     <div class="row">
+      <!-- Kolom Tanggal Awal & Akhir Kegiatan (Satu Kolom) - TETAP ADA -->
       <div class="col-md-4 mt-3">
         <div class="form-group">
-          <input type="text" name="tanggal_kegiatan" id="datepicker" class="form-control custom-form-control" required autocomplete="off" readonly placeholder="Klik untuk pilih tanggal">
-          <label id="lbl_mulai">Mulai kegiatan (Awal - Akhir)</label>
+          <input type="text" name="tanggal_kegiatan" id="datepicker" class="form-control custom-form-control" 
+                 required autocomplete="off" readonly placeholder="Klik untuk pilih tanggal">
+          <label id="lbl_mulai">Tanggal Awal s/d Tanggal Akhir</label>
           <!-- Hidden inputs untuk tanggal awal dan akhir -->
           <input type="hidden" id="tanggal_awal_kegiatan" name="tanggal_awal_kegiatan">
           <input type="hidden" id="tanggal_akhir_kegiatan" name="tanggal_akhir_kegiatan">
@@ -2030,17 +2032,21 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
       </div>
 
+      <!-- Kolom Periode Penugasan - TETAP ADA -->
       <div class="col-md-4 mt-3">
         <div class="form-group">
-          <input type="text" name="periode_penugasan" id="datepicker3" class="form-control custom-form-control" required autocomplete="off" readonly>
+          <input type="text" name="periode_penugasan" id="datepicker3" class="form-control custom-form-control" 
+                 required autocomplete="off" readonly placeholder="Otomatis terisi">
           <label id="lbl_mulai1">Periode Penugasan</label>
           <div class="info-message small" id="info_periode">Akan terisi otomatis</div>
         </div>
       </div>
 
+      <!-- Kolom Akhir Penugasan - TETAP ADA -->
       <div class="col-md-4 mt-3">
         <div class="form-group">
-          <input type="text" name="akhir_periode_penugasan" id="datepicker4" class="form-control custom-form-control" required autocomplete="off" readonly>
+          <input type="text" name="akhir_periode_penugasan" id="datepicker4" class="form-control custom-form-control" 
+                 required autocomplete="off" readonly placeholder="Otomatis terisi">
           <label id="lbl_akhir1">Akhir Penugasan</label>
           <div class="info-message small" id="info_akhir">Akan terisi otomatis</div>
         </div>
@@ -2073,65 +2079,143 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- CSS -->
 <style>
+/* TAMBAHAN: Style untuk memperbaiki kalender */
+.ui-datepicker {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  z-index: 10000 !important;
+}
+
+.ui-datepicker-header {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px 6px 0 0;
+  padding: 10px 0;
+}
+
+.ui-datepicker-title {
+  font-weight: 500;
+  font-size: 16px;
+}
+
+.ui-datepicker-prev, .ui-datepicker-next {
+  cursor: pointer;
+  color: white;
+  top: 10px;
+}
+
+.ui-datepicker-prev:hover, .ui-datepicker-next:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.ui-datepicker-calendar {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.ui-datepicker-calendar th {
+  padding: 10px 0;
+  color: #666;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ui-datepicker-calendar td {
+  padding: 2px;
+  text-align: center;
+}
+
+.ui-datepicker-calendar td a {
+  padding: 8px;
+  display: block;
+  border-radius: 4px;
+  transition: all 0.2s;
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.ui-datepicker-calendar td a:hover {
+  background: #e9ecef;
+}
+
+/* Highlight untuk tanggal yang dipilih */
+.ui-state-highlight {
+  background: #007bff !important;
+  color: white !important;
+  font-weight: 500;
+}
+
+/* Highlight khusus untuk tanggal awal range */
+.ui-state-range-start {
+  background: #0056b3 !important;
+  color: white !important;
+  border-radius: 4px 0 0 4px !important;
+}
+
+/* Highlight khusus untuk tanggal akhir range */
+.ui-state-range-end {
+  background: #0056b3 !important;
+  color: white !important;
+  border-radius: 0 4px 4px 0 !important;
+}
+
+/* Highlight untuk tanggal di antara range */
+.ui-state-active-range {
+  background: rgba(0, 123, 255, 0.1) !important;
+  color: #007bff !important;
+}
+
+/* Style untuk tanggal yang tidak bisa dipilih */
+.ui-state-disabled {
+  color: #ccc !important;
+  cursor: not-allowed !important;
+}
+
+.ui-state-disabled a {
+  color: #ccc !important;
+  cursor: not-allowed !important;
+}
+
+/* Style untuk form yang sudah ada (tidak diubah) */
 .form-group { 
     margin-bottom: 20px; 
 }
 
-/* wrapper periode */
 #periode_section {
     position: relative;
     z-index: 9999 !important;
     transition: margin-bottom 0.3s ease;
 }
 
-/* dropdown nice-select */
 .nice-select {
     z-index: 99999 !important;
 }
 
-/* dropdown saat open = paling depan */
 .nice-select.open {
     z-index: 999999 !important;
 }
 
-/* Tambah margin yang lebih besar saat dropdown dibuka */
 #periode_section.open-margin {
     margin-bottom: 250px !important;
 }
 
-/* Tambah padding bottom untuk memberikan ruang lebih */
-#periode_section .nice-select.open + .list {
-    margin-bottom: 20px;
-}
-
-/* sembunyikan select asli */
 .has-select select.nice-original {
   display: none !important;
 }
 
-/* Pastikan list dropdown tidak terpotong */
 .nice-select .list {
     max-height: 200px;
     overflow-y: auto;
 }
 
-/* Animasi smooth untuk spacing */
-#periode_section {
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Style untuk error message */
 .error-message {
     color: #dc3545;
     font-size: 12px;
@@ -2143,14 +2227,12 @@ document.addEventListener('DOMContentLoaded', function () {
     border-color: #dc3545;
 }
 
-/* Style untuk info message */
 .info-message {
     color: #0d6efd;
     font-size: 12px;
     margin-top: 5px;
 }
 
-/* Style untuk success message */
 .success-message {
     color: #198754;
     font-size: 12px;
@@ -2158,90 +2240,17 @@ document.addEventListener('DOMContentLoaded', function () {
     display: none;
 }
 
-/* Style untuk disabled dates di datepicker */
-.ui-datepicker td.ui-state-disabled {
-    opacity: 0.3;
-}
-
-.ui-datepicker td.ui-state-disabled span {
-    cursor: not-allowed !important;
-}
-
-/* Highlight untuk tanggal yang valid */
-.ui-datepicker td.valid-date a {
-    background-color: #e8f5e8 !important;
-    color: #198754 !important;
-    font-weight: bold;
-}
-
-/* Style untuk tanggal yang melebihi batas */
-.ui-datepicker td.over-limit-date a {
-    background-color: #fff3cd !important;
-    color: #856404 !important;
-    text-decoration: line-through;
-}
-
-/* tambahan visual warning kelas */
-.ui-datepicker td.warning a {
-    box-shadow: 0 0 0 1px #ffc107 inset;
-}
-
-/* Style untuk tanggal yang benar-benar tidak bisa dipilih */
-.ui-datepicker td.force-disabled a {
-    background-color: #f8d7da !important;
-    color: #721c24 !important;
-    text-decoration: line-through;
-    cursor: not-allowed !important;
-}
-
-/* Style khusus untuk input tanggal yang lebih rapi */
 .custom-form-control {
     padding: 10px 12px;
     font-size: 14px;
     height: 45px;
 }
 
-/* Style untuk range datepicker */
-.range-datepicker .ui-state-range {
-    background: #e8f4ff !important;
-    border-color: #b6d4fe !important;
-}
-
-.range-datepicker .ui-state-range-start {
-    background: #007bff !important;
-    color: white !important;
-    font-weight: bold;
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
-}
-
-.range-datepicker .ui-state-range-end {
-    background: #007bff !important;
-    color: white !important;
-    font-weight: bold;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-}
-
-.range-datepicker .ui-state-active-range {
-    background: #b6d4fe !important;
-    color: #084298 !important;
-}
-
-/* Style untuk selected dates */
-.range-datepicker .ui-state-highlight {
-    background: #007bff !important;
-    color: white !important;
-    font-weight: bold;
-}
-
-/* Style untuk auto-filled inputs */
 .auto-filled {
     background-color: #f0f8ff !important;
     border-left: 3px solid #007bff !important;
 }
 
-/* Animasi untuk highlight */
 @keyframes highlight {
     0% { background-color: #fff3cd; }
     100% { background-color: #f0f8ff; }
@@ -2251,7 +2260,6 @@ document.addEventListener('DOMContentLoaded', function () {
     animation: highlight 1s ease;
 }
 
-/* Responsif untuk tampilan mobile */
 @media (max-width: 768px) {
     .col-md-4 {
         flex: 0 0 100%;
@@ -2262,30 +2270,43 @@ document.addEventListener('DOMContentLoaded', function () {
         height: 42px;
         font-size: 13px;
     }
+    
+    .ui-datepicker {
+        width: 280px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
 }
 </style>
 
 <!-- JS -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // Elements - SEMUA ADA
   const jenisDate = document.getElementById('jenis_date');
   const periodeSection = document.getElementById('periode_section');
   const periodeSelect = document.getElementById('periode_value');
   
-  // Datepicker elements
-  const datepicker1 = document.getElementById('datepicker');     // Mulai kegiatan (range)
-  const datepicker3 = document.getElementById('datepicker3');    // Periode penugasan
-  const datepicker4 = document.getElementById('datepicker4');    // Akhir penugasan
+  // Tanggal Kegiatan (Satu Input untuk Awal & Akhir) - TETAP ADA
+  const datepicker = document.getElementById('datepicker');
   const rangeInfo = document.getElementById('range_info');
+  
+  // Datepicker untuk periode penugasan - TETAP ADA
+  const datepicker3 = document.getElementById('datepicker3');
+  const datepicker4 = document.getElementById('datepicker4');
   const infoPeriode = document.getElementById('info_periode');
   const infoAkhir = document.getElementById('info_akhir');
   
-  // Hidden inputs untuk tanggal awal dan akhir
+  // Hidden inputs untuk tanggal - TETAP ADA
   const tanggalAwalKegiatan = document.getElementById('tanggal_awal_kegiatan');
   const tanggalAkhirKegiatan = document.getElementById('tanggal_akhir_kegiatan');
 
-  // ===== Aturan untuk Mulai Kegiatan =====
-  // Hanya dapat memilih tanggal dalam rentang: (today - 30 days) .. today
+  // Variables untuk tracking pemilihan tanggal
+  let firstDate = null;
+  let secondDate = null;
+  let isSelectingFirst = true;
+
+  // ===== Aturan untuk Tanggal Kegiatan =====
   const today = new Date();
   today.setHours(0,0,0,0);
   const minStartDate = (function() {
@@ -2295,14 +2316,13 @@ document.addEventListener('DOMContentLoaded', function () {
     return d;
   })();
 
-  // Fungsi untuk menambahkan hari ke tanggal
+  // Fungsi utilitas
   function addDays(date, days) {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
   }
 
-  // Fungsi untuk format tanggal ke string yyyy-mm-dd
   function formatDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -2310,13 +2330,11 @@ document.addEventListener('DOMContentLoaded', function () {
     return `${year}-${month}-${day}`;
   }
 
-  // Fungsi untuk format tanggal ke format Indonesia
   function formatDateID(date) {
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
     return new Date(date).toLocaleDateString('id-ID', options);
   }
 
-  // Fungsi untuk menghitung selisih hari (date2 - date1)
   function daysDifference(date1, date2) {
     const oneDay = 24 * 60 * 60 * 1000;
     const d1 = new Date(date1); 
@@ -2326,42 +2344,59 @@ document.addEventListener('DOMContentLoaded', function () {
     return Math.round((d2 - d1) / oneDay);
   }
 
-  // Fungsi untuk menampilkan error
-  function showError(input, message) {
-    const formGroup = input.closest('.form-group');
-    formGroup.classList.add('has-error');
-    
-    let errorDiv = formGroup.querySelector('.error-message');
-    if (!errorDiv) {
-      errorDiv = document.createElement('div');
-      errorDiv.className = 'error-message';
-      formGroup.appendChild(errorDiv);
+  // Fungsi untuk toggle section (tidak menghilangkan kolom, hanya show/hide)
+  function toggleSections(value) {
+    // Tampilkan/sembunyikan dropdown periode
+    if (value === 'Periode') {
+      periodeSection.style.display = 'block';
+      // Tetap tampilkan SEMUA kolom tanggal
+      datepicker.closest('.col-md-4').style.display = 'block';
+      datepicker3.closest('.col-md-4').style.display = 'block';
+      datepicker4.closest('.col-md-4').style.display = 'block';
+      
+      // Reset nilai jika perlu
+      resetDateSelection();
+    } else if (value === 'Custom') {
+      periodeSection.style.display = 'none';
+      // Tetap tampilkan SEMUA kolom tanggal
+      datepicker.closest('.col-md-4').style.display = 'block';
+      datepicker3.closest('.col-md-4').style.display = 'block';
+      datepicker4.closest('.col-md-4').style.display = 'block';
+    } else {
+      periodeSection.style.display = 'none';
+      // Tetap tampilkan SEMUA kolom tanggal
+      datepicker.closest('.col-md-4').style.display = 'block';
+      datepicker3.closest('.col-md-4').style.display = 'block';
+      datepicker4.closest('.col-md-4').style.display = 'block';
     }
-    errorDiv.textContent = message;
-    errorDiv.style.display = 'block';
   }
 
-  // Fungsi untuk menghapus semua message
-  function clearMessages(input) {
-    const formGroup = input.closest('.form-group');
-    formGroup.classList.remove('has-error');
+  // Fungsi untuk reset pemilihan tanggal
+  function resetDateSelection() {
+    firstDate = null;
+    secondDate = null;
+    isSelectingFirst = true;
+    datepicker.value = '';
+    tanggalAwalKegiatan.value = '';
+    tanggalAkhirKegiatan.value = '';
+    rangeInfo.textContent = 'Klik tanggal awal, lalu klik tanggal akhir';
+    rangeInfo.style.color = '#0d6efd';
     
-    const errorDiv = formGroup.querySelector('.error-message');
-    if (errorDiv) {
-      errorDiv.style.display = 'none';
-    }
+    // Reset datepicker lainnya
+    datepicker3.value = '';
+    datepicker4.value = '';
+    infoPeriode.textContent = 'Akan terisi otomatis';
+    infoPeriode.style.color = '';
+    infoAkhir.textContent = 'Akan terisi otomatis';
+    infoAkhir.style.color = '';
   }
 
-  // Setup datepicker dengan jQuery UI
+  // Initialize datepicker dengan jQuery UI
   if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
     
-    // ==== DATE PICKER 1 - RANGE SELECTION ====
-    let firstDate = null;
-    let secondDate = null;
-    let isSelectingFirst = true;
-    
+    // ==== DATE PICKER - RANGE SELECTION (Satu Input) ====
     $('#datepicker').datepicker({
-      dateFormat: 'yy-mm-dd',
+      dateFormat: 'dd MM yy',
       autoclose: false,
       minDate: minStartDate,
       maxDate: today,
@@ -2371,7 +2406,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // Validasi tanggal
         if (d < minStartDate || d > today) {
-          return [false, 'ui-state-disabled', ''];
+          return [false, 'ui-state-disabled', 'Tanggal di luar rentang'];
         }
         
         // Highlight untuk range
@@ -2400,34 +2435,25 @@ document.addEventListener('DOMContentLoaded', function () {
         
         return [true, '', ''];
       },
-      onSelect: function(dateText) {
+      onSelect: function(dateText, inst) {
         const selectedDate = new Date(dateText);
         selectedDate.setHours(0,0,0,0);
         
-        clearMessages(datepicker1);
-        
-        // Validasi tanggal
-        if (selectedDate < minStartDate) {
-          showError(datepicker1, `Tanggal tidak boleh lebih dari 30 hari sebelum hari ini`);
-          return;
-        }
-        if (selectedDate > today) {
-          showError(datepicker1, 'Tanggal tidak boleh di masa depan');
-          return;
-        }
+        console.log('Date selected:', dateText, 'isSelectingFirst:', isSelectingFirst);
         
         if (isSelectingFirst) {
           // Klik pertama: pilih tanggal awal
           firstDate = selectedDate;
-          secondDate = null;
           isSelectingFirst = false;
           
-          rangeInfo.textContent = `Tanggal awal: ${formatDateID(selectedDate)}. Klik tanggal akhir`;
+          rangeInfo.textContent = `Tanggal awal: ${formatDateID(selectedDate)}. Sekarang klik tanggal akhir`;
           rangeInfo.style.color = '#0d6efd';
-          datepicker1.value = `${formatDateID(selectedDate)} - ?`;
+          datepicker.value = formatDateID(selectedDate);
           
           // Refresh datepicker untuk update highlight
-          $(this).datepicker('refresh');
+          setTimeout(() => {
+            $(this).datepicker('refresh');
+          }, 10);
         } else {
           // Klik kedua: pilih tanggal akhir
           secondDate = selectedDate;
@@ -2436,9 +2462,10 @@ document.addEventListener('DOMContentLoaded', function () {
           const startDate = firstDate < secondDate ? firstDate : secondDate;
           const endDate = firstDate < secondDate ? secondDate : firstDate;
           
-          // Update tampilan
-          datepicker1.value = `${formatDateID(startDate)} - ${formatDateID(endDate)}`;
-          rangeInfo.textContent = `Rentang: ${formatDate(startDate)} s/d ${formatDate(endDate)}`;
+          // Update tampilan input
+          datepicker.value = `${formatDateID(startDate)} - ${formatDateID(endDate)}`;
+          const duration = daysDifference(startDate, endDate) + 1;
+          rangeInfo.textContent = `Rentang: ${formatDate(startDate)} s/d ${formatDate(endDate)} (${duration} hari)`;
           rangeInfo.style.color = '#198754';
           
           // Update hidden inputs
@@ -2446,16 +2473,14 @@ document.addEventListener('DOMContentLoaded', function () {
           tanggalAkhirKegiatan.value = formatDate(endDate);
           
           // Auto-fill datepicker3 (periode penugasan)
-          datepicker3.value = formatDate(startDate);
+          datepicker3.value = formatDateID(startDate);
           $('#datepicker3').datepicker('setDate', startDate);
-          datepicker3.classList.add('auto-filled', 'highlight-animation');
           infoPeriode.textContent = `Terisi otomatis dari tanggal awal kegiatan`;
           infoPeriode.style.color = '#198754';
           
           // Auto-fill datepicker4 (akhir penugasan)
-          datepicker4.value = formatDate(endDate);
+          datepicker4.value = formatDateID(endDate);
           $('#datepicker4').datepicker('setDate', endDate);
-          datepicker4.classList.add('auto-filled', 'highlight-animation');
           infoAkhir.textContent = `Terisi otomatis dari tanggal akhir kegiatan`;
           infoAkhir.style.color = '#198754';
           
@@ -2465,9 +2490,8 @@ document.addEventListener('DOMContentLoaded', function () {
           $('#datepicker4').datepicker('option', 'maxDate', maxPenugasanDate);
           
           // Cek apakah durasi melebihi 60 hari
-          const durasi = daysDifference(startDate, endDate) + 1;
-          if (durasi > 60) {
-            showError(datepicker4, `Durasi penugasan (${durasi} hari) melebihi batas 60 hari. Silakan sesuaikan manual.`);
+          if (duration > 60) {
+            alert(`Durasi penugasan (${duration} hari) melebihi batas 60 hari. Silakan sesuaikan manual.`);
           }
           
           // Reset state untuk pemilihan berikutnya
@@ -2476,46 +2500,27 @@ document.addEventListener('DOMContentLoaded', function () {
           isSelectingFirst = true;
           
           // Tutup datepicker
-          $(this).datepicker('hide');
-          
           setTimeout(() => {
-            datepicker3.classList.remove('highlight-animation');
-            datepicker4.classList.remove('highlight-animation');
-          }, 1000);
+            $(this).datepicker('hide');
+          }, 100);
         }
       }
-    }).parent().addClass('range-datepicker');
+    });
 
     // Datepicker 3 - Periode Penugasan
     $('#datepicker3').datepicker({
-      dateFormat: 'yy-mm-dd',
+      dateFormat: 'dd MM yy',
       autoclose: true,
       onSelect: function(dateText) {
-        clearMessages(datepicker3);
-        clearMessages(datepicker4);
-
         const startDate = new Date(dateText);
-        const minEndDate = new Date(dateText);
         const maxPenugasanDate = addDays(startDate, 60);
 
         // Update datepicker4 dengan batasan baru
-        $('#datepicker4').datepicker('option', 'minDate', minEndDate);
+        $('#datepicker4').datepicker('option', 'minDate', startDate);
         $('#datepicker4').datepicker('option', 'maxDate', maxPenugasanDate);
 
-        // Reset datepicker4 jika perlu
-        if (datepicker4.value) {
-          const currentEndDate = new Date(datepicker4.value);
-          if (currentEndDate < startDate || currentEndDate > maxPenugasanDate) {
-            datepicker4.value = '';
-            datepicker4.classList.remove('auto-filled');
-            infoAkhir.textContent = 'Silakan pilih ulang akhir penugasan';
-            infoAkhir.style.color = '#0d6efd';
-          }
-        }
-
         // Update info
-        infoPeriode.textContent = `Batas akhir penugasan: ${formatDate(maxPenugasanDate)}`;
-        datepicker3.classList.remove('auto-filled');
+        infoPeriode.textContent = `Batas akhir penugasan: ${formatDateID(maxPenugasanDate)}`;
         
         // Validasi dengan tanggal awal kegiatan
         if (tanggalAwalKegiatan.value && dateText !== tanggalAwalKegiatan.value) {
@@ -2529,7 +2534,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Datepicker 4 - Akhir Penugasan
     $('#datepicker4').datepicker({
-      dateFormat: 'yy-mm-dd',
+      dateFormat: 'dd MM yy',
       autoclose: true,
       minDate: null,
       maxDate: null,
@@ -2573,33 +2578,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return [false, 'ui-state-disabled', 'Melebihi batas maksimal 60 hari'];
       },
       onSelect: function(dateText) {
-        clearMessages(datepicker4);
-
         if (datepicker3.value) {
           const startDate = new Date(datepicker3.value);
           const endDate = new Date(dateText);
           const maxAllowedDate = addDays(startDate, 60);
-
-          if (endDate < startDate) {
-            datepicker4.value = '';
-            showError(datepicker4, 'Akhir penugasan tidak boleh lebih awal dari periode penugasan');
-            $(this).datepicker('hide');
-            return;
-          }
-
-          if (endDate > maxAllowedDate) {
-            datepicker4.value = '';
-            showError(datepicker4, `Akhir penugasan tidak boleh melebihi ${formatDate(maxAllowedDate)} (60 hari dari periode penugasan)`);
-            $(this).datepicker('hide');
-            return;
-          }
 
           const daysUsed = daysDifference(startDate, endDate);
           const daysLeft = 60 - daysUsed;
           
           // Update info
           infoAkhir.textContent = `Durasi: ${daysUsed + 1} hari. Sisa: ${daysLeft} hari`;
-          datepicker4.classList.remove('auto-filled');
           
           // Validasi dengan tanggal akhir kegiatan
           if (tanggalAkhirKegiatan.value && dateText !== tanggalAkhirKegiatan.value) {
@@ -2612,13 +2600,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Event handler untuk reset ketika input difocus
-    $('#datepicker').on('focus', function() {
-      // Tampilkan datepicker ketika input difocus
-      $(this).datepicker('show');
-    });
-
-    // Event handler untuk klik di luar datepicker
+    // Event handler untuk reset ketika klik di luar datepicker
     $(document).on('click', function(e) {
       const $target = $(e.target);
       const $datepicker = $('#datepicker');
@@ -2631,68 +2613,24 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // Jika sedang dalam proses memilih (sudah pilih tanggal awal tapi belum tanggal akhir)
         if (firstDate && !secondDate) {
-          // Reset selection
-          firstDate = null;
-          secondDate = null;
-          isSelectingFirst = true;
-          datepicker1.value = '';
-          rangeInfo.textContent = 'Klik tanggal awal, lalu klik tanggal akhir';
-          rangeInfo.style.color = '#0d6efd';
+          const confirmReset = confirm('Anda sudah memilih tanggal awal. Batalkan dan mulai ulang?');
+          if (confirmReset) {
+            resetDateSelection();
+            $('#datepicker').datepicker('refresh');
+          }
         }
       }
     });
 
-  } // end if jquery-ui available
-
-  // Fungsi untuk toggle periode section
-  function togglePeriodeSection(value) {
-    const niceWrapper = periodeSection.querySelector('.nice-select');
-    const originalSelect = periodeSelect;
-
-    if (value === 'Periode') {
-      periodeSection.style.display = 'block';
-      if (niceWrapper) niceWrapper.style.display = 'block';
-      originalSelect.classList.add('nice-original');
-      periodeSelect.setAttribute('required', 'required');
-    } else {
-      periodeSection.style.display = 'none';
-      if (niceWrapper) niceWrapper.style.display = 'none';
-      originalSelect.classList.add('nice-original');
-      periodeSelect.removeAttribute('required');
-      periodeSelect.value = '';
-      periodeSection.classList.remove('open-margin');
-    }
   }
 
-  // Jika menggunakan NiceSelect
-  if (typeof $ !== 'undefined' && typeof $.fn.niceSelect !== 'undefined') {
-    $('select#periode_value').niceSelect();
-
-    $('select#periode_value').parent().on("click", function () {
-      setTimeout(() => {
-        if ($(this).hasClass("open")) {
-          periodeSection.classList.add("open-margin");
-        } else {
-          periodeSection.classList.remove("open-margin");
-        }
-      }, 50);
-    });
-
-    $(document).on('click', function(e) {
-      if (!$(e.target).closest('#periode_section').length) {
-        periodeSection.classList.remove("open-margin");
-      }
-    });
-
-    $('select#jenis_date').on('change', function () {
-      togglePeriodeSection(this.value);
-    });
-  }
-
-  // fallback
+  // Event listener untuk toggle sections
   jenisDate.addEventListener('change', function () {
-    togglePeriodeSection(this.value);
+    toggleSections(this.value);
   });
+
+  // Initialize berdasarkan pilihan default
+  toggleSections(jenisDate.value);
 
   // Validasi form submit
   const msform = document.getElementById('msform');
@@ -2700,27 +2638,35 @@ document.addEventListener('DOMContentLoaded', function () {
     msform.addEventListener('submit', function(e) {
       let isValid = true;
       
-      // Validasi tanggal kegiatan
-      if (!tanggalAwalKegiatan.value || !tanggalAkhirKegiatan.value) {
-        showError(datepicker1, 'Pilih rentang tanggal kegiatan terlebih dahulu');
-        isValid = false;
-      }
-      
-      // Validasi datepicker4
-      if (datepicker3.value && datepicker4.value) {
-        const startDate = new Date(datepicker3.value);
-        const endDate = new Date(datepicker4.value);
-        const maxAllowedDate = addDays(startDate, 60);
-        
-        if (endDate > maxAllowedDate) {
-          showError(datepicker4, `Akhir penugasan melebihi batas 60 hari. Maksimal: ${formatDate(maxAllowedDate)}`);
+      // Validasi berdasarkan pilihan jenis date
+      if (jenisDate.value === 'Custom') {
+        if (!tanggalAwalKegiatan.value || !tanggalAkhirKegiatan.value) {
+          alert('Pilih rentang tanggal kegiatan terlebih dahulu');
           isValid = false;
         }
+        
+        if (datepicker3.value && datepicker4.value) {
+          const startDate = new Date(datepicker3.value);
+          const endDate = new Date(datepicker4.value);
+          const maxAllowedDate = addDays(startDate, 60);
+          
+          if (endDate > maxAllowedDate) {
+            alert(`Akhir penugasan melebihi batas 60 hari. Maksimal: ${formatDate(maxAllowedDate)}`);
+            isValid = false;
+          }
+        }
+      } else if (jenisDate.value === 'Periode') {
+        if (!periodeSelect.value) {
+          alert('Pilih periode terlebih dahulu');
+          isValid = false;
+        }
+      } else {
+        alert('Pilih jenis tanggal pengajuan terlebih dahulu');
+        isValid = false;
       }
       
       if (!isValid) {
         e.preventDefault();
-        alert('Periksa kembali tanggal yang dimasukkan!');
       }
     });
   }
@@ -2740,19 +2686,29 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
             <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333;">
                 <i class="fas fa-cloud-upload-alt"></i> Upload File Eviden
             </label>
+            <p style="font-size: 13px; color: #6c757d; margin-bottom: 15px;">
+                Anda dapat menambahkan beberapa file. Klik tombol di bawah untuk upload file baru.
+            </p>
         </div>
 
-        <!-- KONTAINER UPLOADCARE (harus div kosong) -->
-        <div id="eviden-panel" style="min-height: 420px; border:1px solid #ddd; border-radius:10px;"></div>
+        <!-- BUTTON UNTUK UPLOAD FILE -->
+        <div style="margin-bottom: 20px;">
+            <button type="button" id="upload-btn" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px; background: #007bff; border: none; color: white; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
+                <i class="fas fa-plus-circle"></i> Tambah File
+            </button>
+        </div>
+
+        <!-- KONTAINER UPLOADCARE (akan muncul saat button diklik) -->
+        <div id="eviden-panel" style="display: none; min-height: 420px; border:1px solid #ddd; border-radius:10px; margin-bottom: 20px;"></div>
 
         <!-- Hidden input untuk simpan URL -->
         <input type="hidden" name="eviden" id="eviden" value="[]">
         
         <!-- Display uploaded files -->
-        <div id="uploaded-files-display" style="margin-top: 20px; display: none;">
+        <div id="uploaded-files-display" style="display: none;">
             <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; border: 1px solid #dee2e6;">
                 <h6 style="font-weight: 600; margin-bottom: 10px; color: #495057;">
-                    <i class="fas fa-check-circle" style="color: #28a745;"></i> File yang sudah diupload:
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i> File yang sudah diupload (<span id="total-files">0</span>):
                 </h6>
                 <div id="files-list"></div>
             </div>
@@ -2760,59 +2716,546 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
     </div>
 </fieldset>
 
+<!-- Modal Preview File - PDF Viewer Style -->
+<div id="file-preview-modal" class="file-preview-modal">
+    <div class="modal-content-fullscreen">
+        <!-- Header Purple seperti PDF viewer -->
+        <div class="pdf-viewer-header">
+            <div class="pdf-header-left">
+                <button type="button" class="header-icon-btn" onclick="closePreviewModal()" title="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+                <span class="pdf-title" id="modal-file-title">Preview: document.pdf</span>
+            </div>
+            <div class="pdf-header-right">
+                <a id="btn-download-file" href="#" target="_blank" download class="header-icon-btn" title="Download">
+                    <i class="fas fa-download"></i>
+                </a>
+                <button type="button" class="header-icon-btn" onclick="window.print()" title="Print">
+                    <i class="fas fa-print"></i>
+                </button>
+                <button type="button" class="header-icon-btn" title="More options">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Toolbar Dark seperti PDF viewer -->
+        <div class="pdf-viewer-toolbar">
+            <div class="toolbar-left">
+                <button type="button" class="toolbar-icon-btn" title="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="page-indicator">
+                    <span id="current-page">1</span> / <span id="total-pages">1</span>
+                </span>
+            </div>
+            
+            <div class="toolbar-center">
+                <button type="button" class="toolbar-icon-btn" title="Zoom out" onclick="zoomOut()">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button type="button" class="toolbar-icon-btn" title="Zoom in" onclick="zoomIn()">
+                    <i class="fas fa-plus"></i>
+                </button>
+                <select class="zoom-select" id="zoom-select">
+                    <option value="50">50%</option>
+                    <option value="75">75%</option>
+                    <option value="100" selected>100%</option>
+                    <option value="125">125%</option>
+                    <option value="150">150%</option>
+                    <option value="200">200%</option>
+                </select>
+                <button type="button" class="toolbar-icon-btn" title="Rotate" onclick="rotateImage()">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button type="button" class="toolbar-icon-btn" title="Fit to page" onclick="fitToPage()">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
+            <div class="toolbar-right">
+                <button type="button" class="toolbar-icon-btn" title="Undo">
+                    <i class="fas fa-undo"></i>
+                </button>
+                <button type="button" class="toolbar-icon-btn" title="Redo">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="pdf-viewer-body">
+            <div id="preview-content" class="preview-container">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- BUTTON AREA -->
 <div class="button-area" style="margin-top:25px; text-align:center;">
     <button type="button" class="btn btn-primary prev-btn rounded-pill btn-sm" style="padding: 6px 20px;">Back</button>
     <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px;">Continue</button>
 </div>
 
+<style>
+/* Modal Styles - PDF Viewer Style */
+.file-preview-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #202124;
+    z-index: 10000;
+}
+
+.file-preview-modal.show {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content-fullscreen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #202124;
+}
+
+/* PDF Viewer Header - Purple */
+.pdf-viewer-header {
+    background: linear-gradient(135deg, #7b5e9f 0%, #9370b8 100%);
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pdf-header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    min-width: 0;
+}
+
+.pdf-title {
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: white;
+}
+
+.pdf-header-right {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.header-icon-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    font-size: 18px;
+    text-decoration: none;
+}
+
+.header-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* PDF Viewer Toolbar - Dark */
+.pdf-viewer-toolbar {
+    background: #323639;
+    color: #e8eaed;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.toolbar-left,
+.toolbar-center,
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toolbar-center {
+    flex: 1;
+    justify-content: center;
+}
+
+.toolbar-icon-btn {
+    background: transparent;
+    border: none;
+    color: #e8eaed;
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    font-size: 16px;
+}
+
+.toolbar-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.page-indicator {
+    color: #e8eaed;
+    font-size: 13px;
+    padding: 0 12px;
+    white-space: nowrap;
+}
+
+.zoom-select {
+    background: #3c4043;
+    border: 1px solid #5f6368;
+    color: #e8eaed;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+}
+
+.zoom-select:hover {
+    background: #484a4d;
+}
+
+/* PDF Viewer Body */
+.pdf-viewer-body {
+    flex: 1;
+    overflow: auto;
+    background: #202124;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.preview-container {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+}
+
+.preview-image {
+    max-width: 90%;
+    max-height: 85vh;
+    height: auto;
+    width: auto;
+    border-radius: 4px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    background: transparent;
+    transition: transform 0.3s ease;
+    object-fit: contain;
+}
+
+.preview-pdf {
+    width: 100%;
+    height: calc(100vh - 120px);
+    border: none;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.preview-file-info {
+    text-align: center;
+    padding: 60px 40px;
+    background: #3c3f43;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    max-width: 500px;
+    border: 1px solid #5f6368;
+}
+
+.preview-file-icon {
+    font-size: 100px;
+    margin-bottom: 25px;
+    opacity: 0.9;
+    color: #e8eaed;
+}
+
+.preview-file-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: #e8eaed;
+    margin-bottom: 12px;
+    word-break: break-all;
+}
+
+.preview-file-type {
+    font-size: 15px;
+    color: #9aa0a6;
+    margin-bottom: 25px;
+}
+
+.btn-open-tab {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: #1a73e8;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+}
+
+.btn-open-tab:hover {
+    background: #1557b0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+}
+
+.btn-open-tab i {
+    margin-right: 8px;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin: 100px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Style untuk tombol upload */
+#upload-btn:hover {
+    background: #0056b3 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+    transition: all 0.3s ease;
+}
+
+#upload-btn:active {
+    transform: translateY(0);
+}
+
+/* Style untuk file item */
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.file-item:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-color: #007bff;
+}
+
+.file-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    border-radius: 6px;
+}
+
+.file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.file-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+}
+
+.file-url {
+    font-size: 11px;
+    color: #6c757d;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-remove {
+    padding: 6px 12px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.btn-remove:hover {
+    background: #c82333;
+    transform: scale(1.05);
+}
+
+.btn-view {
+    padding: 6px 12px;
+    background: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    margin-right: 5px;
+}
+
+.btn-view:hover {
+    background: #138496;
+    transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .pdf-viewer-header {
+        padding: 10px 15px;
+    }
+    
+    .pdf-title {
+        font-size: 14px;
+    }
+    
+    .toolbar-center {
+        gap: 4px;
+    }
+    
+    .zoom-select {
+        width: 70px;
+        font-size: 12px;
+    }
+    
+    .pdf-viewer-body {
+        padding: 10px;
+    }
+}
+</style>
+
 <script>
 // ========================================
-// PERBAIKAN UPLOADCARE - SIMPAN URL KE DATABASE
+// MULTIPLE UPLOAD DENGAN UPLOADCARE
 // ========================================
 
 document.addEventListener("DOMContentLoaded", function () {
     const evidenInput = document.getElementById("eviden");
-    const msform = document.getElementById("msform");
     const uploadedDisplay = document.getElementById("uploaded-files-display");
     const filesList = document.getElementById("files-list");
+    const uploadBtn = document.getElementById("upload-btn");
+    const evidenPanel = document.getElementById("eviden-panel");
+    const totalFilesSpan = document.getElementById("total-files");
     
-    // Pastikan default selalu array kosong (bukan string kosong)
+    // Pastikan default selalu array kosong
     if (!evidenInput.value || evidenInput.value === "") {
         evidenInput.value = "[]";
     }
 
     // Array untuk menyimpan semua URL yang di-upload
     let uploadedFiles = [];
+    let currentPanel = null;
+    let currentRotation = 0;
+
+    // Function untuk get file type icon
+    function getFileIcon(url) {
+        const ext = url.split('.').pop().toLowerCase().split('?')[0];
+        
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+            return '<i class="fas fa-file-image" style="font-size: 20px; color: #17a2b8;"></i>';
+        } else if (['pdf'].includes(ext)) {
+            return '<i class="fas fa-file-pdf" style="font-size: 20px; color: #dc3545;"></i>';
+        } else if (['doc', 'docx'].includes(ext)) {
+            return '<i class="fas fa-file-word" style="font-size: 20px; color: #2b579a;"></i>';
+        } else if (['xls', 'xlsx'].includes(ext)) {
+            return '<i class="fas fa-file-excel" style="font-size: 20px; color: #217346;"></i>';
+        } else if (['zip', 'rar', '7z'].includes(ext)) {
+            return '<i class="fas fa-file-archive" style="font-size: 20px; color: #ffc107;"></i>';
+        } else {
+            return '<i class="fas fa-file-alt" style="font-size: 20px; color: #6c757d;"></i>';
+        }
+    }
 
     // Function untuk update display files
     function updateFilesDisplay() {
         if (uploadedFiles.length === 0) {
             uploadedDisplay.style.display = 'none';
+            totalFilesSpan.textContent = '0';
             return;
         }
 
         uploadedDisplay.style.display = 'block';
+        totalFilesSpan.textContent = uploadedFiles.length;
         filesList.innerHTML = '';
 
         uploadedFiles.forEach((url, index) => {
-            const filename = url.split('/').pop().split('?')[0]; // Extract filename dari URL
+            const filename = url.split('/').pop().split('?')[0];
             const fileItem = document.createElement('div');
-            fileItem.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 8px; background: white; border-radius: 6px; margin-bottom: 8px; border: 1px solid #e9ecef;';
+            fileItem.className = 'file-item';
             
             fileItem.innerHTML = `
-                <div style="flex-shrink: 0;">
-                    <i class="fas fa-file-alt" style="font-size: 20px; color: #6c757d;"></i>
+                <div class="file-icon">
+                    ${getFileIcon(url)}
                 </div>
-                <div style="flex: 1; min-width: 0;">
-                    <strong style="font-size: 13px; color: #495057;">File ${index + 1}</strong>
-                    <div style="font-size: 11px; color: #6c757d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${filename}</div>
+                <div class="file-info">
+                    <div class="file-name">File ${index + 1}: ${filename}</div>
+                    <div class="file-url">${url}</div>
                 </div>
-                <button type="button" 
-                        onclick="removeFile(${index})" 
-                        style="padding: 4px 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">
-                    <i class="fas fa-times"></i> Hapus
-                </button>
+                <div style="display: flex; gap: 5px;">
+                    <button type="button" onclick="removeFile(${index})" class="btn-remove">
+                        <i class="fas fa-times"></i> Hapus
+                    </button>
+                </div>
             `;
             
             filesList.appendChild(fileItem);
@@ -2821,50 +3264,280 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function untuk remove file
     window.removeFile = function(index) {
-        uploadedFiles.splice(index, 1);
-        evidenInput.value = JSON.stringify(uploadedFiles);
-        updateFilesDisplay();
-        console.log("🗑 File dihapus. Total file:", uploadedFiles.length);
+        if (confirm('Apakah Anda yakin ingin menghapus file ini?')) {
+            uploadedFiles.splice(index, 1);
+            evidenInput.value = JSON.stringify(uploadedFiles);
+            updateFilesDisplay();
+            console.log("🗑 File dihapus. Total file:", uploadedFiles.length);
+        }
     };
 
-    // Inisialisasi Uploadcare Panel
-    const panel = uploadcare.openPanel('#eviden-panel', null, {
-        multiple: true,
-        previewStep: true,
-        tabs: "file url camera dropbox gdrive",
-        publicKey: "3438a2ee1b7dd183914c"
+    // Zoom functions
+    window.zoomIn = function() {
+        const zoomSelect = document.getElementById('zoom-select');
+        const currentValue = parseInt(zoomSelect.value);
+        const options = [50, 75, 100, 125, 150, 200];
+        const currentIndex = options.indexOf(currentValue);
+        
+        if (currentIndex < options.length - 1) {
+            zoomSelect.value = options[currentIndex + 1];
+            applyZoom(options[currentIndex + 1]);
+        }
+    };
+
+    window.zoomOut = function() {
+        const zoomSelect = document.getElementById('zoom-select');
+        const currentValue = parseInt(zoomSelect.value);
+        const options = [50, 75, 100, 125, 150, 200];
+        const currentIndex = options.indexOf(currentValue);
+        
+        if (currentIndex > 0) {
+            zoomSelect.value = options[currentIndex - 1];
+            applyZoom(options[currentIndex - 1]);
+        }
+    };
+
+    // Rotate function untuk gambar
+    window.rotateImage = function() {
+        const img = document.querySelector('.preview-image');
+        if (img) {
+            currentRotation = (currentRotation + 90) % 360;
+            const currentScale = parseInt(document.getElementById('zoom-select').value) / 100;
+            img.style.transform = `scale(${currentScale}) rotate(${currentRotation}deg)`;
+        }
+    };
+
+    // Fit to page function
+    window.fitToPage = function() {
+        const zoomSelect = document.getElementById('zoom-select');
+        zoomSelect.value = '100';
+        applyZoom(100);
+        currentRotation = 0;
+        const img = document.querySelector('.preview-image');
+        if (img) {
+            img.style.transform = 'scale(1) rotate(0deg)';
+        }
+    };
+
+    function applyZoom(zoomValue) {
+        const previewContent = document.getElementById('preview-content');
+        const img = previewContent.querySelector('.preview-image');
+        
+        if (img) {
+            img.style.transform = `scale(${zoomValue / 100}) rotate(${currentRotation}deg)`;
+            img.style.transformOrigin = 'center center';
+        }
+    }
+
+    // Zoom select change event
+    document.addEventListener('change', function(e) {
+        if (e.target.id === 'zoom-select') {
+            applyZoom(parseInt(e.target.value));
+        }
     });
 
-    // Event ketika user selesai upload file
-    panel.done(function (fileGroup) {
-        console.log("✅ Upload selesai! File group:", fileGroup);
+    // Function untuk preview file dalam modal
+    window.previewFile = function(url, filename) {
+        const modal = document.getElementById('file-preview-modal');
+        const modalTitle = document.getElementById('modal-file-title');
+        const previewContent = document.getElementById('preview-content');
+        const downloadBtn = document.getElementById('btn-download-file');
         
-        // Proses semua file yang di-upload
-        fileGroup.files().forEach(filePromise => {
-            filePromise.done(fileInfo => {
-                console.log("📁 File info:", fileInfo);
+        // Reset zoom dan rotation
+        const zoomSelect = document.getElementById('zoom-select');
+        zoomSelect.value = '100';
+        currentRotation = 0;
+        
+        // Set modal title
+        modalTitle.textContent = 'Preview: ' + filename;
+        
+        // Set download link
+        downloadBtn.href = url;
+        downloadBtn.download = filename;
+        
+        // Show modal
+        modal.classList.add('show');
+        
+        // Show loading
+        previewContent.innerHTML = '<div class="loading-spinner"></div>';
+        
+        // Get file extension
+        const ext = url.split('.').pop().toLowerCase().split('?')[0];
+        
+        // Render preview based on file type
+        setTimeout(() => {
+            if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
+                // Image preview - Load image properly
+                const img = new Image();
+                img.onload = function() {
+                    previewContent.innerHTML = `
+                        <img src="${url}" alt="${filename}" class="preview-image">
+                    `;
+                };
+                img.onerror = function() {
+                    previewContent.innerHTML = `
+                        <div class="preview-file-info">
+                            <div class="preview-file-icon">
+                                <i class="fas fa-exclamation-triangle" style="color: #ff6b6b;"></i>
+                            </div>
+                            <div class="preview-file-name">Gagal Memuat Gambar</div>
+                            <p style="color: #999; font-size: 14px;">
+                                Tidak dapat menampilkan gambar ini.<br>
+                                Silakan coba download file.
+                            </p>
+                        </div>
+                    `;
+                };
+                img.src = url;
+            } else if (ext === 'pdf') {
+                // PDF preview
+                previewContent.innerHTML = `
+                    <iframe src="${url}" class="preview-pdf" frameborder="0"></iframe>
+                `;
+            } else {
+                // Other file types - show info
+                const fileTypeMap = {
+                    'doc': 'Microsoft Word Document',
+                    'docx': 'Microsoft Word Document',
+                    'xls': 'Microsoft Excel Spreadsheet',
+                    'xlsx': 'Microsoft Excel Spreadsheet',
+                    'ppt': 'Microsoft PowerPoint Presentation',
+                    'pptx': 'Microsoft PowerPoint Presentation',
+                    'zip': 'ZIP Archive',
+                    'rar': 'RAR Archive',
+                    '7z': '7-Zip Archive',
+                    'txt': 'Text File',
+                    'csv': 'CSV File'
+                };
                 
-                // Tambahkan URL ke array
-                uploadedFiles.push(fileInfo.cdnUrl);
+                const fileType = fileTypeMap[ext] || 'File';
+                const iconHtml = getFileIcon(url);
                 
-                // Update hidden input dengan format JSON array
-                evidenInput.value = JSON.stringify(uploadedFiles);
-                
-                // Update display
-                updateFilesDisplay();
-                
-                console.log("💾 Eviden tersimpan:", evidenInput.value);
-                console.log("📊 Total files:", uploadedFiles.length);
-            });
+                previewContent.innerHTML = `
+                    <div class="preview-file-info">
+                        <div class="preview-file-icon">${iconHtml}</div>
+                        <div class="preview-file-name">${filename}</div>
+                        <div class="preview-file-type">${fileType}</div>
+                        <p style="color: #999; font-size: 14px; line-height: 1.6;">
+                            Preview tidak tersedia untuk tipe file ini.<br>
+                            Klik tombol "Download" di header untuk mengunduh.
+                        </p>
+                        <a href="${url}" target="_blank" class="btn-open-tab">
+                            <i class="fas fa-external-link-alt"></i> Buka di Tab Baru
+                        </a>
+                    </div>
+                `;
+            }
+        }, 300);
+    };
+
+    // Function untuk close modal
+    window.closePreviewModal = function() {
+        const modal = document.getElementById('file-preview-modal');
+        modal.classList.remove('show');
+        currentRotation = 0;
+        
+        // Clear content after animation
+        setTimeout(() => {
+            document.getElementById('preview-content').innerHTML = '<div class="loading-spinner"></div>';
+        }, 300);
+    };
+
+    // Close modal when clicking outside (pada area abu-abu)
+    document.getElementById('file-preview-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePreviewModal();
+        }
+    });
+
+    // Close modal with ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('file-preview-modal');
+            if (modal.classList.contains('show')) {
+                closePreviewModal();
+            }
+        }
+    });
+
+    // Function untuk open upload panel
+    function openUploadPanel() {
+        // Tutup panel sebelumnya jika ada
+        if (currentPanel) {
+            try {
+                currentPanel.reject();
+            } catch (e) {
+                console.log("Panel sudah tertutup");
+            }
+        }
+
+        // Show panel container
+        evidenPanel.style.display = 'block';
+        
+        // Clear panel content
+        evidenPanel.innerHTML = '';
+
+        // Create new panel
+        currentPanel = uploadcare.openPanel('#eviden-panel', null, {
+            multiple: true,
+            multipleMax: 10,
+            multipleMin: 1,
+            previewStep: true,
+            tabs: "file url camera dropbox gdrive",
+            publicKey: "3438a2ee1b7dd183914c",
+            imagesOnly: false,
+            clearable: true
         });
+
+        // Event ketika user selesai upload
+        currentPanel.done(function (fileGroup) {
+            console.log("✅ Upload selesai! File group:", fileGroup);
+            
+            // Process all files
+            fileGroup.files().forEach(filePromise => {
+                filePromise.done(fileInfo => {
+                    console.log("📁 File info:", fileInfo);
+                    
+                    // Add URL to array
+                    uploadedFiles.push(fileInfo.cdnUrl);
+                    
+                    // Update hidden input
+                    evidenInput.value = JSON.stringify(uploadedFiles);
+                    
+                    // Update display
+                    updateFilesDisplay();
+                    
+                    console.log("💾 File tersimpan:", fileInfo.cdnUrl);
+                });
+            });
+
+            // Hide panel after upload
+            setTimeout(() => {
+                evidenPanel.style.display = 'none';
+                evidenPanel.innerHTML = '';
+            }, 500);
+        });
+
+        // Event ketika user cancel
+        currentPanel.fail(function() {
+            console.log("❌ Upload dibatalkan");
+            evidenPanel.style.display = 'none';
+            evidenPanel.innerHTML = '';
+        });
+    }
+
+    // Event listener untuk tombol upload
+    uploadBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        openUploadPanel();
     });
 
     // ========================================
-    // PERBAIKAN FORM SUBMIT
+    // FORM NAVIGATION
     // ========================================
     
-    // Cegah submit default di tombol "Finish"
     const nextBtn = document.querySelector('.next-btn');
+    const prevBtn = document.querySelector('.prev-btn');
     const fieldsets = document.querySelectorAll('fieldset');
     let currentStep = 0;
 
@@ -2882,12 +3555,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 fieldsets[currentStep].classList.add('active');
                 
                 // Update progress bar
-                const percent = ((currentStep + 1) / totalSteps) * 100;
-                document.getElementById('progressBar').style.width = percent + '%';
-                document.getElementById('currentStep').textContent = currentStep + 1;
+                if (document.getElementById('progressBar')) {
+                    const percent = ((currentStep + 1) / totalSteps) * 100;
+                    document.getElementById('progressBar').style.width = percent + '%';
+                }
+                if (document.getElementById('currentStep')) {
+                    document.getElementById('currentStep').textContent = currentStep + 1;
+                }
                 
                 // Toggle tombol back
-                document.querySelector('.prev-btn').style.display = currentStep > 0 ? 'inline-block' : 'none';
+                if (prevBtn) {
+                    prevBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
+                }
                 
                 // Update text tombol
                 nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
@@ -2896,18 +3575,24 @@ document.addEventListener("DOMContentLoaded", function () {
             else {
                 console.log("🚀 Submitting form...");
                 console.log("📎 Final eviden value:", evidenInput.value);
+                console.log("📊 Total files:", uploadedFiles.length);
                 
                 // Validasi: pastikan eviden tidak kosong jika wajib
                 if (uploadedFiles.length === 0) {
                     alert("⚠ Silakan upload minimal 1 file eviden!");
                     return false;
                 }
+                
+                // Submit form
+                const msform = document.getElementById('msform');
+                if (msform) {
+                    msform.submit();
+                }
             }
         });
     }
 
     // Tombol Back
-    const prevBtn = document.querySelector('.prev-btn');
     if (prevBtn) {
         prevBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -2919,36 +3604,57 @@ document.addEventListener("DOMContentLoaded", function () {
                 
                 // Update progress
                 const totalSteps = fieldsets.length;
-                const percent = ((currentStep + 1) / totalSteps) * 100;
-                document.getElementById('progressBar').style.width = percent + '%';
-                document.getElementById('currentStep').textContent = currentStep + 1;
+                if (document.getElementById('progressBar')) {
+                    const percent = ((currentStep + 1) / totalSteps) * 100;
+                    document.getElementById('progressBar').style.width = percent + '%';
+                }
+                if (document.getElementById('currentStep')) {
+                    document.getElementById('currentStep').textContent = currentStep + 1;
+                }
                 
                 prevBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
                 nextBtn.textContent = currentStep === totalSteps - 1 ? 'Finish' : 'Continue';
             }
         });
     }
+
+    // Load existing files if any (for edit mode)
+    try {
+        const existingFiles = JSON.parse(evidenInput.value);
+        if (Array.isArray(existingFiles) && existingFiles.length > 0) {
+            uploadedFiles = existingFiles;
+            updateFilesDisplay();
+        }
+    } catch (e) {
+        console.log("No existing files to load");
+    }
 });
 
 // ========================================
 // DEBUG HELPER - CEK ISI FORM SEBELUM SUBMIT
 // ========================================
-document.getElementById("msform").addEventListener("submit", function(e) {
-    const evidenValue = document.getElementById("eviden").value;
-    console.log("📤 Form akan di-submit dengan eviden:", evidenValue);
-    
-    // Cek apakah eviden kosong
-    try {
-        const parsed = JSON.parse(evidenValue);
-        if (!Array.isArray(parsed) || parsed.length === 0) {
-            console.warn("⚠ WARNING: Eviden kosong!");
-        } else {
-            console.log("✅ Eviden berisi", parsed.length, "file(s)");
+const msform = document.getElementById("msform");
+if (msform) {
+    msform.addEventListener("submit", function(e) {
+        const evidenValue = document.getElementById("eviden").value;
+        console.log("📤 Form akan di-submit dengan eviden:", evidenValue);
+        
+        // Cek apakah eviden kosong
+        try {
+            const parsed = JSON.parse(evidenValue);
+            if (!Array.isArray(parsed) || parsed.length === 0) {
+                console.warn("⚠ WARNING: Eviden kosong!");
+            } else {
+                console.log("✅ Eviden berisi", parsed.length, "file(s)");
+                parsed.forEach((url, index) => {
+                    console.log(`   ${index + 1}. ${url}`);
+                });
+            }
+        } catch (err) {
+            console.error("❌ ERROR: Format eviden tidak valid!", err);
         }
-    } catch (err) {
-        console.error("❌ ERROR: Format eviden tidak valid!", err);
-    }
-});
+    });
+}
 </script>
 </div>
 </form>
