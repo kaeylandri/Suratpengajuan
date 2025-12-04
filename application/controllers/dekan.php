@@ -541,6 +541,9 @@ class Dekan extends CI_Controller
                 'akhir_kegiatan' => $akhir_kegiatan,
                 'periode_kegiatan' => $periode_display,  // Nilai yang sudah diformat
                 'jenis_date' => $jenis_date,
+                'periode_value' => $periode_display,
+                'tanggal_kegiatan' => $tanggal_kegiatan,
+                'akhir_kegiatan' => $akhir_kegiatan,
                 'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
                 'created_at' => $pengajuan->created_at,
                 'eviden' => $pengajuan->eviden,

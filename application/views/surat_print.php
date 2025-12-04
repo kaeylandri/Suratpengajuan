@@ -331,18 +331,19 @@ function tgl_indo($tanggal) {
 
         <!-- Untuk Menghadiri Kegiatan -->
 <p>
-    sebagai <b><?= $surat->jenis_penugasan_kelompok ??  '-' ?></b> dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
+    sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b> 
+    dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
     yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
+
     <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'custom'): ?>
-        pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b> 
-        <?php if (!empty($surat->akhir_kegiatan) && $surat->akhir_kegiatan != $surat->tanggal_kegiatan): ?>
-            sampai dengan <b><?= tgl_indo($surat->akhir_kegiatan ?? '-') ?></b>
-        <?php endif; ?>
+        pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b>
     <?php else: ?>
         selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
     <?php endif; ?>
+
     di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
 </p>
+
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
 
         <!-- Penutup -->

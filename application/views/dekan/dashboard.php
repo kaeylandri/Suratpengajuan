@@ -603,6 +603,35 @@
     animation: slideIn 0.3s ease;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
+/* Clickable Row Styles - IMPROVED */
+.clickable-row {
+    cursor: pointer !important;
+    transition: all 0.2s ease;
+}
+
+.clickable-row:hover {
+    background-color: #fef9e7 !important;
+    box-shadow: 0 2px 4px rgba(251, 140, 0, 0.1);
+}
+
+.clickable-row:active {
+    background-color: #fdebd0 !important;
+    transform: scale(0.998);
+}
+
+/* Highlight untuk baris yang sedang dipilih */
+.clickable-row.selected {
+    background-color: #fef9e7 !important;
+    border-left: 4px solid #FB8C00;
+}
+
+/* Pastikan tombol di dalam row tidak ter-affected */
+.clickable-row button,
+.clickable-row select,
+.clickable-row textarea,
+.clickable-row input {
+    pointer-events: all;
+}
 </style>
 </head>
 <body>
@@ -811,7 +840,7 @@
                         $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
                         $tgl_kegiatan = isset($s['tanggal_kegiatan']) && $s['tanggal_kegiatan'] ? date('d M Y', strtotime($s['tanggal_kegiatan'])) : '-';
                     ?>
-                    <tr data-status="<?= $st_key ?>">
+                    <tr onclick="showRowDetail(<?= $s['id'] ?>)" style="cursor: pointer;" class="clickable-row">
                         <td><?= $no++ ?></td>
                         <td><strong><?= htmlspecialchars($s['nama_kegiatan']) ?></strong></td>
                         <td><?= htmlspecialchars($s['penyelenggara']) ?></td>
@@ -822,21 +851,20 @@
                         <!-- Di bagian tabel, ganti tombol status menjadi tombol eviden -->
                         <td>
                             <div style="display:flex;gap:6px">
-                                <!-- Tombol Lihat Eviden (DIGANTI DARI STATUS) -->
-                                <button class="btn btn-status" title="Lihat Eviden" onclick="showEvidenModal(<?= $s['id']; ?>)">
+                                <button class="btn btn-eviden" onclick="event.stopPropagation(); showEvidenModal(<?= $s['id']; ?>)" title="Lihat Eviden">
                                     <i class="fas fa-file-image"></i>
                                 </button>
                                 
                                 <!-- Tombol Lihat Detail -->
-                                <button class="btn btn-detail" onclick="showDetail(<?= $s['id']?>)" title="Lihat Detail">
+                                <button class="btn btn-detail" onclick="event.stopPropagation(); showDetail(<?= $s['id']?>)" title="Lihat Detail">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
                                 
                                 <?php if($s['status']== 'disetujui sekretariat'): ?>
-                                    <button class="btn btn-approve" onclick="showApproveModal(<?= $s['id'] ?>)" title="Setujui">
+                                    <button class="btn btn-approve" onclick="event.stopPropagation(); showApproveModal(<?= $s['id'] ?>)" title="Setujui">
                                         <i class="fa-solid fa-check"></i>
                                     </button>
-                                    <button class="btn btn-reject" onclick="showRejectModal(<?= $s['id'] ?>)" title="Tolak">
+                                    <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModal(<?= $s['id'] ?>)" title="Tolak">
                                         <i class="fa-solid fa-times"></i>
                                     </button>
                                 <?php endif; ?>
@@ -1828,6 +1856,487 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     <?php endif; ?>
 });
+// Update fungsi showRowDetail untuk menggunakan generateDetailContentEnhanced
+async function showRowDetail(id) {
+    try {
+        // Tampilkan loading
+        document.getElementById('detailContent').innerHTML = `
+            <div style="text-align:center;padding:40px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
+                <p style="margin-top:10px;color:#7f8c8d">Memuat detail pengajuan...</p>
+            </div>
+        `;
+        
+        // Tampilkan modal
+        document.getElementById('detailModal').classList.add('show');
+        
+        // Ambil data detail via AJAX
+        const data = await getSuratDetail(id);
+        
+        if (!data) {
+            throw new Error('Data tidak ditemukan');
+        }
+        
+        // Generate HTML untuk detail pengajuan ENHANCED
+        const detailHtml = generateDetailContentEnhanced(data);
+        document.getElementById('detailContent').innerHTML = detailHtml;
+        
+    } catch (error) {
+        console.error('Error loading detail:', error);
+        document.getElementById('detailContent').innerHTML = `
+            <div style="text-align:center;padding:40px;color:#e74c3c">
+                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
+                <p>Gagal memuat detail: ${error.message}</p>
+                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')" style="margin-top:20px">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        `;
+    }
+}
+
+// Fungsi untuk generate konten detail (TANPA eviden dan timeline)
+function generateDetailContent(item) {
+    // Helper function untuk mendapatkan nilai
+    const getVal = (k) => {
+        const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+        return value;
+    };
+    
+    // Format status badge
+    let statusBadge = '';
+    const status = getVal('status').toLowerCase();
+    
+    if (status.includes('setuju')) {
+        statusBadge = `<span class="badge badge-approved">${getVal('status')}</span>`;
+    } else if (status.includes('tolak')) {
+        statusBadge = `<span class="badge badge-rejected">${getVal('status')}</span>`;
+    } else {
+        statusBadge = `<span class="badge badge-pending">${getVal('status')}</span>`;
+    }
+    
+    // Ambil data dosen
+    const dosenData = item.dosen_data || [];
+    
+    // Generate HTML untuk data dosen
+    let dosenHtml = '';
+    if (dosenData && dosenData.length > 0) {
+        dosenHtml = `
+        <div class="dosen-list">
+            ${dosenData.map((dosen, index) => `
+            <div class="dosen-item">
+                <div class="dosen-avatar">
+                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div class="dosen-info">
+                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
+                    <div class="dosen-details">
+                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
+                    </div>
+                </div>
+            </div>
+            `).join('')}
+        </div>`;
+    } else {
+        dosenHtml = `
+        <div class="dosen-item">
+            <div class="dosen-avatar">
+                ?
+            </div>
+            <div class="dosen-info">
+                <div class="dosen-name">Data dosen tidak tersedia</div>
+                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+            </div>
+        </div>`;
+    }
+    
+    // Tampilkan nomor surat jika sudah disetujui
+    let nomorSuratHtml = '';
+    if (getVal('nomor_surat') && getVal('nomor_surat') !== '-') {
+        nomorSuratHtml = `
+        <div class="nomor-surat-container">
+            <div class="nomor-surat-label">
+                <i class="fa-solid fa-file-signature"></i> Nomor Surat
+            </div>
+            <div class="nomor-surat-value">
+                ${escapeHtml(getVal('nomor_surat'))}
+            </div>
+        </div>`;
+    }
+    
+    // Tampilkan catatan penolakan jika ada
+    let rejectionHtml = '';
+    if (getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-') {
+        rejectionHtml = `
+        <div class="rejection-notes">
+            <div class="detail-label">
+                <i class="fa-solid fa-comment-dots"></i> Catatan Penolakan
+            </div>
+            <div class="detail-value">
+                ${escapeHtml(getVal('catatan_penolakan'))}
+            </div>
+        </div>`;
+    }
+    
+    // KEMBALIKAN KE FORMAT SEBELUMNYA - TANPA EVIDEN DAN TIMELINE
+    return `
+    ${nomorSuratHtml}
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-info-circle"></i> Informasi Utama
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Nama Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status Pengajuan</div>
+                <div class="detail-value">${statusBadge}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Pengajuan</div>
+                <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Lingkup Penugasan</div>
+                <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-users"></i> Dosen Terkait
+        </div>
+        ${dosenHtml}
+    </div>
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Penyelenggara</div>
+                <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Periode Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('periode_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tempat Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Pengajuan</div>
+                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+            </div>
+        </div>
+    </div>
+    
+    ${rejectionHtml}
+
+    
+    <div class="modal-actions">
+        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+            <i class="fa-solid fa-times"></i> Tutup
+        </button>
+        ${getVal('status') === 'disetujui sekretariat' ? `
+        <div style="display:flex;gap:10px;margin-left:auto">
+            <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); showRejectModal(${item.id})">
+                <i class="fa-solid fa-times"></i> Tolak
+            </button>
+            <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+                <i class="fa-solid fa-check"></i> Setujui
+            </button>
+        </div>
+        ` : ''}
+    </div>`;
+}
+// Fungsi untuk membuat baris tabel clickable
+function makeRowsClickable() {
+    const rows = document.querySelectorAll('#tableBody tr:not(#emptyRow)');
+    
+    rows.forEach(row => {
+        // Tambahkan class clickable
+        row.classList.add('clickable-row');
+        
+        // Ambil ID dari onclick attribute yang sudah ada
+        const onclickAttr = row.getAttribute('onclick');
+        if (onclickAttr) {
+            const match = onclickAttr.match(/showRowDetail\((\d+)\)/);
+            
+            if (match) {
+                const suratId = match[1];
+                
+                // Event listener untuk klik row (sebagai backup)
+                row.addEventListener('click', function(e) {
+                    // Jangan trigger jika yang diklik adalah tombol atau link
+                    if (e.target.closest('button') || 
+                        e.target.closest('a') || 
+                        e.target.closest('select') ||
+                        e.target.closest('textarea') ||
+                        e.target.closest('input')) {
+                        return;
+                    }
+                    
+                    // Remove highlight dari row lain
+                    rows.forEach(r => r.classList.remove('selected'));
+                    
+                    // Add highlight ke row yang diklik
+                    this.classList.add('selected');
+                    
+                    // Buka modal detail
+                    showRowDetail(suratId);
+                });
+                
+                // Hover effect
+                row.style.cursor = 'pointer';
+            }
+        }
+    });
+}
+
+// Panggil fungsi setelah DOM loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM siap, inisialisasi...');
+    setTimeout(initChart, 100);
+    
+    // Inisialisasi clickable rows
+    makeRowsClickable();
+    
+    // Check for success modal data
+    <?php if($this->session->flashdata('approved_items')): ?>
+        const approvedItems = <?= json_encode($this->session->flashdata('approved_items')) ?>;
+        const isSingle = <?= json_encode($this->session->flashdata('is_single_approve')) ?>;
+        
+        setTimeout(function() {
+            showSuccessModal(approvedItems.length, approvedItems, isSingle);
+        }, 500);
+    <?php endif; ?>
+});
+
+// Jika ada filter/reload tabel, panggil lagi
+function refreshTable() {
+    setTimeout(() => {
+        makeRowsClickable();
+    }, 100);
+}
+
+// ============================================
+// FUNGSI GENERATE DETAIL CONTENT - IMPROVED
+// ============================================
+
+function generateDetailContentEnhanced(item) {
+    const getVal = (k) => {
+        const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+        return value;
+    };
+
+    // Format status badge
+    let statusBadge = '';
+    const status = getVal('status').toLowerCase();
+
+    if (status.includes('setuju')) {
+        statusBadge = `<span class="badge badge-approved">${getVal('status')}</span>`;
+    } else if (status.includes('tolak')) {
+        statusBadge = `<span class="badge badge-rejected">${getVal('status')}</span>`;
+    } else {
+        statusBadge = `<span class="badge badge-pending">${getVal('status')}</span>`;
+    }
+
+    // Ambil data dosen
+    const dosenData = item.dosen_data || [];
+
+    // Generate HTML untuk data dosen
+    let dosenHtml = '';
+    if (dosenData && dosenData.length > 0) {
+        dosenHtml = `
+        <div class="dosen-list">
+            ${dosenData.map((dosen, index) => `
+            <div class="dosen-item">
+                <div class="dosen-avatar">
+                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div class="dosen-info">
+                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
+                    <div class="dosen-details">
+                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
+                    </div>
+                </div>
+            </div>
+            `).join('')}
+        </div>`;
+    } else {
+        dosenHtml = `
+        <div class="dosen-item">
+            <div class="dosen-avatar">
+                ?
+            </div>
+            <div class="dosen-info">
+                <div class="dosen-name">Data dosen tidak tersedia</div>
+                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+            </div>
+        </div>`;
+    }
+
+    // Tampilkan nomor surat jika sudah disetujui
+    let nomorSuratHtml = '';
+    if (getVal('nomor_surat') && getVal('nomor_surat') !== '-') {
+        nomorSuratHtml = `
+        <div class="nomor-surat-container">
+            <div class="nomor-surat-label">
+                <i class="fa-solid fa-file-signature"></i> Nomor Surat
+            </div>
+            <div class="nomor-surat-value">
+                ${escapeHtml(getVal('nomor_surat'))}
+            </div>
+        </div>`;
+    }
+
+    // Tampilkan catatan penolakan jika ada
+    let rejectionHtml = '';
+    if (getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-') {
+        rejectionHtml = `
+        <div class="rejection-notes">
+            <div class="detail-label">
+                <i class="fa-solid fa-comment-dots"></i> Catatan Penolakan
+            </div>
+            <div class="detail-value">
+                ${escapeHtml(getVal('catatan_penolakan'))}
+            </div>
+        </div>`;
+    }
+
+    // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date
+    const jenisDate = getVal('jenis_date');
+    const periodeValue = getVal('periode_value');
+    const tanggalKegiatan = getVal('tanggal_kegiatan');
+    const akhirKegiatan = getVal('akhir_kegiatan');
+
+    // Tentukan tampilan untuk Periode dan Tanggal Mulai
+    let periodeDisplay = '-';
+    let tanggalMulaiDisplay = '-';
+    let tanggalAkhirDisplay = '-';
+
+    if (jenisDate === 'Periode') {
+        // Jika Periode: tampilkan periode_value, kosongkan tanggal
+        periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
+        tanggalMulaiDisplay = '-';
+        tanggalAkhirDisplay = '-';
+    } else if (jenisDate === 'Custom') {
+        // Jika Custom: tampilkan tanggal, kosongkan periode
+        periodeDisplay = '-';
+        if (tanggalKegiatan !== '-' && tanggalKegiatan) {
+            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+        }
+        if (akhirKegiatan !== '-' && akhirKegiatan) {
+            tanggalAkhirDisplay = formatDate(akhirKegiatan);
+        }
+    } else {
+        // Fallback jika jenis_date tidak ada (data lama)
+        if (periodeValue && periodeValue !== '-') {
+            periodeDisplay = periodeValue;
+        } else if (tanggalKegiatan && tanggalKegiatan !== '-') {
+            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+            if (akhirKegiatan && akhirKegiatan !== '-') {
+                tanggalAkhirDisplay = formatDate(akhirKegiatan);
+            }
+        }
+    }
+    return `
+    ${nomorSuratHtml}
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-info-circle"></i> Informasi Utama
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Nama Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status Pengajuan</div>
+                <div class="detail-value">${statusBadge}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Pengajuan</div>
+                <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Lingkup Penugasan</div>
+                <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-users"></i> Dosen Terkait
+        </div>
+        ${dosenHtml}
+    </div>
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Penyelenggara</div>
+                <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Tanggal</div>
+                <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Periode Kegiatan</div>
+                <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">${escapeHtml(periodeDisplay)}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Mulai</div>
+                <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
+            </div>
+            ${tanggalAkhirDisplay !== '-' ? `
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Akhir</div>
+                <div class="detail-value">${tanggalAkhirDisplay}</div>
+            </div>
+            ` : ''}
+            <div class="detail-row">
+                <div class="detail-label">Tempat Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Pengajuan</div>
+                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+            </div>
+        </div>
+    </div>
+    
+    ${rejectionHtml}
+    
+    <div class="modal-actions">
+        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+            <i class="fa-solid fa-times"></i> Tutup
+        </button>
+        ${getVal('status') === 'disetujui sekretariat' ? `
+        <div style="display:flex;gap:10px;margin-left:auto">
+            <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); showRejectModal(${item.id})">
+                <i class="fa-solid fa-times"></i> Tolak
+            </button>
+            <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+                <i class="fa-solid fa-check"></i> Setujui
+            </button>
+        </div>
+        ` : ''}
+    </div>`;
+}
 </script>
 </body>
 </html>

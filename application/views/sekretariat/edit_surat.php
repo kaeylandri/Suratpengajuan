@@ -711,8 +711,8 @@
             <div class="form-group">
                 <label>Jenis Tanggal</label>
                 <select name="jenis_date" id="jenis_date" class="form-control">
-                    <option value="custom" <?= (isset($surat['jenis_date']) && $surat['jenis_date']=='custom') ? 'selected' : '' ?>>Custom</option>
-                    <option value="periode" <?= (isset($surat['jenis_date']) && $surat['jenis_date']=='periode') ? 'selected' : '' ?>>Periode</option>
+                    <option value="Custom" <?= (isset($surat['jenis_date']) && $surat['jenis_date']=='Custom') ? 'selected' : '' ?>>Custom</option>
+                    <option value="Periode" <?= (isset($surat['jenis_date']) && $surat['jenis_date']=='Periode') ? 'selected' : '' ?>>Periode</option>
                 </select>
             </div>
             
@@ -735,7 +735,7 @@
                 </div>
             </div>
             
-            <div id="periode_date" style="<?= (isset($surat['jenis_date']) && $surat['jenis_date']=='periode') ? '' : 'display:none;'; ?>">
+            <div id="periode_date" style="<?= (isset($surat['jenis_date']) && $surat['jenis_date']=='Periode') ? '' : 'display:none;'; ?>">
                 <div class="form-group">
                     <label>Pilih Periode</label>
                     <select name="periode_value" class="form-control">
@@ -1406,8 +1406,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Toggle sections based on selections
     document.getElementById('jenis_date').addEventListener('change', function() { 
-        document.getElementById('custom_date').style.display = this.value === 'custom' ? 'block' : 'none';
-        document.getElementById('periode_date').style.display = this.value === 'periode' ? 'block' : 'none';
+        document.getElementById('custom_date').style.display = this.value === 'Custom' ? 'block' : 'none';
+        document.getElementById('periode_date').style.display = this.value === 'Periode' ? 'block' : 'none';
     });
     
     document.getElementById('jenis_pengajuan').addEventListener('change', function() { 

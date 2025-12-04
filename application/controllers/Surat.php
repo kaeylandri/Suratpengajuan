@@ -389,7 +389,7 @@ private function get_dosen_by_nip($nip_data) {
                 'label'=>'Ditolak',
                 'catatan_penolakan'=>$catatan_penolakan
             ];
-            $progress_percentage = 100;
+            $progress_percentage = 80;
             break;
 
         default:

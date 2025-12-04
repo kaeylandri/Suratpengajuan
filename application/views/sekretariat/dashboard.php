@@ -723,7 +723,33 @@
         max-height: none;
         overflow-y: visible;
     }
+/* Clickable Row Styles - IMPROVED */
+.clickable-row {
+    cursor: pointer !important;
+    transition: all 0.2s ease;
+}
 
+.clickable-row:hover {
+    background-color: #f0f8ff !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.clickable-row:active {
+    background-color: #e3f2fd !important;
+    transform: scale(0.998);
+}
+
+/* Highlight untuk baris yang sedang dipilih */
+.clickable-row.selected {
+    background-color: #e8f6f3 !important;}
+
+/* Pastikan tombol di dalam row tidak ter-affected */
+.clickable-row button,
+.clickable-row select,
+.clickable-row textarea,
+.clickable-row input {
+    pointer-events: all;
+}
 </style>
 </head>
 <body>
@@ -968,11 +994,11 @@
                         <div id="disposisiBox<?= $s->id ?>" class="disposisi-card" style="display:none;">
 
                             <label class="label-disposisi">Pilih Disposisi</label>
-                            <select id="disposisiSelect<?= $s->id ?>" 
+                            <select id="disposisiSelect<?= $s->id ?>"
                                     class="select-disposisi"
                                     onchange="onDisposisiChange(<?= $s->id ?>)">
                                 <option value="">-- Pilih Disposisi --</option>
-                                <option value="Lanjut Proses">Lanjut Proses</option>
+                                <option value="Lanjut Proses ✔">Lanjut Proses</option>
                                 <option value="Hold/Pending">Hold/Pending</option>
                                 <option value="Batal">Batal</option>
                             </select>
@@ -1019,7 +1045,7 @@
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
                                 
-                                <?php if($status == 'disetujui KK' && $s->disposisi_status == 'Lanjut Proses'): ?>
+                                <?php if($status == 'disetujui KK' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
                                     <button class="btn btn-approve" onclick="showApproveModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')" title="Setujui & Teruskan ke Dekan">
                                         <i class="fa-solid fa-check"></i>
                                     </button>
@@ -1028,7 +1054,7 @@
                                     </button>
                                 <?php endif; ?>
                                 
-                                <?php if($status == 'ditolak dekan' && $s->disposisi_status == 'Lanjut Proses'): ?>
+                                <?php if($status == 'ditolak dekan' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
                                     <a href="<?= site_url('sekretariat/edit_surat/' . $s->id) ?>" 
                                        class="btn btn-warning" 
                                        title="Edit & Ajukan Ulang ke Dekan"
@@ -1825,138 +1851,314 @@ async function showDetail(id) {
     }
 }
 
-// Fungsi untuk generate konten detail dengan progress bar
+// ============================================
+// FUNGSI GENERATE DETAIL CONTENT (untuk klik baris)
+// ============================================
+
 function generateDetailContent(item) {
-    // Helper function
+    // Helper function untuk mendapatkan nilai
     const getVal = (k) => {
         const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
         return value;
     };
 
-    // Format status dengan badge
-    const status = getVal('status');
+    // Format status badge
     let statusBadge = '';
-    if (status.toLowerCase() === 'disetujui dekan') {
-        statusBadge = '<span class="badge badge-completed" style="margin-left:10px">Disetujui Dekan</span>';
-    } else if (status.toLowerCase() === 'disetujui sekretariat') {
-        statusBadge = '<span class="badge badge-approved" style="margin-left:10px">Disetujui Sekretariat</span>';
-    } else if (status.toLowerCase() === 'disetujui kk') {
-        statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu Sekretariat</span>';
-    } else if (status.toLowerCase().includes('ditolak sekretariat')) {
-        statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak Sekretariat</span>';
-    } else if (status.toLowerCase().includes('ditolak dekan')) {
-        statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak Dekan</span>';
-    } else if (status.toLowerCase().includes('ditolak')) {
-        statusBadge = '<span class="badge badge-rejected" style="margin-left:10px">Ditolak</span>';
+    const status = getVal('status').toLowerCase();
+
+    if (status.includes('setuju')) {
+        statusBadge = `<span class="badge badge-approved">${getVal('status')}</span>`;
+    } else if (status.includes('tolak')) {
+        statusBadge = `<span class="badge badge-rejected">${getVal('status')}</span>`;
     } else {
-        statusBadge = '<span class="badge badge-pending" style="margin-left:10px">Menunggu</span>';
+        statusBadge = `<span class="badge badge-pending">${getVal('status')}</span>`;
     }
 
-    // Generate dosen data
-    let dosenData = [];
-    if (item.dosen_data && Array.isArray(item.dosen_data) && item.dosen_data.length > 0) {
-        dosenData = item.dosen_data;
-    } else {
-        dosenData = [{
-            nama: getVal('nama_dosen') !== '-' ? getVal('nama_dosen') : 'Data dosen tidak tersedia',
-            nip: getVal('nip') !== '-' ? getVal('nip') : '-',
-            jabatan: '-',
-            divisi: '-'
-        }];
-    }
+    // Ambil data dosen
+    const dosenData = item.dosen_data || [];
 
-    // Generate progress bar dari timeline data
-    let progressBarHtml = '';
-    if (item.progress_timeline) {
-        const timeline = item.progress_timeline;
-        const steps = ['mengirim', 'kaprodi', 'sekretariat', 'dekan'];
-        const stepNames = ['Mengirim', 'Kaprodi', 'Sekretariat', 'Dekan'];
-        const stepIcons = ['fa-paper-plane', 'fa-user-tie', 'fa-clipboard-list', 'fa-university'];
-        
-        progressBarHtml = `
-        <div class="detail-section">
-            <div class="detail-section-title">
-                <i class="fa-solid fa-tasks"></i> Progress Approval
-            </div>
-            <div class="progress-track">
-        `;
-        
-        // Hitung progress persentase
-        let completedSteps = 0;
-        steps.forEach(step => {
-            if (timeline[step] && timeline[step].status === 'completed') {
-                completedSteps++;
-            }
-        });
-        const progressPercentage = Math.round((completedSteps / steps.length) * 100);
-        
-        // Progress line
-        progressBarHtml += `<div class="progress-line" style="width: ${progressPercentage}%"></div>`;
-        
-        // Steps
-        steps.forEach((step, index) => {
-            const stepData = timeline[step] || { status: 'pending', display_time: '-' };
-            const statusClass = stepData.status || 'pending';
-            const displayTime = stepData.display_time || '-';
-            
-            progressBarHtml += `
-                <div class="progress-step ${statusClass}">
-                    <div class="step-icon">
-                        <i class="fas ${stepIcons[index]}"></i>
-                    </div>
-                    <div class="step-text">${stepNames[index]}</div>
-                    <div class="step-date">${displayTime}</div>
+    // Generate HTML untuk data dosen
+    let dosenHtml = '';
+    if (dosenData && dosenData.length > 0) {
+        dosenHtml = `
+        <div class="dosen-list">
+            ${dosenData.map((dosen, index) => `
+            <div class="dosen-item">
+                <div class="dosen-avatar">
+                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
                 </div>
-            `;
-        });
-        
-        progressBarHtml += `
+                <div class="dosen-info">
+                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
+                    <div class="dosen-details">
+                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
+                    </div>
+                </div>
             </div>
-            <div style="text-align:center;margin-top:15px;font-size:14px;color:#6c757d">
-                <i class="fa-solid fa-info-circle"></i> Progress: ${progressPercentage}% (${completedSteps} dari ${steps.length} tahap)
+            `).join('')}
+        </div>`;
+    } else {
+        dosenHtml = `
+        <div class="dosen-item">
+            <div class="dosen-avatar">
+                ?
+            </div>
+            <div class="dosen-info">
+                <div class="dosen-name">Data dosen tidak tersedia</div>
+                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
             </div>
         </div>`;
     }
 
-    // Tampilkan Nomor Surat jika sudah ada
-    let nomorSuratHtml = '';
-    const nomorSurat = getVal('nomor_surat');
-    if (nomorSurat && nomorSurat !== '-') {
-        nomorSuratHtml = `
-        <div class="nomor-surat-container">
-            <div class="nomor-surat-label">
-                <i class="fa-solid fa-file-signature"></i> Nomor Surat
+    // Tampilkan catatan penolakan jika ada
+    let rejectionHtml = '';
+    if (getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-') {
+        rejectionHtml = `
+        <div class="rejection-notes">
+            <div class="detail-label">
+                <i class="fa-solid fa-comment-dots"></i> Catatan Penolakan
             </div>
-            <div class="nomor-surat-value">${escapeHtml(nomorSurat)}</div>
+            <div class="detail-value">
+                ${escapeHtml(getVal('catatan_penolakan'))}
+            </div>
         </div>`;
     }
 
-    // Generate content
+    // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date
+    const jenisDate = getVal('jenis_date');
+    const periodeValue = getVal('periode_value');
+    const tanggalKegiatan = getVal('tanggal_kegiatan');
+    const akhirKegiatan = getVal('akhir_kegiatan');
+
+    // Tentukan tampilan untuk Periode dan Tanggal Mulai
+    let periodeDisplay = '-';
+    let tanggalMulaiDisplay = '-';
+    let tanggalAkhirDisplay = '-';
+
+    if (jenisDate === 'Periode') {
+        // Jika Periode: tampilkan periode_value, kosongkan tanggal
+        periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
+        tanggalMulaiDisplay = '-';
+        tanggalAkhirDisplay = '-';
+    } else if (jenisDate === 'Custom') {
+        // Jika Custom: tampilkan tanggal, kosongkan periode
+        periodeDisplay = '-';
+        if (tanggalKegiatan !== '-' && tanggalKegiatan) {
+            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+        }
+        if (akhirKegiatan !== '-' && akhirKegiatan) {
+            tanggalAkhirDisplay = formatDate(akhirKegiatan);
+        }
+    } else {
+        // Fallback jika jenis_date tidak ada (data lama)
+        if (periodeValue && periodeValue !== '-') {
+            periodeDisplay = periodeValue;
+        } else if (tanggalKegiatan && tanggalKegiatan !== '-') {
+            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+            if (akhirKegiatan && akhirKegiatan !== '-') {
+                tanggalAkhirDisplay = formatDate(akhirKegiatan);
+            }
+        }
+    }
+
     return `
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-info-circle"></i> Informasi Utama
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Nama Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status Pengajuan</div>
+                <div class="detail-value">${statusBadge}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Pengajuan</div>
+                <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Lingkup Penugasan</div>
+                <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
+            </div>
+        </div>
+    </div>
     
-
-        ${ (item.status && item.status.toLowerCase() === 'disetujui kk') ? `
-        <div class="modal-actions">
-            <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-                <i class="fa-solid fa-times"></i> Tutup
-            </button>
-            <button class="modal-btn modal-btn-reject" onclick="showRejectModal(${item.id}); closeModal('detailModal')">
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-users"></i> Dosen Terkait
+        </div>
+        ${dosenHtml}
+    </div>
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Penyelenggara</div>
+                <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Tanggal</div>
+                <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Periode Kegiatan</div>
+                <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">${escapeHtml(periodeDisplay)}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Mulai</div>
+                <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
+            </div>
+            ${tanggalAkhirDisplay !== '-' ? `
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Akhir</div>
+                <div class="detail-value">${tanggalAkhirDisplay}</div>
+            </div>
+            ` : ''}
+            <div class="detail-row">
+                <div class="detail-label">Tempat Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Pengajuan</div>
+                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+            </div>
+        </div>
+    </div>
+    
+    ${rejectionHtml}
+    
+    <div class="modal-actions">
+        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+            <i class="fa-solid fa-times"></i> Tutup
+        </button>
+        ${getVal('status') === 'disetujui KK' ? `
+        <div style="display:flex;gap:10px;margin-left:auto">
+            <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); showRejectModal(${item.id})">
                 <i class="fa-solid fa-times"></i> Tolak
             </button>
-            <button class="modal-btn modal-btn-approve" onclick="showApproveModal(${item.id}, '${escapeHtml(item.nama_kegiatan)}'); closeModal('detailModal')">
+            <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
                 <i class="fa-solid fa-check"></i> Setujui
             </button>
         </div>
-        ` : `
-        <div class="modal-actions">
-            <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-                <i class="fa-solid fa-times"></i> Tutup
-            </button>
-        </div>
-        ` }
-    `;
+        ` : ''}
+    </div>`;
 }
 
+// PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
+function getSuratDetail(id) {
+    return fetch('<?= site_url("sekretariat/getDetailPengajuan/") ?>' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.data;
+            } else {
+                throw new Error(data.message || 'Gagal memuat data');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching detail:', error);
+            throw error;
+        });
+}
+
+// Update fungsi showDetail untuk menggunakan AJAX
+async function showDetailViaClick(id) {
+    try {
+        // Tampilkan loading
+        document.getElementById('detailContent').innerHTML = `
+            <div style="text-align:center;padding:40px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#16A085"></i>
+                <p style="margin-top:10px;color:#7f8c8d">Memuat detail...</p>
+            </div>
+        `;
+        
+        document.getElementById('detailModal').classList.add('show');
+
+        // Ambil data detail via AJAX
+        const item = await getSuratDetail(id);
+        
+        if (!item) {
+            throw new Error('Data tidak ditemukan');
+        }
+
+        // Generate dan tampilkan content
+        const content = generateDetailContent(item);
+        document.getElementById('detailContent').innerHTML = content;
+        
+    } catch (error) {
+        console.error('Error loading detail:', error);
+        document.getElementById('detailContent').innerHTML = `
+            <div style="text-align:center;padding:40px;color:#e74c3c">
+                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:15px"></i>
+                <h4>Gagal Memuat Data</h4>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Fungsi untuk membuat baris tabel clickable
+function makeRowsClickable() {
+    const rows = document.querySelectorAll('#tableBody tr:not(#emptyRow)');
+    
+    rows.forEach(row => {
+        // Tambahkan class clickable
+        row.classList.add('clickable-row');
+        
+        // Ambil ID dari tombol detail yang ada di row
+        const detailBtn = row.querySelector('.btn-detail');
+        if (detailBtn) {
+            const onclickAttr = detailBtn.getAttribute('onclick');
+            const match = onclickAttr.match(/showDetail\((\d+)\)/);
+            
+            if (match) {
+                const suratId = match[1];
+                
+                // Event listener untuk klik row
+                row.addEventListener('click', function(e) {
+                    // Jangan trigger jika yang diklik adalah tombol atau link
+                    if (e.target.closest('button') || 
+                        e.target.closest('a') || 
+                        e.target.closest('select') ||
+                        e.target.closest('textarea') ||
+                        e.target.closest('input')) {
+                        return;
+                    }
+                    
+                    // Remove highlight dari row lain
+                    rows.forEach(r => r.classList.remove('selected'));
+                    
+                    // Add highlight ke row yang diklik
+                    this.classList.add('selected');
+                    
+                    // Buka modal detail
+                    showDetailViaClick(suratId);
+                });
+                
+                // Hover effect
+                row.style.cursor = 'pointer';
+            }
+        }
+    });
+}
+
+// Panggil fungsi setelah DOM loaded dan setiap kali tabel di-update
+document.addEventListener('DOMContentLoaded', function() {
+    makeRowsClickable();
+});
+
+// Jika ada filter/reload tabel, panggil lagi
+function refreshTable() {
+    // Fungsi ini dipanggil setelah tabel di-update
+    setTimeout(() => {
+        makeRowsClickable();
+    }, 100);
+}
 function showApproveModal(id, namaKegiatan) {
     currentApproveId = id;
     document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
@@ -2074,26 +2276,26 @@ function onDisposisiChange(id) {
     catatanTextarea.value = "";
     
     // Untuk disposisi yang memerlukan catatan
-    if (val === "Hold/Pending" || val === "Batal" || val === "Lanjut Proses") {
+    if (val === "Hold/Pending" || val === "Batal" ) {
         catatanLabel.style.display = "block";
         catatanTextarea.style.display = "block";
         btnSave.style.display = "block";
-        
+
+    } else if (val === "Lanjut Proses ✔"){
+        btnSave.style.display = "block";
+       }
         // Set placeholder berdasarkan pilihan
         if (val === "Hold/Pending") {
             catatanTextarea.placeholder = "Berikan alasan mengapa perlu ditahan/ditunda...";
         } else if (val === "Batal") {
             catatanTextarea.placeholder = "Berikan alasan pembatalan...";
-        } else if (val === "Lanjut Proses") {
-            catatanTextarea.placeholder = "Tambahkan catatan jika diperlukan...";
         }
-        
         // Fokus ke textarea
         setTimeout(() => {
             catatanTextarea.focus();
         }, 100);
     }
-}
+
 
 
 // SIMPAN DISPOSISI
@@ -2127,6 +2329,7 @@ function saveDisposisi(id) {
         location.reload();
     });
 }
+
 </script>
 </body>
 </html>

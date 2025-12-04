@@ -936,33 +936,30 @@
     }
 
     .dosen-item {
-        margin-bottom: 20px;
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 10px;
-        border-left: 4px solid #FB8C00;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+}
 
-    .dosen-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(251, 140, 0, 0.15);
-    }
+.dosen-info {
+    display: flex;
+    flex-direction: column;
+}
 
-    .dosen-name {
-        font-size: 16px;
-        font-weight: 700;
-        color: #212529;
-        margin-bottom: 10px;
-        line-height: 1.4;
-    }
+.dosen-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
 
-    .dosen-details {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
+.dosen-details div {
+    font-size: 14px;
+    margin-bottom: 3px;
+    color: #444;
+}
+
 
     .dosen-detail-item {
         display: flex;
@@ -1025,6 +1022,56 @@
         color: #FB8C00;
         font-size: 16px;
     }
+.dosen-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    background: #ffffff;
+}
+
+.dosen-avatar {
+    width: 40px;
+    height: 40px;
+    background: #ff9800;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dosen-card-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.dosen-card-name {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.dosen-card-detail {
+    font-size: 13px;
+    color: #5b5b5b;
+}
+/* Hapus icon mata otomatis dari elemen dosen */
+.dosen-container::after,
+.dosen-container::before,
+.nama-dosen-badge::after,
+.nama-dosen-badge::before,
+.nama-dosen-more::after,
+.nama-dosen-more::before {
+    content: none !important;
+    display: none !important;
+}
+
 
     /* ===== REVISI: Status Badge Styles ===== */
     .status-badge {
@@ -2803,7 +2850,21 @@
             </div>
         </div>
 
-        <!-- Modal Detail -->
+              <!-- Modal Detail -->
+        <div id="modalDetail" class="modal-detail">
+            <div class="modal-content-detail">
+                <div class="modal-header-detail">
+                    <span>Detail Surat Tugas</span>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body-detail">
+                    <div id="detailContent">
+                        <!-- Content akan diisi oleh JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
        <!-- Status Modal - REVISED CLEAN DESIGN -->
 <div id="statusModal" class="status-modal">
     <div class="status-content">
@@ -3109,103 +3170,58 @@
         window.location.href = '<?= base_url() ?>';
     }
 
-    // ===== REVISI: FUNGSI MODAL DETAIL DOSEN - FIXED =====
-    function showDosenModal(event, dosenData, namaKegiatan) {
-        event.stopPropagation(); // Mencegah event bubbling ke row
-        
-        // Validasi data dosen
-        if (!dosenData || dosenData.length === 0) {
-            Swal.fire({
-                icon: 'info',
-                title: 'Tidak Ada Dosen',
-                text: 'Tidak ada data dosen untuk surat tugas ini.',
-                confirmButtonColor: '#FB8C00'
-            });
-            return;
-        }
-        
-        const modal = document.getElementById('dosenModal');
-        const title = document.getElementById('dosenModalTitle');
-        const kegiatanTitle = document.getElementById('kegiatanTitle');
-        const listContainer = document.getElementById('dosenListContainer');
-        const totalCount = document.getElementById('dosenTotalCount');
-        
-        // Set title modal
-        title.textContent = `Detail Dosen`;
-        
-        // Set kegiatan title
-        const shortKegiatan = namaKegiatan.length > 50 ? namaKegiatan.substring(0, 50) + '...' : namaKegiatan;
-        kegiatanTitle.textContent = `Kegiatan: ${shortKegiatan}`;
-        
-        // Clear container
-        listContainer.innerHTML = '';
-        
-        // Format data dosen sesuai contoh image.png
-        const dosenSections = {};
-        
-        // Kelompokkan dosen berdasarkan nama (tampilkan semua)
-        dosenData.forEach((dosen, index) => {
-            const nama = dosen.nama_dosen || 'Nama tidak tersedia';
-            const nip = dosen.nip || 'NIP tidak tersedia';
-            const jabatan = dosen.jabatan || 'Jabatan tidak tersedia';
-            const divisi = dosen.divisi || 'Divisi tidak tersedia';
-            
-            // Buat section untuk setiap dosen (semua dosen ditampilkan)
-            dosenSections[nama] = {
-                nama: nama,
-                detailItems: [
-                    { icon: 'fas fa-id-card', label: 'NIP', value: nip },
-                    { icon: 'fas fa-briefcase', label: 'Jabatan', value: jabatan },
-                    { icon: 'fas fa-building', label: 'Divisi', value: divisi }
-                ]
-            };
-        });
-        
-        // Tambahkan setiap dosen ke dalam modal
-        Object.values(dosenSections).forEach((dosen, index) => {
-            const dosenItem = document.createElement('div');
-            dosenItem.className = 'dosen-item';
-            
-            let detailsHTML = '';
-            dosen.detailItems.forEach(item => {
-                detailsHTML += `
-                    <div class="dosen-detail-item">
-                        <i class="${item.icon}"></i>
-                        <span class="dosen-detail-label">${item.label}:</span>
-                        <span class="dosen-detail-value">${escapeHtml(item.value)}</span>
-                    </div>
-                `;
-            });
-            
-            dosenItem.innerHTML = `
-                <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
-                <div class="dosen-details">
-                    ${detailsHTML}
-                </div>
-            `;
-            
-            listContainer.appendChild(dosenItem);
-        });
-        
-        // Update total count
-        totalCount.textContent = Object.keys(dosenSections).length;
-        
-        // Show modal
-        modal.classList.add('show');
+function showDosenModal(event, dosenList, namaKegiatan) {
+    event.stopPropagation();
+    // Jika dosen hanya 1, modal tidak ditampilkan
+    if (!dosenList || dosenList.length <= 1) {
+        return;
     }
 
-    // Fungsi untuk menutup modal dosen
-    document.getElementById('closeDosenModal').addEventListener('click', function() {
-        document.getElementById('dosenModal').classList.remove('show');
-    });
+    document.getElementById("kegiatanTitle").innerText = namaKegiatan;
+    const container = document.getElementById("dosenListContainer");
+    container.innerHTML = "";
 
-    // Tutup modal dosen saat klik di luar
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('dosenModal');
-        if (event.target === modal) {
-            modal.classList.remove('show');
-        }
-    });
+    if (!dosenList || dosenList.length === 0) {
+        container.innerHTML = "<p>Tidak ada dosen terkait.</p>";
+    } else {
+        dosenList.forEach(d => {
+            const item = document.createElement("div");
+            item.className = "dosen-card";
+
+            // Huruf pertama nama
+            const initial = (d.nama_dosen ?? "-").charAt(0).toUpperCase();
+
+            item.innerHTML = `
+                <div class="dosen-avatar">${initial}</div>
+                <div class="dosen-card-info">
+                    <div class="dosen-card-name">${d.nama_dosen ?? '-'}</div>
+                    <div class="dosen-card-detail">
+                        NIP: ${d.nip ?? '-'} |
+                        Jabatan: ${d.jabatan ?? '-'} |
+                        Divisi: ${d.divisi ?? '-'}
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(item);
+        });
+    }
+
+    document.getElementById("dosenTotalCount").innerText = dosenList.length;
+    document.getElementById("dosenModal").style.display = "flex";
+}
+
+
+// Tutup modal
+document.getElementById("closeDosenModal").onclick = () => {
+    document.getElementById("dosenModal").style.display = "none";
+};
+
+// Klik luar modal = menutup
+window.onclick = function(e) {
+    const modal = document.getElementById("dosenModal");
+    if (e.target === modal) modal.style.display = "none";
+};
 
     // Tampilkan modal dan load data
     function showStatusModal(suratId) {
