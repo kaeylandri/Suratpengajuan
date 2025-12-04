@@ -331,20 +331,20 @@ function format_periode_penugasan($surat) {
             <p style="text-align:center;">Tidak ada data dosen</p>
         <?php endif; ?>
 
-        <!-- Untuk Menghadiri Kegiatan -->
         <p>
-            sebagai <b><?= $surat->jenis_penugasan_perorangan ?? 'menghadiri' ?></b> dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
-            yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
-            <?php if (($surat->jenis_date ?? 'custom') === 'periode'): ?>
-                selama periode <b><?= $surat->periode_value ?? '-' ?></b>
-            <?php else: ?>
-                pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b> 
-                <?php if (!empty($surat->akhir_kegiatan) && $surat->akhir_kegiatan !== '-'): ?>
-                sampai dengan <b><?= tgl_indo($surat->akhir_kegiatan) ?></b> 
-                <?php endif; ?>
-            <?php endif; ?>
-            di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
-        </p>
+        sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b> 
+        dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
+        yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
+
+        <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'custom'): ?>
+            pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b>
+        <?php else: ?>
+            selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
+        <?php endif; ?>
+
+        di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
+    </p>
+
 
         <!-- Periode Penugasan -->
         <?php if (($surat->jenis_date ?? 'custom') === 'custom' && (!empty($surat->periode_penugasan) && $surat->periode_penugasan !== '-')): ?>
