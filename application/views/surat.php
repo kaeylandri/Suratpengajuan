@@ -301,42 +301,6 @@
             display: none;
         }
 
-        /* Style untuk disabled dates di datepicker */
-        .ui-datepicker td.ui-state-disabled {
-            opacity: 0.3;
-        }
-
-        .ui-datepicker td.ui-state-disabled span {
-            cursor: not-allowed !important;
-        }
-
-        /* Highlight untuk tanggal yang valid */
-        .ui-datepicker td.valid-date a {
-            background-color: #e8f5e8 !important;
-            color: #198754 !important;
-            font-weight: bold;
-        }
-
-        /* Style untuk tanggal yang melebihi batas */
-        .ui-datepicker td.over-limit-date a {
-            background-color: #fff3cd !important;
-            color: #856404 !important;
-            text-decoration: line-through;
-        }
-
-        /* tambahan visual warning kelas */
-        .ui-datepicker td.warning a {
-            box-shadow: 0 0 0 1px #ffc107 inset;
-        }
-
-        /* Style untuk tanggal yang benar-benar tidak bisa dipilih */
-        .ui-datepicker td.force-disabled a {
-            background-color: #f8d7da !important;
-            color: #721c24 !important;
-            text-decoration: line-through;
-            cursor: not-allowed !important;
-        }
-
         /* Button cell styling */
         .button-cell { display: none; justify-content: center; align-items: center; }
         .add-row-btn, .remove-row-btn { width: 35px; height: 35px; border-radius: 50%; padding: 0; }
@@ -1999,10 +1963,14 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 <!-- Step 2 -->
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <fieldset>
   <div class="custom-form" style="position: relative; z-index: 1;">
     <input type="hidden" name="user_id" id="user_id" value="632045c808b1c">
 
+    <!-- Nama kegiatan -->
     <div class="form-group mb-4">
       <input type="text" name="nama_kegiatan" id="nama_kegiatan" class="form-control" required autocomplete="off">
       <label>Nama Kegiatan</label>
@@ -2017,44 +1985,56 @@ document.addEventListener('DOMContentLoaded', function () {
       </select>
     </div>
 
-    <!-- Form tanggal yang disederhanakan -->
     <div class="row">
-      <!-- Kolom Tanggal Awal & Akhir Kegiatan (Satu Kolom) - TETAP ADA -->
+      <!-- Tanggal awal & akhir kegiatan -->
       <div class="col-md-4 mt-3">
         <div class="form-group">
-          <input type="text" name="tanggal_kegiatan" id="datepicker" class="form-control custom-form-control" 
-                 required autocomplete="off" readonly placeholder="Klik untuk pilih tanggal">
-          <label id="lbl_mulai">Tanggal Awal s/d Tanggal Akhir</label>
-          <!-- Hidden inputs untuk tanggal awal dan akhir -->
+          <input type="text" id="datepicker" class="form-control custom-form-control"
+       required autocomplete="off" inputmode="none" readonly
+       placeholder="Klik untuk pilih tanggal">
+
+          <label id="lbl_mulai">Tanggal Awal s/d Akhir</label>
+
+          <!-- Hidden input (ID sudah dibetulkan) -->
           <input type="hidden" id="tanggal_awal_kegiatan" name="tanggal_awal_kegiatan">
           <input type="hidden" id="tanggal_akhir_kegiatan" name="tanggal_akhir_kegiatan">
-          <div class="info-message small mt-1" id="range_info">Klik tanggal awal, lalu klik tanggal akhir</div>
+
+          <div class="info-message small mt-1" id="range_info">
+            Klik tanggal awal, lalu klik tanggal akhir
+          </div>
         </div>
       </div>
 
-      <!-- Kolom Periode Penugasan - TETAP ADA -->
+      <!-- Periode penugasan -->
       <div class="col-md-4 mt-3">
         <div class="form-group">
-          <input type="text" name="periode_penugasan" id="datepicker3" class="form-control custom-form-control" 
-                 required autocomplete="off" readonly placeholder="Otomatis terisi">
+          <input type="text" name="periode_penugasan" id="datepicker3"
+       class="form-control custom-form-control"
+       required autocomplete="off" inputmode="none" readonly
+       placeholder="Otomatis terisi">
+
           <label id="lbl_mulai1">Periode Penugasan</label>
           <div class="info-message small" id="info_periode">Akan terisi otomatis</div>
         </div>
       </div>
 
-      <!-- Kolom Akhir Penugasan - TETAP ADA -->
+      <!-- Akhir penugasan -->
       <div class="col-md-4 mt-3">
         <div class="form-group">
-          <input type="text" name="akhir_periode_penugasan" id="datepicker4" class="form-control custom-form-control" 
-                 required autocomplete="off" readonly placeholder="Otomatis terisi">
+          <input type="text" name="akhir_periode_penugasan" id="datepicker4"
+       class="form-control custom-form-control"
+       required autocomplete="off" inputmode="none" readonly
+       placeholder="Otomatis terisi">
+
           <label id="lbl_akhir1">Akhir Penugasan</label>
           <div class="info-message small" id="info_akhir">Akan terisi otomatis</div>
         </div>
       </div>
     </div>
 
-    <!-- Dropdown Periode -->
-    <div id="periode_section" class="form-group has-select" style="display:none; position:relative; margin-top: 20px; margin-bottom: 60px;">
+    <!-- Dropdown periode -->
+    <div id="periode_section" class="form-group has-select" 
+         style="display:none; position:relative; margin-top: 20px; margin-bottom: 60px;">
       <select class="nice form-control" name="periode_value" id="periode_value">
         <option disabled selected value="">Pilih Periode</option>
         <option value="2024/2025 Ganjil">2024/2025 Ganjil</option>
@@ -2064,125 +2044,32 @@ document.addEventListener('DOMContentLoaded', function () {
       </select>
     </div>
 
-    <!-- Form lainnya -->
+    <!-- Tempat kegiatan -->
     <div class="form-group mb-4">
-      <input type="text" name="tempat_kegiatan" class="form-control custom-form-control" required autocomplete="off">
+      <input type="text" name="tempat_kegiatan" class="form-control custom-form-control" 
+             required autocomplete="off">
       <label>Tempat Kegiatan</label>
     </div>
 
+    <!-- Penyelenggara -->
     <div class="form-group mb-4">
-      <input type="text" name="penyelenggara" class="form-control custom-form-control" required autocomplete="off">
+      <input type="text" name="penyelenggara" class="form-control custom-form-control" 
+             required autocomplete="off">
       <label>Penyelenggara</label>
     </div>
   </div>
 </fieldset>
 
+
 <!-- CSS -->
 <style>
-/* TAMBAHAN: Style untuk memperbaiki kalender */
-.ui-datepicker {
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  z-index: 10000 !important;
+    /* Hilangkan datepicker bawaan browser */
+input::-webkit-calendar-picker-indicator {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
-.ui-datepicker-header {
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px 6px 0 0;
-  padding: 10px 0;
-}
-
-.ui-datepicker-title {
-  font-weight: 500;
-  font-size: 16px;
-}
-
-.ui-datepicker-prev, .ui-datepicker-next {
-  cursor: pointer;
-  color: white;
-  top: 10px;
-}
-
-.ui-datepicker-prev:hover, .ui-datepicker-next:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.ui-datepicker-calendar {
-  border-collapse: collapse;
-  width: 100%;
-  margin-top: 10px;
-}
-
-.ui-datepicker-calendar th {
-  padding: 10px 0;
-  color: #666;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.ui-datepicker-calendar td {
-  padding: 2px;
-  text-align: center;
-}
-
-.ui-datepicker-calendar td a {
-  padding: 8px;
-  display: block;
-  border-radius: 4px;
-  transition: all 0.2s;
-  color: #333;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.ui-datepicker-calendar td a:hover {
-  background: #e9ecef;
-}
-
-/* Highlight untuk tanggal yang dipilih */
-.ui-state-highlight {
-  background: #007bff !important;
-  color: white !important;
-  font-weight: 500;
-}
-
-/* Highlight khusus untuk tanggal awal range */
-.ui-state-range-start {
-  background: #0056b3 !important;
-  color: white !important;
-  border-radius: 4px 0 0 4px !important;
-}
-
-/* Highlight khusus untuk tanggal akhir range */
-.ui-state-range-end {
-  background: #0056b3 !important;
-  color: white !important;
-  border-radius: 0 4px 4px 0 !important;
-}
-
-/* Highlight untuk tanggal di antara range */
-.ui-state-active-range {
-  background: rgba(0, 123, 255, 0.1) !important;
-  color: #007bff !important;
-}
-
-/* Style untuk tanggal yang tidak bisa dipilih */
-.ui-state-disabled {
-  color: #ccc !important;
-  cursor: not-allowed !important;
-}
-
-.ui-state-disabled a {
-  color: #ccc !important;
-  cursor: not-allowed !important;
-}
 
 /* Style untuk form yang sudah ada (tidak diubah) */
 .form-group { 
@@ -2270,409 +2157,56 @@ document.addEventListener('DOMContentLoaded', function () {
         height: 42px;
         font-size: 13px;
     }
-    
-    .ui-datepicker {
-        width: 280px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-    }
+.ui-datepicker {
+    display: none !important;
+}
+
 }
 </style>
 
-<!-- JS -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  // Elements - SEMUA ADA
-  const jenisDate = document.getElementById('jenis_date');
-  const periodeSection = document.getElementById('periode_section');
-  const periodeSelect = document.getElementById('periode_value');
-  
-  // Tanggal Kegiatan (Satu Input untuk Awal & Akhir) - TETAP ADA
-  const datepicker = document.getElementById('datepicker');
-  const rangeInfo = document.getElementById('range_info');
-  
-  // Datepicker untuk periode penugasan - TETAP ADA
-  const datepicker3 = document.getElementById('datepicker3');
-  const datepicker4 = document.getElementById('datepicker4');
-  const infoPeriode = document.getElementById('info_periode');
-  const infoAkhir = document.getElementById('info_akhir');
-  
-  // Hidden inputs untuk tanggal - TETAP ADA
-  const tanggalAwalKegiatan = document.getElementById('tanggal_awal_kegiatan');
-  const tanggalAkhirKegiatan = document.getElementById('tanggal_akhir_kegiatan');
+document.addEventListener("DOMContentLoaded", function () {
 
-  // Variables untuk tracking pemilihan tanggal
-  let firstDate = null;
-  let secondDate = null;
-  let isSelectingFirst = true;
-
-  // ===== Aturan untuk Tanggal Kegiatan =====
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const minStartDate = (function() {
-    const d = new Date(today);
-    d.setDate(d.getDate() - 30);
-    d.setHours(0,0,0,0);
-    return d;
-  })();
-
-  // Fungsi utilitas
-  function addDays(date, days) {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-  }
-
-  function formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  function formatDateID(date) {
-    const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    return new Date(date).toLocaleDateString('id-ID', options);
-  }
-
-  function daysDifference(date1, date2) {
-    const oneDay = 24 * 60 * 60 * 1000;
-    const d1 = new Date(date1); 
-    d1.setHours(0,0,0,0);
-    const d2 = new Date(date2); 
-    d2.setHours(0,0,0,0);
-    return Math.round((d2 - d1) / oneDay);
-  }
-
-  // Fungsi untuk toggle section (tidak menghilangkan kolom, hanya show/hide)
-  function toggleSections(value) {
-    // Tampilkan/sembunyikan dropdown periode
-    if (value === 'Periode') {
-      periodeSection.style.display = 'block';
-      // Tetap tampilkan SEMUA kolom tanggal
-      datepicker.closest('.col-md-4').style.display = 'block';
-      datepicker3.closest('.col-md-4').style.display = 'block';
-      datepicker4.closest('.col-md-4').style.display = 'block';
-      
-      // Reset nilai jika perlu
-      resetDateSelection();
-    } else if (value === 'Custom') {
-      periodeSection.style.display = 'none';
-      // Tetap tampilkan SEMUA kolom tanggal
-      datepicker.closest('.col-md-4').style.display = 'block';
-      datepicker3.closest('.col-md-4').style.display = 'block';
-      datepicker4.closest('.col-md-4').style.display = 'block';
-    } else {
-      periodeSection.style.display = 'none';
-      // Tetap tampilkan SEMUA kolom tanggal
-      datepicker.closest('.col-md-4').style.display = 'block';
-      datepicker3.closest('.col-md-4').style.display = 'block';
-      datepicker4.closest('.col-md-4').style.display = 'block';
+    function formatDateLocal(date) {
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, "0");
+        const d = date.getDate().toString().padStart(2, "0");
+        return `${y}-${m}-${d}`;
     }
-  }
 
-  // Fungsi untuk reset pemilihan tanggal
-  function resetDateSelection() {
-    firstDate = null;
-    secondDate = null;
-    isSelectingFirst = true;
-    datepicker.value = '';
-    tanggalAwalKegiatan.value = '';
-    tanggalAkhirKegiatan.value = '';
-    rangeInfo.textContent = 'Klik tanggal awal, lalu klik tanggal akhir';
-    rangeInfo.style.color = '#0d6efd';
-    
-    // Reset datepicker lainnya
-    datepicker3.value = '';
-    datepicker4.value = '';
-    infoPeriode.textContent = 'Akan terisi otomatis';
-    infoPeriode.style.color = '';
-    infoAkhir.textContent = 'Akan terisi otomatis';
-    infoAkhir.style.color = '';
-  }
+    flatpickr("#datepicker", {
+        mode: "range",
+        dateFormat: "Y-m-d",
+        allowInput: false,
+        onChange: function(selectedDates) {
 
-  // Initialize datepicker dengan jQuery UI
-  if (typeof $ !== 'undefined' && typeof $.fn.datepicker !== 'undefined') {
-    
-    // ==== DATE PICKER - RANGE SELECTION (Satu Input) ====
-    $('#datepicker').datepicker({
-      dateFormat: 'dd MM yy',
-      autoclose: false,
-      minDate: minStartDate,
-      maxDate: today,
-      beforeShowDay: function(date) {
-        const d = new Date(date);
-        d.setHours(0,0,0,0);
-        
-        // Validasi tanggal
-        if (d < minStartDate || d > today) {
-          return [false, 'ui-state-disabled', 'Tanggal di luar rentang'];
-        }
-        
-        // Highlight untuk range
-        if (firstDate && secondDate) {
-          const start = new Date(firstDate < secondDate ? firstDate : secondDate);
-          const end = new Date(firstDate < secondDate ? secondDate : firstDate);
-          start.setHours(0,0,0,0);
-          end.setHours(0,0,0,0);
-          
-          if (d.getTime() === start.getTime()) {
-            return [true, 'ui-state-highlight ui-state-range-start', 'Tanggal awal'];
-          }
-          if (d.getTime() === end.getTime()) {
-            return [true, 'ui-state-highlight ui-state-range-end', 'Tanggal akhir'];
-          }
-          if (d > start && d < end) {
-            return [true, 'ui-state-active-range', 'Dalam rentang'];
-          }
-        } else if (firstDate) {
-          const selected = new Date(firstDate);
-          selected.setHours(0,0,0,0);
-          if (d.getTime() === selected.getTime()) {
-            return [true, 'ui-state-highlight', 'Tanggal awal dipilih'];
-          }
-        }
-        
-        return [true, '', ''];
-      },
-      onSelect: function(dateText, inst) {
-        const selectedDate = new Date(dateText);
-        selectedDate.setHours(0,0,0,0);
-        
-        console.log('Date selected:', dateText, 'isSelectingFirst:', isSelectingFirst);
-        
-        if (isSelectingFirst) {
-          // Klik pertama: pilih tanggal awal
-          firstDate = selectedDate;
-          isSelectingFirst = false;
-          
-          rangeInfo.textContent = `Tanggal awal: ${formatDateID(selectedDate)}. Sekarang klik tanggal akhir`;
-          rangeInfo.style.color = '#0d6efd';
-          datepicker.value = formatDateID(selectedDate);
-          
-          // Refresh datepicker untuk update highlight
-          setTimeout(() => {
-            $(this).datepicker('refresh');
-          }, 10);
-        } else {
-          // Klik kedua: pilih tanggal akhir
-          secondDate = selectedDate;
-          
-          // Tentukan mana start dan end (yang lebih kecil jadi start)
-          const startDate = firstDate < secondDate ? firstDate : secondDate;
-          const endDate = firstDate < secondDate ? secondDate : firstDate;
-          
-          // Update tampilan input
-          datepicker.value = `${formatDateID(startDate)} - ${formatDateID(endDate)}`;
-          const duration = daysDifference(startDate, endDate) + 1;
-          rangeInfo.textContent = `Rentang: ${formatDate(startDate)} s/d ${formatDate(endDate)} (${duration} hari)`;
-          rangeInfo.style.color = '#198754';
-          
-          // Update hidden inputs
-          tanggalAwalKegiatan.value = formatDate(startDate);
-          tanggalAkhirKegiatan.value = formatDate(endDate);
-          
-          // Auto-fill datepicker3 (periode penugasan)
-          datepicker3.value = formatDateID(startDate);
-          $('#datepicker3').datepicker('setDate', startDate);
-          infoPeriode.textContent = `Terisi otomatis dari tanggal awal kegiatan`;
-          infoPeriode.style.color = '#198754';
-          
-          // Auto-fill datepicker4 (akhir penugasan)
-          datepicker4.value = formatDateID(endDate);
-          $('#datepicker4').datepicker('setDate', endDate);
-          infoAkhir.textContent = `Terisi otomatis dari tanggal akhir kegiatan`;
-          infoAkhir.style.color = '#198754';
-          
-          // Update validasi untuk datepicker4
-          const maxPenugasanDate = addDays(startDate, 60);
-          $('#datepicker4').datepicker('option', 'minDate', startDate);
-          $('#datepicker4').datepicker('option', 'maxDate', maxPenugasanDate);
-          
-          // Cek apakah durasi melebihi 60 hari
-          if (duration > 60) {
-            alert(`Durasi penugasan (${duration} hari) melebihi batas 60 hari. Silakan sesuaikan manual.`);
-          }
-          
-          // Reset state untuk pemilihan berikutnya
-          firstDate = null;
-          secondDate = null;
-          isSelectingFirst = true;
-          
-          // Tutup datepicker
-          setTimeout(() => {
-            $(this).datepicker('hide');
-          }, 100);
-        }
-      }
-    });
+            if (selectedDates.length === 2) {
 
-    // Datepicker 3 - Periode Penugasan
-    $('#datepicker3').datepicker({
-      dateFormat: 'dd MM yy',
-      autoclose: true,
-      onSelect: function(dateText) {
-        const startDate = new Date(dateText);
-        const maxPenugasanDate = addDays(startDate, 60);
+                const awal = formatDateLocal(selectedDates[0]);
+                const akhir = formatDateLocal(selectedDates[1]);
 
-        // Update datepicker4 dengan batasan baru
-        $('#datepicker4').datepicker('option', 'minDate', startDate);
-        $('#datepicker4').datepicker('option', 'maxDate', maxPenugasanDate);
+                document.getElementById("tanggal_awal_kegiatan").value = awal;
+                document.getElementById("tanggal_akhir_kegiatan").value = akhir;
 
-        // Update info
-        infoPeriode.textContent = `Batas akhir penugasan: ${formatDateID(maxPenugasanDate)}`;
-        
-        // Validasi dengan tanggal awal kegiatan
-        if (tanggalAwalKegiatan.value && dateText !== tanggalAwalKegiatan.value) {
-          infoPeriode.textContent = 'Periode penugasan diubah manual dari tanggal awal kegiatan';
-          infoPeriode.style.color = '#ffc107';
-        }
+                document.getElementById("datepicker3").value = awal;
+                document.getElementById("datepicker4").value = akhir;
 
-        $(this).datepicker('hide');
-      }
-    });
-
-    // Datepicker 4 - Akhir Penugasan
-    $('#datepicker4').datepicker({
-      dateFormat: 'dd MM yy',
-      autoclose: true,
-      minDate: null,
-      maxDate: null,
-      beforeShowDay: function(date) {
-        if (!datepicker3.value) {
-          return [false, 'ui-state-disabled', 'Pilih periode penugasan terlebih dahulu'];
-        }
-
-        const startDate = new Date(datepicker3.value);
-        startDate.setHours(0,0,0,0);
-
-        const checkDate = new Date(date);
-        checkDate.setHours(0,0,0,0);
-
-        const maxAllowedDate = addDays(startDate, 60);
-        maxAllowedDate.setHours(0,0,0,0);
-
-        if (checkDate < startDate) {
-          return [false, 'ui-state-disabled', 'Tidak bisa memilih tanggal sebelum periode penugasan'];
-        }
-
-        if (checkDate >= startDate && checkDate <= maxAllowedDate) {
-          const daysFromStart = daysDifference(startDate, checkDate);
-          const daysLeft = 60 - daysFromStart;
-
-          // Highlight tanggal yang sama dengan akhir kegiatan
-          if (tanggalAkhirKegiatan.value) {
-            const endKegiatan = new Date(tanggalAkhirKegiatan.value);
-            endKegiatan.setHours(0,0,0,0);
-            if (checkDate.getTime() === endKegiatan.getTime()) {
-              return [true, 'ui-state-highlight ui-state-range-end', `Tanggal akhir kegiatan (${daysFromStart} hari)`];
+                document.getElementById("info_periode").innerHTML = "Terisi otomatis ✔";
+                document.getElementById("info_akhir").innerHTML = "Terisi otomatis ✔";
             }
-          }
-
-          if (daysLeft <= 7) {
-            return [true, 'valid-date warning', `Sisa ${daysLeft} hari dari batas 60 hari`];
-          }
-          return [true, 'valid-date', `${daysFromStart} hari dari periode penugasan`];
         }
-
-        return [false, 'ui-state-disabled', 'Melebihi batas maksimal 60 hari'];
-      },
-      onSelect: function(dateText) {
-        if (datepicker3.value) {
-          const startDate = new Date(datepicker3.value);
-          const endDate = new Date(dateText);
-          const maxAllowedDate = addDays(startDate, 60);
-
-          const daysUsed = daysDifference(startDate, endDate);
-          const daysLeft = 60 - daysUsed;
-          
-          // Update info
-          infoAkhir.textContent = `Durasi: ${daysUsed + 1} hari. Sisa: ${daysLeft} hari`;
-          
-          // Validasi dengan tanggal akhir kegiatan
-          if (tanggalAkhirKegiatan.value && dateText !== tanggalAkhirKegiatan.value) {
-            infoAkhir.textContent = 'Akhir penugasan diubah manual dari tanggal akhir kegiatan';
-            infoAkhir.style.color = '#ffc107';
-          }
-        }
-
-        $(this).datepicker('hide');
-      }
     });
 
-    // Event handler untuk reset ketika klik di luar datepicker
-    $(document).on('click', function(e) {
-      const $target = $(e.target);
-      const $datepicker = $('#datepicker');
-      const $datepickerWidget = $('.ui-datepicker');
-      
-      // Jika klik di luar datepicker dan bukan pada input datepicker itu sendiri
-      if (!$target.closest('.ui-datepicker').length && 
-          !$target.is($datepicker) && 
-          !$target.closest($datepicker).length) {
-        
-        // Jika sedang dalam proses memilih (sudah pilih tanggal awal tapi belum tanggal akhir)
-        if (firstDate && !secondDate) {
-          const confirmReset = confirm('Anda sudah memilih tanggal awal. Batalkan dan mulai ulang?');
-          if (confirmReset) {
-            resetDateSelection();
-            $('#datepicker').datepicker('refresh');
-          }
-        }
-      }
+    document.getElementById("jenis_date").addEventListener("change", function () {
+        document.getElementById("periode_section").style.display =
+            this.value === "Periode" ? "block" : "none";
     });
-
-  }
-
-  // Event listener untuk toggle sections
-  jenisDate.addEventListener('change', function () {
-    toggleSections(this.value);
-  });
-
-  // Initialize berdasarkan pilihan default
-  toggleSections(jenisDate.value);
-
-  // Validasi form submit
-  const msform = document.getElementById('msform');
-  if (msform) {
-    msform.addEventListener('submit', function(e) {
-      let isValid = true;
-      
-      // Validasi berdasarkan pilihan jenis date
-      if (jenisDate.value === 'Custom') {
-        if (!tanggalAwalKegiatan.value || !tanggalAkhirKegiatan.value) {
-          alert('Pilih rentang tanggal kegiatan terlebih dahulu');
-          isValid = false;
-        }
-        
-        if (datepicker3.value && datepicker4.value) {
-          const startDate = new Date(datepicker3.value);
-          const endDate = new Date(datepicker4.value);
-          const maxAllowedDate = addDays(startDate, 60);
-          
-          if (endDate > maxAllowedDate) {
-            alert(`Akhir penugasan melebihi batas 60 hari. Maksimal: ${formatDate(maxAllowedDate)}`);
-            isValid = false;
-          }
-        }
-      } else if (jenisDate.value === 'Periode') {
-        if (!periodeSelect.value) {
-          alert('Pilih periode terlebih dahulu');
-          isValid = false;
-        }
-      } else {
-        alert('Pilih jenis tanggal pengajuan terlebih dahulu');
-        isValid = false;
-      }
-      
-      if (!isValid) {
-        e.preventDefault();
-      }
-    });
-  }
 
 });
 </script>
+
+
+
 <!-- Step 3 (Upload File) -->
 <!-- ===== UPLOADCARE CDN ===== -->
 <script>
@@ -3668,15 +3202,8 @@ if (msform) {
         <?php elseif ($this->session->flashdata('error')): ?>
             <p style="color:red;"><?php echo $this->session->flashdata('error'); ?></p>
         <?php endif; ?>
-
-
-
-
 <!-- FONT AWESOME ICON -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-
-
 
     <script type="text/javascript">
         $(document).ready(function() {
@@ -3710,10 +3237,6 @@ if (msform) {
         });
         var dateToday = new Date();
         $(document).ready(function() {
-            $("#datepicker").datepicker({
-                minDate: -49,
-                dateFormat: 'dd-mm-yy'
-            });
             $(function() {
                 $("#datepicker2").datepicker({
                     minDate: -49,

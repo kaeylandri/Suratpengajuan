@@ -486,10 +486,29 @@ private function get_dosen_by_nip($nip_data) {
         return round(($completed / $total) * 100);
     }
 
-    public function submit()
+public function submit()
 {
     $post = $this->input->post() ?? [];
 
+    $nama_kegiatan = $post['nama_kegiatan'] ?? '';
+    $tanggal_kegiatan = $this->safe_date($post['tanggal_awal_kegiatan'] ?? null);
+    $user_id = $post['user_id'] ?? '';
+    
+    // Cek apakah ada pengajuan yang sama dalam 5 menit terakhir
+    $five_minutes_ago = date('Y-m-d H:i:s', strtotime('-5 minutes'));
+    
+    $this->db->where('user_id', $user_id);
+    $this->db->where('nama_kegiatan', $nama_kegiatan);
+    $this->db->where('tanggal_kegiatan', $tanggal_kegiatan);
+    $this->db->where('created_at >=', $five_minutes_ago);
+    $existing = $this->db->get('surat')->row();
+    
+    if ($existing) {
+        $this->session->set_flashdata('error', 'Anda sudah mengajukan surat tugas dengan data yang sama baru-baru ini. Silakan tunggu beberapa saat atau periksa daftar pengajuan.');
+        redirect('list-surat-tugas');
+        return;
+    }
+    // Clean array values
     foreach ($post as $k => $v) {
         if (is_array($v)) {
             $post[$k] = array_values(array_filter($v, fn($x) => trim($x) !== ""));
@@ -498,10 +517,13 @@ private function get_dosen_by_nip($nip_data) {
         }
     }
 
-    $tp_safe = $this->safe_date($post['created_at'] ?? null);
-    $created_at = ($tp_safe === "-") ? date('Y-m-d') : $tp_safe;
+        // Process tanggal dengan aman
+    $tanggal_kegiatan = $this->safe_date($post['tanggal_awal_kegiatan'] ?? null);
+    $akhir_kegiatan = $this->safe_date($post['tanggal_akhir_kegiatan'] ?? null);
+    $periode_penugasan = $this->safe_date($post['periode_penugasan'] ?? null);
+    $akhir_periode_penugasan = $this->safe_date($post['akhir_periode_penugasan'] ?? null);
 
-    /* ======================================================
+   /* ======================================================
        🔥 PROSES EVIDEN: ambil URL Uploadcare → download → simpan
        ====================================================== */
     $eviden_raw = $post['eviden'] ?? "[]";
@@ -569,20 +591,20 @@ private function get_dosen_by_nip($nip_data) {
     }
 }
 
-
-    /* ======================================================
-       🔥 END PROSES EVIDEN
-       ====================================================== */
-
     $data = [
         'user_id' => $post['user_id'] ?? '-',
         'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
         'jenis_date' => $post['jenis_date'] ?? '-',
         'created_at' => date('Y-m-d H:i:s'),
-        'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan']),
-        'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan']),
-        'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
-        'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
+        
+        // TANGGAL KEGIATAN - DUA FIELD TERPISAH
+        'tanggal_kegiatan' => $tanggal_kegiatan,
+        'akhir_kegiatan' => $akhir_kegiatan,
+        
+        // PERIODE PENUGASAN - AUTO-FILLED
+        'periode_penugasan' => $periode_penugasan,
+        'akhir_periode_penugasan' => $akhir_periode_penugasan,
+        
         'periode_value' => $post['periode_value'] ?? '-',
         'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
         'penyelenggara' => $post['penyelenggara'] ?? '-',
@@ -593,21 +615,19 @@ private function get_dosen_by_nip($nip_data) {
         'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
         'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
         'format' => $post['format'] ?? '-',
-
         'nip' => json_encode($post['nip'] ?? []),
-
-        // ⬇️ Simpan hanya NAMA FILE (bukan URL)
         'eviden' => json_encode($saved_filenames),
-
         'status' => 'pengajuan',
     ];
 
     $this->Surat_model->insert_surat($data);
 
-    $this->session->set_flashdata('success', 'Data berhasil disimpan!');
-    redirect('surat');
-}
+    log_message('info', 'Surat submitted - Tanggal Kegiatan: ' . $tanggal_kegiatan . ' s/d ' . $akhir_kegiatan);
+    log_message('info', 'Periode Penugasan: ' . $periode_penugasan . ' s/d ' . $akhir_periode_penugasan);
 
+    $this->session->set_flashdata('success', 'Data berhasil disimpan!');
+    redirect('list-surat-tugas');
+}
 
     /* ===========================================
        DOWNLOAD EVIDEN
