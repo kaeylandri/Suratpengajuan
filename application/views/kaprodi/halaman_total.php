@@ -249,7 +249,7 @@
 <body>
 
 <div class="navbar">
-    <h2><i class="fa-solid fa-user-tie"></i> Dashboard Kaprodi</h2>
+    <h2><i class="fa-solid fa-user-tie"></i> Dashboard Kaprodi - Total Pengajuan</h2>
     <div></div>
 </div>
 
@@ -359,27 +359,141 @@
                             $tgl_pengajuan = isset($s->created_at) && $s->created_at? date('d M Y', strtotime($s->created_at)) : '-';
                             $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
                             
-                            // Ambil nama dosen
-                            $nama_dosen = '-';
-                            if (!empty($s->nama_dosen)) {
-                                $nama_dosen = $s->nama_dosen;
-                            } elseif (!empty($s->dosen_list)) {
+                            // FUNGSI BARU: Ambil nama dosen dengan format yang lebih baik
+                            $dosen_display_list = [];
+                            $dosen_display_html = '';
+                            
+                            // DEBUG: Tampilkan data untuk debugging
+                            // echo "<!-- Debug id {$s->id}: ";
+                            // echo "nama_dosen: " . ($s->nama_dosen ?? 'NULL') . ", ";
+                            // echo "dosen_list: " . (is_string($s->dosen_list ?? null) ? htmlspecialchars(substr($s->dosen_list, 0, 100)) : gettype($s->dosen_list ?? null)) . ", ";
+                            // echo "nip: " . (is_string($s->nip ?? null) ? htmlspecialchars($s->nip) : gettype($s->nip ?? null));
+                            // echo " -->";
+                            
+                            // Cek 1: Apakah ada field nama_dosen langsung?
+                            if (!empty($s->nama_dosen) && $s->nama_dosen != '-' && $s->nama_dosen != 'null') {
+                                $dosen_display_list = [$s->nama_dosen];
+                            }
+                            // Cek 2: Apakah ada data dosen_list (JSON string)?
+                            elseif (!empty($s->dosen_list) && $s->dosen_list != '-' && $s->dosen_list != 'null') {
+                                // Coba decode JSON
+                                $dosen_data = null;
+                                
                                 if (is_string($s->dosen_list)) {
                                     $decoded = json_decode($s->dosen_list, true);
                                     if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                                        $nama_array = [];
-                                        foreach ($decoded as $item) {
-                                            if (is_array($item) && isset($item['nama'])) {
-                                                $nama_array[] = $item['nama'];
-                                            } elseif (is_string($item)) {
-                                                $nama_array[] = $item;
-                                            }
-                                        }
-                                        $nama_dosen = !empty($nama_array) ? implode(', ', $nama_array) : 'Data dosen';
+                                        $dosen_data = $decoded;
                                     } else {
-                                        $nama_dosen = $s->dosen_list;
+                                        // Jika bukan JSON, coba sebagai string biasa
+                                        $dosen_display_list = [$s->dosen_list];
+                                    }
+                                } elseif (is_array($s->dosen_list)) {
+                                    $dosen_data = $s->dosen_list;
+                                }
+                                
+                                // Proses array dosen_data
+                                if (is_array($dosen_data) && !empty($dosen_data)) {
+                                    foreach ($dosen_data as $item) {
+                                        if (is_array($item) && isset($item['nama'])) {
+                                            $dosen_display_list[] = $item['nama'];
+                                        } elseif (is_string($item)) {
+                                            $dosen_display_list[] = $item;
+                                        } elseif (is_object($item) && isset($item->nama)) {
+                                            $dosen_display_list[] = $item->nama;
+                                        }
                                     }
                                 }
+                            }
+                            
+                            // Cek 3: Apakah ada NIP dan perlu diambil dari database?
+                            // PERBAIKAN: Cek dulu tipe data NIP sebelum query database
+                            elseif (!empty($s->nip) && $s->nip != '-' && $s->nip != 'null') {
+                                // Jika NIP adalah string JSON
+                                $nip_data = $s->nip;
+                                if (is_string($nip_data)) {
+                                    // Coba decode JSON terlebih dahulu
+                                    $decoded_nip = json_decode($nip_data, true);
+                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded_nip) && !empty($decoded_nip)) {
+                                        // Ini adalah array NIP dalam format JSON
+                                        $nip_array = $decoded_nip;
+                                    } else {
+                                        // Ini adalah string NIP biasa
+                                        $nip_array = [$nip_data];
+                                    }
+                                } elseif (is_array($nip_data)) {
+                                    // Sudah dalam format array
+                                    $nip_array = $nip_data;
+                                } else {
+                                    // Format lainnya
+                                    $nip_array = [];
+                                }
+                                
+                                // Jika ada NIP array, ambil data dosen dari database
+                                if (!empty($nip_array)) {
+                                    // Pastikan semua elemen adalah string untuk query
+                                    $valid_nips = [];
+                                    foreach ($nip_array as $nip_item) {
+                                        if (is_string($nip_item) && !empty($nip_item) && $nip_item != '-' && $nip_item != 'null') {
+                                            $valid_nips[] = $nip_item;
+                                        } elseif (is_numeric($nip_item)) {
+                                            $valid_nips[] = (string)$nip_item;
+                                        }
+                                    }
+                                    
+                                    if (!empty($valid_nips)) {
+                                        $this->db->select('nama_dosen');
+                                        $this->db->from('list_dosen');
+                                        $this->db->where_in('nip', $valid_nips);
+                                        $dosen_db = $this->db->get()->result_array();
+                                        
+                                        if (!empty($dosen_db)) {
+                                            $dosen_display_list = array_column($dosen_db, 'nama_dosen');
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Cek 4: Apakah ada field lain yang mungkin berisi nama dosen?
+                            if (empty($dosen_display_list)) {
+                                // Coba cek field-field lain yang mungkin berisi nama dosen
+                                $possible_fields = ['dosen', 'nama_pengaju', 'pengaju', 'user_nama', 'created_by'];
+                                foreach ($possible_fields as $field) {
+                                    if (isset($s->$field) && !empty($s->$field) && $s->$field != '-' && $s->$field != 'null') {
+                                        $dosen_display_list[] = $s->$field;
+                                        break;
+                                    }
+                                }
+                            }
+                            
+                            // Generate HTML untuk tampilan nama dosen
+                            if (!empty($dosen_display_list)) {
+                                $dosen_display_html = '<div style="display: flex; flex-direction: column; gap: 4px;">';
+                                foreach ($dosen_display_list as $index => $nama) {
+                                    $dosen_display_html .= '
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <span style="
+                                                background: #8E44AD;
+                                                color: white;
+                                                border-radius: 50%;
+                                                width: 20px;
+                                                height: 20px;
+                                                display: inline-flex;
+                                                align-items: center;
+                                                justify-content: center;
+                                                font-size: 10px;
+                                                font-weight: 600;
+                                                flex-shrink: 0;
+                                            ">' . ($index + 1) . '</span>
+                                            <span style="
+                                                font-size: 13px;
+                                                color: #2c3e50;
+                                                line-height: 1.4;
+                                            ">' . htmlspecialchars($nama) . '</span>
+                                        </div>';
+                                }
+                                $dosen_display_html .= '</div>';
+                            } else {
+                                $dosen_display_html = '<span style="color: #95a5a6; font-style: italic;">Data dosen tidak tersedia</span>';
                             }
                     ?>
                     <!-- BARIS TABEL BISA DIKLIK UNTUK DETAIL - SAMA SEPERTI DASHBOARD -->
@@ -390,11 +504,7 @@
                         <td data-label="Tanggal Pengajuan"><?= $tgl_pengajuan ?></td>
                         <td data-label="Tanggal Kegiatan"><?= $tgl_kegiatan ?></td>
                         <td data-label="Nama Dosen">
-                            <?php if($nama_dosen !== '-'): ?>
-                                <?= htmlspecialchars($nama_dosen) ?>
-                            <?php else: ?>
-                                <span style="color: #95a5a6; font-style: italic;">Data dosen tidak tersedia</span>
-                            <?php endif; ?>
+                            <?= $dosen_display_html ?>
                         </td>
                         <td data-label="Status"><?= $badge ?></td>
                         <!-- TOMBOL AKSI - SAMA SEPERTI DASHBOARD -->
