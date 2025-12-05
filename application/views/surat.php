@@ -224,6 +224,7 @@
             position: relative;
             z-index: 9999 !important;
             transition: margin-bottom 0.3s ease;
+             margin-top: -10px !important; /* Atur nilai negatif untuk naik */
         }
 
         /* dropdown nice-select */
@@ -3621,7 +3622,6 @@ if (msform) {
                     $("#datepicker2").hide();
                     $("#datepicker3").hide();
                     $("#datepicker4").hide();
-                    $("#periode_value").show();
                 }
             });
         });
