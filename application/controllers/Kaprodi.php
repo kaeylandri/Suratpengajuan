@@ -10,7 +10,78 @@ class Kaprodi extends CI_Controller
         $this->load->database();
         $this->load->model('Surat_model');
     }
-
+/**
+ * Get display name untuk dosen dari data surat
+ * Return array untuk tampilan yang lebih fleksibel
+ */
+private function get_dosen_data_for_display($surat) 
+{
+    $dosen_list = [];
+    
+    // 1. Cek nama_dosen langsung
+    if (!empty($surat->nama_dosen) && $surat->nama_dosen !== '-') {
+        // Jika nama_dosen berisi multiple names (separated by comma)
+        if (strpos($surat->nama_dosen, ',') !== false) {
+            $names = explode(',', $surat->nama_dosen);
+            foreach ($names as $name) {
+                $dosen_list[] = trim($name);
+            }
+        } else {
+            $dosen_list[] = $surat->nama_dosen;
+        }
+        return $dosen_list;
+    }
+    
+    // 2. Cek dosen_list
+    if (!empty($surat->dosen_list)) {
+        if (is_string($surat->dosen_list) && strpos($surat->dosen_list, '[') !== false) {
+            $decoded = json_decode($surat->dosen_list, true);
+            if ($decoded && is_array($decoded)) {
+                foreach ($decoded as $item) {
+                    if (is_array($item) && isset($item['nama'])) {
+                        $dosen_list[] = $item['nama'];
+                    } elseif (is_string($item)) {
+                        $dosen_list[] = $item;
+                    }
+                }
+            }
+        } else {
+            $dosen_list[] = $surat->dosen_list;
+        }
+        
+        if (!empty($dosen_list)) {
+            return $dosen_list;
+        }
+    }
+    
+    // 3. Lookup dari NIP
+    if (!empty($surat->nip) && $surat->nip !== '-') {
+        $nip_data = null;
+        
+        if (is_string($surat->nip) && (strpos($surat->nip, '[') !== false || strpos($surat->nip, '{') !== false)) {
+            $nip_data = json_decode($surat->nip, true);
+        } else {
+            $nip_data = [$surat->nip];
+        }
+        
+        if ($nip_data && is_array($nip_data)) {
+            $this->db->select('nama_dosen');
+            $this->db->from('list_dosen');
+            $this->db->where_in('nip', $nip_data);
+            $this->db->order_by('nama_dosen', 'ASC'); // Sort alphabetically
+            $result = $this->db->get()->result_array();
+            
+            if (!empty($result)) {
+                foreach ($result as $row) {
+                    $dosen_list[] = $row['nama_dosen'];
+                }
+                return $dosen_list;
+            }
+        }
+    }
+    
+    return ['Data dosen tidak tersedia'];
+}
     /* ================================
        DASHBOARD - DITAMBAHKAN FILTER BULAN
     ================================= */
@@ -20,6 +91,7 @@ class Kaprodi extends CI_Controller
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
         $status_filter = $this->input->get('status');
+        
         
         $data['tahun'] = $tahun;
         $data['bulan'] = $bulan;
@@ -60,7 +132,14 @@ class Kaprodi extends CI_Controller
         }
 
         $this->db->order_by('created_at', 'DESC');
-        $data['surat_list'] = $this->db->get('surat')->result();
+    $surat_raw = $this->db->get('surat')->result();
+    
+    // Pre-process: tambahkan dosen_display_list
+    foreach ($surat_raw as $surat) {
+        $surat->dosen_display_list = $this->get_dosen_data_for_display($surat);
+    }
+    
+    $data['surat_list'] = $surat_raw;
 
         // Statistik untuk card (dengan filter bulan)
         $this->db->where('YEAR(created_at)', $tahun);
@@ -127,7 +206,41 @@ class Kaprodi extends CI_Controller
 
         $this->load->view('kaprodi/dashboard', $data);
     }
-
+public function check_nama_dosen_field()
+{
+    echo "<h3>Cek Field nama_dosen</h3>";
+    
+    // 1. Cek field yang ada
+    $fields = $this->db->list_fields('surat');
+    echo "<strong>Fields yang ada di tabel 'surat':</strong><br><pre>";
+    print_r($fields);
+    echo "</pre>";
+    
+    // 2. Cek apakah field nama_dosen ada
+    if (in_array('nama_dosen', $fields)) {
+        echo "<p style='color:green'><strong>✓ Field 'nama_dosen' ADA</strong></p>";
+        
+        // 3. Cek sample data
+        $this->db->select('id, nama_kegiatan, nama_dosen, dosen_list, nip');
+        $this->db->limit(5);
+        $sample = $this->db->get('surat')->result();
+        
+        echo "<h4>Sample Data (5 baris pertama):</h4>";
+        echo "<pre>";
+        foreach ($sample as $row) {
+            echo "ID: {$row->id}\n";
+            echo "Nama Kegiatan: {$row->nama_kegiatan}\n";
+            echo "Nama Dosen: " . (isset($row->nama_dosen) ? $row->nama_dosen : 'NULL/EMPTY') . "\n";
+            echo "Dosen List: " . (isset($row->dosen_list) ? $row->dosen_list : 'NULL/EMPTY') . "\n";
+            echo "NIP: " . (isset($row->nip) ? $row->nip : 'NULL/EMPTY') . "\n";
+            echo "---\n";
+        }
+        echo "</pre>";
+    } else {
+        echo "<p style='color:red'><strong>✗ Field 'nama_dosen' TIDAK ADA</strong></p>";
+        echo "<p>Field alternatif: dosen_list, nip</p>";
+    }
+}
     /* ================================
        HELPER FUNCTIONS UNTUK COUNT DATA PER BULAN
     ================================= */
@@ -346,13 +459,6 @@ class Kaprodi extends CI_Controller
 
         $this->load->view('kaprodi/halaman_ditolak', $data);
     }
-
-    /* ================================
-       SEMUA (TOTAL) PENGAJUAN - PERBAIKAN UTAMA UNTUK FILTER JENIS PENUGASAN
-    ================================= */
-   /* ================================
-   SEMUA (TOTAL) PENGAJUAN - DIPERBAIKI
-================================= */
 /* ================================
    SEMUA (TOTAL) PENGAJUAN - DIPERBAIKI UNTUK MULTIPLE SELECTION
 ================================= */

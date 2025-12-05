@@ -669,40 +669,38 @@
                     <td data-label="Penyelenggara"><?= htmlspecialchars($s->penyelenggara) ?></td>
                     <td data-label="Tanggal Pengajuan"><?= $tgl_pengajuan ?></td>
                     <td data-label="Tanggal Kegiatan"><?= $tgl_kegiatan ?></td>
-                <td data-label="Nama Dosen">
-    <?php
-    // Cara paling sederhana: gunakan field yang ada
-    if (!empty($s->nama_dosen) && $s->nama_dosen !== '-' && $s->nama_dosen !== ''):
-        echo htmlspecialchars($s->nama_dosen);
-    elseif (!empty($s->dosen_list)):
-        // Coba ambil dari dosen_list
-        $dosen_list_data = $s->dosen_list;
-        
-        // Coba decode jika JSON
-        if (is_string($dosen_list_data) && strpos($dosen_list_data, '[') !== false) {
-            $decoded = json_decode($dosen_list_data, true);
-            if ($decoded && is_array($decoded)) {
-                $nama_array = [];
-                foreach ($decoded as $item) {
-                    if (is_array($item) && isset($item['nama'])) {
-                        $nama_array[] = $item['nama'];
-                    } elseif (is_string($item)) {
-                        $nama_array[] = $item;
-                    }
-                }
-                echo !empty($nama_array) ? htmlspecialchars(implode(', ', $nama_array)) : 'Data dosen';
-            } else {
-                echo htmlspecialchars($dosen_list_data);
-            }
-        } else {
-            echo htmlspecialchars($dosen_list_data);
-        }
-    else:
-        echo '<span style="color: #95a5a6; font-style: italic;">Data dosen tidak tersedia</span>';
-    endif;
-    ?>
+              
+        <td data-label="Nama Dosen">
+    <?php if (!empty($s->dosen_display_list)): ?>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <?php foreach ($s->dosen_display_list as $index => $nama): ?>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="
+                        background: #8E44AD;
+                        color: white;
+                        border-radius: 50%;
+                        width: 20px;
+                        height: 20px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 10px;
+                        font-weight: 600;
+                        flex-shrink: 0;
+                    "><?= $index + 1 ?></span>
+                    <span style="
+                        font-size: 13px;
+                        color: #2c3e50;
+                        line-height: 1.4;
+                    "><?= htmlspecialchars($nama) ?></span>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php else: ?>
+        <span style="color: #95a5a6; font-style: italic;">Data dosen tidak tersedia</span>
+    <?php endif; ?>
 </td>
-                    <td data-label="Status"><?= $badge ?></td>
+                      <td data-label="Status"><?= $badge ?></td>
                     <!-- TOMBOL AKSI - TOMBOL DETAIL MENJADI LIHAT SURAT, TAMBAH TOMBOL EVIDEN -->
                     <td data-label="Aksi">
                         <div style="display:flex;gap:6px">

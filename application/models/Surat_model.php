@@ -65,13 +65,18 @@ class Surat_model extends CI_Model
     // ============================================================
     //  GET BY ID
     // ============================================================
-    public function get_by_id($id)
-    {
-        $row = $this->db->get_where('surat', ['id' => $id])->row();
-        if (!$row) return null;
-
-        return $this->append_dosen_data($row);
-    }
+// Di Surat_model.php
+public function get_by_id($id)
+{
+    log_message('debug', 'get_by_id called with id: ' . $id);
+    
+    $this->db->where('id', $id);
+    $query = $this->db->get('surat');
+    
+    log_message('debug', 'Query result: ' . ($query->num_rows() > 0 ? 'found' : 'not found'));
+    
+    return $query->row();
+}
 
     // ============================================================
     //  GET BY IDS (METHOD BARU UNTUK MULTI EDIT)
@@ -99,14 +104,19 @@ class Surat_model extends CI_Model
         return $this->append_dosen_data($result);
     }
 
-    // ============================================================
-    //  UPDATE SURAT
-    // ============================================================
-    public function update_surat($id, $data)
-    {
-        $this->encode_array_fields($data);
-        return $this->db->where('id', $id)->update('surat', $data);
-    }
+public function update_surat($id, $data)
+{
+    log_message('debug', 'update_surat called for id: ' . $id);
+    log_message('debug', 'Update data: ' . print_r($data, true));
+    
+    $this->db->where('id', $id);
+    $result = $this->db->update('surat', $data);
+    
+    log_message('debug', 'Update result: ' . ($result ? 'success' : 'failed'));
+    log_message('debug', 'DB error: ' . $this->db->error()['message']);
+    
+    return $result;
+}
 
     // ============================================================
     //  DELETE
