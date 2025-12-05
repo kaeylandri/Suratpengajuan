@@ -2955,6 +2955,125 @@
 .no-dosen-message p {
     margin: 5px 0;
 }
+/* ===== MULTIPLE DOSEN STYLES ===== */
+.selected-dosen-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.selected-dosen-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+    border-color: #FB8C00;
+}
+
+/* Autocomplete styles */
+.autocomplete-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.autocomplete-item:hover {
+    background-color: #f8f9fa;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item.selected {
+    background-color: #e8f4ff;
+    border-left: 3px solid #FB8C00;
+}
+
+/* Badge styles */
+.badge-primary {
+    background: #FB8C00;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Button states */
+.btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Progress bar in modal */
+#progressBar {
+    transition: width 0.3s ease;
+}
+
+/* Alert customization */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border-left: 4px solid #28a745;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border-left: 4px solid #ffc107;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid #17a2b8;
+}
+
+/* Scrollbar customization */
+#selectedDosenList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#selectedDosenList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#selectedDosenList::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+#selectedDosenList::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .selected-dosen-item {
+        padding: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .selected-dosen-item > div:first-child {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+}
     </style>
 </head>
 
@@ -3203,9 +3322,9 @@
                 </div>
             </div>
         </div>
-        <!-- ===== MODAL TAMBAH DOSEN ===== -->
+      <!-- ===== MODAL TAMBAH DOSEN MULTIPLE ===== -->
         <div id="modalTambahDosen" class="custom-modal">
-            <div class="custom-modal-content">
+            <div class="custom-modal-content" style="max-width: 700px;">
                 <div class="custom-modal-header">
                     <h3 class="custom-modal-title">
                         <i class="fas fa-user-plus"></i>
@@ -3214,21 +3333,103 @@
                     <button class="custom-modal-close" id="closeTambahModal">&times;</button>
                 </div>
                 <div class="custom-modal-body">
+                    <!-- PENCARIAN DOSEN -->
                     <div class="form-group">
-                        <label for="inputNipTambah">NIP Dosen</label>
-                        <input type="text" id="inputNipTambah" class="form-control"
-                            placeholder="Masukkan NIP dosen" autocomplete="off">
-                        <small class="text-muted">Masukkan NIP yang valid. Sistem akan mencari di database.</small>
+                        <label for="inputNipTambah">
+                            <i class="fas fa-search"></i> Cari Dosen
+                        </label>
+                        <div style="position: relative;">
+                            <input type="text" id="inputNipTambah" class="form-control"
+                                placeholder="Masukkan NIP atau nama dosen" 
+                                autocomplete="off"
+                                data-autocomplete-url="<?= site_url('surat/autocomplete_dosen') ?>">
+                            <div id="autocompleteResults" 
+                                style="display: none; 
+                                    position: absolute; 
+                                    top: 100%; 
+                                    left: 0; 
+                                    right: 0; 
+                                    background: white; 
+                                    border: 1px solid #ddd; 
+                                    border-radius: 8px; 
+                                    max-height: 200px; 
+                                    overflow-y: auto; 
+                                    z-index: 1000; 
+                                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                <!-- Hasil autocomplete akan muncul di sini -->
+                            </div>
+                        </div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Mulai ketik NIP atau nama dosen. Pilih dosen untuk ditambahkan ke daftar.
+                        </small>
                     </div>
+
+                    <!-- DAFTAR DOSEN YANG AKAN DITAMBAHKAN -->
+                    <div class="form-group">
+                        <label>
+                            <i class="fas fa-list"></i> Daftar Dosen yang Akan Ditambahkan
+                            <span id="selectedCount" class="badge badge-primary" style="margin-left: 10px;">0</span>
+                        </label>
+                        
+                        <div id="selectedDosenList" style="
+                            max-height: 250px;
+                            overflow-y: auto;
+                            border: 1px solid #dee2e6;
+                            border-radius: 8px;
+                            padding: 10px;
+                            margin-top: 10px;
+                            background: #f8f9fa;
+                            <?php echo (isset($hide_mobile) ? 'min-height: 200px;' : ''); ?>
+                        ">
+                            <!-- Dosen yang dipilih akan muncul di sini -->
+                            <div id="emptySelectionMessage" style="
+                                text-align: center;
+                                padding: 30px;
+                                color: #6c757d;
+                            ">
+                                <i class="fas fa-user-plus" style="font-size: 48px; margin-bottom: 10px;"></i>
+                                <p>Belum ada dosen yang dipilih.</p>
+                                <small>Pilih dosen dari kolom pencarian di atas.</small>
+                            </div>
+                        </div>
+                        
+                        <small class="text-muted" style="display: block; margin-top: 8px;">
+                            <i class="fas fa-exclamation-circle"></i> 
+                            Maksimal 10 dosen dapat ditambahkan dalam satu kali proses.
+                        </small>
+                    </div>
+
+                    <!-- INFO PENGAJUAN -->
+                    <div class="alert alert-info" style="margin: 15px 0;">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Informasi:</strong> Anda akan menambahkan dosen ke pengajuan: 
+                        <strong id="currentPengajuanName">-</strong>
+                        <br>
+                        <small>
+                            Saat ini ada <strong id="currentDosenCount">0</strong> dosen dalam pengajuan ini.
+                        </small>
+                    </div>
+
                     <div id="hasilPencarian" style="margin-top: 15px;"></div>
                 </div>
-                <div class="custom-modal-footer">
-                    <button class="btn-cancel" onclick="tutupModalTambah()">Batal</button>
-                    <button class="btn-submit" onclick="prosesTambahDosen()">Tambah</button>
+                <div class="custom-modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <button class="btn-cancel" onclick="hapusSemuaDosen()" id="btnClearAll" style="display: none;">
+                            <i class="fas fa-trash"></i> Hapus Semua
+                        </button>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn-cancel" onclick="tutupModalTambah()">
+                            <i class="fas fa-times"></i> Batal
+                        </button>
+                        <button class="btn-submit" onclick="prosesTambahMultipleDosen()" id="btnTambahSubmit" disabled>
+                            <i class="fas fa-plus"></i> Tambah <span id="tambahCount">0</span> Dosen
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
-
        <!-- ===== MODAL KURANG DOSEN - SIMPLE VERSION ===== -->
 <div id="modalKurangDosen" class="custom-modal">
     <div class="custom-modal-content" style="max-width: 500px;">
@@ -3571,566 +3772,1162 @@
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        // Toggle Sidebar for Mobile
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
+<script>
+    // ===== REVISI COMPLETE JAVASCRIPT =====
+
+    // Variabel global
+    let currentSuratId = null;
+    let currentDosenList = [];
+    let selectedDosenForDeletion = null;
+    let selectedDosenList = [];
+    let currentPengajuanName = '';
+    let currentDosenCount = 0;
+
+    // Toggle Sidebar for Mobile
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    $(document).click(function(e) {
+        if ($(window).width() <= 992) {
+            if (!$(e.target).closest('.fik-db-side-menu, .db-menu-trigger').length) {
+                $('#sidebar').removeClass('active');
+            }
+        }
+    });
+
+    // Fungsi untuk tombol Kembali
+    function goBack() {
+        window.location.href = '<?= base_url() ?>';
+    }
+
+    // ===== FUNGSI UNTUK SHOW MODAL DOSEN =====
+    function showDosenModal(event, dosenList, namaKegiatan, suratId) {
+        event.stopPropagation();
+
+        // Simpan data ke variabel global
+        currentSuratId = suratId;
+        currentDosenList = dosenList || [];
+        currentPengajuanName = namaKegiatan;
+
+        console.log('showDosenModal - currentSuratId:', currentSuratId);
+        console.log('showDosenModal - currentDosenList:', currentDosenList);
+        console.log('showDosenModal - namaKegiatan:', namaKegiatan);
+
+        // Update judul dan konten
+        document.getElementById("kegiatanTitle").innerText = namaKegiatan || "Kegiatan";
+        updateDosenListDisplay();
+
+        // Tampilkan tombol aksi jika ada lebih dari 1 dosen
+        const actionButtons = document.getElementById("dosenActionButtons");
+        if (currentDosenList.length > 1) {
+            actionButtons.style.display = 'flex';
+        } else {
+            actionButtons.style.display = 'none';
         }
 
-        // Close sidebar when clicking outside on mobile
-        $(document).click(function(e) {
-            if ($(window).width() <= 992) {
-                if (!$(e.target).closest('.fik-db-side-menu, .db-menu-trigger').length) {
-                    $('#sidebar').removeClass('active');
+        // Tampilkan modal
+        document.getElementById("dosenModal").classList.add('show');
+    }
+
+    // ===== MODAL TAMBAH DOSEN - PERBAIKAN UTAMA =====
+    function bukaModalTambah() {
+        console.log('=== bukaModalTambah called ===');
+        console.log('currentSuratId:', currentSuratId);
+        console.log('currentDosenList:', currentDosenList);
+        
+        if (!currentSuratId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'ID Surat tidak ditemukan',
+                confirmButtonColor: '#FB8C00'
+            });
+            return;
+        }
+
+        // RESET semua state
+        selectedDosenList = [];
+        
+        // Update data yang ditampilkan
+        updateModalTambahData();
+        
+        // Tampilkan modal
+        document.getElementById('modalTambahDosen').classList.add('show');
+        
+        // Fokus ke input pencarian
+        setTimeout(() => {
+            const input = document.getElementById('inputNipTambah');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+        }, 300);
+    }
+
+    // FUNGSI BANTUAN: Update data modal
+    function updateModalTambahData() {
+        // Update nama pengajuan
+        const kegiatanTitle = document.getElementById('kegiatanTitle')?.textContent || 
+                            currentPengajuanName || 
+                            'Kegiatan';
+        document.getElementById('currentPengajuanName').textContent = kegiatanTitle;
+        
+        // Update jumlah dosen saat ini
+        document.getElementById('currentDosenCount').textContent = currentDosenList.length;
+        
+        // Update tampilan daftar dosen yang dipilih
+        updateSelectedDosenList();
+        
+        // Update state tombol
+        updateButtonState();
+        
+        // Clear hasil pencarian
+        document.getElementById('hasilPencarian').innerHTML = '';
+        
+        // Clear input
+        const nipInput = document.getElementById('inputNipTambah');
+        if (nipInput) nipInput.value = '';
+        
+        // Hide autocomplete
+        const autocomplete = document.getElementById('autocompleteResults');
+        if (autocomplete) autocomplete.style.display = 'none';
+    }
+
+    // ===== FUNGSI TUTUP MODAL TAMBAH =====
+    function tutupModalTambah() {
+        console.log('tutupModalTambah called');
+        
+        // Reset semua state
+        selectedDosenList = [];
+        
+        // Clear input dan tampilan
+        const inputNip = document.getElementById('inputNipTambah');
+        if (inputNip) inputNip.value = '';
+        
+        const hasilPencarian = document.getElementById('hasilPencarian');
+        if (hasilPencarian) hasilPencarian.innerHTML = '';
+        
+        const autocomplete = document.getElementById('autocompleteResults');
+        if (autocomplete) autocomplete.style.display = 'none';
+        
+        const selectedList = document.getElementById('selectedDosenList');
+        if (selectedList) {
+            selectedList.innerHTML = `
+                <div id="emptySelectionMessage" style="text-align: center; padding: 30px; color: #6c757d;">
+                    <i class="fas fa-user-plus" style="font-size: 48px; margin-bottom: 10px;"></i>
+                    <p>Belum ada dosen yang dipilih.</p>
+                    <small>Pilih dosen dari kolom pencarian di atas.</small>
+                </div>
+            `;
+        }
+        
+        // Reset tombol
+        const btnSubmit = document.getElementById('btnTambahSubmit');
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.style.background = '#6c757d';
+        }
+        
+        const btnClearAll = document.getElementById('btnClearAll');
+        if (btnClearAll) btnClearAll.style.display = 'none';
+        
+        // Sembunyikan modal
+        document.getElementById('modalTambahDosen').classList.remove('show');
+    }
+
+    // ===== FUNGSI UTAMA TAMBAH MULTIPLE DOSEN =====
+    function prosesTambahMultipleDosen() {
+        console.log('prosesTambahMultipleDosen dipanggil');
+        console.log('Dosen yang akan ditambahkan:', selectedDosenList);
+        console.log('currentSuratId:', currentSuratId);
+        
+        if (selectedDosenList.length === 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Tidak ada dosen yang dipilih',
+                confirmButtonColor: '#FB8C00'
+            });
+            return;
+        }
+        
+        if (!currentSuratId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Surat ID tidak ditemukan',
+                confirmButtonColor: '#FB8C00'
+            });
+            return;
+        }
+        
+        // Cek apakah ada dosen duplikat (sudah ada dalam pengajuan)
+        const existingNips = currentDosenList.map(d => d.nip);
+        const duplicateDosen = selectedDosenList.filter(d => 
+            existingNips.includes(d.nip)
+        );
+        
+        if (duplicateDosen.length > 0) {
+            const names = duplicateDosen.map(d => d.nama_dosen).join(', ');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Dosen Sudah Ada',
+                html: `
+                    <p>Berikut dosen sudah ada dalam pengajuan:</p>
+                    <div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                        <strong>${names}</strong>
+                    </div>
+                    <p>Dosen duplikat akan dilewati.</p>
+                    <p style="font-size: 14px; color: #6c757d;">
+                        <i class="fas fa-info-circle"></i> 
+                        Dosen lainnya akan tetap ditambahkan.
+                    </p>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Lanjutkan Tambah',
+                cancelButtonText: 'Periksa Ulang',
+                confirmButtonColor: '#FB8C00'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Hapus duplikat
+                    const filteredDosen = selectedDosenList.filter(d => 
+                        !existingNips.includes(d.nip)
+                    );
+                    doTambahMultipleDosen(filteredDosen);
                 }
+            });
+            return;
+        }
+        
+        // Jika tidak ada duplikat, langsung proses
+        doTambahMultipleDosen(selectedDosenList);
+    }
+
+    // ===== FUNGSI BANTUAN: PROSES TAMBAH KE SERVER =====
+    function doTambahMultipleDosen(dosenToAdd) {
+        if (dosenToAdd.length === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Tidak Ada yang Baru',
+                text: 'Semua dosen yang dipilih sudah ada dalam pengajuan.',
+                confirmButtonColor: '#FB8C00'
+            });
+            return;
+        }
+        
+        // Tampilkan loading dengan progress
+        let currentProgress = 0;
+        const totalDosen = dosenToAdd.length;
+        
+        Swal.fire({
+            title: 'Memproses...',
+            html: `
+                <div style="text-align: center;">
+                    <div style="font-size: 14px; color: #6c757d; margin-bottom: 10px;">
+                        Menambahkan dosen: <strong>${currentProgress}/${totalDosen}</strong>
+                    </div>
+                    <div style="width: 100%; background: #e9ecef; border-radius: 10px; height: 10px;">
+                        <div id="progressBar" style="width: 0%; height: 100%; background: #FB8C00; border-radius: 10px; transition: width 0.3s;"></div>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 12px; color: #6c757d;">
+                        <i class="fas fa-sync fa-spin"></i> Sedang memproses...
+                    </div>
+                </div>
+            `,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                updateProgressBar(0);
             }
         });
-
-        // Fungsi untuk tombol Kembali
-        function goBack() {
-            window.location.href = '<?= base_url() ?>';
+        
+        // Kirim semua NIP sekaligus
+        const nipList = dosenToAdd.map(d => d.nip);
+        
+        console.log('Mengirim request batch:', nipList);
+        
+        const formData = new FormData();
+        formData.append('surat_id', currentSuratId);
+        formData.append('nip_list', JSON.stringify(nipList));
+        
+        fetch('<?= site_url("surat/tambah_banyak_dosen") ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response batch:', data);
+            
+            if (data.success) {
+                successCount = data.added_count || dosenToAdd.length;
+                
+                // PERBAIKAN: Update currentDosenList dengan data baru dari server
+                if (data.new_dosen_list) {
+                    currentDosenList = data.new_dosen_list;
+                }
+                
+                // Update progress bar
+                updateProgressBar(100);
+                
+                // Tutup modal setelah delay
+                setTimeout(() => {
+                    Swal.close();
+                    
+                    // Tutup modal tambah
+                    tutupModalTambah();
+                    
+                    // Tutup modal dosen utama
+                    document.getElementById("dosenModal").classList.remove('show');
+                    
+                    // Tampilkan hasil sukses
+                    showTambahSuccessMessage(successCount, dosenToAdd);
+                    
+                }, 500);
+                
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message || 'Terjadi kesalahan saat menambahkan dosen',
+                    confirmButtonColor: '#FB8C00'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error batch:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Terjadi kesalahan: ' + error.message,
+                confirmButtonColor: '#FB8C00'
+            });
+        });
+        
+        // Fungsi update progress bar
+        function updateProgressBar(percent) {
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = percent + '%';
+            }
         }
-     // ===== REVISI COMPLETE JAVASCRIPT =====
+    }
 
-// Variabel global
-let currentSuratId = null;
-let currentDosenList = [];
-let selectedDosenForDeletion = null;
-
-// Fungsi untuk show modal dosen
-function showDosenModal(event, dosenList, namaKegiatan, suratId) {
-    event.stopPropagation();
-
-    // Simpan data ke variabel global
-    currentSuratId = suratId;
-    currentDosenList = dosenList || [];
-
-    console.log('showDosenModal - currentSuratId:', currentSuratId);
-    console.log('showDosenModal - currentDosenList:', currentDosenList);
-
-    // Update judul dan konten
-    document.getElementById("kegiatanTitle").innerText = namaKegiatan || "Kegiatan";
-    const container = document.getElementById("dosenListContainer");
-    container.innerHTML = "";
-
-    if (currentDosenList.length === 0) {
-        container.innerHTML = `
-        <div class="no-dosen">
-            <i class="fas fa-user-slash"></i>
-            <h4>Tidak Ada Dosen</h4>
-            <p>Belum ada dosen yang ditambahkan ke pengajuan ini.</p>
-        </div>
-    `;
-    } else {
-        currentDosenList.forEach((d, index) => {
-            const item = document.createElement("div");
-            item.className = "dosen-card";
-            item.setAttribute('data-index', index);
-
-            const initial = (d.nama_dosen || "-").charAt(0).toUpperCase();
-
-            item.innerHTML = `
-            <div class="dosen-avatar">${initial}</div>
-            <div class="dosen-card-info">
-                <div class="dosen-card-name">${d.nama_dosen || '-'}</div>
-                <div class="dosen-card-detail">
-                    NIP: ${d.nip || '-'} | 
-                    Jabatan: ${d.jabatan || '-'} | 
-                    Divisi: ${d.divisi || '-'}
+    // FUNGSI TAMPILKAN PESAN SUKSES TAMBAH
+    function showTambahSuccessMessage(successCount, dosenToAdd) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            html: `
+                <div style="text-align: center;">
+                    <div style="width: 80px; height: 80px; background: #d4edda; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                        <i class="fas fa-check" style="font-size: 40px; color: #155724;"></i>
+                    </div>
+                    <h4>${successCount} Dosen Ditambahkan</h4>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong>Daftar Dosen:</strong>
+                        <div style="max-height: 150px; overflow-y: auto; text-align: left; margin-top: 10px;">
+                            ${dosenToAdd.map(d => `
+                                <div style="padding: 8px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 24px; height: 24px; background: #28a745; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <div>
+                                        <strong>${d.nama_dosen}</strong>
+                                        <div style="font-size: 12px; color: #666;">NIP: ${d.nip}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <p style="font-size: 14px; color: #6c757d; margin-top: 10px;">
+                        <i class="fas fa-sync-alt"></i> Memperbarui tampilan...
+                    </p>
                 </div>
+            `,
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#FB8C00',
+            width: 600
+        }).then(() => {
+            // PERBAIKAN PENTING: Refresh data dosen di modal utama
+            refreshDosenDataFromServer().then(success => {
+                if (success) {
+                    console.log('Data dosen berhasil diperbarui setelah tambah');
+                }
+                // Refresh halaman untuk memastikan data sinkron
+                location.reload();
+            });
+        });
+    }
+
+    // ===== MODAL KURANG DOSEN =====
+    function bukaModalKurang() {
+        console.log('=== bukaModalKurang called ===');
+        console.log('currentDosenList:', currentDosenList);
+        console.log('currentSuratId:', currentSuratId);
+        
+        // Cek minimal harus ada 2 dosen
+        if (currentDosenList.length <= 1) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Tidak Dapat Mengurangi',
+                text: 'Minimal harus ada 1 dosen dalam pengajuan. Tidak dapat mengurangi dosen.',
+                confirmButtonColor: '#FB8C00'
+            });
+            return;
+        }
+        document.getElementById('dosenModal').classList.remove('show');
+
+        // Tampilkan modal hapus dosen sederhana
+        showKurangDosenModal();
+    }
+
+    function showKurangDosenModal() {
+        // Buat opsi dosen untuk dipilih (kecuali dosen pertama)
+        let options = '';
+        for (let i = 1; i < currentDosenList.length; i++) {
+            const dosen = currentDosenList[i];
+            options += `<option value="${dosen.nip}">${dosen.nama_dosen} (${dosen.nip})</option>`;
+        }
+
+        Swal.fire({
+            title: 'Kurangi Dosen',
+            html: `
+                <div style="text-align: left;">
+                    <p>Pilih dosen yang akan dihapus:</p>
+                    <select id="dosenSelect" class="swal2-select" style="width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
+                        <option value="" disabled selected>-- Pilih Dosen --</option>
+                        ${options}
+                    </select>
+                    <p style="font-size: 12px; color: #666; margin-top: 10px;">
+                        <i class="fas fa-info-circle"></i> Dosen pertama tidak dapat dihapus (minimal 1 dosen harus tersisa)
+                    </p>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Lanjut Hapus',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#FB8C00',
+            cancelButtonColor: '#6c757d',
+            width: '500px',
+            showLoaderOnConfirm: false,
+            preConfirm: () => {
+                const select = document.getElementById('dosenSelect');
+                const nip = select.value;
+                const dosenName = select.options[select.selectedIndex].text;
+                
+                if (!nip) {
+                    Swal.showValidationMessage('Pilih dosen yang akan dihapus');
+                    return false;
+                }
+                
+                return { nip, dosenName };
+            }
+        }).then((result) => {
+            if (result.isConfirmed && result.value) {
+                const { nip, dosenName } = result.value;
+                
+                // Tampilkan konfirmasi akhir
+                Swal.fire({
+                    title: 'Konfirmasi Penghapusan',
+                    html: `
+                        <div style="text-align: left;">
+                            <p>Anda akan menghapus:</p>
+                            <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #FB8C00;">
+                                <strong>${dosenName}</strong>
+                            </div>
+                            <p style="color: #dc3545; font-size: 14px;">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                Aksi ini tidak dapat dibatalkan.
+                            </p>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, Hapus Sekarang',
+                    cancelButtonText: 'Batal',
+                    width: '500px'
+                }).then((confirmResult) => {
+                    if (confirmResult.isConfirmed) {
+                        // Panggil fungsi hapus
+                        prosesHapusDosen(nip);
+                    }
+                });
+            }
+        });
+    }
+
+    function tutupModalKurang() {
+        const modal = document.getElementById('modalKurangDosen');
+        if (modal) modal.classList.remove('show');
+    }
+
+    // ===== FUNGSI UTAMA HAPUS DOSEN =====
+    function prosesHapusDosen(nip) {
+        console.log('=== prosesHapusDosen called ===');
+        console.log('NIP:', nip);
+        console.log('currentSuratId:', currentSuratId);
+        
+        if (!nip) {
+            console.error('NIP is null/undefined');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'NIP tidak valid',
+                confirmButtonColor: '#FB8C00'
+            });
+            return;
+        }
+        
+        if (!currentSuratId) {
+            console.error('currentSuratId is null/undefined');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Surat ID tidak ditemukan',
+                confirmButtonColor: '#FB8C00'
+            });
+            return;
+        }
+        
+        // Tampilkan loading
+        Swal.fire({
+            title: 'Memproses...',
+            text: 'Sedang menghapus dosen',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Kirim request ke server
+        const formData = new FormData();
+        formData.append('surat_id', currentSuratId);
+        formData.append('nip', nip);
+        
+        console.log('Mengirim request hapus ke server...');
+        console.log('URL:', '<?= site_url("surat/hapus_dosen") ?>');
+        
+        fetch('<?= site_url("surat/hapus_dosen") ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            
+            if (data.success) {
+                // PERBAIKAN: Update currentDosenList setelah hapus
+                if (data.remaining_dosen) {
+                    currentDosenList = data.remaining_dosen;
+                }
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    // PERBAIKAN PENTING: Refresh data dosen
+                    refreshDosenDataFromServer().then(success => {
+                        if (success) {
+                            console.log('Data dosen berhasil diperbarui setelah hapus');
+                        }
+                        // Refresh halaman
+                        location.reload();
+                    });
+                });
+            } else {
+                console.error('Server returned error:', data.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message || 'Terjadi kesalahan',
+                    confirmButtonColor: '#FB8C00'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Terjadi kesalahan saat menghapus dosen: ' + error.message,
+                confirmButtonColor: '#FB8C00'
+            });
+        });
+    }
+
+    // ===== FUNGSI REFRESH DATA DOSEN DARI SERVER =====
+    function refreshDosenDataFromServer() {
+        if (!currentSuratId) return Promise.resolve(false);
+        
+        return fetch(`<?= site_url('surat/get_dosen_list/') ?>${currentSuratId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.dosen_list) {
+                    currentDosenList = data.dosen_list;
+                    updateDosenListDisplay();
+                    return true;
+                }
+                return false;
+            })
+            .catch(error => {
+                console.error('Error refreshing dosen data:', error);
+                return false;
+            });
+    }
+
+    // ===== FUNGSI UPDATE TAMPILAN DOSEN =====
+    function updateDosenListDisplay() {
+        console.log('updateDosenListDisplay called');
+        console.log('currentDosenList:', currentDosenList);
+        
+        const container = document.getElementById("dosenListContainer");
+        if (!container) return;
+        
+        container.innerHTML = "";
+
+        if (currentDosenList.length === 0) {
+            container.innerHTML = `
+            <div class="no-dosen">
+                <i class="fas fa-user-slash"></i>
+                <h4>Tidak Ada Dosen</h4>
+                <p>Belum ada dosen yang ditambahkan ke pengajuan ini.</p>
             </div>
         `;
+        } else {
+            currentDosenList.forEach((d, index) => {
+                const item = document.createElement("div");
+                item.className = "dosen-card";
+                item.setAttribute('data-index', index);
 
+                const initial = (d.nama_dosen || "-").charAt(0).toUpperCase();
+
+                item.innerHTML = `
+                <div class="dosen-avatar">${initial}</div>
+                <div class="dosen-card-info">
+                    <div class="dosen-card-name">${d.nama_dosen || '-'}</div>
+                    <div class="dosen-card-detail">
+                        NIP: ${d.nip || '-'} | 
+                        Jabatan: ${d.jabatan || '-'} | 
+                        Divisi: ${d.divisi || '-'}
+                    </div>
+                </div>
+            `;
+
+                container.appendChild(item);
+            });
+        }
+
+        // Update total dosen
+        const totalCountElement = document.getElementById("dosenTotalCount");
+        if (totalCountElement) {
+            totalCountElement.innerText = currentDosenList.length;
+        }
+
+        // Update tombol aksi
+        const actionButtons = document.getElementById("dosenActionButtons");
+        if (actionButtons) {
+            if (currentDosenList.length > 1) {
+                actionButtons.style.display = 'flex';
+            } else {
+                actionButtons.style.display = 'none';
+            }
+        }
+    }
+
+    // ===== FUNGSI UPDATE TAMPILAN DOSEN YANG DIPILIH =====
+    function updateSelectedDosenList() {
+        const container = document.getElementById('selectedDosenList');
+        const emptyMessage = document.getElementById('emptySelectionMessage');
+        const selectedCount = document.getElementById('selectedCount');
+        const tambahCount = document.getElementById('tambahCount');
+        const clearAllBtn = document.getElementById('btnClearAll');
+        
+        if (!container) return;
+        
+        // Update count
+        if (selectedCount) selectedCount.textContent = selectedDosenList.length;
+        if (tambahCount) tambahCount.textContent = selectedDosenList.length;
+        
+        // Toggle empty message
+        if (selectedDosenList.length === 0) {
+            if (emptyMessage) emptyMessage.style.display = 'block';
+            if (clearAllBtn) clearAllBtn.style.display = 'none';
+            
+            container.innerHTML = '';
+            if (emptyMessage) container.appendChild(emptyMessage);
+            return;
+        }
+        
+        if (emptyMessage) emptyMessage.style.display = 'none';
+        if (clearAllBtn) clearAllBtn.style.display = 'inline-flex';
+        
+        // Clear container
+        container.innerHTML = '';
+        
+        // Buat list dosen
+        selectedDosenList.forEach((dosen, index) => {
+            const item = document.createElement('div');
+            item.className = 'selected-dosen-item';
+            item.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 15px;
+                background: white;
+                border: 1px solid #dee2e6;
+                border-radius: 8px;
+                margin-bottom: 8px;
+                transition: all 0.2s;
+            `;
+            
+            item.innerHTML = `
+                <div style="
+                    width: 40px;
+                    height: 40px;
+                    background: linear-gradient(135deg, #FB8C00 0%, #FF9800 100%);
+                    color: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    font-size: 16px;
+                    flex-shrink: 0;
+                ">
+                    ${(dosen.nama_dosen || '?').charAt(0).toUpperCase()}
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: 600; color: #333; font-size: 14px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${dosen.nama_dosen || '-'}
+                    </div>
+                    <div style="font-size: 12px; color: #6c757d; display: flex; flex-wrap: wrap; gap: 10px;">
+                        <span><i class="fas fa-id-card"></i> ${dosen.nip || '-'}</span>
+                        <span><i class="fas fa-briefcase"></i> ${dosen.jabatan || '-'}</span>
+                        <span><i class="fas fa-building"></i> ${dosen.divisi || '-'}</span>
+                    </div>
+                </div>
+                <button type="button" onclick="hapusDosenDariList(${index})" style="
+                    background: #dc3545;
+                    color: white;
+                    border: none;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    flex-shrink: 0;
+                    transition: background 0.2s;
+                ">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
             container.appendChild(item);
         });
     }
 
-    // Update total dosen
-    document.getElementById("dosenTotalCount").innerText = currentDosenList.length;
-
-    // Tampilkan tombol aksi jika ada lebih dari 1 dosen
-    const actionButtons = document.getElementById("dosenActionButtons");
-    if (currentDosenList.length > 1) {
-        actionButtons.style.display = 'flex';
-    } else {
-        actionButtons.style.display = 'none';
-    }
-
-    // Tampilkan modal
-    document.getElementById("dosenModal").classList.add('show');
-}
-
-// ===== MODAL TAMBAH DOSEN =====
-function bukaModalTambah() {
-    console.log('bukaModalTambah called');
-    
-    // Reset form
-    document.getElementById('inputNipTambah').value = '';
-    document.getElementById('hasilPencarian').innerHTML = '';
-
-    // Tampilkan modal
-    document.getElementById('modalTambahDosen').classList.add('show');
-
-    // Fokus ke input
-    setTimeout(() => {
-        document.getElementById('inputNipTambah').focus();
-    }, 300);
-}
-
-function tutupModalTambah() {
-    console.log('tutupModalTambah called');
-    document.getElementById('modalTambahDosen').classList.remove('show');
-}
-
-// ===== MODAL KURANG DOSEN - REVISED SIMPLE VERSION =====
-function bukaModalKurang() {
-    console.log('=== bukaModalKurang called ===');
-    console.log('currentDosenList:', currentDosenList);
-    console.log('currentSuratId:', currentSuratId);
-    
-    // Cek minimal harus ada 2 dosen
-    if (currentDosenList.length <= 1) {
-        Swal.fire({
-            icon: 'warning',
-            title: 'Tidak Dapat Mengurangi',
-            text: 'Minimal harus ada 1 dosen dalam pengajuan. Tidak dapat mengurangi dosen.',
-            confirmButtonColor: '#FB8C00'
-        });
-        return;
-    }
-
-    // Reset selection
-    selectedDosenForDeletion = null;
-
-    // Buat opsi dosen untuk dipilih (kecuali dosen pertama)
-    let options = '';
-    for (let i = 1; i < currentDosenList.length; i++) {
-        const dosen = currentDosenList[i];
-        options += `<option value="${dosen.nip}">${dosen.nama_dosen} (${dosen.nip})</option>`;
-    }
-
-    Swal.fire({
-        title: 'Kurangi Dosen',
-        html: `
-            <div style="text-align: left;">
-                <p>Pilih dosen yang akan dihapus:</p>
-                <select id="dosenSelect" class="swal2-select" style="width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px;">
-                    <option value="" disabled selected>-- Pilih Dosen --</option>
-                    ${options}
-                </select>
-                <p style="font-size: 12px; color: #666; margin-top: 10px;">
-                    <i class="fas fa-info-circle"></i> Dosen pertama tidak dapat dihapus (minimal 1 dosen harus tersisa)
-                </p>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Lanjut Hapus',
-        cancelButtonText: 'Batal',
-        confirmButtonColor: '#FB8C00',
-        cancelButtonColor: '#6c757d',
-        width: '500px',
-        showLoaderOnConfirm: false,
-        preConfirm: () => {
-            const select = document.getElementById('dosenSelect');
-            const nip = select.value;
-            const dosenName = select.options[select.selectedIndex].text;
+    // ===== FUNGSI HAPUS DOSEN DARI LIST =====
+    function hapusDosenDariList(index) {
+        if (index >= 0 && index < selectedDosenList.length) {
+            const dosen = selectedDosenList[index];
+            selectedDosenList.splice(index, 1);
             
-            if (!nip) {
-                Swal.showValidationMessage('Pilih dosen yang akan dihapus');
-                return false;
-            }
+            updateSelectedDosenList();
+            updateButtonState();
             
-            return { nip, dosenName };
+            showWarningMessage(`"${dosen.nama_dosen}" dihapus dari daftar`);
         }
-    }).then((result) => {
-        if (result.isConfirmed && result.value) {
-            const { nip, dosenName } = result.value;
-            
-            // Tampilkan konfirmasi akhir
-            Swal.fire({
-                title: 'Konfirmasi Penghapusan',
-                html: `
-                    <div style="text-align: left;">
-                        <p>Anda akan menghapus:</p>
-                        <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 10px 0; border-left: 4px solid #FB8C00;">
-                            <strong>${dosenName}</strong>
-                        </div>
-                        <p style="color: #dc3545; font-size: 14px;">
-                            <i class="fas fa-exclamation-triangle"></i> 
-                            Aksi ini tidak dapat dibatalkan.
-                        </p>
+    }
+
+    // ===== FUNGSI HAPUS SEMUA DOSEN =====
+    function hapusSemuaDosen() {
+        if (selectedDosenList.length === 0) return;
+        
+        Swal.fire({
+            title: 'Hapus Semua Dosen?',
+            html: `
+                <div style="text-align: center;">
+                    <div style="color: #dc3545; font-size: 48px; margin-bottom: 15px;">
+                        <i class="fas fa-exclamation-triangle"></i>
                     </div>
-                `,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, Hapus Sekarang',
-                cancelButtonText: 'Batal',
-                width: '500px'
-            }).then((confirmResult) => {
-                if (confirmResult.isConfirmed) {
-                    // Panggil fungsi hapus
-                    prosesHapusDosen(nip);
-                }
-            });
-        }
-    });
-     // Tutup modal dosen terlebih dahulu (penting!)
-    document.getElementById('dosenModal').classList.remove('show');
-    
-    // Tampilkan modal hapus dosen
-    showKurangDosenModal();
-}
-
-// ===== FUNGSI UTAMA TAMBAH DOSEN =====
-function prosesTambahDosen() {
-    const nip = document.getElementById('inputNipTambah').value.trim();
-    
-    console.log('prosesTambahDosen dipanggil');
-    console.log('NIP:', nip);
-    console.log('currentSuratId:', currentSuratId);
-    
-    if (!nip) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'NIP harus diisi',
-            confirmButtonColor: '#FB8C00'
-        });
-        return;
-    }
-    
-    if (!currentSuratId) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Surat ID tidak ditemukan',
-            confirmButtonColor: '#FB8C00'
-        });
-        return;
-    }
-    
-    // Cek apakah dosen sudah ada dalam list
-    const sudahAda = currentDosenList.some(dosen => dosen.nip === nip);
-    console.log('Dosen sudah ada?', sudahAda);
-    
-    if (sudahAda) {
-        Swal.fire({
+                    <p>Anda akan menghapus <strong>${selectedDosenList.length} dosen</strong> dari daftar.</p>
+                    <p style="font-size: 14px; color: #6c757d;">Tindakan ini tidak dapat dibatalkan.</p>
+                </div>
+            `,
             icon: 'warning',
-            title: 'Dosen Sudah Ada',
-            text: 'Dosen dengan NIP ini sudah ada dalam pengajuan',
-            confirmButtonColor: '#FB8C00'
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Hapus Semua',
+            cancelButtonText: 'Batal',
+            width: 500
+        }).then((result) => {
+            if (result.isConfirmed) {
+                selectedDosenList = [];
+                updateSelectedDosenList();
+                updateButtonState();
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Semua dosen telah dihapus dari daftar',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
         });
-        return;
     }
-    
-    // Tampilkan loading
-    Swal.fire({
-        title: 'Memproses...',
-        text: 'Sedang menambahkan dosen',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
-    // Kirim request ke server
-    const formData = new FormData();
-    formData.append('surat_id', currentSuratId);
-    formData.append('nip', nip);
-    
-    console.log('Mengirim request ke server...');
-    
-    fetch('<?= site_url("surat/tambah_dosen") ?>', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        return response.json();
-    })
-    .then(data => {
-        console.log('Response data:', data);
+
+    // ===== FUNGSI UPDATE STATE TOMBOL =====
+    function updateButtonState() {
+        const btnSubmit = document.getElementById('btnTambahSubmit');
+        if (!btnSubmit) return;
         
-        if (data.success) {
-            // Tutup modal tambah
-            tutupModalTambah();
-            
-            // Tutup modal dosen utama
-            document.getElementById("dosenModal").classList.remove('show');
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: data.message,
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                // Refresh halaman
-                location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: data.message || 'Terjadi kesalahan',
-                confirmButtonColor: '#FB8C00'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Terjadi kesalahan saat menambahkan dosen: ' + error.message,
-            confirmButtonColor: '#FB8C00'
-        });
-    });
-}
-
-// ===== FUNGSI UTAMA HAPUS DOSEN =====
-function prosesHapusDosen(nip) {
-    console.log('=== prosesHapusDosen called ===');
-    console.log('NIP:', nip);
-    console.log('currentSuratId:', currentSuratId);
-    
-    if (!nip) {
-        console.error('NIP is null/undefined');
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'NIP tidak valid',
-            confirmButtonColor: '#FB8C00'
-        });
-        return;
-    }
-    
-    if (!currentSuratId) {
-        console.error('currentSuratId is null/undefined');
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Surat ID tidak ditemukan',
-            confirmButtonColor: '#FB8C00'
-        });
-        return;
-    }
-    
-    // Tampilkan loading
-    Swal.fire({
-        title: 'Memproses...',
-        text: 'Sedang menghapus dosen',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-    
-    // Kirim request ke server
-    const formData = new FormData();
-    formData.append('surat_id', currentSuratId);
-    formData.append('nip', nip);
-    
-    console.log('Mengirim request hapus ke server...');
-    console.log('URL:', '<?= site_url("surat/hapus_dosen") ?>');
-    console.log('Data:', { surat_id: currentSuratId, nip: nip });
-    
-    fetch('<?= site_url("surat/hapus_dosen") ?>', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        console.log('Response status:', response.status);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Response data:', data);
+        const isValid = selectedDosenList.length > 0;
         
-        if (data.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: data.message,
-                timer: 2000,
-                showConfirmButton: false
-            }).then(() => {
-                // Refresh halaman untuk memperbarui tabel
-                console.log('Reloading page...');
-                location.reload();
-            });
+        btnSubmit.disabled = !isValid;
+        
+        if (isValid) {
+            btnSubmit.style.background = 'linear-gradient(135deg, #FB8C00 0%, #FF9800 100%)';
         } else {
-            console.error('Server returned error:', data.message);
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal',
-                text: data.message || 'Terjadi kesalahan',
-                confirmButtonColor: '#FB8C00'
-            });
+            btnSubmit.style.background = '#6c757d';
         }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Terjadi kesalahan saat menghapus dosen: ' + error.message,
-            confirmButtonColor: '#FB8C00'
-        });
-    });
-}
+    }
 
-// ===== FUNGSI BANTUAN =====
-function setupNipInputListener() {
-    const nipInput = document.getElementById('inputNipTambah');
-    if (nipInput) {
-        nipInput.addEventListener('input', function(e) {
-            const nip = e.target.value.trim();
+    // ===== FUNGSI TAMPILKAN PESAN =====
+    function showSuccessMessage(message) {
+        const resultDiv = document.getElementById('hasilPencarian');
+        if (!resultDiv) return;
+        
+        resultDiv.innerHTML = `
+            <div class="alert alert-success alert-dismissible fade show" style="border-radius: 8px; margin: 0;">
+                <i class="fas fa-check-circle"></i> ${message}
+                <button type="button" class="close" onclick="this.parentElement.style.display='none'">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            if (resultDiv.innerHTML.includes('alert-success')) {
+                resultDiv.innerHTML = '';
+            }
+        }, 3000);
+    }
 
-            if (nip.length < 3) {
-                document.getElementById('hasilPencarian').innerHTML = '';
+    function showWarningMessage(message) {
+        const resultDiv = document.getElementById('hasilPencarian');
+        if (!resultDiv) return;
+        
+        resultDiv.innerHTML = `
+            <div class="alert alert-warning alert-dismissible fade show" style="border-radius: 8px; margin: 0;">
+                <i class="fas fa-exclamation-triangle"></i> ${message}
+                <button type="button" class="close" onclick="this.parentElement.style.display='none'">
+                    <span>&times;</span>
+                </button>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            if (resultDiv.innerHTML.includes('alert-warning')) {
+                resultDiv.innerHTML = '';
+            }
+        }, 3000);
+    }
+
+    // ===== AUTCOMPLETE FUNGSI UTAMA =====
+    function setupAutocomplete() {
+        const input = document.getElementById('inputNipTambah');
+        const resultsContainer = document.getElementById('autocompleteResults');
+        
+        if (!input || !resultsContainer) {
+            console.warn('Elemen autocomplete tidak ditemukan');
+            return;
+        }
+
+        let selectedIndex = -1;
+        let currentResults = [];
+
+        // Event listener untuk input
+        input.addEventListener('input', function(e) {
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                resultsContainer.style.display = 'none';
                 return;
             }
 
-            // Cari di database
-            fetch(`<?= site_url('surat/cari_dosen') ?>?q=${encodeURIComponent(nip)}`)
+            // Fetch data dari server
+            fetch(`<?= site_url('surat/autocomplete_dosen') ?>?q=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    const resultDiv = document.getElementById('hasilPencarian');
-
-                    if (data.success && data.dosen) {
-                        resultDiv.innerHTML = `
-                        <div class="search-result">
-                            <div class="found">✓ Dosen ditemukan:</div>
-                            <div style="margin-top: 5px;">
-                                <strong>${data.dosen.nama_dosen}</strong><br>
-                                NIP: ${data.dosen.nip}<br>
-                                Jabatan: ${data.dosen.jabatan}<br>
-                                Divisi: ${data.dosen.divisi}
-                            </div>
-                        </div>
-                    `;
+                    if (data.success && data.results && data.results.length > 0) {
+                        currentResults = data.results;
+                        displayAutocompleteResults(data.results);
                     } else {
-                        resultDiv.innerHTML = `
-                        <div class="search-result">
-                            <div class="not-found">✗ Dosen tidak ditemukan</div>
-                            <div style="margin-top: 5px; font-size: 12px;">
-                                Pastikan NIP yang dimasukkan benar. Dosen harus terdaftar di database.
+                        resultsContainer.style.display = 'none';
+                        currentResults = [];
+                        
+                        // Tampilkan pesan tidak ditemukan
+                        resultsContainer.innerHTML = `
+                            <div style="padding: 15px; text-align: center; color: #6c757d;">
+                                <i class="fas fa-search"></i>
+                                <div style="margin-top: 5px;">Tidak ditemukan dosen yang cocok</div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                        resultsContainer.style.display = 'block';
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('Autocomplete error:', error);
+                    resultsContainer.style.display = 'none';
                 });
         });
-        console.log('NIP input listener attached');
-    }
-}
 
-function updateDosenListDisplay() {
-    console.log('updateDosenListDisplay called');
-    console.log('currentDosenList:', currentDosenList);
-    
-    const container = document.getElementById("dosenListContainer");
-    container.innerHTML = "";
+        // Display results
+        function displayAutocompleteResults(results) {
+            resultsContainer.innerHTML = '';
+            
+            // Filter out dosen yang sudah dipilih
+            const filteredResults = results.filter(dosen => 
+                !selectedDosenList.some(selected => selected.nip === dosen.nip)
+            );
+            
+            if (filteredResults.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div style="padding: 15px; text-align: center; color: #6c757d;">
+                        <i class="fas fa-check-circle"></i>
+                        <div style="margin-top: 5px;">Semua dosen yang cocok sudah dipilih</div>
+                    </div>
+                `;
+                resultsContainer.style.display = 'block';
+                return;
+            }
+            
+            filteredResults.forEach((dosen, index) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.style.cssText = 'padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;';
+                item.dataset.index = index;
+                
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 32px; height: 32px; background: #FB8C00; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                            ${(dosen.nama_dosen || '?').charAt(0).toUpperCase()}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #333;">${dosen.nama_dosen || '-'}</div>
+                            <div style="font-size: 12px; color: #666;">
+                                NIP: ${dosen.nip || '-'} | 
+                                ${dosen.jabatan || '-'}
+                            </div>
+                        </div>
+                        <div style="color: #28a745; font-size: 12px;">
+                            <i class="fas fa-plus-circle"></i> Pilih
+                        </div>
+                    </div>
+                `;
+                
+                // Hover effect
+                item.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f8f9fa';
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = '';
+                });
+                
+                // Click handler
+                item.addEventListener('click', function() {
+                    selectDosenFromAutocomplete(dosen);
+                    input.value = '';
+                    input.focus();
+                });
+                
+                resultsContainer.appendChild(item);
+            });
+            
+            resultsContainer.style.display = 'block';
+        }
 
-    if (currentDosenList.length === 0) {
-        container.innerHTML = `
-        <div class="no-dosen">
-            <i class="fas fa-user-slash"></i>
-            <h4>Tidak Ada Dosen</h4>
-            <p>Belum ada dosen yang ditambahkan ke pengajuan ini.</p>
-        </div>
-    `;
-    } else {
-        currentDosenList.forEach((d, index) => {
-            const item = document.createElement("div");
-            item.className = "dosen-card";
-            item.setAttribute('data-index', index);
+        // Select dosen dari autocomplete
+        function selectDosenFromAutocomplete(dosen) {
+            // Cek apakah sudah mencapai batas maksimum
+            if (selectedDosenList.length >= 10) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Batas Maksimum',
+                    text: 'Maksimal 10 dosen dapat ditambahkan dalam satu kali proses.',
+                    confirmButtonColor: '#FB8C00'
+                });
+                return;
+            }
+            
+            // Cek apakah dosen sudah dipilih
+            if (selectedDosenList.some(d => d.nip === dosen.nip)) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Dosen Sudah Dipilih',
+                    text: 'Dosen ini sudah ada dalam daftar yang akan ditambahkan.',
+                    confirmButtonColor: '#FB8C00'
+                });
+                return;
+            }
+            
+            console.log('Dosen dipilih:', dosen);
+            
+            // Tambahkan ke array
+            selectedDosenList.push(dosen);
+            
+            // Update tampilan
+            updateSelectedDosenList();
+            updateButtonState();
+            
+            // Sembunyikan hasil autocomplete
+            resultsContainer.style.display = 'none';
+            
+            // Tampilkan pesan sukses
+            showSuccessMessage(`"${dosen.nama_dosen}" ditambahkan ke daftar`);
+        }
 
-            const initial = (d.nama_dosen || "-").charAt(0).toUpperCase();
-
-            item.innerHTML = `
-            <div class="dosen-avatar">${initial}</div>
-            <div class="dosen-card-info">
-                <div class="dosen-card-name">${d.nama_dosen || '-'}</div>
-                <div class="dosen-card-detail">
-                    NIP: ${d.nip || '-'} | 
-                    Jabatan: ${d.jabatan || '-'} | 
-                    Divisi: ${d.divisi || '-'}
-                </div>
-            </div>
-        `;
-
-            container.appendChild(item);
+        // Keyboard navigation
+        input.addEventListener('keydown', function(e) {
+            if (!currentResults.length) return;
+            
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, currentResults.length - 1);
+                    highlightSelected();
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    highlightSelected();
+                    break;
+                    
+                case 'Enter':
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && selectedIndex < currentResults.length) {
+                        selectDosenFromAutocomplete(currentResults[selectedIndex]);
+                        input.value = '';
+                        selectedIndex = -1;
+                    }
+                    break;
+                    
+                case 'Escape':
+                    resultsContainer.style.display = 'none';
+                    selectedIndex = -1;
+                    break;
+            }
         });
+
+        function highlightSelected() {
+            const items = resultsContainer.querySelectorAll('.autocomplete-item');
+            
+            items.forEach((item, index) => {
+                if (index === selectedIndex) {
+                    item.style.backgroundColor = '#e8f4ff';
+                    item.style.borderLeft = '3px solid #FB8C00';
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.style.backgroundColor = '';
+                    item.style.borderLeft = 'none';
+                }
+            });
+        }
+
+        // Close autocomplete when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !resultsContainer.contains(e.target)) {
+                resultsContainer.style.display = 'none';
+                selectedIndex = -1;
+            }
+        });
+        
+        console.log('Autocomplete multiple initialized');
     }
 
-    // Update total dosen
-    document.getElementById("dosenTotalCount").innerText = currentDosenList.length;
-
-    // Update tombol aksi
-    const actionButtons = document.getElementById("dosenActionButtons");
-    if (currentDosenList.length > 1) {
-        actionButtons.style.display = 'flex';
-    } else {
-        actionButtons.style.display = 'none';
-    }
-}
-
-// ===== EVENT LISTENERS =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== DOMContentLoaded - Initializing event listeners ===');
-    
-    // Close buttons untuk semua modal
-    document.getElementById("closeDosenModal")?.addEventListener('click', function() {
-        document.getElementById("dosenModal").classList.remove('show');
-    });
-    
-    document.getElementById("closeTambahModal")?.addEventListener('click', tutupModalTambah);
-    
-    // Tombol aksi di modal dosen
-    document.getElementById('btnTambahDosen')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        bukaModalTambah();
-    });
-    
-    document.getElementById('btnKurangDosen')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        bukaModalKurang();
-    });
-
-    // Setup NIP input listener
-    setupNipInputListener();
-
-    // Close modal when clicking outside
-    window.addEventListener('click', function(e) {
-        if (e.target.id === 'dosenModal') {
-            document.getElementById('dosenModal').classList.remove('show');
-        }
-        if (e.target.id === 'modalTambahDosen') {
-            tutupModalTambah();
-        }
-    });
-
-    // Enter key untuk input tambah dosen
-    document.getElementById('inputNipTambah')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+    // ===== EVENT LISTENERS INITIALIZATION =====
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== DOMContentLoaded - Initializing event listeners ===');
+        
+        // Close buttons untuk semua modal
+        document.getElementById("closeDosenModal")?.addEventListener('click', function() {
+            document.getElementById("dosenModal").classList.remove('show');
+        });
+        
+        document.getElementById("closeTambahModal")?.addEventListener('click', tutupModalTambah);
+        
+        // Tombol aksi di modal dosen
+        document.getElementById('btnTambahDosen')?.addEventListener('click', function(e) {
             e.preventDefault();
-            prosesTambahDosen();
-        }
+            e.stopPropagation();
+            console.log('Tombol Tambah Dosen diklik');
+            bukaModalTambah();
+        });
+        
+        document.getElementById('btnKurangDosen')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Tombol Kurangi Dosen diklik');
+            bukaModalKurang();
+        });
+
+        // Setup autocomplete
+        setTimeout(() => {
+            setupAutocomplete();
+            console.log('Autocomplete initialized');
+        }, 500);
+
+        // Close modal ketika klik di luar
+        window.addEventListener('click', function(e) {
+            if (e.target.id === 'dosenModal') {
+                document.getElementById('dosenModal').classList.remove('show');
+            }
+            if (e.target.id === 'modalTambahDosen') {
+                tutupModalTambah();
+            }
+            if (e.target.id === 'modalKurangDosen') {
+                tutupModalKurang();
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // ESC untuk close modal
+            if (e.key === 'Escape') {
+                if (document.getElementById('modalTambahDosen')?.classList.contains('show')) {
+                    tutupModalTambah();
+                }
+                if (document.getElementById('modalKurangDosen')?.classList.contains('show')) {
+                    tutupModalKurang();
+                }
+                if (document.getElementById('dosenModal')?.classList.contains('show')) {
+                    document.getElementById('dosenModal').classList.remove('show');
+                }
+            }
+        });
+        
+        console.log('=== Event listeners initialization complete ===');
     });
-    
-    console.log('=== Event listeners initialization complete ===');
-});
+
         // Tampilkan modal dan load data
         function showStatusModal(suratId) {
             const modal = document.getElementById('statusModal');

@@ -1589,95 +1589,41 @@ public function hapus_dosen()
     echo json_encode($response);
     exit;
 }
-/* ===========================================
-   HAPUS BANYAK DOSEN SEKALIGUS (BATCH)
-============================================*/
-public function hapus_banyak_dosen()
-{
-    header('Content-Type: application/json');
-    
-    $surat_id = $this->input->post('surat_id');
-    $nip_array = $this->input->post('nip_array');
-    
-    if (!$surat_id || !$nip_array || !is_array($nip_array)) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Data tidak lengkap'
-        ]);
-        return;
-    }
-    
-    // Mulai transaction
-    $this->db->trans_start();
-    
-    try {
-        // Ambil data surat dengan lock
-        $this->db->where('id', $surat_id);
-        $this->db->set_lock_for_update();
-        $surat = $this->db->get('surat')->row();
+ public function hapus_banyak_dosen() {
+        $surat_id = $this->input->post('surat_id');
+        $nip_list = json_decode($this->input->post('nip_list'), true);
         
-        if (!$surat) {
-            throw new Exception('Surat tidak ditemukan');
+        if (!$surat_id || !$nip_list) {
+            echo json_encode(['success' => false, 'message' => 'Data tidak valid']);
+            return;
         }
         
-        // Decode NIP yang sudah ada
-        $current_nip_array = json_decode($surat->nip, true);
-        if (!is_array($current_nip_array)) {
-            $current_nip_array = [];
-        }
+        $this->load->model('surat_model');
+        $success = true;
+        $deleted_count = 0;
         
-        // Validasi setiap NIP yang akan dihapus
-        $valid_nip_to_delete = [];
-        foreach ($nip_array as $nip) {
-            if (in_array($nip, $current_nip_array)) {
-                $valid_nip_to_delete[] = $nip;
+        foreach ($nip_list as $nip) {
+            if ($this->surat_model->hapus_dosen($surat_id, $nip)) {
+                $deleted_count++;
+            } else {
+                $success = false;
             }
         }
         
-        // Cek minimal 1 dosen harus tersisa
-        $remaining_count = count($current_nip_array) - count($valid_nip_to_delete);
-        if ($remaining_count < 1) {
-            throw new Exception('Tidak dapat menghapus. Minimal harus ada 1 dosen tersisa dalam pengajuan.');
+        if ($success) {
+            // Ambil data dosen yang tersisa
+            $remaining_dosen = $this->surat_model->get_dosen_by_surat_id($surat_id);
+            
+            echo json_encode([
+                'success' => true,
+                'message' => $deleted_count . ' dosen berhasil dihapus',
+                'deleted_count' => $deleted_count,
+                'remaining_dosen' => $remaining_dosen
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Gagal menghapus beberapa dosen']);
         }
-        
-        // Filter NIP array baru
-        $new_nip_array = array_values(array_filter($current_nip_array, function($nip) use ($valid_nip_to_delete) {
-            return !in_array($nip, $valid_nip_to_delete);
-        }));
-        
-        // Update database
-        $update_data = [
-            'nip' => json_encode($new_nip_array),
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-        
-        $this->db->where('id', $surat_id);
-        $result = $this->db->update('surat', $update_data);
-        
-        if (!$result) {
-            throw new Exception('Gagal memperbarui database');
-        }
-        
-        // Commit transaction
-        $this->db->trans_commit();
-        
-        echo json_encode([
-            'success' => true,
-            'message' => 'Berhasil menghapus ' . count($valid_nip_to_delete) . ' dosen',
-            'deleted_count' => count($valid_nip_to_delete),
-            'total_dosen' => count($new_nip_array),
-            'failed_nip' => array_diff($nip_array, $valid_nip_to_delete)
-        ]);
-        
-    } catch (Exception $e) {
-        $this->db->trans_rollback();
-        
-        echo json_encode([
-            'success' => false,
-            'message' => $e->getMessage()
-        ]);
     }
-}
 /* ===========================================
    CARI DOSEN UNTUK AUTOCOMPLETE (AJAX)
 ============================================*/
@@ -1786,5 +1732,199 @@ public function cek_surat($id)
             'dosen_data' => $this->get_dosen_by_nip($surat->nip)
         ]
     ]);
+}
+/* ===========================================
+   AUTOCOMPLETE DOSEN UNTUK MODAL TAMBAH
+============================================*/
+public function autocomplete_dosen()
+{
+    header('Content-Type: application/json');
+    
+    $query = $this->input->get('q');
+    
+    if (!$query || strlen($query) < 2) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Kata kunci terlalu pendek',
+            'results' => []
+        ]);
+        return;
+    }
+    
+    try {
+        // Mencari di database dengan multiple fields
+        $this->db->select('nip, nama_dosen, jabatan, divisi');
+        $this->db->from('list_dosen');
+        
+        // Search in multiple columns
+        $this->db->group_start();
+        $this->db->like('nip', $query);
+        $this->db->or_like('nama_dosen', $query);
+        $this->db->or_like('jabatan', $query);
+        $this->db->or_like('divisi', $query);
+        $this->db->group_end();
+        
+        $this->db->limit(10);
+        $this->db->order_by('nama_dosen', 'ASC');
+        
+        $result = $this->db->get();
+        
+        if ($result->num_rows() > 0) {
+            $dosen_list = $result->result_array();
+            
+            // Format results for autocomplete
+            $results = array_map(function($dosen) {
+                return [
+                    'nip' => $dosen['nip'] ?? '',
+                    'nama_dosen' => $dosen['nama_dosen'] ?? '',
+                    'jabatan' => $dosen['jabatan'] ?? '',
+                    'divisi' => $dosen['divisi'] ?? '',
+                    'display_text' => $dosen['nama_dosen'] . ' (' . $dosen['nip'] . ')'
+                ];
+            }, $dosen_list);
+            
+            echo json_encode([
+                'success' => true,
+                'results' => $results,
+                'count' => count($results)
+            ]);
+        } else {
+            echo json_encode([
+                'success' => true,
+                'results' => [],
+                'message' => 'Tidak ditemukan dosen yang cocok'
+            ]);
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Autocomplete dosen error: ' . $e->getMessage());
+        echo json_encode([
+            'success' => false,
+            'message' => 'Terjadi kesalahan saat mencari dosen',
+            'results' => []
+        ]);
+    }
+}
+/* ===========================================
+   TAMBAH BANYAK DOSEN SEKALIGUS (BATCH)
+============================================*/
+public function tambah_banyak_dosen()
+{
+    header('Content-Type: application/json');
+    
+    // Log untuk debugging
+    log_message('debug', 'tambah_banyak_dosen called');
+    log_message('debug', 'POST data: ' . print_r($this->input->post(), true));
+    
+    $surat_id = $this->input->post('surat_id');
+    $nip_list_json = $this->input->post('nip_list');
+    
+    if (!$surat_id || !$nip_list_json) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Data tidak lengkap'
+        ]);
+        return;
+    }
+    
+    // Decode NIP list
+    $nip_list = json_decode($nip_list_json, true);
+    if (!is_array($nip_list) || empty($nip_list)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Daftar NIP tidak valid'
+        ]);
+        return;
+    }
+    
+    // Ambil data surat
+    $surat = $this->Surat_model->get_by_id($surat_id);
+    if (!$surat) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Surat tidak ditemukan'
+        ]);
+        return;
+    }
+    
+    // Decode NIP yang sudah ada
+    $existing_nips = json_decode($surat->nip, true);
+    if (!is_array($existing_nips)) {
+        $existing_nips = [];
+    }
+    
+    // Filter NIP yang belum ada
+    $new_nips = array_filter($nip_list, function($nip) use ($existing_nips) {
+        return !in_array($nip, $existing_nips);
+    });
+    
+    // Validasi NIP di database
+    $valid_nips = [];
+    $invalid_nips = [];
+    
+    foreach ($new_nips as $nip) {
+        // Cek apakah NIP valid di database
+        $this->db->where('nip', $nip);
+        $dosen = $this->db->get('list_dosen')->row();
+        
+        if ($dosen) {
+            $valid_nips[] = $nip;
+        } else {
+            $invalid_nips[] = $nip;
+        }
+    }
+    
+    // Jika tidak ada NIP valid
+    if (empty($valid_nips)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Tidak ada NIP yang valid untuk ditambahkan',
+            'invalid_nips' => $invalid_nips
+        ]);
+        return;
+    }
+    
+    // Gabungkan NIP lama dengan baru
+    $final_nips = array_merge($existing_nips, $valid_nips);
+    
+    // Update database
+    $update_data = [
+        'nip' => json_encode($final_nips),
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+    
+    $this->db->where('id', $surat_id);
+    $result = $this->db->update('surat', $update_data);
+    
+    if ($result) {
+        // Get dosen data untuk response
+        $added_dosen = [];
+        foreach ($valid_nips as $nip) {
+            $this->db->where('nip', $nip);
+            $dosen = $this->db->get('list_dosen')->row();
+            if ($dosen) {
+                $added_dosen[] = [
+                    'nip' => $dosen->nip,
+                    'nama_dosen' => $dosen->nama_dosen,
+                    'jabatan' => $dosen->jabatan,
+                    'divisi' => $dosen->divisi
+                ];
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Berhasil menambahkan ' . count($valid_nips) . ' dosen',
+            'added_count' => count($valid_nips),
+            'added_dosen' => $added_dosen,
+            'invalid_nips' => $invalid_nips,
+            'total_dosen' => count($final_nips)
+        ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Gagal memperbarui database'
+        ]);
+    }
 }
 }
