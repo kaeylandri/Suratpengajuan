@@ -442,6 +442,33 @@
         .search-box{min-width:100%}
         .filter-select{width:100%}
     }
+
+    /* Ensure buttons are clickable */
+#tableBody button,
+#tableBody a.btn-warning {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+#tableBody tr.clickable-row {
+    position: relative;
+    z-index: 1;
+}
+
+/* Disposisi elements */
+.disposisi-card {
+    position: relative;
+    z-index: 20;
+}
+
+.disposisi-card select,
+.disposisi-card textarea,
+.disposisi-card button {
+    pointer-events: auto !important;
+    z-index: 21;
+}
 </style>
 </head>
 <body>
@@ -612,7 +639,7 @@
                             <!-- Tombol Tentukan Disposisi -->
                             <button 
                                 class="btn-disposisi" 
-                                onclick="openPinModal(<?= $s->id ?>)"
+                                onclick="openPinModal(<?= $s->id ?>, event)"
                             >
                                 <i class="fas fa-shuffle"></i> Tentukan
                             </button>
@@ -622,7 +649,7 @@
                                 <label class="label-disposisi">Pilih Disposisi</label>
                                 <select id="disposisiSelect<?= $s->id ?>"
                                         class="select-disposisi"
-                                        onchange="onDisposisiChange(<?= $s->id ?>)">
+                                        onchange="onDisposisiChange(<?= $s->id ?>, event)">
                                     <option value="">-- Pilih Disposisi --</option>
                                     <option value="Lanjut Proses ✔">Lanjut Proses</option>
                                     <option value="Hold/Pending">Hold/Pending</option>
@@ -642,7 +669,7 @@
                                 </textarea>
 
                                 <button class="btn-disposisi" 
-                                        onclick="saveDisposisi(<?= $s->id ?>)" 
+                                        onclick="saveDisposisi(<?= $s->id ?>, event)" 
                                         id="btnSaveDisposisi<?= $s->id ?>"
                                         style="display:none; width: 100%; margin-top: 10px;">
                                     Simpan
@@ -660,29 +687,38 @@
                         <td>
                             <div style="display:flex;gap:6px">
                                 <!-- Tombol Lihat Eviden -->
-                                <button class="btn btn-eviden" title="Lihat Eviden" onclick="showEvidenModal(<?= $s->id; ?>)">
+                                <button class="btn btn-eviden" 
+                                        title="Lihat Eviden" 
+                                        onclick="event.stopPropagation(); showEvidenModal(<?= $s->id; ?>, event)">
                                     <i class="fas fa-file-image"></i>
                                 </button>
                                 
-                                <!-- Tombol Lihat Detail -->
-                                <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?>)" title="Lihat Detail">
+                                <!-- Tombol Lihat Surat Tugas -->
+                                <button class="btn btn-detail" 
+                                        onclick="event.stopPropagation(); showSuratTugasFromButton(<?= $s->id ?>, event)" 
+                                        title="Lihat Surat Tugas">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
                                 
                                 <?php if($status == 'disetujui KK' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
-                                    <button class="btn btn-approve" onclick="showApproveModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan ?? '')) ?>', 'semua')" title="Setujui & Teruskan ke Dekan">
+                                    <button class="btn btn-approve" 
+                                            onclick="event.stopPropagation(); showApproveModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan ?? '')) ?>', 'semua', event)" 
+                                            title="Setujui & Teruskan ke Dekan">
                                         <i class="fa-solid fa-check"></i>
                                     </button>
-                                    <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan ?? '')) ?>', 'semua')" title="Tolak Pengajuan">
+                                    <button class="btn btn-reject" 
+                                            onclick="event.stopPropagation(); showRejectModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan ?? '')) ?>', 'semua', event)" 
+                                            title="Tolak Pengajuan">
                                         <i class="fa-solid fa-times"></i>
                                     </button>
                                 <?php endif; ?>
                                 
                                 <?php if($status == 'ditolak dekan' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
                                     <a href="<?= site_url('sekretariat/edit_surat/' . $s->id) ?>" 
-                                       class="btn btn-warning" 
-                                       title="Edit & Ajukan Ulang ke Dekan"
-                                       style="background:#ffc107;color:#000;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;text-decoration:none;">
+                                    class="btn btn-warning" 
+                                    title="Edit & Ajukan Ulang ke Dekan"
+                                    onclick="event.stopPropagation(); return true;"
+                                    style="background:#ffc107;color:#000;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;text-decoration:none;">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 <?php endif; ?>
@@ -740,7 +776,7 @@
     <div class="preview-content">
         <div class="preview-header">
             <h3 id="previewTitle">Preview File</h3>
-            <button class="preview-close" onclick="closePreviewModal()">&times;</button>
+            <button class="preview-close" onclick="closePreviewModal(event)">&times;</button>
         </div>
         <div class="preview-body" id="previewBody">
             <!-- Preview content akan diisi oleh JavaScript -->
@@ -753,7 +789,7 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
-            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
+            <button class="close-modal" onclick="closeModal('detailModal', event)">&times;</button>
         </div>
         <div class="detail-content" id="detailContent">
             <!-- Content akan diisi oleh JavaScript -->
@@ -766,7 +802,7 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-image"></i> File Evidence</h3>
-            <button class="close-modal" onclick="closeModal('evidenModal')">&times;</button>
+            <button class="close-modal" onclick="closeModal('evidenModal', event)">&times;</button>
         </div>
         <div class="detail-content" id="evidenContent">
             <!-- Content akan diisi oleh JavaScript -->
@@ -779,7 +815,7 @@
     <div class="approve-modal-content" onclick="event.stopPropagation()">
         <div class="approve-modal-header">
             <h3><i class="fa-solid fa-check-circle"></i> Setujui Pengajuan</h3>
-            <button class="close-modal" onclick="closeModal('approveModal')">&times;</button>
+            <button class="close-modal" onclick="closeModal('approveModal', event)">&times;</button>
         </div>
         <div class="approve-modal-body">
             <div class="approve-info-box">
@@ -815,7 +851,7 @@
                 </div>
 
                 <div class="approve-modal-actions">
-                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
+                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal', event)">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
                     <button type="submit" class="approve-btn approve-btn-submit">
@@ -832,7 +868,7 @@
     <div class="reject-modal-content" onclick="event.stopPropagation()">
         <div class="reject-modal-header">
             <h3><i class="fa-solid fa-ban"></i> Tolak Pengajuan</h3>
-            <button class="close-modal" onclick="closeModal('rejectModal')">&times;</button>
+            <button class="close-modal" onclick="closeModal('rejectModal', event)">&times;</button>
         </div>
         <div class="reject-modal-body">
             <div class="reject-info-box">
@@ -858,10 +894,10 @@
             </div>
 
             <div class="approve-modal-actions">
-                <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('rejectModal')">
+                <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('rejectModal', event)">
                     <i class="fa-solid fa-times"></i> Batal
                 </button>
-                <button type="button" class="approve-btn modal-btn-reject" onclick="confirmReject()">
+                <button type="button" class="approve-btn modal-btn-reject" onclick="confirmReject(event)">
                     <i class="fa-solid fa-paper-plane"></i> Kirim Penolakan
                 </button>
             </div>
@@ -912,12 +948,14 @@ let currentPage = 'semua';
 let selectedSurat = null;
 
 // ============================================
-// FUNGSI DISPOSISI (SAMA DENGAN DASHBOARD)
+// FUNGSI DISPOSISI
 // ============================================
 
-function openPinModal(id) {
+function openPinModal(id, event) {
+    if (event) event.stopPropagation();
     selectedSurat = id;
     document.getElementById("pinModal").style.display = "flex";
+    document.getElementById("pinInput").focus();
 }
 
 function closePinModal() {
@@ -930,44 +968,63 @@ function checkPin() {
 
     if (pin !== "1234") {
         alert("PIN salah!");
+        document.getElementById("pinInput").value = "";
+        document.getElementById("pinInput").focus();
         return;
     }
 
-    document.getElementById("disposisiBox" + selectedSurat).style.display = "block";
+    if (document.getElementById("disposisiBox" + selectedSurat)) {
+        document.getElementById("disposisiBox" + selectedSurat).style.display = "block";
+    }
     closePinModal();
 }
 
-function onDisposisiChange(id) {
+function onDisposisiChange(id, event) {
+    if (event) event.stopPropagation();
     let val = document.getElementById("disposisiSelect" + id).value;
     let catatanLabel = document.getElementById("labelCatatan" + id);
     let catatanTextarea = document.getElementById("catatanDisposisi" + id);
     let btnSave = document.getElementById("btnSaveDisposisi" + id);
 
-    btnSave.style.display = "none";
-    catatanLabel.style.display = "none";
-    catatanTextarea.style.display = "none";
-    catatanTextarea.value = "";
+    if (btnSave) btnSave.style.display = "none";
+    if (catatanLabel) catatanLabel.style.display = "none";
+    if (catatanTextarea) {
+        catatanTextarea.style.display = "none";
+        catatanTextarea.value = "";
+    }
     
     if (val === "Hold/Pending" || val === "Batal") {
-        catatanLabel.style.display = "block";
-        catatanTextarea.style.display = "block";
-        btnSave.style.display = "block";
-        if (val === "Hold/Pending") {
-            catatanTextarea.placeholder = "Berikan alasan mengapa perlu ditahan/ditunda...";
-        } else if (val === "Batal") {
-            catatanTextarea.placeholder = "Berikan alasan pembatalan...";
+        if (catatanLabel) catatanLabel.style.display = "block";
+        if (catatanTextarea) {
+            catatanTextarea.style.display = "block";
+            if (val === "Hold/Pending") {
+                catatanTextarea.placeholder = "Berikan alasan mengapa perlu ditahan/ditunda...";
+            } else if (val === "Batal") {
+                catatanTextarea.placeholder = "Berikan alasan pembatalan...";
+            }
         }
+        if (btnSave) btnSave.style.display = "block";
         setTimeout(() => {
-            catatanTextarea.focus();
+            if (catatanTextarea) catatanTextarea.focus();
         }, 100);
     } else if (val === "Lanjut Proses ✔") {
-        btnSave.style.display = "block";
+        if (btnSave) btnSave.style.display = "block";
     }
 }
 
-function saveDisposisi(id) {
-    let disposisi = document.getElementById("disposisiSelect" + id).value;
-    let catatan = document.getElementById("catatanDisposisi" + id).value;
+function saveDisposisi(id, event) {
+    if (event) event.stopPropagation();
+    
+    let disposisiSelect = document.getElementById("disposisiSelect" + id);
+    let catatanTextarea = document.getElementById("catatanDisposisi" + id);
+    
+    if (!disposisiSelect) {
+        alert("Element disposisi tidak ditemukan!");
+        return;
+    }
+    
+    let disposisi = disposisiSelect.value;
+    let catatan = catatanTextarea ? catatanTextarea.value : "";
 
     if (!disposisi) {
         alert("Pilih disposisi dulu!");
@@ -976,32 +1033,55 @@ function saveDisposisi(id) {
 
     if ((disposisi === "Hold/Pending" || disposisi === "Batal") && catatan === "") {
         alert("Wajib Mengisi Catatan!");
+        if (catatanTextarea) catatanTextarea.focus();
         return;
     }
 
     fetch("<?= base_url('sekretariat/set_disposisi') ?>", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+        },
         body: JSON.stringify({
             id: id,
             disposisi: disposisi,
-            catatan: catatan
+            catatan: catatan,
+            <?= $this->security->get_csrf_token_name() ?>: "<?= $this->security->get_csrf_hash() ?>"
         })
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return res.json();
+    })
     .then(data => {
-        alert("Disposisi tersimpan!");
-        location.reload();
+        if (data.success) {
+            alert("Disposisi tersimpan!");
+            location.reload();
+        } else {
+            alert(data.message || "Gagal menyimpan disposisi");
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("Terjadi kesalahan saat menyimpan disposisi");
     });
 }
 
 // ============================================
-// FUNGSI LAINNYA (SAMA DENGAN DASHBOARD)
+// FUNGSI LAINNYA
 // ============================================
 
 function getSuratDetail(id) {
     return fetch('<?= site_url("sekretariat/getDetailPengajuan/") ?>' + id)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 return data.data;
@@ -1016,12 +1096,8 @@ function getSuratDetail(id) {
 }
 
 // Preview File Functions
-function previewFile(fileUrl, fileName) {
-    console.log('Preview File:', {
-        fileName: fileName,
-        fileUrl: fileUrl,
-        fullUrl: fileUrl
-    });
+function previewFile(fileUrl, fileName, event) {
+    if (event) event.stopPropagation();
     
     const previewModal = document.getElementById('previewModal');
     const previewTitle = document.getElementById('previewTitle');
@@ -1045,11 +1121,9 @@ function previewFile(fileUrl, fileName) {
         if (imageExtensions.includes(fileExtension)) {
             const img = new Image();
             img.onload = function() {
-                console.log('Image loaded successfully');
                 previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
             };
             img.onerror = function() {
-                console.error('Error loading image:', fileUrl);
                 showUnsupportedPreview(fileUrl, fileName);
             };
             img.src = fileUrl;
@@ -1059,6 +1133,7 @@ function previewFile(fileUrl, fileName) {
                     src="${fileUrl}" 
                     class="preview-iframe" 
                     frameborder="0"
+                    title="Preview PDF: ${fileName}"
                 ></iframe>
             `;
         } else {
@@ -1080,12 +1155,15 @@ function showUnsupportedPreview(fileUrl, fileName) {
     `;
 }
 
-function closePreviewModal() {
+function closePreviewModal(event) {
+    if (event) event.stopPropagation();
     document.getElementById('previewModal').classList.remove('show');
 }
 
 // Fungsi untuk menampilkan modal eviden
-async function showEvidenModal(suratId) {
+async function showEvidenModal(suratId, event) {
+    if (event) event.stopPropagation();
+    
     try {
         const item = await getSuratDetail(suratId);
         
@@ -1103,7 +1181,7 @@ async function showEvidenModal(suratId) {
         
         if (evidenFiles.length === 1) {
             const file = evidenFiles[0];
-            previewFile(file.url, file.name);
+            previewFile(file.url, file.name, event);
         } else {
             showMultipleEvidenModal(item, evidenFiles);
         }
@@ -1114,7 +1192,6 @@ async function showEvidenModal(suratId) {
     }
 }
 
-// Fungsi helper untuk mendapatkan array file eviden dari data
 function getEvidenFilesFromData(item) {
     const getVal = (k) => {
         const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
@@ -1150,7 +1227,8 @@ function getEvidenFilesFromData(item) {
                                 name: fileName,
                                 url: fileUrl,
                                 ext: fileName.split('.').pop().toLowerCase()
-                        });
+                            });
+                        }
                     });
                 }
             } else {
@@ -1197,6 +1275,11 @@ function getFileUrl(filePath, baseUrl) {
         filePath
     ];
     
+    for (const path of possiblePaths) {
+        const fullUrl = baseUrl + path;
+        return fullUrl;
+    }
+    
     return baseUrl + possiblePaths[0];
 }
 
@@ -1242,17 +1325,19 @@ function generateMultipleEvidenContent(item, evidenFiles) {
                 fileIcon = 'fa-file-excel';
             }
             
+            const previewHandler = canPreview ? `onclick="previewFile('${file.url}', '${file.name}', event)"` : '';
+            
             fileEvidenceHtml += `
                 <div class="file-item">
                     <div class="file-icon">
                         <i class="fa-solid ${fileIcon}"></i>
                     </div>
-                    <div class="file-info" ${canPreview ? `onclick="previewFile('${file.url}', '${file.name}')" style="cursor: pointer;"` : ''}>
+                    <div class="file-info" ${previewHandler} style="${canPreview ? 'cursor: pointer;' : ''}">
                         <div class="file-name" ${canPreview ? 'title="Klik untuk preview"' : ''}>${escapeHtml(file.name)}</div>
                         <div class="file-size">File ${index + 1} - ${ext.toUpperCase()}</div>
                     </div>
                     ${canPreview ? 
-                        `<button class="preview-btn" onclick="previewFile('${file.url}', '${file.name}')">
+                        `<button class="preview-btn" onclick="previewFile('${file.url}', '${file.name}', event)">
                             <i class="fa-solid fa-eye"></i> Preview
                         </button>` :
                         `<button class="preview-btn disabled" disabled title="Preview tidak tersedia">
@@ -1285,45 +1370,268 @@ function generateMultipleEvidenContent(item, evidenFiles) {
         ${fileEvidenceHtml}
         
         <div class="modal-actions">
-            <button class="modal-btn modal-btn-close" onclick="closeModal('evidenModal')">
+            <button class="modal-btn modal-btn-close" onclick="closeModal('evidenModal', event)">
                 <i class="fa-solid fa-times"></i> Tutup
             </button>
         </div>
     `;
 }
 
-async function showDetail(id) {
+// ============================================
+// FUNGSI UTAMA
+// ============================================
+
+// FUNGSI 1: Klik BARIS - Menampilkan DETAIL PENGAJUAN
+async function showDetailPengajuan(id, event) {
+    if (event) event.stopPropagation();
+    
     try {
         document.getElementById('detailContent').innerHTML = `
             <div style="text-align:center;padding:40px;">
                 <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#16A085"></i>
-                <p style="margin-top:10px;color:#7f8c8d">Memuat surat pengajuan...</p>
-            </div>
-        `;
-        document.getElementById('detailModal').classList.add('show');
-
-        const suratUrl = '<?= base_url("sekretariat/view_surat_pengajuan/") ?>' + id;
-        document.getElementById('detailContent').innerHTML = `
-            <iframe 
-                src="${suratUrl}" 
-                style="width:100%; height:70vh; border:none; border-radius:8px;"
-                onload="this.style.opacity=1"
-                style="opacity:0; transition: opacity 0.3s;"
-            ></iframe>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
+                <p style="margin-top:10px;color:#7f8c8d">Memuat detail pengajuan...</p>
             </div>
         `;
         
+        // Ganti judul modal menjadi "Detail Pengajuan"
+        document.querySelector('#detailModal .modal-header h3').innerHTML = `
+            <i class="fa-solid fa-info-circle"></i> Detail Pengajuan
+        `;
+        
+        // Tampilkan modal
+        document.getElementById('detailModal').classList.add('show');
+
+        const response = await fetch('<?= site_url("sekretariat/getDetailPengajuan/") ?>' + id);
+        const result = await response.json();
+        
+        if (!result.success) {
+            throw new Error(result.message || 'Gagal memuat data');
+        }
+
+        const data = result.data;
+        
+        const formatDate = (dateStr) => {
+            if (!dateStr || dateStr === '-' || dateStr === '0000-00-00') return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+        };
+
+        const getStatusBadge = (status) => {
+            if (!status) return '<span class="badge badge-pending">-</span>';
+            
+            const statusLower = status.toLowerCase();
+            if (statusLower.includes('disetujui') && statusLower.includes('kk')) {
+                return '<span class="badge badge-pending">Menunggu Sekretariat</span>';
+            } else if (statusLower.includes('disetujui') && statusLower.includes('sekretariat')) {
+                return '<span class="badge badge-approved">Disetujui Sekretariat</span>';
+            } else if (statusLower.includes('ditolak') && statusLower.includes('sekretariat')) {
+                return '<span class="badge badge-rejected">Ditolak Sekretariat</span>';
+            } else if (statusLower.includes('disetujui') && statusLower.includes('dekan')) {
+                return '<span class="badge badge-completed">Disetujui Dekan</span>';
+            } else if (statusLower.includes('ditolak') && statusLower.includes('dekan')) {
+                return '<span class="badge badge-rejected">Ditolak Dekan</span>';
+            } else if (statusLower.includes('pending') || statusLower.includes('menunggu')) {
+                return '<span class="badge badge-pending">' + status + '</span>';
+            } else if (statusLower.includes('setuju') || statusLower.includes('approved')) {
+                return '<span class="badge badge-approved">' + status + '</span>';
+            } else if (statusLower.includes('tolak') || statusLower.includes('rejected')) {
+                return '<span class="badge badge-rejected">' + status + '</span>';
+            }
+            return '<span class="badge badge-pending">' + status + '</span>';
+        };
+
+        let detailHtml = `
+            <div class="detail-section">
+                <div class="detail-section-title">
+                    <i class="fa-solid fa-info-circle"></i> Informasi Pengajuan
+                </div>
+                <div class="detail-grid">
+                    <div class="detail-row">
+                        <div class="detail-label">Nama Kegiatan</div>
+                        <div class="detail-value">${escapeHtml(data.nama_kegiatan || '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Penyelenggara</div>
+                        <div class="detail-value">${escapeHtml(data.penyelenggara || '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Jenis Pengajuan</div>
+                        <div class="detail-value">${escapeHtml(data.jenis_pengajuan || '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Jenis Penugasan</div>
+                        <div class="detail-value">${escapeHtml(data.jenis_penugasan || '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">${getStatusBadge(data.status)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Pengajuan</div>
+                        <div class="detail-value">${formatDate(data.created_at)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tanggal Kegiatan</div>
+                        <div class="detail-value">${formatDate(data.tanggal_kegiatan)}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Lokasi Kegiatan</div>
+                        <div class="detail-value">${escapeHtml(data.lokasi_kegiatan || '-')}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <div class="detail-section-title">
+                    <i class="fa-solid fa-user"></i> Informasi Dosen
+                </div>
+                <div class="detail-grid">
+        `;
+
+        if (data.jenis_penugasan === 'perorangan') {
+            detailHtml += `
+                <div class="detail-row">
+                    <div class="detail-label">Nama Dosen</div>
+                    <div class="detail-value">${escapeHtml(data.nama_dosen || '-')}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">NIDN/NIDK</div>
+                    <div class="detail-value">${escapeHtml(data.nidn || data.nidk || '-')}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Jabatan Fungsional</div>
+                    <div class="detail-value">${escapeHtml(data.jabatan_fungsional || '-')}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Program Studi</div>
+                    <div class="detail-value">${escapeHtml(data.prodi || '-')}</div>
+                </div>
+            `;
+        } else if (data.jenis_penugasan === 'kelompok') {
+            try {
+                const dosenList = typeof data.dosen === 'string' ? JSON.parse(data.dosen) : data.dosen;
+                if (Array.isArray(dosenList) && dosenList.length > 0) {
+                    detailHtml += `<div class="detail-row" style="grid-column: 1 / -1;">
+                        <div class="detail-label">Dosen Kelompok</div>
+                        <div class="dosen-list">`;
+                    
+                    dosenList.forEach((dosen, index) => {
+                        detailHtml += `
+                            <div class="dosen-item">
+                                <div class="dosen-avatar">${(index + 1)}</div>
+                                <div class="dosen-info">
+                                    <div class="dosen-name">${escapeHtml(dosen.nama || '-')}</div>
+                                    <div class="dosen-details">
+                                        NIDN: ${escapeHtml(dosen.nidn || '-')} | 
+                                        Jabatan: ${escapeHtml(dosen.jabatan_fungsional || '-')}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    detailHtml += `</div></div>`;
+                } else {
+                    detailHtml += `<div class="detail-row" style="grid-column: 1 / -1;">
+                        <div class="detail-value detail-value-empty">Tidak ada data dosen</div>
+                    </div>`;
+                }
+            } catch (e) {
+                detailHtml += `<div class="detail-row" style="grid-column: 1 / -1;">
+                    <div class="detail-value detail-value-empty">Format data dosen tidak valid</div>
+                </div>`;
+            }
+        }
+
+        detailHtml += `
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <div class="detail-section-title">
+                    <i class="fa-solid fa-file-alt"></i> Informasi Surat
+                </div>
+                <div class="detail-grid">
+                    <div class="detail-row">
+                        <div class="detail-label">Nomor Surat (Jika Ada)</div>
+                        <div class="detail-value">${escapeHtml(data.nomor_surat || '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Perihal</div>
+                        <div class="detail-value">${escapeHtml(data.perihal || '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Tujuan Surat</div>
+                        <div class="detail-value">${escapeHtml(data.tujuan_surat || '-')}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Disposisi</div>
+                        <div class="detail-value">${escapeHtml(data.disposisi_status || '-')}</div>
+                    </div>
+                    ${data.disposisi_catatan ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Catatan Disposisi</div>
+                        <div class="detail-value">${escapeHtml(data.disposisi_catatan)}</div>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+
+        if (data.notes && data.status && data.status.toLowerCase().includes('ditolak')) {
+            detailHtml += `
+                <div class="detail-section rejection-notes">
+                    <div class="detail-section-title">
+                        <i class="fa-solid fa-exclamation-triangle"></i> Alasan Penolakan
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-value">${escapeHtml(data.notes)}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        detailHtml += `
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal', event)">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+                
+                <button class="modal-btn btn-detail" onclick="showSuratTugas(${id}, event)">
+                    <i class="fa-solid fa-eye"></i> Lihat Surat Tugas
+                </button>
+        `;
+
+        if (data.status === 'disetujui KK' && data.disposisi_status === 'Lanjut Proses ✔') {
+            detailHtml += `
+                <button class="modal-btn modal-btn-reject" onclick="showRejectModal(${id}, '${escapeHtml(data.nama_kegiatan || '')}', 'semua', event)">
+                    <i class="fa-solid fa-times"></i> Tolak
+                </button>
+                <button class="modal-btn modal-btn-approve" onclick="showApproveModal(${id}, '${escapeHtml(data.nama_kegiatan || '')}', 'semua', event)">
+                    <i class="fa-solid fa-check"></i> Setujui
+                </button>
+            `;
+        }
+        
+        detailHtml += `
+                <button class="modal-btn modal-btn-close" onclick="showEvidenModal(${id}, event)">
+                    <i class="fa-solid fa-file-image"></i> Lihat Eviden
+                </button>
+            </div>
+        `;
+
+        document.getElementById('detailContent').innerHTML = detailHtml;
+        
     } catch (error) {
-        console.error('Error loading surat:', error);
+        console.error('Error loading detail:', error);
         document.getElementById('detailContent').innerHTML = `
             <div style="text-align:center;padding:40px;color:#e74c3c">
                 <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
                 <p>Gagal memuat data: ${error.message}</p>
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')" style="margin-top:20px">
+                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal', event)" style="margin-top:20px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
             </div>
@@ -1331,7 +1639,72 @@ async function showDetail(id) {
     }
 }
 
-function showApproveModal(id, namaKegiatan, page = 'semua') {
+// FUNGSI 2: Tombol MATA - Menampilkan SURAT TUGAS (iframe)
+function showSuratTugas(id, event) {
+    if (event) event.stopPropagation();
+    
+    try {
+        document.getElementById('detailContent').innerHTML = `
+            <div style="text-align:center;padding:40px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#16A085"></i>
+                <p style="margin-top:10px;color:#7f8c8d">Memuat surat tugas...</p>
+            </div>
+        `;
+        
+        // Ganti judul modal menjadi "Surat Tugas"
+        document.querySelector('#detailModal .modal-header h3').innerHTML = `
+            <i class="fa-solid fa-file-alt"></i> Surat Tugas
+        `;
+        
+        // Tampilkan modal
+        document.getElementById('detailModal').classList.add('show');
+        
+        setTimeout(() => {
+            const suratUrl = '<?= base_url("sekretariat/view_surat_pengajuan/") ?>' + id;
+            document.getElementById('detailContent').innerHTML = `
+                <iframe 
+                    src="${suratUrl}" 
+                    style="width:100%; height:70vh; border:none; border-radius:8px; opacity:0; transition: opacity 0.3s;"
+                    onload="this.style.opacity=1"
+                    title="Surat Tugas"
+                ></iframe>
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal', event)">
+                        <i class="fa-solid fa-times"></i> Tutup
+                    </button>
+                </div>
+            `;
+        }, 300);
+        
+    } catch (error) {
+        console.error('Error loading surat tugas:', error);
+        document.getElementById('detailContent').innerHTML = `
+            <div style="text-align:center;padding:40px;color:#e74c3c">
+                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
+                <p>Gagal memuat surat tugas: ${error.message}</p>
+                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal', event)" style="margin-top:20px">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        `;
+    }
+}
+
+// ============================================
+// FUNGSI BUTTON DI TABEL
+// ============================================
+
+function showSuratTugasFromButton(id, event) {
+    if (event) event.stopPropagation();
+    showSuratTugas(id, event);
+}
+
+// ============================================
+// FUNGSI APPROVE & REJECT
+// ============================================
+
+function showApproveModal(id, namaKegiatan, page = 'semua', event) {
+    if (event) event.stopPropagation();
     currentApproveId = id;
     currentPage = page;
     document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
@@ -1345,24 +1718,33 @@ function showApproveModal(id, namaKegiatan, page = 'semua') {
     }, 300);
 }
 
-function showRejectModal(id, namaKegiatan, page = 'semua') {
+function showRejectModal(id, namaKegiatan, page = 'semua', event) {
+    if (event) event.stopPropagation();
     currentRejectId = id;
     currentPage = page;
     document.getElementById('rejectNamaKegiatan').textContent = namaKegiatan;
     document.getElementById('rejectionNotes').value = '';
     document.getElementById('rejectModal').classList.add('show');
+    
+    setTimeout(() => {
+        document.getElementById('rejectionNotes').focus();
+    }, 300);
 }
 
-function confirmReject() {
+function confirmReject(event) {
+    if (event) event.stopPropagation();
+    
     const notes = document.getElementById('rejectionNotes').value.trim();
     if (!notes) { 
         alert('Alasan penolakan harus diisi'); 
+        document.getElementById('rejectionNotes').focus();
         return; 
     }
     
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '<?= base_url("sekretariat/reject/") ?>' + currentRejectId;
+    form.style.display = 'none';
     
     const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
     const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
@@ -1382,7 +1764,7 @@ function confirmReject() {
     };
     
     for (const key in params) {
-        if (params[key]) {
+        if (params[key] !== undefined && params[key] !== null) {
             const inp = document.createElement('input');
             inp.type='hidden'; 
             inp.name=key; 
@@ -1401,7 +1783,8 @@ function confirmReject() {
     form.submit();
 }
 
-function closeModal(id) { 
+function closeModal(id, event) { 
+    if (event) event.stopPropagation();
     document.getElementById(id).classList.remove('show'); 
 }
 
@@ -1409,9 +1792,12 @@ function modalClickOutside(evt, id) {
     if (evt.target && evt.target.id === id) closeModal(id); 
 }
 
-// Helper functions
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
 function formatDate(d) {
-    if (!d || d === '-' || d === '0000-00-00') return '-';
+    if (!d || d === '-' || d === '0000-00-00' || d === '0000-00-00 00:00:00') return '-';
     const t = new Date(d);
     if (isNaN(t)) return d;
     return t.toLocaleDateString('id-ID', { day:'2-digit', month: 'short', year:'numeric' });
@@ -1427,41 +1813,172 @@ function escapeHtml(unsafe) {
        .replace(/'/g, "&#039;");
 }
 
-// Membuat baris tabel clickable
+// ============================================
+// EVENT HANDLERS & INITIALIZATION
+// ============================================
+
 function makeRowsClickable() {
     const rows = document.querySelectorAll('#tableBody tr.clickable-row');
     
     rows.forEach(row => {
-        const detailBtn = row.querySelector('.btn-detail');
-        if (detailBtn) {
-            const onclickAttr = detailBtn.getAttribute('onclick');
-            const match = onclickAttr.match(/showDetail\((\d+)\)/);
-            
+        // Cari ID surat dari data baris
+        let suratId = null;
+        
+        // Coba cari dari tombol disposisi
+        const disposisiBtn = row.querySelector('.btn-disposisi[onclick*="openPinModal"]');
+        if (disposisiBtn) {
+            const onclickAttr = disposisiBtn.getAttribute('onclick');
+            const match = onclickAttr.match(/openPinModal\((\d+)/);
             if (match) {
-                const suratId = match[1];
-                
-                row.addEventListener('click', function(e) {
-                    if (e.target.closest('button') || 
-                        e.target.closest('a') || 
-                        e.target.closest('select') ||
-                        e.target.closest('textarea') ||
-                        e.target.closest('input')) {
-                        return;
-                    }
-                    
-                    rows.forEach(r => r.classList.remove('selected'));
-                    this.classList.add('selected');
-                    showDetail(suratId);
-                });
-                
-                row.style.cursor = 'pointer';
+                suratId = match[1];
             }
+        }
+        
+        // Jika tidak ditemukan, coba dari tombol eviden
+        if (!suratId) {
+            const evidenBtn = row.querySelector('.btn-eviden[onclick*="showEvidenModal"]');
+            if (evidenBtn) {
+                const onclickAttr = evidenBtn.getAttribute('onclick');
+                const match = onclickAttr.match(/showEvidenModal\((\d+)/);
+                if (match) {
+                    suratId = match[1];
+                }
+            }
+        }
+        
+        // Jika masih tidak ditemukan, coba dari tombol mata
+        if (!suratId) {
+            const detailBtn = row.querySelector('.btn-detail[onclick*="showSuratTugasFromButton"]');
+            if (detailBtn) {
+                const onclickAttr = detailBtn.getAttribute('onclick');
+                const match = onclickAttr.match(/showSuratTugasFromButton\((\d+)/);
+                if (match) {
+                    suratId = match[1];
+                }
+            }
+        }
+        
+        // Jika ID ditemukan, tambahkan event listener
+        if (suratId) {
+            row.addEventListener('click', function(e) {
+                // Cek apakah yang diklik adalah element yang tidak boleh trigger row click
+                const clickedElement = e.target;
+                const isClickableElement = 
+                    clickedElement.closest('button') || 
+                    clickedElement.closest('a') || 
+                    clickedElement.closest('select') ||
+                    clickedElement.closest('textarea') ||
+                    clickedElement.closest('input') ||
+                    clickedElement.closest('.btn') ||
+                    clickedElement.closest('.btn-disposisi') ||
+                    clickedElement.closest('.file-info') ||
+                    clickedElement.closest('.preview-btn') ||
+                    clickedElement.closest('.download-btn');
+                
+                if (isClickableElement) {
+                    return;
+                }
+                
+                // Highlight baris yang dipilih
+                rows.forEach(r => r.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // Tampilkan detail pengajuan
+                showDetailPengajuan(suratId, e);
+            });
+            
+            row.style.cursor = 'pointer';
+        }
+    });
+}
+
+function initializeEventListeners() {
+    makeRowsClickable();
+    
+    // Tambahkan event listener untuk semua element di dalam tabel
+    document.querySelectorAll('#tableBody button, #tableBody a, #tableBody select, #tableBody textarea, #tableBody input').forEach(element => {
+        element.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        element.addEventListener('mousedown', function(e) {
+            e.stopPropagation();
+        });
+        
+        element.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+        });
+    });
+    
+    // Event untuk PIN input (Enter key)
+    document.getElementById('pinInput')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            checkPin();
+        }
+    });
+    
+    // Event untuk nomor surat input (Enter key)
+    document.getElementById('nomorSurat')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('approveForm').dispatchEvent(new Event('submit'));
+        }
+    });
+    
+    // Event untuk rejection notes (Enter key dengan Ctrl)
+    document.getElementById('rejectionNotes')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            e.preventDefault();
+            confirmReject(e);
         }
     });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    makeRowsClickable();
+    initializeEventListeners();
+    
+    // Tambahkan CSS untuk mencegah selection pada klik
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            #tableBody button, #tableBody a, #tableBody select, #tableBody textarea, #tableBody input {
+                user-select: none;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+            }
+            
+            .clickable-row {
+                position: relative;
+            }
+            
+            .clickable-row::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1;
+                pointer-events: none;
+            }
+            
+            .clickable-row td > * {
+                position: relative;
+                z-index: 2;
+            }
+        </style>
+    `);
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modals = ['detailModal', 'evidenModal', 'approveModal', 'rejectModal', 'previewModal', 'pinModal'];
+        modals.forEach(modalId => {
+            if (document.getElementById(modalId)?.classList.contains('show')) {
+                closeModal(modalId);
+            }
+        });
+    }
 });
 </script>
 </body>

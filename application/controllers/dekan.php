@@ -368,6 +368,115 @@ class Dekan extends CI_Controller
         $this->load->view('dekan/halaman_ditolak', $data);
     }
 
+    /* ================================
+   GET DETAIL PENGAJUAN - UNTUK MODAL DETAIL (API ENDPOINT)
+================================= */
+public function getDetailPengajuan($id)
+{
+    try {
+        $this->db->where('id', $id);
+        $surat = $this->db->get('surat')->row_array();
+        
+        if (!$surat) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ]);
+            return;
+        }
+        
+        // Ambil data dosen
+        $surat['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat['nip'] ?? '');
+        
+        // Format data eviden jika perlu
+        if (!empty($surat['eviden'])) {
+            $eviden = $surat['eviden'];
+            if (is_string($eviden) && (strpos($eviden, '[') === 0 || strpos($eviden, '{') === 0)) {
+                $surat['eviden'] = json_decode($eviden, true);
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'data' => $surat
+        ]);
+        
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
+    }
+}
+
+/* ================================
+   GET EVIDEN DETAIL - UNTUK MODAL EVIDEN (API ENDPOINT)
+================================= */
+public function getEvidenDetail($id)
+{
+    try {
+        $this->db->where('id', $id);
+        $surat = $this->db->get('surat')->row_array();
+        
+        if (!$surat) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ]);
+            return;
+        }
+        
+        // Process eviden files
+        $evidenFiles = [];
+        $evidenValue = $surat['eviden'] ?? '';
+        
+        if (!empty($evidenValue)) {
+            // Jika string JSON
+            if (strpos($evidenValue, '[') === 0 || strpos($evidenValue, '{') === 0) {
+                try {
+                    $parsed = json_decode($evidenValue, true);
+                    if (is_array($parsed)) {
+                        $evidenFiles = $parsed;
+                    } else {
+                        $evidenFiles = [$evidenValue];
+                    }
+                } catch (Exception $e) {
+                    $evidenFiles = [$evidenValue];
+                }
+            } else {
+                $evidenFiles = [$evidenValue];
+            }
+        }
+        
+        // Process each file
+        $processedFiles = [];
+        foreach ($evidenFiles as $file) {
+            if (!empty($file) && $file !== '-' && $file !== 'null') {
+                $fileName = basename($file);
+                $processedFiles[] = [
+                    'name' => $fileName,
+                    'url' => base_url('uploads/eviden/' . $fileName),
+                    'ext' => strtolower(pathinfo($fileName, PATHINFO_EXTENSION))
+                ];
+            }
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'id' => $surat['id'],
+                'nama_kegiatan' => $surat['nama_kegiatan'],
+                'eviden_files' => $processedFiles
+            ]
+        ]);
+        
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
+    }
+}
 /* ================================
    TOTAL SEMUA PENGAJUAN - VERSI DIPERBAIKI
 ================================= */
@@ -1276,6 +1385,28 @@ public function halaman_total()
         // Load view surat_print2
         $this->load->view('surat_print2', $data);
     }
+
+    /* ================================
+   TAMPILKAN SURAT TUGAS (PRINT VIEW)
+================================= */
+public function view_surat_print($id)
+{
+    $this->db->where('id', $id);
+    $data['surat'] = $this->db->get('surat')->row();
+    
+    if (!$data['surat']) {
+        show_404();
+        return;
+    }
+    
+    // Ambil data dosen lengkap dari list_dosen
+    $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($data['surat']->nip);
+    
+    // Generate QR code jika diperlukan
+    
+    // Load view surat_print2.php
+    $this->load->view('surat_print2', $data);
+}
     
     /* ================================
        GET EVIDEN - UNTUK TOMBOL LIHAT EVIDEN
@@ -1308,9 +1439,7 @@ public function halaman_total()
             ]);
         }
     }
-/* ================================
-   DEBUG DATA - UNTUK TROUBLESHOOTING
-================================= */
+
 /* ================================
    DEBUG FILTER JENIS PENUGASAN
 ================================= */
