@@ -26,7 +26,7 @@
     .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;transition:all 0.3s;background:white}
     .search-input:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
     .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d}
-    .filter-select{padding:12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white;color:#495057;min-width:180px;cursor:pointer;transition:all 0.3s}
+    .filter-select{padding:12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white;color:#495057;min-width:180px;cursor:pointer;transition:all 0.3s;height:44px}
     .filter-select:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
     .btn-primary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#FB8C00;color:#fff}
     .btn-primary:hover{background:#e67e22;transform:translateY(-2px)}
@@ -409,6 +409,8 @@
     
     /* Responsive */
     @media (max-width:768px){
+        .search-filter-container{flex-direction:column;align-items:stretch}
+        .search-box,.filter-select{min-width:100%;width:100%}
         .detail-grid{grid-template-columns:1fr}
         .modal-content{width:95%;margin:10px}
         .detail-content{padding:15px}
@@ -476,7 +478,13 @@
                     if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
                     if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
                     if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-                    echo "Menampilkan: " . $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
+                    
+                    // TAMBAHAN: Filter jenis penugasan info
+                    $jenis_info = "";
+                    if($this->input->get('jenis_penugasan') == 'perorangan') $jenis_info = " - Perorangan";
+                    if($this->input->get('jenis_penugasan') == 'kelompok') $jenis_info = " - Kelompok";
+                    
+                    echo "Menampilkan: " . $filter_info . $jenis_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
                     ?>
                 </span>
             </div>
@@ -504,6 +512,13 @@
                     <option value="approved" <?= ($this->input->get('status') == 'approved') ? 'selected' : '' ?>>Disetujui</option>
                     <option value="rejected" <?= ($this->input->get('status') == 'rejected') ? 'selected' : '' ?>>Ditolak</option>
                 </select>
+                
+                <!-- TAMBAHAN: Filter Jenis Penugasan -->
+        <select name="jenis_penugasan" class="filter-select">
+            <option value="">Semua Jenis Penugasan</option>
+            <option value="perorangan" <?= ($this->input->get('jenis_penugasan') == 'perorangan') ? 'selected' : '' ?>>Perorangan</option>
+            <option value="kelompok" <?= ($this->input->get('jenis_penugasan') == 'kelompok') ? 'selected' : '' ?>>Kelompok</option>
+        </select>
                 
                 <!-- Tambahkan input hidden untuk tahun -->
                 <input type="hidden" name="tahun" value="<?= isset($tahun) ? $tahun : date('Y') ?>">
@@ -593,7 +608,7 @@
                             <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
                                 <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
                                 <strong>
-                                    <?php if($this->input->get('search') || $this->input->get('status')): ?>
+                                    <?php if($this->input->get('search') || $this->input->get('status') || $this->input->get('jenis_penugasan')): ?>
                                         Tidak ada data yang sesuai dengan filter
                                     <?php else: ?>
                                         Belum ada pengajuan
@@ -606,18 +621,58 @@
             </table>
         </div>
 
-        <div class="pagination-info">
+              <div class="pagination-info">
             <?php
             $filter_info = "Semua Data";
             if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
             if($this->input->get('status') == 'approved') $filter_info = "Disetujui";
             if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
-            echo "Menampilkan: " . $filter_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
+            
+            // TAMBAHAN: Filter jenis penugasan info
+            $jenis_info = "";
+            if($this->input->get('jenis_penugasan') == 'perorangan') $jenis_info = " - Perorangan";
+            if($this->input->get('jenis_penugasan') == 'kelompok') $jenis_info = " - Kelompok";
+            
+            echo "Menampilkan: " . $filter_info . $jenis_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
             ?>
         </div>
-    </div>
-</div>
+    </div> <!-- Ini penutupan div.card -->
 
+    <!-- DEBUG INFO - TAMBAHKAN DI SINI -->
+    <?php if(isset($debug_info) && !empty($debug_info)): ?>
+    <div class="card" style="margin-top: 20px; background: #f8f9fa;">
+        <div class="card-header">
+            <h4><i class="fa-solid fa-bug"></i> Debug Info</h4>
+        </div>
+        <div style="padding: 15px; font-family: monospace; font-size: 12px;">
+            <p><strong>Total Data:</strong> <?= isset($debug_info['total_data']) ? $debug_info['total_data'] : 'N/A' ?></p>
+            <p><strong>Filtered Data:</strong> <?= isset($debug_info['filtered_data']) ? $debug_info['filtered_data'] : 'N/A' ?></p>
+            <p><strong>Perorangan Terdeteksi:</strong> <?= isset($debug_info['perorangan_detected']) ? $debug_info['perorangan_detected'] : 'N/A' ?></p>
+            <p><strong>Kelompok Terdeteksi:</strong> <?= isset($debug_info['kelompok_detected']) ? $debug_info['kelompok_detected'] : 'N/A' ?></p>
+            <p><strong>Filter Aktif:</strong> <?= isset($debug_info['filter_applied']) ? $debug_info['filter_applied'] : 'Tidak ada' ?></p>
+            
+            <hr style="margin: 10px 0;">
+            
+            <h5>Sample Data (3 pertama):</h5>
+            <?php if(isset($surat_list) && count($surat_list) > 0): ?>
+                <?php for($i = 0; $i < min(3, count($surat_list)); $i++): ?>
+                    <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+                        <p><strong>ID:</strong> <?= $surat_list[$i]['id'] ?></p>
+                        <p><strong>NIP:</strong> <?= htmlspecialchars(substr($surat_list[$i]['nip'] ?? '', 0, 50)) ?></p>
+                        <p><strong>Nama Dosen:</strong> <?= htmlspecialchars(substr($surat_list[$i]['nama_dosen'] ?? '', 0, 50)) ?></p>
+                        <p><strong>Jenis Pengajuan:</strong> <?= htmlspecialchars($surat_list[$i]['jenis_pengajuan'] ?? '-') ?></p>
+                        <p><strong>Status:</strong> <?= htmlspecialchars($surat_list[$i]['status'] ?? '-') ?></p>
+                    </div>
+                <?php endfor; ?>
+            <?php else: ?>
+                <p>Tidak ada data untuk ditampilkan</p>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+    <!-- END DEBUG INFO -->
+
+</div> <!-- Ini penutupan div.container -->
 <!-- Preview Modal -->
 <div id="previewModal" class="preview-modal">
     <div class="preview-content">
@@ -1351,8 +1406,14 @@ function showApproveModal(id, namaKegiatan) {
     const searchParams = new URLSearchParams(window.location.search);
     const from = 'total';
     const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
+    const jenis_penugasan = searchParams.get('jenis_penugasan') || '';
     
-    document.getElementById('approveForm').action = `<?= base_url("dekan/approve/") ?>${id}?from=${from}&tahun=${tahun}&${searchParams.toString()}`;
+    let actionUrl = `<?= base_url("dekan/approve/") ?>${id}?from=${from}&tahun=${tahun}`;
+    if (jenis_penugasan) {
+        actionUrl += `&jenis_penugasan=${jenis_penugasan}`;
+    }
+    
+    document.getElementById('approveForm').action = actionUrl;
     document.getElementById('approveModal').classList.add('show');
 }
 
@@ -1373,10 +1434,16 @@ function confirmReject() {
     const searchParams = new URLSearchParams(window.location.search);
     const from = 'total';
     const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
+    const jenis_penugasan = searchParams.get('jenis_penugasan') || '';
+    
+    let actionUrl = `<?= base_url("dekan/reject/") ?>${currentRejectId}?from=${from}&tahun=${tahun}`;
+    if (jenis_penugasan) {
+        actionUrl += `&jenis_penugasan=${jenis_penugasan}`;
+    }
     
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = `<?= base_url("dekan/reject/") ?>${currentRejectId}?from=${from}&tahun=${tahun}&${searchParams.toString()}`;
+    form.action = actionUrl;
 
     const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
     const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
@@ -1425,8 +1492,16 @@ function escapeHtml(unsafe) {
 // Auto submit form ketika select berubah
 document.addEventListener('DOMContentLoaded', function() {
     const statusSelect = document.querySelector('select[name="status"]');
+    const jenisPenugasanSelect = document.querySelector('select[name="jenis_penugasan"]');
+    
     if (statusSelect) {
         statusSelect.addEventListener('change', function() {
+            this.form.submit();
+        });
+    }
+    
+    if (jenisPenugasanSelect) {
+        jenisPenugasanSelect.addEventListener('change', function() {
             this.form.submit();
         });
     }

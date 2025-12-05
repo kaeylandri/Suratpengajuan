@@ -348,108 +348,156 @@ class Kaprodi extends CI_Controller
     }
 
     /* ================================
-       SEMUA (TOTAL) PENGAJUAN
+       SEMUA (TOTAL) PENGAJUAN - PERBAIKAN UTAMA UNTUK FILTER JENIS PENUGASAN
     ================================= */
-    public function semua()
-    {
-        $tahun = $this->input->get('tahun') ?? date('Y');
-        $bulan = $this->input->get('bulan') ?? 'all';
-        $search = $this->input->get('search');
-        $status_filter = $this->input->get('status');
-        
-        $data['tahun'] = $tahun;
-        $data['bulan'] = $bulan;
-        $data['judul'] = "Total Pengajuan - Kaprodi";
-        $data['role'] = "kaprodi";
-        $data['status_filter'] = $status_filter;
+   /* ================================
+   SEMUA (TOTAL) PENGAJUAN - DIPERBAIKI
+================================= */
+/* ================================
+   SEMUA (TOTAL) PENGAJUAN - DIPERBAIKI UNTUK MULTIPLE SELECTION
+================================= */
+public function semua()
+{
+    $tahun = $this->input->get('tahun') ?? date('Y');
+    $bulan = $this->input->get('bulan') ?? 'all';
+    $search = $this->input->get('search');
+    $status_filter = $this->input->get('status');
+    $lingkup_filter = $this->input->get('lingkup_penugasan');
+    $jenis_penugasan_filter = $this->input->get('jenis_penugasan');
+    
+    $data['tahun'] = $tahun;
+    $data['bulan'] = $bulan;
+    $data['judul'] = "Total Pengajuan - Kaprodi";
+    $data['role'] = "kaprodi";
+    $data['status_filter'] = $status_filter;
+    $data['lingkup_filter'] = $lingkup_filter;
+    $data['jenis_penugasan_filter'] = $jenis_penugasan_filter;
 
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-
-        if (!empty($status_filter)) {
-            switch ($status_filter) {
-                case 'pending':
-                    $this->db->where('status', 'pengajuan');
-                    break;
-                case 'approved':
-                    $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan']);
-                    break;
-                case 'rejected':
-                    $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
-                    break;
-            }
-        }
-
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('nama_kegiatan', $search);
-            $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->or_like('nama_dosen', $search);
-            $this->db->group_end();
-        }
-
-        $this->db->order_by("created_at", "DESC");
-        $data['surat_list'] = $this->db->get("surat")->result();
-        $data['total_surat'] = count($data['surat_list']);
-
-        // Statistik untuk card
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('nama_kegiatan', $search);
-            $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->or_like('nama_dosen', $search);
-            $this->db->group_end();
-        }
-        
-        if (!empty($status_filter)) {
-            switch ($status_filter) {
-                case 'pending':
-                    $this->db->where('status', 'pengajuan');
-                    break;
-                case 'approved':
-                    $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan']);
-                    break;
-                case 'rejected':
-                    $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
-                    break;
-            }
-        }
-        
-        $data['total_all'] = $this->db->count_all_results('surat');
-
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        $data['pending_count'] = $this->db->where('status', 'pengajuan')
-                                         ->count_all_results('surat');
-
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        $data['approved_count'] = $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan'])
-                                          ->count_all_results('surat');
-
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
-                                          ->count_all_results('surat');
-
-        $this->load->view('kaprodi/halaman_total', $data);
+    // **PERBAIKAN UTAMA: Reset query builder untuk menghindari konflik**
+    $this->db->reset_query();
+    
+    // Mulai dari query yang bersih
+    $this->db->from('surat');
+    
+    // Filter tahun dan bulan
+    $this->db->where('YEAR(created_at)', $tahun);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
     }
 
+    // **PERBAIKAN: Filter status dengan kondisi yang benar**
+    if (!empty($status_filter) && $status_filter !== 'all') {
+        switch ($status_filter) {
+            case 'pending':
+                $this->db->where('status', 'pengajuan');
+                break;
+            case 'approved':
+                $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan']);
+                break;
+            case 'rejected':
+                $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
+                break;
+            case 'dekan_approved':
+                $this->db->where('status', 'disetujui dekan');
+                break;
+            case 'dekan_rejected':
+                $this->db->where('status', 'ditolak dekan');
+                break;
+        }
+    }
+
+    // **PERBAIKAN: Filter lingkup penugasan - PERHATIAN KHUSUS**
+    if (!empty($lingkup_filter) && $lingkup_filter !== 'all') {
+        // Jika ingin exact match
+        $this->db->where('lingkup_penugasan', $lingkup_filter);
+        
+        // ATAU jika ingin case insensitive
+        // $this->db->where('LOWER(lingkup_penugasan)', strtolower($lingkup_filter));
+    }
+
+    // **PERBAIKAN KRITIS: Filter jenis penugasan - CEK DATA DI DATABASE**
+    if (!empty($jenis_penugasan_filter) && $jenis_penugasan_filter !== 'all') {
+        // Debug: Tampilkan filter yang diterima
+        // echo "DEBUG: Jenis Penugasan Filter = " . $jenis_penugasan_filter . "<br>";
+        
+        // Cek field apa yang ada di database
+        $fields = $this->db->list_fields('surat');
+        
+        if (in_array('jenis_penugasan', $fields)) {
+            $this->db->where('jenis_penugasan', $jenis_penugasan_filter);
+        } 
+        else if (in_array('jenis_tugas', $fields)) {
+            $this->db->where('jenis_tugas', $jenis_penugasan_filter);
+        }
+        else if (in_array('kategori', $fields)) {
+            $this->db->where('kategori', $jenis_penugasan_filter);
+        }
+        else if (in_array('jenis_pengajuan', $fields)) {
+            // Mungkin maksudnya jenis_pengajuan, bukan jenis_penugasan
+            $this->db->where('jenis_pengajuan', $jenis_penugasan_filter);
+        }
+    }
+
+    // Filter search
+    if (!empty($search)) {
+        $this->db->group_start();
+        $this->db->like('nama_kegiatan', $search);
+        $this->db->or_like('penyelenggara', $search);
+        $this->db->or_like('jenis_pengajuan', $search);
+        $this->db->or_like('nama_dosen', $search);
+        $this->db->group_end();
+    }
+
+    // Clone query untuk count
+    $query_count = clone $this->db;
+    $data['total_surat'] = $query_count->count_all_results();
+    
+    // Ambil data dengan order by
+    $this->db->order_by("created_at", "DESC");
+    $data['surat_list'] = $this->db->get()->result();
+
+    // **DEBUG: Tampilkan query SQL yang dihasilkan**
+    // echo "DEBUG Query: " . $this->db->last_query() . "<br>";
+    // echo "DEBUG Total Data: " . $data['total_surat'] . "<br>";
+    // echo "DEBUG Jenis Penugasan Filter: " . ($jenis_penugasan_filter ?: 'tidak ada') . "<br>";
+
+    // Statistik untuk card (tanpa filter jenis/lingkup agar statistik tetap lengkap)
+    $this->db->reset_query();
+    $this->db->where('YEAR(created_at)', $tahun);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
+    }
+    $data['total_all'] = $this->db->count_all_results('surat');
+
+    // Pending count
+    $this->db->reset_query();
+    $this->db->where('YEAR(created_at)', $tahun);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
+    }
+    $data['pending_count'] = $this->db->where('status', 'pengajuan')
+                                     ->count_all_results('surat');
+
+    // Approved count
+    $this->db->reset_query();
+    $this->db->where('YEAR(created_at)', $tahun);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
+    }
+    $data['approved_count'] = $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan'])
+                                      ->count_all_results('surat');
+
+    // Rejected count
+    $this->db->reset_query();
+    $this->db->where('YEAR(created_at)', $tahun);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
+    }
+    $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
+                                      ->count_all_results('surat');
+
+    $this->load->view('kaprodi/halaman_total', $data);
+}
     /* ================================
        GET DETAIL PENGAJUAN (AJAX) - DENGAN PROGRESS TIMELINE
     ================================= */
@@ -510,10 +558,11 @@ class Kaprodi extends CI_Controller
                 'status' => $pengajuan->status,
                 'jenis_pengajuan' => $pengajuan->jenis_pengajuan,
                 'lingkup_penugasan' => $pengajuan->lingkup_penugasan,
+                'jenis_penugasan' => $pengajuan->jenis_penugasan ?? ($pengajuan->jenis_tugas ?? '-'), // Field baru
                 'penyelenggara' => $pengajuan->penyelenggara,
                 'tanggal_kegiatan' => $tanggal_kegiatan,
                 'akhir_kegiatan' => $akhir_kegiatan,
-                'periode_kegiatan' => $periode_display,  // Nilai yang sudah diformat
+                'periode_kegiatan' => $periode_display,
                 'jenis_date' => $jenis_date,
                 'periode_value' => $periode_value,
                 'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
@@ -522,7 +571,7 @@ class Kaprodi extends CI_Controller
                 'nomor_surat' => $pengajuan->nomor_surat,
                 'catatan_penolakan' => $pengajuan->catatan_penolakan,
                 'dosen_data' => $dosen_data,
-                'progress_timeline' => $progress_timeline, // Data timeline lengkap
+                'progress_timeline' => $progress_timeline,
                 'approval_status' => json_decode($pengajuan->approval_status, true)
             );
             
@@ -552,7 +601,7 @@ class Kaprodi extends CI_Controller
         
         $approval = json_decode($surat->approval_status, true) ?? [];
         
-        // Timeline untuk Kaprodi (lebih sederhana dari Dekan)
+        // Timeline untuk Kaprodi
         $timeline = [
             'pengirim' => [
                 'status' => 'completed',
@@ -582,7 +631,7 @@ class Kaprodi extends CI_Controller
                 }
                 $timeline['kaprodi']['timestamp'] = $kaprodi_approval['timestamp'] ?? null;
             } else {
-                // Jika format lama (hanya timestamp)
+                // Jika format lama
                 $timeline['kaprodi']['status'] = 'completed';
                 $timeline['kaprodi']['timestamp'] = $kaprodi_approval;
             }
@@ -805,10 +854,9 @@ class Kaprodi extends CI_Controller
             redirect('kaprodi/pending');
         }
 
-        // Update approval status dengan format yang mendukung progress bar
+        // Update approval status
         $approval = json_decode($surat->approval_status, true) ?? [];
         
-        // Pastikan tahap pengirim ada
         if (!isset($approval['pengirim'])) {
             $approval['pengirim'] = $surat->created_at;
         }
@@ -852,10 +900,9 @@ class Kaprodi extends CI_Controller
             redirect('kaprodi');
         }
 
-        // Update approval status dengan format yang mendukung progress bar
+        // Update approval status
         $approval = json_decode($surat->approval_status, true) ?? [];
         
-        // Pastikan tahap pengirim ada
         if (!isset($approval['pengirim'])) {
             $approval['pengirim'] = $surat->created_at;
         }
@@ -878,17 +925,14 @@ class Kaprodi extends CI_Controller
     ================================= */
     public function process_multi_approve()
     {
-        // Validasi request method
         if ($this->input->server('REQUEST_METHOD') !== 'POST') {
             $this->session->set_flashdata('error', 'Invalid request method.');
             redirect('kaprodi/pending');
             return;
         }
 
-        // Ambil selected IDs dari POST (sebagai array)
         $selected_ids = $this->input->post('selected_ids');
         
-        // Validasi input
         if (empty($selected_ids) || !is_array($selected_ids)) {
             $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
             redirect('kaprodi/pending');
@@ -898,18 +942,15 @@ class Kaprodi extends CI_Controller
         $success_count = 0;
         $error_count = 0;
         $error_messages = [];
-        $approved_items = []; // Array untuk menyimpan data yang disetujui
+        $approved_items = [];
         
-        // Proses setiap ID
         foreach ($selected_ids as $id) {
             $id = trim($id);
             
-            // Skip jika ID kosong
             if (empty($id)) {
                 continue;
             }
             
-            // Ambil data surat
             $surat = $this->db->get_where('surat', ['id' => $id])->row();
             
             if (!$surat) {
@@ -918,20 +959,17 @@ class Kaprodi extends CI_Controller
                 continue;
             }
             
-            // Update approval status
             $approval = json_decode($surat->approval_status, true);
             if (!is_array($approval)) {
                 $approval = [];
             }
             
-            // Pastikan tahap pengirim ada
             if (!isset($approval['pengirim'])) {
                 $approval['pengirim'] = $surat->created_at;
             }
             
             $approval['kk'] = date("Y-m-d H:i:s");
             
-            // Update database
             $update_data = [
                 'status' => 'disetujui KK',
                 'approval_status' => json_encode($approval),
@@ -941,7 +979,6 @@ class Kaprodi extends CI_Controller
             if ($this->db->update('surat', $update_data)) {
                 $success_count++;
                 
-                // Simpan data yang berhasil disetujui
                 $approved_items[] = [
                     'nama' => $surat->nama_kegiatan,
                     'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara
@@ -952,14 +989,12 @@ class Kaprodi extends CI_Controller
             }
         }
         
-        // Set flash message berdasarkan hasil
         if ($success_count > 0) {
             $message = "✅ Berhasil menyetujui $success_count pengajuan.";
             if ($error_count > 0) {
                 $message .= " ⚠️ $error_count pengajuan gagal: " . implode(', ', $error_messages);
             }
             
-            // Set flashdata untuk success modal
             $this->session->set_flashdata('approved_items', $approved_items);
             $this->session->set_flashdata('is_single_approve', false);
             $this->session->set_flashdata('success', $message);
@@ -975,18 +1010,15 @@ class Kaprodi extends CI_Controller
     ================================= */
     public function process_multi_reject()
     {
-        // Validasi request method
         if ($this->input->server('REQUEST_METHOD') !== 'POST') {
             $this->session->set_flashdata('error', 'Invalid request method.');
             redirect('kaprodi/pending');
             return;
         }
 
-        // Ambil selected IDs dan rejection notes dari POST (sebagai array)
         $selected_ids = $this->input->post('selected_ids');
         $rejection_notes_array = $this->input->post('rejection_notes');
         
-        // Validasi input
         if (empty($selected_ids) || !is_array($selected_ids)) {
             $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
             redirect('kaprodi/pending');
@@ -999,7 +1031,6 @@ class Kaprodi extends CI_Controller
             return;
         }
         
-        // Validasi jumlah IDs dan notes harus sama
         if (count($selected_ids) !== count($rejection_notes_array)) {
             $this->session->set_flashdata('error', 'Jumlah pengajuan dan alasan penolakan tidak sesuai.');
             redirect('kaprodi/pending');
@@ -1010,24 +1041,20 @@ class Kaprodi extends CI_Controller
         $error_count = 0;
         $error_messages = [];
         
-        // Proses setiap ID dengan rejection notes yang sesuai
         foreach ($selected_ids as $index => $id) {
             $id = trim($id);
             $rejection_notes = isset($rejection_notes_array[$index]) ? trim($rejection_notes_array[$index]) : '';
             
-            // Skip jika ID kosong
             if (empty($id)) {
                 continue;
             }
             
-            // Validasi rejection notes untuk setiap item
             if (empty($rejection_notes)) {
                 $error_count++;
                 $error_messages[] = "Alasan penolakan kosong untuk ID: $id";
                 continue;
             }
             
-            // Ambil data surat
             $surat = $this->db->get_where('surat', ['id' => $id])->row();
             
             if (!$surat) {
@@ -1036,20 +1063,17 @@ class Kaprodi extends CI_Controller
                 continue;
             }
             
-            // Update approval status
             $approval = json_decode($surat->approval_status, true);
             if (!is_array($approval)) {
                 $approval = [];
             }
             
-            // Pastikan tahap pengirim ada
             if (!isset($approval['pengirim'])) {
                 $approval['pengirim'] = $surat->created_at;
             }
             
             $approval['kk'] = date("Y-m-d H:i:s");
             
-            // Update database
             $update_data = [
                 'status' => 'ditolak KK',
                 'approval_status' => json_encode($approval),
@@ -1065,7 +1089,6 @@ class Kaprodi extends CI_Controller
             }
         }
         
-        // Set flash message berdasarkan hasil
         if ($success_count > 0) {
             $message = "✅ Berhasil menolak $success_count pengajuan.";
             if ($error_count > 0) {
@@ -1138,10 +1161,8 @@ class Kaprodi extends CI_Controller
             return;
         }
         
-        // Ambil data dosen lengkap dari list_dosen
         $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($data['surat']->nip);
         
-        // Load view surat_print2
         $this->load->view('surat_print2', $data);
     }
     
@@ -1154,7 +1175,6 @@ class Kaprodi extends CI_Controller
         $surat = $this->db->get('surat')->row();
         
         if ($surat && !empty($surat->eviden)) {
-            // Periksa apakah file exist
             $file_path = FCPATH . $surat->eviden;
             
             if (file_exists($file_path)) {
@@ -1187,6 +1207,8 @@ class Kaprodi extends CI_Controller
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
         $status = $this->input->get('status');
+        $lingkup = $this->input->get('lingkup_penugasan');
+        $jenis_penugasan = $this->input->get('jenis_penugasan');
         
         $query_params = 'tahun=' . $tahun . '&bulan=' . $bulan;
         if (!empty($search)) {
@@ -1194,6 +1216,12 @@ class Kaprodi extends CI_Controller
         }
         if (!empty($status)) {
             $query_params .= '&status=' . $status;
+        }
+        if (!empty($lingkup)) {
+            $query_params .= '&lingkup_penugasan=' . $lingkup;
+        }
+        if (!empty($jenis_penugasan)) {
+            $query_params .= '&jenis_penugasan=' . $jenis_penugasan;
         }
         
         switch($current_page) {
@@ -1215,11 +1243,91 @@ class Kaprodi extends CI_Controller
     }
 
     /* ================================
+       CEK FIELD DATABASE UNTUK FILTER JENIS PENUGASAN - TAMBAHKAN DI VIEW
+    ================================= */
+    public function check_fields_simple()
+    {
+        echo "<h3>Checking Database Structure</h3>";
+        
+        // Cek field yang ada
+        $fields = $this->db->list_fields('surat');
+        echo "<strong>All fields in 'surat' table:</strong><br>";
+        foreach ($fields as $field) {
+            echo "- " . $field . "<br>";
+        }
+        
+        // Cek nilai yang ada untuk filter
+        echo "<br><strong>Checking filter-related fields:</strong><br>";
+        
+        $filter_fields = ['jenis_penugasan', 'jenis_tugas', 'lingkup_penugasan', 'kategori'];
+        
+        foreach ($filter_fields as $field) {
+            if ($this->db->field_exists($field, 'surat')) {
+                echo "<br><strong>Field '$field' exists. Values:</strong><br>";
+                
+                $this->db->distinct();
+                $this->db->select($field);
+                $this->db->from('surat');
+                $this->db->where($field . ' IS NOT NULL');
+                $this->db->where($field . ' !=', '');
+                $this->db->order_by($field);
+                $result = $this->db->get();
+                
+                if ($result->num_rows() > 0) {
+                    foreach ($result->result() as $row) {
+                        $value = $row->$field;
+                        echo "- '" . htmlspecialchars($value) . "'<br>";
+                    }
+                } else {
+                    echo "- No values found (all NULL or empty)<br>";
+                }
+            } else {
+                echo "<br>Field '$field' does NOT exist in database<br>";
+            }
+        }
+        
+        // Cek sample data
+        echo "<br><strong>Sample data (first 3 rows):</strong><br>";
+        $this->db->limit(3);
+        $sample = $this->db->get('surat')->result();
+        
+        echo "<pre>";
+        foreach ($sample as $row) {
+            print_r($row);
+        }
+        echo "</pre>";
+    }
+public function check_dosen_field()
+{
+    $fields = $this->db->list_fields('surat');
+    
+    echo "Field yang ada di tabel surat:<br>";
+    echo "<pre>";
+    print_r($fields);
+    echo "</pre>";
+    
+    // Cek jika field nama_dosen ada
+    if (in_array('nama_dosen', $fields)) {
+        echo "<p style='color: green;'><strong>Field 'nama_dosen' ADA di database</strong></p>";
+        
+        // Cek sample data
+        $this->db->select('id, nama_kegiatan, nama_dosen, nip, dosen_list');
+        $this->db->limit(5);
+        $sample = $this->db->get('surat')->result();
+        
+        echo "<p>Sample data:</p>";
+        echo "<pre>";
+        print_r($sample);
+        echo "</pre>";
+    } else {
+        echo "<p style='color: red;'><strong>Field 'nama_dosen' TIDAK ADA di database!</strong></p>";
+    }
+}
+    /* ================================
        DEBUG: CEK STRUKTUR TABEL SURAT
     ================================= */
     public function debug_table_structure()
     {
-        // Cek struktur tabel surat untuk memastikan field yang ada
         $query = $this->db->query("DESCRIBE surat");
         $structure = $query->result();
         
@@ -1230,7 +1338,6 @@ class Kaprodi extends CI_Controller
         }
         echo "</pre>";
         
-        // Cek data contoh untuk debugging
         $sample = $this->db->get('surat')->row();
         echo "<h3>Data Contoh:</h3>";
         echo "<pre>";

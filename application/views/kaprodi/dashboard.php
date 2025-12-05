@@ -527,6 +527,7 @@
     </div>
 </div>
 
+
 <!-- Tabel -->
 <div class="card">
     <div class="card-header">
@@ -545,7 +546,7 @@
                     <th>Penyelenggara</th>
                     <th>Tanggal Pengajuan</th>
                     <th>Tanggal Kegiatan</th>
-                    <th>Tempat Kegiatan</th>
+                    <th>Nama Dosen</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -571,6 +572,95 @@
 
                     $tgl_pengajuan = isset($s->created_at) && $s->created_at ? date('d M Y', strtotime($s->created_at)) : '-';
                     $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
+                    
+                    // **PERBAIKAN: Ambil nama dosen dari database dengan benar**
+                    $nama_dosen = '-';
+                    
+                    // Cek jika ada field nama_dosen langsung di surat
+                    if (!empty($s->nama_dosen)) {
+                        $nama_dosen = $s->nama_dosen;
+                    } 
+                    // Jika tidak ada, coba ambil dari dosen_list
+                    else if (!empty($s->dosen_list)) {
+                        // Jika dosen_list adalah string JSON
+                        if (is_string($s->dosen_list)) {
+                            // Coba decode JSON
+                            $decoded_dosen = json_decode($s->dosen_list, true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded_dosen)) {
+                                $dosen_data = $decoded_dosen;
+                            } else {
+                                // Jika bukan JSON, gunakan sebagai string biasa
+                                $nama_dosen = $s->dosen_list;
+                                $dosen_data = [['nama' => $s->dosen_list]];
+                            }
+                        } 
+                        // Jika dosen_list sudah array
+                        else if (is_array($s->dosen_list)) {
+                            $dosen_data = $s->dosen_list;
+                        }
+                        
+                        // Jika berhasil mendapatkan array dosen_data
+                        if (isset($dosen_data) && is_array($dosen_data)) {
+                            $nama_dosen_array = [];
+                            foreach ($dosen_data as $dosen) {
+                                if (is_array($dosen) && isset($dosen['nama'])) {
+                                    $nama_dosen_array[] = $dosen['nama'];
+                                } elseif (is_string($dosen)) {
+                                    $nama_dosen_array[] = $dosen;
+                                } elseif (is_object($dosen) && isset($dosen->nama)) {
+                                    $nama_dosen_array[] = $dosen->nama;
+                                }
+                            }
+                            
+                            // Gabungkan nama dosen dengan pemisah koma
+                            if (!empty($nama_dosen_array)) {
+                                $nama_dosen = implode(', ', $nama_dosen_array);
+                            }
+                        }
+                    }
+                    // Jika masih kosong, coba ambil dari NIP
+                    else if (!empty($s->nip)) {
+                        // Ambil data dosen dari NIP
+                        $nip_data = $s->nip;
+                        
+                        // Jika NIP berisi multiple data (array/JSON)
+                        if (is_string($nip_data) && (strpos($nip_data, '[') !== false || strpos($nip_data, '{') !== false)) {
+                            try {
+                                $nip_array = json_decode($nip_data, true);
+                                if (is_array($nip_array) && !empty($nip_array)) {
+                                    // Ambil data dosen dari database berdasarkan NIP
+                                    $this->db->select('nama_dosen');
+                                    $this->db->from('list_dosen');
+                                    $this->db->where_in('nip', $nip_array);
+                                    $dosen_db = $this->db->get()->result_array();
+                                    
+                                    if (!empty($dosen_db)) {
+                                        $nama_dosen_array = array_column($dosen_db, 'nama_dosen');
+                                        $nama_dosen = implode(', ', $nama_dosen_array);
+                                    }
+                                }
+                            } catch (Exception $e) {
+                                // Jika error, gunakan NIP sebagai fallback
+                                $nama_dosen = 'Dosen dari NIP: ' . substr($nip_data, 0, 30);
+                            }
+                        } else {
+                            // Single NIP
+                            $this->db->select('nama_dosen');
+                            $this->db->from('list_dosen');
+                            $this->db->where('nip', $nip_data);
+                            $dosen_db = $this->db->get()->row();
+                            
+                            if ($dosen_db) {
+                                $nama_dosen = $dosen_db->nama_dosen;
+                            }
+                        }
+                    }
+                    
+                    // **SIMPLE FIX: Gunakan apa yang ada di database**
+                    $nama_dosen_display = $nama_dosen;
+                    if ($nama_dosen === '-' && isset($s->nama_dosen) && !empty($s->nama_dosen)) {
+                        $nama_dosen_display = $s->nama_dosen;
+                    }
                 ?>
                 <!-- BARIS TABEL BISA DIKLIK UNTUK DETAIL -->
                 <tr onclick="showRowDetail(<?= $s->id ?>)" style="cursor: pointer;" class="clickable-row">
@@ -579,11 +669,39 @@
                     <td data-label="Penyelenggara"><?= htmlspecialchars($s->penyelenggara) ?></td>
                     <td data-label="Tanggal Pengajuan"><?= $tgl_pengajuan ?></td>
                     <td data-label="Tanggal Kegiatan"><?= $tgl_kegiatan ?></td>
-                    <td data-label="Nama Dosen">
-                    <?= !empty($s->dosen_list) ? htmlspecialchars($s->tempat_kegiatan) : '-' ?>
-                    </td>
-
-
+                <td data-label="Nama Dosen">
+    <?php
+    // Cara paling sederhana: gunakan field yang ada
+    if (!empty($s->nama_dosen) && $s->nama_dosen !== '-' && $s->nama_dosen !== ''):
+        echo htmlspecialchars($s->nama_dosen);
+    elseif (!empty($s->dosen_list)):
+        // Coba ambil dari dosen_list
+        $dosen_list_data = $s->dosen_list;
+        
+        // Coba decode jika JSON
+        if (is_string($dosen_list_data) && strpos($dosen_list_data, '[') !== false) {
+            $decoded = json_decode($dosen_list_data, true);
+            if ($decoded && is_array($decoded)) {
+                $nama_array = [];
+                foreach ($decoded as $item) {
+                    if (is_array($item) && isset($item['nama'])) {
+                        $nama_array[] = $item['nama'];
+                    } elseif (is_string($item)) {
+                        $nama_array[] = $item;
+                    }
+                }
+                echo !empty($nama_array) ? htmlspecialchars(implode(', ', $nama_array)) : 'Data dosen';
+            } else {
+                echo htmlspecialchars($dosen_list_data);
+            }
+        } else {
+            echo htmlspecialchars($dosen_list_data);
+        }
+    else:
+        echo '<span style="color: #95a5a6; font-style: italic;">Data dosen tidak tersedia</span>';
+    endif;
+    ?>
+</td>
                     <td data-label="Status"><?= $badge ?></td>
                     <!-- TOMBOL AKSI - TOMBOL DETAIL MENJADI LIHAT SURAT, TAMBAH TOMBOL EVIDEN -->
                     <td data-label="Aksi">
@@ -1012,22 +1130,12 @@ function getEvidenFilesFromData(item) {
                                 name: fileName,
                                 url: fileUrl,
                                 ext: fileName.split('.').pop().toLowerCase()
-                            });
-                        }
-                    });
-                }
-            } else {
-                // Single file string
-                const fileName = getFileNameFromPath(evidenValue);
-                const fileUrl = getFileUrl(evidenValue, baseUrl);
-                evidenFiles.push({
-                    name: fileName,
-                    url: fileUrl,
-                    ext: fileName.split('.').pop().toLowerCase()
+                        });
+                    }
                 });
             }
-        } catch (e) {
-            // Fallback: treat as single file
+        } else {
+            // Single file string
             const fileName = getFileNameFromPath(evidenValue);
             const fileUrl = getFileUrl(evidenValue, baseUrl);
             evidenFiles.push({
@@ -1036,6 +1144,16 @@ function getEvidenFilesFromData(item) {
                 ext: fileName.split('.').pop().toLowerCase()
             });
         }
+    } catch (e) {
+        // Fallback: treat as single file
+        const fileName = getFileNameFromPath(evidenValue);
+        const fileUrl = getFileUrl(evidenValue, baseUrl);
+        evidenFiles.push({
+            name: fileName,
+            url: fileUrl,
+            ext: fileName.split('.').pop().toLowerCase()
+        });
+    }
     }
     
     return evidenFiles;

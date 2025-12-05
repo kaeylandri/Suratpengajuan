@@ -241,27 +241,38 @@ class Sekretariat extends CI_Controller {
     /* ================================
     FUNGSI BARU: FILTER JENIS PENUGASAN
     ================================= */
-    private function applyJenisPenugasanFilter($jenis_penugasan_filter = null)
-    {
-        if (!empty($jenis_penugasan_filter)) {
-            if ($jenis_penugasan_filter === 'perorangan') {
-                $this->db->group_start();
-                $this->db->where("(`jenis_penugasan_perorangan` IS NOT NULL AND `jenis_penugasan_perorangan` != '' AND `jenis_penugasan_perorangan` != '-')");
-                $this->db->or_where("(`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-')");
-                $this->db->group_end();
-            } elseif ($jenis_penugasan_filter === 'kelompok') {
-                $this->db->group_start();
-                $this->db->where("(`jenis_penugasan_kelompok` IS NOT NULL AND `jenis_penugasan_kelompok` != '' AND `jenis_penugasan_kelompok` != '-')");
-                $this->db->or_where("(`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-')");
-                $this->db->group_end();
-            } elseif ($jenis_penugasan_filter === 'lainnya') {
-                $this->db->group_start();
-                $this->db->where("(`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-')");
-                $this->db->or_where("(`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-')");
-                $this->db->group_end();
-            }
+  private function applyJenisPenugasanFilter($jenis_penugasan_filter = null)
+{
+    if (!empty($jenis_penugasan_filter)) {
+        if ($jenis_penugasan_filter === 'perorangan') {
+            $this->db->where("(
+                (`jenis_penugasan_perorangan` IS NOT NULL AND `jenis_penugasan_perorangan` != '' AND `jenis_penugasan_perorangan` != '-') AND
+                (`jenis_penugasan_kelompok` IS NULL OR `jenis_penugasan_kelompok` = '' OR `jenis_penugasan_kelompok` = '-')
+            ) OR (
+                (`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-') AND
+                (`penugasan_lainnya_kelompok` IS NULL OR `penugasan_lainnya_kelompok` = '' OR `penugasan_lainnya_kelompok` = '-')
+            )");
+            
+        } elseif ($jenis_penugasan_filter === 'kelompok') {
+            $this->db->where("(
+                (`jenis_penugasan_kelompok` IS NOT NULL AND `jenis_penugasan_kelompok` != '' AND `jenis_penugasan_kelompok` != '-') AND
+                (`jenis_penugasan_perorangan` IS NULL OR `jenis_penugasan_perorangan` = '' OR `jenis_penugasan_perorangan` = '-')
+            ) OR (
+                (`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-') AND
+                (`penugasan_lainnya_perorangan` IS NULL OR `penugasan_lainnya_perorangan` = '' OR `penugasan_lainnya_perorangan` = '-')
+            )");
+            
+        } elseif ($jenis_penugasan_filter === 'lainnya') {
+            $this->db->where("(
+                (`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-') OR
+                (`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-')
+            ) AND (
+                (`jenis_penugasan_perorangan` IS NULL OR `jenis_penugasan_perorangan` = '' OR `jenis_penugasan_perorangan` = '-') AND
+                (`jenis_penugasan_kelompok` IS NULL OR `jenis_penugasan_kelompok` = '' OR `jenis_penugasan_kelompok` = '-')
+            )");
         }
     }
+}
 
     /* ================================
     PENDING - DENGAN FILTER JENIS PENUGASAN

@@ -368,204 +368,221 @@ class Dekan extends CI_Controller
         $this->load->view('dekan/halaman_ditolak', $data);
     }
 
-    /* ================================
-       TOTAL SEMUA PENGAJUAN
-    ================================= */
-    public function halaman_total()
-    {
-        $tahun = $this->input->get('tahun') ?? date('Y');
-        $bulan = $this->input->get('bulan') ?? 'all';
-        $search = $this->input->get('search');
-        $status = $this->input->get('status');
-        
-        $data['tahun'] = $tahun;
-        $data['bulan'] = $bulan;
-        $data['current_page'] = 'total';
-
-        // Ambil semua data yang relevan untuk dekan
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
-
-        // Filter search
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('nama_kegiatan', $search);
-            $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('nip', $search);
-            $this->db->or_like('nama_dosen', $search);
-            $this->db->group_end();
-        }
-
-        // Filter status
-        if (!empty($status)) {
-            switch($status) {
-                case 'pending':
-                    $this->db->where('status', 'disetujui sekretariat');
-                    break;
-                case 'approved':
-                    $this->db->where('status', 'disetujui dekan');
-                    break;
-                case 'rejected':
-                    $this->db->where('status', 'ditolak dekan');
-                    break;
-            }
-        }
-
-        $data['surat_list'] = $this->db->select('*')
-                               ->order_by('created_at', 'DESC')
-                               ->get('surat')
-                               ->result_array();
-
-        // Statistik (dengan filter bulan)
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
-        
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('nama_kegiatan', $search);
-            $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('nip', $search);
-            $this->db->or_like('nama_dosen', $search);
-            $this->db->group_end();
-        }
-        
-        if (!empty($status)) {
-            switch($status) {
-                case 'pending':
-                    $this->db->where('status', 'disetujui sekretariat');
-                    break;
-                case 'approved':
-                    $this->db->where('status', 'disetujui dekan');
-                    break;
-                case 'rejected':
-                    $this->db->where('status', 'ditolak dekan');
-                    break;
-            }
-        }
-        
-        $data['total_surat'] = $this->db->count_all_results('surat');
-
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        $data['approved_count'] = $this->db->where('status', 'disetujui dekan')
-                                          ->count_all_results('surat');
-
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        $data['pending_count'] = $this->db->where('status', 'disetujui sekretariat')
-                                         ->count_all_results('surat');
-
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        $data['rejected_count'] = $this->db->where('status', 'ditolak dekan')
-                                          ->count_all_results('surat');
-
-        $this->load->view('dekan/halaman_total', $data);
+/* ================================
+   TOTAL SEMUA PENGAJUAN - VERSI DIPERBAIKI
+================================= */
+public function halaman_total()
+{
+    $tahun = $this->input->get('tahun') ?? date('Y');
+    $bulan = $this->input->get('bulan') ?? 'all';
+    $search = $this->input->get('search');
+    $status = $this->input->get('status');
+    $jenis_penugasan = $this->input->get('jenis_penugasan');
+    
+    $data['tahun'] = $tahun;
+    $data['bulan'] = $bulan;
+    $data['current_page'] = 'total';
+    $data['jenis_penugasan'] = $jenis_penugasan;
+    
+    // Query dasar
+    $this->db->select('*');
+    $this->db->from('surat');
+    $this->db->where('YEAR(created_at)', $tahun);
+    
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
     }
-
-    /* ================================
-       DETAIL MODAL (AJAX) - DIPERBAIKI DENGAN PERIODE KEGIATAN
-    ================================= */
-    public function getDetailPengajuan($id)
-    {
-        $this->db->where('id', $id);
-        $pengajuan = $this->db->get('surat')->row();
+    
+    // Filter status
+    $this->db->where_in('status', ['disetujui sekretariat', 'disetujui dekan', 'ditolak dekan']);
+    
+    if ($status) {
+        switch($status) {
+            case 'pending':
+                $this->db->where('status', 'disetujui sekretariat');
+                break;
+            case 'approved':
+                $this->db->where('status', 'disetujui dekan');
+                break;
+            case 'rejected':
+                $this->db->where('status', 'ditolak dekan');
+                break;
+        }
+    }
+    
+    // Filter search
+    if ($search) {
+        $this->db->group_start();
+        $this->db->like('nama_kegiatan', $search);
+        $this->db->or_like('penyelenggara', $search);
+        $this->db->or_like('nip', $search);
+        $this->db->or_like('nama_dosen', $search);
+        $this->db->group_end();
+    }
+    
+    $this->db->order_by('created_at', 'DESC');
+    $query = $this->db->get();
+    $all_data = $query->result_array();
+    
+    // Filter berdasarkan jenis penugasan dengan logika yang lebih baik
+    $data['surat_list'] = [];
+    $perorangan_count = 0;
+    $kelompok_count = 0;
+    
+    foreach ($all_data as $surat) {
+        $nip = trim($surat['nip'] ?? '');
+        $nama_dosen = trim($surat['nama_dosen'] ?? '');
+        $jenis_pengajuan = strtolower(trim($surat['jenis_pengajuan'] ?? ''));
         
-        if ($pengajuan) {
-            // Ambil data dosen
-            $dosen_data = $this->get_dosen_data_from_nip_fixed($pengajuan->nip);
+        // Deteksi jenis penugasan - LOGIKA YANG DIOPTIMASI
+        $is_kelompok = false;
+        
+        // Cek 1: Apakah field jenis_pengajuan sudah ada dan jelas
+        if (!empty($jenis_pengajuan)) {
+            if (strpos($jenis_pengajuan, 'kelompok') !== false || 
+                strpos($jenis_pengajuan, 'tim') !== false ||
+                strpos($jenis_pengajuan, 'group') !== false ||
+                strpos($jenis_pengajuan, 'multiple') !== false ||
+                strpos($jenis_pengajuan, 'banyak') !== false) {
+                $is_kelompok = true;
+            }
+        }
+        
+        // Cek 2: Analisis NIP jika jenis_pengajuan tidak jelas
+        if (!$is_kelompok && !empty($nip)) {
+            // Hapus karakter tidak penting
+            $nip_clean = preg_replace('/[\[\]\{\}]/', '', $nip);
             
-            // Ambil progress timeline yang lengkap
-            $progress_timeline = $this->getProgressTimeline($id);
-            
-            // Ambil semua field yang berkaitan dengan periode
-            $jenis_date = $pengajuan->jenis_date ?? null;
-            $periode_kegiatan = $pengajuan->periode_kegiatan ?? null;
-            $periode_value = $pengajuan->periode_value ?? null;
-            $tanggal_kegiatan = $pengajuan->tanggal_kegiatan ?? null;
-            $akhir_kegiatan = $pengajuan->akhir_kegiatan ?? null;
-            
-            // Tentukan nilai periode yang akan ditampilkan
-            $periode_display = '-';
-            
-            if ($jenis_date === 'Custom') {
-                // FORMAT CUSTOM: "30 Nov 2025 - 01 Des 2025"
-                if ($tanggal_kegiatan && $akhir_kegiatan) {
-                    // Format tanggal Indonesia
-                    $bulan_indonesia = [
-                        'Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mar', 'Apr' => 'Apr',
-                        'May' => 'Mei', 'Jun' => 'Jun', 'Jul' => 'Jul', 'Aug' => 'Ags',
-                        'Sep' => 'Sep', 'Oct' => 'Okt', 'Nov' => 'Nov', 'Dec' => 'Des'
-                    ];
-                    
-                    $format_tanggal = function($date) use ($bulan_indonesia) {
-                        $day = date('d', strtotime($date));
-                        $month_en = date('M', strtotime($date));
-                        $month_id = $bulan_indonesia[$month_en] ?? $month_en;
-                        $year = date('Y', strtotime($date));
-                        return $day . ' ' . $month_id . ' ' . $year;
-                    };
-                    
-                    $start_formatted = $format_tanggal($tanggal_kegiatan);
-                    $end_formatted = $format_tanggal($akhir_kegiatan);
-                    $periode_display = $start_formatted . ' - ' . $end_formatted;
-                } elseif ($tanggal_kegiatan) {
-                    // Jika hanya ada tanggal mulai
-                    $periode_display = date('d M Y', strtotime($tanggal_kegiatan));
+            // Deteksi multiple NIP
+            // Cek koma (pemisah NIP)
+            if (strpos($nip_clean, ',') !== false) {
+                // Pecah berdasarkan koma
+                $nip_parts = explode(',', $nip_clean);
+                $valid_nip_count = 0;
+                
+                foreach ($nip_parts as $part) {
+                    $clean_part = trim($part);
+                    // Jika bagian terlihat seperti NIP (panjang minimal 6 angka)
+                    if (preg_match('/^\d{6,}$/', $clean_part)) {
+                        $valid_nip_count++;
+                    }
                 }
-            } elseif ($jenis_date === 'Periode') {
-                // Untuk jenis Periode, gunakan periode_kegiatan atau periode_value
-                $periode_display = $periode_kegiatan ?: $periode_value ?: '-';
+                
+                // Jika ada lebih dari 1 NIP valid, anggap kelompok
+                if ($valid_nip_count > 1) {
+                    $is_kelompok = true;
+                }
             }
+            // Cek format JSON tanpa tanda baca
+            elseif (strlen($nip) > 15) {
+                // Cek apakah NIP sangat panjang (mungkin berisi multiple NIP tanpa pemisah jelas)
+                // Atau cek pola "nip1nip2nip3"
+                if (preg_match('/(\d{18,})/', $nip) || strlen($nip) > 30) {
+                    $is_kelompok = true;
+                }
+            }
+        }
+        
+        // Cek 3: Analisis nama dosen
+        if (!$is_kelompok && !empty($nama_dosen)) {
+            // Hapus karakter tidak penting
+            $nama_clean = preg_replace('/[\[\]\{\}]/', '', $nama_dosen);
             
-            $response_data = array(
-                'id' => $pengajuan->id,
-                'nama_kegiatan' => $pengajuan->nama_kegiatan,
-                'status' => $pengajuan->status,
-                'jenis_pengajuan' => $pengajuan->jenis_pengajuan,
-                'lingkup_penugasan' => $pengajuan->lingkup_penugasan,
-                'penyelenggara' => $pengajuan->penyelenggara,
-                'tanggal_kegiatan' => $tanggal_kegiatan,
-                'akhir_kegiatan' => $akhir_kegiatan,
-                'periode_kegiatan' => $periode_display,  // Nilai yang sudah diformat
-                'jenis_date' => $jenis_date,
-                'periode_value' => $periode_display,
-                'tanggal_kegiatan' => $tanggal_kegiatan,
-                'akhir_kegiatan' => $akhir_kegiatan,
-                'tempat_kegiatan' => $pengajuan->tempat_kegiatan,
-                'created_at' => $pengajuan->created_at,
-                'eviden' => $pengajuan->eviden,
-                'nomor_surat' => $pengajuan->nomor_surat,
-                'catatan_penolakan' => $pengajuan->catatan_penolakan,
-                'dosen_data' => $dosen_data,
-                'progress_timeline' => $progress_timeline, // Data timeline lengkap
-                'approval_status' => json_decode($pengajuan->approval_status, true)
-            );
-            
-            echo json_encode([
-                'success' => true,
-                'data' => $response_data
-            ]);
+            // Cek koma atau kata kunci "dan", "&"
+            if (strpos($nama_clean, ',') !== false ||
+                strpos($nama_clean, ' dan ') !== false ||
+                strpos($nama_clean, ' & ') !== false ||
+                strpos(strtolower($nama_clean), 'dr.') !== false && strpos($nama_clean, ',') !== false) {
+                
+                // Hitung kemungkinan jumlah nama
+                $nama_count = 0;
+                if (strpos($nama_clean, ',') !== false) {
+                    $nama_parts = explode(',', $nama_clean);
+                    foreach ($nama_parts as $part) {
+                        if (str_word_count(trim($part)) >= 2) { // Minimal 2 kata per nama
+                            $nama_count++;
+                        }
+                    }
+                }
+                
+                if ($nama_count > 1) {
+                    $is_kelompok = true;
+                }
+            }
+        }
+        
+        // Cek 4: Fallback - lihat field lain yang mungkin indikator
+        if (!$is_kelompok) {
+            // Cek field lain seperti jumlah_dosen jika ada
+            if (isset($surat['jumlah_dosen']) && $surat['jumlah_dosen'] > 1) {
+                $is_kelompok = true;
+            }
+            // Cek field nama_kegiatan untuk kata kunci tim/kelompok
+            elseif (isset($surat['nama_kegiatan'])) {
+                $nama_kegiatan_lower = strtolower($surat['nama_kegiatan']);
+                if (strpos($nama_kegiatan_lower, 'tim ') === 0 ||
+                    strpos($nama_kegiatan_lower, 'kelompok ') === 0 ||
+                    strpos($nama_kegiatan_lower, 'team ') === 0) {
+                    $is_kelompok = true;
+                }
+            }
+        }
+        
+        // Hitung statistik
+        if ($is_kelompok) {
+            $kelompok_count++;
         } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Data tidak ditemukan'
-            ]);
+            $perorangan_count++;
+        }
+        
+        // Terapkan filter
+        $include = true;
+        if ($jenis_penugasan) {
+            if ($jenis_penugasan == 'perorangan' && $is_kelompok) {
+                $include = false;
+            } elseif ($jenis_penugasan == 'kelompok' && !$is_kelompok) {
+                $include = false;
+            }
+        }
+        
+        if ($include) {
+            $data['surat_list'][] = $surat;
         }
     }
-
+    
+    // Hitung statistik
+    $data['total_surat'] = count($data['surat_list']);
+    
+    // Hitung berdasarkan status
+    $data['approved_count'] = 0;
+    $data['pending_count'] = 0;
+    $data['rejected_count'] = 0;
+    
+    foreach ($data['surat_list'] as $surat) {
+        switch ($surat['status']) {
+            case 'disetujui dekan':
+                $data['approved_count']++;
+                break;
+            case 'disetujui sekretariat':
+                $data['pending_count']++;
+                break;
+            case 'ditolak dekan':
+                $data['rejected_count']++;
+                break;
+        }
+    }
+    
+    // DEBUG: Kirim data statistik ke view
+    $data['debug_info'] = [
+        'total_data' => count($all_data),
+        'filtered_data' => count($data['surat_list']),
+        'perorangan_detected' => $perorangan_count,
+        'kelompok_detected' => $kelompok_count,
+        'filter_applied' => $jenis_penugasan
+    ];
+    
+    $this->load->view('dekan/halaman_total', $data);
+}
     /* ================================
        FUNGSI UNTUK MENDAPATKAN PROGRESS TIMELINE - BARU
     ================================= */
@@ -785,71 +802,72 @@ class Dekan extends CI_Controller
     }
 
     public function approve($id)
-{
-    // Generate nomor surat otomatis jika tidak diisi
-    $nomor_surat = $this->input->post('nomor_surat');
-    if (empty($nomor_surat)) {
-        $nomor_surat = $this->generate_nomor_surat_dekan();
-    }
+    {
+        // Generate nomor surat otomatis jika tidak diisi
+        $nomor_surat = $this->input->post('nomor_surat');
+        if (empty($nomor_surat)) {
+            $nomor_surat = $this->generate_nomor_surat_dekan();
+        }
 
-    $surat = $this->db->get_where('surat', ['id' => $id])->row();
-    if (!$surat) {
-        $this->session->set_flashdata('error', 'Data surat tidak ditemukan');
-        redirect('dekan/dashboard');
-        return;
-    }
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+        if (!$surat) {
+            $this->session->set_flashdata('error', 'Data surat tidak ditemukan');
+            redirect('dekan/dashboard');
+            return;
+        }
 
-    // Validasi status - lebih fleksibel
-    $allowed_statuses = ['disetujui sekretariat', 'pending', 'menunggu persetujuan dekan'];
-    
-    if (!in_array($surat->status, $allowed_statuses)) {
-        $this->session->set_flashdata('error', 'Status pengajuan tidak dapat diproses. Status saat ini: ' . $surat->status);
-        redirect('dekan/dashboard');
-        return;
-    }
-
-    // Update approval status dengan format yang mendukung progress bar
-    $approval = json_decode($surat->approval_status, true) ?? [];
-    
-    // Pastikan semua tahap sebelumnya ada
-    if (!isset($approval['pengirim'])) {
-        $approval['pengirim'] = date("Y-m-d H:i:s");
-    }
-    if (!isset($approval['kaprodi'])) {
-        $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
-    }
-    if (!isset($approval['sekretariat'])) {
-        $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
-    }
-    
-    $approval['dekan'] = date("Y-m-d H:i:s");
-    
-    $update_data = [
-        'status' => 'disetujui dekan',
-        'nomor_surat' => $nomor_surat,
-        'approval_status' => json_encode($approval),
-        'updated_at' => date('Y-m-d H:i:s')
-    ];
-
-    $result = $this->db->where('id', $id)->update('surat', $update_data);
-
-    if ($result) {
-        // PERBAIKAN UTAMA: Siapkan data untuk success modal
-        $approved_items = [[
-            'nama' => $surat->nama_kegiatan,
-            'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara
-        ]];
+        // Validasi status - lebih fleksibel
+        $allowed_statuses = ['disetujui sekretariat', 'pending', 'menunggu persetujuan dekan'];
         
-        // Set flashdata untuk success modal
-        $this->session->set_flashdata('approved_items', $approved_items);
-        $this->session->set_flashdata('is_single_approve', true);
-        $this->session->set_flashdata('success', 'Surat berhasil disetujui oleh Dekan.');
-    } else {
-        $this->session->set_flashdata('error', 'Gagal menyetujui surat.');
+        if (!in_array($surat->status, $allowed_statuses)) {
+            $this->session->set_flashdata('error', 'Status pengajuan tidak dapat diproses. Status saat ini: ' . $surat->status);
+            redirect('dekan/dashboard');
+            return;
+        }
+
+        // Update approval status dengan format yang mendukung progress bar
+        $approval = json_decode($surat->approval_status, true) ?? [];
+        
+        // Pastikan semua tahap sebelumnya ada
+        if (!isset($approval['pengirim'])) {
+            $approval['pengirim'] = date("Y-m-d H:i:s");
+        }
+        if (!isset($approval['kaprodi'])) {
+            $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+        }
+        if (!isset($approval['sekretariat'])) {
+            $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
+        }
+        
+        $approval['dekan'] = date("Y-m-d H:i:s");
+        
+        $update_data = [
+            'status' => 'disetujui dekan',
+            'nomor_surat' => $nomor_surat,
+            'approval_status' => json_encode($approval),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
+        $result = $this->db->where('id', $id)->update('surat', $update_data);
+
+        if ($result) {
+            // PERBAIKAN UTAMA: Siapkan data untuk success modal
+            $approved_items = [[
+                'nama' => $surat->nama_kegiatan,
+                'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara
+            ]];
+            
+            // Set flashdata untuk success modal
+            $this->session->set_flashdata('approved_items', $approved_items);
+            $this->session->set_flashdata('is_single_approve', true);
+            $this->session->set_flashdata('success', 'Surat berhasil disetujui oleh Dekan.');
+        } else {
+            $this->session->set_flashdata('error', 'Gagal menyetujui surat.');
+        }
+        
+        redirect('dekan/dashboard');
     }
-    
-    redirect('dekan/dashboard');
-}
+
     /* ================================
        REJECT - VERSI DIPERBAIKI DENGAN PROGRESS BAR
     ================================= */
@@ -910,95 +928,96 @@ class Dekan extends CI_Controller
     }
 
     public function process_multi_approve()
-{
-    if ($this->input->post()) {
-        $selected_ids = $this->input->post('selected_ids');
-        
-        if (empty($selected_ids)) {
-            $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih');
-            redirect('dekan/halaman_pending');
-            return;
-        }
-        
-        $success_count = 0;
-        $error_count = 0;
-        $errors = [];
-        $approved_items = []; // TAMBAHAN: Array untuk menyimpan data yang disetujui
-        
-        foreach ($selected_ids as $id) {
-            $surat = $this->db->get_where('surat', ['id' => $id])->row();
+    {
+        if ($this->input->post()) {
+            $selected_ids = $this->input->post('selected_ids');
             
-            if ($surat) {
-                // Validasi status yang lebih fleksibel
-                $allowed_statuses = ['disetujui sekretariat', 'pending', 'menunggu persetujuan dekan'];
+            if (empty($selected_ids)) {
+                $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih');
+                redirect('dekan/halaman_pending');
+                return;
+            }
+            
+            $success_count = 0;
+            $error_count = 0;
+            $errors = [];
+            $approved_items = []; // TAMBAHAN: Array untuk menyimpan data yang disetujui
+            
+            foreach ($selected_ids as $id) {
+                $surat = $this->db->get_where('surat', ['id' => $id])->row();
                 
-                if (!in_array($surat->status, $allowed_statuses)) {
-                    $error_count++;
-                    $errors[] = "ID $id: Status tidak valid ($surat->status)";
-                    continue;
-                }
-                
-                // Update approval status dengan format yang mendukung progress bar
-                $approval = json_decode($surat->approval_status, true) ?? [];
-                
-                // Pastikan semua tahap sebelumnya ada
-                if (!isset($approval['pengirim'])) {
-                    $approval['pengirim'] = date("Y-m-d H:i:s");
-                }
-                if (!isset($approval['kaprodi'])) {
-                    $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
-                }
-                if (!isset($approval['sekretariat'])) {
-                    $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
-                }
-                
-                $approval['dekan'] = date("Y-m-d H:i:s");
-                
-                $result = $this->db->where('id', $id)->update('surat', [
-                    'status' => 'disetujui dekan',
-                    'nomor_surat' => $this->generate_nomor_surat_dekan(),
-                    'approval_status' => json_encode($approval),
-                    'updated_at' => date('Y-m-d H:i:s')
-                ]);
-                
-                if ($result) {
-                    $success_count++;
+                if ($surat) {
+                    // Validasi status yang lebih fleksibel
+                    $allowed_statuses = ['disetujui sekretariat', 'pending', 'menunggu persetujuan dekan'];
                     
-                    // TAMBAHAN: Simpan data yang berhasil disetujui
-                    $approved_items[] = [
-                        'nama' => $surat->nama_kegiatan,
-                        'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara
-                    ];
+                    if (!in_array($surat->status, $allowed_statuses)) {
+                        $error_count++;
+                        $errors[] = "ID $id: Status tidak valid ($surat->status)";
+                        continue;
+                    }
+                    
+                    // Update approval status dengan format yang mendukung progress bar
+                    $approval = json_decode($surat->approval_status, true) ?? [];
+                    
+                    // Pastikan semua tahap sebelumnya ada
+                    if (!isset($approval['pengirim'])) {
+                        $approval['pengirim'] = date("Y-m-d H:i:s");
+                    }
+                    if (!isset($approval['kaprodi'])) {
+                        $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+                    }
+                    if (!isset($approval['sekretariat'])) {
+                        $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
+                    }
+                    
+                    $approval['dekan'] = date("Y-m-d H:i:s");
+                    
+                    $result = $this->db->where('id', $id)->update('surat', [
+                        'status' => 'disetujui dekan',
+                        'nomor_surat' => $this->generate_nomor_surat_dekan(),
+                        'approval_status' => json_encode($approval),
+                        'updated_at' => date('Y-m-d H:i:s')
+                    ]);
+                    
+                    if ($result) {
+                        $success_count++;
+                        
+                        // TAMBAHAN: Simpan data yang berhasil disetujui
+                        $approved_items[] = [
+                            'nama' => $surat->nama_kegiatan,
+                            'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara
+                        ];
+                    } else {
+                        $error_count++;
+                        $errors[] = "ID $id: Gagal update database";
+                    }
                 } else {
                     $error_count++;
-                    $errors[] = "ID $id: Gagal update database";
+                    $errors[] = "ID $id: Data tidak ditemukan";
                 }
-            } else {
-                $error_count++;
-                $errors[] = "ID $id: Data tidak ditemukan";
-            }
-        }
-        
-        if ($success_count > 0) {
-            $message = "Berhasil menyetujui $success_count pengajuan";
-            if ($error_count > 0) {
-                $message .= ". Gagal: $error_count pengajuan";
             }
             
-            // PERBAIKAN UTAMA: Set flashdata untuk success modal
-            $this->session->set_flashdata('approved_items', $approved_items);
-            $this->session->set_flashdata('is_single_approve', false);
-            $this->session->set_flashdata('success', $message);
+            if ($success_count > 0) {
+                $message = "Berhasil menyetujui $success_count pengajuan";
+                if ($error_count > 0) {
+                    $message .= ". Gagal: $error_count pengajuan";
+                }
+                
+                // PERBAIKAN UTAMA: Set flashdata untuk success modal
+                $this->session->set_flashdata('approved_items', $approved_items);
+                $this->session->set_flashdata('is_single_approve', false);
+                $this->session->set_flashdata('success', $message);
+            } else {
+                $this->session->set_flashdata('error', 'Gagal menyetujui semua pengajuan yang dipilih');
+            }
+            
+            redirect('dekan/halaman_pending');
         } else {
-            $this->session->set_flashdata('error', 'Gagal menyetujui semua pengajuan yang dipilih');
+            $this->session->set_flashdata('error', 'Metode request tidak valid');
+            redirect('dekan/halaman_pending');
         }
-        
-        redirect('dekan/halaman_pending');
-    } else {
-        $this->session->set_flashdata('error', 'Metode request tidak valid');
-        redirect('dekan/halaman_pending');
     }
-}
+
     /* ================================
        BULK REJECT - DIPERBAIKI DENGAN PROGRESS BAR
     ================================= */
@@ -1106,6 +1125,7 @@ class Dekan extends CI_Controller
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
         $status = $this->input->get('status');
+        $jenis_penugasan = $this->input->get('jenis_penugasan'); // TAMBAHAN: Filter jenis penugasan
         
         $query_params = 'tahun=' . $tahun . '&bulan=' . $bulan;
         if (!empty($search)) {
@@ -1113,6 +1133,9 @@ class Dekan extends CI_Controller
         }
         if (!empty($status)) {
             $query_params .= '&status=' . $status;
+        }
+        if (!empty($jenis_penugasan)) {
+            $query_params .= '&jenis_penugasan=' . $jenis_penugasan;
         }
         
         switch($current_page) {
@@ -1285,4 +1308,97 @@ class Dekan extends CI_Controller
             ]);
         }
     }
+/* ================================
+   DEBUG DATA - UNTUK TROUBLESHOOTING
+================================= */
+/* ================================
+   DEBUG FILTER JENIS PENUGASAN
+================================= */
+public function debug_filter_jenis_penugasan()
+{
+    $tahun = date('Y');
+    $jenis_penugasan = $this->input->get('jenis') ?? 'perorangan';
+    
+    echo "<h1>Debug Filter Jenis Penugasan: $jenis_penugasan</h1>";
+    
+    // Ambil semua data
+    $this->db->select('id, nama_kegiatan, nip, nama_dosen');
+    $this->db->where('YEAR(created_at)', $tahun);
+    $all_data = $this->db->get('surat')->result_array();
+    
+    echo "<h2>Semua Data (" . count($all_data) . ")</h2>";
+    echo "<table border='1' cellpadding='5'>";
+    echo "<tr><th>ID</th><th>Nama Kegiatan</th><th>NIP</th><th>Nama Dosen</th><th>Jenis Deteksi</th></tr>";
+    
+    $perorangan_count = 0;
+    $kelompok_count = 0;
+    
+    foreach ($all_data as $row) {
+        $nip = $row['nip'] ?? '';
+        $nama_dosen = $row['nama_dosen'] ?? '';
+        
+        // Deteksi
+        $is_kelompok = false;
+        
+        if (strpos($nip, ',') !== false) {
+            $is_kelompok = true;
+        } elseif (strpos($nip, '[') !== false && strpos($nip, ']') !== false) {
+            $is_kelompok = true;
+        } elseif (strpos($nama_dosen, ',') !== false) {
+            $is_kelompok = true;
+        } elseif (strpos($nama_dosen, '[') !== false && strpos($nama_dosen, ']') !== false) {
+            $is_kelompok = true;
+        }
+        
+        $jenis_deteksi = $is_kelompok ? 'kelompok' : 'perorangan';
+        
+        if ($is_kelompok) {
+            $kelompok_count++;
+        } else {
+            $perorangan_count++;
+        }
+        
+        echo "<tr>";
+        echo "<td>{$row['id']}</td>";
+        echo "<td>" . htmlspecialchars($row['nama_kegiatan']) . "</td>";
+        echo "<td>" . htmlspecialchars(substr($nip, 0, 50)) . "</td>";
+        echo "<td>" . htmlspecialchars(substr($nama_dosen, 0, 50)) . "</td>";
+        echo "<td>{$jenis_deteksi}</td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+    
+    echo "<h2>Statistik:</h2>";
+    echo "<p>Perorangan: $perorangan_count</p>";
+    echo "<p>Kelompok: $kelompok_count</p>";
+    
+    // Test dengan filter
+    echo "<h2>Test Filter untuk '$jenis_penugasan':</h2>";
+    
+    $filtered = [];
+    foreach ($all_data as $row) {
+        $nip = $row['nip'] ?? '';
+        $nama_dosen = $row['nama_dosen'] ?? '';
+        
+        $is_kelompok = false;
+        
+        if (strpos($nip, ',') !== false) {
+            $is_kelompok = true;
+        } elseif (strpos($nip, '[') !== false && strpos($nip, ']') !== false) {
+            $is_kelompok = true;
+        } elseif (strpos($nama_dosen, ',') !== false) {
+            $is_kelompok = true;
+        } elseif (strpos($nama_dosen, '[') !== false && strpos($nama_dosen, ']') !== false) {
+            $is_kelompok = true;
+        }
+        
+        if ($jenis_penugasan == 'perorangan' && !$is_kelompok) {
+            $filtered[] = $row;
+        } elseif ($jenis_penugasan == 'kelompok' && $is_kelompok) {
+            $filtered[] = $row;
+        }
+    }
+    
+    echo "<p>Jumlah setelah filter: " . count($filtered) . "</p>";
+}
 }
