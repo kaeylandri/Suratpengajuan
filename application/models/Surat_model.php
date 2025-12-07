@@ -237,4 +237,34 @@ public function update_surat($id, $data)
     return $this->db->get('list_surat')->result();
 }
 
+public function hapus_dosen_dari_surat($surat_id, $nip)
+{
+    // Pastikan surat ada
+    $surat = $this->db->get_where('surat_tugas', ['id' => $surat_id])->row();
+    if (!$surat) {
+        return false;
+    }
+    
+    // Hapus dari tabel pivot (sesuaikan dengan nama tabel Anda)
+    // Contoh: jika tabel pivot adalah surat_dosen
+    $this->db->where('surat_id', $surat_id);
+    $this->db->where('nip', $nip);
+    $result = $this->db->delete('surat_dosen');
+    
+    return $result;
+}
+
+public function get_dosen_by_surat_id($surat_id)
+{
+    // Query untuk mengambil dosen terkait surat
+    // Sesuaikan dengan struktur database Anda
+    $this->db->select('d.nip, d.nama_dosen, d.jabatan, d.divisi');
+    $this->db->from('surat_dosen sd');
+    $this->db->join('dosen d', 'd.nip = sd.nip');
+    $this->db->where('sd.surat_id', $surat_id);
+    $this->db->order_by('d.nama_dosen', 'ASC');
+    
+    $query = $this->db->get();
+    return $query->result_array();
+}
 }
