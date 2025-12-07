@@ -1530,4 +1530,39 @@ public function debug_filter_jenis_penugasan()
     
     echo "<p>Jumlah setelah filter: " . count($filtered) . "</p>";
 }
+public function return_pengajuan($id)
+{
+    $surat = $this->db->get_where('surat', ['id' => $id])->row();
+    
+    if (!$surat) {
+        $this->session->set_flashdata('error', 'Surat tidak ditemukan.');
+        $this->redirectToPreviousPage();
+        return;
+    }
+
+    // Validasi: Hanya bisa return jika sudah disetujui/ditolak oleh Kaprodi
+    $allowed_statuses = ['disetujui dekan', 'ditolak dekan'];
+    
+    if (!in_array($surat->status, $allowed_statuses)) {
+        $this->session->set_flashdata('error', 'Hanya pengajuan yang sudah disetujui/ditolak Dekan yang dapat dikembalikan.');
+        $this->redirectToPreviousPage();
+        return;
+    }
+
+    // Update: Kembalikan ke status pengajuan & hapus approval Kaprodi
+    if (isset($approval['dekan'])) {
+        unset($approval['dekan']);
+    }
+    
+    $this->db->where('id', $id)->update('surat', [
+        'status' => 'disetujui sekretariat',
+        'approval_status' => json_encode($approval),
+        'catatan_penolakan' => null, // Hapus catatan penolakan jika ada
+    ]);
+
+    $this->session->set_flashdata('success', '✅ Pengajuan berhasil dikembalikan ke status awal (Menunggu Persetujuan).');
+    
+    $this->redirectToPreviousPage();
+}
+
 }

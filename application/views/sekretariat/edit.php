@@ -1,6 +1,32 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+// Tentukan mode edit
+$is_sekretariat_mode = isset($is_edit_sekretariat) && $is_edit_sekretariat === true;
+$current_status = isset($current_status) ? strtolower($current_status) : strtolower($surat['status'] ?? '');
+
+// Tentukan pesan berdasarkan status
+$alert_class = 'alert-info';
+$alert_icon = 'fa-info-circle';
+$alert_title = 'Mode Edit Sekretariat';
+
+if ($current_status === 'disetujui sekretariat') {
+    $alert_message = 'Anda sedang mengedit pengajuan yang sudah disetujui oleh Sekretariat.';
+    $additional_message = '<br><small>Setelah diedit, pengajuan akan dikembalikan ke status "Disetujui KK" untuk diproses ulang oleh Sekretariat.</small>';
+} elseif ($current_status === 'ditolak sekretariat') {
+    $alert_message = 'Anda sedang mengedit pengajuan yang ditolak oleh Sekretariat.';
+    $additional_message = '<br><small>Setelah diedit, pengajuan akan dikembalikan ke status "Disetujui KK" untuk diproses ulang.</small>';
+} else {
+    $alert_message = 'Anda sedang mengedit pengajuan sebagai Sekretariat.';
+    $additional_message = '';
+}
+
+// Tentukan form action
+$form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
+?>
+
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -437,24 +463,24 @@
             color: #16A085;
         }
 
-        /* Alert Box for Revision Mode */
-        .alert-revision {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
+        /* Alert Box for Sekretariat Mode */
+        .alert-sekretariat {
+            background: #e8f6f3;
+            border: 2px solid #16A085;
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+            box-shadow: 0 4px 12px rgba(22, 160, 133, 0.2);
         }
 
-        .alert-revision-content {
+        .alert-sekretariat-content {
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
-        .alert-revision-icon {
-            background: #ffc107;
+        .alert-sekretariat-icon {
+            background: #16A085;
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -464,18 +490,25 @@
             flex-shrink: 0;
         }
 
-        .alert-revision-icon i {
+        .alert-sekretariat-icon i {
             color: white;
             font-size: 24px;
         }
 
-        .alert-rejection-reason {
-            margin-top: 15px;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            border-left: 4px solid #dc3545;
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
         }
+        
+        .badge-warning { background: #ffc107; color: #000; }
+        .badge-success { background: #28a745; color: white; }
+        .badge-danger { background: #dc3545; color: white; }
+        .badge-info { background: #17a2b8; color: white; }
 
         /* Google-style Autocomplete - SEKRETARIAT THEME */
         .autocomplete-box-fixed {
@@ -555,7 +588,6 @@
         .query-match {
             font-weight: 600;
             color: #16A085;
-            /* Warna tema sekretariat */
         }
 
         .autocomplete-item:first-child {
@@ -656,62 +688,60 @@
     <div class="container">
         <div class="header-title">
             <i class="fas fa-edit"></i> Edit Pengajuan Surat - Sekretariat
+            <?php if(isset($surat['status'])): ?>
+                <div style="font-size: 14px; margin-top: 10px; opacity: 0.9;">
+                    <i class="fas fa-tag"></i> Status: 
+                    <span class="status-badge <?= 
+                        strpos($current_status, 'disetujui kk') !== false ? 'badge-info' : 
+                        (strpos($current_status, 'disetujui sekretariat') !== false ? 'badge-success' : 
+                        (strpos($current_status, 'ditolak sekretariat') !== false ? 'badge-danger' : 'badge-warning')) 
+                    ?>">
+                        <?= htmlspecialchars($surat['status']) ?>
+                    </span>
+                </div>
+            <?php endif; ?>
         </div>
 
-        <?php
-        // Cek apakah ini revisi setelah penolakan
-        $is_revision = false;
-        $rejected_by = '';
-        $current_status = isset($surat['status']) ? strtolower($surat['status']) : '';
-
-        if ($current_status === 'ditolak dekan') {
-            $is_revision = true;
-            $rejected_by = 'Dekan';
-        } elseif ($current_status === 'ditolak sekretariat') {
-            $is_revision = true;
-            $rejected_by = 'Sekretariat';
-        }
-        ?>
-
-        <?php if ($is_revision): ?>
-            <div class="alert-revision">
-                <div class="alert-revision-content">
-                    <div class="alert-revision-icon">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div style="flex: 1;">
-                        <h4 style="margin: 0 0 8px 0; color: #856404; font-size: 18px; font-weight: 700;">
-                            <i class="fas fa-redo-alt"></i> Mode Revisi - Pengajuan Ulang
-                        </h4>
-                        <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
-                            <strong>Surat ini ditolak oleh <?= $rejected_by; ?>.</strong><br>
-                            Setelah Anda mengedit dan menyimpan, pengajuan akan <strong>dikirim kembali ke <?= $rejected_by; ?></strong> untuk disetujui ulang.
-                        </p>
-
-                        <?php if (!empty($surat['catatan_penolakan'])): ?>
-                            <div class="alert-rejection-reason">
-                                <strong style="color: #dc3545; display: block; margin-bottom: 5px;">
-                                    <i class="fas fa-comment-dots"></i> Alasan Penolakan:
-                                </strong>
-                                <p style="margin: 0; color: #666; font-size: 13px; font-style: italic;">
-                                    "<?= htmlspecialchars($surat['catatan_penolakan']); ?>"
-                                </p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+        <!-- Alert Info untuk Mode Sekretariat -->
+        <div class="alert-sekretariat">
+            <div class="alert-sekretariat-content">
+                <div class="alert-sekretariat-icon">
+                    <i class="fas <?= $alert_icon ?>"></i>
+                </div>
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 8px 0; color: #0c5460; font-size: 18px; font-weight: 700;">
+                        <i class="fas fa-user-cog"></i> <?= $alert_title ?>
+                    </h4>
+                    <p style="margin: 0; color: #0c5460; font-size: 14px; line-height: 1.6;">
+                        <strong><?= $alert_message ?></strong>
+                        <?= $additional_message ?>
+                    </p>
+                    
+                    <?php if(in_array($current_status, ['disetujui sekretariat', 'ditolak sekretariat'])): ?>
+                        <div style="margin-top: 10px; padding: 8px 12px; background: rgba(22, 160, 133, 0.1); border-radius: 6px;">
+                            <small style="color: #138D75;">
+                                <i class="fas fa-sync-alt"></i> 
+                                <strong>Status akan direset ke:</strong> "Disetujui KK"
+                            </small>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
 
-        <form action="<?= site_url('sekretariat/update_surat/' . (isset($surat['id']) ? $surat['id'] : '')); ?>" method="post" enctype="multipart/form-data">
-
+        <form action="<?= $form_action ?>" method="post" enctype="multipart/form-data">
             <!-- Informasi Kegiatan -->
             <div class="form-section">
                 <h5><i class="fas fa-info-circle"></i> Informasi Kegiatan</h5>
+                
+                <?php if(in_array($current_status, ['disetujui sekretariat'])): ?>
                 <div class="form-group">
                     <label>Nomor Surat <span style="color:#e74c3c">*</span></label>
                     <input type="text" name="nomor_surat" class="form-control" value="<?= htmlspecialchars($surat['nomor_surat'] ?? ''); ?>" required>
+                    <small style="color: #6c757d; font-size: 12px;">Format: XXX/SKT/FT/Tahun</small>
                 </div>
+                <?php endif; ?>
+                
                 <div class="form-group">
                     <label>Nama Kegiatan <span style="color:#e74c3c">*</span></label>
                     <input type="text" name="nama_kegiatan" class="form-control" value="<?= htmlspecialchars($surat['nama_kegiatan'] ?? ''); ?>" required>
@@ -730,7 +760,7 @@
                     </select>
                 </div>
 
-                <div id="custom_date" style="<?= (isset($surat['jenis_date']) && $surat['jenis_date'] == 'custom') ? '' : 'display:none;'; ?>">
+                <div id="custom_date" style="<?= (isset($surat['jenis_date']) && $surat['jenis_date'] == 'Custom') ? '' : 'display:none;'; ?>">
                     <div class="form-group">
                         <label>Tanggal Mulai Kegiatan</label>
                         <input type="date" name="tanggal_kegiatan" class="form-control" value="<?= htmlspecialchars($surat['tanggal_kegiatan'] ?? ''); ?>">
@@ -802,8 +832,13 @@
                     <div class="form-group">
                         <label>Jenis Penugasan (Perorangan)</label>
                         <select name="jenis_penugasan_perorangan" id="jenis_penugasan_perorangan" class="form-control">
-                            <?php $opsi_per = ["Juri", "Pembicara", "Narasumber", "Lainnya"];
-                            foreach ($opsi_per as $o) echo '<option value="' . htmlspecialchars($o) . '" ' . ((isset($surat['jenis_penugasan_perorangan']) && $surat['jenis_penugasan_perorangan'] == $o) ? 'selected' : '') . '>' . htmlspecialchars($o) . '</option>'; ?>
+                            <?php 
+                            $opsi_per = ["Juri", "Pembicara", "Narasumber", "Lainnya"];
+                            foreach ($opsi_per as $o) {
+                                $selected = (isset($surat['jenis_penugasan_perorangan']) && $surat['jenis_penugasan_perorangan'] == $o) ? 'selected' : '';
+                                echo '<option value="' . htmlspecialchars($o) . '" ' . $selected . '>' . htmlspecialchars($o) . '</option>';
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="form-group" id="lainnya_perorangan_box" style="<?= (isset($surat['jenis_penugasan_perorangan']) && $surat['jenis_penugasan_perorangan'] == 'Lainnya') ? '' : 'display:none;'; ?>">
@@ -816,8 +851,13 @@
                     <div class="form-group">
                         <label>Jenis Penugasan (Kelompok)</label>
                         <select name="jenis_penugasan_kelompok" id="jenis_penugasan_kelompok" class="form-control">
-                            <?php $opsi_kel = ["Tim", "Kepanitiaan", "Lainnya"];
-                            foreach ($opsi_kel as $o) echo '<option value="' . htmlspecialchars($o) . '" ' . ((isset($surat['jenis_penugasan_kelompok']) && $surat['jenis_penugasan_kelompok'] == $o) ? 'selected' : '') . '>' . htmlspecialchars($o) . '</option>'; ?>
+                            <?php 
+                            $opsi_kel = ["Tim", "Kepanitiaan", "Lainnya"];
+                            foreach ($opsi_kel as $o) {
+                                $selected = (isset($surat['jenis_penugasan_kelompok']) && $surat['jenis_penugasan_kelompok'] == $o) ? 'selected' : '';
+                                echo '<option value="' . htmlspecialchars($o) . '" ' . $selected . '>' . htmlspecialchars($o) . '</option>';
+                            }
+                            ?>
                         </select>
                     </div>
                     <div class="form-group" id="lainnya_kelompok_box" style="<?= (isset($surat['jenis_penugasan_kelompok']) && $surat['jenis_penugasan_kelompok'] == 'Lainnya') ? '' : 'display:none;'; ?>">
@@ -856,13 +896,13 @@
                                                 required>
                                         </td>
                                         <td>
-                                <input type="text" 
-                                    name="nama_dosen[]"
-                                    class="form-control nama-dosen-input" 
-                                    value="<?= htmlspecialchars($dosen['nama_dosen'] ?? '') ?>" 
-                                    autocomplete="off"
-                                    required>
-                            </td>
+                                            <input type="text" 
+                                                name="nama_dosen[]"
+                                                class="form-control nama-dosen-input" 
+                                                value="<?= htmlspecialchars($dosen['nama_dosen'] ?? '') ?>" 
+                                                autocomplete="off"
+                                                required>
+                                        </td>
                                         <td>
                                             <input type="text"
                                                 name="jabatan[]"
@@ -1117,7 +1157,7 @@
 
             try {
                 // Gunakan endpoint yang sama seperti edit_surat biasa
-                const response = await fetch(`${BASE_URL}/surat/autocomplete_nip?q=${encodeURIComponent(query)}&field=${fieldType}`);
+                const response = await fetch(`${BASE_URL}/sekretariat/autocomplete_nip?q=${encodeURIComponent(query)}&field=${fieldType}`);
 
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -1589,5 +1629,4 @@
         });
     </script>
 </body>
-
 </html>

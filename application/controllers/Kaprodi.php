@@ -1450,4 +1450,48 @@ public function check_dosen_field()
         print_r($sample);
         echo "</pre>";
     }
+    public function return_pengajuan($id)
+{
+    $surat = $this->db->get_where('surat', ['id' => $id])->row();
+    
+    if (!$surat) {
+        $this->session->set_flashdata('error', 'Surat tidak ditemukan.');
+        $this->redirectToPreviousPage();
+        return;
+    }
+
+    // Validasi: Hanya bisa return jika sudah disetujui/ditolak oleh Kaprodi
+    $allowed_statuses = ['disetujui KK', 'ditolak KK'];
+    
+    if (!in_array($surat->status, $allowed_statuses)) {
+        $this->session->set_flashdata('error', 'Hanya pengajuan yang sudah disetujui/ditolak Kaprodi yang dapat dikembalikan.');
+        $this->redirectToPreviousPage();
+        return;
+    }
+    
+    // Cek apakah sudah disetujui oleh pihak selanjutnya (Sekretariat/Dekan)
+    $approval = json_decode($surat->approval_status, true) ?? [];
+    
+    if (isset($approval['sekretariat']) || isset($approval['dekan'])) {
+        $this->session->set_flashdata('error', 'Pengajuan tidak dapat dikembalikan karena sudah diproses oleh Sekretariat/Dekan.');
+        $this->redirectToPreviousPage();
+        return;
+    }
+
+    // Update: Kembalikan ke status pengajuan & hapus approval Kaprodi
+    if (isset($approval['kk'])) {
+        unset($approval['kk']);
+    }
+    
+    $this->db->where('id', $id)->update('surat', [
+        'status' => 'pengajuan',
+        'approval_status' => json_encode($approval),
+        'catatan_penolakan' => null, // Hapus catatan penolakan jika ada
+    ]);
+
+    $this->session->set_flashdata('success', '✅ Pengajuan berhasil dikembalikan ke status awal (Menunggu Persetujuan).');
+    
+    $this->redirectToPreviousPage();
+}
+
 }

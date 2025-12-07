@@ -147,6 +147,13 @@ $route['sekretariat/approve/(:num)'] = 'sekretariat/approve/$1';
 $route['sekretariat/reject/(:num)'] = 'sekretariat/reject/$1';
 $route['sekretariat/getDetailPengajuan/(:num)'] = 'sekretariat/getDetailPengajuan/$1';
 $route['sekretariat/get_dashboard_counts'] = 'sekretariat/get_dashboard_counts';
+$route['sekretariat/update-pin'] = 'Sekretariat/update_pin';
+$route['sekretariat/update-pin'] = 'Sekretariat/update_pin';
+// Edit untuk sekretariat (semua status kecuali ditolak dekan)
+$route['sekretariat/edit_surat_sekretariat/(:num)'] = 'sekretariat/edit_surat_sekretariat/$1';
+$route['sekretariat/update_surat_sekretariat/(:num)'] = 'sekretariat/update_surat_sekretariat/$1';
+
+
 
 /*
 | -------------------------------------------------------------------------

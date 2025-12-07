@@ -679,12 +679,7 @@
                                 <button class="btn btn-eviden" onclick="event.stopPropagation(); showEvidenModal(<?= (int)$s['id'] ?>)" title="Lihat Eviden">
                                     <i class="fas fa-file-image"></i>
                                 </button>
-                                
-                                <!-- Tombol Status -->
-                                <button class="btn btn-status" onclick="event.stopPropagation(); showStatusModal(<?= (int)$s['id'] ?>)" title="Lihat Status">
-                                    <i class="fas fa-tasks"></i>
-                                </button>
-                                
+
                                 <!-- Tombol Mata (Surat Tugas) - PERUBAHAN UTAMA DI SINI -->
                                 <button class="btn btn-detail" onclick="event.stopPropagation(); showSuratTugasModal(<?= (int)$s['id'] ?>)" title="Lihat Surat Tugas">
                                     <i class="fa-solid fa-eye"></i>

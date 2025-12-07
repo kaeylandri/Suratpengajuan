@@ -346,7 +346,7 @@ function tgl_indo($tanggal) {
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
         echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
-        ?></p>
+        ?></p><br><br><br>
 
          <!-- SIGNATURE + QR -->
          <div class="signature-bottom">

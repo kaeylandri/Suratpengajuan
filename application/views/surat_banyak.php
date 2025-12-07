@@ -346,6 +346,7 @@ function tgl_indo($tanggal) {
                     <th>Nama</th>
                     <th>Jabatan</th>
                     <th>Prodi/Unit</th>
+                    <th>Sebagai</th>
                 </tr>
             </thead>
             <tbody>
@@ -357,6 +358,7 @@ function tgl_indo($tanggal) {
                         <td><?= htmlspecialchars($d['nama']) ?></td>
                         <td><?= htmlspecialchars($d['jabatan']) ?></td>
                         <td><?= htmlspecialchars($d['divisi']) ?></td>
+                        <td><?= htmlspecialchars($d['nip']) ?></td>
                     </tr>
                     <?php endforeach; ?>
                 <?php else: ?>

@@ -1,9 +1,11 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Sekretariat extends CI_Controller {
-    
-    public function __construct() {
+class Sekretariat extends CI_Controller
+{
+
+    public function __construct()
+    {
         parent::__construct();
         $this->load->library('session');
         $this->load->database();
@@ -13,14 +15,15 @@ class Sekretariat extends CI_Controller {
     /* ================================
     DASHBOARD - DENGAN FILTER JENIS PENUGASAN BARU
     ================================= */
-    public function index($filter = 'all') {
+    public function index($filter = 'all')
+    {
         $tahun = $this->input->get('tahun') ?? date('Y');
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
         $status_filter = $this->input->get('status');
         $lingkup_penugasan_filter = $this->input->get('lingkup_penugasan');
         $jenis_penugasan_filter = $this->input->get('jenis_penugasan'); // Filter baru
-        
+
         $data['tahun'] = $tahun;
         $data['bulan'] = $bulan;
         $data['current_filter'] = $filter;
@@ -28,13 +31,13 @@ class Sekretariat extends CI_Controller {
 
         // Surat yang relevan bagi sekretariat
         $this->db->where('YEAR(created_at)', $tahun);
-        
+
         if ($bulan !== 'all') {
             $this->db->where('MONTH(created_at)', $bulan);
         }
-        
+
         $this->db->where_in("status", ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         // Filter search
         if (!empty($search)) {
             $this->db->group_start();
@@ -47,7 +50,7 @@ class Sekretariat extends CI_Controller {
 
         // Filter status dari URL parameter
         if (!empty($status_filter)) {
-            switch($status_filter) {
+            switch ($status_filter) {
                 case 'pending':
                     $this->db->where('status', 'disetujui KK');
                     break;
@@ -65,7 +68,7 @@ class Sekretariat extends CI_Controller {
                     break;
             }
         } else {
-            switch($filter) {
+            switch ($filter) {
                 case 'pending':
                     $this->db->where('status', 'disetujui KK');
                     break;
@@ -103,11 +106,11 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
@@ -121,7 +124,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['pending_count'] = $this->db->where('status', 'disetujui KK')
-                                         ->count_all_results('surat');
+            ->count_all_results('surat');
 
         // Disetujui oleh sekretariat
         $this->db->where('YEAR(created_at)', $tahun);
@@ -133,7 +136,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         // Ditolak oleh sekretariat
         $this->db->where('YEAR(created_at)', $tahun);
@@ -145,7 +148,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['rejected_count'] = $this->db->where_in('status', ['ditolak sekretariat', 'ditolak KK'])
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         // Grafik data
         $total     = array_fill(0, 12, 0);
@@ -155,19 +158,19 @@ class Sekretariat extends CI_Controller {
 
         if ($bulan === 'all') {
             for ($i = 1; $i <= 12; $i++) {
-                $total[$i-1] = $this->countByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                $pending[$i-1] = $this->countPendingByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                $approved[$i-1] = $this->countApprovedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                $rejected[$i-1] = $this->countRejectedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
+                $total[$i - 1] = $this->countByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
+                $pending[$i - 1] = $this->countPendingByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
+                $approved[$i - 1] = $this->countApprovedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
+                $rejected[$i - 1] = $this->countRejectedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
             }
         } else {
             $bulan_int = (int)$bulan;
             for ($i = 1; $i <= 12; $i++) {
                 if ($i == $bulan_int) {
-                    $total[$i-1] = $this->countByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                    $pending[$i-1] = $this->countPendingByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                    $approved[$i-1] = $this->countApprovedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                    $rejected[$i-1] = $this->countRejectedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
+                    $total[$i - 1] = $this->countByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
+                    $pending[$i - 1] = $this->countPendingByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
+                    $approved[$i - 1] = $this->countApprovedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
+                    $rejected[$i - 1] = $this->countRejectedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
                 }
             }
         }
@@ -187,11 +190,11 @@ class Sekretariat extends CI_Controller {
         $this->db->where('YEAR(created_at)', $year);
         $this->db->where('MONTH(created_at)', $month);
         $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         return $this->db->count_all_results('surat');
     }
@@ -201,11 +204,11 @@ class Sekretariat extends CI_Controller {
         $this->db->where('YEAR(created_at)', $year);
         $this->db->where('MONTH(created_at)', $month);
         $this->db->where('status', 'disetujui KK');
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         return $this->db->count_all_results('surat');
     }
@@ -215,11 +218,11 @@ class Sekretariat extends CI_Controller {
         $this->db->where('YEAR(created_at)', $year);
         $this->db->where('MONTH(created_at)', $month);
         $this->db->where('status', 'disetujui sekretariat');
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         return $this->db->count_all_results('surat');
     }
@@ -229,11 +232,11 @@ class Sekretariat extends CI_Controller {
         $this->db->where('YEAR(created_at)', $year);
         $this->db->where('MONTH(created_at)', $month);
         $this->db->where('status', 'ditolak sekretariat');
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         return $this->db->count_all_results('surat');
     }
@@ -241,49 +244,48 @@ class Sekretariat extends CI_Controller {
     /* ================================
     FUNGSI BARU: FILTER JENIS PENUGASAN
     ================================= */
-  private function applyJenisPenugasanFilter($jenis_penugasan_filter = null)
-{
-    if (!empty($jenis_penugasan_filter)) {
-        if ($jenis_penugasan_filter === 'perorangan') {
-            $this->db->where("(
+    private function applyJenisPenugasanFilter($jenis_penugasan_filter = null)
+    {
+        if (!empty($jenis_penugasan_filter)) {
+            if ($jenis_penugasan_filter === 'perorangan') {
+                $this->db->where("(
                 (`jenis_penugasan_perorangan` IS NOT NULL AND `jenis_penugasan_perorangan` != '' AND `jenis_penugasan_perorangan` != '-') AND
                 (`jenis_penugasan_kelompok` IS NULL OR `jenis_penugasan_kelompok` = '' OR `jenis_penugasan_kelompok` = '-')
             ) OR (
                 (`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-') AND
                 (`penugasan_lainnya_kelompok` IS NULL OR `penugasan_lainnya_kelompok` = '' OR `penugasan_lainnya_kelompok` = '-')
             )");
-            
-        } elseif ($jenis_penugasan_filter === 'kelompok') {
-            $this->db->where("(
+            } elseif ($jenis_penugasan_filter === 'kelompok') {
+                $this->db->where("(
                 (`jenis_penugasan_kelompok` IS NOT NULL AND `jenis_penugasan_kelompok` != '' AND `jenis_penugasan_kelompok` != '-') AND
                 (`jenis_penugasan_perorangan` IS NULL OR `jenis_penugasan_perorangan` = '' OR `jenis_penugasan_perorangan` = '-')
             ) OR (
                 (`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-') AND
                 (`penugasan_lainnya_perorangan` IS NULL OR `penugasan_lainnya_perorangan` = '' OR `penugasan_lainnya_perorangan` = '-')
             )");
-            
-        } elseif ($jenis_penugasan_filter === 'lainnya') {
-            $this->db->where("(
+            } elseif ($jenis_penugasan_filter === 'lainnya') {
+                $this->db->where("(
                 (`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-') OR
                 (`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-')
             ) AND (
                 (`jenis_penugasan_perorangan` IS NULL OR `jenis_penugasan_perorangan` = '' OR `jenis_penugasan_perorangan` = '-') AND
                 (`jenis_penugasan_kelompok` IS NULL OR `jenis_penugasan_kelompok` = '' OR `jenis_penugasan_kelompok` = '-')
             )");
+            }
         }
     }
-}
 
     /* ================================
     PENDING - DENGAN FILTER JENIS PENUGASAN
     ================================= */
-    public function pending() {
+    public function pending()
+    {
         $tahun = $this->input->get('tahun') ?? date('Y');
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
         $lingkup_penugasan_filter = $this->input->get('lingkup_penugasan');
         $jenis_penugasan_filter = $this->input->get('jenis_penugasan');
-        
+
         $data['tahun'] = $tahun;
         $data['bulan'] = $bulan;
         $data['current_page'] = 'pending';
@@ -294,13 +296,13 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where('status', 'disetujui KK');
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        
+
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
@@ -318,11 +320,11 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
@@ -335,7 +337,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['pending_count'] = $this->db->where('status', 'disetujui KK')
-                                         ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -346,7 +348,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -357,7 +359,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_pending', $data);
     }
@@ -365,7 +367,8 @@ class Sekretariat extends CI_Controller {
     /* ================================
     DISETUJUI SEKRETARIAT - DENGAN FILTER JENIS PENUGASAN
     ================================= */
-    public function disetujui() {
+    public function disetujui()
+    {
         $tahun = $this->input->get('tahun') ?? date('Y');
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
@@ -382,7 +385,7 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where('status', 'disetujui sekretariat');
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
@@ -406,11 +409,11 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
@@ -423,7 +426,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['pending_count'] = $this->db->where('status', 'disetujui KK')
-                                         ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -434,7 +437,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -445,7 +448,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_disetujui', $data);
     }
@@ -453,7 +456,8 @@ class Sekretariat extends CI_Controller {
     /* ================================
     DITOLAK SEKRETARIAT - DENGAN FILTER JENIS PENUGASAN
     ================================= */
-    public function ditolak() {
+    public function ditolak()
+    {
         $tahun = $this->input->get('tahun') ?? date('Y');
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
@@ -470,7 +474,7 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where('status', 'ditolak sekretariat');
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
@@ -494,11 +498,11 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
@@ -511,7 +515,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['pending_count'] = $this->db->where('status', 'disetujui KK')
-                                         ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -522,7 +526,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -533,7 +537,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_ditolak', $data);
     }
@@ -541,7 +545,8 @@ class Sekretariat extends CI_Controller {
     /* ================================
     DISETUJUI DEKAN - DENGAN FILTER JENIS PENUGASAN
     ================================= */
-    public function disetujui_dekan() {
+    public function disetujui_dekan()
+    {
         $tahun = $this->input->get('tahun') ?? date('Y');
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
@@ -558,7 +563,7 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where('status', 'disetujui dekan');
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
@@ -582,11 +587,11 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
@@ -599,7 +604,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['pending_count'] = $this->db->where('status', 'disetujui KK')
-                                         ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -610,7 +615,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -621,7 +626,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_disetujui_dekan', $data);
     }
@@ -629,7 +634,8 @@ class Sekretariat extends CI_Controller {
     /* ================================
     DITOLAK DEKAN - DENGAN FILTER JENIS PENUGASAN
     ================================= */
-    public function ditolak_dekan() {
+    public function ditolak_dekan()
+    {
         $tahun = $this->input->get('tahun') ?? date('Y');
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
@@ -646,7 +652,7 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where('status', 'ditolak dekan');
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
@@ -670,11 +676,11 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['total_surat'] = $this->db->count_all_results('surat');
 
@@ -687,7 +693,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['pending_count'] = $this->db->where('status', 'disetujui KK')
-                                         ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -698,7 +704,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -709,7 +715,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_ditolak_dekan', $data);
     }
@@ -717,14 +723,15 @@ class Sekretariat extends CI_Controller {
     /* ================================
     TOTAL SEMUA PENGAJUAN - DENGAN FILTER JENIS PENUGASAN
     ================================= */
-    public function semua() {
+    public function semua()
+    {
         $tahun = $this->input->get('tahun') ?? date('Y');
         $bulan = $this->input->get('bulan') ?? 'all';
         $search = $this->input->get('search');
         $status = $this->input->get('status');
         $lingkup_penugasan_filter = $this->input->get('lingkup_penugasan');
         $jenis_penugasan_filter = $this->input->get('jenis_penugasan');
-        
+
         $data['tahun'] = $tahun;
         $data['bulan'] = $bulan;
         $data['current_page'] = 'semua';
@@ -755,7 +762,7 @@ class Sekretariat extends CI_Controller {
 
         // Filter status
         if (!empty($status)) {
-            switch($status) {
+            switch ($status) {
                 case 'pending':
                     $this->db->where('status', 'disetujui KK');
                     break;
@@ -783,13 +790,13 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        
+
         if (!empty($search)) {
             $this->db->group_start();
             $this->db->like('nama_kegiatan', $search);
@@ -798,9 +805,9 @@ class Sekretariat extends CI_Controller {
             $this->db->or_like('nama_dosen', $search);
             $this->db->group_end();
         }
-        
+
         if (!empty($status)) {
-            switch($status) {
+            switch ($status) {
                 case 'pending':
                     $this->db->where('status', 'disetujui KK');
                     break;
@@ -818,7 +825,7 @@ class Sekretariat extends CI_Controller {
                     break;
             }
         }
-        
+
         $data['total_surat'] = $this->db->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
@@ -830,7 +837,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['pending_count'] = $this->db->where('status', 'disetujui KK')
-                                         ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -841,7 +848,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -852,7 +859,7 @@ class Sekretariat extends CI_Controller {
         }
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $data['rejected_count'] = $this->db->where('status', 'ditolak sekretariat')
-                                          ->count_all_results('surat');
+            ->count_all_results('surat');
 
         $this->load->view('sekretariat/halaman_total', $data);
     }
@@ -864,34 +871,43 @@ class Sekretariat extends CI_Controller {
     {
         $this->db->where('id', $id);
         $pengajuan = $this->db->get('surat')->row();
-        
+
         if ($pengajuan) {
             $dosen_data = $this->get_dosen_data_from_nip_fixed($pengajuan->nip);
-            
+
             $jenis_date = $pengajuan->jenis_date ?? null;
             $periode_kegiatan = $pengajuan->periode_kegiatan ?? null;
             $periode_value = $pengajuan->periode_value ?? null;
             $tanggal_kegiatan = $pengajuan->tanggal_kegiatan ?? null;
             $akhir_kegiatan = $pengajuan->akhir_kegiatan ?? null;
-            
+
             $periode_display = '-';
-            
+
             if ($jenis_date === 'Custom') {
                 if ($tanggal_kegiatan && $akhir_kegiatan) {
                     $bulan_indonesia = [
-                        'Jan' => 'Jan', 'Feb' => 'Feb', 'Mar' => 'Mar', 'Apr' => 'Apr',
-                        'May' => 'Mei', 'Jun' => 'Jun', 'Jul' => 'Jul', 'Aug' => 'Ags',
-                        'Sep' => 'Sep', 'Oct' => 'Okt', 'Nov' => 'Nov', 'Dec' => 'Des'
+                        'Jan' => 'Jan',
+                        'Feb' => 'Feb',
+                        'Mar' => 'Mar',
+                        'Apr' => 'Apr',
+                        'May' => 'Mei',
+                        'Jun' => 'Jun',
+                        'Jul' => 'Jul',
+                        'Aug' => 'Ags',
+                        'Sep' => 'Sep',
+                        'Oct' => 'Okt',
+                        'Nov' => 'Nov',
+                        'Dec' => 'Des'
                     ];
-                    
-                    $format_tanggal = function($date) use ($bulan_indonesia) {
+
+                    $format_tanggal = function ($date) use ($bulan_indonesia) {
                         $day = date('d', strtotime($date));
                         $month_en = date('M', strtotime($date));
                         $month_id = $bulan_indonesia[$month_en] ?? $month_en;
                         $year = date('Y', strtotime($date));
                         return $day . ' ' . $month_id . ' ' . $year;
                     };
-                    
+
                     $start_formatted = $format_tanggal($tanggal_kegiatan);
                     $end_formatted = $format_tanggal($akhir_kegiatan);
                     $periode_display = $start_formatted . ' - ' . $end_formatted;
@@ -901,13 +917,13 @@ class Sekretariat extends CI_Controller {
             } elseif ($jenis_date === 'Periode') {
                 $periode_display = $periode_kegiatan ?: $periode_value ?: '-';
             }
-            
+
             // TAMBAHAN: Data jenis penugasan untuk modal detail
             $jenis_penugasan_perorangan = $pengajuan->jenis_penugasan_perorangan ?? '-';
             $jenis_penugasan_kelompok = $pengajuan->jenis_penugasan_kelompok ?? '-';
             $penugasan_lainnya_perorangan = $pengajuan->penugasan_lainnya_perorangan ?? '-';
             $penugasan_lainnya_kelompok = $pengajuan->penugasan_lainnya_kelompok ?? '-';
-            
+
             $response_data = array(
                 'id' => $pengajuan->id,
                 'nama_kegiatan' => $pengajuan->nama_kegiatan,
@@ -932,7 +948,7 @@ class Sekretariat extends CI_Controller {
                 'nama_dosen' => $pengajuan->nama_dosen ?? null,
                 'nip' => $pengajuan->nip ?? null,
             );
-            
+
             echo json_encode([
                 'success' => true,
                 'data' => $response_data
@@ -952,13 +968,13 @@ class Sekretariat extends CI_Controller {
     {
         $this->db->where('id', $id);
         $surat = $this->db->get('surat')->row();
-        
+
         if (!$surat) {
             return null;
         }
-        
+
         $approval = json_decode($surat->approval_status, true) ?? [];
-        
+
         $timeline = [
             'mengirim' => [
                 'status' => 'completed',
@@ -973,7 +989,7 @@ class Sekretariat extends CI_Controller {
                 'display_time' => '-'
             ],
             'sekretariat' => [
-                'status' => 'pending', 
+                'status' => 'pending',
                 'timestamp' => null,
                 'label' => 'Disetujui Sekretariat',
                 'display_time' => '-'
@@ -985,7 +1001,7 @@ class Sekretariat extends CI_Controller {
                 'display_time' => '-'
             ]
         ];
-        
+
         foreach ($approval as $role => $data) {
             if (isset($timeline[$role])) {
                 $status = 'pending';
@@ -998,38 +1014,38 @@ class Sekretariat extends CI_Controller {
                 } else {
                     $status = 'completed';
                 }
-                
+
                 $timeline[$role]['status'] = $status;
                 $timeline[$role]['timestamp'] = is_array($data) ? ($data['timestamp'] ?? null) : $data;
-                $timeline[$role]['display_time'] = $timeline[$role]['timestamp'] ? 
+                $timeline[$role]['display_time'] = $timeline[$role]['timestamp'] ?
                     $this->formatDisplayTime($timeline[$role]['timestamp']) : '-';
             }
         }
-        
+
         if ($timeline['sekretariat']['status'] == 'completed') {
             $timeline['kaprodi']['status'] = 'completed';
-            
+
             if (!$timeline['kaprodi']['timestamp']) {
                 $timeline['kaprodi']['timestamp'] = date('Y-m-d H:i:s', strtotime($surat->created_at . ' +1 hour'));
                 $timeline['kaprodi']['display_time'] = $this->formatDisplayTime($timeline['kaprodi']['timestamp']);
             }
         }
-        
+
         if ($timeline['dekan']['status'] == 'completed') {
             $timeline['kaprodi']['status'] = 'completed';
             $timeline['sekretariat']['status'] = 'completed';
-            
+
             if (!$timeline['kaprodi']['timestamp']) {
                 $timeline['kaprodi']['timestamp'] = date('Y-m-d H:i:s', strtotime($surat->created_at . ' +1 hour'));
                 $timeline['kaprodi']['display_time'] = $this->formatDisplayTime($timeline['kaprodi']['timestamp']);
             }
-            
+
             if (!$timeline['sekretariat']['timestamp']) {
                 $timeline['sekretariat']['timestamp'] = date('Y-m-d H:i:s', strtotime($timeline['kaprodi']['timestamp'] . ' +1 hour'));
                 $timeline['sekretariat']['display_time'] = $this->formatDisplayTime($timeline['sekretariat']['timestamp']);
             }
         }
-        
+
         return $timeline;
     }
 
@@ -1039,11 +1055,11 @@ class Sekretariat extends CI_Controller {
     private function formatDisplayTime($timestamp)
     {
         if (!$timestamp) return '-';
-        
+
         $time = strtotime($timestamp);
         $now = time();
         $diff = $now - $time;
-        
+
         if ($diff < 60) {
             return 'Baru saja';
         } elseif ($diff < 3600) {
@@ -1063,7 +1079,7 @@ class Sekretariat extends CI_Controller {
     private function get_dosen_data_from_nip_fixed($nip_data)
     {
         $dosen_data = array();
-        
+
         if (empty($nip_data) || $nip_data === '-' || $nip_data === '[]' || $nip_data === 'null') {
             return [array(
                 'nama' => 'Data dosen tidak tersedia',
@@ -1072,12 +1088,12 @@ class Sekretariat extends CI_Controller {
                 'divisi' => '-'
             )];
         }
-        
+
         $nip_array = array();
-        
+
         if (is_string($nip_data)) {
             $trimmed_data = trim($nip_data);
-            
+
             if (preg_match('/^\[.*\]$/', $trimmed_data)) {
                 $decoded = json_decode($trimmed_data, true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
@@ -1094,16 +1110,16 @@ class Sekretariat extends CI_Controller {
         } else {
             $nip_array = [$nip_data];
         }
-        
-        $nip_array = array_filter(array_map(function($nip) {
+
+        $nip_array = array_filter(array_map(function ($nip) {
             if (is_array($nip)) {
                 return !empty($nip) ? trim(strval($nip[0])) : null;
             }
             return trim(strval($nip));
-        }, $nip_array), function($nip) {
+        }, $nip_array), function ($nip) {
             return !empty($nip) && $nip !== '-' && $nip !== 'null' && $nip !== '[]';
         });
-        
+
         if (empty($nip_array)) {
             return [array(
                 'nama' => 'Data dosen tidak tersedia',
@@ -1112,21 +1128,21 @@ class Sekretariat extends CI_Controller {
                 'divisi' => '-'
             )];
         }
-        
+
         $this->db->select('nip, nama_dosen, jabatan, divisi');
         $this->db->from('list_dosen');
-        
+
         if (count($nip_array) === 1) {
             $this->db->where('nip', $nip_array[0]);
         } else {
             $this->db->where_in('nip', $nip_array);
         }
-        
+
         $query = $this->db->get();
-        
+
         if ($query->num_rows() > 0) {
             $results = $query->result_array();
-            
+
             $dosen_by_nip = [];
             foreach ($results as $row) {
                 $dosen_by_nip[trim($row['nip'])] = array(
@@ -1136,7 +1152,7 @@ class Sekretariat extends CI_Controller {
                     'divisi' => $row['divisi']
                 );
             }
-            
+
             foreach ($nip_array as $nip) {
                 $clean_nip = trim(strval($nip));
                 if (isset($dosen_by_nip[$clean_nip])) {
@@ -1161,7 +1177,7 @@ class Sekretariat extends CI_Controller {
                 );
             }
         }
-        
+
         return $dosen_data;
     }
 
@@ -1171,7 +1187,7 @@ class Sekretariat extends CI_Controller {
     public function approve($id)
     {
         $nomor_surat = $this->input->post('nomor_surat');
-        
+
         if (empty($nomor_surat)) {
             $this->session->set_flashdata('error', 'Nomor surat harus diisi!');
             $this->redirectToPreviousPage();
@@ -1189,7 +1205,7 @@ class Sekretariat extends CI_Controller {
         }
 
         $surat = $this->db->get_where('surat', ['id' => $id])->row();
-        
+
         if (!$surat) {
             $this->session->set_flashdata('error', 'Data surat tidak ditemukan');
             $this->redirectToPreviousPage();
@@ -1203,16 +1219,16 @@ class Sekretariat extends CI_Controller {
         }
 
         $approval = json_decode($surat->approval_status, true) ?? [];
-        
+
         if (!isset($approval['pengirim'])) {
             $approval['pengirim'] = date("Y-m-d H:i:s");
         }
         if (!isset($approval['kaprodi'])) {
             $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
         }
-        
+
         $approval['sekretariat'] = date("Y-m-d H:i:s");
-        
+
         $update_data = [
             'status' => 'disetujui sekretariat',
             'approval_status' => json_encode($approval),
@@ -1227,10 +1243,10 @@ class Sekretariat extends CI_Controller {
         } else {
             $this->session->set_flashdata('error', 'Gagal menyetujui surat.');
         }
-        
+
         $this->redirectToPreviousPage();
     }
-    
+
     /* ================================
     REJECT
     ================================= */
@@ -1244,7 +1260,7 @@ class Sekretariat extends CI_Controller {
         }
 
         $surat = $this->db->get_where('surat', ['id' => $id])->row();
-        
+
         if (!$surat) {
             $this->session->set_flashdata('error', 'Data surat tidak ditemukan');
             $this->redirectToPreviousPage();
@@ -1258,14 +1274,14 @@ class Sekretariat extends CI_Controller {
         }
 
         $approval = json_decode($surat->approval_status, true) ?? [];
-        
+
         if (!isset($approval['pengirim'])) {
             $approval['pengirim'] = date("Y-m-d H:i:s");
         }
         if (!isset($approval['kaprodi'])) {
             $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
         }
-        
+
         $approval['sekretariat'] = date("Y-m-d H:i:s");
 
         $update_data = [
@@ -1282,7 +1298,7 @@ class Sekretariat extends CI_Controller {
         } else {
             $this->session->set_flashdata('error', 'Gagal menolak surat.');
         }
-        
+
         $this->redirectToPreviousPage();
     }
 
@@ -1298,7 +1314,7 @@ class Sekretariat extends CI_Controller {
         $status = $this->input->get('status');
         $lingkup_penugasan = $this->input->get('lingkup_penugasan');
         $jenis_penugasan = $this->input->get('jenis_penugasan');
-        
+
         $query_params = 'tahun=' . $tahun . '&bulan=' . $bulan;
         if (!empty($search)) {
             $query_params .= '&search=' . urlencode($search);
@@ -1312,8 +1328,8 @@ class Sekretariat extends CI_Controller {
         if (!empty($jenis_penugasan)) {
             $query_params .= '&jenis_penugasan=' . $jenis_penugasan;
         }
-        
-        switch($current_page) {
+
+        switch ($current_page) {
             case 'semua':
                 redirect('sekretariat/semua?' . $query_params);
                 break;
@@ -1340,7 +1356,8 @@ class Sekretariat extends CI_Controller {
     /* ================================
     REALTIME DASHBOARD COUNTER - DENGAN FILTER JENIS PENUGASAN
     ================================= */
-    public function get_dashboard_counts() {
+    public function get_dashboard_counts()
+    {
         $tahun = $this->input->get('tahun') ?? date('Y');
         $bulan = $this->input->get('bulan') ?? 'all';
         $lingkup_penugasan_filter = $this->input->get('lingkup_penugasan');
@@ -1351,11 +1368,11 @@ class Sekretariat extends CI_Controller {
             $this->db->where('MONTH(created_at)', $bulan);
         }
         $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-        
+
         if (!empty($lingkup_penugasan_filter)) {
             $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
         }
-        
+
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
         $total = $this->db->count_all_results('surat');
 
@@ -1410,17 +1427,17 @@ class Sekretariat extends CI_Controller {
     {
         $this->db->where('id', $id);
         $data['surat'] = $this->db->get('surat')->row();
-        
+
         if (!$data['surat']) {
             show_404();
             return;
         }
-        
+
         $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($data['surat']->nip);
-        
+
         $this->load->view('surat_print2', $data);
     }
-    
+
     /* ================================
     GET EVIDEN
     ================================= */
@@ -1428,10 +1445,10 @@ class Sekretariat extends CI_Controller {
     {
         $this->db->where('id', $id);
         $surat = $this->db->get('surat')->row();
-        
+
         if ($surat && !empty($surat->eviden)) {
             $file_path = FCPATH . $surat->eviden;
-            
+
             if (file_exists($file_path)) {
                 echo json_encode([
                     'success' => true,
@@ -1460,71 +1477,71 @@ class Sekretariat extends CI_Controller {
         if ($this->input->server('REQUEST_METHOD') === 'POST') {
             $ids = $this->input->post('ids');
             $nomor_surat_data = $this->input->post('nomor_surat');
-            
+
             if (empty($ids)) {
                 $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
                 redirect('sekretariat/pending');
             }
-            
+
             $id_array = explode(',', $ids);
-            
+
             $success_count = 0;
             $error_count = 0;
             $error_messages = [];
-            
+
             foreach ($id_array as $id) {
                 $id = trim($id);
-                
+
                 if (!isset($nomor_surat_data[$id]) || empty($nomor_surat_data[$id])) {
                     $error_count++;
                     $error_messages[] = "Nomor surat harus diisi untuk ID: $id";
                     continue;
                 }
-                
+
                 $nomor_surat = $nomor_surat_data[$id];
-                
+
                 $this->db->where('nomor_surat', $nomor_surat);
                 $this->db->where('id !=', $id);
                 $existing = $this->db->get('surat')->row();
-                
+
                 if ($existing) {
                     $error_count++;
                     $error_messages[] = "Nomor surat '$nomor_surat' sudah digunakan (ID: $id)";
                     continue;
                 }
-                
+
                 $surat = $this->db->get_where('surat', ['id' => $id])->row();
-                
+
                 if (!$surat) {
                     $error_count++;
                     $error_messages[] = "Data tidak ditemukan (ID: $id)";
                     continue;
                 }
-                
+
                 if ($surat->status !== 'disetujui KK') {
                     $error_count++;
                     $error_messages[] = "Status tidak valid untuk ID: $id (Status: $surat->status)";
                     continue;
                 }
-                
+
                 $approval = json_decode($surat->approval_status, true) ?? [];
-                
+
                 if (!isset($approval['pengirim'])) {
                     $approval['pengirim'] = date("Y-m-d H:i:s");
                 }
                 if (!isset($approval['kaprodi'])) {
                     $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
                 }
-                
+
                 $approval['sekretariat'] = date("Y-m-d H:i:s");
-                
+
                 $update_data = [
                     'status' => 'disetujui sekretariat',
                     'approval_status' => json_encode($approval),
                     'nomor_surat' => $nomor_surat,
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
-                
+
                 $this->db->where('id', $id);
                 if ($this->db->update('surat', $update_data)) {
                     $success_count++;
@@ -1533,7 +1550,7 @@ class Sekretariat extends CI_Controller {
                     $error_messages[] = "Gagal update database (ID: $id)";
                 }
             }
-            
+
             if ($success_count > 0) {
                 $message = "Berhasil menyetujui $success_count pengajuan.";
                 if ($error_count > 0) {
@@ -1543,7 +1560,7 @@ class Sekretariat extends CI_Controller {
             } else {
                 $this->session->set_flashdata('error', "Gagal menyetujui semua pengajuan: " . implode(', ', $error_messages));
             }
-            
+
             redirect('sekretariat/pending');
         } else {
             redirect('sekretariat/pending');
@@ -1558,52 +1575,52 @@ class Sekretariat extends CI_Controller {
         if ($this->input->server('REQUEST_METHOD') === 'POST') {
             $ids = $this->input->post('ids');
             $rejection_notes_data = $this->input->post('rejection_notes');
-            
+
             if (empty($ids)) {
                 $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
                 redirect('sekretariat/pending');
             }
-            
+
             $id_array = explode(',', $ids);
-            
+
             $success_count = 0;
             $error_count = 0;
             $error_messages = [];
-            
+
             foreach ($id_array as $id) {
                 $id = trim($id);
-                
+
                 if (!isset($rejection_notes_data[$id]) || empty($rejection_notes_data[$id])) {
                     $error_count++;
                     $error_messages[] = "Alasan penolakan harus diisi untuk ID: $id";
                     continue;
                 }
-                
+
                 $rejection_notes = $rejection_notes_data[$id];
-                
+
                 $surat = $this->db->get_where('surat', ['id' => $id])->row();
-                
+
                 if (!$surat) {
                     $error_count++;
                     $error_messages[] = "Data tidak ditemukan (ID: $id)";
                     continue;
                 }
-                
+
                 if ($surat->status !== 'disetujui KK') {
                     $error_count++;
                     $error_messages[] = "Status tidak valid untuk ID: $id (Status: $surat->status)";
                     continue;
                 }
-                
+
                 $approval = json_decode($surat->approval_status, true) ?? [];
-                
+
                 if (!isset($approval['pengirim'])) {
                     $approval['pengirim'] = date("Y-m-d H:i:s");
                 }
                 if (!isset($approval['kaprodi'])) {
                     $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
                 }
-                
+
                 $approval['sekretariat'] = date("Y-m-d H:i:s");
 
                 $update_data = [
@@ -1612,7 +1629,7 @@ class Sekretariat extends CI_Controller {
                     'catatan_penolakan' => $rejection_notes,
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
-                
+
                 $this->db->where('id', $id);
                 if ($this->db->update('surat', $update_data)) {
                     $success_count++;
@@ -1621,7 +1638,7 @@ class Sekretariat extends CI_Controller {
                     $error_messages[] = "Gagal update database (ID: $id)";
                 }
             }
-            
+
             if ($success_count > 0) {
                 $message = "Berhasil menolak $success_count pengajuan.";
                 if ($error_count > 0) {
@@ -1631,7 +1648,7 @@ class Sekretariat extends CI_Controller {
             } else {
                 $this->session->set_flashdata('error', "Gagal menolak semua pengajuan: " . implode(', ', $error_messages));
             }
-            
+
             redirect('sekretariat/pending');
         } else {
             redirect('sekretariat/pending');
@@ -1651,7 +1668,7 @@ class Sekretariat extends CI_Controller {
         }
 
         $status_lower = strtolower($surat->status);
-        
+
         if ($status_lower !== 'ditolak dekan') {
             $this->session->set_flashdata('error', '⚠️ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan! Status surat ini: ' . $surat->status);
             redirect('sekretariat');
@@ -1660,9 +1677,9 @@ class Sekretariat extends CI_Controller {
 
         $data['surat'] = (array)$surat;
         $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat->nip);
-        
+
         $eviden_raw = $surat->eviden ?? "[]";
-        
+
         if (is_string($eviden_raw)) {
             $eviden_decoded = json_decode($eviden_raw, true);
             $data['eviden'] = is_array($eviden_decoded) ? $eviden_decoded : [];
@@ -1695,7 +1712,7 @@ class Sekretariat extends CI_Controller {
         }
 
         $status_lower = strtolower($surat->status);
-        
+
         if ($status_lower !== 'ditolak dekan') {
             $this->session->set_flashdata('error', '⚠️ Update hanya dapat dilakukan untuk surat yang ditolak Dekan!');
             redirect('sekretariat');
@@ -1711,7 +1728,7 @@ class Sekretariat extends CI_Controller {
 
         foreach ($post as $k => $v) {
             if (is_array($v)) {
-                $post[$k] = array_values(array_filter($v, function($x) {
+                $post[$k] = array_values(array_filter($v, function ($x) {
                     return trim($x) !== "";
                 }));
             } else {
@@ -1721,13 +1738,13 @@ class Sekretariat extends CI_Controller {
 
         $existing_eviden = json_decode($surat->eviden, true) ?: [];
         $deleted_files = $post['delete_eviden'] ?? [];
-        
+
         foreach ($deleted_files as $del_file) {
             if ($del_file && trim($del_file) !== '') {
-                $existing_eviden = array_filter($existing_eviden, function($f) use ($del_file) {
+                $existing_eviden = array_filter($existing_eviden, function ($f) use ($del_file) {
                     return $f !== $del_file;
                 });
-                
+
                 if (!filter_var($del_file, FILTER_VALIDATE_URL)) {
                     $file_path = './uploads/eviden/' . $del_file;
                     if (file_exists($file_path)) {
@@ -1736,24 +1753,24 @@ class Sekretariat extends CI_Controller {
                 }
             }
         }
-        
+
         $new_files = [];
         if (!empty($_FILES['new_eviden']['name'][0])) {
             $upload_path = './uploads/eviden/';
-            
+
             if (!is_dir($upload_path)) {
                 mkdir($upload_path, 0755, true);
             }
-            
+
             $config['upload_path'] = $upload_path;
             $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx';
             $config['max_size'] = 10240;
             $config['encrypt_name'] = TRUE;
-            
+
             $this->load->library('upload', $config);
-            
+
             $files_count = count($_FILES['new_eviden']['name']);
-            
+
             for ($i = 0; $i < $files_count; $i++) {
                 if (!empty($_FILES['new_eviden']['name'][$i])) {
                     $_FILES['file']['name'] = $_FILES['new_eviden']['name'][$i];
@@ -1761,7 +1778,7 @@ class Sekretariat extends CI_Controller {
                     $_FILES['file']['tmp_name'] = $_FILES['new_eviden']['tmp_name'][$i];
                     $_FILES['file']['error'] = $_FILES['new_eviden']['error'][$i];
                     $_FILES['file']['size'] = $_FILES['new_eviden']['size'][$i];
-                    
+
                     if ($this->upload->do_upload('file')) {
                         $upload_data = $this->upload->data();
                         $new_files[] = $upload_data['file_name'];
@@ -1769,7 +1786,7 @@ class Sekretariat extends CI_Controller {
                 }
             }
         }
-        
+
         $final_eviden = array_merge(array_values($existing_eviden), $new_files);
         $update_eviden = json_encode($final_eviden);
 
@@ -1802,7 +1819,7 @@ class Sekretariat extends CI_Controller {
                 'dekan' => null
             ];
         }
-        
+
         $approval_status['dekan'] = null;
         $update['status'] = 'disetujui sekretariat';
         $update['approval_status'] = json_encode($approval_status);
@@ -1816,27 +1833,280 @@ class Sekretariat extends CI_Controller {
         } else {
             $this->session->set_flashdata('error', '❌ Gagal menyimpan revisi. Silakan coba lagi.');
         }
+
+        redirect('sekretariat');
+    }
+/* ================================
+    EDIT SURAT UNTUK SEKRETARIAT (SEMUA STATUS KECUALI DITOLAK DEKAN)
+    ================================= */
+    public function edit_surat_sekretariat($id)
+    {
+        $surat = $this->Surat_model->get_by_id($id);
+
+        if (!$surat) {
+            show_404();
+            return;
+        }
+
+        // Cek status: tidak boleh edit jika sudah disetujui dekan
+        if (strtolower($surat->status) === 'disetujui dekan') {
+            $this->session->set_flashdata('error', '⚠️ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
+            redirect('sekretariat');
+            return;
+        }
+
+        // Cek status: tidak boleh edit jika sudah ditolak dekan (gunakan fungsi edit_surat yang sudah ada)
+        if (strtolower($surat->status) === 'ditolak dekan') {
+            // Redirect ke fungsi edit_surat yang sudah ada
+            redirect('sekretariat/edit_surat/' . $id);
+            return;
+        }
+
+        // Process dosen data
+        $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
         
+        // Format untuk form (sama seperti di edit_surat)
+        $formatted_dosen = [];
+        foreach ($dosen_data as $dosen) {
+            $formatted_dosen[] = [
+                'nip' => $dosen['nip'],
+                'nama_dosen' => $dosen['nama'],
+                'jabatan' => $dosen['jabatan'],
+                'divisi' => $dosen['divisi']
+            ];
+        }
+
+        $data['surat'] = (array)$surat;
+        $data['dosen_data'] = $formatted_dosen;
+        $data['is_edit_sekretariat'] = true; // Flag untuk view
+        $data['current_status'] = strtolower($surat->status);
+
+        // Process eviden files
+        $eviden_raw = $surat->eviden ?? "[]";
+        $eviden_files = [];
+
+        if (is_string($eviden_raw)) {
+            $eviden_decoded = json_decode($eviden_raw, true);
+            if (is_array($eviden_decoded)) {
+                $eviden_files = $eviden_decoded;
+            } else {
+                $eviden_files = [$eviden_raw];
+            }
+        } elseif (is_array($eviden_raw)) {
+            $eviden_files = $eviden_raw;
+        }
+
+        $data['eviden'] = $eviden_files;
+
+        // Load view edit.php dengan data mode sekretariat
+        $this->load->view('sekretariat/edit', $data);
+    }
+
+    /* ================================
+    UPDATE SURAT UNTUK SEKRETARIAT (SEMUA STATUS KECUALI DITOLAK DEKAN)
+    ================================= */
+    public function update_surat_sekretariat($id = null)
+    {
+        if (!$id) {
+            $id = $this->uri->segment(3);
+        }
+
+        $surat = $this->Surat_model->get_by_id($id);
+
+        if (!$surat) {
+            show_404();
+            return;
+        }
+
+        // Cek status: tidak boleh edit jika sudah disetujui dekan
+        if (strtolower($surat->status) === 'disetujui dekan') {
+            $this->session->set_flashdata('error', '⚠️ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
+            redirect('sekretariat');
+            return;
+        }
+
+        if (!$this->input->post()) {
+            redirect('sekretariat/edit_surat_sekretariat/' . $id);
+            return;
+        }
+
+        $post = $this->input->post();
+
+        // Process form data (sama seperti update_surat biasa)
+        $update_data = $this->process_surat_update_data($post, $surat);
+        
+        // LOGIKA RESET STATUS KHUSUS UNTUK SEKRETARIAT
+        $current_status_lower = strtolower($surat->status);
+        $approval_status = json_decode($surat->approval_status, true);
+        if (!is_array($approval_status)) {
+            $approval_status = [
+                'kk' => null,
+                'sekretariat' => null,
+                'dekan' => null
+            ];
+        }
+
+        // Reset berdasarkan status saat ini
+        if (in_array($current_status_lower, ['disetujui sekretariat', 'ditolak sekretariat'])) {
+            // Reset ke disetujui KK
+            $approval_status['sekretariat'] = null;
+            $approval_status['dekan'] = null; // Reset juga approval dekan jika ada
+            
+            $update_data['status'] = 'disetujui KK';
+            $update_data['catatan_penolakan'] = null;
+            $update_data['disposisi_status'] = null;
+            $update_data['disposisi_catatan'] = null;
+            
+            $success_message = "✅ Revisi berhasil disimpan! Pengajuan dikembalikan ke status <strong>Disetujui KK</strong>.";
+        } elseif ($current_status_lower === 'disetujui kk') {
+            // Tetap di status disetujui KK
+            $update_data['status'] = 'disetujui KK';
+            $success_message = "✅ Revisi berhasil disimpan!";
+        }
+
+        $update_data['approval_status'] = json_encode($approval_status);
+        $update_data['updated_at'] = date('Y-m-d H:i:s');
+
+        $result = $this->Surat_model->update_surat($id, $update_data);
+
+        if ($result) {
+            $this->session->set_flashdata('success', $success_message);
+        } else {
+            $this->session->set_flashdata('error', '❌ Gagal menyimpan revisi. Silakan coba lagi.');
+        }
+
         redirect('sekretariat');
     }
 
     /* ================================
-    HELPER: SAFE DATE
+    HELPER: PROCESS SURAT UPDATE DATA (reuse dari fungsi update_surat)
+    ================================= */
+    private function process_surat_update_data($post, $surat)
+    {
+        // Process data yang sama seperti di update_surat
+        $update = [
+            'nama_kegiatan' => $post['nama_kegiatan'] ?? $surat->nama_kegiatan,
+            'jenis_date' => $post['jenis_date'] ?? $surat->jenis_date,
+            'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan'] ?? null),
+            'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan'] ?? null),
+            'periode_penugasan' => $this->safe_date($post['periode_penugasan'] ?? null),
+            'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan'] ?? null),
+            'periode_value' => $post['periode_value'] ?? $surat->periode_value,
+            'tempat_kegiatan' => $post['tempat_kegiatan'] ?? $surat->tempat_kegiatan,
+            'penyelenggara' => $post['penyelenggara'] ?? $surat->penyelenggara,
+            'jenis_pengajuan' => $post['jenis_pengajuan'] ?? $surat->jenis_pengajuan,
+            'lingkup_penugasan' => $post['lingkup_penugasan'] ?? $surat->lingkup_penugasan,
+            'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? $surat->jenis_penugasan_perorangan,
+            'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? $surat->penugasan_lainnya_perorangan,
+            'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? $surat->jenis_penugasan_kelompok,
+            'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? $surat->penugasan_lainnya_kelompok
+        ];
+
+        // Handle nomor surat khusus untuk status tertentu
+        if (strtolower($surat->status) === 'disetujui sekretariat') {
+            $update['nomor_surat'] = $post['nomor_surat'] ?? $surat->nomor_surat;
+        }
+
+        // Process NIP data
+        if (isset($post['nip']) && is_array($post['nip'])) {
+            $nip_array = [];
+            $nama_array = [];
+            
+            foreach ($post['nip'] as $key => $nip) {
+                if (!empty(trim($nip))) {
+                    $nip_array[] = trim($nip);
+                    $nama_array[] = $post['nama_dosen'][$key] ?? '';
+                }
+            }
+            
+            $update['nip'] = json_encode($nip_array);
+            $update['nama_dosen'] = json_encode($nama_array);
+        }
+
+        // Process file uploads (sama seperti di update_surat)
+        $update['eviden'] = $this->process_eviden_files($post, $surat);
+
+        return $update;
+    }
+
+    /* ================================
+    HELPER: PROCESS EVIDEN FILES (reuse dari fungsi update_surat)
+    ================================= */
+    private function process_eviden_files($post, $surat)
+    {
+        $existing_eviden = json_decode($surat->eviden, true) ?: [];
+        $deleted_files = $post['delete_eviden'] ?? [];
+
+        // Remove deleted files
+        foreach ($deleted_files as $del_file) {
+            if ($del_file && trim($del_file) !== '') {
+                $existing_eviden = array_filter($existing_eviden, function ($f) use ($del_file) {
+                    return $f !== $del_file;
+                });
+
+                // Delete physical file
+                if (!filter_var($del_file, FILTER_VALIDATE_URL)) {
+                    $file_path = './uploads/eviden/' . $del_file;
+                    if (file_exists($file_path)) {
+                        @unlink($file_path);
+                    }
+                }
+            }
+        }
+
+        // Upload new files
+        $new_files = [];
+        if (!empty($_FILES['new_eviden']['name'][0])) {
+            $upload_path = './uploads/eviden/';
+
+            if (!is_dir($upload_path)) {
+                mkdir($upload_path, 0755, true);
+            }
+
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx';
+            $config['max_size'] = 10240;
+            $config['encrypt_name'] = TRUE;
+
+            $this->load->library('upload', $config);
+
+            $files_count = count($_FILES['new_eviden']['name']);
+
+            for ($i = 0; $i < $files_count; $i++) {
+                if (!empty($_FILES['new_eviden']['name'][$i])) {
+                    $_FILES['file']['name'] = $_FILES['new_eviden']['name'][$i];
+                    $_FILES['file']['type'] = $_FILES['new_eviden']['type'][$i];
+                    $_FILES['file']['tmp_name'] = $_FILES['new_eviden']['tmp_name'][$i];
+                    $_FILES['file']['error'] = $_FILES['new_eviden']['error'][$i];
+                    $_FILES['file']['size'] = $_FILES['new_eviden']['size'][$i];
+
+                    if ($this->upload->do_upload('file')) {
+                        $upload_data = $this->upload->data();
+                        $new_files[] = $upload_data['file_name'];
+                    }
+                }
+            }
+        }
+
+        $final_eviden = array_merge(array_values($existing_eviden), $new_files);
+        return json_encode($final_eviden);
+    }
+    /* ================================
+    HELPER: SAFE DATE (jika belum ada di controller)
     ================================= */
     private function safe_date($val)
     {
         if (!$val || trim($val) === "" || $val === "-") return "-";
         $ts = strtotime($val);
-        return $ts ? date('Y-m-d', $ts) : "";
+        return $ts ? date('Y-m-d', $ts) : "-";
     }
-
     /* ================================
     CETAK SURAT UNTUK SEKRETARIAT
     ================================= */
     public function cetak($id)
     {
         $surat = $this->Surat_model->get_by_id($id);
-        
+
         if (!$surat) {
             show_404();
             return;
@@ -1851,7 +2121,7 @@ class Sekretariat extends CI_Controller {
 
         $data['surat'] = $surat;
         $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat->nip);
-        
+
         $this->load->view('sekretariat/cetak_surat', $data);
     }
 
@@ -1861,27 +2131,37 @@ class Sekretariat extends CI_Controller {
     public function download_pdf($id)
     {
         $surat = $this->Surat_model->get_by_id($id);
-        
+
         if (!$surat) {
             show_404();
             return;
         }
 
+        // Cek status surat
         $allowed_status = ['disetujui sekretariat', 'disetujui dekan'];
         if (!in_array(strtolower($surat->status), array_map('strtolower', $allowed_status))) {
-            $this->session->set_flashdata('error', 'Surat belum disetujui untuk didownload.');
-            redirect('sekretariat');
+            echo "<script>alert('Surat belum disetujui untuk didownload.'); window.close();</script>";
             return;
         }
 
-        $this->load->library('pdf');
-        
+        // Load data
         $data['surat'] = $surat;
         $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat->nip);
         
-        $html = $this->load->view('sekretariat/pdf_surat', $data, TRUE);
+        // Load library PDF (gunakan library yang sudah ada)
+        $this->load->library('pdf');
         
-        $this->pdf->generate($html, 'surat_tugas_' . $id . '.pdf', TRUE);
+        // Load view yang sama untuk konsistensi
+        $html = $this->load->view('surat_print2', $data, TRUE);
+        
+        // Konfigurasi PDF
+        $this->pdf->setPaper('A4', 'portrait');
+        $this->pdf->load_html($html);
+        $this->pdf->render();
+        
+        // Output PDF
+        $filename = 'Surat_Tugas_' . ($surat->nomor_surat ?? $id) . '.pdf';
+        $this->pdf->stream($filename, array('Attachment' => 1));
     }
 
     /* ================================
@@ -1890,7 +2170,7 @@ class Sekretariat extends CI_Controller {
     public function validasi($id)
     {
         $surat = $this->Surat_model->get_by_id($id);
-        
+
         if (!$surat) {
             $data['found'] = false;
         } else {
@@ -1900,7 +2180,7 @@ class Sekretariat extends CI_Controller {
         }
 
         $data['role'] = 'sekretariat';
-        
+
         $this->load->view('sekretariat/validasi_surat', $data);
     }
 
@@ -1910,7 +2190,7 @@ class Sekretariat extends CI_Controller {
     public function get_status($surat_id)
     {
         header('Content-Type: application/json');
-        
+
         $this->db->select('id, status, created_at, catatan_penolakan, approval_status');
         $this->db->where('id', $surat_id);
         $query = $this->db->get('surat');
@@ -1928,7 +2208,7 @@ class Sekretariat extends CI_Controller {
         $approval = json_decode($surat->approval_status, true);
         if (!is_array($approval)) $approval = [];
 
-        $getTime = function($val) {
+        $getTime = function ($val) {
             if (!$val) return null;
 
             if (is_string($val)) return $val;
@@ -1942,7 +2222,7 @@ class Sekretariat extends CI_Controller {
         $dek = $getTime($approval['dekan'] ?? null);
 
         $status = strtolower(trim($surat->status ?? 'pengajuan'));
-        
+
         $steps = [];
         $progress_percentage = 0;
 
@@ -2131,36 +2411,35 @@ class Sekretariat extends CI_Controller {
     public function autocomplete_nip()
     {
         header('Content-Type: application/json');
-        
+
         $query = $this->input->get('q');
         $field = $this->input->get('field');
-        
+
         if (empty($query) || strlen($query) < 1) {
             echo json_encode([]);
             return;
         }
-        
+
         $allowed_fields = ['nip', 'nama_dosen', 'jabatan', 'divisi'];
         if (!in_array($field, $allowed_fields)) {
             $field = 'nip';
         }
-        
+
         try {
             $this->db->select('nip, nama_dosen, jabatan, divisi');
             $this->db->from('list_dosen');
             $this->db->like($field, $query);
             $this->db->limit(10);
             $this->db->order_by($field, 'ASC');
-            
+
             $result = $this->db->get();
-            
+
             if ($result->num_rows() > 0) {
                 $data = $result->result_array();
                 echo json_encode($data);
             } else {
                 echo json_encode([]);
             }
-            
         } catch (Exception $e) {
             log_message('error', 'Autocomplete error: ' . $e->getMessage());
             echo json_encode([]);
@@ -2183,5 +2462,127 @@ class Sekretariat extends CI_Controller {
 
         echo json_encode(["success" => true]);
     }
+    public function return_pengajuan($id)
+    {
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+
+        if (!$surat) {
+            $this->session->set_flashdata('error', 'Surat tidak ditemukan.');
+            $this->redirectToPreviousPage();
+            return;
+        }
+
+        // Validasi: Hanya bisa return jika sudah disetujui/ditolak oleh Kaprodi
+        $allowed_statuses = ['disetujui sekretariat', 'ditolak sekretariat'];
+
+        if (!in_array($surat->status, $allowed_statuses)) {
+            $this->session->set_flashdata('error', 'Hanya pengajuan yang sudah disetujui/ditolak Sekretariat yang dapat dikembalikan.');
+            $this->redirectToPreviousPage();
+            return;
+        }
+
+        // Cek apakah sudah disetujui oleh pihak selanjutnya (Sekretariat/Dekan)
+        $approval = json_decode($surat->approval_status, true) ?? [];
+
+        if (isset($approval['dekan'])) {
+            $this->session->set_flashdata('error', 'Pengajuan tidak dapat dikembalikan karena sudah diproses oleh Dekan.');
+            $this->redirectToPreviousPage();
+            return;
+        }
+
+        // Update: Kembalikan ke status pengajuan & hapus approval Kaprodi
+        if (isset($approval['sekretariat'])) {
+            unset($approval['sekretariat']);
+        }
+
+        $this->db->where('id', $id)->update('surat', [
+            'status' => 'disetujui KK',
+            'approval_status' => json_encode($approval),
+            'catatan_penolakan' => null, // Hapus catatan penolakan jika ada
+        ]);
+
+        $this->session->set_flashdata('success', '✅ Pengajuan berhasil dikembalikan ke status awal (Disetujui KK).');
+
+        $this->redirectToPreviousPage();
+    }
+    public function ubah_pin()
+    {
+        $this->load->model('Setting_model');
+
+        if ($this->input->post('pin')) {
+            $pin = $this->input->post('pin');
+
+            // Validasi: harus 6 digit angka
+            if (!preg_match('/^[0-9]{6}$/', $pin)) {
+                $this->session->set_flashdata('error', 'PIN harus 6 digit angka!');
+                redirect('sekretariat/ubah_pin');
+                return;
+            }
+
+            $this->Setting_model->update_pin($pin);
+            $this->session->set_flashdata('success', 'PIN berhasil diperbarui!');
+            redirect('sekretariat/ubah_pin');
+            return;
+        }
+        $this->load->model('Setting_model');
+
+        $pin_benar = $this->Setting_model->get_pin();
+        $pin_input = $this->input->post('pin');
+
+        if ($pin_input !== $pin_benar) {
+            echo json_encode(['status' => 'error', 'message' => 'PIN salah!']);
+            return;
+        }
+
+        $data['pin'] = $this->Setting_model->get_pin();
+        $this->load->view('sekretariat/ubah_pin', $data);
+    }
+    public function cek_pin()
+    {
+        $this->load->model('Setting_model');
+
+        $json = json_decode($this->input->raw_input_stream, true);
+        $pin_input = $json['pin'] ?? '';
+
+        $pin_benar = $this->Setting_model->get_pin();
+
+        if ($pin_input === $pin_benar) {
+            echo json_encode(["status" => "success"]);
+        } else {
+            echo json_encode(["status" => "error"]);
+        }
+    }
+public function updatePin()
+{
+    $this->load->model('Setting_model');
+
+    $oldPin = $this->input->post('old_pin');
+    $newPin = $this->input->post('new_pin');
+
+    $currentPin = $this->Setting_model->getPin();
+
+    if (!$currentPin) {
+        echo json_encode(['status' => false, 'message' => 'PIN tidak ditemukan di database!']);
+        return;
+    }
+
+    if ($oldPin !== $currentPin) {
+        echo json_encode(['status' => false, 'message' => 'PIN lama salah!']);
+        return;
+    }
+
+    if (!preg_match('/^[0-9]{6}$/', $newPin)) {
+        echo json_encode(['status' => false, 'message' => 'PIN baru harus 6 digit angka!']);
+        return;
+    }
+
+    $update = $this->Setting_model->updatePin($newPin);
+
+    if ($update) {
+        echo json_encode(['status' => true, 'message' => 'PIN berhasil diperbarui!']);
+    } else {
+        echo json_encode(['status' => false, 'message' => 'Gagal memperbarui PIN!']);
+    }
+}
 
 }

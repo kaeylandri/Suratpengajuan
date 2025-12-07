@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title><?= $surat->nama_kegiatan ?? '-' ?></title>
@@ -8,7 +9,7 @@
         @page {
             margin: 80px 80px 120px 80px;
         }
-        
+
         body {
             font-family: Calibri, Arial, sans-serif;
             margin: 0;
@@ -66,6 +67,7 @@
             height: 30px;
             object-fit: fill;
         }
+
         /* === CONTENT === */
         .content {
             margin: 0;
@@ -75,20 +77,27 @@
 
         /* Judul Surat */
         .surat-title {
-        text-align: center;
-        text-transform: uppercase;
-        font-size: 25px;        /* sedikit lebih besar */
-        font-weight: bold;
-        margin-bottom: 2px;     /* lebih rapat ke nomor */
-        text-decoration: underline; 
-        text-underline-offset: 4px;   /* jarak garis ke teks */
-    }
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 25px;
+            /* sedikit lebih besar */
+            font-weight: bold;
+            margin-bottom: 2px;
+            /* lebih rapat ke nomor */
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            /* jarak garis ke teks */
+        }
+
         .surat-number {
-        text-align: center;
-        font-size: 13px;        /* sedikit lebih besar dari sebelumnya */
-        margin-top: -2px;       /* menaikkan sedikit agar lebih dekat */
-        margin-bottom: 25px;    /* jarak ke isi */
-    }
+            text-align: center;
+            font-size: 13px;
+            /* sedikit lebih besar dari sebelumnya */
+            margin-top: -2px;
+            /* menaikkan sedikit agar lebih dekat */
+            margin-bottom: 25px;
+            /* jarak ke isi */
+        }
 
         /* Paragraf styling - TANPA INDENT */
         .content p {
@@ -139,7 +148,8 @@
             font-size: 11px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #000;
             padding: 6px 8px;
             text-align: left;
@@ -177,20 +187,23 @@
 
         /* Tanda tangan */
         .signature-bottom-text {
-        margin-top: 5px;
-        font-weight: bold;
-        text-decoration: underline;
-        line-height: 1;      /* jarak vertikal lebih rapat */
-        margin-bottom: 2px;   
+            margin-top: 5px;
+            font-weight: bold;
+            text-decoration: underline;
+            line-height: 1;
+            /* jarak vertikal lebih rapat */
+            margin-bottom: 2px;
         }
+
         .signature-position {
-        margin-top: 2px;
-        font-weight: bold;
-    }
+            margin-top: 2px;
+            font-weight: bold;
+        }
 
         .qr-centered {
             width: 90px;
-            margin-bottom: 6px; /* jarak QR ke nama */
+            margin-bottom: 6px;
+            /* jarak QR ke nama */
             margin-top: 20px;
         }
 
@@ -201,12 +214,14 @@
             width: 100px;
             page-break-inside: avoid;
         }
+
         .qr-bottom-box {
-        margin-top: 5px;
+            margin-top: 5px;
         }
 
         .qr-bottom {
-            width: 90px;   /* ukuran sama seperti QR atas */
+            width: 90px;
+            /* ukuran sama seperti QR atas */
             margin-bottom: 6px;
         }
 
@@ -227,17 +242,28 @@
 
 </head>
 <?php
-function tgl_indo($tanggal) {
-    if(empty($tanggal) || $tanggal == '-') return '-';
-    
-    $tanggal = substr($tanggal, 0, 10); 
+function tgl_indo($tanggal)
+{
+    if (empty($tanggal) || $tanggal == '-') return '-';
+
+    $tanggal = substr($tanggal, 0, 10);
     $bulan = [
-        1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        1 => 'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember'
     ];
 
     $pecah = explode('-', $tanggal);
-    if(count($pecah) == 3) {
+    if (count($pecah) == 3) {
         return $pecah[2] . ' ' . $bulan[(int)$pecah[1]] . ' ' . $pecah[0];
     }
     return $tanggal;
@@ -276,9 +302,9 @@ function tgl_indo($tanggal) {
         <div class="surat-title">SURAT TUGAS</div>
         <div class="surat-number">Nomor : <?= $surat->nomor_surat ?? '-' ?></div>
 
-    
+
         <p>Saya yang bertanda tangan di bawah ini :</p>
-        
+
         <div class="identity">
             <div class="identity-row">
                 <div class="identity-label">Nama</div>
@@ -313,13 +339,13 @@ function tgl_indo($tanggal) {
             <tbody>
                 <?php if (!empty($surat->dosen_data)): ?>
                     <?php foreach ($surat->dosen_data as $i => $d): ?>
-                    <tr>
-                        <td class="table-number"><?= $i + 1 ?></td>
-                        <td><?= htmlspecialchars($d['nama'] ?? '-') ?></td>
-                        <td class="table-nip"><?= htmlspecialchars($d['nip'] ?? '-') ?></td>
-                        <td><?= htmlspecialchars($d['jabatan'] ?? '-') ?></td>
-                        <td class="table-prodi"><?= htmlspecialchars($d['divisi'] ?? '-') ?></td>
-                    </tr>
+                        <tr>
+                            <td class="table-number"><?= $i + 1 ?></td>
+                            <td><?= htmlspecialchars($d['nama'] ?? '-') ?></td>
+                            <td class="table-nip"><?= htmlspecialchars($d['nip'] ?? '-') ?></td>
+                            <td><?= htmlspecialchars($d['jabatan'] ?? '-') ?></td>
+                            <td class="table-prodi"><?= htmlspecialchars($d['divisi'] ?? '-') ?></td>
+                        </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
@@ -330,19 +356,19 @@ function tgl_indo($tanggal) {
         </table>
 
         <!-- Untuk Menghadiri Kegiatan -->
-<p>
-    sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b> 
-    dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
-    yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
+        <p>
+            sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b>
+            dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b>
+            yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b>
 
-    <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'custom'): ?>
-        pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b>
-    <?php else: ?>
-        selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
-    <?php endif; ?>
+            <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'custom'): ?>
+                pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b>
+            <?php else: ?>
+                selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
+            <?php endif; ?>
 
-    di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
-</p>
+            di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
+        </p>
 
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
 
@@ -351,47 +377,57 @@ function tgl_indo($tanggal) {
 
         <!-- Tanggal -->
         <p class="date">Bandung, <?php
-        // Default tanggal
-        $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
-        
-        // Jika approval_status berisi data mentah seperti contoh
-        if (!empty($surat->approval_status)) {
-            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
-            if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
-                $tanggalPengesahan = $matches[1];
-            }
-        }
-        
-        // Format tanggal
-        $timestamp = strtotime($tanggalPengesahan);
-        $bulan = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-        ];
-        echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
-        ?></p>
+                                    // Default tanggal
+                                    $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
 
-         <!-- SIGNATURE + QR -->
-         <div class="signature-bottom">
+                                    // Jika approval_status berisi data mentah seperti contoh
+                                    if (!empty($surat->approval_status)) {
+                                        // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
+                                        if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
+                                            $tanggalPengesahan = $matches[1];
+                                        }
+                                    }
 
-        <?php if (!empty($qr_base64)): ?>
-        <div class="qr-bottom-box">
-            <img class="qr-bottom" src="data:image/png;base64,<?= $qr_base64 ?>" alt="QR Code">
-        </div>
-        <?php endif; ?>
+                                    // Format tanggal
+                                    $timestamp = strtotime($tanggalPengesahan);
+                                    $bulan = [
+                                        1 => 'Januari',
+                                        2 => 'Februari',
+                                        3 => 'Maret',
+                                        4 => 'April',
+                                        5 => 'Mei',
+                                        6 => 'Juni',
+                                        7 => 'Juli',
+                                        8 => 'Agustus',
+                                        9 => 'September',
+                                        10 => 'Oktober',
+                                        11 => 'November',
+                                        12 => 'Desember'
+                                    ];
+                                    echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
+                                    ?></p>
 
-        <div class="signature-bottom-text">
-            <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
-        </div>
+        <!-- SIGNATURE + QR -->
+        <div class="signature-bottom">
+
+            <?php if (!empty($qr_base64)): ?>
+                <div class="qr-bottom-box">
+                    <img class="qr-bottom" src="data:image/png;base64,<?= $qr_base64 ?>" alt="QR Code">
+                </div>
+            <?php endif; ?>
+
+            <div class="signature-bottom-text">
+                <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
+            </div>
             <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
-    </div>
-    <p>
-    <b>Tembusan</b><br>
-1.	Wakil Dekan Bidang Akaademik dan Dukungan Peneliltian FIK<br>
-2.	Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
-3.	Kaprodi S1 Desain Produk
-</p>
         </div>
+        <p>
+            <b>Tembusan</b><br>
+            1. Wakil Dekan Bidang Akaademik dan Dukungan Peneliltian FIK<br>
+            2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
+            3. Kaprodi S1 Desain Produk
+        </p>
+    </div>
 </body>
+
 </html>

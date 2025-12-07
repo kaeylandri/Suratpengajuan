@@ -50,7 +50,7 @@
     .close-modal:hover{background:rgba(255,255,255,0.2)}
     
     /* Detail Content Styles - IMPROVED (SAMA DENGAN DASHBOARD DEKAN) */
-    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
+    .detail-content{padding:25px;max-height:calc(85vh - 80px)}
     .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
     .detail-section:last-child{margin-bottom:0}
     .detail-section-title{font-size:16px;font-weight:700;color:#16A085;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #16A085;display:flex;align-items:center;gap:10px}
@@ -750,6 +750,116 @@
 .clickable-row input {
     pointer-events: all;
 }
+/* Tombol Return - WARNA ORANGE/KUNING */
+.btn-return {
+    background: #ff9800 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 6px 10px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.2s ease-in-out;
+    font-size: 14px;
+    height: 32px;
+}
+
+.btn-return i {
+    font-size: 14px;
+}
+
+.btn-return:hover {
+    background: #f57c00 !important;
+    transform: scale(1.05);
+}
+.modal-pin-box {
+    background: #ffffff;
+    width: 360px;
+    padding: 28px;
+    border-radius: 14px;
+    text-align: center;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.18);
+    animation: fadeInUp 0.25s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {opacity: 0; transform: translateY(15px);}
+    to   {opacity: 1; transform: translateY(0);}
+}
+
+.modal-pin-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #2c3e50;
+}
+
+.modal-pin-title i {
+    color: #16A085;
+    margin-right: 6px;
+}
+
+.modal-pin-sub {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 20px;
+}
+
+.pin-field {
+    margin-bottom: 12px;
+}
+
+.pin-field input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #dfe6e9;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: 0.25s;
+}
+
+.pin-field input:focus {
+    border-color: #16A085;
+    outline: none;
+    box-shadow: 0 0 0px 3px rgba(22,160,133,0.12);
+}
+
+.modal-pin-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.btn-save {
+    background: #16A085;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-save:hover {
+    background: #138a70;
+}
+
+.btn-cancel {
+    background: #b2bec3;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-cancel:hover {
+    background: #a4aeb3;
+}
 </style>
 </head>
 <body>
@@ -1032,10 +1142,9 @@
                             <?php endif; ?>
                         <?php endif; ?>
                     </td>
-
                         <td>
                             <div style="display:flex;gap:6px">
-                                <!-- Tombol Lihat Eviden (DIGANTI DARI STATUS) -->
+                                <!-- Tombol Lihat Eviden -->
                                 <button class="btn btn-eviden" title="Lihat Eviden" onclick="showEvidenModal(<?= $s->id; ?>)">
                                     <i class="fas fa-file-image"></i>
                                 </button>
@@ -1045,6 +1154,17 @@
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
                                 
+                                <!-- TOMBOL EDIT BARU: Tampilkan jika status BUKAN "ditolak dekan" -->
+                                <?php if($status != 'ditolak dekan'): ?>
+                                    <a href="<?= site_url('sekretariat/edit_surat_sekretariat/' . $s->id) ?>" 
+                                    class="btn btn-warning" 
+                                    title="Edit Pengajuan"
+                                    style="background:#ffc107;color:#000;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;text-decoration:none;">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                <?php endif; ?>
+                                
+                                <!-- Tombol lain yang sudah ada -->
                                 <?php if($status == 'disetujui KK' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
                                     <button class="btn btn-approve" onclick="showApproveModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')" title="Setujui & Teruskan ke Dekan">
                                         <i class="fa-solid fa-check"></i>
@@ -1052,13 +1172,19 @@
                                     <button class="btn btn-reject" onclick="showRejectModal(<?= $s->id ?>)" title="Tolak Pengajuan">
                                         <i class="fa-solid fa-times"></i>
                                     </button>
+                                <?php elseif(in_array($s->status, ['disetujui sekretariat', 'ditolak sekretariat'])): ?>
+                                    <!-- Tombol Return -->
+                                    <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModal(<?= $s->id ?>, '<?= htmlspecialchars($s->nama_kegiatan, ENT_QUOTES) ?>')" title="Kembalikan Pengajuan">
+                                        <i class="fa-solid fa-undo"></i>
+                                    </button>
                                 <?php endif; ?>
                                 
+                                <!-- Tombol edit khusus untuk ditolak dekan (yang sudah ada) -->
                                 <?php if($status == 'ditolak dekan' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
                                     <a href="<?= site_url('sekretariat/edit_surat/' . $s->id) ?>" 
-                                       class="btn btn-warning" 
-                                       title="Edit & Ajukan Ulang ke Dekan"
-                                       style="background:#ffc107;color:#000;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;text-decoration:none;">
+                                    class="btn btn-warning" 
+                                    title="Edit & Ajukan Ulang ke Dekan"
+                                    style="background:#ffc107;color:#000;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;text-decoration:none;">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                 <?php endif; ?>
@@ -1183,45 +1309,176 @@
         </div>
     </div>
 </div>
-<!-- Modal PIN yang diperbarui -->
+<!-- Modal PIN -->
 <div id="pinModal" 
      style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
-     background:rgba(0,0,0,0.4);align-items:center;justify-content:center;z-index:9999">
+     background:rgba(0,0,0,0.45);backdrop-filter:blur(3px);
+     align-items:center;justify-content:center;z-index:9999">
 
-    <div style="background:#fff;padding:25px;border-radius:12px;width:350px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.2);">
-        <h3 style="margin-bottom:15px;color:#333;">
-            <i class="fas fa-lock" style="margin-right:8px;color:#16A085;"></i>Masukkan PIN
+    <div style="
+        background:#ffffff;
+        padding:28px;
+        border-radius:14px;
+        width:360px;
+        text-align:center;
+        animation: fadeIn 0.25s ease;
+        box-shadow:0 12px 30px rgba(0,0,0,0.25);
+    ">
+        <h3 style="margin-bottom:18px;color:#333;font-weight:700;font-size:20px;">
+            <i class="fas fa-shield-alt" style="margin-right:8px;color:#16A085;"></i>
+            Verifikasi PIN
         </h3>
-        
-        <div class="pin-input-container">
-            <i class="fas fa-key pin-icon"></i>
-            <input type="password" 
-                   id="pinInput" 
-                   maxlength="4"
-                   class="pin-input-with-icon"
-                   placeholder="••••"
-                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+
+        <!-- Input PIN -->
+        <div class="pin-input-container" style="position:relative;display:flex;justify-content:center;">
+            <i class="fas fa-key pin-icon" 
+               style="position:absolute;left:30px;top:50%;transform:translateY(-50%);color:#16A085;"></i>
+
+            <input type="password"
+                id="pinInput"
+                maxlength="6"
+                style="
+                    width:220px;
+                    padding:12px 40px;
+                    border:2px solid #16A085;
+                    border-radius:8px;
+                    font-size:18px;
+                    text-align:center;
+                    letter-spacing:6px;
+                    outline:none;
+                "
+                placeholder="••••••"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
         </div>
-        
-        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+
+        <!-- Tombol -->
+        <div style="display:flex;gap:12px;justify-content:center;margin-top:25px;">
             <button onclick="checkPin()" 
-                    class="btn btn-primary"
-                    style="background:#16A085;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:600;">
+                style="
+                    background:#16A085;
+                    color:white;
+                    border:none;
+                    padding:10px 22px;
+                    border-radius:7px;
+                    cursor:pointer;
+                    font-weight:600;
+                ">
                 <i class="fas fa-check"></i> Lanjut
             </button>
-            <button onclick="closePinModal()" 
-                    class="btn btn-secondary"
-                    style="background:#95a5a6;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:600;">
+
+            <button onclick="closePinModal()"
+                style="
+                    background:#7f8c8d;
+                    color:white;
+                    border:none;
+                    padding:10px 22px;
+                    border-radius:7px;
+                    cursor:pointer;
+                    font-weight:600;
+                ">
                 <i class="fas fa-times"></i> Batal
             </button>
         </div>
-        
+<button onclick="openUbahPinModal()" 
+        style="background:none;border:none;color:#16A085;margin-top:10px;cursor:pointer;font-weight:600;">
+    Ubah PIN?
+</button>
+
         <p style="margin-top:15px;font-size:12px;color:#7f8c8d;">
-            <i class="fas fa-info-circle"></i> PIN terdiri dari 4 digit angka
+            <i class="fas fa-info-circle"></i> PIN terdiri dari 6 digit angka
         </p>
     </div>
 </div>
 
+<style>
+@keyframes fadeIn {
+    from { opacity:0; transform: scale(0.94); }
+    to   { opacity:1; transform: scale(1); }
+}
+</style>
+<!-- Modal Ubah PIN -->
+<div id="ubahPinModal" 
+     style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;
+     background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999">
+
+    <div style="background:#fff;width:380px;padding:25px;border-radius:14px;
+        box-shadow:0 15px 35px rgba(0,0,0,0.25);text-align:center;">
+
+        <h2 style="margin-bottom:10px;color:#333;font-weight:700;">
+            <i class="fas fa-key" style="color:#16A085;margin-right:8px;"></i>
+            Ubah PIN
+        </h2>
+
+        <p style="font-size:13px;color:#777;margin-bottom:20px;">
+            Masukkan PIN lama dan PIN baru (6 digit).
+        </p>
+
+        <div style="text-align:left;margin-bottom:12px;">
+            <label>PIN Lama</label>
+            <input type="password" id="oldPin" maxlength="6"
+                style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin-top:5px;"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        </div>
+
+        <div style="text-align:left;">
+            <label>PIN Baru</label>
+            <input type="password" id="newPin" maxlength="6"
+                style="width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin-top:5px;"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:25px;justify-content:center;">
+            <button onclick="submitUbahPin()" 
+                style="background:#16A085;color:white;border:none;padding:10px 20px;
+                border-radius:8px;cursor:pointer;font-weight:600;">
+                Simpan
+            </button>
+
+            <button onclick="closeUbahPinModal()" 
+                style="background:#7f8c8d;color:white;border:none;padding:10px 20px;
+                border-radius:8px;cursor:pointer;font-weight:600;">
+                Batal
+            </button>
+        </div>
+
+        <p id="pinMsg" style="margin-top:12px;color:red;font-size:13px;"></p>
+
+    </div>
+</div>
+
+
+<!-- Return Modal -->
+<div id="returnModal" class="modal" onclick="modalClickOutside(event,'returnModal')">
+    <div class="approve-modal-content" onclick="event.stopPropagation()">
+        <div class="approve-modal-header" style="background: #ff9800;">
+            <h3><i class="fa-solid fa-undo"></i> Kembalikan Pengajuan</h3>
+            <button class="close-modal" onclick="closeModal('returnModal')">&times;</button>
+        </div>
+        <div class="approve-modal-body">
+            <div class="approve-info-box" style="background: #fff3e0; border-color: #ff9800;">
+                <strong style="color: #ff9800;"><i class="fa-solid fa-exclamation-triangle"></i> Peringatan</strong>
+                <span id="returnNamaKegiatan"></span>
+            </div>
+            
+            <p style="margin-bottom:20px;color:#e65100;font-weight:600">
+                ⚠️ Pengajuan ini akan dikembalikan ke status <strong>"Menunggu Persetujuan"</strong> dan dapat diajukan ulang.
+            </p>
+            
+            <form id="returnForm" method="POST" action="">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <div class="approve-modal-actions">
+                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('returnModal')">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="approve-btn" style="background: #ff9800;">
+                        <i class="fa-solid fa-undo"></i> Ya, Kembalikan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 // Data dari controller
@@ -2033,20 +2290,26 @@ function generateDetailContent(item) {
     ${rejectionHtml}
     
     <div class="modal-actions">
-        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-            <i class="fa-solid fa-times"></i> Tutup
+    <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+        <i class="fa-solid fa-times"></i> Tutup
+    </button>
+    ${getVal('status') === 'disetujui KK' ? `
+    <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); showRejectModal(${item.id})">
+            <i class="fa-solid fa-times"></i> Tolak
         </button>
-        ${getVal('status') === 'disetujui KK' ? `
-        <div style="display:flex;gap:10px;margin-left:auto">
-            <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); showRejectModal(${item.id})">
-                <i class="fa-solid fa-times"></i> Tolak
-            </button>
-            <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
-                <i class="fa-solid fa-check"></i> Setujui
-            </button>
-        </div>
-        ` : ''}
-    </div>`;
+        <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+            <i class="fa-solid fa-check"></i> Setujui
+        </button>
+    </div>
+    ` : (getVal('status') === 'disetujui sekretariat' || getVal('status') === 'ditolak sekretariat') ? `
+    <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="modal-btn" style="background: #ff9800;" onclick="event.stopPropagation(); closeModal('detailModal'); showReturnModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+            <i class="fa-solid fa-undo"></i> Kembalikan
+        </button>
+    </div>
+    ` : ''}
+</div>`;
 }
 
 // PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
@@ -2206,7 +2469,14 @@ function confirmReject() {
     document.body.appendChild(form);
     form.submit();
 }
+let currentReturnId = null;
 
+function showReturnModal(id, namaKegiatan) {
+    currentReturnId = id;
+    document.getElementById('returnNamaKegiatan').textContent = namaKegiatan;
+    document.getElementById('returnForm').action = '<?= base_url("sekretariat/return_pengajuan/") ?>' + id;
+    document.getElementById('returnModal').classList.add('show');
+}
 function closeModal(id) { 
     document.getElementById(id).classList.remove('show'); 
 }
@@ -2246,20 +2516,29 @@ function closePinModal() {
     document.getElementById("pinInput").value = "";
 }
 
-// CEK PIN
 function checkPin() {
     let pin = document.getElementById("pinInput").value;
 
-    if (pin !== "1234") {
-        alert("PIN salah!");
-        return;
-    }
+    fetch("<?= base_url('sekretariat/cek_pin') ?>", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin: pin })
+    })
+    .then(res => res.json())
+    .then(data => {
 
-    // PIN benar → tampilkan dropdown disposisi
-    document.getElementById("disposisiBox" + selectedSurat).style.display = "block";
+        if (data.status !== "success") {
+            alert("PIN salah!");
+            return;
+        }
 
-    closePinModal();
+        // PIN benar → tampilkan dropdown disposisi
+        document.getElementById("disposisiBox" + selectedSurat).style.display = "block";
+
+        closePinModal();
+    });
 }
+
 // PADA SAAT MEMILIH DISPOSISI
 function onDisposisiChange(id) {
     let val = document.getElementById("disposisiSelect" + id).value;
@@ -2329,7 +2608,46 @@ function saveDisposisi(id) {
         location.reload();
     });
 }
+function openUbahPinModal() {
+    document.getElementById("ubahPinModal").style.display = "flex";
+}
+
+function closeUbahPinModal() {
+    document.getElementById("ubahPinModal").style.display = "none";
+    document.getElementById("pinMsg").innerHTML = "";
+}
+
+function submitUbahPin() {
+    let oldPin = document.getElementById("oldPin").value;
+    let newPin = document.getElementById("newPin").value;
+
+    if (oldPin.length !== 6 || newPin.length !== 6) {
+        document.getElementById("pinMsg").innerHTML = "PIN harus 6 digit!";
+        return;
+    }
+
+    fetch("<?= base_url('sekretariat/updatePin') ?>", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `old_pin=${encodeURIComponent(oldPin)}&new_pin=${encodeURIComponent(newPin)}`
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("pinMsg").innerHTML = data.message;
+
+        if (data.status) {
+            setTimeout(() => {
+                closeUbahPinModal();
+                location.reload();
+            }, 800);
+        }
+    })
+    .catch(() => {
+        document.getElementById("pinMsg").innerHTML = "Terjadi kesalahan!";
+    });
+}
 
 </script>
+
 </body>
 </html>

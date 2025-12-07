@@ -50,7 +50,7 @@
     .close-modal:hover{background:rgba(255,255,255,0.2)}
     
     /* Detail Content Styles */
-    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
+    .detail-content{padding:25px;max-height:calc(85vh - 80px)}
     .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
     .detail-section:last-child{margin-bottom:0}
     .detail-section-title{font-size:16px;font-weight:700;color:#8E44AD;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #8E44AD;display:flex;align-items:center;gap:10px}
@@ -364,6 +364,30 @@
             border-bottom: none;
         }
     }
+    /* Tombol Return - WARNA ORANGE/KUNING */
+.btn-return {
+    background: #ff9800 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 6px 10px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.2s ease-in-out;
+    font-size: 14px;
+    height: 32px;
+}
+
+.btn-return i {
+    font-size: 14px;
+}
+
+.btn-return:hover {
+    background: #f57c00 !important;
+    transform: scale(1.05);
+}
 </style>
 </head>
 <body>
@@ -715,13 +739,18 @@
                             </button>
                             
                             <?php if($s->status == 'pengajuan'): ?>
-                                <button class="btn btn-approve" onclick="event.stopPropagation(); showApproveModal(<?= $s->id ?>)" title="Setujui">
-                                    <i class="fa-solid fa-check"></i>
-                                </button>
-                                <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModal(<?= $s->id ?>)" title="Tolak">
-                                    <i class="fa-solid fa-times"></i>
-                                </button>
-                            <?php endif; ?>
+                            <button class="btn btn-approve" onclick="event.stopPropagation(); showApproveModal(<?= $s->id ?>)" title="Setujui">
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                            <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModal(<?= $s->id ?>)" title="Tolak">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        <?php elseif(in_array($s->status, ['disetujui KK', 'ditolak KK'])): ?>
+                            <!-- Tombol Return: Kembalikan ke status awal -->
+                            <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModal(<?= $s->id ?>, '<?= htmlspecialchars($s->nama_kegiatan, ENT_QUOTES) ?>')" title="Kembalikan Pengajuan">
+                                <i class="fa-solid fa-undo"></i>
+                            </button>
+                        <?php endif; ?>
                         </div>
                     </td>
                 </tr>
@@ -865,7 +894,38 @@
         </div>
     </div>
 </div>
-
+<!-- Return Modal -->
+<div id="returnModal" class="modal" onclick="modalClickOutside(event,'returnModal')">
+    <div class="approve-modal-content" onclick="event.stopPropagation()">
+        <div class="approve-modal-header" style="background: #ff9800;">
+            <h3><i class="fa-solid fa-undo"></i> Kembalikan Pengajuan</h3>
+            <button class="close-modal" onclick="closeModal('returnModal')">&times;</button>
+        </div>
+        <div class="approve-modal-body">
+            <div class="approve-info-box" style="background: #fff3e0; border-color: #ff9800;">
+                <strong style="color: #ff9800;"><i class="fa-solid fa-exclamation-triangle"></i> Peringatan</strong>
+                <span>Ini akan mengembalikan status ke sebelumnya</span>
+            </div>
+            
+            <p style="margin-bottom:20px;color:#e65100;font-weight:600">
+                ⚠️ Pengajuan ini akan dikembalikan ke status <strong>"Menunggu Persetujuan"</strong> dan dapat diajukan ulang.
+            </p>
+            
+            <form id="returnForm" method="POST" action="">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <div class="approve-modal-actions">
+                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('returnModal')">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="approve-btn" style="background: #ff9800;">
+                        <i class="fa-solid fa-undo"></i> Ya, Kembalikan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 // Data dari controller
@@ -1496,21 +1556,27 @@ function generateDetailContent(item) {
     
     ${rejectionHtml}
     
-    <div class="modal-actions">
-        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-            <i class="fa-solid fa-times"></i> Tutup
+<div class="modal-actions">
+    <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+        <i class="fa-solid fa-times"></i> Tutup
+    </button>
+    ${getVal('status') === 'pengajuan' ? `
+    <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); showRejectModal(${item.id})">
+            <i class="fa-solid fa-times"></i> Tolak
         </button>
-        ${getVal('status') === 'pengajuan' ? `
-        <div style="display:flex;gap:10px;margin-left:auto">
-            <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); showRejectModal(${item.id})">
-                <i class="fa-solid fa-times"></i> Tolak
-            </button>
-            <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
-                <i class="fa-solid fa-check"></i> Setujui
-            </button>
-        </div>
-        ` : ''}
-    </div>`;
+        <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+            <i class="fa-solid fa-check"></i> Setujui
+        </button>
+    </div>
+    ` : (getVal('status') === 'disetujui KK' || getVal('status') === 'ditolak KK') ? `
+    <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="modal-btn" style="background: #ff9800;" onclick="event.stopPropagation(); closeModal('detailModal'); showReturnModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+            <i class="fa-solid fa-undo"></i> Kembalikan
+        </button>
+    </div>
+    ` : ''}
+</div>`;
 }
 
 // ============================================
@@ -1557,6 +1623,13 @@ function confirmReject() {
     
     document.body.appendChild(form);
     form.submit();
+}
+let currentReturnId = null;
+
+function showReturnModal(id, namaKegiatan) {
+    currentReturnId = id;
+    document.getElementById('returnForm').action = '<?= base_url("kaprodi/return_pengajuan/") ?>' + id;
+    document.getElementById('returnModal').classList.add('show');
 }
 
 function closeModal(id) { 
