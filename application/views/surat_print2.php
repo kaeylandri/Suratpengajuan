@@ -267,6 +267,7 @@ function tgl_indo($tanggal) {
 ?>
 
 <body>
+    
     <br><br>
     <!-- CONTENT -->
     <div class="content">

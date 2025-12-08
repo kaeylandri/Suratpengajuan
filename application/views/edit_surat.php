@@ -377,7 +377,14 @@ foreach($opsi_kel as $o) echo '<option value="'.htmlspecialchars($o).'" '.((isse
 <div class="table-responsive">
 <table class="table table-bordered" id="dosen_table">
 <thead class="thead-light">
-<tr><th>NIP</th><th>Nama Dosen</th><th>Jabatan</th><th>Divisi</th><th width="5%">Aksi</th></tr>
+<tr>
+    <th>NIP</th>
+    <th>Nama Dosen</th>
+    <th>Jabatan</th>
+    <th>Divisi</th>
+    <th class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">Peran</th>
+    <th width="5%">Aksi</th>
+</tr>
 </thead>
 <tbody>
 <?php
@@ -415,6 +422,14 @@ if (!empty($dosen_data) && is_array($dosen_data)):
            value="<?= htmlspecialchars($dosen['divisi'] ?? '') ?>" 
            autocomplete="off">
 </td>
+<td class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
+    <input type="text"
+           name="peran[]"
+           class="form-control peran-input"
+           value="<?= htmlspecialchars($dosen['peran'] ?? '') ?>"
+           placeholder="Ketua/Anggota/dll"
+           autocomplete="off">
+</td>
 <td><span class="remove-row" style="cursor:pointer;color:red;font-weight:bold;">X</span></td>
 </tr>
 <?php
@@ -433,6 +448,9 @@ else:
 </td>
 <td>
     <input type="text" name="divisi[]" class="form-control divisi-input">
+</td>
+<td class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
+    <input type="text" name="peran[]" class="form-control peran-input" placeholder="Ketua/Anggota/dll">
 </td>
 <td><span class="remove-row" style="cursor:pointer;color:red;font-weight:bold;">X</span></td>
 </tr>
@@ -920,23 +938,6 @@ $(document).ready(function(){
         $("#lainnya_kelompok_box").toggle(this.value==="Lainnya"); 
     });
 
-    // Add new dosen row with autocomplete
-    $("#addRow").click(function(){
-        const rowIndex = $('#dosen_table tbody tr').length;
-        const newRow = $(`<tr class="dosen-row" style="opacity:0;transform:translateY(-10px);" data-row-index="${rowIndex}">
-            <td><input type="text" name="nip[]" class="form-control nip-input" required></td>
-            <td><input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" required></td>
-            <td><input type="text" name="jabatan[]" class="form-control jabatan-input"></td>
-            <td><input type="text" name="divisi[]" class="form-control divisi-input"></td>
-            <td><span class="remove-row" style="cursor:pointer;color:red;font-weight:bold;">X</span></td>
-        </tr>`).appendTo("#dosen_table tbody");
-        
-        setTimeout(()=>{ 
-            newRow.css({'transition':'all 0.3s ease','opacity':'1','transform':'translateY(0)'});
-            // Initialize autocomplete for the new row
-            initAutocompleteForRow(newRow[0]);
-        }, 10);
-    });
 
     // Remove row
     $(document).on("click", ".remove-row", function(){
@@ -1028,6 +1029,76 @@ $(document).ready(function(){
             removeAutocompleteBox();
         }
     });
+});
+// Function untuk toggle kolom peran
+function togglePeranColumn(show) {
+    const peranColumns = document.querySelectorAll('.peran-column');
+    peranColumns.forEach(col => {
+        col.style.display = show ? '' : 'none';
+    });
+}
+
+// Initialize visibility based on jenis_pengajuan saat halaman load
+const jenisPengajuanSelect = document.getElementById('jenis_pengajuan');
+if (jenisPengajuanSelect) {
+    // Set initial state
+    const isKelompok = jenisPengajuanSelect.value === 'Kelompok';
+    togglePeranColumn(isKelompok);
+
+    // Add event listener for changes (JANGAN DUPLIKAT - cek dulu apakah sudah ada)
+    // Hapus listener lama jika ada
+    const oldListener = jenisPengajuanSelect._peranListener;
+    if (oldListener) {
+        jenisPengajuanSelect.removeEventListener('change', oldListener);
+    }
+    
+    // Buat listener baru
+    const newListener = function() {
+        const showPeran = this.value === 'Kelompok';
+        togglePeranColumn(showPeran);
+        
+        // Clear peran values if switching to Perorangan
+        if (!showPeran) {
+            document.querySelectorAll('.peran-input').forEach(input => {
+                input.value = '-';
+            });
+        }
+        
+        // Toggle boxes untuk perorangan/kelompok
+        $("#perorangan_box").toggle(this.value === "Perorangan"); 
+        $("#kelompok_box").toggle(this.value === "Kelompok");
+    };
+    
+    // Simpan reference listener
+    jenisPengajuanSelect._peranListener = newListener;
+    
+    // Attach listener
+    jenisPengajuanSelect.addEventListener('change', newListener);
+}
+
+// Update addRow function untuk include peran
+// GANTI fungsi $("#addRow").click yang sudah ada dengan yang ini:
+$("#addRow").off('click').click(function(){
+    const rowIndex = $('#dosen_table tbody tr').length;
+    const jenisPengajuan = document.getElementById('jenis_pengajuan').value;
+    const showPeran = jenisPengajuan === 'Kelompok';
+    
+    const newRow = $(`<tr class="dosen-row" style="opacity:0;transform:translateY(-10px);" data-row-index="${rowIndex}">
+        <td><input type="text" name="nip[]" class="form-control nip-input" required></td>
+        <td><input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" required></td>
+        <td><input type="text" name="jabatan[]" class="form-control jabatan-input"></td>
+        <td><input type="text" name="divisi[]" class="form-control divisi-input"></td>
+        <td class="peran-column" style="${showPeran ? '' : 'display:none;'}">
+            <input type="text" name="peran[]" class="form-control peran-input" placeholder="Ketua/Anggota/dll">
+        </td>
+        <td><span class="remove-row" style="cursor:pointer;color:red;font-weight:bold;">X</span></td>
+    </tr>`).appendTo("#dosen_table tbody");
+    
+    setTimeout(()=>{ 
+        newRow.css({'transition':'all 0.3s ease','opacity':'1','transform':'translateY(0)'});
+        // Initialize autocomplete for the new row
+        initAutocompleteForRow(newRow[0]);
+    }, 10);
 });
 </script>
 </body>

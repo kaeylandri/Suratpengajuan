@@ -878,6 +878,7 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                                 <th>Nama Dosen</th>
                                 <th>Jabatan</th>
                                 <th>Divisi</th>
+                                <th class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">Peran</th>
                                 <th width="5%">Aksi</th>
                             </tr>
                         </thead>
@@ -917,6 +918,14 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                                                 value="<?= htmlspecialchars($dosen['divisi'] ?? '') ?>"
                                                 autocomplete="off">
                                         </td>
+                                        <td class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
+                                            <input type="text"
+                                                name="peran[]"
+                                                class="form-control peran-input"
+                                                value="<?= htmlspecialchars($dosen['peran'] ?? '') ?>"
+                                                placeholder="Ketua/Anggota/dll"
+                                                autocomplete="off">
+                                        </td>
                                         <td class="text-center">
                                             <span class="remove-row">
                                                 <i class="fas fa-trash"></i>
@@ -939,6 +948,9 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                                     </td>
                                     <td>
                                         <input type="text" name="divisi[]" class="form-control divisi-input">
+                                    </td>
+                                    <td class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
+                                        <input type="text" name="peran[]" class="form-control peran-input" placeholder="Ketua/Anggota/dll">
                                     </td>
                                     <td class="text-center">
                                         <span class="remove-row">
@@ -1487,44 +1499,6 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                     document.getElementById('lainnya_kelompok_box').style.display = this.value === 'Lainnya' ? 'block' : 'none';
                 });
             }
-
-            // Add new dosen row with autocomplete
-            document.getElementById('addRow').addEventListener('click', function() {
-                const rowIndex = document.querySelectorAll('#dosen_table tbody tr').length;
-                const newRow = document.createElement('tr');
-                newRow.className = 'dosen-row';
-                newRow.dataset.rowIndex = rowIndex;
-                newRow.innerHTML = `
-            <td>
-                <input type="text" name="nip[]" class="form-control nip-input" required>
-            </td>
-            <td>
-                <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" required>
-            </td>
-            <td>
-                <input type="text" name="jabatan[]" class="form-control jabatan-input">
-            </td>
-            <td>
-                <input type="text" name="divisi[]" class="form-control divisi-input">
-            </td>
-            <td class="text-center">
-                <span class="remove-row">
-                    <i class="fas fa-trash"></i>
-                </span>
-            </td>
-        `;
-
-                document.querySelector('#dosen_table tbody').appendChild(newRow);
-
-                setTimeout(() => {
-                    newRow.style.opacity = '1';
-                    newRow.style.transform = 'translateY(0)';
-                    newRow.style.transition = 'all 0.3s ease';
-                    // Initialize autocomplete for the new row
-                    initAutocompleteForRow(newRow);
-                }, 10);
-            });
-
             // Remove row
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.remove-row')) {
@@ -1627,6 +1601,83 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                 }
             });
         });
+            // Function untuk toggle kolom peran
+    function togglePeranColumn(show) {
+        const peranColumns = document.querySelectorAll('.peran-column');
+        peranColumns.forEach(col => {
+            col.style.display = show ? '' : 'none';
+        });
+    }
+
+    // Initialize visibility based on jenis_pengajuan
+    const jenisPengajuanSelect = document.getElementById('jenis_pengajuan');
+    if (jenisPengajuanSelect) {
+        // Set initial state
+        const isKelompok = jenisPengajuanSelect.value === 'Kelompok';
+        togglePeranColumn(isKelompok);
+
+        // Add event listener for changes
+        jenisPengajuanSelect.addEventListener('change', function() {
+            const showPeran = this.value === 'Kelompok';
+            togglePeranColumn(showPeran);
+            
+            // Clear peran values if switching to Perorangan
+            if (!showPeran) {
+                document.querySelectorAll('.peran-input').forEach(input => {
+                    input.value = '-';
+                });
+            }
+        });
+    }
+
+    // Update addRow function untuk include peran
+    document.getElementById('addRow').addEventListener('click', function() {
+        const rowIndex = document.querySelectorAll('#dosen_table tbody tr').length;
+        const jenisPengajuan = document.getElementById('jenis_pengajuan').value;
+        const showPeran = jenisPengajuan === 'Kelompok';
+        
+        const newRow = document.createElement('tr');
+        newRow.className = 'dosen-row';
+        newRow.dataset.rowIndex = rowIndex;
+        newRow.innerHTML = `
+            <td>
+                <input type="text" name="nip[]" class="form-control nip-input" required>
+            </td>
+            <td>
+                <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" required>
+            </td>
+            <td>
+                <input type="text" name="jabatan[]" class="form-control jabatan-input">
+            </td>
+            <td>
+                <input type="text" name="divisi[]" class="form-control divisi-input">
+            </td>
+            <td class="peran-column" style="${showPeran ? '' : 'display:none;'}">
+                <input type="text" name="peran[]" class="form-control peran-input" placeholder="Ketua/Anggota/dll">
+            </td>
+            <td class="text-center">
+                <span class="remove-row">
+                    <i class="fas fa-trash"></i>
+                </span>
+            </td>
+        `;
+
+        document.querySelector('#dosen_table tbody').appendChild(newRow);
+
+        setTimeout(() => {
+            newRow.style.opacity = '1';
+            newRow.style.transform = 'translateY(0)';
+            newRow.style.transition = 'all 0.3s ease';
+            // Initialize autocomplete for the new row
+            initAutocompleteForRow(newRow);
+        }, 10);
+    });
+
+    // Initialize autocomplete for existing rows
+    document.querySelectorAll('.dosen-row').forEach(row => {
+        initAutocompleteForRow(row);
+    });
+
     </script>
 </body>
 </html>

@@ -827,7 +827,7 @@
                 </div>
             </div>
 
-            <!-- Dosen Terkait -->
+                    <!-- Dosen Terkait -->
             <div class="form-section">
                 <h5><i class="fas fa-user-tie"></i> Dosen Terkait</h5>
                 <div class="table-responsive">
@@ -838,6 +838,7 @@
                                 <th>Nama Dosen</th>
                                 <th>Jabatan</th>
                                 <th>Divisi</th>
+                                <th class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">Peran</th>
                                 <th width="5%">Aksi</th>
                             </tr>
                         </thead>
@@ -856,13 +857,13 @@
                                                 required>
                                         </td>
                                         <td>
-                                <input type="text" 
-                                    name="nama_dosen[]"
-                                    class="form-control nama-dosen-input" 
-                                    value="<?= htmlspecialchars($dosen['nama_dosen'] ?? '') ?>" 
-                                    autocomplete="off"
-                                    required>
-                            </td>
+                                            <input type="text" 
+                                                name="nama_dosen[]"
+                                                class="form-control nama-dosen-input" 
+                                                value="<?= htmlspecialchars($dosen['nama'] ?? '') ?>" 
+                                                autocomplete="off"
+                                                required>
+                                        </td>
                                         <td>
                                             <input type="text"
                                                 name="jabatan[]"
@@ -875,6 +876,14 @@
                                                 name="divisi[]"
                                                 class="form-control divisi-input"
                                                 value="<?= htmlspecialchars($dosen['divisi'] ?? '') ?>"
+                                                autocomplete="off">
+                                        </td>
+                                        <td class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
+                                            <input type="text"
+                                                name="peran[]"
+                                                class="form-control peran-input"
+                                                value="<?= htmlspecialchars($dosen['peran'] ?? '') ?>"
+                                                placeholder="Ketua/Anggota/dll"
                                                 autocomplete="off">
                                         </td>
                                         <td class="text-center">
@@ -899,6 +908,9 @@
                                     </td>
                                     <td>
                                         <input type="text" name="divisi[]" class="form-control divisi-input">
+                                    </td>
+                                    <td class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
+                                        <input type="text" name="peran[]" class="form-control peran-input" placeholder="Ketua/Anggota/dll">
                                     </td>
                                     <td class="text-center">
                                         <span class="remove-row">
@@ -1448,42 +1460,6 @@
                 });
             }
 
-            // Add new dosen row with autocomplete
-            document.getElementById('addRow').addEventListener('click', function() {
-                const rowIndex = document.querySelectorAll('#dosen_table tbody tr').length;
-                const newRow = document.createElement('tr');
-                newRow.className = 'dosen-row';
-                newRow.dataset.rowIndex = rowIndex;
-                newRow.innerHTML = `
-            <td>
-                <input type="text" name="nip[]" class="form-control nip-input" required>
-            </td>
-            <td>
-                <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" required>
-            </td>
-            <td>
-                <input type="text" name="jabatan[]" class="form-control jabatan-input">
-            </td>
-            <td>
-                <input type="text" name="divisi[]" class="form-control divisi-input">
-            </td>
-            <td class="text-center">
-                <span class="remove-row">
-                    <i class="fas fa-trash"></i>
-                </span>
-            </td>
-        `;
-
-                document.querySelector('#dosen_table tbody').appendChild(newRow);
-
-                setTimeout(() => {
-                    newRow.style.opacity = '1';
-                    newRow.style.transform = 'translateY(0)';
-                    newRow.style.transition = 'all 0.3s ease';
-                    // Initialize autocomplete for the new row
-                    initAutocompleteForRow(newRow);
-                }, 10);
-            });
 
             // Remove row
             document.addEventListener('click', function(e) {
@@ -1587,6 +1563,111 @@
                 }
             });
         });
+         // Function untuk toggle kolom peran
+    function togglePeranColumn(show) {
+        const peranColumns = document.querySelectorAll('.peran-column');
+        peranColumns.forEach(col => {
+            col.style.display = show ? '' : 'none';
+        });
+    }
+
+    // Initialize visibility based on jenis_pengajuan
+    const jenisPengajuanSelect = document.getElementById('jenis_pengajuan');
+    if (jenisPengajuanSelect) {
+        // Set initial state
+        const isKelompok = jenisPengajuanSelect.value === 'Kelompok';
+        togglePeranColumn(isKelompok);
+
+        // Add event listener for changes
+        jenisPengajuanSelect.addEventListener('change', function() {
+            const showPeran = this.value === 'Kelompok';
+            togglePeranColumn(showPeran);
+            
+            // Clear peran values if switching to Perorangan
+            if (!showPeran) {
+                document.querySelectorAll('.peran-input').forEach(input => {
+                    input.value = '-';
+                });
+            }
+        });
+    }
+
+    // Toggle sections based on selections
+    document.getElementById('jenis_date').addEventListener('change', function() {
+        document.getElementById('custom_date').style.display = this.value === 'Custom' ? 'block' : 'none';
+        document.getElementById('periode_date').style.display = this.value === 'Periode' ? 'block' : 'none';
+    });
+
+    if (document.getElementById('jenis_penugasan_perorangan')) {
+        document.getElementById('jenis_penugasan_perorangan').addEventListener('change', function() {
+            document.getElementById('lainnya_perorangan_box').style.display = this.value === 'Lainnya' ? 'block' : 'none';
+        });
+    }
+
+    if (document.getElementById('jenis_penugasan_kelompok')) {
+        document.getElementById('jenis_penugasan_kelompok').addEventListener('change', function() {
+            document.getElementById('lainnya_kelompok_box').style.display = this.value === 'Lainnya' ? 'block' : 'none';
+        });
+    }
+
+    // Update addRow function untuk include peran
+    document.getElementById('addRow').addEventListener('click', function() {
+        const rowIndex = document.querySelectorAll('#dosen_table tbody tr').length;
+        const jenisPengajuan = document.getElementById('jenis_pengajuan').value;
+        const showPeran = jenisPengajuan === 'Kelompok';
+        
+        const newRow = document.createElement('tr');
+        newRow.className = 'dosen-row';
+        newRow.dataset.rowIndex = rowIndex;
+        newRow.innerHTML = `
+            <td>
+                <input type="text" name="nip[]" class="form-control nip-input" required>
+            </td>
+            <td>
+                <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" required>
+            </td>
+            <td>
+                <input type="text" name="jabatan[]" class="form-control jabatan-input">
+            </td>
+            <td>
+                <input type="text" name="divisi[]" class="form-control divisi-input">
+            </td>
+            <td class="peran-column" style="${showPeran ? '' : 'display:none;'}">
+                <input type="text" name="peran[]" class="form-control peran-input" placeholder="Ketua/Anggota/dll">
+            </td>
+            <td class="text-center">
+                <span class="remove-row">
+                    <i class="fas fa-trash"></i>
+                </span>
+            </td>
+        `;
+
+        document.querySelector('#dosen_table tbody').appendChild(newRow);
+
+        setTimeout(() => {
+            newRow.style.opacity = '1';
+            newRow.style.transform = 'translateY(0)';
+            newRow.style.transition = 'all 0.3s ease';
+            // Initialize autocomplete for the new row
+            initAutocompleteForRow(newRow);
+        }, 10);
+    });
+
+    // Initialize autocomplete for existing rows
+    document.querySelectorAll('.dosen-row').forEach(row => {
+        initAutocompleteForRow(row);
+    });
+
+    // Remove row
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-row')) {
+            const row = e.target.closest('tr');
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(20px)';
+            setTimeout(() => row.remove(), 300);
+        }
+    });
+
     </script>
 </body>
 

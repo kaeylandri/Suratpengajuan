@@ -50,7 +50,7 @@
     .close-modal:hover{background:rgba(255,255,255,0.2)}
     
     /* Detail Content Styles - IMPROVED (SAMA DENGAN DASHBOARD SEKRETARIAT) */
-    .detail-content{padding:25px;max-height:calc(85vh - 80px)d}
+    .detail-content{padding:25px;max-height:calc(85vh - 80px);doverflow-y:auto}
     .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
     .detail-section:last-child{margin-bottom:0}
     .detail-section-title{font-size:16px;font-weight:700;color:#FB8C00;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #FB8C00;display:flex;align-items:center;gap:10px}
