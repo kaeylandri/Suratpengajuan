@@ -1186,7 +1186,7 @@ i[class*="fa-"] {
 
                 <div class="col-md-3 position-relative peran-column">
                     <label>Peran</label>
-                    <input type="text" name="peran[]" class="form-control peran-input" autocomplete="off" required placeholder="Masukkan peran/posisi">
+                    <input type="text" name="peran[]" class="form-control peran-input" autocomplete="off" placeholder="Masukkan peran/posisi">
                 </div>
 
                 <div class="col-md-1 text-center button-cell">
@@ -1197,6 +1197,9 @@ i[class*="fa-"] {
 
             </div>
         </div>
+
+        <!-- Hidden input untuk menangkap peran untuk jenis perorangan -->
+        <input type="hidden" name="peran_perorangan" id="peran_perorangan" value="">
 
     </div>
 </fieldset>
@@ -1340,7 +1343,7 @@ i[class*="fa-"] {
     border-bottom: none;
 }
 
-/* Styling untuk kolom peran yang disembunyikan */
+/* Styling untuk kolom peran */
 .peran-column.hidden {
     display: none !important;
 }
@@ -1390,21 +1393,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const jenisPengajuan = document.getElementById('jenis_pengajuan');
     const jenisPenugasanPeroranganContainer = document.getElementById('jenis_penugasan_perorangan_container');
     const jenisPenugasanKelompokContainer = document.getElementById('jenis_penugasan_kelompok_container');
+    const peranPeroranganHidden = document.getElementById('peran_perorangan');
     
     let rowCounter = 1;
 
     // Mock data untuk testing (field divisi diubah menjadi kaprodi)
     const mockData = [
-        { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', kaprodi: 'DKV', peran: 'Ketua Panitia' },
-        { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', kaprodi: 'DKV', peran: 'Sekretaris' },
-        { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', kaprodi: 'DKV', peran: 'Bendahara' },
-        { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', kaprodi: 'DI', peran: 'Koordinator Acara' },
-        { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', kaprodi: 'DKV', peran: 'Anggota' },
-        { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', kaprodi: 'DI', peran: 'Ketua Tim' },
-        { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', kaprodi: 'DI', peran: 'Wakil Ketua' },
-        { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', kaprodi: 'DKV', peran: 'Sekretaris' },
-        { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', kaprodi: 'DP', peran: 'Bendahara' },
-        { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', kaprodi: 'Admin KK', peran: 'Koordinator' }
+        { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', kaprodi: 'DKV'},
+        { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', kaprodi: 'DKV'},
+        { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', kaprodi: 'DKV' },
+        { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', kaprodi: 'DI'},
+        { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', kaprodi: 'DKV'},
+        { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', kaprodi: 'DI'},
+        { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', kaprodi: 'DI'},
+        { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', kaprodi: 'DKV'},
+        { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', kaprodi: 'DP' },
+        { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', kaprodi: 'Admin KK'  }
     ];
 
     // Global state untuk autocomplete
@@ -1433,7 +1437,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const peranInputs = document.querySelectorAll('.peran-input');
         
         if (jenisPengajuan.value === 'Kelompok') {
-            // Tampilkan kolom peran
+            // Tampilkan kolom peran dan set sebagai required
             peranColumns.forEach(column => {
                 column.classList.remove('hidden');
                 column.classList.add('visible');
@@ -1443,34 +1447,29 @@ document.addEventListener('DOMContentLoaded', function () {
             // Set required untuk input peran
             peranInputs.forEach(input => {
                 input.required = true;
+                input.name = 'peran[]'; // Pastikan nama tetap 'peran[]'
             });
             
-            console.log('Kolom peran ditampilkan (Kelompok)');
-        } else if (jenisPengajuan.value === 'Perorangan') {
-            // Sembunyikan kolom peran
-            peranColumns.forEach(column => {
-                column.classList.add('hidden');
-                column.classList.remove('visible');
-                column.style.display = 'none';
-            });
-            
-            // Hapus required dari input peran
-            peranInputs.forEach(input => {
-                input.required = false;
-            });
-            
-            console.log('Kolom peran disembunyikan (Perorangan)');
+            console.log('Kolom peran ditampilkan dan required (Kelompok)');
         } else {
-            // Default: sembunyikan kolom peran
+            // Sembunyikan kolom peran dan hapus required
             peranColumns.forEach(column => {
                 column.classList.add('hidden');
                 column.classList.remove('visible');
                 column.style.display = 'none';
             });
             
+            // Hapus required dari input peran dan ubah nama agar tidak dikirim
             peranInputs.forEach(input => {
                 input.required = false;
+                input.name = 'peran_hidden[]'; // Ubah nama agar tidak dikirim ke server
+                input.value = ''; // Kosongkan nilai
             });
+            
+            // Set hidden input untuk peran perorangan (array kosong)
+            peranPeroranganHidden.value = JSON.stringify([]);
+            
+            console.log('Kolom peran disembunyikan dan tidak required (Perorangan/Default)');
         }
     }
 
@@ -1496,6 +1495,13 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleJenisPenugasan();
         toggleKolomPeran();
         toggleButtonVisibility();
+        
+        // PERBAIKAN: Pastikan autocomplete berfungsi untuk baris pertama
+        if (jenisPengajuan.value === 'Perorangan') {
+            setTimeout(() => {
+                initializeFirstRow();
+            }, 50);
+        }
     }
 
     // Event listener untuk jenis pengajuan
@@ -1558,11 +1564,16 @@ document.addEventListener('DOMContentLoaded', function () {
         currentInputElement = null;
     }
 
-    // Fetch suggestions from database
+    // Fetch suggestions from database - HANYA untuk NIP dan Nama Dosen
     async function fetchSuggestions(query, fieldType = 'nip') {
         if (!query) return [];
         
         try {
+            // Hanya tampilkan autocomplete untuk nip dan nama_dosen
+            if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
+                return [];
+            }
+            
             // Mock data untuk testing
             await new Promise(resolve => setTimeout(resolve, 200));
             const lowerQuery = query.toLowerCase();
@@ -1579,6 +1590,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Show suggestion box
     function showSuggestionBox(inputEl, items, onSelect, fieldType) {
         removeAutocompleteBox();
+
+        // Hanya tampilkan autocomplete untuk nip dan nama_dosen
+        if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
+            return;
+        }
 
         const rect = inputEl.getBoundingClientRect();
         const box = document.createElement('div');
@@ -1617,18 +1633,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 case 'nama_dosen':
                     primaryText = highlightMatch(item.nama_dosen, query);
                     secondaryText = `NIP: ${item.nip}`;
-                    break;
-                case 'jabatan':
-                    primaryText = highlightMatch(item.jabatan, query);
-                    secondaryText = `${item.nama_dosen} (${item.nip})`;
-                    break;
-                case 'kaprodi':
-                    primaryText = highlightMatch(item.kaprodi, query);
-                    secondaryText = `${item.nama_dosen} (${item.nip})`;
-                    break;
-                case 'peran':
-                    primaryText = highlightMatch(item.peran, query);
-                    secondaryText = `${item.nama_dosen} - ${item.kaprodi}`;
                     break;
                 default:
                     primaryText = item[fieldType] || '-';
@@ -1704,6 +1708,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize autocomplete for a row
     function initAutocompleteForRow(rowEl) {
+        // Pastikan rowEl valid
+        if (!rowEl) {
+            console.error('Row element tidak valid');
+            return;
+        }
+        
         // Hapus flag initialization sebelumnya
         delete rowEl.dataset.autocompleteInitialized;
 
@@ -1713,7 +1723,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const inputKaprodi = rowEl.querySelector('.kaprodi-input');
         const inputPeran = rowEl.querySelector('.peran-input');
 
-        if (!inputNip || !inputNama || !inputJabatan || !inputKaprodi) {
+        if (!inputNip || !inputNama) {
             console.log('Input elements not found in row:', rowEl);
             return;
         }
@@ -1726,29 +1736,34 @@ document.addEventListener('DOMContentLoaded', function () {
             
             console.log('Filling row with data:', item);
             
-            // Set values untuk semua field
+            // Set values untuk field utama
             inputNip.value = item.nip || '';
             inputNama.value = item.nama_dosen || '';
-            inputJabatan.value = item.jabatan || '';
-            inputKaprodi.value = item.kaprodi || '';
             
-            // Hanya set peran jika input peran ada (untuk jenis pengajuan Kelompok)
-            if (inputPeran) {
+            // Untuk jabatan dan kaprodi, isi dari data mock
+            if (inputJabatan) inputJabatan.value = item.jabatan || '';
+            if (inputKaprodi) inputKaprodi.value = item.kaprodi || '';
+            
+            // Hanya set peran jika jenis pengajuan adalah Kelompok dan field peran ada
+            if (jenisPengajuan.value === 'Kelompok' && inputPeran) {
                 inputPeran.value = item.peran || '';
             }
             
             // Trigger input events untuk validasi
             inputNip.dispatchEvent(new Event('input', { bubbles: true }));
             inputNama.dispatchEvent(new Event('input', { bubbles: true }));
-            inputJabatan.dispatchEvent(new Event('input', { bubbles: true }));
-            inputKaprodi.dispatchEvent(new Event('input', { bubbles: true }));
-            if (inputPeran) {
+            if (inputJabatan) inputJabatan.dispatchEvent(new Event('input', { bubbles: true }));
+            if (inputKaprodi) inputKaprodi.dispatchEvent(new Event('input', { bubbles: true }));
+            if (jenisPengajuan.value === 'Kelompok' && inputPeran) {
                 inputPeran.dispatchEvent(new Event('input', { bubbles: true }));
             }
         }
 
-        // Create input handler untuk setiap field
+        // Create input handler untuk NIP dan Nama Dosen saja
         function createAutocompleteHandler(fieldType, inputElement) {
+            // Hanya autocomplete untuk nip dan nama_dosen
+            if (fieldType !== 'nip' && fieldType !== 'nama_dosen') return;
+
             const handler = debounce(async function() {
                 const val = this.value.trim();
                 console.log(`Input detected in ${fieldType}:`, val);
@@ -1777,20 +1792,40 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(`Handler attached to ${fieldType}`);
         }
 
-        // Initialize autocomplete untuk semua field dalam row ini
+        // Initialize autocomplete hanya untuk NIP dan Nama Dosen
         createAutocompleteHandler('nip', inputNip);
         createAutocompleteHandler('nama_dosen', inputNama);
-        createAutocompleteHandler('jabatan', inputJabatan);
-        createAutocompleteHandler('kaprodi', inputKaprodi);
         
-        // Inisialisasi autocomplete untuk peran hanya jika input peran ada
+        // Untuk field jabatan, kaprodi, dan peran - TANPA AUTOCOMPLETE
+        if (inputJabatan) {
+            // Hapus autocomplete untuk jabatan
+            if (inputJabatan._currentHandler) {
+                inputJabatan.removeEventListener('input', inputJabatan._currentHandler);
+            }
+            // Bisa diisi manual atau dari data mock
+        }
+        
+        if (inputKaprodi) {
+            // Hapus autocomplete untuk kaprodi
+            if (inputKaprodi._currentHandler) {
+                inputKaprodi.removeEventListener('input', inputKaprodi._currentHandler);
+            }
+            // Bisa diisi manual atau dari data mock
+        }
+        
         if (inputPeran) {
-            createAutocompleteHandler('peran', inputPeran);
+            // Untuk field peran, tidak perlu autocomplete - user isi manual
+            if (inputPeran._currentHandler) {
+                inputPeran.removeEventListener('input', inputPeran._currentHandler);
+            }
+            // Tambahkan handler sederhana tanpa autocomplete
+            inputPeran.addEventListener('input', function() {
+                console.log('Input peran:', this.value);
+            });
         }
 
         // Focus handlers untuk close autocomplete
-        const inputs = [inputNip, inputNama, inputJabatan, inputKaprodi];
-        if (inputPeran) inputs.push(inputPeran);
+        const inputs = [inputNip, inputNama];
         
         inputs.forEach(input => {
             input.addEventListener('focus', () => {
@@ -1811,6 +1846,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Set flag bahwa row sudah diinisialisasi
         rowEl.dataset.autocompleteInitialized = 'true';
+    }
+
+    // PERBAIKAN: Inisialisasi baris pertama secara khusus
+    function initializeFirstRow() {
+        const firstRow = document.querySelector('.panitia-row[data-row-index="0"]');
+        
+        if (!firstRow) {
+            console.error('Baris pertama tidak ditemukan');
+            return;
+        }
+        
+        // Jika belum diinisialisasi, inisialisasi sekarang
+        if (!firstRow.dataset.autocompleteInitialized) {
+            console.log('Initializing FIRST ROW for Perorangan/Kelompok');
+            initAutocompleteForRow(firstRow);
+        }
     }
 
     // Add new row function
@@ -1841,7 +1892,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update tampilan kolom peran berdasarkan jenis pengajuan saat ini
         updateKolomPeranForRow(newRow);
         
-        // Initialize autocomplete untuk row baru
+        // Initialize autocomplete untuk row baru (hanya untuk nip dan nama_dosen)
         setTimeout(() => {
             initAutocompleteForRow(newRow);
         }, 100);
@@ -1860,17 +1911,20 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!peranColumn || !peranInput) return;
         
         if (jenisPengajuan.value === 'Kelompok') {
-            // Tampilkan kolom peran
+            // Tampilkan kolom peran dan set sebagai required
             peranColumn.classList.remove('hidden');
             peranColumn.classList.add('visible');
             peranColumn.style.display = 'block';
             peranInput.required = true;
+            peranInput.name = 'peran[]'; // Pastikan nama 'peran[]'
         } else {
-            // Sembunyikan kolom peran
+            // Sembunyikan kolom peran, hapus required, dan ubah nama
             peranColumn.classList.add('hidden');
             peranColumn.classList.remove('visible');
             peranColumn.style.display = 'none';
             peranInput.required = false;
+            peranInput.name = 'peran_hidden[]'; // Ubah nama agar tidak dikirim
+            peranInput.value = '';
         }
     }
 
@@ -1922,23 +1976,43 @@ document.addEventListener('DOMContentLoaded', function () {
         
         rows.forEach((row, index) => {
             row.dataset.rowIndex = index;
+            // Hapus flag sebelumnya untuk memastikan inisialisasi ulang
+            delete row.dataset.autocompleteInitialized;
             initAutocompleteForRow(row);
         });
     }
 
+    // PERBAIKAN: Inisialisasi yang lebih komprehensif
+    function comprehensiveInitialize() {
+        console.log('Comprehensive initialization started...');
+        
+        // Selalu inisialisasi baris pertama terlebih dahulu
+        initializeFirstRow();
+        
+        // Kemudian inisialisasi semua baris
+        setTimeout(() => {
+            initializeAllRows();
+        }, 100);
+        
+        // Juga pastikan untuk kasus Perorangan saat load
+        if (jenisPengajuan.value === 'Perorangan') {
+            console.log('Perorangan detected, ensuring autocomplete...');
+            setTimeout(() => {
+                initializeFirstRow();
+            }, 200);
+        }
+    }
+
     // Initialize saat DOM ready
     setTimeout(() => {
-        initializeAllRows();
+        comprehensiveInitialize();
     }, 100);
 
     // Close autocomplete ketika klik di luar
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.autocomplete-box-fixed') && 
             !e.target.closest('.nip-input') && 
-            !e.target.closest('.nama-dosen-input') && 
-            !e.target.closest('.jabatan-input') && 
-            !e.target.closest('.kaprodi-input') &&
-            !e.target.closest('.peran-input')) {
+            !e.target.closest('.nama-dosen-input')) {
             removeAutocompleteBox();
         }
     });
@@ -1948,6 +2022,69 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'Escape') {
             removeAutocompleteBox();
         }
+    });
+
+    // Form submit handler - persiapkan data sebelum dikirim
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // PERBAIKAN: Validasi khusus untuk Perorangan
+        if (jenisPengajuan.value === 'Perorangan') {
+            const nipInput = document.querySelector('.nip-input');
+            const namaInput = document.querySelector('.nama-dosen-input');
+            
+            if (!nipInput || !nipInput.value.trim()) {
+                e.preventDefault();
+                alert('Mohon isi NIP untuk pengajuan perorangan');
+                nipInput.focus();
+                return;
+            }
+            
+            if (!namaInput || !namaInput.value.trim()) {
+                e.preventDefault();
+                alert('Mohon isi Nama Dosen untuk pengajuan perorangan');
+                namaInput.focus();
+                return;
+            }
+        }
+        
+        // Jika jenis pengajuan adalah Perorangan, pastikan peran tidak dikirim
+        if (jenisPengajuan.value === 'Perorangan') {
+            // Ubah semua input peran_hidden[] menjadi peran[] dengan nilai kosong
+            const peranHiddenInputs = document.querySelectorAll('input[name="peran_hidden[]"]');
+            peranHiddenInputs.forEach(input => {
+                input.name = 'peran[]'; // Kembalikan nama ke peran[]
+                input.value = ''; // Pastikan nilai kosong
+            });
+            
+            // Set hidden input untuk peran perorangan (array kosong)
+            peranPeroranganHidden.value = JSON.stringify([]);
+        } else if (jenisPengajuan.value === 'Kelompok') {
+            // Untuk kelompok, pastikan semua input peran memiliki nama yang benar
+            const peranInputs = document.querySelectorAll('.peran-input');
+            peranInputs.forEach(input => {
+                input.name = 'peran[]'; // Pastikan nama 'peran[]'
+            });
+        }
+        
+        console.log('Form submitted - Jenis Pengajuan:', jenisPengajuan.value);
+    });
+    
+    // PERBAIKAN: Tambahkan event listener untuk input NIP dan Nama di baris pertama
+    // saat dokumen sudah sepenuhnya dimuat
+    document.addEventListener('readystatechange', function() {
+        if (document.readyState === 'complete') {
+            console.log('Document fully loaded, ensuring first row autocomplete...');
+            setTimeout(() => {
+                initializeFirstRow();
+            }, 300);
+        }
+    });
+    
+    // Juga trigger inisialisasi saat window load
+    window.addEventListener('load', function() {
+        console.log('Window loaded, running comprehensive initialization...');
+        setTimeout(() => {
+            comprehensiveInitialize();
+        }, 500);
     });
 });
 </script>

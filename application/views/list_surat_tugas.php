@@ -3077,7 +3077,7 @@
             }
         }
 
-        /* ===== STYLES UNTUK MODAL KURANGI DOSEN ===== */
+        /* ===== STYLES UNTUK MODAL KURANGI DOSEN (DENGAN MULTI HAPUS) ===== */
         .dosen-item-hapus {
             display: flex;
             align-items: center;
@@ -3087,7 +3087,6 @@
             margin-bottom: 10px;
             background: white;
             transition: all 0.2s;
-            cursor: pointer;
         }
 
         .dosen-item-hapus:hover {
@@ -3134,47 +3133,59 @@
             color: #6c757d;
         }
 
-        .btn-hapus-dosen {
-            padding: 8px 16px;
-            border-radius: 6px;
-            border: none;
+        .checkbox-hapus {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #dc3545;
+            margin-right: 10px;
+        }
+
+        /* ===== STYLE UNTUK MULTI HAPUS HEADER ===== */
+        .multi-hapus-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .multi-hapus-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .multi-hapus-count {
             background: #dc3545;
             color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-select-all {
+            background: #FB8C00;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 12px;
             font-weight: 600;
             transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 5px;
         }
 
-        .btn-hapus-dosen:hover {
-            background: #c82333;
+        .btn-select-all:hover {
+            background: #e67e00;
             transform: translateY(-1px);
-            box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
         }
 
-        .btn-hapus-dosen:disabled {
-            background: #bdc3c7;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .empty-dosen-message {
-            text-align: center;
-            padding: 30px;
-            color: #6c757d;
-        }
-
-        .empty-dosen-message i {
-            font-size: 48px;
-            margin-bottom: 10px;
-            color: #adb5bd;
-        }
-
-        /* ===== PERBAIKAN: Modal Konfirmasi Penghapusan ===== */
+        /* ===== PERBAIKAN: Modal Konfirmasi Penghapusan (MULTI) ===== */
         .konfirmasi-hapus-modal {
             display: none;
             position: fixed;
@@ -3184,7 +3195,6 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.8);
             z-index: 10030;
-            /* LEBIH TINGGI DARI MODAL LAIN */
             justify-content: center;
             align-items: center;
             padding: 20px;
@@ -3200,12 +3210,11 @@
             background: white;
             border-radius: 16px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
             max-height: 80vh;
             overflow: hidden;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
             z-index: 10031;
-            /* DI ATAS BACKGROUND */
         }
 
         .konfirmasi-hapus-header {
@@ -3282,6 +3291,56 @@
             font-size: 14px;
             color: #6c757d;
             margin-bottom: 5px;
+        }
+
+        /* ===== STYLE UNTUK DAFTAR MULTI HAPUS ===== */
+        .dosen-list-hapus {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+
+        .dosen-hapus-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .dosen-hapus-item:last-child {
+            border-bottom: none;
+        }
+
+        .dosen-hapus-initial {
+            width: 30px;
+            height: 30px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .dosen-hapus-info {
+            flex: 1;
+        }
+
+        .dosen-hapus-nama {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .dosen-hapus-nip {
+            font-size: 12px;
+            color: #666;
         }
     </style>
 </head>
@@ -3582,7 +3641,6 @@
                             padding: 10px;
                             margin-top: 10px;
                             background: #f8f9fa;
-                            <?php echo (isset($hide_mobile) ? 'min-height: 200px;' : ''); ?>
                         ">
                             <!-- Dosen yang dipilih akan muncul di sini -->
                             <div id="emptySelectionMessage" style="
@@ -3633,23 +3691,34 @@
             </div>
         </div>
 
-        <!-- ===== MODAL KURANG DOSEN - REVISI VERSION ===== -->
+        <!-- ===== MODAL KURANG DOSEN - DENGAN FITUR MULTI HAPUS ===== -->
         <div id="modalKurangDosen" class="custom-modal">
-            <div class="custom-modal-content" style="max-width: 600px;">
+            <div class="custom-modal-content" style="max-width: 700px;">
                 <div class="custom-modal-header">
                     <h3 class="custom-modal-title">
                         <i class="fas fa-user-minus"></i>
-                        Kurangi Dosen
+                        Kurangi Dosen - Pilih Multiple
                     </h3>
                     <button class="custom-modal-close" id="closeKurangModal">&times;</button>
                 </div>
                 <div class="custom-modal-body">
                     <div class="alert alert-info" style="margin-bottom: 15px;">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Informasi:</strong> Pilih dosen yang akan dihapus dari daftar.
+                        <strong>Informasi:</strong> Pilih satu atau lebih dosen yang akan dihapus dari daftar.
                         <div style="margin-top: 5px; font-size: 13px;">
                             Minimal harus ada 1 dosen tersisa dalam pengajuan. Dosen pertama tidak dapat dihapus.
                         </div>
+                    </div>
+                    
+                    <!-- HEADER MULTI HAPUS -->
+                    <div id="multiHapusHeader" class="multi-hapus-header" style="display: none;">
+                        <div class="multi-hapus-info">
+                            <span id="selectedHapusCount">0</span> dosen terpilih
+                            <span class="multi-hapus-count" id="multiHapusCount">0</span>
+                        </div>
+                        <button class="btn-select-all" onclick="toggleSelectAllDosen()">
+                            <i class="fas fa-check-square"></i> Pilih Semua
+                        </button>
                     </div>
                     
                     <!-- DAFTAR DOSEN YANG DAPAT DIHAPUS -->
@@ -3667,28 +3736,36 @@
                     <button class="btn-cancel" onclick="tutupModalKurang()">
                         <i class="fas fa-times"></i> Batal
                     </button>
-                    <button class="btn-delete" onclick="showKonfirmasiHapusModal()" id="btnHapusDosen" disabled>
-                        <i class="fas fa-trash"></i> Hapus Dosen Terpilih
+                    <button class="btn-delete" onclick="showKonfirmasiHapusMultiModal()" id="btnHapusDosen" disabled>
+                        <i class="fas fa-trash"></i> Hapus Dosen Terpilih (<span id="countHapus">0</span>)
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- ===== MODAL KONFIRMASI PENGHAPUSAN - PERBAIKAN UTAMA ===== -->
+        <!-- ===== MODAL KONFIRMASI PENGHAPUSAN MULTI ===== -->
         <div id="konfirmasiHapusModal" class="konfirmasi-hapus-modal">
             <div class="konfirmasi-hapus-content">
                 <div class="konfirmasi-hapus-header">
                     <h3 class="konfirmasi-hapus-title">
                         <i class="fas fa-exclamation-triangle"></i>
-                        Konfirmasi Penghapusan
+                        Konfirmasi Penghapusan Multiple
                     </h3>
                     <button class="konfirmasi-hapus-close" onclick="tutupKonfirmasiHapus()">&times;</button>
                 </div>
                 <div class="konfirmasi-hapus-body">
-                    <p>Anda akan menghapus dosen berikut:</p>
+                    <div id="singleHapusInfo" style="display: none;">
+                        <p>Anda akan menghapus dosen berikut:</p>
+                        <div id="dosenHapusInfo" class="info-dosen-hapus">
+                            <!-- Informasi dosen tunggal akan diisi oleh JavaScript -->
+                        </div>
+                    </div>
                     
-                    <div id="dosenHapusInfo" class="info-dosen-hapus">
-                        <!-- Informasi dosen akan diisi oleh JavaScript -->
+                    <div id="multiHapusInfo" style="display: none;">
+                        <p>Anda akan menghapus <strong id="jumlahDosenHapus">0</strong> dosen berikut:</p>
+                        <div class="dosen-list-hapus" id="listDosenKonfirmasi">
+                            <!-- Daftar dosen multiple akan diisi oleh JavaScript -->
+                        </div>
                     </div>
                     
                     <div class="alert alert-danger">
@@ -3700,7 +3777,7 @@
                     <button class="btn-cancel" onclick="tutupKonfirmasiHapus()">
                         <i class="fas fa-times"></i> Batal
                     </button>
-                    <button class="btn-delete" onclick="prosesHapusDosen()" id="btnKonfirmasiHapus">
+                    <button class="btn-delete" onclick="prosesHapusDosenMulti()" id="btnKonfirmasiHapus">
                         <i class="fas fa-trash"></i> Ya, Hapus Sekarang
                     </button>
                 </div>
@@ -4021,7 +4098,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-    // ===== REVISI COMPLETE JAVASCRIPT =====
+    // ===== REVISI COMPLETE JAVASCRIPT DENGAN MULTI HAPUS =====
 
     // Variabel global
     let currentSuratId = null;
@@ -4029,7 +4106,7 @@
     let selectedDosenList = [];
     let currentPengajuanName = '';
     let currentDosenCount = 0;
-    let selectedDosenToDelete = null;
+    let selectedDosenToDelete = []; // Array untuk multiple hapus
     let baseUrl = '<?= site_url() ?>';
 
     // Toggle Sidebar for Mobile
@@ -4501,7 +4578,7 @@
         });
     }
 
-    // ===== MODAL KURANG DOSEN - DENGAN PERBAIKAN Z-INDEX =====
+    // ===== MODAL KURANG DOSEN - DENGAN FITUR MULTI HAPUS =====
     function bukaModalKurang() {
         console.log('=== bukaModalKurang called ===');
         console.log('currentDosenList:', currentDosenList);
@@ -4521,21 +4598,22 @@
         // Tutup semua modal terlebih dahulu
         tutupSemuaModalKecuali();
         
-        // Reset selected dosen
-        selectedDosenToDelete = null;
+        // Reset selected dosen untuk multi hapus
+        selectedDosenToDelete = [];
         
         // Tampilkan modal hapus dosen dengan z-index tinggi
         showModalKurangDosen();
     }
 
     function showModalKurangDosen() {
-        // Reset state
-        selectedDosenToDelete = null;
+        // Reset state untuk multi hapus
+        selectedDosenToDelete = [];
         
         // Update daftar dosen yang dapat dihapus (semua kecuali dosen pertama)
         updateDosenHapusList();
         
-        // Update tombol hapus
+        // Update tombol hapus dan header multi hapus
+        updateMultiHapusHeader();
         updateHapusButtonState();
         
         // Tampilkan modal dengan z-index tinggi
@@ -4564,7 +4642,7 @@
         
         if (emptyMessage) emptyMessage.style.display = 'none';
         
-        // Tampilkan setiap dosen
+        // Tampilkan setiap dosen dengan checkbox
         dosenBisaDihapus.forEach((dosen, index) => {
             const actualIndex = index + 1; // Index di currentDosenList
             const item = document.createElement('div');
@@ -4573,8 +4651,10 @@
             item.dataset.nip = dosen.nip;
             
             const initial = (dosen.nama_dosen || "?").charAt(0).toUpperCase();
+            const isSelected = selectedDosenToDelete.includes(dosen.nip);
             
             item.innerHTML = `
+                <input type="checkbox" class="checkbox-hapus" ${isSelected ? 'checked' : ''}>
                 <div class="dosen-avatar-hapus">${initial}</div>
                 <div class="dosen-info-hapus">
                     <div class="dosen-nama-hapus">${dosen.nama_dosen || '-'}</div>
@@ -4586,63 +4666,145 @@
                 </div>
             `;
             
-            // Tambahkan event listener untuk memilih dosen
-            item.addEventListener('click', function(e) {
-                // Jangan pilih jika klik tombol hapus
-                if (e.target.closest('.btn-hapus-dosen')) {
-                    return;
-                }
+            // Tambahkan event listener untuk checkbox
+            const checkbox = item.querySelector('.checkbox-hapus');
+            checkbox.addEventListener('change', function(e) {
+                e.stopPropagation();
                 
-                // Toggle selection
-                if (selectedDosenToDelete === dosen.nip) {
-                    // Deselect
-                    item.classList.remove('selected');
-                    selectedDosenToDelete = null;
+                const nip = dosen.nip;
+                if (this.checked) {
+                    if (!selectedDosenToDelete.includes(nip)) {
+                        selectedDosenToDelete.push(nip);
+                    }
                 } else {
-                    // Hapus selection dari item lain
-                    container.querySelectorAll('.dosen-item-hapus').forEach(el => {
-                        el.classList.remove('selected');
-                    });
-                    
-                    // Select item ini
-                    item.classList.add('selected');
-                    selectedDosenToDelete = dosen.nip;
+                    const index = selectedDosenToDelete.indexOf(nip);
+                    if (index > -1) {
+                        selectedDosenToDelete.splice(index, 1);
+                    }
                 }
                 
-                // Update tombol hapus
+                // Update UI
+                updateItemSelection(item, this.checked);
+                updateMultiHapusHeader();
                 updateHapusButtonState();
             });
+            
+            // Juga bisa select dengan klik item
+            item.addEventListener('click', function(e) {
+                if (e.target === checkbox || e.target.type === 'checkbox') {
+                    return; // Jangan tangani jika klik checkbox
+                }
+                
+                // Toggle checkbox
+                checkbox.checked = !checkbox.checked;
+                const nip = dosen.nip;
+                
+                if (checkbox.checked) {
+                    if (!selectedDosenToDelete.includes(nip)) {
+                        selectedDosenToDelete.push(nip);
+                    }
+                } else {
+                    const index = selectedDosenToDelete.indexOf(nip);
+                    if (index > -1) {
+                        selectedDosenToDelete.splice(index, 1);
+                    }
+                }
+                
+                // Update UI
+                updateItemSelection(item, checkbox.checked);
+                updateMultiHapusHeader();
+                updateHapusButtonState();
+            });
+            
+            // Set initial selection state
+            updateItemSelection(item, isSelected);
             
             container.appendChild(item);
         });
     }
 
+    function updateItemSelection(item, isSelected) {
+        if (isSelected) {
+            item.classList.add('selected');
+        } else {
+            item.classList.remove('selected');
+        }
+    }
+
+    function updateMultiHapusHeader() {
+        const header = document.getElementById('multiHapusHeader');
+        const countElement = document.getElementById('multiHapusCount');
+        const selectedCountElement = document.getElementById('selectedHapusCount');
+        
+        if (selectedDosenToDelete.length > 0) {
+            header.style.display = 'flex';
+            if (countElement) countElement.textContent = selectedDosenToDelete.length;
+            if (selectedCountElement) selectedCountElement.textContent = selectedDosenToDelete.length;
+        } else {
+            header.style.display = 'none';
+        }
+    }
+
+    function toggleSelectAllDosen() {
+        const checkboxes = document.querySelectorAll('.checkbox-hapus');
+        const allDosen = Array.from(document.querySelectorAll('.dosen-item-hapus')).map(item => ({
+            nip: item.dataset.nip,
+            element: item
+        }));
+        
+        // Jika ada yang belum terpilih, pilih semua
+        const currentlySelected = selectedDosenToDelete.length;
+        const totalDosen = allDosen.length;
+        
+        if (currentlySelected < totalDosen) {
+            // Pilih semua
+            selectedDosenToDelete = allDosen.map(d => d.nip);
+            checkboxes.forEach(cb => cb.checked = true);
+            allDosen.forEach(d => updateItemSelection(d.element, true));
+        } else {
+            // Batalkan semua
+            selectedDosenToDelete = [];
+            checkboxes.forEach(cb => cb.checked = false);
+            allDosen.forEach(d => updateItemSelection(d.element, false));
+        }
+        
+        updateMultiHapusHeader();
+        updateHapusButtonState();
+    }
+
     function updateHapusButtonState() {
         const btnHapus = document.getElementById('btnHapusDosen');
+        const countSpan = document.getElementById('countHapus');
+        
         if (btnHapus) {
-            if (selectedDosenToDelete) {
+            if (selectedDosenToDelete.length > 0) {
                 btnHapus.disabled = false;
+                if (countSpan) countSpan.textContent = selectedDosenToDelete.length;
             } else {
                 btnHapus.disabled = true;
+                if (countSpan) countSpan.textContent = '0';
             }
         }
     }
 
-    // ===== PERBAIKAN UTAMA: Modal Konfirmasi Penghapusan =====
-    function showKonfirmasiHapusModal() {
-        if (!selectedDosenToDelete) {
+    // ===== MODAL KONFIRMASI PENGHAPUSAN MULTI =====
+    function showKonfirmasiHapusMultiModal() {
+        if (selectedDosenToDelete.length === 0) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Pilih Dosen',
-                text: 'Silakan pilih dosen yang akan dihapus',
+                text: 'Silakan pilih minimal 1 dosen yang akan dihapus',
                 confirmButtonColor: '#FB8C00'
             });
             return;
         }
         
         // Cari data dosen yang dipilih
-        const dosen = currentDosenList.find(d => d.nip === selectedDosenToDelete);
-        if (!dosen) {
+        const dosenToDelete = currentDosenList.filter(d => 
+            selectedDosenToDelete.includes(d.nip)
+        );
+        
+        if (dosenToDelete.length === 0) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -4653,14 +4815,48 @@
         }
         
         // Update informasi dosen di modal konfirmasi
-        const dosenInfoElement = document.getElementById('dosenHapusInfo');
-        if (dosenInfoElement) {
-            dosenInfoElement.innerHTML = `
-                <strong>${dosen.nama_dosen || '-'}</strong>
-                <div>NIP: ${dosen.nip || '-'}</div>
-                <div>Jabatan: ${dosen.jabatan || '-'}</div>
-                <div>Divisi: ${dosen.divisi || '-'}</div>
-            `;
+        const singleInfo = document.getElementById('singleHapusInfo');
+        const multiInfo = document.getElementById('multiHapusInfo');
+        const jumlahElement = document.getElementById('jumlahDosenHapus');
+        const listContainer = document.getElementById('listDosenKonfirmasi');
+        
+        if (selectedDosenToDelete.length === 1) {
+            // Tampilkan single info
+            singleInfo.style.display = 'block';
+            multiInfo.style.display = 'none';
+            
+            const dosen = dosenToDelete[0];
+            const dosenInfoElement = document.getElementById('dosenHapusInfo');
+            if (dosenInfoElement) {
+                dosenInfoElement.innerHTML = `
+                    <strong>${dosen.nama_dosen || '-'}</strong>
+                    <div>NIP: ${dosen.nip || '-'}</div>
+                    <div>Jabatan: ${dosen.jabatan || '-'}</div>
+                    <div>Divisi: ${dosen.divisi || '-'}</div>
+                `;
+            }
+        } else {
+            // Tampilkan multi info
+            singleInfo.style.display = 'none';
+            multiInfo.style.display = 'block';
+            
+            if (jumlahElement) jumlahElement.textContent = dosenToDelete.length;
+            
+            // Clear dan isi list
+            listContainer.innerHTML = '';
+            dosenToDelete.forEach(dosen => {
+                const initial = (dosen.nama_dosen || "?").charAt(0).toUpperCase();
+                const item = document.createElement('div');
+                item.className = 'dosen-hapus-item';
+                item.innerHTML = `
+                    <div class="dosen-hapus-initial">${initial}</div>
+                    <div class="dosen-hapus-info">
+                        <div class="dosen-hapus-nama">${dosen.nama_dosen || '-'}</div>
+                        <div class="dosen-hapus-nip">NIP: ${dosen.nip || '-'}</div>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
         }
         
         // Tampilkan modal konfirmasi dengan z-index lebih tinggi
@@ -4677,7 +4873,7 @@
 
     function tutupModalKurang() {
         // Reset state
-        selectedDosenToDelete = null;
+        selectedDosenToDelete = [];
         
         // Sembunyikan modal dan reset z-index
         const modalKurang = document.getElementById('modalKurangDosen');
@@ -4685,14 +4881,14 @@
         modalKurang.style.zIndex = '';
     }
 
-    // ===== FUNGSI UTAMA HAPUS DOSEN - VERSI DIPERBAIKI =====
-    function prosesHapusDosen() {
-        console.log('=== prosesHapusDosen called ===');
+    // ===== FUNGSI UTAMA HAPUS DOSEN MULTIPLE =====
+    function prosesHapusDosenMulti() {
+        console.log('=== prosesHapusDosenMulti dipanggil ===');
         console.log('NIP to delete:', selectedDosenToDelete);
         console.log('Surat ID:', currentSuratId);
         
         // Validasi data
-        if (!selectedDosenToDelete || !currentSuratId) {
+        if (selectedDosenToDelete.length === 0 || !currentSuratId) {
             Swal.fire({
                 icon: 'error',
                 title: 'Data Tidak Lengkap',
@@ -4703,8 +4899,10 @@
         }
         
         // Cari data dosen untuk ditampilkan di pesan
-        const dosenToDelete = currentDosenList.find(d => d.nip === selectedDosenToDelete);
-        const dosenName = dosenToDelete?.nama_dosen || selectedDosenToDelete;
+        const dosenToDelete = currentDosenList.filter(d => 
+            selectedDosenToDelete.includes(d.nip)
+        );
+        const dosenNames = dosenToDelete.map(d => d.nama_dosen || d.nip).join(', ');
         
         // Tutup modal konfirmasi
         tutupKonfirmasiHapus();
@@ -4712,7 +4910,19 @@
         // Tampilkan loading
         Swal.fire({
             title: 'Menghapus Dosen...',
-            html: `<p>Sedang menghapus: <strong>${dosenName}</strong></p>`,
+            html: `
+                <p>Sedang menghapus <strong>${dosenToDelete.length}</strong> dosen:</p>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0; max-height: 150px; overflow-y: auto;">
+                    ${dosenToDelete.map(d => 
+                        `<div style="padding: 5px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 20px; height: 20px; background: #dc3545; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">
+                                <i class="fas fa-user-minus"></i>
+                            </div>
+                            <span>${d.nama_dosen || d.nip}</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            `,
             allowOutsideClick: false,
             showConfirmButton: false,
             didOpen: () => {
@@ -4723,42 +4933,29 @@
         // Siapkan data untuk dikirim
         const formData = new FormData();
         formData.append('surat_id', currentSuratId);
-        formData.append('nip', selectedDosenToDelete);
+        formData.append('nip_list', JSON.stringify(selectedDosenToDelete));
         
-        // Debug: Log URL yang akan diakses
-        console.log('Base URL:', baseUrl);
-        const endpointUrl = `${baseUrl}/surat/hapus_dosen`;
-        console.log('Endpoint URL:', endpointUrl);
+        console.log('Endpoint URL:', `${baseUrl}/surat/hapus_banyak_dosen`);
         
-        // Kirim request dengan timeout
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
-        
-        fetch(endpointUrl, {
+        // Kirim request
+        fetch(`${baseUrl}/surat/hapus_banyak_dosen`, {
             method: 'POST',
             body: formData,
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
-            },
-            signal: controller.signal
+            }
         })
         .then(response => {
-            clearTimeout(timeoutId);
-            
-            // PERBAIKAN: Tangani semua jenis response
             if (response.status === 200) {
-                // Jika response OK, coba parse sebagai JSON
                 return response.text().then(text => {
                     try {
                         return JSON.parse(text);
                     } catch (e) {
-                        // Jika bukan JSON, anggap berhasil
-                        console.log('Response bukan JSON, anggap berhasil:', text);
+                        console.log('Response bukan JSON:', text);
                         return { status: 'success', message: 'Dosen berhasil dihapus' };
                     }
                 });
             } else {
-                // Jika response error
                 return response.text().then(text => {
                     console.error('Server error response:', text);
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -4771,7 +4968,7 @@
             // Tutup loading
             Swal.close();
             
-            // PERBAIKAN UTAMA: Cek berbagai kemungkinan response
+            // Cek keberhasilan
             const isSuccess = 
                 result.success === true || 
                 result.status === 'success' || 
@@ -4788,15 +4985,24 @@
                             <div style="width: 60px; height: 60px; background: #d4edda; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
                                 <i class="fas fa-check" style="font-size: 30px; color: #155724;"></i>
                             </div>
-                            <h5>Dosen Berhasil Dihapus</h5>
-                            <p style="margin: 10px 0;">"${dosenName}" telah dihapus dari pengajuan.</p>
-                            <p style="font-size: 14px; color: #6c757d;">
+                            <h5>${dosenToDelete.length} Dosen Berhasil Dihapus</h5>
+                            <p style="margin: 10px 0;">Dosen telah dihapus dari pengajuan.</p>
+                            <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; margin: 10px 0; max-height: 150px; overflow-y: auto;">
+                                <strong>Daftar dosen:</strong>
+                                ${dosenToDelete.map(d => 
+                                    `<div style="padding: 5px; border-bottom: 1px solid #eee; color: #666; font-size: 13px;">
+                                        <i class="fas fa-user-minus" style="color: #dc3545; margin-right: 5px;"></i>
+                                        ${d.nama_dosen || d.nip}
+                                    </div>`
+                                ).join('')}
+                            </div>
+                            <p style="font-size: 14px; color: #6c757d; margin-top: 10px;">
                                 <i class="fas fa-sync-alt fa-spin"></i> Memperbarui data...
                             </p>
                         </div>
                     `,
                     showConfirmButton: false,
-                    timer: 1500,
+                    timer: 2000,
                     willClose: () => {
                         // Pastikan semua modal tertutup sebelum refresh
                         tutupSemuaModalKecuali();
@@ -4815,7 +5021,7 @@
                     html: `
                         <p>${errorMsg}</p>
                         <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 13px;">
-                            <strong>Detail:</strong> Data terhapus tapi ada masalah dengan response.
+                            <strong>Detail:</strong> Terjadi kesalahan saat menghapus dosen.
                         </div>
                     `,
                     confirmButtonColor: '#FB8C00',
@@ -4827,70 +5033,32 @@
             }
         })
         .catch(error => {
-            clearTimeout(timeoutId);
-            
             // Tutup loading
             Swal.close();
             
             console.error('Error deleting dosen:', error);
             
-            // PERBAIKAN: Jika error tapi data mungkin sudah terhapus
-            // Cek jika response 200 tetapi ada parsing error
-            if (error.message.includes('JSON') || error.message.includes('parsing')) {
-                // Kemungkinan data berhasil dihapus tapi response bukan JSON
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    html: `
-                        <div style="text-align: center;">
-                            <div style="width: 60px; height: 60px; background: #d4edda; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px;">
-                                <i class="fas fa-check" style="font-size: 30px; color: #155724;"></i>
-                            </div>
-                            <h5>Dosen Berhasil Dihapus</h5>
-                            <p style="margin: 10px 0;">"${dosenName}" telah dihapus dari pengajuan.</p>
-                            <p style="font-size: 12px; color: #6c757d;">
-                                <i class="fas fa-info-circle"></i> (Ada masalah parsing response, tapi data sudah terhapus)
-                            </p>
-                            <p style="font-size: 14px; color: #6c757d;">
-                                <i class="fas fa-sync-alt fa-spin"></i> Memperbarui data...
-                            </p>
-                        </div>
-                    `,
-                    showConfirmButton: false,
-                    timer: 2000,
-                    willClose: () => {
-                        // Tutup semua modal dan refresh
-                        tutupSemuaModalKecuali();
-                        setTimeout(() => {
-                            location.reload();
-                        }, 300);
-                    }
-                });
-                
-            } else {
-                // Error jaringan atau server
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    html: `
-                        <p>Terjadi kesalahan saat menghapus dosen.</p>
-                        <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 13px;">
-                            <strong>Detail:</strong> ${error.message}<br>
-                            <strong>Solusi:</strong>
-                            <ul style="margin: 5px 0 0 15px; text-align: left;">
-                                <li>Refresh halaman untuk memastikan status terbaru</li>
-                                <li>Periksa koneksi internet</li>
-                                <li>Hubungi administrator jika masalah berlanjut</li>
-                            </ul>
-                        </div>
-                    `,
-                    confirmButtonColor: '#FB8C00',
-                    willClose: () => {
-                        // Refresh halaman untuk sinkronisasi
-                        location.reload();
-                    }
-                });
-            }
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                html: `
+                    <p>Terjadi kesalahan saat menghapus dosen.</p>
+                    <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 13px;">
+                        <strong>Detail:</strong> ${error.message}<br>
+                        <strong>Solusi:</strong>
+                        <ul style="margin: 5px 0 0 15px; text-align: left;">
+                            <li>Refresh halaman untuk memastikan status terbaru</li>
+                            <li>Periksa koneksi internet</li>
+                            <li>Hubungi administrator jika masalah berlanjut</li>
+                        </ul>
+                    </div>
+                `,
+                confirmButtonColor: '#FB8C00',
+                willClose: () => {
+                    // Refresh halaman untuk sinkronisasi
+                    location.reload();
+                }
+            });
         });
     }
 
