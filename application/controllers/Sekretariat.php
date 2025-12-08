@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-
+    use Dompdf\Dompdf;
+    use Dompdf\Options;
 class Sekretariat extends CI_Controller
 {
 
@@ -12,235 +13,255 @@ class Sekretariat extends CI_Controller
         $this->load->model('Surat_model');
     }
 
-    /* ================================
-    DASHBOARD - DENGAN FILTER JENIS PENUGASAN BARU
-    ================================= */
     public function index($filter = 'all')
-    {
-        $tahun = $this->input->get('tahun') ?? date('Y');
-        $bulan = $this->input->get('bulan') ?? 'all';
-        $search = $this->input->get('search');
-        $status_filter = $this->input->get('status');
-        $lingkup_penugasan_filter = $this->input->get('lingkup_penugasan');
-        $jenis_penugasan_filter = $this->input->get('jenis_penugasan'); // Filter baru
+{
+    $tahun = $this->input->get('tahun') ?? date('Y');
+    $bulan = $this->input->get('bulan') ?? 'all';
+    $search = $this->input->get('search');
+    $status_filter = $this->input->get('status');
+    $lingkup_penugasan_filter = $this->input->get('lingkup_penugasan');
+    $jenis_penugasan_filter = $this->input->get('jenis_penugasan');
+    $divisi_filter = $this->input->get('divisi');
 
-        $data['tahun'] = $tahun;
-        $data['bulan'] = $bulan;
-        $data['current_filter'] = $filter;
-        $data['jenis_penugasan_filter'] = $jenis_penugasan_filter;
+    $data['tahun'] = $tahun;
+    $data['bulan'] = $bulan;
+    $data['current_filter'] = $filter;
+    $data['jenis_penugasan_filter'] = $jenis_penugasan_filter;
+    $data['divisi_filter'] = $divisi_filter;
+    $data['divisi_list'] = $this->getDivisiList();
 
-        // Surat yang relevan bagi sekretariat
-        $this->db->where('YEAR(created_at)', $tahun);
+    // PENTING: Reset query builder sebelum mulai
+    $this->db->reset_query();
+    
+    // Query untuk surat_list
+    $this->db->select('*');
+    $this->db->from('surat');
+    $this->db->where('YEAR(created_at)', $tahun);
 
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
+    }
+
+    $this->db->where_in("status", ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+
+    // Filter search
+    if (!empty($search)) {
+        $this->db->group_start();
+        $this->db->like('nama_kegiatan', $search);
+        $this->db->or_like('penyelenggara', $search);
+        $this->db->or_like('nip', $search);
+        $this->db->or_like('nama_dosen', $search);
+        $this->db->group_end();
+    }
+
+    // Filter status
+    if (!empty($status_filter)) {
+        switch ($status_filter) {
+            case 'pending':
+                $this->db->where('status', 'disetujui KK');
+                break;
+            case 'approved':
+                $this->db->where('status', 'disetujui sekretariat');
+                break;
+            case 'rejected':
+                $this->db->where('status', 'ditolak sekretariat');
+                break;
+            case 'dekan_approved':
+                $this->db->where('status', 'disetujui dekan');
+                break;
+            case 'dekan_rejected':
+                $this->db->where('status', 'ditolak dekan');
+                break;
         }
-
-        $this->db->where_in("status", ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-
-        // Filter search
-        if (!empty($search)) {
-            $this->db->group_start();
-            $this->db->like('nama_kegiatan', $search);
-            $this->db->or_like('penyelenggara', $search);
-            $this->db->or_like('nip', $search);
-            $this->db->or_like('nama_dosen', $search);
-            $this->db->group_end();
+    } else {
+        switch ($filter) {
+            case 'pending':
+                $this->db->where('status', 'disetujui KK');
+                break;
+            case 'disetujui':
+                $this->db->where('status', 'disetujui sekretariat');
+                break;
+            case 'ditolak':
+                $this->db->where('status', 'ditolak sekretariat');
+                break;
+            case 'dekan_disetujui':
+                $this->db->where('status', 'disetujui dekan');
+                break;
+            case 'dekan_ditolak':
+                $this->db->where('status', 'ditolak dekan');
+                break;
+            default:
+                break;
         }
+    }
 
-        // Filter status dari URL parameter
-        if (!empty($status_filter)) {
-            switch ($status_filter) {
-                case 'pending':
-                    $this->db->where('status', 'disetujui KK');
-                    break;
-                case 'approved':
-                    $this->db->where('status', 'disetujui sekretariat');
-                    break;
-                case 'rejected':
-                    $this->db->where('status', 'ditolak sekretariat');
-                    break;
-                case 'dekan_approved':
-                    $this->db->where('status', 'disetujui dekan');
-                    break;
-                case 'dekan_rejected':
-                    $this->db->where('status', 'ditolak dekan');
-                    break;
+    // Filter lingkup penugasan
+    if (!empty($lingkup_penugasan_filter)) {
+        $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
+    }
+
+    // Filter jenis penugasan
+    $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+    
+    // PENTING: Filter divisi harus dipanggil terakhir sebelum get()
+    $this->applyDivisiFilter($divisi_filter);
+
+    $this->db->order_by("created_at", "DESC");
+    $data['surat_list'] = $this->db->get()->result();
+
+    // Statistik untuk card - RESET query builder untuk setiap query
+    
+    // Total surat
+    $this->db->reset_query();
+    $this->db->from('surat');
+    $this->db->where('YEAR(created_at)', $tahun);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
+    }
+    $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+    if (!empty($lingkup_penugasan_filter)) {
+        $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
+    }
+    $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+    $this->applyDivisiFilter($divisi_filter);
+    $data['total_surat'] = $this->db->count_all_results();
+
+    // Pending count
+    $this->db->reset_query();
+    $this->db->from('surat');
+    $this->db->where('YEAR(created_at)', $tahun);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
+    }
+    $this->db->where('status', 'disetujui KK');
+    if (!empty($lingkup_penugasan_filter)) {
+        $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
+    }
+    $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+    $this->applyDivisiFilter($divisi_filter);
+    $data['pending_count'] = $this->db->count_all_results();
+
+    // Approved count
+    $this->db->reset_query();
+    $this->db->from('surat');
+    $this->db->where('YEAR(created_at)', $tahun);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
+    }
+    $this->db->where('status', 'disetujui sekretariat');
+    if (!empty($lingkup_penugasan_filter)) {
+        $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
+    }
+    $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+    $this->applyDivisiFilter($divisi_filter);
+    $data['approved_count'] = $this->db->count_all_results();
+
+    // Rejected count
+    $this->db->reset_query();
+    $this->db->from('surat');
+    $this->db->where('YEAR(created_at)', $tahun);
+    if ($bulan !== 'all') {
+        $this->db->where('MONTH(created_at)', $bulan);
+    }
+    $this->db->where_in('status', ['ditolak sekretariat', 'ditolak KK']);
+    if (!empty($lingkup_penugasan_filter)) {
+        $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
+    }
+    $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+    $this->applyDivisiFilter($divisi_filter);
+    $data['rejected_count'] = $this->db->count_all_results();
+
+    // Grafik data
+    $total = array_fill(0, 12, 0);
+    $pending = array_fill(0, 12, 0);
+    $approved = array_fill(0, 12, 0);
+    $rejected = array_fill(0, 12, 0);
+
+    if ($bulan === 'all') {
+        for ($i = 1; $i <= 12; $i++) {
+            $total[$i - 1] = $this->countByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter, $divisi_filter);
+            $pending[$i - 1] = $this->countPendingByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter, $divisi_filter);
+            $approved[$i - 1] = $this->countApprovedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter, $divisi_filter);
+            $rejected[$i - 1] = $this->countRejectedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter, $divisi_filter);
+        }
+    } else {
+        $bulan_int = (int)$bulan;
+        for ($i = 1; $i <= 12; $i++) {
+            if ($i == $bulan_int) {
+                $total[$i - 1] = $this->countByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter, $divisi_filter);
+                $pending[$i - 1] = $this->countPendingByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter, $divisi_filter);
+                $approved[$i - 1] = $this->countApprovedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter, $divisi_filter);
+                $rejected[$i - 1] = $this->countRejectedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter, $divisi_filter);
             }
-        } else {
-            switch ($filter) {
-                case 'pending':
-                    $this->db->where('status', 'disetujui KK');
-                    break;
-                case 'disetujui':
-                    $this->db->where('status', 'disetujui sekretariat');
-                    break;
-                case 'ditolak':
-                    $this->db->where('status', 'ditolak sekretariat');
-                    break;
-                case 'dekan_disetujui':
-                    $this->db->where('status', 'disetujui dekan');
-                    break;
-                case 'dekan_ditolak':
-                    $this->db->where('status', 'ditolak dekan');
-                    break;
-                default:
-                    break;
-            }
         }
-
-        // Filter lingkup penugasan
-        if (!empty($lingkup_penugasan_filter)) {
-            $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
-        }
-
-        // Filter jenis penugasan baru
-        $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-
-        $this->db->order_by("created_at", "DESC");
-        $data['surat_list'] = $this->db->get("surat")->result();
-
-        // Statistik untuk card
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-
-        if (!empty($lingkup_penugasan_filter)) {
-            $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
-        }
-
-        $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        $data['total_surat'] = $this->db->count_all_results('surat');
-
-        // Pending count
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        if (!empty($lingkup_penugasan_filter)) {
-            $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
-        }
-        $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        $data['pending_count'] = $this->db->where('status', 'disetujui KK')
-            ->count_all_results('surat');
-
-        // Disetujui oleh sekretariat
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        if (!empty($lingkup_penugasan_filter)) {
-            $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
-        }
-        $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        $data['approved_count'] = $this->db->where('status', 'disetujui sekretariat')
-            ->count_all_results('surat');
-
-        // Ditolak oleh sekretariat
-        $this->db->where('YEAR(created_at)', $tahun);
-        if ($bulan !== 'all') {
-            $this->db->where('MONTH(created_at)', $bulan);
-        }
-        if (!empty($lingkup_penugasan_filter)) {
-            $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
-        }
-        $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        $data['rejected_count'] = $this->db->where_in('status', ['ditolak sekretariat', 'ditolak KK'])
-            ->count_all_results('surat');
-
-        // Grafik data
-        $total     = array_fill(0, 12, 0);
-        $pending   = array_fill(0, 12, 0);
-        $approved  = array_fill(0, 12, 0);
-        $rejected  = array_fill(0, 12, 0);
-
-        if ($bulan === 'all') {
-            for ($i = 1; $i <= 12; $i++) {
-                $total[$i - 1] = $this->countByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                $pending[$i - 1] = $this->countPendingByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                $approved[$i - 1] = $this->countApprovedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                $rejected[$i - 1] = $this->countRejectedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-            }
-        } else {
-            $bulan_int = (int)$bulan;
-            for ($i = 1; $i <= 12; $i++) {
-                if ($i == $bulan_int) {
-                    $total[$i - 1] = $this->countByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                    $pending[$i - 1] = $this->countPendingByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                    $approved[$i - 1] = $this->countApprovedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                    $rejected[$i - 1] = $this->countRejectedByMonthYear($i, $tahun, $lingkup_penugasan_filter, $jenis_penugasan_filter);
-                }
-            }
-        }
-
-        $data['chart_total']    = $total;
-        $data['chart_approved'] = $approved;
-        $data['chart_rejected'] = $rejected;
-
-        $this->load->view('sekretariat/dashboard', $data);
     }
 
-    /* ================================
-    HELPER FUNCTIONS UNTUK COUNT DATA PER BULAN
-    ================================= */
-    private function countByMonthYear($month, $year, $lingkup_penugasan_filter = null, $jenis_penugasan_filter = null)
-    {
-        $this->db->where('YEAR(created_at)', $year);
-        $this->db->where('MONTH(created_at)', $month);
-        $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+    $data['chart_total'] = $total;
+    $data['chart_approved'] = $approved;
+    $data['chart_rejected'] = $rejected;
 
-        if (!empty($lingkup_penugasan_filter)) {
-            $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
-        }
+    $this->load->view('sekretariat/dashboard', $data);
+}
 
-        $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        return $this->db->count_all_results('surat');
+   private function countByMonthYear($month, $year, $lingkup_penugasan_filter = null, $jenis_penugasan_filter = null, $divisi_filter = null)
+{
+    $this->db->where('YEAR(created_at)', $year);
+    $this->db->where('MONTH(created_at)', $month);
+    $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+
+    if (!empty($lingkup_penugasan_filter)) {
+        $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
     }
 
-    private function countPendingByMonthYear($month, $year, $lingkup_penugasan_filter = null, $jenis_penugasan_filter = null)
-    {
-        $this->db->where('YEAR(created_at)', $year);
-        $this->db->where('MONTH(created_at)', $month);
-        $this->db->where('status', 'disetujui KK');
+    $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+    $this->applyDivisiFilter($divisi_filter); // TAMBAHAN BARU
+    return $this->db->count_all_results('surat');
+}
 
-        if (!empty($lingkup_penugasan_filter)) {
-            $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
-        }
+private function countPendingByMonthYear($month, $year, $lingkup_penugasan_filter = null, $jenis_penugasan_filter = null, $divisi_filter = null)
+{
+    $this->db->where('YEAR(created_at)', $year);
+    $this->db->where('MONTH(created_at)', $month);
+    $this->db->where('status', 'disetujui KK');
 
-        $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        return $this->db->count_all_results('surat');
+    if (!empty($lingkup_penugasan_filter)) {
+        $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
     }
 
-    private function countApprovedByMonthYear($month, $year, $lingkup_penugasan_filter = null, $jenis_penugasan_filter = null)
-    {
-        $this->db->where('YEAR(created_at)', $year);
-        $this->db->where('MONTH(created_at)', $month);
-        $this->db->where('status', 'disetujui sekretariat');
+    $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+    $this->applyDivisiFilter($divisi_filter); // TAMBAHAN BARU
+    return $this->db->count_all_results('surat');
+}
 
-        if (!empty($lingkup_penugasan_filter)) {
-            $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
-        }
+private function countApprovedByMonthYear($month, $year, $lingkup_penugasan_filter = null, $jenis_penugasan_filter = null, $divisi_filter = null)
+{
+    $this->db->where('YEAR(created_at)', $year);
+    $this->db->where('MONTH(created_at)', $month);
+    $this->db->where('status', 'disetujui sekretariat');
 
-        $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        return $this->db->count_all_results('surat');
+    if (!empty($lingkup_penugasan_filter)) {
+        $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
     }
 
-    private function countRejectedByMonthYear($month, $year, $lingkup_penugasan_filter = null, $jenis_penugasan_filter = null)
-    {
-        $this->db->where('YEAR(created_at)', $year);
-        $this->db->where('MONTH(created_at)', $month);
-        $this->db->where('status', 'ditolak sekretariat');
+    $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+    $this->applyDivisiFilter($divisi_filter); // TAMBAHAN BARU
+    return $this->db->count_all_results('surat');
+}
 
-        if (!empty($lingkup_penugasan_filter)) {
-            $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
-        }
+private function countRejectedByMonthYear($month, $year, $lingkup_penugasan_filter = null, $jenis_penugasan_filter = null, $divisi_filter = null)
+{
+    $this->db->where('YEAR(created_at)', $year);
+    $this->db->where('MONTH(created_at)', $month);
+    $this->db->where('status', 'ditolak sekretariat');
 
-        $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
-        return $this->db->count_all_results('surat');
+    if (!empty($lingkup_penugasan_filter)) {
+        $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
     }
 
+    $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+    $this->applyDivisiFilter($divisi_filter); // TAMBAHAN BARU
+    return $this->db->count_all_results('surat');
+}
     /* ================================
     FUNGSI BARU: FILTER JENIS PENUGASAN
     ================================= */
@@ -285,11 +306,14 @@ class Sekretariat extends CI_Controller
         $search = $this->input->get('search');
         $lingkup_penugasan_filter = $this->input->get('lingkup_penugasan');
         $jenis_penugasan_filter = $this->input->get('jenis_penugasan');
+         $divisi_filter = $this->input->get('divisi'); 
 
         $data['tahun'] = $tahun;
         $data['bulan'] = $bulan;
         $data['current_page'] = 'pending';
         $data['jenis_penugasan_filter'] = $jenis_penugasan_filter;
+        $data['divisi_filter'] = $divisi_filter; // TAMBAHAN BARU
+        $data['divisi_list'] = $this->getDivisiList(); // TAMBAHAN BARU
 
         $this->db->where('YEAR(created_at)', $tahun);
         if ($bulan !== 'all') {
@@ -302,6 +326,7 @@ class Sekretariat extends CI_Controller
         }
 
         $this->applyJenisPenugasanFilter($jenis_penugasan_filter);
+        $this->applyDivisiFilter($divisi_filter);
 
         if (!empty($search)) {
             $this->db->group_start();
@@ -1302,56 +1327,57 @@ class Sekretariat extends CI_Controller
         $this->redirectToPreviousPage();
     }
 
-    /* ================================
-    HELPER FUNCTION UNTUK REDIRECT
-    ================================= */
-    private function redirectToPreviousPage()
-    {
-        $current_page = $this->input->get('from') ?? 'sekretariat';
-        $tahun = $this->input->get('tahun') ?? date('Y');
-        $bulan = $this->input->get('bulan') ?? 'all';
-        $search = $this->input->get('search');
-        $status = $this->input->get('status');
-        $lingkup_penugasan = $this->input->get('lingkup_penugasan');
-        $jenis_penugasan = $this->input->get('jenis_penugasan');
+   private function redirectToPreviousPage()
+{
+    $current_page = $this->input->get('from') ?? 'sekretariat';
+    $tahun = $this->input->get('tahun') ?? date('Y');
+    $bulan = $this->input->get('bulan') ?? 'all';
+    $search = $this->input->get('search');
+    $status = $this->input->get('status');
+    $lingkup_penugasan = $this->input->get('lingkup_penugasan');
+    $jenis_penugasan = $this->input->get('jenis_penugasan');
+    $divisi = $this->input->get('divisi'); // TAMBAHAN BARU
 
-        $query_params = 'tahun=' . $tahun . '&bulan=' . $bulan;
-        if (!empty($search)) {
-            $query_params .= '&search=' . urlencode($search);
-        }
-        if (!empty($status)) {
-            $query_params .= '&status=' . $status;
-        }
-        if (!empty($lingkup_penugasan)) {
-            $query_params .= '&lingkup_penugasan=' . $lingkup_penugasan;
-        }
-        if (!empty($jenis_penugasan)) {
-            $query_params .= '&jenis_penugasan=' . $jenis_penugasan;
-        }
-
-        switch ($current_page) {
-            case 'semua':
-                redirect('sekretariat/semua?' . $query_params);
-                break;
-            case 'disetujui':
-                redirect('sekretariat/disetujui?' . $query_params);
-                break;
-            case 'ditolak':
-                redirect('sekretariat/ditolak?' . $query_params);
-                break;
-            case 'pending':
-                redirect('sekretariat/pending?' . $query_params);
-                break;
-            case 'disetujui_dekan':
-                redirect('sekretariat/disetujui_dekan?' . $query_params);
-                break;
-            case 'ditolak_dekan':
-                redirect('sekretariat/ditolak_dekan?' . $query_params);
-                break;
-            default:
-                redirect('sekretariat?' . $query_params);
-        }
+    $query_params = 'tahun=' . $tahun . '&bulan=' . $bulan;
+    if (!empty($search)) {
+        $query_params .= '&search=' . urlencode($search);
     }
+    if (!empty($status)) {
+        $query_params .= '&status=' . $status;
+    }
+    if (!empty($lingkup_penugasan)) {
+        $query_params .= '&lingkup_penugasan=' . $lingkup_penugasan;
+    }
+    if (!empty($jenis_penugasan)) {
+        $query_params .= '&jenis_penugasan=' . $jenis_penugasan;
+    }
+    if (!empty($divisi)) { // TAMBAHAN BARU
+        $query_params .= '&divisi=' . urlencode($divisi);
+    }
+
+    switch ($current_page) {
+        case 'semua':
+            redirect('sekretariat/semua?' . $query_params);
+            break;
+        case 'disetujui':
+            redirect('sekretariat/disetujui?' . $query_params);
+            break;
+        case 'ditolak':
+            redirect('sekretariat/ditolak?' . $query_params);
+            break;
+        case 'pending':
+            redirect('sekretariat/pending?' . $query_params);
+            break;
+        case 'disetujui_dekan':
+            redirect('sekretariat/disetujui_dekan?' . $query_params);
+            break;
+        case 'ditolak_dekan':
+            redirect('sekretariat/ditolak_dekan?' . $query_params);
+            break;
+        default:
+            redirect('sekretariat?' . $query_params);
+    }
+}
 
     /* ================================
     REALTIME DASHBOARD COUNTER - DENGAN FILTER JENIS PENUGASAN
@@ -1420,24 +1446,25 @@ class Sekretariat extends CI_Controller
         echo json_encode($counts);
     }
 
-    /* ================================
-    TAMPILKAN SURAT PENGAJUAN DALAM MODAL
-    ================================= */
-    public function view_surat_pengajuan($id)
-    {
-        $this->db->where('id', $id);
-        $data['surat'] = $this->db->get('surat')->row();
+/* ================================
+TAMPILKAN SURAT PENGAJUAN DALAM MODAL (DENGAN TOOLBAR)
+================================= */
+public function view_surat_pengajuan($id)
+{
+    $this->db->where('id', $id);
+    $data['surat'] = $this->db->get('surat')->row();
 
-        if (!$data['surat']) {
-            show_404();
-            return;
-        }
-
-        $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($data['surat']->nip);
-
-        $this->load->view('surat_print2', $data);
+    if (!$data['surat']) {
+        show_404();
+        return;
     }
 
+    $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($data['surat']->nip);
+    $data['show_toolbar'] = true; // Flag untuk menampilkan toolbar
+    $data['surat_id'] = $id; // Pass ID untuk URL download/print
+
+    $this->load->view('surat_print2', $data);
+}
     /* ================================
     GET EVIDEN
     ================================= */
@@ -2112,7 +2139,7 @@ class Sekretariat extends CI_Controller
             return;
         }
 
-        $allowed_status = ['disetujui sekretariat', 'disetujui dekan'];
+        $allowed_status = ['disetujui kk'];
         if (!in_array(strtolower($surat->status), array_map('strtolower', $allowed_status))) {
             $this->session->set_flashdata('error', 'Surat belum disetujui untuk dicetak.');
             redirect('sekretariat');
@@ -2121,49 +2148,57 @@ class Sekretariat extends CI_Controller
 
         $data['surat'] = $surat;
         $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat->nip);
+        
 
         $this->load->view('sekretariat/cetak_surat', $data);
     }
 
-    /* ================================
-    DOWNLOAD PDF UNTUK SEKRETARIAT
-    ================================= */
-    public function download_pdf($id)
-    {
-        $surat = $this->Surat_model->get_by_id($id);
+  /* ================================
+DOWNLOAD PDF UNTUK SEKRETARIAT - PERBAIKAN
+================================= */
+public function download_pdf($id)
+{
+    $surat = $this->Surat_model->get_by_id($id);
 
-        if (!$surat) {
-            show_404();
-            return;
-        }
-
-        // Cek status surat
-        $allowed_status = ['disetujui sekretariat', 'disetujui dekan'];
-        if (!in_array(strtolower($surat->status), array_map('strtolower', $allowed_status))) {
-            echo "<script>alert('Surat belum disetujui untuk didownload.'); window.close();</script>";
-            return;
-        }
-
-        // Load data
-        $data['surat'] = $surat;
-        $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat->nip);
-        
-        // Load library PDF (gunakan library yang sudah ada)
-        $this->load->library('pdf');
-        
-        // Load view yang sama untuk konsistensi
-        $html = $this->load->view('surat_print2', $data, TRUE);
-        
-        // Konfigurasi PDF
-        $this->pdf->setPaper('A4', 'portrait');
-        $this->pdf->load_html($html);
-        $this->pdf->render();
-        
-        // Output PDF
-        $filename = 'Surat_Tugas_' . ($surat->nomor_surat ?? $id) . '.pdf';
-        $this->pdf->stream($filename, array('Attachment' => 1));
+    if (!$surat) {
+        show_404();
+        return;
     }
 
+    // Cek status surat
+    $allowed_status = ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan'];
+    if (!in_array(strtolower($surat->status), array_map('strtolower', $allowed_status))) {
+        echo "<script>alert('Surat belum disetujui untuk didownload.'); window.close();</script>";
+        return;
+    }
+
+    // Load data
+    $data['surat'] = $surat;
+    $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat->nip);
+    $data['show_toolbar'] = false; // Hide toolbar di PDF
+    
+    // Load HTML content
+    $html = $this->load->view('surat_print2', $data, TRUE);
+    
+    // PERBAIKAN: Gunakan DOMPDF
+    require_once APPPATH . 'third_party/dompdf/autoload.inc.php';
+    
+    
+    // Konfigurasi DOMPDF
+    $options = new Options();
+    $options->set('isRemoteEnabled', true);
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('defaultFont', 'Arial');
+    
+    $dompdf = new Dompdf($options);
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+    
+    // Output PDF
+    $filename = 'Surat_Tugas_' . ($surat->nomor_surat ?? $id) . '.pdf';
+    $dompdf->stream($filename, array('Attachment' => 1));
+}
     /* ================================
     VALIDASI QR CODE UNTUK SEKRETARIAT
     ================================= */
@@ -2537,21 +2572,67 @@ class Sekretariat extends CI_Controller
         $data['pin'] = $this->Setting_model->get_pin();
         $this->load->view('sekretariat/ubah_pin', $data);
     }
-    public function cek_pin()
-    {
-        $this->load->model('Setting_model');
+public function cek_pin()
+{
+    // Load model
+    $this->load->model('Setting_model');
 
-        $json = json_decode($this->input->raw_input_stream, true);
-        $pin_input = $json['pin'] ?? '';
+    // Set header JSON
+    header('Content-Type: application/json');
+    
+    // Disable CodeIgniter output buffering untuk JSON
+    $this->output->set_content_type('application/json');
 
-        $pin_benar = $this->Setting_model->get_pin();
+    // Ambil raw input
+    $raw_input = file_get_contents('php://input');
+    $json = json_decode($raw_input, true);
+    
+    // Ambil PIN dari request
+    $pin_input = isset($json['pin']) ? trim($json['pin']) : '';
 
-        if ($pin_input === $pin_benar) {
-            echo json_encode(["status" => "success"]);
-        } else {
-            echo json_encode(["status" => "error"]);
-        }
+    // Log untuk debugging
+    log_message('debug', '=== PIN Check Request ===');
+    log_message('debug', 'Raw Input: ' . $raw_input);
+    log_message('debug', 'PIN Input: ' . $pin_input);
+
+    // Validasi input tidak kosong
+    if (empty($pin_input)) {
+        echo json_encode([
+            "status" => "error",
+            "message" => "PIN tidak boleh kosong"
+        ]);
+        return;
     }
+
+    // Validasi PIN harus 6 digit angka
+    if (!preg_match('/^[0-9]{6}$/', $pin_input)) {
+        echo json_encode([
+            "status" => "error",
+            "message" => "PIN harus 6 digit angka"
+        ]);
+        return;
+    }
+
+    // Ambil PIN dari database
+    $pin_benar = $this->Setting_model->get_pin();
+
+    // Log untuk debugging
+    log_message('debug', 'PIN dari DB: ' . $pin_benar);
+    log_message('debug', 'PIN Match: ' . (strval($pin_input) === strval($pin_benar) ? 'YES' : 'NO'));
+
+    // Bandingkan PIN
+    if (strval($pin_input) === strval($pin_benar)) {
+        echo json_encode([
+            "status" => "success",
+            "message" => "PIN benar"
+        ]);
+    } else {
+        echo json_encode([
+            "status" => "error",
+            "message" => "PIN salah! Coba lagi."
+        ]);
+    }
+}
 public function updatePin()
 {
     $this->load->model('Setting_model');
@@ -2584,5 +2665,168 @@ public function updatePin()
         echo json_encode(['status' => false, 'message' => 'Gagal memperbarui PIN!']);
     }
 }
+private function applyDivisiFilter($divisi_filter = null)
+{
+    if (!empty($divisi_filter)) {
+        // Query terpisah menggunakan SQL langsung
+        $query = $this->db->query("
+            SELECT nip 
+            FROM list_dosen 
+            WHERE divisi = ?
+        ", [$divisi_filter]);
+        
+        if ($query->num_rows() > 0) {
+            $nip_list = [];
+            foreach ($query->result() as $dosen) {
+                $clean_nip = trim($dosen->nip);
+                if (!empty($clean_nip)) {
+                    $nip_list[] = $clean_nip;
+                }
+            }
+            
+            if (!empty($nip_list)) {
+                // Buat WHERE condition untuk JSON array
+                $this->db->group_start();
+                
+                foreach ($nip_list as $index => $nip) {
+                    // Escape untuk keamanan
+                    $safe_nip = $this->db->escape_str($nip);
+                    
+                    if ($index === 0) {
+                        $this->db->like('nip', '"' . $safe_nip . '"');
+                    } else {
+                        $this->db->or_like('nip', '"' . $safe_nip . '"');
+                    }
+                }
+                
+                $this->db->group_end();
+            } else {
+                $this->db->where('1', '0');
+            }
+        } else {
+            $this->db->where('1', '0');
+        }
+    }
+}
 
+public function debug_filter()
+{
+    $divisi = $this->input->get('divisi') ?? 'DI';
+    
+    echo "<h2>Debug Filter Divisi: $divisi</h2>";
+    
+    // 1. Cek dosen di divisi
+    echo "<h3>1. Dosen di Divisi '$divisi':</h3>";
+    
+    // PERBAIKAN: Gunakan query SQL langsung
+    $dosen_query = $this->db->query("
+        SELECT nip, nama_dosen, divisi 
+        FROM list_dosen 
+        WHERE divisi = ?
+    ", [$divisi]);
+    
+    echo "<pre>";
+    if ($dosen_query->num_rows() > 0) {
+        $nip_list = [];
+        foreach ($dosen_query->result() as $d) {
+            echo "NIP: {$d->nip} - Nama: {$d->nama_dosen} - Divisi: {$d->divisi}\n";
+            $nip_list[] = $d->nip;
+        }
+    } else {
+        echo "Tidak ada dosen di divisi ini!";
+    }
+    echo "</pre>";
+    
+    // 2. Cek format NIP di tabel surat
+    if (!empty($nip_list)) {
+        echo "<h3>2. Format NIP di Tabel Surat:</h3>";
+        
+        // PERBAIKAN: Query terpisah untuk surat
+        $surat_query = $this->db->query("
+            SELECT id, nip, nama_kegiatan, status 
+            FROM surat 
+            LIMIT 20
+        ");
+        
+        echo "<table border='1' style='border-collapse:collapse;'>";
+        echo "<tr><th>ID</th><th>NIP (Raw)</th><th>NIP (Decoded)</th><th>Nama Kegiatan</th><th>Match?</th></tr>";
+        
+        foreach ($surat_query->result() as $s) {
+            $nip_decoded = json_decode($s->nip, true);
+            $is_match = false;
+            
+            // Cek apakah ada NIP yang match
+            if (is_array($nip_decoded)) {
+                foreach ($nip_decoded as $nip_item) {
+                    if (in_array(trim($nip_item), $nip_list)) {
+                        $is_match = true;
+                        break;
+                    }
+                }
+            }
+            
+            $match_text = $is_match ? '<span style="color:green;">✓ MATCH</span>' : '<span style="color:red;">✗ NO MATCH</span>';
+            
+            echo "<tr>";
+            echo "<td>{$s->id}</td>";
+            echo "<td>" . htmlspecialchars($s->nip) . "</td>";
+            echo "<td><pre>" . print_r($nip_decoded, true) . "</pre></td>";
+            echo "<td>" . htmlspecialchars($s->nama_kegiatan) . "</td>";
+            echo "<td>$match_text</td>";
+            echo "</tr>";
+        }
+        
+        echo "</table>";
+        
+        // 3. Test query dengan filter
+        echo "<h3>3. Test Query dengan Filter:</h3>";
+        
+        // PERBAIKAN: Reset query builder dan gunakan fresh query
+        $this->db->reset_query();
+        $this->db->select('surat.id, surat.nip, surat.nama_kegiatan, surat.status');
+        $this->db->from('surat');
+        $this->db->where_in('surat.status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
+        
+        // Apply filter
+        $this->applyDivisiFilter($divisi);
+        
+        $filtered = $this->db->get();
+        
+        echo "<p><strong>Query:</strong> " . $this->db->last_query() . "</p>";
+        echo "<p><strong>Hasil:</strong> " . $filtered->num_rows() . " baris ditemukan</p>";
+        
+        if ($filtered->num_rows() > 0) {
+            echo "<table border='1' style='border-collapse:collapse;'>";
+            echo "<tr><th>ID</th><th>NIP</th><th>Nama Kegiatan</th><th>Status</th></tr>";
+            foreach ($filtered->result() as $f) {
+                echo "<tr>";
+                echo "<td>{$f->id}</td>";
+                echo "<td>" . htmlspecialchars($f->nip) . "</td>";
+                echo "<td>" . htmlspecialchars($f->nama_kegiatan) . "</td>";
+                echo "<td>{$f->status}</td>";
+                echo "</tr>";
+            }
+            echo "</table>";
+        }
+    }
+}
+private function getDivisiList()
+{
+    // Cara 1: Menggunakan distinct() method (Recommended)
+    $this->db->distinct();
+    $this->db->select('divisi');
+    $this->db->from('list_dosen');
+    $this->db->where('divisi IS NOT NULL');
+    $this->db->where('divisi !=', '');
+    $this->db->where('divisi !=', '-');
+    $this->db->order_by('divisi', 'ASC');
+    $query = $this->db->get();
+    
+    $divisi_list = [];
+    foreach ($query->result() as $row) {
+        $divisi_list[] = $row->divisi;
+    }
+    
+    return $divisi_list;
+}
 }

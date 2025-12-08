@@ -178,6 +178,9 @@
         .table-prodi {
             width: 80px;
         }
+        .table-peran {
+            width: 80px;
+        }
 
         /* Section title */
         .section-title {
@@ -334,6 +337,7 @@ function tgl_indo($tanggal)
                     <th class="table-nip">NIP</th>
                     <th>Jabatan</th>
                     <th class="table-prodi">Prodi/Unit</th>
+                    <th class="table-peran">Peran</th>
                 </tr>
             </thead>
             <tbody>
@@ -345,6 +349,7 @@ function tgl_indo($tanggal)
                             <td class="table-nip"><?= htmlspecialchars($d['nip'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($d['jabatan'] ?? '-') ?></td>
                             <td class="table-prodi"><?= htmlspecialchars($d['divisi'] ?? '-') ?></td>
+                            <td class="table-peran"><?= htmlspecialchars($d['peran'] ?? '-') ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>

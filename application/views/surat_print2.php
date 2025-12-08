@@ -5,6 +5,28 @@
     <title><?= $surat->nama_kegiatan ?? '-' ?></title>
 
     <style>
+        /* HILANGKAN SCROLL BAR DI SEMUA ELEMEN */
+        html, body {
+            overflow: hidden !important;
+            overflow-x: hidden !important;
+            overflow-y: hidden !important;
+            -ms-overflow-style: none !important; /* IE and Edge */
+            scrollbar-width: none !important; /* Firefox */
+        }
+        
+        /* Untuk browser Webkit (Chrome, Safari, Opera) */
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        
+        /* Pastikan semua kontainer tidak membuat scroll */
+        * {
+            max-height: 100vh !important;
+            overflow: visible !important;
+        }
         @page {
             margin: 80px 80px 120px 80px;
         }

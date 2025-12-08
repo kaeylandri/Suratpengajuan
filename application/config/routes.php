@@ -152,6 +152,7 @@ $route['sekretariat/update-pin'] = 'Sekretariat/update_pin';
 // Edit untuk sekretariat (semua status kecuali ditolak dekan)
 $route['sekretariat/edit_surat_sekretariat/(:num)'] = 'sekretariat/edit_surat_sekretariat/$1';
 $route['sekretariat/update_surat_sekretariat/(:num)'] = 'sekretariat/update_surat_sekretariat/$1';
+$route['sekretariat/download_pdf/(:num)'] = 'sekretariat/download_pdf/$1';
 
 
 

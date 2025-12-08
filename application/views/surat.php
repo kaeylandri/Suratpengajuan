@@ -1159,18 +1159,6 @@ i[class*="fa-"] {
                    style="margin-top:12px; display:none;">
         </div>
 
-        <!-- Format -->
-        <div id="selectformat" class="mb-3">
-            <input class="form-check-input" type="radio" name="format" value="1" checked>
-            <a href="https://ifik.telkomuniversity.ac.id/assets/eviden/format1.pdf" target="_blank"
-               class="badge badge-success text-light">Lihat contoh format kepanitiaan 1</a>
-
-            &nbsp;&nbsp;
-
-            <input class="form-check-input" type="radio" name="format" value="2">
-            <a href="https://ifik.telkomuniversity.ac.id/assets/eviden/format2.pdf" target="_blank"
-               class="badge badge-info text-light">Lihat contoh format kepanitiaan 2</a>
-        </div>
 
         <!-- FORM PANITIA -->
         <div id="panitiaContainer" class="mt-4">
@@ -1964,7 +1952,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 <!-- Step 2 -->
- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <fieldset>
@@ -1991,14 +1979,25 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="col-md-4 mt-3">
         <div class="form-group">
           <input type="text" id="datepicker" class="form-control custom-form-control"
-       required autocomplete="off" inputmode="none" readonly
-       placeholder="Klik untuk pilih tanggal">
+                 required autocomplete="off" inputmode="none" readonly
+                 placeholder="Klik untuk pilih tanggal">
 
           <label id="lbl_mulai">Tanggal Awal s/d Akhir</label>
 
-          <!-- Hidden input (ID sudah dibetulkan) -->
+          <!-- Hidden input -->
           <input type="hidden" id="tanggal_awal_kegiatan" name="tanggal_awal_kegiatan">
           <input type="hidden" id="tanggal_akhir_kegiatan" name="tanggal_akhir_kegiatan">
+
+          <!-- Konfirmasi tanggal -->
+          <div id="konfirmasi_tanggal" class="small mt-2" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="text-success">✓ Tanggal dipilih:</span>
+            </div>
+            <div class="d-flex flex-column">
+              <span id="konfirmasi_awal" class="text-muted small"></span>
+              <span id="konfirmasi_akhir" class="text-muted small"></span>
+            </div>
+          </div>
 
           <div class="info-message small mt-1" id="range_info">
             Klik tanggal awal, lalu klik tanggal akhir
@@ -2010,9 +2009,9 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="col-md-4 mt-3">
         <div class="form-group">
           <input type="text" name="periode_penugasan" id="datepicker3"
-       class="form-control custom-form-control"
-       required autocomplete="off" inputmode="none" readonly
-       placeholder="Otomatis terisi">
+                 class="form-control custom-form-control"
+                 required autocomplete="off" inputmode="none" readonly
+                 placeholder="Otomatis terisi">
 
           <label id="lbl_mulai1">Periode Penugasan</label>
           <div class="info-message small" id="info_periode">Akan terisi otomatis</div>
@@ -2023,9 +2022,9 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="col-md-4 mt-3">
         <div class="form-group">
           <input type="text" name="akhir_periode_penugasan" id="datepicker4"
-       class="form-control custom-form-control"
-       required autocomplete="off" inputmode="none" readonly
-       placeholder="Otomatis terisi">
+                 class="form-control custom-form-control"
+                 required autocomplete="off" inputmode="none" readonly
+                 placeholder="Otomatis terisi">
 
           <label id="lbl_akhir1">Akhir Penugasan</label>
           <div class="info-message small" id="info_akhir">Akan terisi otomatis</div>
@@ -2061,113 +2060,139 @@ document.addEventListener('DOMContentLoaded', function () {
   </div>
 </fieldset>
 
-
 <!-- CSS -->
 <style>
     /* Hilangkan datepicker bawaan browser */
-input::-webkit-calendar-picker-indicator {
-    display: none !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-
-/* Style untuk form yang sudah ada (tidak diubah) */
-.form-group { 
-    margin-bottom: 20px; 
-}
-
-#periode_section {
-    position: relative;
-    z-index: 9999 !important;
-    transition: margin-bottom 0.3s ease;
-}
-
-.nice-select {
-    z-index: 99999 !important;
-}
-
-.nice-select.open {
-    z-index: 999999 !important;
-}
-
-#periode_section.open-margin {
-    margin-bottom: 250px !important;
-}
-
-.has-select select.nice-original {
-  display: none !important;
-}
-
-.nice-select .list {
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.error-message {
-    color: #dc3545;
-    font-size: 12px;
-    margin-top: 5px;
-    display: none;
-}
-
-.form-group.has-error input {
-    border-color: #dc3545;
-}
-
-.info-message {
-    color: #0d6efd;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.success-message {
-    color: #198754;
-    font-size: 12px;
-    margin-top: 5px;
-    display: none;
-}
-
-.custom-form-control {
-    padding: 10px 12px;
-    font-size: 14px;
-    height: 45px;
-}
-
-.auto-filled {
-    background-color: #f0f8ff !important;
-    border-left: 3px solid #007bff !important;
-}
-
-@keyframes highlight {
-    0% { background-color: #fff3cd; }
-    100% { background-color: #f0f8ff; }
-}
-
-.highlight-animation {
-    animation: highlight 1s ease;
-}
-
-@media (max-width: 768px) {
-    .col-md-4 {
-        flex: 0 0 100%;
-        max-width: 100%;
+    input::-webkit-calendar-picker-indicator {
+        display: none !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
-    
+
+    /* Style untuk form yang sudah ada (tidak diubah) */
+    .form-group { 
+        margin-bottom: 20px; 
+    }
+
+    #periode_section {
+        position: relative;
+        z-index: 9999 !important;
+        transition: margin-bottom 0.3s ease;
+    }
+
+    .nice-select {
+        z-index: 99999 !important;
+    }
+
+    .nice-select.open {
+        z-index: 999999 !important;
+    }
+
+    #periode_section.open-margin {
+        margin-bottom: 250px !important;
+    }
+
+    .has-select select.nice-original {
+        display: none !important;
+    }
+
+    .nice-select .list {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+    }
+
+    .form-group.has-error input {
+        border-color: #dc3545;
+    }
+
+    .info-message {
+        color: #0d6efd;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .success-message {
+        color: #198754;
+        font-size: 12px;
+        margin-top: 5px;
+        display: none;
+    }
+
     .custom-form-control {
-        height: 42px;
-        font-size: 13px;
+        padding: 10px 12px;
+        font-size: 14px;
+        height: 45px;
     }
-.ui-datepicker {
-    display: none !important;
-}
 
-}
+    .auto-filled {
+        background-color: #f0f8ff !important;
+        border-left: 3px solid #007bff !important;
+    }
+
+    @keyframes highlight {
+        0% { background-color: #fff3cd; }
+        100% { background-color: #f0f8ff; }
+    }
+
+    .highlight-animation {
+        animation: highlight 1s ease;
+    }
+
+    /* Style untuk konfirmasi tanggal */
+    #konfirmasi_tanggal {
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        padding: 8px 10px;
+        border-left: 3px solid #28a745;
+    }
+
+    @media (max-width: 768px) {
+        .col-md-4 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        
+        .custom-form-control {
+            height: 42px;
+            font-size: 13px;
+        }
+        
+        .ui-datepicker {
+            display: none !important;
+        }
+        
+        #konfirmasi_tanggal {
+            padding: 6px 8px;
+            font-size: 11px;
+        }
+    }
 </style>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
+    // Fungsi untuk format tanggal ke format Indonesia
+    function formatDateIndonesian(date) {
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        
+        const dayName = days[date.getDay()];
+        const day = date.getDate();
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+        
+        return `${dayName}, ${day} ${month} ${year}`;
+    }
+
+    // Fungsi untuk format tanggal ke YYYY-MM-DD
     function formatDateLocal(date) {
         const y = date.getFullYear();
         const m = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -2175,32 +2200,84 @@ document.addEventListener("DOMContentLoaded", function () {
         return `${y}-${m}-${d}`;
     }
 
-    flatpickr("#datepicker", {
+    // Inisialisasi flatpickr untuk range date
+    const datepicker = flatpickr("#datepicker", {
         mode: "range",
         dateFormat: "Y-m-d",
         allowInput: false,
         onChange: function(selectedDates) {
-
+            const konfirmasiDiv = document.getElementById("konfirmasi_tanggal");
+            const rangeInfo = document.getElementById("range_info");
+            
             if (selectedDates.length === 2) {
-
-                const awal = formatDateLocal(selectedDates[0]);
-                const akhir = formatDateLocal(selectedDates[1]);
-
-                document.getElementById("tanggal_awal_kegiatan").value = awal;
-                document.getElementById("tanggal_akhir_kegiatan").value = akhir;
-
-                document.getElementById("datepicker3").value = awal;
-                document.getElementById("datepicker4").value = akhir;
-
-                document.getElementById("info_periode").innerHTML = "Terisi otomatis ✔";
-                document.getElementById("info_akhir").innerHTML = "Terisi otomatis ✔";
+                const awal = selectedDates[0];
+                const akhir = selectedDates[1];
+                
+                // Format untuk hidden inputs
+                const awalFormatted = formatDateLocal(awal);
+                const akhirFormatted = formatDateLocal(akhir);
+                
+                // Format untuk display
+                const awalDisplay = formatDateIndonesian(awal);
+                const akhirDisplay = formatDateIndonesian(akhir);
+                
+                // Set hidden inputs
+                document.getElementById("tanggal_awal_kegiatan").value = awalFormatted;
+                document.getElementById("tanggal_akhir_kegiatan").value = akhirFormatted;
+                
+                // Set auto-filled inputs
+                document.getElementById("datepicker3").value = awalFormatted;
+                document.getElementById("datepicker4").value = akhirFormatted;
+                
+                // Tampilkan konfirmasi tanggal
+                document.getElementById("konfirmasi_awal").innerHTML = `<strong>Awal:</strong> ${awalDisplay}`;
+                document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Akhir:</strong> ${akhirDisplay}`;
+                konfirmasiDiv.style.display = 'block';
+                rangeInfo.style.display = 'none';
+                
+                // Update info messages
+                document.getElementById("info_periode").innerHTML = "Terisi otomatis ✓";
+                document.getElementById("info_akhir").innerHTML = "Terisi otomatis ✓";
+                
+                // Tambahkan efek visual
+                document.getElementById("datepicker3").classList.add("auto-filled", "highlight-animation");
+                document.getElementById("datepicker4").classList.add("auto-filled", "highlight-animation");
+                
+                // Hapus animasi setelah selesai
+                setTimeout(() => {
+                    document.getElementById("datepicker3").classList.remove("highlight-animation");
+                    document.getElementById("datepicker4").classList.remove("highlight-animation");
+                }, 1000);
+                
+            } else if (selectedDates.length === 1) {
+                // Jika hanya satu tanggal yang dipilih
+                const awalDisplay = formatDateIndonesian(selectedDates[0]);
+                document.getElementById("konfirmasi_awal").innerHTML = `<strong>Tanggal awal:</strong> ${awalDisplay}`;
+                document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Tanggal akhir:</strong> Klik tanggal akhir`;
+                konfirmasiDiv.style.display = 'block';
+                rangeInfo.style.display = 'none';
+            } else {
+                // Jika tanggal di-reset
+                konfirmasiDiv.style.display = 'none';
+                rangeInfo.style.display = 'block';
+                
+                // Reset auto-filled inputs
+                document.getElementById("datepicker3").value = "";
+                document.getElementById("datepicker4").value = "";
+                document.getElementById("info_periode").innerHTML = "Akan terisi otomatis";
+                document.getElementById("info_akhir").innerHTML = "Akan terisi otomatis";
+                
+                // Hapus class styling
+                document.getElementById("datepicker3").classList.remove("auto-filled");
+                document.getElementById("datepicker4").classList.remove("auto-filled");
             }
         }
     });
 
+    // Handler untuk dropdown jenis tanggal
     document.getElementById("jenis_date").addEventListener("change", function () {
-        document.getElementById("periode_section").style.display =
-            this.value === "Periode" ? "block" : "none";
+        const periodeSection = document.getElementById("periode_section");
+        periodeSection.style.display = this.value === "Periode" ? "block" : "none";
     });
 
 });

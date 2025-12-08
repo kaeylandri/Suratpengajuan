@@ -50,7 +50,7 @@
     .close-modal:hover{background:rgba(255,255,255,0.2)}
     
     /* Detail Content Styles - IMPROVED (SAMA DENGAN DASHBOARD DEKAN) */
-    .detail-content{padding:25px;max-height:calc(85vh - 80px)}
+    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
     .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
     .detail-section:last-child{margin-bottom:0}
     .detail-section-title{font-size:16px;font-weight:700;color:#16A085;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #16A085;display:flex;align-items:center;gap:10px}
@@ -963,43 +963,61 @@
     </a>
 </div>
     <!-- Filter -->
-    <div class="filter-container">
-        <div>
-            <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
-                <i class="fa-solid fa-calendar"></i> Filter Tahun
-            </label>
-            <select class="filter-select" id="tahunSelect" onchange="updateTahun(this.value)">
-                <?php 
-                    $currentYear = date('Y');
-                    $selectedYear = isset($tahun) ? $tahun : $currentYear;
-                    for ($y = $currentYear; $y >= $currentYear - 5; $y--): 
-                ?>
-                    <option value="<?= $y ?>" <?= ($selectedYear == $y ? 'selected' : '') ?>>Tahun <?= $y ?></option>
-                <?php endfor; ?>
-            </select>
-        </div>
-        
-        <div>
-            <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
-                <i class="fa-solid fa-calendar-alt"></i> Filter Bulan
-            </label>
-            <select class="filter-select" id="bulanSelect" onchange="filterByBulan(this.value)">
-                <option value="all">Semua Bulan</option>
-                <option value="1" <?= (isset($bulan) && $bulan == 1 ? 'selected' : '') ?>>Januari</option>
-                <option value="2" <?= (isset($bulan) && $bulan == 2 ? 'selected' : '') ?>>Februari</option>
-                <option value="3" <?= (isset($bulan) && $bulan == 3 ? 'selected' : '') ?>>Maret</option>
-                <option value="4" <?= (isset($bulan) && $bulan == 4 ? 'selected' : '') ?>>April</option>
-                <option value="5" <?= (isset($bulan) && $bulan == 5 ? 'selected' : '') ?>>Mei</option>
-                <option value="6" <?= (isset($bulan) && $bulan == 6 ? 'selected' : '') ?>>Juni</option>
-                <option value="7" <?= (isset($bulan) && $bulan == 7 ? 'selected' : '') ?>>Juli</option>
-                <option value="8" <?= (isset($bulan) && $bulan == 8 ? 'selected' : '') ?>>Agustus</option>
-                <option value="9" <?= (isset($bulan) && $bulan == 9 ? 'selected' : '') ?>>September</option>
-                <option value="10" <?= (isset($bulan) && $bulan == 10 ? 'selected' : '') ?>>Oktober</option>
-                <option value="11" <?= (isset($bulan) && $bulan == 11 ? 'selected' : '') ?>>November</option>
-                <option value="12" <?= (isset($bulan) && $bulan == 12 ? 'selected' : '') ?>>Desember</option>
-            </select>
-        </div>
+<div class="filter-container">
+    <div>
+        <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
+            <i class="fa-solid fa-calendar"></i> Filter Tahun
+        </label>
+        <select class="filter-select" id="tahunSelect" onchange="updateTahun(this.value)">
+            <?php 
+                $currentYear = date('Y');
+                $selectedYear = isset($tahun) ? $tahun : $currentYear;
+                for ($y = $currentYear; $y >= $currentYear - 5; $y--): 
+            ?>
+                <option value="<?= $y ?>" <?= ($selectedYear == $y ? 'selected' : '') ?>>Tahun <?= $y ?></option>
+            <?php endfor; ?>
+        </select>
     </div>
+    
+    <div>
+        <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
+            <i class="fa-solid fa-calendar-alt"></i> Filter Bulan
+        </label>
+        <select class="filter-select" id="bulanSelect" onchange="filterByBulan(this.value)">
+            <option value="all">Semua Bulan</option>
+            <option value="1" <?= (isset($bulan) && $bulan == 1 ? 'selected' : '') ?>>Januari</option>
+            <option value="2" <?= (isset($bulan) && $bulan == 2 ? 'selected' : '') ?>>Februari</option>
+            <option value="3" <?= (isset($bulan) && $bulan == 3 ? 'selected' : '') ?>>Maret</option>
+            <option value="4" <?= (isset($bulan) && $bulan == 4 ? 'selected' : '') ?>>April</option>
+            <option value="5" <?= (isset($bulan) && $bulan == 5 ? 'selected' : '') ?>>Mei</option>
+            <option value="6" <?= (isset($bulan) && $bulan == 6 ? 'selected' : '') ?>>Juni</option>
+            <option value="7" <?= (isset($bulan) && $bulan == 7 ? 'selected' : '') ?>>Juli</option>
+            <option value="8" <?= (isset($bulan) && $bulan == 8 ? 'selected' : '') ?>>Agustus</option>
+            <option value="9" <?= (isset($bulan) && $bulan == 9 ? 'selected' : '') ?>>September</option>
+            <option value="10" <?= (isset($bulan) && $bulan == 10 ? 'selected' : '') ?>>Oktober</option>
+            <option value="11" <?= (isset($bulan) && $bulan == 11 ? 'selected' : '') ?>>November</option>
+            <option value="12" <?= (isset($bulan) && $bulan == 12 ? 'selected' : '') ?>>Desember</option>
+        </select>
+    </div>
+    
+    <!-- TAMBAHAN BARU: Filter Divisi -->
+    <div>
+        <label style="display:block;margin-bottom:5px;font-weight:600;color:#7f8c8d">
+            <i class="fa-solid fa-building"></i> Filter Unit
+        </label>
+        <select class="filter-select" id="divisiSelect" onchange="filterByDivisi(this.value)">
+            <option value="all">Semua Unit</option>
+            <?php if(isset($divisi_list) && !empty($divisi_list)): ?>
+                <?php foreach($divisi_list as $divisi): ?>
+                    <option value="<?= htmlspecialchars($divisi) ?>" 
+                        <?= (isset($divisi_filter) && $divisi_filter == $divisi ? 'selected' : '') ?>>
+                        <?= htmlspecialchars($divisi) ?>
+                    </option>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </select>
+    </div>
+</div>
 
     <!-- Grafik 3D -->
     <div class="card" style="background: linear-gradient(135deg, #ffffffff 0%, #f7f7f7ff 100%);">
@@ -1729,27 +1747,58 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(initChart, 100);
 });
 
-// Fungsi untuk filter berdasarkan bulan
-function filterByBulan(bulan) {
+// Fungsi filter berdasarkan divisi
+function filterByDivisi(divisi) {
     const tahun = document.getElementById('tahunSelect').value;
+    const bulan = document.getElementById('bulanSelect').value;
     
-    // Jika memilih "Semua Bulan", redirect ke URL tanpa parameter bulan
-    if (bulan === 'all') {
-        window.location.href = "<?= base_url('sekretariat?tahun=') ?>" + tahun;
-    } else {
-        // Redirect dengan parameter tahun dan bulan
-        window.location.href = "<?= base_url('sekretariat?tahun=') ?>" + tahun + "&bulan=" + bulan;
+    let url = "<?= base_url('sekretariat?tahun=') ?>" + tahun;
+    
+    if (bulan !== 'all') {
+        url += "&bulan=" + bulan;
     }
+    
+    if (divisi !== 'all') {
+        url += "&divisi=" + encodeURIComponent(divisi);
+    }
+    
+    window.location.href = url;
 }
 
-// Fungsi update tahun yang sudah ada, modifikasi untuk handle bulan
+// Update fungsi filterByBulan untuk mempertahankan filter divisi
+function filterByBulan(bulan) {
+    const tahun = document.getElementById('tahunSelect').value;
+    const divisi = document.getElementById('divisiSelect').value;
+    
+    let url = "<?= base_url('sekretariat?tahun=') ?>" + tahun;
+    
+    if (bulan !== 'all') {
+        url += "&bulan=" + bulan;
+    }
+    
+    if (divisi !== 'all') {
+        url += "&divisi=" + encodeURIComponent(divisi);
+    }
+    
+    window.location.href = url;
+}
+
+// Update fungsi updateTahun untuk mempertahankan filter divisi
 function updateTahun(year) {
     const bulan = document.getElementById('bulanSelect').value;
-    if (bulan === 'all') {
-        window.location.href = "<?= base_url('sekretariat?tahun=') ?>" + year;
-    } else {
-        window.location.href = "<?= base_url('sekretariat?tahun=') ?>" + year + "&bulan=" + bulan;
+    const divisi = document.getElementById('divisiSelect').value;
+    
+    let url = "<?= base_url('sekretariat?tahun=') ?>" + year;
+    
+    if (bulan !== 'all') {
+        url += "&bulan=" + bulan;
     }
+    
+    if (divisi !== 'all') {
+        url += "&divisi=" + encodeURIComponent(divisi);
+    }
+    
+    window.location.href = url;
 }
 
 // =================================================================
@@ -2073,39 +2122,57 @@ function generateMultipleEvidenContent(item, evidenFiles) {
         </div>
     `;
 }
-
-// GANTI fungsi showDetail() menjadi seperti di dekan:
 async function showDetail(id) {
-    try {
-        // Tampilkan loading
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#16A085"></i>
-                <p style="margin-top:10px;color:#7f8c8d">Memuat surat pengajuan...</p>
-            </div>
-        `;
-        document.getElementById('detailModal').classList.add('show');
+    const viewUrl = "<?= base_url('sekretariat/view_surat_pengajuan/') ?>" + id; // HTML
+    const pdfUrl  = "<?= base_url('sekretariat/download_pdf/') ?>" + id;        // PDF asli
 
-        // Load surat pengajuan via iframe (SAMA SEPERTI DEKAN)
-        const suratUrl = '<?= base_url("sekretariat/view_surat_pengajuan/") ?>' + id;
-        document.getElementById('detailContent').innerHTML = `
-            <iframe 
-                src="${suratUrl}" 
-                style="width:100%; height:70vh; border:none; border-radius:8px;"
-                onload="this.style.opacity=1"
-                style="opacity:0; transition: opacity 0.3s;"
-            ></iframe>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
-        
-    } catch (error) {
-        console.error('Error loading surat:', error);
-        // Error handling...
-    }
+    document.getElementById('detailContent').innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            
+            <!-- TOMBOL DOWNLOAD -->
+            <button onclick="downloadPDF('${pdfUrl}')"
+                style="padding:8px 15px; background:#16A085; color:white; border:none; border-radius:6px; cursor:pointer;">
+                <i class="fa fa-download"></i> Download
+            </button>
+
+            <!-- TOMBOL PRINT -->
+            <button onclick="printPDF('${pdfUrl}')"
+                style="padding:8px 15px; background:#2c3e50; color:white; border:none; border-radius:6px; cursor:pointer;">
+                <i class="fa fa-print"></i> Print
+            </button>
+        </div>
+
+        <!-- VIEW HTML -->
+        <iframe id="pdfFrame"
+            src="${viewUrl}"
+            style="width:100%; height:85vh; border:none; border-radius:10px;">
+        </iframe>
+    `;
+
+    document.getElementById("detailModal").classList.add("show");
+}
+
+
+
+function printPDF(url) {
+    fetch(url)
+        .then(res => res.blob())
+        .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = blobUrl;
+            document.body.appendChild(iframe);
+
+            iframe.onload = function () {
+                iframe.contentWindow.print();
+            };
+        });
+}
+
+function downloadPDF(url) {
+    // Download langsung
+    window.location.href = url;
 }
 
 // ============================================
@@ -2519,26 +2586,68 @@ function closePinModal() {
 function checkPin() {
     let pin = document.getElementById("pinInput").value;
 
+    // Debug
+    console.log("=== Check PIN Debug ===");
+    console.log("PIN Input:", pin);
+    console.log("PIN Length:", pin.length);
+    console.log("Selected Surat:", selectedSurat);
+
+    // Validasi input
+    if (!pin) {
+        alert("PIN harus diisi!");
+        return;
+    }
+
+    if (pin.length !== 6) {
+        alert("PIN harus 6 digit!");
+        return;
+    }
+
+    if (!/^[0-9]{6}$/.test(pin)) {
+        alert("PIN harus berupa angka!");
+        return;
+    }
+
+    // Kirim request
     fetch("<?= base_url('sekretariat/cek_pin') ?>", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest"
+        },
         body: JSON.stringify({ pin: pin })
     })
-    .then(res => res.json())
-    .then(data => {
-
-        if (data.status !== "success") {
-            alert("PIN salah!");
-            return;
+    .then(response => {
+        console.log("Response Status:", response.status);
+        if (!response.ok) {
+            throw new Error('HTTP error! status: ' + response.status);
         }
+        return response.json();
+    })
+    .then(data => {
+        console.log("Response Data:", data);
 
-        // PIN benar → tampilkan dropdown disposisi
-        document.getElementById("disposisiBox" + selectedSurat).style.display = "block";
-
-        closePinModal();
+        if (data.status === "success") {
+            
+            // Tampilkan dropdown disposisi
+            if (selectedSurat) {
+                document.getElementById("disposisiBox" + selectedSurat).style.display = "block";
+            }
+            
+            // Tutup modal PIN
+            closePinModal();
+        } else {
+            // PIN salah
+            alert(data.message || "PIN salah!");
+            document.getElementById("pinInput").value = "";
+            document.getElementById("pinInput").focus();
+        }
+    })
+    .catch(error => {
+        console.error("Fetch Error:", error);
+        alert("Terjadi kesalahan: " + error.message);
     });
 }
-
 // PADA SAAT MEMILIH DISPOSISI
 function onDisposisiChange(id) {
     let val = document.getElementById("disposisiSelect" + id).value;
