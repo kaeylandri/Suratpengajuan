@@ -335,7 +335,7 @@
     </span>
 </div>
 
-    <?php if ($surat->jenis_date === 'custom'): ?>
+    <?php if ($surat->jenis_date === 'Custom'): ?>
     <div class="info-row">
         <span class="info-label">Tanggal Kegiatan</span>
         <span class="info-separator">:</span>

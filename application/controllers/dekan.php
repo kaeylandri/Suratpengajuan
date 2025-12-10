@@ -909,74 +909,76 @@ public function halaman_total()
         
         return $dosen_data;
     }
-
-    public function approve($id)
-    {
-        // Generate nomor surat otomatis jika tidak diisi
-        $nomor_surat = $this->input->post('nomor_surat');
-        if (empty($nomor_surat)) {
-            $nomor_surat = $this->generate_nomor_surat_dekan();
-        }
-
-        $surat = $this->db->get_where('surat', ['id' => $id])->row();
-        if (!$surat) {
-            $this->session->set_flashdata('error', 'Data surat tidak ditemukan');
-            redirect('dekan/dashboard');
-            return;
-        }
-
-        // Validasi status - lebih fleksibel
-        $allowed_statuses = ['disetujui sekretariat', 'pending', 'menunggu persetujuan dekan'];
-        
-        if (!in_array($surat->status, $allowed_statuses)) {
-            $this->session->set_flashdata('error', 'Status pengajuan tidak dapat diproses. Status saat ini: ' . $surat->status);
-            redirect('dekan/dashboard');
-            return;
-        }
-
-        // Update approval status dengan format yang mendukung progress bar
-        $approval = json_decode($surat->approval_status, true) ?? [];
-        
-        // Pastikan semua tahap sebelumnya ada
-        if (!isset($approval['pengirim'])) {
-            $approval['pengirim'] = date("Y-m-d H:i:s");
-        }
-        if (!isset($approval['kaprodi'])) {
-            $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
-        }
-        if (!isset($approval['sekretariat'])) {
-            $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
-        }
-        
-        $approval['dekan'] = date("Y-m-d H:i:s");
-        
-        $update_data = [
-            'status' => 'disetujui dekan',
-            'nomor_surat' => $nomor_surat,
-            'approval_status' => json_encode($approval),
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-
-        $result = $this->db->where('id', $id)->update('surat', $update_data);
-
-        if ($result) {
-            // PERBAIKAN UTAMA: Siapkan data untuk success modal
-            $approved_items = [[
-                'nama' => $surat->nama_kegiatan,
-                'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara
-            ]];
-            
-            // Set flashdata untuk success modal
-            $this->session->set_flashdata('approved_items', $approved_items);
-            $this->session->set_flashdata('is_single_approve', true);
-            $this->session->set_flashdata('success', 'Surat berhasil disetujui oleh Dekan.');
-        } else {
-            $this->session->set_flashdata('error', 'Gagal menyetujui surat.');
-        }
-        
-        redirect('dekan/dashboard');
+public function approve($id)
+{
+    // Generate nomor surat otomatis jika tidak diisi
+    $nomor_surat = $this->input->post('nomor_surat');
+    if (empty($nomor_surat)) {
+        $nomor_surat = $this->generate_nomor_surat_dekan();
     }
 
+    $surat = $this->db->get_where('surat', ['id' => $id])->row();
+    if (!$surat) {
+        $this->session->set_flashdata('error', 'Data surat tidak ditemukan');
+        redirect('dekan/dashboard');
+        return;
+    }
+
+    // Validasi status - lebih fleksibel
+    $allowed_statuses = ['disetujui sekretariat', 'pending', 'menunggu persetujuan dekan'];
+    
+    if (!in_array($surat->status, $allowed_statuses)) {
+        $this->session->set_flashdata('error', 'Status pengajuan tidak dapat diproses. Status saat ini: ' . $surat->status);
+        redirect('dekan/dashboard');
+        return;
+    }
+
+    // Update approval status dengan format yang mendukung progress bar
+    $approval = json_decode($surat->approval_status, true) ?? [];
+    
+    // Pastikan semua tahap sebelumnya ada
+    if (!isset($approval['pengirim'])) {
+        $approval['pengirim'] = date("Y-m-d H:i:s");
+    }
+    if (!isset($approval['kaprodi'])) {
+        $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+    }
+    if (!isset($approval['sekretariat'])) {
+        $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
+    }
+    
+    $approval['dekan'] = date("Y-m-d H:i:s");
+    
+    $update_data = [
+        'status' => 'disetujui dekan',
+        'nomor_surat' => $nomor_surat,
+        'approval_status' => json_encode($approval),
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+
+    $result = $this->db->where('id', $id)->update('surat', $update_data);
+
+    if ($result) {
+        // AMBIL DATA DOSEN DARI DATABASE
+        $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
+        
+        // PERBAIKAN UTAMA: Siapkan data untuk success modal dengan data dosen
+        $approved_items = [[
+            'nama' => $surat->nama_kegiatan,
+            'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara,
+            'dosen_data' => $dosen_data // TAMBAHKAN DATA DOSEN
+        ]];
+        
+        // Set flashdata untuk success modal
+        $this->session->set_flashdata('approved_items', $approved_items);
+        $this->session->set_flashdata('is_single_approve', true);
+        $this->session->set_flashdata('success', 'Surat berhasil disetujui oleh Dekan.');
+    } else {
+        $this->session->set_flashdata('error', 'Gagal menyetujui surat.');
+    }
+    
+    redirect('dekan/dashboard');
+}
     /* ================================
        REJECT - VERSI DIPERBAIKI DENGAN PROGRESS BAR
     ================================= */
@@ -1017,7 +1019,12 @@ public function halaman_total()
         }
         
         $approval['dekan'] = date("Y-m-d H:i:s");
-
+         // Get rejection notes
+        $rejection_notes = $this->input->post('rejection_notes');
+        if (empty($rejection_notes)) {
+            $this->session->set_flashdata('error', 'Alasan penolakan harus diisi');
+            redirect('dekan');
+    }
         $update_data = [
             'status' => 'ditolak dekan',
             'approval_status' => json_encode($approval),
@@ -1025,13 +1032,27 @@ public function halaman_total()
             'updated_at' => date('Y-m-d H:i:s')
         ];
 
-        $result = $this->db->where('id', $id)->update('surat', $update_data);
+         $result = $this->db->where('id', $id)->update('surat', $update_data);
 
-        if ($result) {
-            $this->session->set_flashdata('success', 'Surat berhasil ditolak.');
-        } else {
-            $this->session->set_flashdata('error', 'Gagal menolak surat.');
-        }
+    if ($result) {
+        // AMBIL DATA DOSEN DARI DATABASE
+        $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
+        
+        // Siapkan data untuk success modal dengan data dosen
+        $rejected_items = [[
+            'nama' => $surat->nama_kegiatan,
+            'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara,
+            'dosen_data' => $dosen_data,
+            'rejection_notes' => $rejection_notes
+        ]];
+        
+        // Set flashdata untuk success modal
+        $this->session->set_flashdata('rejected_items', $rejected_items);
+        $this->session->set_flashdata('is_single_reject', true);
+        $this->session->set_flashdata('success', 'Surat berhasil ditolak oleh Dekan.');
+    } else {
+        $this->session->set_flashdata('error', 'Gagal menolak surat.');
+    }
         
         $this->redirectToPreviousPage();
     }
@@ -1561,6 +1582,19 @@ public function return_pengajuan($id)
     ]);
 
     $this->session->set_flashdata('success', '✅ Pengajuan berhasil dikembalikan ke status awal (Menunggu Persetujuan).');
+    // Set flashdata untuk success return modal
+    $surat = $this->db->get_where('surat', ['id' => $id])->row();
+    
+    $returned_items = [
+        [
+            'nama' => $surat->nama_kegiatan,
+            'details' => "{$surat->penyelenggara} - " . date('d M Y', strtotime($surat->tanggal_kegiatan)),
+            'new_status' => $surat->status
+        ]
+    ];
+    
+    $this->session->set_flashdata('returned_items', $returned_items);
+    $this->session->set_flashdata('is_single_return', true);
     
     $this->redirectToPreviousPage();
 }

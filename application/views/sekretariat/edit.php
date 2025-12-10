@@ -805,6 +805,10 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                     <label>Penyelenggara</label>
                     <input type="text" name="penyelenggara" class="form-control" value="<?= htmlspecialchars($surat['penyelenggara'] ?? ''); ?>">
                 </div>
+                <div class="form-group">
+                    <label>Customize</label>
+                    <input type="text" name="customize" class="form-control" value="<?= htmlspecialchars($surat['customize'] ?? ''); ?>">
+                </div>
             </div>
 
             <!-- Jenis Pengajuan -->
@@ -897,12 +901,11 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                                                 required>
                                         </td>
                                         <td>
-                                            <input type="text" 
-                                                name="nama_dosen[]"
-                                                class="form-control nama-dosen-input" 
-                                                value="<?= htmlspecialchars($dosen['nama_dosen'] ?? '') ?>" 
-                                                autocomplete="off"
-                                                required>
+                                            <input type="text"
+                                                name="jabatan[]"
+                                                class="form-control nama-dosen-input"
+                                                value="<?= htmlspecialchars($dosen['nama_dosen'] ?? '') ?>"
+                                                autocomplete="off">
                                         </td>
                                         <td>
                                             <input type="text"
