@@ -948,83 +948,127 @@ public function semua()
         return $dosen_data;
     }
 
-    /* ================================
-       APPROVE SINGLE - DENGAN SUCCESS MODAL
-    ================================= */
-    public function approve($id)
-    {
-        $surat = $this->db->get_where('surat', ['id' => $id])->row();
-        
-        if (!$surat) {
-            $this->session->set_flashdata('error', 'Surat tidak ditemukan.');
-            redirect('kaprodi/pending');
-        }
+/* ================================
+   APPROVE SINGLE - DENGAN SUCCESS MODAL & DATA DOSEN
+================================= */
+public function approve($id)
+{
+    $surat = $this->db->get_where('surat', ['id' => $id])->row();
+    
+    if (!$surat) {
+        $this->session->set_flashdata('error', 'Surat tidak ditemukan.');
+        redirect('kaprodi/pending');
+    }
 
-        // Update approval status
-        $approval = json_decode($surat->approval_status, true) ?? [];
-        
-        if (!isset($approval['pengirim'])) {
-            $approval['pengirim'] = $surat->created_at;
-        }
-        
-        $approval['kk'] = date("Y-m-d H:i:s");
-        
-        $this->db->where('id', $id)->update('surat', [
-            'status' => 'disetujui KK',
-            'approval_status' => json_encode($approval),
-        ]);
+    // Validasi status - hanya bisa approve jika status = 'pengajuan'
+    if ($surat->status !== 'pengajuan') {
+        $this->session->set_flashdata('error', 'Hanya pengajuan baru yang dapat disetujui.');
+        redirect('kaprodi');
+    }
 
-        // Siapkan data untuk success modal
+    // Update approval status
+    $approval = json_decode($surat->approval_status, true) ?? [];
+    
+    if (!isset($approval['pengirim'])) {
+        $approval['pengirim'] = $surat->created_at;
+    }
+    
+    $approval['kk'] = date("Y-m-d H:i:s");
+    
+    $update_data = [
+        'status' => 'disetujui KK',
+        'approval_status' => json_encode($approval),
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+
+    $result = $this->db->where('id', $id)->update('surat', $update_data);
+
+    if ($result) {
+        // AMBIL DATA DOSEN DARI DATABASE
+        $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
+        
+        // Siapkan data untuk success modal dengan data dosen
         $approved_items = [[
             'nama' => $surat->nama_kegiatan,
-            'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara
+            'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara,
+            'dosen_data' => $dosen_data // TAMBAHKAN DATA DOSEN
         ]];
         
         // Set flashdata untuk success modal
         $this->session->set_flashdata('approved_items', $approved_items);
         $this->session->set_flashdata('is_single_approve', true);
         $this->session->set_flashdata('success', 'Surat berhasil disetujui Kaprodi.');
-        
+    } else {
+        $this->session->set_flashdata('error', 'Gagal menyetujui surat.');
+    }
+    
+    redirect('kaprodi');
+}
+/* ================================
+   REJECT SINGLE - DENGAN SUCCESS MODAL
+================================= */
+public function reject($id)
+{
+    $surat = $this->db->get_where('surat', ['id' => $id])->row();
+    
+    if (!$surat) {
+        $this->session->set_flashdata('error', 'Surat tidak ditemukan.');
         redirect('kaprodi');
     }
 
-    /* ================================
-       REJECT SINGLE - DENGAN SUCCESS MODAL
-    ================================= */
-    public function reject($id)
-    {
-        $surat = $this->db->get_where('surat', ['id' => $id])->row();
-        
-        if (!$surat) {
-            $this->session->set_flashdata('error', 'Surat tidak ditemukan.');
-            redirect('kaprodi/pending');
-        }
-
-        $notes = $this->input->post('rejection_notes');
-        if (empty($notes)) {
-            $this->session->set_flashdata('error', 'Alasan penolakan harus diisi');
-            redirect('kaprodi');
-        }
-
-        // Update approval status
-        $approval = json_decode($surat->approval_status, true) ?? [];
-        
-        if (!isset($approval['pengirim'])) {
-            $approval['pengirim'] = $surat->created_at;
-        }
-        
-        $approval['kk'] = date("Y-m-d H:i:s");
-
-        $this->db->where('id', $id)->update('surat', [
-            'status' => 'ditolak KK',
-            'approval_status' => json_encode($approval),
-            'catatan_penolakan' => $notes,
-        ]);
-
-        $this->session->set_flashdata('success', 'Surat berhasil ditolak Kaprodi.');
-        
-        $this->redirectToPreviousPage();
+    // Validasi status - hanya bisa reject jika status = 'pengajuan'
+    if ($surat->status !== 'pengajuan') {
+        $this->session->set_flashdata('error', 'Hanya pengajuan baru yang dapat ditolak.');
+        redirect('kaprodi');
     }
+
+    // Get rejection notes
+    $rejection_notes = $this->input->post('rejection_notes');
+    if (empty($rejection_notes)) {
+        $this->session->set_flashdata('error', 'Alasan penolakan harus diisi');
+        redirect('kaprodi');
+    }
+
+    // Update approval status
+    $approval = json_decode($surat->approval_status, true) ?? [];
+    
+    if (!isset($approval['pengirim'])) {
+        $approval['pengirim'] = $surat->created_at;
+    }
+    
+    $approval['kk'] = date("Y-m-d H:i:s");
+
+    $update_data = [
+        'status' => 'ditolak KK',
+        'approval_status' => json_encode($approval),
+        'catatan_penolakan' => $rejection_notes,
+        'updated_at' => date('Y-m-d H:i:s')
+    ];
+
+    $result = $this->db->where('id', $id)->update('surat', $update_data);
+
+    if ($result) {
+        // AMBIL DATA DOSEN DARI DATABASE
+        $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
+        
+        // Siapkan data untuk success modal dengan data dosen
+        $rejected_items = [[
+            'nama' => $surat->nama_kegiatan,
+            'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara,
+            'dosen_data' => $dosen_data,
+            'rejection_notes' => $rejection_notes
+        ]];
+        
+        // Set flashdata untuk success modal
+        $this->session->set_flashdata('rejected_items', $rejected_items);
+        $this->session->set_flashdata('is_single_reject', true);
+        $this->session->set_flashdata('success', 'Surat berhasil ditolak oleh Kaprodi.');
+    } else {
+        $this->session->set_flashdata('error', 'Gagal menolak surat.');
+    }
+    
+    redirect('kaprodi');
+}
 
     /* ================================
        PROCESS MULTI APPROVE - DENGAN SUCCESS MODAL
@@ -1489,8 +1533,19 @@ public function check_dosen_field()
         'catatan_penolakan' => null, // Hapus catatan penolakan jika ada
     ]);
 
-    $this->session->set_flashdata('success', '✅ Pengajuan berhasil dikembalikan ke status awal (Menunggu Persetujuan).');
+    // Set flashdata untuk success return modal
+    $surat = $this->db->get_where('surat', ['id' => $id])->row();
     
+    $returned_items = [
+        [
+            'nama' => $surat->nama_kegiatan,
+            'details' => "{$surat->penyelenggara} - " . date('d M Y', strtotime($surat->tanggal_kegiatan)),
+            'new_status' => $surat->status
+        ]
+    ];
+    
+    $this->session->set_flashdata('returned_items', $returned_items);
+    $this->session->set_flashdata('is_single_return', true);
     $this->redirectToPreviousPage();
 }
 
