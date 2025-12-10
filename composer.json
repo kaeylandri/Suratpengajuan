@@ -12,11 +12,8 @@
 	},
 	"require": {
 		"php": ">=5.3.7",
-<<<<<<< HEAD
-		"dompdf/dompdf": "*",
-=======
+
 		"dompdf/dompdf": "^3.1",
->>>>>>> d5db7f9c6ebf25aebbbcce99a4f0ee8f22bfd9bb
 		"endroid/qr-code": "4.3"
 	},
 	"suggest": {

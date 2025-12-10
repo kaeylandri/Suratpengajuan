@@ -709,10 +709,6 @@
             <div class="form-section">
                 <h5><i class="fas fa-info-circle"></i> Informasi Kegiatan</h5>
                 <div class="form-group">
-                    <label>Nomor Surat <span style="color:#e74c3c">*</span></label>
-                    <input type="text" name="nomor_surat" class="form-control" value="<?= htmlspecialchars($surat['nomor_surat'] ?? ''); ?>" required>
-                </div>
-                <div class="form-group">
                     <label>Nama Kegiatan <span style="color:#e74c3c">*</span></label>
                     <input type="text" name="nama_kegiatan" class="form-control" value="<?= htmlspecialchars($surat['nama_kegiatan'] ?? ''); ?>" required>
                 </div>
@@ -830,106 +826,230 @@
                     </div>
                 </div>
             </div>
+<!-- Dosen Terkait - READONLY NIP/NAMA/DIVISI, EDITABLE JABATAN/PERAN -->
+<div class="form-section">
+    <h5><i class="fas fa-user-tie"></i> Dosen Terkait</h5>
+    <div class="alert" style="background: #fff3cd; border: 1px solid #ffc107; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+        <i class="fas fa-info-circle" style="color: #856404;"></i>
+        <strong style="color: #856404;">Info:</strong>
+        <span style="color: #856404;">NIP, Nama Dosen, dan Divisi tidak dapat diedit. Hanya Jabatan dan Peran yang dapat diubah.</span>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table" id="dosen_table">
+            <thead>
+                <tr>
+                    <th>NIP</th>
+                    <th>Nama Dosen</th>
+                    <th>Jabatan </th>
+                    <th>Divisi </th>
+                    <th class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
+                        Peran 
+                    </th>
+                    <th width="5%">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                if (!empty($dosen_data) && is_array($dosen_data)):
+                    foreach ($dosen_data as $i => $dosen):
+                ?>
+                        <tr class="dosen-row" data-row-index="<?= $i ?>">
+                        <td>
+                            <input type="text"
+                                name="nip[]"
+                                class="form-control nip-input"
+                                value="<?= htmlspecialchars($dosen['nip'] ?? '') ?>"
+                                required>
+                        </td>
 
-                    <!-- Dosen Terkait -->
-            <div class="form-section">
-                <h5><i class="fas fa-user-tie"></i> Dosen Terkait</h5>
-                <div class="table-responsive">
-                    <table class="table" id="dosen_table">
-                        <thead>
-                            <tr>
-                                <th>NIP</th>
-                                <th>Nama Dosen</th>
-                                <th>Jabatan</th>
-                                <th>Divisi</th>
-                                <th class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">Peran</th>
-                                <th width="5%">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            if (!empty($dosen_data) && is_array($dosen_data)):
-                                foreach ($dosen_data as $i => $dosen):
-                            ?>
-                                    <tr class="dosen-row" data-row-index="<?= $i ?>">
-                                        <td>
-                                            <input type="text"
-                                                name="nip[]"
-                                                class="form-control nip-input"
-                                                value="<?= htmlspecialchars($dosen['nip'] ?? '') ?>"
-                                                autocomplete="off"
-                                                required>
-                                        </td>
-                                        <td>
-                                            <input type="text" 
-                                                name="nama_dosen[]"
-                                                class="form-control nama-dosen-input" 
-                                                value="<?= htmlspecialchars($dosen['nama'] ?? '') ?>" 
-                                                autocomplete="off"
-                                                required>
-                                        </td>
-                                        <td>
-                                            <input type="text"
-                                                name="jabatan[]"
-                                                class="form-control jabatan-input"
-                                                value="<?= htmlspecialchars($dosen['jabatan'] ?? '') ?>"
-                                                autocomplete="off">
-                                        </td>
-                                        <td>
-                                            <input type="text"
-                                                name="divisi[]"
-                                                class="form-control divisi-input"
-                                                value="<?= htmlspecialchars($dosen['divisi'] ?? '') ?>"
-                                                autocomplete="off">
-                                        </td>
-                                        <td class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
-                                            <input type="text"
-                                                name="peran[]"
-                                                class="form-control peran-input"
-                                                value="<?= htmlspecialchars($dosen['peran'] ?? '') ?>"
-                                                placeholder="Ketua/Anggota/dll"
-                                                autocomplete="off">
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="remove-row">
-                                                <i class="fas fa-trash"></i>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                <?php
-                                endforeach;
-                            else:
-                                ?>
-                                <tr class="dosen-row" data-row-index="0">
-                                    <td>
-                                        <input type="text" name="nip[]" class="form-control nip-input" required>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" required>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="jabatan[]" class="form-control jabatan-input">
-                                    </td>
-                                    <td>
-                                        <input type="text" name="divisi[]" class="form-control divisi-input">
-                                    </td>
-                                    <td class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
-                                        <input type="text" name="peran[]" class="form-control peran-input" placeholder="Ketua/Anggota/dll">
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="remove-row">
-                                            <i class="fas fa-trash"></i>
-                                        </span>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-                <button type="button" id="addRow" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i> Tambah Dosen
-                </button>
-            </div>
+                        <td>
+                            <input type="text" 
+                                name="nama_dosen[]"
+                                class="form-control nama-dosen-input" 
+                                value="<?= htmlspecialchars($dosen['nama'] ?? '') ?>" 
+                                required>
+                        </td>
+
+                        <td>
+                            <input type="text"
+                                name="jabatan[]"
+                                class="form-control jabatan-input"
+                                value="<?= htmlspecialchars($dosen['jabatan'] ?? '') ?>"
+                                autocomplete="off">
+                        </td>
+
+                        <td>
+                            <input type="text"
+                                name="divisi[]"
+                                class="form-control divisi-input"
+                                value="<?= htmlspecialchars($dosen['divisi'] ?? '') ?>">
+                        </td>
+
+                        <td class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">
+                            <input type="text"
+                                name="peran[]"
+                                class="form-control peran-input"
+                                value="<?= htmlspecialchars($dosen['peran'] ?? '') ?>"
+                                autocomplete="off">
+                        </td>
+
+                        <td class="text-center">
+                            <span class="remove-row" style="cursor:pointer;color:#c0392b;">
+                                <i class="fas fa-trash"></i>
+                            </span>
+                        </td>
+                    </tr>
+
+                    <?php
+                    endforeach;
+                else:
+                    ?>
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Belum ada dosen terkait</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- TOMBOL TAMBAH DOSEN DISABLED -->
+<button type="button" id="addRow" class="btn btn-success btn-sm">
+    <i class="fas fa-plus"></i> Tambah Dosen
+</button>
+
+    <small class="text-muted" style="display: block; margin-top: 8px;">
+        <i class="fas fa-info-circle"></i> Jumlah dosen tidak dapat diubah. Hanya jabatan dan peran yang dapat diedit.
+    </small>
+</div>
+
+<style>
+/* Additional Styles untuk field readonly dan editable */
+.nip-input-readonly,
+.nama-dosen-input-readonly,
+.divisi-input-readonly {
+    background: #e9ecef !important;
+    cursor: not-allowed !important;
+    border: 2px solid #ced4da !important;
+    color: #6c757d !important;
+}
+
+.jabatan-input,
+.peran-input {
+    border: 2px solid #16A085 !important;
+    background: #e8f6f3 !important;
+    transition: all 0.3s ease;
+}
+
+.jabatan-input:focus,
+.peran-input:focus {
+    border-color: #138D75 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.15);
+    transform: scale(1.02);
+}
+
+.jabatan-input:hover,
+.peran-input:hover {
+    border-color: #138D75;
+}
+
+/* Disable remove button */
+.remove-row[style*="opacity: 0.3"] {
+    pointer-events: none;
+}
+</style>
+
+<script>
+// UPDATE JAVASCRIPT: HANYA AUTOCOMPLETE UNTUK JABATAN
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize autocomplete HANYA untuk field jabatan
+    document.querySelectorAll('.dosen-row').forEach(row => {
+        initAutocompleteForJabatan(row);
+    });
+    
+    // Disable remove row action
+    document.querySelectorAll('.remove-row').forEach(btn => {
+        btn.style.opacity = '0.3';
+        btn.style.cursor = 'not-allowed';
+        btn.title = 'Tidak dapat menghapus dosen';
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        });
+    });
+});
+
+// Function untuk autocomplete HANYA jabatan
+function initAutocompleteForJabatan(rowEl) {
+    const inputJabatan = rowEl.querySelector('.jabatan-input');
+    const inputNip = rowEl.querySelector('.nip-input-readonly');
+    
+    if (!inputJabatan || !inputNip) {
+        return;
+    }
+    
+    // Get NIP untuk filter jabatan dari dosen yang sama
+    const currentNip = inputNip.value.trim();
+
+    // Fill jabatan ketika item dipilih dari autocomplete
+    function fillJabatan(item) {
+        if (!item) return;
+        inputJabatan.value = item.jabatan || '';
+    }
+
+    // Create autocomplete handler untuk jabatan
+    const handler = debounce(async function() {
+        const val = this.value.trim();
+
+        if (val.length < 2 || document.activeElement !== this) {
+            removeAutocompleteBox();
+            return;
+        }
+
+        // Fetch suggestions HANYA untuk jabatan
+        const suggestions = await fetchSuggestions(val, 'jabatan');
+        showSuggestionBox(inputJabatan, suggestions, fillJabatan, 'jabatan');
+    }, 300);
+
+    // Remove old event listener if exists
+    if (inputJabatan._currentHandler) {
+        inputJabatan.removeEventListener('input', inputJabatan._currentHandler);
+    }
+
+    // Save reference to new handler
+    inputJabatan._currentHandler = handler;
+    inputJabatan.addEventListener('input', handler);
+
+    // Focus handlers
+    inputJabatan.addEventListener('focus', () => {
+        if (inputJabatan.value.trim().length >= 2) {
+            handler.call(inputJabatan);
+        }
+    });
+
+    inputJabatan.addEventListener('blur', () => {
+        setTimeout(() => {
+            if (document.activeElement !== inputJabatan &&
+                (!currentAutocompleteBox || !currentAutocompleteBox.contains(document.activeElement))) {
+                removeAutocompleteBox();
+            }
+        }, 150);
+    });
+    
+    // Visual feedback
+    inputJabatan.addEventListener('focus', function() {
+        this.style.borderColor = '#138D75';
+        this.style.background = '#ffffff';
+    });
+    
+    inputJabatan.addEventListener('blur', function() {
+        this.style.borderColor = '#16A085';
+        this.style.background = '#e8f6f3';
+    });
+}
+</script>
 
             <!-- File Eviden -->
             <div class="form-section">

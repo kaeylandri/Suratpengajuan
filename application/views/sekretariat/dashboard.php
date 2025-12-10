@@ -1190,6 +1190,118 @@
     animation: slideIn 0.3s ease;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
 }
+/* Tombol Masukkan Nomor Surat - WARNA BIRU */
+.btn-nomor {
+    background: #3498db !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 6px 10px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.2s ease-in-out;
+    font-size: 14px;
+    height: 32px;
+}
+
+.btn-nomor i {
+    font-size: 14px;
+}
+
+.btn-nomor:hover {
+    background: #2980b9 !important;
+    transform: scale(1.05);
+}
+
+/* Tombol Cetak - WARNA UNGU */
+.btn-cetak {
+    background: #9b59b6 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 6px 10px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.2s ease-in-out;
+    font-size: 14px;
+    height: 32px;
+}
+
+.btn-cetak i {
+    font-size: 14px;
+}
+
+.btn-cetak:hover {
+    background: #8e44ad !important;
+    transform: scale(1.05);
+}
+
+/* Tombol Download PDF - WARNA HIJAU */
+.btn-download {
+    background: #2ecc71 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 6px 10px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.2s ease-in-out;
+    font-size: 14px;
+    height: 32px;
+    text-decoration: none !important;
+}
+
+.btn-download:hover {
+    background: #27ae60 !important;
+    transform: scale(1.05);
+    text-decoration: none !important;
+}
+/* Modal Nomor Surat Specific Styles */
+#nomorSuratInfoBox {
+    background: #e8f6f3;
+    border: 1px solid #16A085;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+#nomorSuratInfoBox strong {
+    color: #16A085;
+    display: block;
+    margin-bottom: 8px;
+}
+
+#nomorSuratInfoBox p {
+    color: #2c3e50;
+    margin-bottom: 4px;
+    font-size: 13px;
+}
+
+#nomorSuratError {
+    background: #fff5f5;
+    border: 1px solid #f8cccc;
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+/* Success Modal Nomor Surat */
+#successNomorValue {
+    background: white;
+    border: 2px dashed #3498db;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
             </style>
             </head>
             <body>
@@ -1538,8 +1650,8 @@
                                                 <i class="fa-solid fa-eye"></i>
                                             </button>
                                             
-                                            <!-- TOMBOL EDIT BARU: Tampilkan jika status BUKAN "ditolak dekan" -->
-                                            <?php if($status != 'ditolak dekan'): ?>
+                                            <!-- TOMBOL EDIT BARU -->
+                                            <?php if(in_array($s->status, ['disetujui KK', 'disetujui sekretariat', 'ditolak sekretariat'])): ?>
                                                 <a href="<?= site_url('sekretariat/edit_surat_sekretariat/' . $s->id) ?>" 
                                                 class="btn btn-warning" 
                                                 title="Edit Pengajuan"
@@ -1550,20 +1662,20 @@
                                             
                                             <!-- Tombol lain yang sudah ada -->
                                             <?php if($status == 'disetujui KK' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
-                                                <button class="btn btn-approve" onclick="showApproveModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')" title="Setujui & Teruskan ke Dekan">
+                                                <button class="btn btn-approve" onclick="showApproveModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')" title="Approve">
                                                     <i class="fa-solid fa-check"></i>
                                                 </button>
-                                                <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModalNew(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')" title="Tolak Pengajuan">
-                                                <i class="fa-solid fa-times"></i>
-                                            </button>
+                                                <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModalNew(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')" title="Rejected">
+                                                    <i class="fa-solid fa-times"></i>
+                                                </button>
                                             <?php elseif(in_array($s->status, ['disetujui sekretariat', 'ditolak sekretariat'])): ?>
                                                 <!-- Tombol Return -->
-                                                <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModal(<?= $s->id ?>, '<?= htmlspecialchars($s->nama_kegiatan, ENT_QUOTES) ?>')" title="Kembalikan Pengajuan">
+                                                <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModal(<?= $s->id ?>, '<?= htmlspecialchars($s->nama_kegiatan, ENT_QUOTES) ?>')" title="Return">
                                                     <i class="fa-solid fa-undo"></i>
                                                 </button>
                                             <?php endif; ?>
                                             
-                                            <!-- Tombol edit khusus untuk ditolak dekan (yang sudah ada) -->
+                                            <!-- Tombol edit khusus untuk ditolak dekan -->
                                             <?php if($status == 'ditolak dekan' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
                                                 <a href="<?= site_url('sekretariat/edit_surat/' . $s->id) ?>" 
                                                 class="btn btn-warning" 
@@ -1571,6 +1683,25 @@
                                                 style="background:#ffc107;color:#000;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;text-decoration:none;">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+                                            <?php endif; ?>
+                                            <!-- TOMBOL BARU: TAMBAH NOMOR SURAT (hanya untuk status disetujui dekan) -->
+                                            <?php if($status == 'disetujui dekan'): ?>
+                                                <button class="btn btn-nomor" 
+                                                        onclick="openNomorSuratModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')"
+                                                        title="Masukkan Nomor Surat"
+                                                        style="background:#3498db;color:white;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;">
+                                                    <i class="fa-solid fa-hashtag"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                            
+                                            <!-- TOMBOL BARU: CETAK SURAT (hanya jika nomor surat sudah terisi) -->
+                                            <?php if($status == 'disetujui dekan' && !empty($s->nomor_surat) && $s->nomor_surat !== '-' && $s->nomor_surat !== 'null'): ?>
+                                                <button class="btn btn-cetak" 
+                                                        onclick="window.open('<?= site_url('sekretariat/cetak_surat/' . $s->id) ?>', '_blank')"
+                                                        title="Cetak Surat"
+                                                        style="background:#9b59b6;color:white;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;">
+                                                    <i class="fa-solid fa-print"></i>
+                                                </button>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -1615,53 +1746,127 @@
                 </div>
             </div>
 
-            <!-- Approve Modal -->
-            <div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
-                <div class="approve-modal-content" onclick="event.stopPropagation()">
-                    <div class="approve-modal-header">
-                        <h3><i class="fa-solid fa-check-circle"></i> Setujui Pengajuan</h3>
-                        <button class="close-modal" onclick="closeModal('approveModal')">&times;</button>
+            <!-- Approve Modal Sederhana -->
+<div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
+    <div class="approve-modal-content" onclick="event.stopPropagation()" style="max-width: 450px;">
+        <div class="approve-modal-header">
+            <h3><i class="fa-solid fa-check-circle"></i> Konfirmasi Persetujuan</h3>
+            <button class="close-modal" onclick="closeModal('approveModal')">&times;</button>
+        </div>
+        <div class="approve-modal-body">
+            <div style="text-align:center;margin-bottom:20px">
+                <i class="fa-solid fa-question-circle" style="font-size:48px;color:#27ae60;margin-bottom:15px"></i>
+                <h4 style="color:#2c3e50;margin-bottom:10px">Setujui Pengajuan?</h4>
+                <p id="approveNamaKegiatan" style="font-weight:600;color:#7f8c8d;margin-bottom:20px"></p>
+            </div>
+            
+            <div class="approve-modal-actions">
+                <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
+                    <i class="fa-solid fa-times"></i> Batal
+                </button>
+                <button type="button" class="approve-btn approve-btn-submit" onclick="submitApprove()">
+                    <i class="fa-solid fa-check"></i> Ya, Setujui
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Nomor Surat -->
+<div id="nomorSuratModal" class="modal" onclick="modalClickOutside(event,'nomorSuratModal')">
+    <div class="approve-modal-content" onclick="event.stopPropagation()" style="max-width: 500px;">
+        <div class="approve-modal-header">
+            <h3><i class="fa-solid fa-hashtag"></i> Masukkan Nomor Surat</h3>
+            <button class="close-modal" onclick="closeModal('nomorSuratModal')">&times;</button>
+        </div>
+        <div class="approve-modal-body">
+            <div class="approve-info-box" id="nomorSuratInfoBox">
+                <!-- Info akan diisi oleh JavaScript -->
+            </div>
+            
+            <form id="nomorSuratForm">
+                <input type="hidden" id="nomorSuratId" value="">
+                
+                <div class="form-group">
+                    <label for="nomorSuratInput">
+                        <i class="fa-solid fa-file-alt"></i> Nomor Surat <span style="color:#e74c3c">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nomorSuratInput" 
+                        name="nomor_surat" 
+                        class="form-control" 
+                        placeholder="Contoh: 001/SKT/FT/2025" 
+                        required
+                        autocomplete="off"
+                    >
+                    <div class="form-hint">
+                        <i class="fa-solid fa-exclamation-circle"></i> Format: XXX/SKT/FT/Tahun
                     </div>
-                    <div class="approve-modal-body">
-                        <div class="approve-info-box">
-                            <strong><i class="fa-solid fa-info-circle"></i> Informasi: Silahkan isi Nomor Surat sebelum disetujui</strong>
-                            <span id="approveNamaKegiatan"></span>
-                        </div>
-                        
-                        <form id="approveForm" method="POST" action="">
-                            <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                            
-                            <div class="form-group">
-                                <label for="nomorSurat">
-                                    <i class="fa-solid fa-file-alt"></i> Nomor Surat <span style="color:#e74c3c">*</span>
-                                </label>
-                                <input 
-                                type="text" 
-                                id="nomorSurat" 
-                                name="nomor_surat" 
-                                class="form-control" 
-                                placeholder="Contoh: 001 SKT FT 2025" 
-                                required
-                                autocomplete="off"
-                            >
-                                <div class="form-hint">
-                                    <i class="fa-solid fa-exclamation-circle"></i> Format: 001/SKT/FT/Tahun
-                                </div>
-                            </div>
-
-                            <div class="approve-modal-actions">
-                                <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
-                                    <i class="fa-solid fa-times"></i> Batal
-                                </button>
-                                <button type="submit" class="approve-btn approve-btn-submit">
-                                    <i class="fa-solid fa-check"></i> Setujui & Teruskan ke Dekan
-                                </button>
-                            </div>
-                        </form>
+                    <div id="nomorSuratError" style="color:#e74c3c;font-size:12px;margin-top:5px;display:none">
+                        <!-- Error message -->
                     </div>
                 </div>
-            </div>
 
+                <div class="approve-modal-actions">
+                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('nomorSuratModal')">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="approve-btn approve-btn-submit">
+                        <i class="fa-solid fa-save"></i> Simpan Nomor Surat
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal untuk Nomor Surat -->
+<div id="successNomorSuratModal" class="modal" onclick="modalClickOutside(event,'successNomorSuratModal')">
+    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 500px;">
+        <div class="modal-header" style="background: #3498db;">
+            <h3><i class="fa-solid fa-check-circle"></i> Nomor Surat Berhasil Disimpan</h3>
+            <button class="close-modal" onclick="closeModal('successNomorSuratModal')">&times;</button>
+        </div>
+        <div style="padding:25px;text-align:center">
+            <div style="width:80px;height:80px;border-radius:50%;background:#d6eaf8;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                <i class="fas fa-check" style="font-size:40px;color:#3498db"></i>
+            </div>
+            
+            <h3 style="color:#3498db;margin-bottom:10px" id="successNomorTitle"></h3>
+            <p style="color:#666;margin-bottom:10px">
+                Nomor surat berhasil disimpan untuk pengajuan:
+            </p>
+            
+            <div style="background:#e8f4fc;border:1px solid #3498db;border-radius:8px;padding:15px;margin:15px 0">
+                <div style="font-weight:600;color:#2980b9;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+                    <span>Informasi Surat</span>
+                    <span id="successNomorItemCount" style="background:#3498db;color:white;padding:3px 10px;border-radius:20px;font-size:11px">1 item</span>
+                </div>
+                <div id="successNomorList" style="text-align:left">
+                    <!-- List akan diisi oleh JavaScript -->
+                </div>
+            </div>
+            
+            <div style="background:#d4edda;border:1px solid #c3e6cb;border-radius:8px;padding:12px;margin:15px 0">
+                <div style="font-weight:600;color:#155724;margin-bottom:5px">
+                    <i class="fa-solid fa-hashtag"></i> Nomor Surat
+                </div>
+                <div style="font-size:18px;font-weight:700;color:#117864;font-family:'Courier New',monospace" id="successNomorValue">
+                    <!-- Nomor surat akan diisi -->
+                </div>
+            </div>
+            
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+                <button class="btn-bulk" onclick="refreshPage()" style="background:#3498db;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
+                </button>
+                <button class="btn-bulk" onclick="closeModal('successNomorSuratModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
             <!-- Reject Modal (BARU - MIRIP SEPERTI APPROVE MODAL) -->
             <div id="rejectConfirmModal" class="modal" onclick="modalClickOutside(event,'rejectConfirmModal')">
                 <div class="reject-modal-content" onclick="event.stopPropagation()">
@@ -2108,9 +2313,189 @@
                 let currentRejectId = null;
                 let currentRejectNamaKegiatan = null;   
                 let currentApproveId = null;
-
-                // Buat variabel global untuk chart
+                let currentNomorSuratId = null;
+                let currentNomorSuratNama = null;
                 let chartInstance = null;
+                // Fungsi untuk membuka modal nomor surat
+async function openNomorSuratModal(id, namaKegiatan) {
+    currentNomorSuratId = id;
+    currentNomorSuratNama = namaKegiatan;
+    
+    // Tampilkan loading
+    document.getElementById('nomorSuratInfoBox').innerHTML = `
+        <div style="text-align:center;padding:10px">
+            <i class="fa-solid fa-spinner fa-spin" style="color:#16A085"></i>
+            <p style="color:#7f8c8d;margin-top:5px">Memuat data...</p>
+        </div>
+    `;
+    
+    // Reset form
+    document.getElementById('nomorSuratInput').value = '';
+    document.getElementById('nomorSuratError').style.display = 'none';
+    document.getElementById('nomorSuratError').textContent = '';
+    
+    // Tampilkan modal
+    document.getElementById('nomorSuratModal').classList.add('show');
+    
+    try {
+        // Ambil data surat via AJAX
+        const response = await fetch('<?= site_url("sekretariat/get_data_for_nomor_surat/") ?>' + id);
+        const data = await response.json();
+        
+        if (data.success) {
+            const suratData = data.data;
+            
+            // Update info box
+            let nomorStatus = '';
+            if (suratData.nomor_surat) {
+                nomorStatus = `<span style="color:#27ae60;font-weight:600">${escapeHtml(suratData.nomor_surat)}</span>`;
+            } else {
+                nomorStatus = '<span style="color:#e74c3c;font-weight:600">Belum diisi</span>';
+            }
+            
+            document.getElementById('nomorSuratInfoBox').innerHTML = `
+                <strong><i class="fa-solid fa-info-circle"></i> Informasi Surat</strong>
+                <p style="margin:8px 0 5px 0">
+                    <strong>Nama Kegiatan:</strong> ${escapeHtml(suratData.nama_kegiatan)}
+                </p>
+                <p style="margin:5px 0">
+                    <strong>Status:</strong> <span class="badge badge-approved" style="display:inline-block">${escapeHtml(suratData.status)}</span>
+                </p>
+                <p style="margin:5px 0">
+                    <strong>Nomor Surat Saat Ini:</strong> ${nomorStatus}
+                </p>
+            `;
+            
+            // Isi input jika sudah ada nomor surat
+            if (suratData.nomor_surat) {
+                document.getElementById('nomorSuratInput').value = suratData.nomor_surat;
+            }
+            
+            // Set hidden ID
+            document.getElementById('nomorSuratId').value = id;
+            
+            // Focus ke input
+            setTimeout(() => {
+                document.getElementById('nomorSuratInput').focus();
+            }, 300);
+            
+        } else {
+            document.getElementById('nomorSuratInfoBox').innerHTML = `
+                <div style="color:#e74c3c;text-align:center;padding:10px">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <p>${data.message || 'Gagal memuat data surat.'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading surat data:', error);
+        document.getElementById('nomorSuratInfoBox').innerHTML = `
+            <div style="color:#e74c3c;text-align:center;padding:10px">
+                <i class="fa-solid fa-exclamation-triangle"></i>
+                <p>Terjadi kesalahan saat memuat data.</p>
+            </div>
+        `;
+    }
+}
+
+// Event listener untuk form nomor surat
+document.getElementById('nomorSuratForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const id = document.getElementById('nomorSuratId').value;
+    const nomorSurat = document.getElementById('nomorSuratInput').value.trim();
+    const errorDiv = document.getElementById('nomorSuratError');
+    
+    // Reset error
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+    
+    if (!nomorSurat) {
+        errorDiv.textContent = 'Nomor surat harus diisi!';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Disable submit button
+    const submitBtn = this.querySelector('.approve-btn-submit');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+    submitBtn.disabled = true;
+    
+    try {
+        // Kirim data via AJAX
+        const formData = new FormData();
+        formData.append('nomor_surat', nomorSurat);
+        formData.append('<?= $this->security->get_csrf_token_name() ?>', '<?= $this->security->get_csrf_hash() ?>');
+        
+        const response = await fetch('<?= site_url("sekretariat/tambah_nomor_surat_ajax/") ?>' + id, {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Tutup modal nomor surat
+            closeModal('nomorSuratModal');
+            
+            // Tampilkan success modal
+            showSuccessNomorSuratModal(currentNomorSuratNama, data.nomor_surat);
+            
+        } else {
+            // Tampilkan error
+            errorDiv.textContent = data.message || 'Gagal menyimpan nomor surat.';
+            errorDiv.style.display = 'block';
+            
+            // Enable button kembali
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+        
+    } catch (error) {
+        console.error('Error saving nomor surat:', error);
+        errorDiv.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
+        errorDiv.style.display = 'block';
+        
+        // Enable button kembali
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+// Fungsi untuk menampilkan success modal nomor surat
+function showSuccessNomorSuratModal(namaKegiatan, nomorSurat) {
+    const modal = document.getElementById('successNomorSuratModal');
+    const title = document.getElementById('successNomorTitle');
+    const listContainer = document.getElementById('successNomorList');
+    const nomorValue = document.getElementById('successNomorValue');
+    
+    title.textContent = 'Nomor Surat Tersimpan';
+    
+    // Populate list
+    listContainer.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;padding:10px;background:white;border-radius:6px;margin-bottom:8px">
+            <i class="fas fa-file-alt" style="color:#3498db;font-size:18px;flex-shrink:0"></i>
+            <div style="flex:1">
+                <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(namaKegiatan)}</div>
+                <div style="font-size:12px;color:#6c757d">Status: <span class="badge badge-approved" style="display:inline-block">Disetujui Dekan</span></div>
+            </div>
+        </div>
+    `;
+    
+    // Tampilkan nomor surat
+    nomorValue.textContent = nomorSurat;
+    
+    modal.classList.add('show');
+}
+
+// Fungsi untuk refresh tombol cetak setelah nomor surat disimpan
+function refreshCetakButton(id) {
+    // Refresh halaman untuk update tombol
+    setTimeout(() => {
+        location.reload();
+    }, 2000);
+}
                 // ============================================
                 // SUCCESS MODAL FUNCTIONS - UNTUK APPROVAL (SAMA SEPERTI DEKAN)
                 // ============================================
@@ -3452,18 +3837,31 @@
                     }, 100);
                 }
                 function showApproveModal(id, namaKegiatan) {
-                    currentApproveId = id;
-                    document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
-                    document.getElementById('nomorSurat').value = '';
-                    document.getElementById('approveForm').action = '<?= base_url("sekretariat/approve/") ?>' + id;
-                    document.getElementById('approveModal').classList.add('show');
-                    
-                    // Auto focus ke input nomor surat
-                    setTimeout(() => {
-                        document.getElementById('nomorSurat').focus();
-                    }, 300);
-                }
-
+                currentApproveId = id;
+                document.getElementById('approveNamaKegiatan').textContent = '"' + namaKegiatan + '"';
+                document.getElementById('approveModal').classList.add('show');
+            }
+            function submitApprove() {
+            if (!currentApproveId) return;
+            
+            // Kirim request tanpa nomor surat
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '<?= base_url("sekretariat/approve/") ?>' + currentApproveId;
+            
+            const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+            const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
+            
+            // Tambahkan CSRF token saja
+            const inpCsrf = document.createElement('input');
+            inpCsrf.type = 'hidden';
+            inpCsrf.name = csrfName;
+            inpCsrf.value = csrfHash;
+            form.appendChild(inpCsrf);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
                 function showRejectModal(id) {
                     currentRejectId = id;
                     document.getElementById('rejectionNotes').value = '';
@@ -4012,16 +4410,25 @@ function generateTextChangeHtml(change) {
         </div>
     </div>`;
 }
-
-// Generate HTML untuk perubahan dosen (tampilan before/after detail)
+// Generate HTML untuk perubahan dosen - DENGAN JABATAN & PERAN
 function generateDosenChangeHtml(change) {
     const oldDosen = Array.isArray(change.old_value) ? change.old_value : [];
     const newDosen = Array.isArray(change.new_value) ? change.new_value : [];
     
-    // Cari dosen yang ditambah dan dihapus
+    // Cari dosen yang ditambah, dihapus, dan yang berubah jabatan/perannya
     const addedDosen = newDosen.filter(nd => !oldDosen.some(od => od.nip === nd.nip));
     const removedDosen = oldDosen.filter(od => !newDosen.some(nd => nd.nip === od.nip));
-    const unchangedDosen = newDosen.filter(nd => oldDosen.some(od => od.nip === nd.nip));
+    
+    // Dosen yang jabatan atau perannya berubah
+    const changedDosen = newDosen.filter(nd => {
+        const old = oldDosen.find(od => od.nip === nd.nip);
+        return old && (old.jabatan !== nd.jabatan || old.peran !== nd.peran);
+    });
+    
+    const unchangedDosen = newDosen.filter(nd => {
+        const old = oldDosen.find(od => od.nip === nd.nip);
+        return old && old.jabatan === nd.jabatan && old.peran === nd.peran;
+    });
     
     return `
     <div style="background:white;border:1px solid #ffe082;border-radius:6px;padding:10px;">
@@ -4040,8 +4447,8 @@ function generateDosenChangeHtml(change) {
                     ${d.nama ? d.nama.charAt(0).toUpperCase() : '?'}
                 </div>
                 <div style="flex:1;min-width:0;">
-                    <div style="font-weight:600;color:#c62828;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(d.nama)}</div>
-                    <div style="color:#666;font-size:9px;">NIP: ${escapeHtml(d.nip)}</div>
+                    <div style="font-weight:600;color:#c62828;font-size:11px;">${escapeHtml(d.nama)}</div>
+                    <div style="color:#666;font-size:9px;">NIP: ${escapeHtml(d.nip)} | ${escapeHtml(d.jabatan)} | ${escapeHtml(d.peran)}</div>
                 </div>
             </div>
             `).join('')}
@@ -4059,11 +4466,48 @@ function generateDosenChangeHtml(change) {
                     ${d.nama ? d.nama.charAt(0).toUpperCase() : '?'}
                 </div>
                 <div style="flex:1;min-width:0;">
-                    <div style="font-weight:600;color:#2e7d32;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(d.nama)}</div>
-                    <div style="color:#666;font-size:9px;">NIP: ${escapeHtml(d.nip)}</div>
+                    <div style="font-weight:600;color:#2e7d32;font-size:11px;">${escapeHtml(d.nama)}</div>
+                    <div style="color:#666;font-size:9px;">NIP: ${escapeHtml(d.nip)} | ${escapeHtml(d.jabatan)} | ${escapeHtml(d.peran)}</div>
                 </div>
             </div>
             `).join('')}
+        </div>
+        ` : ''}
+        
+        ${changedDosen.length > 0 ? `
+        <div style="background:#fff3e0;border:1px solid #ffcc80;border-radius:4px;padding:8px;margin-bottom:6px;">
+            <div style="color:#e65100;font-size:11px;font-weight:600;margin-bottom:4px;">
+                <i class="fas fa-exchange-alt"></i> Jabatan/Peran Berubah (${changedDosen.length}):
+            </div>
+            ${changedDosen.map(d => {
+                const old = oldDosen.find(od => od.nip === d.nip);
+                const jabatanChanged = old.jabatan !== d.jabatan;
+                const peranChanged = old.peran !== d.peran;
+                
+                return `
+                <div style="padding:6px;margin-bottom:4px;background:white;border-radius:3px;">
+                    <div style="font-weight:600;color:#333;font-size:11px;margin-bottom:3px;">${escapeHtml(d.nama)}</div>
+                    
+                    ${jabatanChanged ? `
+                    <div style="display:flex;align-items:center;gap:6px;font-size:10px;margin-bottom:2px;">
+                        <span style="color:#666;font-weight:600;">Jabatan:</span>
+                        <span style="color:#e65100;background:#fff3e0;padding:2px 6px;border-radius:3px;">${escapeHtml(old.jabatan)}</span>
+                        <i class="fas fa-arrow-right" style="color:#ff9800;font-size:10px;"></i>
+                        <span style="color:#2e7d32;background:#e8f5e9;padding:2px 6px;border-radius:3px;font-weight:600;">${escapeHtml(d.jabatan)}</span>
+                    </div>
+                    ` : ''}
+                    
+                    ${peranChanged ? `
+                    <div style="display:flex;align-items:center;gap:6px;font-size:10px;">
+                        <span style="color:#666;font-weight:600;">Peran:</span>
+                        <span style="color:#e65100;background:#fff3e0;padding:2px 6px;border-radius:3px;">${escapeHtml(old.peran)}</span>
+                        <i class="fas fa-arrow-right" style="color:#ff9800;font-size:10px;"></i>
+                        <span style="color:#2e7d32;background:#e8f5e9;padding:2px 6px;border-radius:3px;font-weight:600;">${escapeHtml(d.peran)}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                `;
+            }).join('')}
         </div>
         ` : ''}
         
@@ -4073,13 +4517,12 @@ function generateDosenChangeHtml(change) {
                 <i class="fas fa-check-circle"></i> Dosen Tetap (${unchangedDosen.length}):
             </div>
             <div style="color:#757575;font-size:10px;font-style:italic;">
-                ${unchangedDosen.map(d => d.nama).join(', ')}
+                ${unchangedDosen.map(d => `${d.nama} (${d.jabatan} - ${d.peran})`).join(', ')}
             </div>
         </div>
         ` : ''}
     </div>`;
 }
-
 // Generate HTML untuk perubahan files
 function generateFilesChangeHtml(change) {
     const oldFiles = Array.isArray(change.old_value) ? change.old_value : [];
@@ -4164,7 +4607,362 @@ function formatDateForDisplay(dateStr) {
         }, 800);
     });
 <?php endif; ?>
-                </script>
+// ============================================
+// SUCCESS REVISION MODAL FUNCTIONS (DITOLAK DEKAN) - LENGKAP
+// ============================================
 
+// Fungsi untuk menampilkan success revision modal
+function showSuccessRevisionModal(count, items, isSingle = false) {
+    const modal = document.getElementById('successRevisionModal');
+    const title = document.getElementById('successRevisionTitle');
+    const timestamp = document.getElementById('revisionTimestamp');
+    const itemCount = document.getElementById('revisionItemCount');
+    const listContainer = document.getElementById('revisionList');
+    
+    title.textContent = isSingle ? 'Revisi Berhasil Dikirim' : 'Revisi Berhasil Dikirim (Multiple)';
+    
+    // Format timestamp
+    const now = new Date();
+    timestamp.textContent = now.toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) + ' WIB';
+    
+    itemCount.textContent = `${count} item`;
+    
+    // Populate list dengan data
+    listContainer.innerHTML = '';
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.style.cssText = 'background:white;border:1px solid #bee5eb;border-radius:6px;margin-bottom:8px;overflow:hidden';
+        
+        // Status baru setelah di-revisi
+        const newStatusBadge = `<span class="badge badge-info" style="background:#d1ecf1;color:#0c5460;flex-shrink:0">${item.new_status || 'disetujui sekretariat'}</span>`;
+        
+        // Generate HTML untuk dosen terlibat (seperti tampilan awal)
+        const dosenHtml = generateDosenSectionRevisionHtml(item.dosen_data || [], item.changes || []);
+        
+        // Generate HTML untuk perubahan
+        const changesHtml = generateChangesRevisionHtml(item.changes || []);
+        
+        itemDiv.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #f0f0f0;">
+                <i class="fas fa-paper-plane" style="color:#17a2b8;font-size:20px;flex-shrink:0"></i>
+                <div style="flex:1;text-align:left">
+                    <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(item.nama)}</div>
+                    <div style="font-size:12px;color:#6c757d">${item.details}</div>
+                </div>
+                ${newStatusBadge}
+            </div>
+            ${dosenHtml}
+            ${changesHtml}
+        `;
+        listContainer.appendChild(itemDiv);
+    });
+    
+    modal.classList.add('show');
+}
+
+// Generate HTML untuk section dosen terlibat (tampilan seperti awal) - REVISION
+function generateDosenSectionRevisionHtml(dosenData, changes) {
+    if (!dosenData || dosenData.length === 0 || (dosenData.length === 1 && dosenData[0].nama === 'Data dosen tidak tersedia')) {
+        return '';
+    }
+    
+    const maxVisible = 3;
+    const isOverLimit = dosenData.length > maxVisible;
+    const visibleDosen = isOverLimit ? dosenData.slice(0, maxVisible) : dosenData;
+    const hiddenDosen = isOverLimit ? dosenData.slice(maxVisible) : [];
+    const uniqueId = 'dosen-revision-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+    
+    return `
+    <div style="background:#d1ecf1;border-top:1px solid #bee5eb;padding:15px;">
+        <div style="font-weight:600;color:#0c5460;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-users"></i>
+                <span>Dosen Terlibat</span>
+            </span>
+            <span style="background:#17a2b8;color:white;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">
+                ${dosenData.length} Dosen
+            </span>
+        </div>
+        
+        <div id="${uniqueId}" style="display:flex;flex-direction:column;gap:6px;">
+            ${visibleDosen.map((dosen, index) => `
+            <div style="display:flex;align-items:center;gap:8px;padding:8px;background:white;border:1px solid #b8daff;border-radius:6px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:#17a2b8;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:600;flex-shrink:0;">
+                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;color:#333;font-size:13px;">${escapeHtml(dosen.nama)}</div>
+                    <div style="color:#666;font-size:11px;">NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)}</div>
+                </div>
+            </div>
+            `).join('')}
+            
+            ${hiddenDosen.map((dosen, index) => `
+            <div class="dosen-hidden-revision" style="display:none;align-items:center;gap:8px;padding:8px;background:white;border:1px solid #b8daff;border-radius:6px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:#17a2b8;display:flex;align-items:center;justify-content:center;color:white;font-size:14px;font-weight:600;flex-shrink:0;">
+                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;color:#333;font-size:13px;">${escapeHtml(dosen.nama)}</div>
+                    <div style="color:#666;font-size:11px;">NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)}</div>
+                </div>
+            </div>
+            `).join('')}
+        </div>
+        
+        ${isOverLimit ? `
+        <button onclick="toggleDosenRevision('${uniqueId}', this)" 
+            style="width:100%;margin-top:8px;background:#17a2b8;color:white;border:none;border-radius:6px;padding:8px;cursor:pointer;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:background 0.2s;">
+            <i class="fa-solid fa-chevron-down"></i>
+            <span>Tampilkan ${hiddenDosen.length} Dosen Lainnya</span>
+        </button>
+        ` : ''}
+    </div>`;
+}
+
+// Toggle show/hide dosen tambahan - REVISION
+function toggleDosenRevision(containerId, button) {
+    const container = document.getElementById(containerId);
+    const hiddenItems = container.querySelectorAll('.dosen-hidden-revision');
+    const icon = button.querySelector('i');
+    const textSpan = button.querySelector('span');
+    
+    let isExpanded = button.getAttribute('data-expanded') === 'true';
+    
+    if (!isExpanded) {
+        // Expand
+        hiddenItems.forEach(item => {
+            item.style.display = 'flex';
+        });
+        icon.className = 'fa-solid fa-chevron-up';
+        textSpan.textContent = 'Sembunyikan';
+        button.setAttribute('data-expanded', 'true');
+        button.style.background = '#138496';
+    } else {
+        // Collapse
+        hiddenItems.forEach(item => {
+            item.style.display = 'none';
+        });
+        icon.className = 'fa-solid fa-chevron-down';
+        const hiddenCount = hiddenItems.length;
+        textSpan.textContent = `Tampilkan ${hiddenCount} Dosen Lainnya`;
+        button.setAttribute('data-expanded', 'false');
+        button.style.background = '#17a2b8';
+    }
+}
+
+// Fungsi untuk generate HTML perubahan - REVISION
+function generateChangesRevisionHtml(changes) {
+    // Filter out perubahan dosen karena sudah ditampilkan di section terpisah
+    const filteredChanges = changes.filter(c => c.field !== 'nip');
+    
+    if (!filteredChanges || filteredChanges.length === 0) {
+        return ''; // Jangan tampilkan apa-apa jika tidak ada perubahan selain dosen
+    }
+    
+    let html = `
+    <div style="background:#e7f3f5;border-top:1px solid #b8daff;padding:15px;">
+        <div style="font-weight:600;color:#0c5460;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+            <i class="fas fa-exchange-alt"></i>
+            <span>Perubahan yang Dilakukan (${filteredChanges.length} field)</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">`;
+    
+    filteredChanges.forEach((change, index) => {
+        if (change.type === 'text') {
+            html += generateTextChangeRevisionHtml(change);
+        } else if (change.type === 'dosen') {
+            html += generateDosenChangeRevisionHtml(change);
+        } else if (change.type === 'files') {
+            html += generateFilesChangeRevisionHtml(change);
+        }
+    });
+    
+    html += `
+        </div>
+    </div>`;
+    
+    return html;
+}
+
+// Generate HTML untuk perubahan text biasa - REVISION
+function generateTextChangeRevisionHtml(change) {
+    const isDateField = ['tanggal_kegiatan', 'akhir_kegiatan', 'periode_penugasan', 'akhir_periode_penugasan'].includes(change.field);
+    
+    let oldDisplay = change.old_value;
+    let newDisplay = change.new_value;
+    
+    if (isDateField && oldDisplay !== '-') {
+        oldDisplay = formatDateForDisplay(oldDisplay);
+    }
+    if (isDateField && newDisplay !== '-') {
+        newDisplay = formatDateForDisplay(newDisplay);
+    }
+    
+    return `
+    <div style="background:white;border:1px solid #b8daff;border-radius:6px;padding:10px;">
+        <div style="font-weight:600;color:#0c5460;font-size:13px;margin-bottom:6px;">
+            <i class="fas fa-edit" style="margin-right:4px;"></i>${escapeHtml(change.label)}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;">
+            <div style="flex:1;background:#e7f3f5;padding:8px 10px;border-radius:4px;border:1px solid #b8daff;">
+                <div style="color:#666;font-size:10px;margin-bottom:3px;font-weight:600;">Sebelum:</div>
+                <div style="color:#333;font-weight:500;">${escapeHtml(oldDisplay)}</div>
+            </div>
+            <i class="fas fa-arrow-right" style="color:#17a2b8;font-size:16px;"></i>
+            <div style="flex:1;background:#d1ecf1;padding:8px 10px;border-radius:4px;border:1px solid #bee5eb;">
+                <div style="color:#666;font-size:10px;margin-bottom:3px;font-weight:600;">Sesudah:</div>
+                <div style="color:#0c5460;font-weight:600;">${escapeHtml(newDisplay)}</div>
+            </div>
+        </div>
+    </div>`;
+}
+
+// Generate HTML untuk perubahan dosen - REVISION
+function generateDosenChangeRevisionHtml(change) {
+    const oldDosen = Array.isArray(change.old_value) ? change.old_value : [];
+    const newDosen = Array.isArray(change.new_value) ? change.new_value : [];
+    
+    // Cari dosen yang ditambah dan dihapus
+    const addedDosen = newDosen.filter(nd => !oldDosen.some(od => od.nip === nd.nip));
+    const removedDosen = oldDosen.filter(od => !newDosen.some(nd => nd.nip === od.nip));
+    const unchangedDosen = newDosen.filter(nd => oldDosen.some(od => od.nip === nd.nip));
+    
+    return `
+    <div style="background:white;border:1px solid #b8daff;border-radius:6px;padding:10px;">
+        <div style="font-weight:600;color:#0c5460;font-size:13px;margin-bottom:8px;">
+            <i class="fas fa-user-edit" style="margin-right:4px;"></i>${escapeHtml(change.label)} - Detail Perubahan
+        </div>
+        
+        ${removedDosen.length > 0 ? `
+        <div style="background:#ffebee;border:1px solid #ffcdd2;border-radius:4px;padding:8px;margin-bottom:6px;">
+            <div style="color:#c62828;font-size:11px;font-weight:600;margin-bottom:4px;">
+                <i class="fas fa-minus-circle"></i> Dosen Dihapus (${removedDosen.length}):
+            </div>
+            ${removedDosen.map(d => `
+            <div style="display:flex;align-items:center;gap:6px;padding:4px;margin-bottom:2px;background:white;border-radius:3px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:#e53935;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:600;">
+                    ${d.nama ? d.nama.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;color:#c62828;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(d.nama)}</div>
+                    <div style="color:#666;font-size:9px;">NIP: ${escapeHtml(d.nip)}</div>
+                </div>
+            </div>
+            `).join('')}
+        </div>
+        ` : ''}
+        
+        ${addedDosen.length > 0 ? `
+        <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:4px;padding:8px;margin-bottom:6px;">
+            <div style="color:#2e7d32;font-size:11px;font-weight:600;margin-bottom:4px;">
+                <i class="fas fa-plus-circle"></i> Dosen Ditambah (${addedDosen.length}):
+            </div>
+            ${addedDosen.map(d => `
+            <div style="display:flex;align-items:center;gap:6px;padding:4px;margin-bottom:2px;background:white;border-radius:3px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:#43a047;display:flex;align-items:center;justify-content:center;color:white;font-size:9px;font-weight:600;">
+                    ${d.nama ? d.nama.charAt(0).toUpperCase() : '?'}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;color:#2e7d32;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(d.nama)}</div>
+                    <div style="color:#666;font-size:9px;">NIP: ${escapeHtml(d.nip)}</div>
+                </div>
+            </div>
+            `).join('')}
+        </div>
+        ` : ''}
+        
+        ${unchangedDosen.length > 0 ? `
+        <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:4px;padding:8px;">
+            <div style="color:#616161;font-size:11px;font-weight:600;margin-bottom:4px;">
+                <i class="fas fa-check-circle"></i> Dosen Tetap (${unchangedDosen.length}):
+            </div>
+            <div style="color:#757575;font-size:10px;font-style:italic;">
+                ${unchangedDosen.map(d => d.nama).join(', ')}
+            </div>
+        </div>
+        ` : ''}
+    </div>`;
+}
+
+// Generate HTML untuk perubahan files - REVISION
+function generateFilesChangeRevisionHtml(change) {
+    const oldFiles = Array.isArray(change.old_value) ? change.old_value : [];
+    const newFiles = Array.isArray(change.new_value) ? change.new_value : [];
+    
+    // Cari file yang ditambah dan dihapus
+    const addedFiles = newFiles.filter(nf => !oldFiles.includes(nf));
+    const removedFiles = oldFiles.filter(of => !newFiles.includes(of));
+    const unchangedFiles = newFiles.filter(nf => oldFiles.includes(nf));
+    
+    return `
+    <div style="background:white;border:1px solid #b8daff;border-radius:6px;padding:10px;">
+        <div style="font-weight:600;color:#0c5460;font-size:13px;margin-bottom:8px;">
+            <i class="fas fa-file-edit" style="margin-right:4px;"></i>${escapeHtml(change.label)} - Detail Perubahan
+        </div>
+        
+        ${removedFiles.length > 0 ? `
+        <div style="background:#ffebee;border:1px solid #ffcdd2;border-radius:4px;padding:8px;margin-bottom:6px;">
+            <div style="color:#c62828;font-size:11px;font-weight:600;margin-bottom:4px;">
+                <i class="fas fa-minus-circle"></i> File Dihapus (${removedFiles.length}):
+            </div>
+            ${removedFiles.map(f => `
+            <div style="display:flex;align-items:center;gap:6px;padding:4px;margin-bottom:2px;background:white;border-radius:3px;">
+                <i class="fas fa-file" style="color:#e53935;font-size:12px;"></i>
+                <span style="color:#c62828;font-size:11px;font-weight:500;">${getFileNameFromPath(f)}</span>
+            </div>
+            `).join('')}
+        </div>
+        ` : ''}
+        
+        ${addedFiles.length > 0 ? `
+        <div style="background:#e8f5e9;border:1px solid #c8e6c9;border-radius:4px;padding:8px;margin-bottom:6px;">
+            <div style="color:#2e7d32;font-size:11px;font-weight:600;margin-bottom:4px;">
+                <i class="fas fa-plus-circle"></i> File Ditambah (${addedFiles.length}):
+            </div>
+            ${addedFiles.map(f => `
+            <div style="display:flex;align-items:center;gap:6px;padding:4px;margin-bottom:2px;background:white;border-radius:3px;">
+                <i class="fas fa-file" style="color:#43a047;font-size:12px;"></i>
+                <span style="color:#2e7d32;font-size:11px;font-weight:600;">${getFileNameFromPath(f)}</span>
+            </div>
+            `).join('')}
+        </div>
+        ` : ''}
+        
+        ${unchangedFiles.length > 0 ? `
+        <div style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:4px;padding:8px;">
+            <div style="color:#616161;font-size:11px;font-weight:600;margin-bottom:4px;">
+                <i class="fas fa-check-circle"></i> File Tetap (${unchangedFiles.length}):
+            </div>
+            ${unchangedFiles.map(f => `
+            <div style="color:#757575;font-size:10px;">${getFileNameFromPath(f)}</div>
+            `).join('')}
+        </div>
+        ` : ''}
+    </div>`;
+}
+
+// ============================================
+// CHECK FOR SUCCESS REVISION MODAL DATA FROM SESSION
+// ============================================
+
+// Check for success revision modal data from session (ditolak dekan)
+<?php if($this->session->flashdata('revision_items')): ?>
+    document.addEventListener('DOMContentLoaded', function() {
+        const revisionItems = <?= json_encode($this->session->flashdata('revision_items')) ?>;
+        const isSingleRevision = <?= json_encode($this->session->flashdata('is_single_revision')) ?>;
+        
+        setTimeout(function() {
+            showSuccessRevisionModal(revisionItems.length, revisionItems, isSingleRevision);
+        }, 800);
+    });
+<?php endif; ?>
+                </script>
             </body>
             </html>
