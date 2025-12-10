@@ -270,27 +270,27 @@ private function countRejectedByMonthYear($month, $year, $lingkup_penugasan_filt
         if (!empty($jenis_penugasan_filter)) {
             if ($jenis_penugasan_filter === 'perorangan') {
                 $this->db->where("(
-                (`jenis_penugasan_perorangan` IS NOT NULL AND `jenis_penugasan_perorangan` != '' AND `jenis_penugasan_perorangan` != '-') AND
-                (`jenis_penugasan_kelompok` IS NULL OR `jenis_penugasan_kelompok` = '' OR `jenis_penugasan_kelompok` = '-')
+                (jenis_penugasan_perorangan IS NOT NULL AND jenis_penugasan_perorangan != '' AND jenis_penugasan_perorangan != '-') AND
+                (jenis_penugasan_kelompok IS NULL OR jenis_penugasan_kelompok = '' OR jenis_penugasan_kelompok = '-')
             ) OR (
-                (`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-') AND
-                (`penugasan_lainnya_kelompok` IS NULL OR `penugasan_lainnya_kelompok` = '' OR `penugasan_lainnya_kelompok` = '-')
+                (penugasan_lainnya_perorangan IS NOT NULL AND penugasan_lainnya_perorangan != '' AND penugasan_lainnya_perorangan != '-') AND
+                (penugasan_lainnya_kelompok IS NULL OR penugasan_lainnya_kelompok = '' OR penugasan_lainnya_kelompok = '-')
             )");
             } elseif ($jenis_penugasan_filter === 'kelompok') {
                 $this->db->where("(
-                (`jenis_penugasan_kelompok` IS NOT NULL AND `jenis_penugasan_kelompok` != '' AND `jenis_penugasan_kelompok` != '-') AND
-                (`jenis_penugasan_perorangan` IS NULL OR `jenis_penugasan_perorangan` = '' OR `jenis_penugasan_perorangan` = '-')
+                (jenis_penugasan_kelompok IS NOT NULL AND jenis_penugasan_kelompok != '' AND jenis_penugasan_kelompok != '-') AND
+                (jenis_penugasan_perorangan IS NULL OR jenis_penugasan_perorangan = '' OR jenis_penugasan_perorangan = '-')
             ) OR (
-                (`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-') AND
-                (`penugasan_lainnya_perorangan` IS NULL OR `penugasan_lainnya_perorangan` = '' OR `penugasan_lainnya_perorangan` = '-')
+                (penugasan_lainnya_kelompok IS NOT NULL AND penugasan_lainnya_kelompok != '' AND penugasan_lainnya_kelompok != '-') AND
+                (penugasan_lainnya_perorangan IS NULL OR penugasan_lainnya_perorangan = '' OR penugasan_lainnya_perorangan = '-')
             )");
             } elseif ($jenis_penugasan_filter === 'lainnya') {
                 $this->db->where("(
-                (`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-') OR
-                (`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-')
+                (penugasan_lainnya_perorangan IS NOT NULL AND penugasan_lainnya_perorangan != '' AND penugasan_lainnya_perorangan != '-') OR
+                (penugasan_lainnya_kelompok IS NOT NULL AND penugasan_lainnya_kelompok != '' AND penugasan_lainnya_kelompok != '-')
             ) AND (
-                (`jenis_penugasan_perorangan` IS NULL OR `jenis_penugasan_perorangan` = '' OR `jenis_penugasan_perorangan` = '-') AND
-                (`jenis_penugasan_kelompok` IS NULL OR `jenis_penugasan_kelompok` = '' OR `jenis_penugasan_kelompok` = '-')
+                (jenis_penugasan_perorangan IS NULL OR jenis_penugasan_perorangan = '' OR jenis_penugasan_perorangan = '-') AND
+                (jenis_penugasan_kelompok IS NULL OR jenis_penugasan_kelompok = '' OR jenis_penugasan_kelompok = '-')
             )");
             }
         }
@@ -1010,119 +1010,38 @@ private function countRejectedByMonthYear($month, $year, $lingkup_penugasan_filt
             return date('d M Y H:i', $time);
         }
     }
-<<<<<<< HEAD
-
-    /* ================================
-    FUNGSI AMBIL DATA DOSEN
-    ================================= */
-    private function get_dosen_data_from_nip_fixed($nip_data)
-    {
-        $dosen_data = array();
-=======
 /* ================================
 GET DOSEN DATA FROM NIP - DENGAN PARSE JABATAN & PERAN
 ================================= */
 private function get_dosen_data_from_nip_fixed($nip_data, $peran_data = null)
 {
     $dosen_data = array();
->>>>>>> 3efbe30ae6b3b9a3ba77a2ab87b6d0b72562271d
 
-        if (empty($nip_data) || $nip_data === '-' || $nip_data === '[]' || $nip_data === 'null') {
-            return [array(
-                'nama' => 'Data dosen tidak tersedia',
-                'nip' => '-',
-                'jabatan' => '-',
-                'divisi' => '-'
-            )];
-        }
+    if (empty($nip_data) || $nip_data === '-' || $nip_data === '[]' || $nip_data === 'null') {
+        return [array(
+            'nama' => 'Data dosen tidak tersedia',
+            'nip' => '-',
+            'jabatan' => '-',
+            'divisi' => '-',
+            'peran' => '-'
+        )];
+    }
 
-<<<<<<< HEAD
-        $nip_array = array();
-=======
     // Parse NIP
     $nip_array = array();
->>>>>>> 3efbe30ae6b3b9a3ba77a2ab87b6d0b72562271d
 
-        if (is_string($nip_data)) {
-            $trimmed_data = trim($nip_data);
+    if (is_string($nip_data)) {
+        $trimmed_data = trim($nip_data);
 
-            if (preg_match('/^\[.*\]$/', $trimmed_data)) {
-                $decoded = json_decode($trimmed_data, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    $nip_array = $decoded;
-                } else {
-                    preg_match_all('/\d+/', $trimmed_data, $matches);
-                    $nip_array = $matches[0] ?? [$trimmed_data];
-                }
+        if (preg_match('/^\[.*\]$/', $trimmed_data)) {
+            $decoded = json_decode($trimmed_data, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $nip_array = $decoded;
             } else {
-                $nip_array = [$trimmed_data];
-            }
-        } elseif (is_array($nip_data)) {
-            $nip_array = $nip_data;
-        } else {
-            $nip_array = [$nip_data];
-        }
-
-        $nip_array = array_filter(array_map(function ($nip) {
-            if (is_array($nip)) {
-                return !empty($nip) ? trim(strval($nip[0])) : null;
-            }
-            return trim(strval($nip));
-        }, $nip_array), function ($nip) {
-            return !empty($nip) && $nip !== '-' && $nip !== 'null' && $nip !== '[]';
-        });
-
-        if (empty($nip_array)) {
-            return [array(
-                'nama' => 'Data dosen tidak tersedia',
-                'nip' => '-',
-                'jabatan' => '-',
-                'divisi' => '-'
-            )];
-        }
-
-        $this->db->select('nip, nama_dosen, jabatan, divisi');
-        $this->db->from('list_dosen');
-
-        if (count($nip_array) === 1) {
-            $this->db->where('nip', $nip_array[0]);
-        } else {
-            $this->db->where_in('nip', $nip_array);
-        }
-
-        $query = $this->db->get();
-
-        if ($query->num_rows() > 0) {
-            $results = $query->result_array();
-
-            $dosen_by_nip = [];
-            foreach ($results as $row) {
-                $dosen_by_nip[trim($row['nip'])] = array(
-                    'nama' => $row['nama_dosen'],
-                    'nip' => $row['nip'],
-                    'jabatan' => $row['jabatan'],
-                    'divisi' => $row['divisi']
-                );
-            }
-
-            foreach ($nip_array as $nip) {
-                $clean_nip = trim(strval($nip));
-                if (isset($dosen_by_nip[$clean_nip])) {
-                    $dosen_data[] = $dosen_by_nip[$clean_nip];
-                } else {
-                    $dosen_data[] = array(
-                        'nama' => 'Data tidak ditemukan',
-                        'nip' => $clean_nip,
-                        'jabatan' => '-',
-                        'divisi' => '-'
-                    );
-                }
+                preg_match_all('/\d+/', $trimmed_data, $matches);
+                $nip_array = $matches[0] ?? [$trimmed_data];
             }
         } else {
-<<<<<<< HEAD
-            foreach ($nip_array as $nip) {
-                $clean_nip = trim(strval($nip));
-=======
             $nip_array = [$trimmed_data];
         }
     } elseif (is_array($nip_data)) {
@@ -1228,21 +1147,10 @@ private function get_dosen_data_from_nip_fixed($nip_data, $peran_data = null)
                     'peran' => $peran_value // Peran dari edit
                 );
             } else {
->>>>>>> 3efbe30ae6b3b9a3ba77a2ab87b6d0b72562271d
                 $dosen_data[] = array(
-                    'nama' => 'Data dari NIP: ' . $clean_nip,
+                    'nama' => 'Data tidak ditemukan',
                     'nip' => $clean_nip,
                     'jabatan' => '-',
-<<<<<<< HEAD
-                    'divisi' => '-'
-                );
-            }
-        }
-
-        return $dosen_data;
-    }
-
-=======
                     'divisi' => '-',
                     'peran' => '-'
                 );
@@ -1263,7 +1171,6 @@ private function get_dosen_data_from_nip_fixed($nip_data, $peran_data = null)
 
     return $dosen_data;
 }
->>>>>>> 3efbe30ae6b3b9a3ba77a2ab87b6d0b72562271d
 /* ================================
 UPDATE FUNGSI edit_surat_sekretariat
 ================================= */
@@ -1278,7 +1185,7 @@ public function edit_surat_sekretariat($id)
 
     // Cek status: tidak boleh edit jika sudah disetujui dekan
     if (strtolower($surat->status) === 'disetujui dekan') {
-        $this->session->set_flashdata('error', '⚠️ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
+        $this->session->set_flashdata('error', '⚠ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
         redirect('sekretariat');
         return;
     }
@@ -1884,235 +1791,7 @@ public function view_surat_pengajuan($id)
         }
     }
 
-<<<<<<< HEAD
-    /* ================================
-    EDIT SURAT - HANYA UNTUK DITOLAK DEKAN
-    ================================= */
-    public function edit_surat($id)
-    {
-        $surat = $this->Surat_model->get_by_id($id);
-
-        if (!$surat) {
-            show_404();
-            return;
-        }
-
-        $status_lower = strtolower($surat->status);
-
-        if ($status_lower !== 'ditolak dekan') {
-            $this->session->set_flashdata('error', '⚠️ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan! Status surat ini: ' . $surat->status);
-            redirect('sekretariat');
-            return;
-        }
-
-        $data['surat'] = (array)$surat;
-        $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat->nip);
-
-        $eviden_raw = $surat->eviden ?? "[]";
-
-        if (is_string($eviden_raw)) {
-            $eviden_decoded = json_decode($eviden_raw, true);
-            $data['eviden'] = is_array($eviden_decoded) ? $eviden_decoded : [];
-        } else {
-            $data['eviden'] = is_array($eviden_raw) ? $eviden_raw : [];
-        }
-
-        if (!$this->input->post()) {
-            $this->load->view('sekretariat/edit_surat', $data);
-            return;
-        }
-
-        $this->update_surat($id);
-    }
-
-    /* ================================
-    UPDATE SURAT
-    ================================= */
-    public function update_surat($id = null)
-    {
-        if (!$id) {
-            $id = $this->uri->segment(3);
-        }
-
-        $surat = $this->Surat_model->get_by_id($id);
-
-        if (!$surat) {
-            show_404();
-            return;
-        }
-
-        $status_lower = strtolower($surat->status);
-
-        if ($status_lower !== 'ditolak dekan') {
-            $this->session->set_flashdata('error', '⚠️ Update hanya dapat dilakukan untuk surat yang ditolak Dekan!');
-            redirect('sekretariat');
-            return;
-        }
-
-        if (!$this->input->post()) {
-            redirect('sekretariat/edit_surat/' . $id);
-            return;
-        }
-
-        $post = $this->input->post();
-
-        foreach ($post as $k => $v) {
-            if (is_array($v)) {
-                $post[$k] = array_values(array_filter($v, function ($x) {
-                    return trim($x) !== "";
-                }));
-            } else {
-                $post[$k] = ($v === "" ? "-" : $v);
-            }
-        }
-
-        $existing_eviden = json_decode($surat->eviden, true) ?: [];
-        $deleted_files = $post['delete_eviden'] ?? [];
-
-        foreach ($deleted_files as $del_file) {
-            if ($del_file && trim($del_file) !== '') {
-                $existing_eviden = array_filter($existing_eviden, function ($f) use ($del_file) {
-                    return $f !== $del_file;
-                });
-
-                if (!filter_var($del_file, FILTER_VALIDATE_URL)) {
-                    $file_path = './uploads/eviden/' . $del_file;
-                    if (file_exists($file_path)) {
-                        @unlink($file_path);
-                    }
-                }
-            }
-        }
-
-        $new_files = [];
-        if (!empty($_FILES['new_eviden']['name'][0])) {
-            $upload_path = './uploads/eviden/';
-
-            if (!is_dir($upload_path)) {
-                mkdir($upload_path, 0755, true);
-            }
-
-            $config['upload_path'] = $upload_path;
-            $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx';
-            $config['max_size'] = 10240;
-            $config['encrypt_name'] = TRUE;
-
-            $this->load->library('upload', $config);
-
-            $files_count = count($_FILES['new_eviden']['name']);
-
-            for ($i = 0; $i < $files_count; $i++) {
-                if (!empty($_FILES['new_eviden']['name'][$i])) {
-                    $_FILES['file']['name'] = $_FILES['new_eviden']['name'][$i];
-                    $_FILES['file']['type'] = $_FILES['new_eviden']['type'][$i];
-                    $_FILES['file']['tmp_name'] = $_FILES['new_eviden']['tmp_name'][$i];
-                    $_FILES['file']['error'] = $_FILES['new_eviden']['error'][$i];
-                    $_FILES['file']['size'] = $_FILES['new_eviden']['size'][$i];
-
-                    if ($this->upload->do_upload('file')) {
-                        $upload_data = $this->upload->data();
-                        $new_files[] = $upload_data['file_name'];
-                    }
-                }
-            }
-        }
-
-        $final_eviden = array_merge(array_values($existing_eviden), $new_files);
-        $update_eviden = json_encode($final_eviden);
-
-    $update = [
-        'nomor_surat' => $post['nomor_surat'] ?? $surat->nomor_surat,
-        'nama_kegiatan' => $post['nama_kegiatan'] ?? $surat->nama_kegiatan,
-        'jenis_date' => $post['jenis_date'] ?? $surat->jenis_date,
-        'tanggal_kegiatan' => $this->safe_date($post['tanggal_kegiatan'] ?? null),
-        'akhir_kegiatan' => $this->safe_date($post['akhir_kegiatan'] ?? null),
-        'periode_penugasan' => $this->safe_date($post['periode_penugasan'] ?? null),
-        'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan'] ?? null),
-        'periode_value' => $post['periode_value'] ?? $surat->periode_value,
-        'tempat_kegiatan' => $post['tempat_kegiatan'] ?? $surat->tempat_kegiatan,
-        'penyelenggara' => $post['penyelenggara'] ?? $surat->penyelenggara,
-        'customize' => $post['customize'] ?? $surat->customize,
-        'jenis_pengajuan' => $post['jenis_pengajuan'] ?? $surat->jenis_pengajuan,
-        'lingkup_penugasan' => $post['lingkup_penugasan'] ?? $surat->lingkup_penugasan,
-        'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? $surat->jenis_penugasan_perorangan,
-        'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? $surat->penugasan_lainnya_perorangan,
-        'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? $surat->jenis_penugasan_kelompok,
-        'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? $surat->penugasan_lainnya_kelompok,
-        'eviden' => $update_eviden
-    ];
-
-    // PENTING: Process NIP, Nama, dan PERAN data
-    if (isset($post['nip']) && is_array($post['nip'])) {
-        $nip_array = [];
-        $nama_array = [];
-        $peran_array = [];
-        
-        foreach ($post['nip'] as $key => $nip) {
-            if (!empty(trim($nip))) {
-                $nip_array[] = trim($nip);
-                $nama_array[] = $post['nama_dosen'][$key] ?? '';
-                
-                // Ambil peran, default '-' jika kosong
-                $peran_value = isset($post['peran'][$key]) && !empty(trim($post['peran'][$key])) 
-                    ? trim($post['peran'][$key]) 
-                    : '-';
-                $peran_array[] = $peran_value;
-            }
-        }
-        
-        $update['nip'] = json_encode($nip_array);
-        $update['peran'] = json_encode($peran_array);
-    }
-
-        $approval_status = json_decode($surat->approval_status, true);
-        if (!is_array($approval_status)) {
-            $approval_status = [
-                'kk' => null,
-                'sekretariat' => null,
-                'dekan' => null
-            ];
-        }
-
-    $approval_status['dekan'] = null;
-    $update['status'] = 'disetujui sekretariat';
-    $update['approval_status'] = json_encode($approval_status);
-    $update['catatan_penolakan'] = null;
-    $update['updated_at'] = date( $result = $this->Surat_model->update_surat($id, $update));
-
-    if ($result) {
-        // TAMBAHKAN FLASHDATA UNTUK SUCCESS MODAL (KHUSUS DITOLAK DEKAN)
-        $updated_surat = $this->Surat_model->get_by_id($id);
-        $dosen_data = $this->get_dosen_data_from_nip_fixed($updated_surat->nip);
-        
-        // Siapkan data untuk success modal
-        $revision_items = [[
-            'nama' => $updated_surat->nama_kegiatan,
-            'details' => '📅 ' . date('d M Y', strtotime($updated_surat->tanggal_kegiatan)) . ' | 📍 ' . $updated_surat->penyelenggara,
-            'dosen_data' => $dosen_data,
-            'new_status' => $updated_surat->status,
-            'timestamp' => date('Y-m-d H:i:s')
-        ]];
-        
-        // Set flashdata untuk success modal
-        $this->session->set_flashdata('revision_items', $revision_items);
-        $this->session->set_flashdata('is_single_revision', true);
-        $this->session->set_flashdata('success', "✅ Revisi berhasil disimpan! Pengajuan telah dikirim kembali ke <strong>Dekan</strong> untuk persetujuan ulang.");
-    } else {
-        $this->session->set_flashdata('error', '❌ Gagal menyimpan revisi. Silakan coba lagi.');
-    }
-    $result = $this->Surat_model->update_surat($id, $update);
-
-        if ($result) {
-            $this->session->set_flashdata('success', "✅ Revisi berhasil disimpan! Pengajuan telah dikirim kembali ke <strong>Dekan</strong> untuk persetujuan ulang.");
-        } else {
-            $this->session->set_flashdata('error', '❌ Gagal menyimpan revisi. Silakan coba lagi.');
-        }
-
-    redirect('sekretariat');
-}
-=======
  
->>>>>>> 3efbe30ae6b3b9a3ba77a2ab87b6d0b72562271d
  public function update_surat_sekretariat($id = null)
 {
     if (!$id) {
@@ -2128,7 +1807,7 @@ public function view_surat_pengajuan($id)
 
     // Cek status: tidak boleh edit jika sudah disetujui dekan
     if (strtolower($surat->status) === 'disetujui dekan') {
-        $this->session->set_flashdata('error', '⚠️ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
+        $this->session->set_flashdata('error', '⚠ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
         redirect('sekretariat');
         return;
     }
@@ -2221,7 +1900,7 @@ public function edit_surat($id)
     $status_lower = strtolower($surat->status);
 
     if ($status_lower !== 'ditolak dekan') {
-        $this->session->set_flashdata('error', '⚠️ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan! Status surat ini: ' . $surat->status);
+        $this->session->set_flashdata('error', '⚠ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan! Status surat ini: ' . $surat->status);
         redirect('sekretariat');
         return;
     }
@@ -2281,7 +1960,7 @@ public function update_surat($id = null)
     $status_lower = strtolower($surat->status);
 
     if ($status_lower !== 'ditolak dekan') {
-        $this->session->set_flashdata('error', '⚠️ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan!');
+        $this->session->set_flashdata('error', '⚠ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan!');
         redirect('sekretariat');
         return;
     }
@@ -2633,9 +2312,7 @@ private function isDifferentDosenJabatanPeran($old_dosen, $new_dosen)
     
     return false;
 }
-
-
-    /* ================================
+/* ================================
     HELPER: PROCESS EVIDEN FILES (reuse dari fungsi update_surat)
     ================================= */
     private function process_eviden_files($post, $surat)
@@ -3511,7 +3188,6 @@ public function get_data_for_nomor_surat($id)
         ]
     ]);
 }
-
 /* ================================
 FUNGSI CETAK SURAT (DENGAN VALIDASI NOMOR SURAT)
 ================================= */
