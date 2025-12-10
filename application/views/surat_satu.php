@@ -332,7 +332,7 @@ function format_periode_penugasan($surat) {
         <?php endif; ?>
 
         <p>
-        sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b> 
+        <?= $surat->customize ?? '-' ?> <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b> 
         dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
         yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
 

@@ -89,7 +89,6 @@
                             'jabatan' => $dosen->jabatan,
                             'divisi' => $dosen->divisi,
                             'peran' => isset($peran_array[$index]) ? $peran_array[$index] : '-', // 🆕 Mapping peran
-                            'index' => $index
                         ];
                     } else {
                         // Fallback jika tidak ditemukan di list_dosen
@@ -99,7 +98,6 @@
                             'jabatan' => '',
                             'divisi' => '',
                             'peran' => isset($peran_array[$index]) ? $peran_array[$index] : '-', // 🆕 Mapping peran
-                            'index' => $index
                         ];
                     }
                 }
@@ -723,7 +721,6 @@ public function submit()
             'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
             'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
             'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
-            'format' => $post['format'] ?? '-',
             'nip' => $nip_json,
             'peran' => $peran_json,
             'eviden' => json_encode($saved_filenames),
@@ -1081,7 +1078,6 @@ public function submit()
                 'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'],
                 'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'],
                 'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'],
-                'format' => $post['format'],
                 'nip' => json_encode($post['nip']),
                 'peran' => $peran_json,
                 'eviden' => $update_eviden
@@ -1150,8 +1146,6 @@ public function submit()
             // DEBUG: Log data dosen
     error_log('EDIT - NIP Raw: ' . $surat->nip);
     error_log('EDIT - Peran Raw: ' . $surat->peran);
-    error_log('EDIT - Dosen Data Count: ' . count($dosen_data));
-    error_log('EDIT - Dosen Data: ' . print_r($dosen_data, true));
     // Di akhir fungsi edit(), sebelum redirect
     $edited_item = [
         'nama' => $surat->nama_kegiatan,

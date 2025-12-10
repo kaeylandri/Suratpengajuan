@@ -1991,13 +1991,8 @@ public function update_surat($id = null)
     }
 
     redirect('sekretariat');
-} /* ================================
-    UPDATE SURAT UNTUK SEKRETARIAT (SEMUA STATUS KECUALI DITOLAK DEKAN)
-    ================================= */
-   /* ================================
-UPDATE SURAT UNTUK SEKRETARIAT (SEMUA STATUS KECUALI DITOLAK DEKAN)
-================================= */
-public function update_surat_sekretariat($id = null)
+}
+ public function update_surat_sekretariat($id = null)
 {
     if (!$id) {
         $id = $this->uri->segment(3);
@@ -2023,6 +2018,9 @@ public function update_surat_sekretariat($id = null)
     }
 
     $post = $this->input->post();
+
+    // DETEKSI PERUBAHAN - BANDINGKAN DATA LAMA DAN BARU
+    $changes = $this->detect_changes($surat, $post);
 
     // Process form data (sama seperti update_surat biasa)
     $update_data = $this->process_surat_update_data($post, $surat);
@@ -2066,13 +2064,14 @@ public function update_surat_sekretariat($id = null)
         $updated_surat = $this->Surat_model->get_by_id($id);
         $dosen_data = $this->get_dosen_data_from_nip_fixed($updated_surat->nip);
         
-        // Siapkan data untuk success modal
+        // Siapkan data untuk success modal dengan perubahan yang terdeteksi
         $edited_items = [[
             'nama' => $updated_surat->nama_kegiatan,
             'details' => '📅 ' . date('d M Y', strtotime($updated_surat->tanggal_kegiatan)) . ' | 📍 ' . $updated_surat->penyelenggara,
             'dosen_data' => $dosen_data,
             'new_status' => $updated_surat->status,
-            'timestamp' => date('Y-m-d H:i:s')
+            'timestamp' => date('Y-m-d H:i:s'),
+            'changes' => $changes // TAMBAHAN BARU: Data perubahan
         ]];
         
         // Set flashdata untuk success modal
@@ -2086,6 +2085,104 @@ public function update_surat_sekretariat($id = null)
     redirect('sekretariat');
 }
 
+/* ================================
+FUNGSI BARU: DETECT CHANGES
+Mendeteksi field yang berubah antara data lama dan baru
+================================= */
+private function detect_changes($surat, $post)
+{
+    $changes = [];
+    
+    // Mapping field dengan label yang user-friendly
+    $field_labels = [
+        'nama_kegiatan' => 'Nama Kegiatan',
+        'jenis_pengajuan' => 'Jenis Pengajuan',
+        'lingkup_penugasan' => 'Lingkup Penugasan',
+        'jenis_penugasan_perorangan' => 'Jenis Penugasan (Perorangan)',
+        'jenis_penugasan_kelompok' => 'Jenis Penugasan (Kelompok)',
+        'penugasan_lainnya_perorangan' => 'Penugasan Lainnya (Perorangan)',
+        'penugasan_lainnya_kelompok' => 'Penugasan Lainnya (Kelompok)',
+        'penyelenggara' => 'Penyelenggara',
+        'tempat_kegiatan' => 'Tempat Kegiatan',
+        'jenis_date' => 'Jenis Tanggal',
+        'periode_value' => 'Periode Kegiatan',
+        'tanggal_kegiatan' => 'Tanggal Mulai Kegiatan',
+        'akhir_kegiatan' => 'Tanggal Akhir Kegiatan',
+        'periode_penugasan' => 'Periode Penugasan',
+        'akhir_periode_penugasan' => 'Akhir Periode Penugasan',
+        'eviden' => 'File Evidence'
+    ];
+    
+    // Cek perubahan untuk field text biasa
+    foreach ($field_labels as $field => $label) {
+        if ($field === 'nip' || $field === 'eviden') {
+            continue; // Skip, akan dihandle khusus
+        }
+        
+        $old_value = isset($surat->$field) ? $surat->$field : '-';
+        $new_value = isset($post[$field]) ? $post[$field] : '-';
+        
+        // Normalisasi nilai kosong
+        if (empty($old_value) || $old_value === 'null' || $old_value === '') {
+            $old_value = '-';
+        }
+        if (empty($new_value) || $new_value === 'null' || $new_value === '') {
+            $new_value = '-';
+        }
+        
+        // Bandingkan
+        if (trim($old_value) !== trim($new_value)) {
+            $changes[] = [
+                'field' => $field,
+                'label' => $label,
+                'old_value' => $old_value,
+                'new_value' => $new_value,
+                'type' => 'text'
+            ];
+        }
+    }
+    
+    
+    // Cek perubahan FILE EVIDENCE
+    $old_eviden = json_decode($surat->eviden, true);
+    if (!is_array($old_eviden)) {
+        $old_eviden = [];
+    }
+    
+    // Proses eviden baru
+    $new_eviden = $old_eviden;
+    
+    // Hapus file yang dihapus
+    if (isset($post['delete_eviden']) && is_array($post['delete_eviden'])) {
+        $new_eviden = array_diff($new_eviden, $post['delete_eviden']);
+    }
+    
+    // Tambah file baru (simulasi, karena belum di-upload)
+    if (!empty($_FILES['new_eviden']['name'][0])) {
+        $file_count = count($_FILES['new_eviden']['name']);
+        for ($i = 0; $i < $file_count; $i++) {
+            if (!empty($_FILES['new_eviden']['name'][$i])) {
+                $new_eviden[] = $_FILES['new_eviden']['name'][$i]; // Temporary, nama asli akan berbeda setelah upload
+            }
+        }
+    }
+    
+    // Bandingkan
+    sort($old_eviden);
+    sort($new_eviden);
+    
+    if ($old_eviden !== $new_eviden) {
+        $changes[] = [
+            'field' => 'eviden',
+            'label' => 'File Evidence',
+            'old_value' => $old_eviden,
+            'new_value' => $new_eviden,
+            'type' => 'files'
+        ];
+    }
+    
+    return $changes;
+}
     /* ================================
     HELPER: PROCESS EVIDEN FILES (reuse dari fungsi update_surat)
     ================================= */
@@ -2565,6 +2662,7 @@ public function set_disposisi()
             'status' => 'disetujui KK',
             'approval_status' => json_encode($approval),
             'catatan_penolakan' => null, // Hapus catatan penolakan jika ada
+            'disposisi_status' => 'none'
         ]);
 
         // Set flashdata untuk success return modal

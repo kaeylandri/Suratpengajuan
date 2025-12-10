@@ -793,7 +793,37 @@
             color: white;
             box-shadow: 0 2px 5px rgba(251, 140, 0, 0.2);
         }
+/* Style untuk dosen tunggal (tanpa modal) */
+.dosen-container.single-dosen {
+    cursor: default !important;
+}
 
+.dosen-container.single-dosen .nama-dosen-badge {
+    cursor: default !important;
+    background: #e9ecef !important;
+    color: #495057 !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+.dosen-container.single-dosen .nama-dosen-badge:hover {
+    background: #e9ecef !important;
+    color: #495057 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.dosen-container.single-dosen::after {
+    content: none !important;
+}
+
+/* Pointer cursor hanya untuk multiple dosen */
+.dosen-container.clickable {
+    cursor: pointer !important;
+}
+
+.dosen-container.clickable .nama-dosen-badge {
+    cursor: pointer !important;
+}
         .nama-dosen-more {
             display: inline-block;
             background: #FB8C00;
@@ -3342,6 +3372,187 @@
             font-size: 12px;
             color: #666;
         }
+        /* ===== MODAL STYLES UNTUK SUCCESS ===== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.bulk-modal-content {
+    background: white;
+    border-radius: 15px;
+    max-width: 600px;
+    width: 95%;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+    background: #27ae60;
+    color: white;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.close-modal:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.btn-bulk {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-bulk:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.badge-success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge-warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.badge-info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+/* ===== STYLE UNTUK SUCCESS MODAL DOSEN ===== */
+.dosen-success-section {
+    background: #f5eef8;
+    border: 1px solid #d7bde2;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 15px 0;
+    transition: all 0.3s ease;
+}
+
+.dosen-success-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid #e8daef;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+    cursor: default;
+}
+
+.dosen-success-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    border-color: #16A085;
+}
+
+.dosen-success-item-hidden {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid #e8daef;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Styling untuk modal success */
+#editList {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+#editList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#editList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#editList::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+#editList::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
     </style>
 </head>
 
@@ -3783,6 +3994,44 @@
                 </div>
             </div>
         </div>
+<!-- ===== SUCCESS MODAL UNTUK EDIT SURAT ===== -->
+<div id="successEditModal" class="modal" onclick="modalClickOutside(event,'successEditModal')">
+    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <div class="modal-header" style="background: #ff9800;">
+            <h3><i class="fa-solid fa-pen-to-square"></i> Edit Berhasil Disimpan</h3>
+            <button class="close-modal" onclick="closeModal('successEditModal')">&times;</button>
+        </div>
+        <div style="padding:25px;text-align:center">
+            <div style="width:100px;height:100px;border-radius:50%;background:#fff3e0;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                <i class="fas fa-check" style="font-size:50px;color:#ff9800"></i>
+            </div>
+            
+            <h3 style="color:#ff9800;margin-bottom:10px">Berhasil Diperbarui</h3>
+            <p style="color:#666;margin-bottom:5px">
+                <i class="fa-solid fa-clock"></i> Diperbarui pada: <strong id="editTimestamp">-</strong>
+            </p>
+            
+            <div style="background:#fff3e0;border:1px solid #ffcc80;border-radius:8px;padding:15px;margin:20px 0">
+                <div style="font-weight:600;color:#e65100;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+                    <span>Data Pengajuan</span>
+                    <span id="editItemCount" style="background:#ff9800;color:white;padding:4px 12px;border-radius:20px;font-size:12px">1 item</span>
+                </div>
+                <div id="editList" style="max-height:250px;overflow-y:auto;text-align:left">
+                    <!-- List akan diisi oleh JavaScript -->
+                </div>
+            </div>
+            
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+                <button class="btn-bulk" onclick="refreshPage()" style="background:#ff9800;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
+                </button>
+                <button class="btn-bulk" onclick="closeModal('successEditModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- Modal Detail -->
         <div id="modalDetail" class="modal-detail">
@@ -3958,25 +4207,32 @@
                         </td>
                         <td><?= htmlspecialchars($s->jenis_pengajuan); ?></td>
                         <td>
-                            <div class="dosen-container clickable"
-                                onclick="showDosenModal(event, <?= htmlspecialchars(json_encode($dosen_data), ENT_QUOTES, 'UTF-8') ?>, 
-                 '<?= htmlspecialchars($s->nama_kegiatan, ENT_QUOTES, 'UTF-8') ?>', 
-                 '<?= $s->id ?>')">
-                                <?php
-                                if (!empty($dosen_data)) {
-                                    $nama = $dosen_data[0]['nama_dosen'] ?? '-';
-                                    $short = strlen($nama) > 30 ? substr($nama, 0, 30) . '...' : $nama;
-                                    echo '<span class="nama-dosen-badge" title="' . htmlspecialchars($nama) . ' (Klik untuk lihat semua)">' . htmlspecialchars($short) . '</span>';
-
-                                    if (count($dosen_data) > 1) {
-                                        echo '<span class="nama-dosen-more" title="Klik untuk lihat semua dosen">+' . (count($dosen_data) - 1) . ' lainnya</span>';
-                                    }
-                                } else {
-                                    echo '-';
-                                }
+                        <?php
+                        $dosen_count = count($dosen_data);
+                        if ($dosen_count > 0):
+                            $nama = $dosen_data[0]['nama_dosen'] ?? '-';
+                            $short = strlen($nama) > 30 ? substr($nama, 0, 30) . '...' : $nama;
+                            
+                            if ($dosen_count > 1):
+                                // Jika lebih dari 1 dosen, tampilkan dengan modal
                                 ?>
-                            </div>
-                        </td>
+                                <div class="dosen-container clickable"
+                                    onclick="showDosenModal(event, <?= htmlspecialchars(json_encode($dosen_data), ENT_QUOTES, 'UTF-8') ?>, 
+                                '<?= htmlspecialchars($s->nama_kegiatan, ENT_QUOTES, 'UTF-8') ?>', 
+                                '<?= $s->id ?>')">
+                                    <span class="nama-dosen-badge" title="<?= htmlspecialchars($nama) ?> (Klik untuk lihat semua)"><?= htmlspecialchars($short) ?></span>
+                                    <span class="nama-dosen-more" title="Klik untuk lihat semua dosen">+<?= $dosen_count - 1 ?> lainnya</span>
+                                </div>
+                            <?php else: ?>
+                                <!-- Jika hanya 1 dosen, tampilkan tanpa modal -->
+                                <div class="dosen-container" style="cursor: default;">
+                                    <span class="nama-dosen-badge" title="<?= htmlspecialchars($nama) ?>"><?= htmlspecialchars($short) ?></span>
+                                </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            -
+                        <?php endif; ?>
+                    </td>
                         <!-- REVISI: Kolom Status -->
                         <td>
                             <span class="status-badge <?= $status_class ?>">
@@ -3995,7 +4251,42 @@
                             } elseif (isset($s->created_at) && !empty($s->created_at)) {
                                 $tanggal_kegiatan = $s->created_at;
                             }
-                            echo htmlspecialchars($tanggal_kegiatan ?: '-');
+                            
+                            // Format tanggal ke "10 Desember 2025"
+                            if (!empty($tanggal_kegiatan) && $tanggal_kegiatan !== '-') {
+                                try {
+                                    // Coba parse tanggal
+                                    $tanggal_obj = new DateTime($tanggal_kegiatan);
+                                    $hari = $tanggal_obj->format('j'); // Tanggal tanpa leading zero
+                                    $bulan = $tanggal_obj->format('n'); // Bulan dalam angka
+                                    
+                                    // Konversi angka bulan ke nama bulan Indonesia
+                                    $bulan_indonesia = [
+                                        1 => 'Januari',
+                                        2 => 'Februari',
+                                        3 => 'Maret',
+                                        4 => 'April',
+                                        5 => 'Mei',
+                                        6 => 'Juni',
+                                        7 => 'Juli',
+                                        8 => 'Agustus',
+                                        9 => 'September',
+                                        10 => 'Oktober',
+                                        11 => 'November',
+                                        12 => 'Desember'
+                                    ];
+                                    
+                                    $bulan_nama = $bulan_indonesia[$bulan] ?? 'Desember';
+                                    $tahun = $tanggal_obj->format('Y');
+                                    
+                                    echo htmlspecialchars($hari . ' ' . $bulan_nama . ' ' . $tahun);
+                                } catch (Exception $e) {
+                                    // Jika parsing gagal, tampilkan format asli
+                                    echo htmlspecialchars($tanggal_kegiatan);
+                                }
+                            } else {
+                                echo '-';
+                            }
                             ?>
                         </td>
                         <td>
@@ -4108,7 +4399,355 @@
     let currentDosenCount = 0;
     let selectedDosenToDelete = []; // Array untuk multiple hapus
     let baseUrl = '<?= site_url() ?>';
+    // Fungsi untuk format tanggal Indonesia
+function formatTanggalIndonesia(dateString) {
+    if (!dateString || dateString === '-') return '-';
+    
+    try {
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return dateString;
+        
+        const hari = date.getDate();
+        const bulan = date.getMonth() + 1;
+        const tahun = date.getFullYear();
+        
+        const namaBulan = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+        
+        return `${hari} ${namaBulan[bulan - 1]} ${tahun}`;
+    } catch (e) {
+        return dateString;
+    }
+}
 
+// Fungsi untuk update semua tanggal di tabel
+function updateAllDates() {
+    document.querySelectorAll('#tabelSurat td:nth-child(7)').forEach(td => {
+        const originalDate = td.textContent.trim();
+        if (originalDate && originalDate !== '-') {
+            const formattedDate = formatTanggalIndonesia(originalDate);
+            if (formattedDate !== originalDate) {
+                td.textContent = formattedDate;
+            }
+        }
+    });
+}
+
+// Panggil setelah DataTable siap
+$(document).ready(function() {
+    // ... kode DataTable lainnya ...
+    
+    // Update format tanggal
+    setTimeout(updateAllDates, 100);
+});
+// ============================================
+// SUCCESS MODAL FUNCTIONS - UNTUK EDIT SURAT
+// ============================================
+function showSuccessEditModal(count, items, isSingle = false) {
+    console.log('showSuccessEditModal called with items:', items);
+    
+    const modal = document.getElementById('successEditModal');
+    const timestamp = document.getElementById('editTimestamp');
+    const itemCount = document.getElementById('editItemCount');
+    const listContainer = document.getElementById('editList');
+    
+    // Format timestamp
+    const now = new Date();
+    timestamp.textContent = now.toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) + ' WIB';
+    
+    itemCount.textContent = `${count} item`;
+    
+    // Populate list dengan data
+    listContainer.innerHTML = '';
+    
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.style.cssText = 'background:white;border:1px solid #ffcc80;border-radius:10px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05)';
+        
+        // Status baru setelah di-edit
+        const newStatus = item.new_status || 'pengajuan';
+        let statusColor = '#ff9800';
+        let statusText = newStatus;
+        
+        // Format status text
+        if (newStatus.includes('disetujui')) {
+            statusColor = '#4CAF50';
+            statusText = 'Disetujui';
+        } else if (newStatus.includes('ditolak')) {
+            statusColor = '#F44336';
+            statusText = 'Ditolak';
+        }
+        
+        // Generate HTML untuk dosen jika ada data
+        const dosenHtml = generateDosenHtmlForSuccessModal(item.dosen_data || []);
+        
+        itemDiv.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;padding:15px;border-bottom:1px solid #f0f0f0;background:#fff9e6;">
+                <div style="width:40px;height:40px;border-radius:50%;background:#ff9800;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">
+                    <i class="fas fa-pen-to-square"></i>
+                </div>
+                <div style="flex:1;text-align:left">
+                    <div style="font-weight:700;color:#212529;font-size:15px;margin-bottom:3px">${escapeHtml(item.nama)}</div>
+                    <div style="font-size:13px;color:#6c757d">${item.details}</div>
+                </div>
+                <span style="background:${statusColor};color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;flex-shrink:0">
+                    ${statusText}
+                </span>
+            </div>
+            ${dosenHtml}
+        `;
+        listContainer.appendChild(itemDiv);
+    });
+    
+    modal.classList.add('show');
+}
+// ============================================
+// SUCCESS REVISION MODAL FUNCTIONS (DITOLAK DEKAN)
+// ============================================
+
+// Fungsi untuk menampilkan success revision modal
+function showSuccessRevisionModal(count, items, isSingle = false) {
+    const modal = document.getElementById('successRevisionModal');
+    const timestamp = document.getElementById('revisionTimestamp');
+    const itemCount = document.getElementById('revisionItemCount');
+    const listContainer = document.getElementById('revisionList');
+    
+    // Format timestamp
+    const now = new Date();
+    timestamp.textContent = now.toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) + ' WIB';
+    
+    itemCount.textContent = `${count} item`;
+    
+    // Populate list dengan data
+    listContainer.innerHTML = '';
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.style.cssText = 'background:white;border:1px solid #bee5eb;border-radius:6px;margin-bottom:8px;overflow:hidden';
+        
+        // Status baru setelah di-revisi
+        const newStatusBadge = `<span class="badge badge-info" style="background:#d1ecf1;color:#0c5460;flex-shrink:0">${item.new_status || 'disetujui sekretariat'}</span>`;
+        
+        // Generate HTML untuk dosen jika ada data
+        const dosenHtml = generateDosenHtmlForSuccessModal(item.dosen_data || []);
+        
+        itemDiv.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #f0f0f0;">
+                <i class="fas fa-paper-plane" style="color:#17a2b8;font-size:20px;flex-shrink:0"></i>
+                <div style="flex:1;text-align:left">
+                    <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(item.nama)}</div>
+                    <div style="font-size:12px;color:#6c757d">${item.details}</div>
+                </div>
+                ${newStatusBadge}
+            </div>
+            ${dosenHtml}
+        `;
+        listContainer.appendChild(itemDiv);
+    });
+    
+    modal.classList.add('show');
+    
+    // Inisialisasi toggle dosen setelah modal ditampilkan
+    setTimeout(initSuccessDosenList, 100);
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+// Fungsi untuk generate HTML dosen di success modal - VERSI RAPI
+function generateDosenHtmlForSuccessModal(dosenData) {
+    console.log('=== generateDosenHtmlForSuccessModal ===');
+    
+    if (!dosenData || !Array.isArray(dosenData) || dosenData.length === 0) {
+        return '';
+    }
+    
+    const maxVisible = 3;
+    const isOverLimit = dosenData.length > maxVisible;
+    const visibleDosen = isOverLimit ? dosenData.slice(0, maxVisible) : dosenData;
+    const hiddenDosen = isOverLimit ? dosenData.slice(maxVisible) : [];
+    const uniqueId = 'dosen-success-' + Date.now();
+    
+    let html = `
+    <div class="dosen-success-section" style="background:#f5eef8;border:1px solid #d7bde2;border-radius:8px;padding:15px;margin:15px 0;">
+        <div style="font-weight:600;color:#16A085;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between">
+            <span><i class="fas fa-users"></i> Dosen Terlibat</span>
+            <span style="background:#16A085;color:white;padding:2px 10px;border-radius:15px;font-size:12px;font-weight:600">
+                ${dosenData.length} Dosen
+            </span>
+        </div>
+        
+        <div id="${uniqueId}" style="max-height:200px;overflow-y:auto;">
+    `;
+    
+    // Tampilkan dosen yang terlihat
+    visibleDosen.forEach((dosen, index) => {
+        const nama = dosen.nama_dosen || dosen.nama || 'Tidak diketahui';
+        const nip = dosen.nip || '-';
+        const jabatan = dosen.jabatan || '-';
+        const divisi = dosen.divisi || '-';
+        const initial = nama.charAt(0).toUpperCase();
+        
+        html += `
+        <div class="dosen-success-item" 
+             style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:white;border:1px solid #e8daef;border-radius:8px;margin-bottom:8px;transition:all 0.2s;">
+            <div style="width:36px;height:36px;border-radius:50%;background:#16A085;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0">
+                ${initial}
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;color:#212529;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                    ${escapeHtml(nama)}
+                </div>
+                <div style="font-size:12px;color:#6c757d;display:flex;flex-wrap:wrap;gap:8px;">
+                    <span><i class="fas fa-id-card"></i> ${escapeHtml(nip)}</span>
+                    <span><i class="fas fa-briefcase"></i> ${escapeHtml(jabatan)}</span>
+                    ${divisi !== '-' ? `<span><i class="fas fa-building"></i> ${escapeHtml(divisi)}</span>` : ''}
+                </div>
+            </div>
+        </div>
+        `;
+    });
+    
+    html += `</div>`;
+    
+    // Jika ada dosen yang tersembunyi, tambahkan tombol show more
+    if (isOverLimit) {
+        html += `
+        <button onclick="toggleHiddenDosen('${uniqueId}', ${hiddenDosen.length}, this)" 
+                style="background:#16A085;color:white;border:none;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;transition:background 0.2s">
+            <i class="fa-solid fa-chevron-down"></i>
+            <span>Tampilkan ${hiddenDosen.length} Dosen Lainnya</span>
+        </button>
+        
+        <div id="${uniqueId}-hidden" style="display:none;margin-top:10px;">
+        `;
+        
+        hiddenDosen.forEach((dosen, index) => {
+            const nama = dosen.nama_dosen || dosen.nama || 'Tidak diketahui';
+            const nip = dosen.nip || '-';
+            const jabatan = dosen.jabatan || '-';
+            const divisi = dosen.divisi || '-';
+            const initial = nama.charAt(0).toUpperCase();
+            
+            html += `
+            <div class="dosen-success-item-hidden" 
+                 style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:white;border:1px solid #e8daef;border-radius:8px;margin-bottom:8px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:#7CB342;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0">
+                    ${initial}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;color:#212529;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                        ${escapeHtml(nama)}
+                    </div>
+                    <div style="font-size:12px;color:#6c757d;display:flex;flex-wrap:wrap;gap:8px;">
+                        <span><i class="fas fa-id-card"></i> ${escapeHtml(nip)}</span>
+                        <span><i class="fas fa-briefcase"></i> ${escapeHtml(jabatan)}</span>
+                        ${divisi !== '-' ? `<span><i class="fas fa-building"></i> ${escapeHtml(divisi)}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+        
+        html += `</div>`;
+    }
+    
+    html += `</div>`;
+    
+    return html;
+}
+
+// Fungsi untuk toggle show/hide dosen
+function toggleHiddenDosen(containerId, hiddenCount, button) {
+    const hiddenContainer = document.getElementById(containerId + '-hidden');
+    const icon = button.querySelector('i');
+    const textSpan = button.querySelector('span');
+    
+    if (hiddenContainer.style.display === 'none') {
+        hiddenContainer.style.display = 'block';
+        icon.className = 'fa-solid fa-chevron-up';
+        textSpan.textContent = 'Sembunyikan';
+    } else {
+        hiddenContainer.style.display = 'none';
+        icon.className = 'fa-solid fa-chevron-down';
+        textSpan.textContent = `Tampilkan ${hiddenCount} Dosen Lainnya`;
+    }
+}
+// Fungsi untuk toggle show more/less dosen di success modal
+function toggleSuccessDosenList(containerId, button) {
+    const container = document.getElementById(containerId);
+    const hiddenItems = container.querySelectorAll('.success-dosen-hidden');
+    const icon = button.querySelector('i');
+    const textSpan = button.querySelector('span');
+    
+    if (container.classList.contains('success-dosen-show-all')) {
+        // Collapse - sembunyikan dosen setelah 3
+        container.classList.remove('success-dosen-show-all');
+        icon.className = 'fa-solid fa-chevron-down';
+        textSpan.textContent = `Tampilkan ${hiddenItems.length} Dosen Lainnya`;
+    } else {
+        // Expand - tampilkan semua dosen
+        container.classList.add('success-dosen-show-all');
+        icon.className = 'fa-solid fa-chevron-up';
+        textSpan.textContent = 'Sembunyikan';
+    }
+}
+
+// Fungsi untuk inisialisasi dosen list di success modal
+function initSuccessDosenList() {
+    const containers = document.querySelectorAll('.success-dosen-list');
+    containers.forEach(container => {
+        const hiddenItems = container.querySelectorAll('.success-dosen-hidden');
+        const button = container.parentElement.querySelector('.success-dosen-more-btn');
+        
+        if (button && hiddenItems.length > 0) {
+            const textSpan = button.querySelector('span');
+            if (textSpan) {
+                textSpan.textContent = `Tampilkan ${hiddenItems.length} Dosen Lainnya`;
+            }
+        }
+    });
+}
+
+// Fungsi untuk escape HTML
+function escapeHtml(unsafe) {
+    if (unsafe === null || unsafe === undefined) return '-';
+    return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// Fungsi untuk refresh halaman
+function refreshPage() {
+    window.location.reload();
+}
+
+// Fungsi untuk menutup modal
+function closeModal(id) { 
+    document.getElementById(id).classList.remove('show'); 
+}
+
+// Fungsi untuk klik di luar modal
+function modalClickOutside(evt, id) { 
+    if (evt.target && evt.target.id === id) closeModal(id); 
+}
     // Toggle Sidebar for Mobile
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
@@ -4129,35 +4768,74 @@
     }
 
     // ===== FUNGSI UNTUK SHOW MODAL DOSEN =====
-    function showDosenModal(event, dosenList, namaKegiatan, suratId) {
-        event.stopPropagation();
+function showDosenModal(event, dosenList, namaKegiatan, suratId) {
+    event.stopPropagation();
 
-        // Simpan data ke variabel global
-        currentSuratId = suratId;
-        currentDosenList = dosenList || [];
-        currentPengajuanName = namaKegiatan;
-
-        console.log('showDosenModal - currentSuratId:', currentSuratId);
-        console.log('showDosenModal - currentDosenList:', currentDosenList);
-        console.log('showDosenModal - namaKegiatan:', namaKegiatan);
-
-        // Update judul dan konten
-        document.getElementById("kegiatanTitle").innerText = namaKegiatan || "Kegiatan";
-        updateDosenListDisplay();
-
-        // Tampilkan tombol aksi jika ada lebih dari 1 dosen
-        const actionButtons = document.getElementById("dosenActionButtons");
-        if (currentDosenList.length > 1) {
-            actionButtons.style.display = 'flex';
-        } else {
-            actionButtons.style.display = 'none';
+    // Validasi: hanya tampilkan modal jika ada lebih dari 1 dosen
+    if (!dosenList || dosenList.length <= 1) {
+        // Tampilkan pesan atau tidak lakukan apa-apa
+        console.log('Modal dosen hanya untuk pengajuan dengan lebih dari 1 dosen');
+        
+        // Atau tampilkan info dosen tunggal di tooltip
+        if (dosenList && dosenList.length === 1) {
+            const dosen = dosenList[0];
+            Swal.fire({
+                icon: 'info',
+                title: 'Informasi Dosen',
+                html: `
+                    <div style="text-align: left; padding: 10px;">
+                        <div style="margin-bottom: 15px; font-weight: 600; color: #FB8C00;">${namaKegiatan}</div>
+                        <div style="display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 10px;">
+                            <div style="width: 50px; height: 50px; background: #FB8C00; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 20px;">
+                                ${(dosen.nama_dosen || '?').charAt(0).toUpperCase()}
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #212529; font-size: 16px;">${dosen.nama_dosen || '-'}</div>
+                                <div style="font-size: 13px; color: #6c757d;">
+                                    <div>NIP: ${dosen.nip || '-'}</div>
+                                    <div>Jabatan: ${dosen.jabatan || '-'}</div>
+                                    <div>Divisi: ${dosen.divisi || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                showConfirmButton: true,
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#FB8C00',
+                showCloseButton: true,
+                width: 500
+            });
         }
-
-        // Tampilkan modal dengan z-index tinggi
-        const dosenModal = document.getElementById("dosenModal");
-        dosenModal.classList.add('show');
-        dosenModal.style.zIndex = '1055'; // Lebih tinggi dari modal detail (biasanya 1050)
+        return;
     }
+
+    // Simpan data ke variabel global
+    currentSuratId = suratId;
+    currentDosenList = dosenList || [];
+    currentPengajuanName = namaKegiatan;
+
+    console.log('showDosenModal - currentSuratId:', currentSuratId);
+    console.log('showDosenModal - currentDosenList:', currentDosenList);
+    console.log('showDosenModal - namaKegiatan:', namaKegiatan);
+
+    // Update judul dan konten
+    document.getElementById("kegiatanTitle").innerText = namaKegiatan || "Kegiatan";
+    updateDosenListDisplay();
+
+    // Tampilkan tombol aksi jika ada lebih dari 1 dosen
+    const actionButtons = document.getElementById("dosenActionButtons");
+    if (currentDosenList.length > 1) {
+        actionButtons.style.display = 'flex';
+    } else {
+        actionButtons.style.display = 'none';
+    }
+
+    // Tampilkan modal dengan z-index tinggi
+    const dosenModal = document.getElementById("dosenModal");
+    dosenModal.classList.add('show');
+    dosenModal.style.zIndex = '1055'; // Lebih tinggi dari modal detail (biasanya 1050)
+}
 
     // ===== FUNGSI UPDATE TAMPILAN DOSEN =====
     function updateDosenListDisplay() {
@@ -5856,6 +6534,30 @@
                 }
             }
         });
+        <?php if($this->session->flashdata('added_items')): ?>
+            // Tunggu DataTable siap sepenuhnya
+            setTimeout(function() {
+                const addedItems = <?= json_encode($this->session->flashdata('added_items')) ?>;
+                const isSingleAdd = <?= json_encode($this->session->flashdata('is_single_add')) ? true : false ?>;
+                
+                // Debug log
+                console.log('Success Add Modal triggered:', addedItems);
+                
+                // Tampilkan modal success
+                showSuccessAddModal(addedItems.length, addedItems, isSingleAdd);
+                
+                // Hapus session flashdata agar tidak muncul lagi saat refresh
+                <?php $this->session->unset_userdata('added_items'); ?>
+                <?php $this->session->unset_userdata('is_single_add'); ?>
+            }, 1000); // Tunggu 1 detik untuk memastikan halaman siap
+        <?php endif; ?>
+<?php if($this->session->flashdata('edited_items')): ?>
+    setTimeout(function() {
+        const editedItems = <?= json_encode($this->session->flashdata('edited_items')) ?>;
+        const isSingleEdit = <?= json_encode($this->session->flashdata('is_single_edit')) ?>;
+        showSuccessEditModal(editedItems.length, editedItems, isSingleEdit);
+    }, 800);
+<?php endif; ?>
 
         // ===== REVISI: MULTI-SELECT FUNCTIONALITY (hanya edit) =====
         let selectedIds = [];
@@ -6266,9 +6968,44 @@
                 </div>
                 
                 <div class="detail-row">
-                    <div class="detail-label">Tanggal Kegiatan</div>
-                    <div class="detail-value">${escapeHtml(data.tanggal_kegiatan || data.tanggal_mulai || data.created_at || '-')}</div>
+                <div class="detail-label">Tanggal Kegiatan</div>
+                <div class="detail-value">
+                    <?php
+                    // Format tanggal untuk modal detail
+                    if (!empty($tanggal_kegiatan) && $tanggal_kegiatan !== '-') {
+                        try {
+                            $tanggal_obj = new DateTime($tanggal_kegiatan);
+                            $hari = $tanggal_obj->format('j');
+                            $bulan = $tanggal_obj->format('n');
+                            
+                            $bulan_indonesia = [
+                                1 => 'Januari',
+                                2 => 'Februari',
+                                3 => 'Maret',
+                                4 => 'April',
+                                5 => 'Mei',
+                                6 => 'Juni',
+                                7 => 'Juli',
+                                8 => 'Agustus',
+                                9 => 'September',
+                                10 => 'Oktober',
+                                11 => 'November',
+                                12 => 'Desember'
+                            ];
+                            
+                            $bulan_nama = $bulan_indonesia[$bulan] ?? 'Desember';
+                            $tahun = $tanggal_obj->format('Y');
+                            
+                            echo htmlspecialchars($hari . ' ' . $bulan_nama . ' ' . $tahun);
+                        } catch (Exception $e) {
+                            echo htmlspecialchars($tanggal_kegiatan);
+                        }
+                    } else {
+                        echo '-';
+                    }
+                    ?>
                 </div>
+            </div>
                 
                 <div class="detail-row">
                     <div class="detail-label">Jenis Tanggal</div>
@@ -6525,7 +7262,239 @@
             // Biarkan link/button berfungsi normal
         });
     });
-</script>
-</body>
+    // ============================================
+// SUCCESS MODAL FUNCTIONS
+// ============================================
+function showSuccessAddModal(count, items, isSingle = false) {
+    console.log('showSuccessAddModal called with items:', items);
+    
+    const modal = document.getElementById('successModal');
+    const timestamp = document.getElementById('successTimestamp');
+    const itemCount = document.getElementById('successItemCount');
+    const listContainer = document.getElementById('successList');
+    
+    // Format timestamp
+    const now = new Date();
+    timestamp.textContent = now.toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) + ' WIB';
+    
+    itemCount.textContent = `${count} item`;
+    
+    // Populate list dengan data
+    listContainer.innerHTML = '';
+    
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.style.cssText = 'background:white;border:1px solid #c3e6cb;border-radius:10px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05)';
+        
+        // Generate HTML untuk dosen jika ada data
+        const dosenHtml = generateDosenHtmlForSuccessModal(item.dosen_data || []);
+        
+        itemDiv.innerHTML = `
+            <div style="display:flex;align-items:center;gap:12px;padding:15px;border-bottom:1px solid #f0f0f0;background:#f0fdf4;">
+                <div style="width:40px;height:40px;border-radius:50%;background:#27ae60;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div style="flex:1;text-align:left">
+                    <div style="font-weight:700;color:#212529;font-size:15px;margin-bottom:3px">${escapeHtml(item.nama)}</div>
+                    <div style="font-size:13px;color:#6c757d">${item.details}</div>
+                </div>
+                <span style="background:#27ae60;color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;flex-shrink:0">
+                    Disetujui
+                </span>
+            </div>
+            ${dosenHtml}
+        `;
+        listContainer.appendChild(itemDiv);
+    });
+    
+    modal.classList.add('show');
+}
 
+// Fungsi untuk generate HTML dosen di success modal
+function generateDosenHtmlForSuccessModal(dosenData) {
+    console.log('=== generateDosenHtmlForSuccessModal ===');
+    console.log('dosenData:', dosenData);
+    
+    if (!dosenData || !Array.isArray(dosenData) || dosenData.length === 0) {
+        console.log('No dosen data');
+        return '';
+    }
+    
+    const maxVisible = 3;
+    const isOverLimit = dosenData.length > maxVisible;
+    const visibleDosen = isOverLimit ? dosenData.slice(0, maxVisible) : dosenData;
+    const hiddenDosen = isOverLimit ? dosenData.slice(maxVisible) : [];
+    const uniqueId = 'dosen-success-' + Date.now();
+    
+    let html = `
+    <div class="dosen-success-section" style="background:#f5eef8;border:1px solid #d7bde2;border-radius:8px;padding:15px;margin:15px 0;">
+        <div style="font-weight:600;color:#16A085;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between">
+            <span><i class="fas fa-users"></i> Dosen Terlibat</span>
+            <span style="background:#16A085;color:white;padding:2px 10px;border-radius:15px;font-size:12px;font-weight:600">
+                ${dosenData.length} Dosen
+            </span>
+        </div>
+        
+        <div id="${uniqueId}" style="max-height:200px;overflow-y:auto;">
+    `;
+    
+    // Tampilkan dosen yang terlihat
+    visibleDosen.forEach((dosen, index) => {
+        const nama = dosen.nama_dosen || dosen.nama || 'Tidak diketahui';
+        const nip = dosen.nip || '-';
+        const jabatan = dosen.jabatan || '-';
+        const divisi = dosen.divisi || '-';
+        const initial = nama.charAt(0).toUpperCase();
+        
+        html += `
+        <div class="dosen-success-item" 
+             style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:white;border:1px solid #e8daef;border-radius:8px;margin-bottom:8px;transition:all 0.2s;">
+            <div style="width:36px;height:36px;border-radius:50%;background:#16A085;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0">
+                ${initial}
+            </div>
+            <div style="flex:1;min-width:0;">
+                <div style="font-weight:600;color:#212529;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                    ${escapeHtml(nama)}
+                </div>
+                <div style="font-size:12px;color:#6c757d;display:flex;flex-wrap:wrap;gap:8px;">
+                    <span><i class="fas fa-id-card"></i> ${escapeHtml(nip)}</span>
+                    <span><i class="fas fa-briefcase"></i> ${escapeHtml(jabatan)}</span>
+                    ${divisi !== '-' ? `<span><i class="fas fa-building"></i> ${escapeHtml(divisi)}</span>` : ''}
+                </div>
+            </div>
+        </div>
+        `;
+    });
+    
+    html += `</div>`;
+    
+    // Jika ada dosen yang tersembunyi, tambahkan tombol show more
+    if (isOverLimit) {
+        html += `
+        <button onclick="toggleHiddenDosen('${uniqueId}', ${hiddenDosen.length}, this)" 
+                style="background:#16A085;color:white;border:none;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;transition:background 0.2s">
+            <i class="fa-solid fa-chevron-down"></i>
+            <span>Tampilkan ${hiddenDosen.length} Dosen Lainnya</span>
+        </button>
+        
+        <div id="${uniqueId}-hidden" style="display:none;margin-top:10px;">
+        `;
+        
+        hiddenDosen.forEach((dosen, index) => {
+            const nama = dosen.nama_dosen || dosen.nama || 'Tidak diketahui';
+            const nip = dosen.nip || '-';
+            const jabatan = dosen.jabatan || '-';
+            const divisi = dosen.divisi || '-';
+            const initial = nama.charAt(0).toUpperCase();
+            
+            html += `
+            <div class="dosen-success-item-hidden" 
+                 style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:white;border:1px solid #e8daef;border-radius:8px;margin-bottom:8px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:#7CB342;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0">
+                    ${initial}
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-weight:600;color:#212529;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                        ${escapeHtml(nama)}
+                    </div>
+                    <div style="font-size:12px;color:#6c757d;display:flex;flex-wrap:wrap;gap:8px;">
+                        <span><i class="fas fa-id-card"></i> ${escapeHtml(nip)}</span>
+                        <span><i class="fas fa-briefcase"></i> ${escapeHtml(jabatan)}</span>
+                        ${divisi !== '-' ? `<span><i class="fas fa-building"></i> ${escapeHtml(divisi)}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+            `;
+        });
+        
+        html += `</div>`;
+    }
+    
+    html += `</div>`;
+    
+    return html;
+}
+
+// Fungsi untuk toggle show/hide dosen
+function toggleHiddenDosen(containerId, hiddenCount, button) {
+    const hiddenContainer = document.getElementById(containerId + '-hidden');
+    const icon = button.querySelector('i');
+    const textSpan = button.querySelector('span');
+    
+    if (hiddenContainer.style.display === 'none') {
+        hiddenContainer.style.display = 'block';
+        icon.className = 'fa-solid fa-chevron-up';
+        textSpan.textContent = 'Sembunyikan';
+    } else {
+        hiddenContainer.style.display = 'none';
+        icon.className = 'fa-solid fa-chevron-down';
+        textSpan.textContent = `Tampilkan ${hiddenCount} Dosen Lainnya`;
+    }
+}
+
+// Fungsi untuk refresh halaman
+function refreshPage() {
+    window.location.reload();
+}
+
+// Fungsi untuk menutup modal
+function closeModal(id) { 
+    document.getElementById(id).classList.remove('show'); 
+}
+
+// Fungsi untuk klik di luar modal
+function modalClickOutside(evt, id) { 
+    if (evt.target && evt.target.id === id) closeModal(id); 
+}
+</script>
+<!-- ===== SUCCESS MODAL SETELAH SUBMIT ===== -->
+<div id="successModal" class="modal" onclick="modalClickOutside(event,'successModal')">
+    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <div class="modal-header" style="background: #27ae60;">
+            <h3><i class="fa-solid fa-circle-check"></i> Pengajuan Berhasil Disetujui</h3>
+            <button class="close-modal" onclick="closeModal('successModal')">&times;</button>
+        </div>
+        <div style="padding:25px;text-align:center">
+            <div style="width:100px;height:100px;border-radius:50%;background:#d4edda;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                <i class="fas fa-check" style="font-size:50px;color:#27ae60"></i>
+            </div>
+            
+            <h3 style="color:#27ae60;margin-bottom:10px">Berhasil Disetujui</h3>
+            <p style="color:#666;margin-bottom:5px">
+                <i class="fa-solid fa-clock"></i> Disetujui pada: <strong id="successTimestamp">-</strong>
+            </p>
+            
+            <div style="background:#d4edda;border:1px solid #c3e6cb;border-radius:8px;padding:15px;margin:20px 0">
+                <div style="font-weight:600;color:#155724;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+                    <span>Daftar Pengajuan</span>
+                    <span id="successItemCount" style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:12px">1 item</span>
+                </div>
+                <div id="successList" style="max-height:250px;overflow-y:auto;text-align:left">
+                    <!-- List akan diisi oleh JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Dosen Section -->
+            <div id="successDosenSection" style="display:none;">
+                <!-- Akan diisi oleh JavaScript -->
+            </div>
+            
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+                <button class="btn-bulk" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
+                </button>
+                <button class="btn-bulk" onclick="closeModal('successModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
 </html>

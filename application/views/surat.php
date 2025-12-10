@@ -1308,6 +1308,7 @@ i[class*="fa-"] {
 .autocomplete-box-fixed::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 10px;
+    
 }
 
 .autocomplete-box-fixed::-webkit-scrollbar-thumb {
@@ -2105,7 +2106,7 @@ document.addEventListener('DOMContentLoaded', function () {
     <!-- Pilihan jenis tanggal -->
     <div class="form-group has-select mb-4">
       <select class="nice form-control" name="jenis_date" id="jenis_date" required>
-        <option disabled selected value="">Tanggal Pengajuan</option>
+        <option disabled selected value="">Tanggal Kegiatan</option>
         <option value="Periode">Periode</option>
         <option value="Custom">Custom</option>
       </select>
@@ -4285,7 +4286,791 @@ window.addEventListener('pageshow', function(event) {
     }
 });
 </script>
+<script>
+// ========================================
+// REAL-TIME VALIDATION & BUTTON STATE
+// ========================================
 
+// Fungsi untuk mengecek apakah Step 1 valid
+function checkStep1Validity() {
+    let isValid = true;
+    
+    // Cek Jenis Pengajuan
+    const jenisPengajuan = $('#jenis_pengajuan').val();
+    if (!jenisPengajuan || jenisPengajuan === '') {
+        isValid = false;
+    }
+    
+    // Cek Status Kepegawaian
+    const lingkupPenugasan = $('#lingkup_penugasan').val();
+    if (!lingkupPenugasan || lingkupPenugasan === '') {
+        isValid = false;
+    }
+    
+    // Cek Jenis Penugasan berdasarkan Jenis Pengajuan
+    if (jenisPengajuan === 'Perorangan') {
+        const jenisPenugasanPerorangan = $('#jenis_penugasan_perorangan').val();
+        if (!jenisPenugasanPerorangan || jenisPenugasanPerorangan === '') {
+            isValid = false;
+        }
+        
+        // Cek "Lainnya" jika dipilih
+        if (jenisPenugasanPerorangan === 'Penugasan Lainnya') {
+            const penugasanLainnya = $('#penugasan_lainnya_perorangan').val().trim();
+            if (!penugasanLainnya) {
+                isValid = false;
+            }
+        }
+    } else if (jenisPengajuan === 'Kelompok') {
+        const jenisPenugasanKelompok = $('#jenis_penugasan_kelompok').val();
+        if (!jenisPenugasanKelompok || jenisPenugasanKelompok === '') {
+            isValid = false;
+        }
+        
+        // Cek "Lainnya" jika dipilih
+        if (jenisPenugasanKelompok === 'Penugasan Lainnya') {
+            const penugasanLainnya = $('#penugasan_lainnya_kelompok').val().trim();
+            if (!penugasanLainnya) {
+                isValid = false;
+            }
+        }
+    }
+    
+    // Cek Data Panitia/Dosen - minimal harus ada 1 row lengkap
+    const panitiaRows = $('.panitia-row');
+    let hasCompleteRow = false;
+    
+    panitiaRows.each(function() {
+        const row = $(this);
+        const nip = row.find('.nip-input').val().trim();
+        const nama = row.find('.nama-dosen-input').val().trim();
+        const jabatan = row.find('.jabatan-input').val().trim();
+        const kaprodi = row.find('.kaprodi-input').val().trim();
+        
+        // Untuk kelompok, cek juga peran
+        let peranValid = true;
+        if (jenisPengajuan === 'Kelompok') {
+            const peran = row.find('.peran-input').val().trim();
+            peranValid = (peran !== '');
+        }
+        
+        if (nip && nama && jabatan && kaprodi && peranValid) {
+            hasCompleteRow = true;
+        }
+    });
+    
+    if (!hasCompleteRow) {
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+// Fungsi untuk mengecek apakah Step 2 valid
+function checkStep2Validity() {
+    let isValid = true;
+    
+    // Cek Nama Kegiatan
+    const namaKegiatan = $('#nama_kegiatan').val().trim();
+    if (!namaKegiatan) {
+        isValid = false;
+    }
+    
+    // Cek Jenis Tanggal
+    const jenisDate = $('#jenis_date').val();
+    if (!jenisDate || jenisDate === '') {
+        isValid = false;
+    } else {
+        // Cek berdasarkan jenis tanggal
+        if (jenisDate === 'Periode') {
+            const periodeValue = $('#periode_value').val();
+            if (!periodeValue || periodeValue === '') {
+                isValid = false;
+            }
+        } else if (jenisDate === 'Custom') {
+            const tanggalAwal = $('#tanggal_awal_kegiatan').val();
+            const tanggalAkhir = $('#tanggal_akhir_kegiatan').val();
+            
+            if (!tanggalAwal || !tanggalAkhir) {
+                isValid = false;
+            }
+        }
+    }
+    
+    // Cek Tempat Kegiatan
+    const tempatKegiatan = $('input[name="tempat_kegiatan"]').val().trim();
+    if (!tempatKegiatan) {
+        isValid = false;
+    }
+    
+    // Cek Penyelenggara
+    const penyelenggara = $('input[name="penyelenggara"]').val().trim();
+    if (!penyelenggara) {
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+// Fungsi untuk mengecek apakah Step 3 valid
+function checkStep3Validity() {
+    // Step 3 selalu valid karena upload file bersifat opsional
+    // Jika ingin file eviden wajib, uncomment kode berikut:
+    /*
+    const evidenValue = $('#eviden').val();
+    try {
+        const evidenArray = JSON.parse(evidenValue);
+        if (!Array.isArray(evidenArray) || evidenArray.length === 0) {
+            return false;
+        }
+    } catch (e) {
+        return false;
+    }
+    */
+    return true;
+}
+
+// Fungsi untuk update state tombol Continue
+function updateContinueButtonState() {
+    const nextBtn = $('.next-btn');
+    let isValid = false;
+    
+    // Cek validitas berdasarkan step saat ini
+    if (currentStep === 0) {
+        isValid = checkStep1Validity();
+    } else if (currentStep === 1) {
+        isValid = checkStep2Validity();
+    } else if (currentStep === 2) {
+        isValid = checkStep3Validity();
+    }
+    
+    // Update state tombol
+    if (isValid) {
+        nextBtn.prop('disabled', false);
+        nextBtn.removeClass('btn-disabled');
+        nextBtn.css({
+            'opacity': '1',
+            'cursor': 'pointer'
+        });
+    } else {
+        nextBtn.prop('disabled', true);
+        nextBtn.addClass('btn-disabled');
+        nextBtn.css({
+            'opacity': '0.6',
+            'cursor': 'not-allowed'
+        });
+    }
+    
+    // Log untuk debugging
+    console.log(`🔘 Button state - Step ${currentStep + 1}:`, isValid ? 'ENABLED ✅' : 'DISABLED ❌');
+}
+
+// ========================================
+// EVENT LISTENERS UNTUK REAL-TIME VALIDATION
+// ========================================
+
+$(document).ready(function() {
+    
+    // ===== STEP 1 EVENT LISTENERS =====
+    
+    // Monitor perubahan pada Jenis Pengajuan
+    $('#jenis_pengajuan').on('change', function() {
+        console.log('📝 Jenis Pengajuan changed:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Status Kepegawaian
+    $('#lingkup_penugasan').on('change', function() {
+        console.log('📝 Status Kepegawaian changed:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Jenis Penugasan (Perorangan)
+    $('#jenis_penugasan_perorangan').on('change', function() {
+        console.log('📝 Jenis Penugasan (Perorangan) changed:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Penugasan Lainnya (Perorangan)
+    $('#penugasan_lainnya_perorangan').on('input', function() {
+        console.log('📝 Penugasan Lainnya (Perorangan) input:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Jenis Penugasan (Kelompok)
+    $('#jenis_penugasan_kelompok').on('change', function() {
+        console.log('📝 Jenis Penugasan (Kelompok) changed:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Penugasan Lainnya (Kelompok)
+    $('#penugasan_lainnya_kelompok').on('input', function() {
+        console.log('📝 Penugasan Lainnya (Kelompok) input:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada field Panitia/Dosen menggunakan event delegation
+    $('#panitiaContainer').on('input change', '.nip-input, .nama-dosen-input, .jabatan-input, .kaprodi-input, .peran-input', function() {
+        console.log('📝 Panitia field changed:', $(this).attr('class'), $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor penambahan/penghapusan row panitia
+    $('#panitiaContainer').on('click', '.add-row-btn, .remove-row-btn', function() {
+        setTimeout(function() {
+            console.log('🔄 Panitia row added/removed');
+            updateContinueButtonState();
+        }, 100);
+    });
+    
+    // ===== STEP 2 EVENT LISTENERS =====
+    
+    // Monitor perubahan pada Nama Kegiatan
+    $('#nama_kegiatan').on('input', function() {
+        console.log('📝 Nama Kegiatan input:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Jenis Tanggal
+    $('#jenis_date').on('change', function() {
+        console.log('📝 Jenis Tanggal changed:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Periode
+    $('#periode_value').on('change', function() {
+        console.log('📝 Periode changed:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Datepicker (tanggal custom)
+    $('#datepicker').on('change', function() {
+        console.log('📝 Datepicker changed');
+        // Delay sedikit karena flatpickr butuh waktu untuk update hidden inputs
+        setTimeout(function() {
+            updateContinueButtonState();
+        }, 100);
+    });
+    
+    // Monitor perubahan pada hidden inputs tanggal
+    $('#tanggal_awal_kegiatan, #tanggal_akhir_kegiatan').on('change', function() {
+        console.log('📝 Hidden date input changed:', $(this).attr('name'), $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Tempat Kegiatan
+    $('input[name="tempat_kegiatan"]').on('input', function() {
+        console.log('📝 Tempat Kegiatan input:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor perubahan pada Penyelenggara
+    $('input[name="penyelenggara"]').on('input', function() {
+        console.log('📝 Penyelenggara input:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // ===== STEP 3 EVENT LISTENERS =====
+    
+    // Monitor perubahan pada file upload
+    $('#eviden').on('change', function() {
+        console.log('📝 Eviden changed:', $(this).val());
+        updateContinueButtonState();
+    });
+    
+    // Monitor saat file diupload via Uploadcare
+    window.updateEvidenList = function(files) {
+        console.log('📁 File diupload:', files);
+        
+        // Update display (kode existing)
+        const uploadedFiles = [];
+        const filesList = $('#files-list');
+        filesList.empty();
+        
+        files.forEach((file, index) => {
+            uploadedFiles.push(file.cdnUrl);
+            
+            const fileName = file.name || `File ${index + 1}`;
+            const fileSize = file.size ? `(${(file.size / 1024 / 1024).toFixed(2)} MB)` : '';
+            
+            const fileItem = $(`
+                <div class="file-item mb-2 p-2 border rounded" style="background: #f8f9fa;">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-file-alt text-muted me-2"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">${fileName}</div>
+                            <small class="text-muted">${fileSize}</small>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <button type="button" class="btn btn-sm btn-danger remove-file" data-index="${index}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `);
+            
+            filesList.append(fileItem);
+        });
+        
+        // Update hidden input
+        $('#eviden').val(JSON.stringify(uploadedFiles));
+        
+        // Tampilkan container jika ada file
+        if (uploadedFiles.length > 0) {
+            $('#uploaded-files-display').show();
+        }
+        
+        // Event untuk tombol hapus
+        $('.remove-file').off('click').on('click', function() {
+            const index = $(this).data('index');
+            files.splice(index, 1);
+            window.updateEvidenList(files);
+            
+            // Update button state setelah hapus file
+            updateContinueButtonState();
+        });
+        
+        // Update button state setelah upload
+        updateContinueButtonState();
+    };
+    
+    // ===== INITIAL STATE =====
+    // Set initial state saat page load
+    setTimeout(function() {
+        updateContinueButtonState();
+        console.log('🎬 Initial button state set');
+    }, 500);
+    
+    // Update button state saat pindah step
+    const originalUpdateProgress = window.updateProgress;
+    window.updateProgress = function() {
+        if (originalUpdateProgress) {
+            originalUpdateProgress();
+        }
+        
+        // Update button state untuk step baru
+        setTimeout(function() {
+            updateContinueButtonState();
+        }, 100);
+    };
+});
+
+// ========================================
+// UPDATE TOMBOL NEXT DENGAN VALIDASI
+// ========================================
+$(document).ready(function() {
+    // Override event handler untuk tombol Next
+    $('.next-btn').off('click').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Cek apakah tombol disabled
+        if ($(this).prop('disabled')) {
+            console.log('⛔ Button disabled, tidak bisa lanjut');
+            
+            // Tampilkan pesan
+            let errorMessages = [];
+            if (currentStep === 0) {
+                errorMessages.push('❌ Lengkapi semua field yang required di Step 1');
+            } else if (currentStep === 1) {
+                errorMessages.push('❌ Lengkapi semua field yang required di Step 2');
+            } else if (currentStep === 2) {
+                errorMessages.push('❌ Lengkapi semua field yang required di Step 3');
+            }
+            showValidationAlert(errorMessages);
+            return false;
+        }
+        
+        const totalSteps = fieldsets.length;
+        
+        // Validasi berdasarkan step saat ini (double check)
+        let isValid = true;
+        
+        if (currentStep === 0) {
+            isValid = validateStep1();
+            console.log('🔍 Validasi Step 1:', isValid ? '✅ Valid' : '❌ Invalid');
+        } else if (currentStep === 1) {
+            isValid = validateStep2();
+            console.log('🔍 Validasi Step 2:', isValid ? '✅ Valid' : '❌ Invalid');
+        } else if (currentStep === 2) {
+            isValid = validateStep3();
+            console.log('🔍 Validasi Step 3:', isValid ? '✅ Valid' : '❌ Invalid');
+        }
+        
+        // Jika validasi gagal, hentikan
+        if (!isValid) {
+            console.log('⛔ Validasi gagal, tidak bisa lanjut ke step berikutnya');
+            return false;
+        }
+        
+        // Jika masih ada step berikutnya
+        if (currentStep < totalSteps - 1) {
+            fieldsets.eq(currentStep).removeClass('active');
+            currentStep++;
+            fieldsets.eq(currentStep).addClass('active');
+            
+            // Update progress bar
+            updateProgress();
+            
+            // Scroll ke atas form
+            $('html, body').animate({
+                scrollTop: $('.multi-step-form').offset().top - 100
+            }, 300);
+            
+            console.log('✅ Pindah ke Step', currentStep + 1);
+        } 
+        // Jika sudah di step terakhir (Finish)
+        else {
+            console.log("🚀 Validasi semua step berhasil, submitting form...");
+            
+            // Validasi final sebelum submit
+            const finalValidation = validateStep1() && validateStep2() && validateStep3();
+            
+            if (finalValidation) {
+                // Submit form via AJAX
+                $('#msform').submit();
+            } else {
+                showValidationAlert(['❌ Mohon lengkapi semua data yang required sebelum mengirim']);
+                return false;
+            }
+        }
+    });
+});
+
+// Fungsi untuk validasi Step 1
+function validateStep1() {
+    let isValid = true;
+    let errorMessages = [];
+    
+    // Validasi Jenis Pengajuan
+    const jenisPengajuan = $('#jenis_pengajuan').val();
+    if (!jenisPengajuan || jenisPengajuan === '') {
+        errorMessages.push('❌ Jenis Pengajuan harus dipilih');
+        $('#jenis_pengajuan').addClass('is-invalid');
+        isValid = false;
+    } else {
+        $('#jenis_pengajuan').removeClass('is-invalid');
+    }
+    
+    // Validasi Status Kepegawaian
+    const lingkupPenugasan = $('#lingkup_penugasan').val();
+    if (!lingkupPenugasan || lingkupPenugasan === '') {
+        errorMessages.push('❌ Status Kepegawaian harus dipilih');
+        $('#lingkup_penugasan').addClass('is-invalid');
+        isValid = false;
+    } else {
+        $('#lingkup_penugasan').removeClass('is-invalid');
+    }
+    
+    // Validasi Jenis Penugasan berdasarkan Jenis Pengajuan
+    if (jenisPengajuan === 'Perorangan') {
+        const jenisPenugasanPerorangan = $('#jenis_penugasan_perorangan').val();
+        if (!jenisPenugasanPerorangan || jenisPenugasanPerorangan === '') {
+            errorMessages.push('❌ Jenis Penugasan harus dipilih');
+            $('#jenis_penugasan_perorangan').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#jenis_penugasan_perorangan').removeClass('is-invalid');
+            
+            // Validasi "Lainnya" jika dipilih
+            if (jenisPenugasanPerorangan === 'Penugasan Lainnya') {
+                const penugasanLainnya = $('#penugasan_lainnya_perorangan').val().trim();
+                if (!penugasanLainnya) {
+                    errorMessages.push('❌ Jenis Penugasan Lainnya harus diisi');
+                    $('#penugasan_lainnya_perorangan').addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $('#penugasan_lainnya_perorangan').removeClass('is-invalid');
+                }
+            }
+        }
+    } else if (jenisPengajuan === 'Kelompok') {
+        const jenisPenugasanKelompok = $('#jenis_penugasan_kelompok').val();
+        if (!jenisPenugasanKelompok || jenisPenugasanKelompok === '') {
+            errorMessages.push('❌ Jenis Penugasan harus dipilih');
+            $('#jenis_penugasan_kelompok').addClass('is-invalid');
+            isValid = false;
+        } else {
+            $('#jenis_penugasan_kelompok').removeClass('is-invalid');
+            
+            // Validasi "Lainnya" jika dipilih
+            if (jenisPenugasanKelompok === 'Penugasan Lainnya') {
+                const penugasanLainnya = $('#penugasan_lainnya_kelompok').val().trim();
+                if (!penugasanLainnya) {
+                    errorMessages.push('❌ Jenis Penugasan Lainnya harus diisi');
+                    $('#penugasan_lainnya_kelompok').addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $('#penugasan_lainnya_kelompok').removeClass('is-invalid');
+                }
+            }
+        }
+    }
+    
+    // Validasi Data Panitia/Dosen
+    const panitiaRows = $('.panitia-row');
+    let hasEmptyFields = false;
+    
+    panitiaRows.each(function(index) {
+        const row = $(this);
+        const nip = row.find('.nip-input').val().trim();
+        const nama = row.find('.nama-dosen-input').val().trim();
+        const jabatan = row.find('.jabatan-input').val().trim();
+        const kaprodi = row.find('.kaprodi-input').val().trim();
+        
+        if (!nip) {
+            row.find('.nip-input').addClass('is-invalid');
+            hasEmptyFields = true;
+        } else {
+            row.find('.nip-input').removeClass('is-invalid');
+        }
+        
+        if (!nama) {
+            row.find('.nama-dosen-input').addClass('is-invalid');
+            hasEmptyFields = true;
+        } else {
+            row.find('.nama-dosen-input').removeClass('is-invalid');
+        }
+        
+        if (!jabatan) {
+            row.find('.jabatan-input').addClass('is-invalid');
+            hasEmptyFields = true;
+        } else {
+            row.find('.jabatan-input').removeClass('is-invalid');
+        }
+        
+        if (!kaprodi) {
+            row.find('.kaprodi-input').addClass('is-invalid');
+            hasEmptyFields = true;
+        } else {
+            row.find('.kaprodi-input').removeClass('is-invalid');
+        }
+        
+        // Validasi Peran untuk Kelompok
+        if (jenisPengajuan === 'Kelompok') {
+            const peran = row.find('.peran-input').val().trim();
+            if (!peran) {
+                row.find('.peran-input').addClass('is-invalid');
+                hasEmptyFields = true;
+            } else {
+                row.find('.peran-input').removeClass('is-invalid');
+            }
+        }
+    });
+    
+    if (hasEmptyFields) {
+        errorMessages.push('❌ Semua field data dosen harus diisi lengkap');
+        isValid = false;
+    }
+    
+    // Tampilkan pesan error jika ada
+    if (!isValid) {
+        showValidationAlert(errorMessages);
+    }
+    
+    return isValid;
+}
+
+// Fungsi untuk validasi Step 2
+function validateStep2() {
+    let isValid = true;
+    let errorMessages = [];
+    
+    // Validasi Nama Kegiatan
+    const namaKegiatan = $('#nama_kegiatan').val().trim();
+    if (!namaKegiatan) {
+        errorMessages.push('❌ Nama Kegiatan harus diisi');
+        $('#nama_kegiatan').addClass('is-invalid');
+        isValid = false;
+    } else {
+        $('#nama_kegiatan').removeClass('is-invalid');
+    }
+    
+    // Validasi Jenis Tanggal
+    const jenisDate = $('#jenis_date').val();
+    if (!jenisDate || jenisDate === '') {
+        errorMessages.push('❌ Tanggal Pengajuan harus dipilih');
+        $('#jenis_date').addClass('is-invalid');
+        isValid = false;
+    } else {
+        $('#jenis_date').removeClass('is-invalid');
+        
+        // Validasi berdasarkan jenis tanggal
+        if (jenisDate === 'Periode') {
+            const periodeValue = $('#periode_value').val();
+            if (!periodeValue || periodeValue === '') {
+                errorMessages.push('❌ Periode harus dipilih');
+                $('#periode_value').addClass('is-invalid');
+                isValid = false;
+            } else {
+                $('#periode_value').removeClass('is-invalid');
+            }
+        } else if (jenisDate === 'Custom') {
+            // Validasi tanggal custom
+            const tanggalAwal = $('#tanggal_awal_kegiatan').val();
+            const tanggalAkhir = $('#tanggal_akhir_kegiatan').val();
+            
+            if (!tanggalAwal) {
+                errorMessages.push('❌ Tanggal Awal Kegiatan harus diisi');
+                $('#datepicker').addClass('is-invalid');
+                isValid = false;
+            } else {
+                $('#datepicker').removeClass('is-invalid');
+            }
+            
+            if (!tanggalAkhir) {
+                errorMessages.push('❌ Tanggal Akhir Kegiatan harus diisi');
+                $('#datepicker').addClass('is-invalid');
+                isValid = false;
+            } else {
+                $('#datepicker').removeClass('is-invalid');
+            }
+        }
+    }
+    
+    // Validasi Tempat Kegiatan
+    const tempatKegiatan = $('input[name="tempat_kegiatan"]').val().trim();
+    if (!tempatKegiatan) {
+        errorMessages.push('❌ Tempat Kegiatan harus diisi');
+        $('input[name="tempat_kegiatan"]').addClass('is-invalid');
+        isValid = false;
+    } else {
+        $('input[name="tempat_kegiatan"]').removeClass('is-invalid');
+    }
+    
+    // Validasi Penyelenggara
+    const penyelenggara = $('input[name="penyelenggara"]').val().trim();
+    if (!penyelenggara) {
+        errorMessages.push('❌ Penyelenggara harus diisi');
+        $('input[name="penyelenggara"]').addClass('is-invalid');
+        isValid = false;
+    } else {
+        $('input[name="penyelenggara"]').removeClass('is-invalid');
+    }
+    
+    // Tampilkan pesan error jika ada
+    if (!isValid) {
+        showValidationAlert(errorMessages);
+    }
+    
+    return isValid;
+}
+
+// Fungsi untuk validasi Step 3
+function validateStep3() {
+    // Step 3 selalu valid karena upload file bersifat opsional
+    return true;
+}
+
+// Fungsi untuk menampilkan alert validasi
+function showValidationAlert(messages) {
+    const alertHtml = `
+        <div class="alert alert-danger alert-dismissible fade show validation-alert" role="alert" style="position: fixed; top: 80px; right: 20px; z-index: 9999; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            <strong><i class="fas fa-exclamation-triangle"></i> Validasi Form</strong>
+            <ul class="mb-0 mt-2" style="padding-left: 20px;">
+                ${messages.map(msg => `<li>${msg}</li>`).join('')}
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    // Hapus alert sebelumnya jika ada
+    $('.validation-alert').remove();
+    
+    // Tambahkan alert baru
+    $('body').append(alertHtml);
+    
+    // Auto-hide setelah 5 detik
+    setTimeout(() => {
+        $('.validation-alert').fadeOut(() => {
+            $('.validation-alert').remove();
+        });
+    }, 5000);
+    
+    // Scroll ke atas
+    $('html, body').animate({
+        scrollTop: $('.multi-step-form').offset().top - 100
+    }, 300);
+}
+</script>
+
+<style>
+/* Style untuk button disabled */
+.next-btn:disabled,
+.next-btn.btn-disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+}
+
+.next-btn:not(:disabled):not(.btn-disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(251, 140, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+/* Style untuk field yang invalid */
+.is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.is-invalid:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Animation untuk alert */
+.validation-alert {
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Visual indicator untuk required fields */
+label:after {
+    content: " *";
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Tooltip untuk button disabled */
+.next-btn:disabled::after,
+.next-btn.btn-disabled::after {
+content: "Lengkapi semua field yang diperlukan";
+position: absolute;
+bottom: -30px;
+left: 50%;
+transform: translateX(-50%);
+background: rgba(0, 0, 0, 0.8);
+color: white;
+padding: 5px 10px;
+border-radius: 4px;
+font-size: 12px;
+white-space: nowrap;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.3s;
+}
+.next-btn:disabled:hover::after,
+.next-btn.btn-disabled:hover::after {
+opacity: 1;
+}
+</style>
 <!-- ============================ -->
 <!-- LOADING SCREEN HTML          -->
 <!-- ============================ -->

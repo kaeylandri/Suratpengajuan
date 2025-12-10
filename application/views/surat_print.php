@@ -362,11 +362,11 @@ function tgl_indo($tanggal)
 
         <!-- Untuk Menghadiri Kegiatan -->
         <p>
-            sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b>
+            <?= $surat->customize ?? '-' ?> <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b>
             dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b>
             yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b>
 
-            <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'custom'): ?>
+            <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
                 pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b>
             <?php else: ?>
                 selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
