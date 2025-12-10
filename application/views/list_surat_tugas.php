@@ -4510,61 +4510,6 @@ function showSuccessEditModal(count, items, isSingle = false) {
     modal.classList.add('show');
 }
 // ============================================
-// SUCCESS REVISION MODAL FUNCTIONS (DITOLAK DEKAN)
-// ============================================
-
-// Fungsi untuk menampilkan success revision modal
-function showSuccessRevisionModal(count, items, isSingle = false) {
-    const modal = document.getElementById('successRevisionModal');
-    const timestamp = document.getElementById('revisionTimestamp');
-    const itemCount = document.getElementById('revisionItemCount');
-    const listContainer = document.getElementById('revisionList');
-    
-    // Format timestamp
-    const now = new Date();
-    timestamp.textContent = now.toLocaleDateString('id-ID', { 
-        day: '2-digit', 
-        month: 'long', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    }) + ' WIB';
-    
-    itemCount.textContent = `${count} item`;
-    
-    // Populate list dengan data
-    listContainer.innerHTML = '';
-    items.forEach((item, index) => {
-        const itemDiv = document.createElement('div');
-        itemDiv.style.cssText = 'background:white;border:1px solid #bee5eb;border-radius:6px;margin-bottom:8px;overflow:hidden';
-        
-        // Status baru setelah di-revisi
-        const newStatusBadge = `<span class="badge badge-info" style="background:#d1ecf1;color:#0c5460;flex-shrink:0">${item.new_status || 'disetujui sekretariat'}</span>`;
-        
-        // Generate HTML untuk dosen jika ada data
-        const dosenHtml = generateDosenHtmlForSuccessModal(item.dosen_data || []);
-        
-        itemDiv.innerHTML = `
-            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #f0f0f0;">
-                <i class="fas fa-paper-plane" style="color:#17a2b8;font-size:20px;flex-shrink:0"></i>
-                <div style="flex:1;text-align:left">
-                    <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(item.nama)}</div>
-                    <div style="font-size:12px;color:#6c757d">${item.details}</div>
-                </div>
-                ${newStatusBadge}
-            </div>
-            ${dosenHtml}
-        `;
-        listContainer.appendChild(itemDiv);
-    });
-    
-    modal.classList.add('show');
-    
-    // Inisialisasi toggle dosen setelah modal ditampilkan
-    setTimeout(initSuccessDosenList, 100);
-}
-
-// ============================================
 // HELPER FUNCTIONS
 // ============================================
 
