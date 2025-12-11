@@ -207,6 +207,17 @@
             margin-top: 15px;
             margin-bottom: 60px;
         }
+
+        /* Tembusan styling */
+        .tembusan-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .tembusan-item {
+            margin-bottom: 4px;
+        }
     </style>
 
 </head>
@@ -226,6 +237,19 @@ function tgl_indo($tanggal) {
     }
     return $tanggal;
 }
+
+// Kode baru: Mengambil divisi unik dari data dosen untuk tembusan
+$divisi_tembusan = [];
+if (!empty($surat->dosen_data)) {
+    foreach ($surat->dosen_data as $dosen) {
+        if (!empty($dosen['divisi'])) {
+            $divisi_tembusan[] = $dosen['divisi'];
+        }
+    }
+}
+// Hapus duplikat dan urutkan
+$divisi_tembusan = array_unique($divisi_tembusan);
+sort($divisi_tembusan); // Urutkan agar konsisten
 ?>
 
 <body>
@@ -321,12 +345,22 @@ function tgl_indo($tanggal) {
             <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
         </div><br><br>
 
-        <p>
-            <b>Tembusan</b><br>
-            1. Wakil Dekan Bidang Akaademik dan Dukungan Peneliltian FIK<br>
-            2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
-            3. Kaprodi S1 Desain Produk
-        </p>
+        <!-- TEMBUSAN dengan divisi dinamis dan penomoran terpisah -->
+        <div class="tembusan-list">
+            <p><b>Tembusan</b></p>
+            <div class="tembusan-item">1. Wakil Dekan Bidang Akademik dan Dukungan Penelitian FIK</div>
+            <div class="tembusan-item">2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK</div>
+            
+            <?php if (!empty($divisi_tembusan)): ?>
+                <?php $counter = 3; ?>
+                <?php foreach ($divisi_tembusan as $divisi): ?>
+                    <div class="tembusan-item"><?= $counter ?>. Kaprodi S1 <?= htmlspecialchars($divisi) ?></div>
+                    <?php $counter++; ?>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="tembusan-item">3. Kaprodi -</div>
+            <?php endif; ?>
+        </div>
         <br><br>
         <p><b>Lampiran Surat Tugas Nomor <?= $surat->nomor_surat ?? '-' ?></b></p>
     </div>

@@ -393,12 +393,15 @@ function format_periode_penugasan($surat) {
     </div>
         <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
 </div>
+
+<!-- TEMBUSAN - hanya satu divisi sesuai dosen yang ditugaskan -->
 <p>
     <b>Tembusan</b><br>
-1.	Wakil Dekan Bidang Akaademik dan Dukungan Peneliltian FIK<br>
-2.	Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
-3.	Kaprodi S1 Desain Produk
+    1. Wakil Dekan Bidang Akademik dan Dukungan Penelitian FIK<br>
+    2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
+    3. Kaprodi S1 <?= !empty($surat->dosen_data[0]['divisi']) ? htmlspecialchars($surat->dosen_data[0]['divisi']) : '-' ?>
 </p>
+
     </div>
     
 </body>

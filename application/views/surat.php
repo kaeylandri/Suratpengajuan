@@ -2179,6 +2179,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <div id="konfirmasi_tanggal" class="small mt-2" style="display: none;">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <span class="text-success">✓ Tanggal dipilih:</span>
+              <span id="day_counter" class="badge bg-info"></span>
             </div>
             <div class="d-flex flex-column">
               <span id="konfirmasi_awal" class="text-muted small"></span>
@@ -2192,7 +2193,12 @@ document.addEventListener('DOMContentLoaded', function () {
           
           <!-- Pesan error untuk validasi tanggal -->
           <div id="date_error" class="error-message" style="display: none;">
-            <i class="fas fa-exclamation-triangle"></i> Tidak bisa memilih tanggal lebih dari 30 hari ke belakang
+            <i class="fas fa-exclamation-triangle"></i> <span id="error_text"></span>
+          </div>
+          
+          <!-- Info batas 60 hari -->
+          <div id="day_limit_info" class="info-message small" style="display: none;">
+            <i class="fas fa-info-circle"></i> Maksimal 60 hari dari tanggal awal
           </div>
         </div>
       </div>
@@ -2355,6 +2361,13 @@ document.addEventListener('DOMContentLoaded', function () {
         border-left: 3px solid #28a745;
     }
 
+    /* Badge untuk counter hari */
+    .badge.bg-info {
+        font-size: 10px;
+        padding: 3px 8px;
+        font-weight: 600;
+    }
+
     /* Flatpickr disabled date styling */
     .flatpickr-day.disabled {
         color: #ccc !important;
@@ -2366,6 +2379,31 @@ document.addEventListener('DOMContentLoaded', function () {
     .flatpickr-day.disabled:hover {
         background-color: #f8f9fa !important;
         color: #ccc !important;
+    }
+
+    /* Flatpickr day limit styling */
+    .flatpickr-day.over-limit {
+        color: #ff6b6b !important;
+        background-color: #ffeaea !important;
+        text-decoration: line-through;
+    }
+    
+    .flatpickr-day.over-limit:hover {
+        background-color: #ffeaea !important;
+        color: #ff6b6b !important;
+        cursor: not-allowed;
+    }
+
+    /* Flatpickr selected date styling */
+    .flatpickr-day.selected {
+        background-color: #007bff !important;
+        border-color: #007bff !important;
+        color: white !important;
+        font-weight: bold;
+    }
+    
+    .flatpickr-day.selected:hover {
+        background-color: #0056b3 !important;
     }
 
     @media (max-width: 768px) {
@@ -2392,11 +2430,20 @@ document.addEventListener('DOMContentLoaded', function () {
             font-size: 11px;
             padding: 6px;
         }
+        
+        .badge.bg-info {
+            font-size: 9px;
+            padding: 2px 6px;
+        }
     }
 </style>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    // Variabel untuk menyimpan tanggal awal yang dipilih
+    let selectedStartDate = null;
+    const MAX_DAYS_LIMIT = 60; // Batas maksimal 60 hari
+
     // Fungsi untuk menghitung tanggal 30 hari yang lalu dari hari ini
     function getMinAllowedDate() {
         const today = new Date();
@@ -2427,9 +2474,25 @@ document.addEventListener("DOMContentLoaded", function () {
         return `${y}-${m}-${d}`;
     }
 
-    // Fungsi untuk validasi tanggal (tidak boleh lebih dari 30 hari ke belakang)
+    // Fungsi untuk menghitung selisih hari antara dua tanggal
+    function calculateDayDifference(startDate, endDate) {
+        const oneDay = 24 * 60 * 60 * 1000; // milliseconds dalam satu hari
+        const diffDays = Math.round(Math.abs((endDate - startDate) / oneDay));
+        return diffDays;
+    }
+
+    // Fungsi untuk menonaktifkan tanggal yang melebihi batas 60 hari dari tanggal awal
+    function disableDatesBeyondLimit(date) {
+        if (!selectedStartDate) return false;
+        
+        const diffDays = calculateDayDifference(selectedStartDate, date);
+        return diffDays > MAX_DAYS_LIMIT;
+    }
+
+    // Fungsi untuk validasi tanggal range
     function validateDateRange(selectedDates) {
         const dateError = document.getElementById("date_error");
+        const errorText = document.getElementById("error_text");
         const datepickerInput = document.getElementById("datepicker");
         const formGroup = datepickerInput.closest('.form-group');
         
@@ -2442,17 +2505,34 @@ document.addEventListener("DOMContentLoaded", function () {
             dateError.style.display = 'none';
             formGroup.classList.remove('has-error');
             
-            // Validasi: tanggal awal tidak boleh lebih dari 30 hari ke belakang
+            // Validasi 1: tanggal awal tidak boleh lebih dari 30 hari ke belakang
             if (startDate < minAllowedDate) {
-                dateError.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Tanggal awal tidak boleh lebih dari 30 hari ke belakang dari hari ini (${formatDateIndonesian(minAllowedDate)})`;
+                errorText.textContent = `Tanggal awal tidak boleh lebih dari 30 hari ke belakang dari hari ini (${formatDateIndonesian(minAllowedDate)})`;
                 dateError.style.display = 'block';
                 formGroup.classList.add('has-error');
                 return false;
             }
             
-            // Validasi: tanggal akhir tidak boleh lebih dari 30 hari ke belakang
+            // Validasi 2: tanggal akhir tidak boleh lebih dari 30 hari ke belakang
             if (endDate < minAllowedDate) {
-                dateError.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Tanggal akhir tidak boleh lebih dari 30 hari ke belakang dari hari ini (${formatDateIndonesian(minAllowedDate)})`;
+                errorText.textContent = `Tanggal akhir tidak boleh lebih dari 30 hari ke belakang dari hari ini (${formatDateIndonesian(minAllowedDate)})`;
+                dateError.style.display = 'block';
+                formGroup.classList.add('has-error');
+                return false;
+            }
+            
+            // Validasi 3: tanggal akhir tidak boleh lebih dari 60 hari dari tanggal awal
+            const dayDifference = calculateDayDifference(startDate, endDate);
+            if (dayDifference > MAX_DAYS_LIMIT) {
+                errorText.textContent = `Rentang tanggal tidak boleh lebih dari ${MAX_DAYS_LIMIT} hari. Rentang saat ini: ${dayDifference} hari`;
+                dateError.style.display = 'block';
+                formGroup.classList.add('has-error');
+                return false;
+            }
+            
+            // Validasi 4: tanggal akhir tidak boleh sebelum tanggal awal
+            if (endDate < startDate) {
+                errorText.textContent = 'Tanggal akhir tidak boleh sebelum tanggal awal';
                 dateError.style.display = 'block';
                 formGroup.classList.add('has-error');
                 return false;
@@ -2471,15 +2551,28 @@ document.addEventListener("DOMContentLoaded", function () {
         dateFormat: "Y-m-d",
         allowInput: false,
         minDate: minAllowedDate, // Tidak bisa pilih tanggal sebelum 30 hari yang lalu
-        disable: [
-            function(date) {
-                // Nonaktifkan tanggal sebelum minAllowedDate
-                return date < minAllowedDate;
+        locale: {
+            firstDayOfWeek: 1 // Senin
+        },
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+            // Tambahkan kelas khusus untuk tanggal yang melebihi batas 60 hari
+            if (selectedStartDate) {
+                const currentDate = new Date(dayElem.dateObj);
+                const diffDays = calculateDayDifference(selectedStartDate, currentDate);
+                
+                if (diffDays > MAX_DAYS_LIMIT) {
+                    dayElem.classList.add("over-limit");
+                    
+                    // Tambahkan tooltip
+                    dayElem.title = `Melebihi batas ${MAX_DAYS_LIMIT} hari dari tanggal awal`;
+                }
             }
-        ],
+        },
         onChange: function(selectedDates, dateStr, instance) {
             const konfirmasiDiv = document.getElementById("konfirmasi_tanggal");
+            const dayCounter = document.getElementById("day_counter");
             const rangeInfo = document.getElementById("range_info");
+            const dayLimitInfo = document.getElementById("day_limit_info");
             const dateError = document.getElementById("date_error");
             const datepickerInput = document.getElementById("datepicker");
             const formGroup = datepickerInput.closest('.form-group');
@@ -2488,15 +2581,29 @@ document.addEventListener("DOMContentLoaded", function () {
             dateError.style.display = 'none';
             formGroup.classList.remove('has-error');
             
+            // Tampilkan/sembunyikan info batas hari
+            if (selectedDates.length === 1) {
+                dayLimitInfo.style.display = 'block';
+                selectedStartDate = selectedDates[0];
+            } else {
+                dayLimitInfo.style.display = 'none';
+                selectedStartDate = null;
+            }
+            
             if (selectedDates.length === 2) {
                 const awal = selectedDates[0];
                 const akhir = selectedDates[1];
+                const dayDifference = calculateDayDifference(awal, akhir);
+                
+                // Simpan tanggal awal untuk kalkulasi
+                selectedStartDate = awal;
                 
                 // Validasi tanggal
                 if (!validateDateRange(selectedDates)) {
                     // Jika validasi gagal, reset datepicker
                     instance.clear();
                     konfirmasiDiv.style.display = 'none';
+                    dayCounter.textContent = '';
                     rangeInfo.style.display = 'block';
                     
                     // Reset auto-filled inputs
@@ -2527,11 +2634,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById("datepicker3").value = awalFormatted;
                 document.getElementById("datepicker4").value = akhirFormatted;
                 
+                // Update day counter
+                dayCounter.textContent = `${dayDifference} hari`;
+                
                 // Tampilkan konfirmasi tanggal
                 document.getElementById("konfirmasi_awal").innerHTML = `<strong>Awal:</strong> ${awalDisplay}`;
                 document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Akhir:</strong> ${akhirDisplay}`;
                 konfirmasiDiv.style.display = 'block';
                 rangeInfo.style.display = 'none';
+                dayLimitInfo.style.display = 'none';
                 
                 // Update info messages
                 document.getElementById("info_periode").innerHTML = "Terisi otomatis ✓";
@@ -2548,7 +2659,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }, 1000);
                 
             } else if (selectedDates.length === 1) {
-                // Jika hanya satu tanggal yang dipilih
+                // Jika hanya satu tanggal yang dipilih (tanggal awal)
                 const awalDisplay = formatDateIndonesian(selectedDates[0]);
                 
                 // Validasi tanggal tunggal
@@ -2557,21 +2668,31 @@ document.addEventListener("DOMContentLoaded", function () {
                 const minAllowedDate = getMinAllowedDate();
                 
                 if (selectedDates[0] < minAllowedDate) {
-                    dateError.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Tanggal tidak boleh lebih dari 30 hari ke belakang dari hari ini (${formatDateIndonesian(minAllowedDate)})`;
+                    errorText.textContent = `Tanggal tidak boleh lebih dari 30 hari ke belakang dari hari ini (${formatDateIndonesian(minAllowedDate)})`;
                     dateError.style.display = 'block';
                     formGroup.classList.add('has-error');
                     instance.clear();
+                    selectedStartDate = null;
                     return;
                 }
                 
+                selectedStartDate = selectedDates[0];
                 document.getElementById("konfirmasi_awal").innerHTML = `<strong>Tanggal awal:</strong> ${awalDisplay}`;
-                document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Tanggal akhir:</strong> Klik tanggal akhir`;
+                document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Tanggal akhir:</strong> Pilih tanggal akhir (maks ${MAX_DAYS_LIMIT} hari)`;
                 konfirmasiDiv.style.display = 'block';
+                dayCounter.textContent = '';
                 rangeInfo.style.display = 'none';
+                dayLimitInfo.style.display = 'block';
+                
+                // Refresh calendar untuk update disabled dates
+                instance.redraw();
             } else {
                 // Jika tanggal di-reset
+                selectedStartDate = null;
                 konfirmasiDiv.style.display = 'none';
+                dayCounter.textContent = '';
                 rangeInfo.style.display = 'block';
+                dayLimitInfo.style.display = 'none';
                 
                 // Reset auto-filled inputs
                 document.getElementById("datepicker3").value = "";
@@ -2582,15 +2703,39 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Hapus class styling
                 document.getElementById("datepicker3").classList.remove("auto-filled");
                 document.getElementById("datepicker4").classList.remove("auto-filled");
+                
+                // Refresh calendar
+                instance.redraw();
             }
         },
         onOpen: function(selectedDates, dateStr, instance) {
             // Update info tentang batasan tanggal
             const minDate = getMinAllowedDate();
-            const today = new Date();
             const infoElement = instance._input.nextElementSibling;
             if (infoElement && infoElement.classList.contains('info-message')) {
-                infoElement.innerHTML = `Tidak bisa memilih tanggal sebelum ${formatDateIndonesian(minDate)}`;
+                infoElement.innerHTML = `Tidak bisa memilih tanggal sebelum ${formatDateIndonesian(minDate)}<br>Maksimal ${MAX_DAYS_LIMIT} hari dari tanggal awal`;
+            }
+            
+            // Jika sudah memilih tanggal awal, tampilkan info
+            if (selectedDates.length === 1) {
+                const dayLimitInfo = document.getElementById("day_limit_info");
+                if (dayLimitInfo) {
+                    dayLimitInfo.style.display = 'block';
+                }
+            }
+        },
+        onClose: function(selectedDates, dateStr, instance) {
+            // Sembunyikan info batas hari saat calendar ditutup
+            const dayLimitInfo = document.getElementById("day_limit_info");
+            if (dayLimitInfo) {
+                dayLimitInfo.style.display = 'none';
+            }
+            
+            // Jika hanya memilih satu tanggal (awal), jangan reset
+            if (selectedDates.length === 1) {
+                selectedStartDate = selectedDates[0];
+            } else if (selectedDates.length === 0) {
+                selectedStartDate = null;
             }
         }
     });
@@ -2598,40 +2743,165 @@ document.addEventListener("DOMContentLoaded", function () {
     // Handler untuk dropdown jenis tanggal
     document.getElementById("jenis_date").addEventListener("change", function () {
         const periodeSection = document.getElementById("periode_section");
+        const datepickerInput = document.getElementById("datepicker");
+        
         periodeSection.style.display = this.value === "Periode" ? "block" : "none";
+        
+        // Jika memilih Custom, reset tanggal dan tampilkan info batas 60 hari
+        if (this.value === "Custom") {
+            datepicker.clear();
+            selectedStartDate = null;
+            
+            // Tampilkan info awal
+            const rangeInfo = document.getElementById("range_info");
+            if (rangeInfo) {
+                const minDate = getMinAllowedDate();
+                rangeInfo.innerHTML = `Klik tanggal awal, lalu klik tanggal akhir<br>
+                                      <small style="color: #666;">• Tidak bisa memilih tanggal sebelum ${formatDateIndonesian(minDate)}</small><br>
+                                      <small style="color: #666;">• Maksimal ${MAX_DAYS_LIMIT} hari dari tanggal awal</small>`;
+            }
+        }
     });
 
     // Tambahkan info batasan tanggal di halaman load
     window.addEventListener('load', function() {
         const minDate = getMinAllowedDate();
         const rangeInfo = document.getElementById("range_info");
+        const dayLimitInfo = document.getElementById("day_limit_info");
+        
         if (rangeInfo) {
-            rangeInfo.innerHTML = `Klik tanggal awal, lalu klik tanggal akhir<br><small style="color: #666;">Tidak bisa memilih tanggal sebelum ${formatDateIndonesian(minDate)}</small>`;
+            rangeInfo.innerHTML = `Klik tanggal awal, lalu klik tanggal akhir<br>
+                                  <small style="color: #666;">• Tidak bisa memilih tanggal sebelum ${formatDateIndonesian(minDate)}</small><br>
+                                  <small style="color: #666;">• Maksimal ${MAX_DAYS_LIMIT} hari dari tanggal awal</small>`;
         }
+        
+        if (dayLimitInfo) {
+            dayLimitInfo.innerHTML = `<i class="fas fa-info-circle"></i> Maksimal ${MAX_DAYS_LIMIT} hari dari tanggal awal`;
+        }
+        
+        // Tambahkan event listener untuk menghitung ulang saat ada perubahan
+        document.getElementById('datepicker').addEventListener('change', function() {
+            const selectedDates = datepicker.selectedDates;
+            if (selectedDates.length === 2) {
+                const awal = selectedDates[0];
+                const akhir = selectedDates[1];
+                const dayDifference = calculateDayDifference(awal, akhir);
+                
+                // Update counter
+                const dayCounter = document.getElementById("day_counter");
+                if (dayCounter) {
+                    dayCounter.textContent = `${dayDifference} hari`;
+                    
+                    // Update warna badge berdasarkan jumlah hari
+                    if (dayDifference > 50) {
+                        dayCounter.className = "badge bg-danger";
+                    } else if (dayDifference > 30) {
+                        dayCounter.className = "badge bg-warning";
+                    } else {
+                        dayCounter.className = "badge bg-info";
+                    }
+                }
+            }
+        });
     });
+    
+    // Fungsi untuk menampilkan notifikasi batas hari
+    function showDayLimitNotification(startDate) {
+        const maxDate = new Date(startDate);
+        maxDate.setDate(startDate.getDate() + MAX_DAYS_LIMIT);
+        
+        // Buat elemen notifikasi
+        const notification = document.createElement('div');
+        notification.className = 'alert alert-info alert-dismissible fade show';
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 300px;
+            animation: slideInRight 0.5s ease;
+        `;
+        notification.innerHTML = `
+            <strong><i class="fas fa-calendar-alt"></i> Batas Waktu</strong>
+            <p class="mb-1 small">Anda memilih tanggal awal: <strong>${formatDateIndonesian(startDate)}</strong></p>
+            <p class="mb-1 small">Anda dapat memilih tanggal akhir maksimal: <strong>${formatDateIndonesian(maxDate)}</strong></p>
+            <p class="mb-0 small text-muted">(${MAX_DAYS_LIMIT} hari dari tanggal awal)</p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Hapus notifikasi setelah 5 detik
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 500);
+            }
+        }, 5000);
+    }
+    
+    // Tambahkan CSS untuk animasi notifikasi
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .alert {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+    `;
+    document.head.appendChild(style);
 });
 </script>
 
-<!-- Step 3 (Upload File) -->
 <!-- ===== UPLOADCARE CDN ===== -->
 <script>
 UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
 </script>
 <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
+<!-- Loading Screen (Hidden by default) -->
+<div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.5s ease;">
+    <div class="loading-container" style="text-align: center; max-width: 400px; padding: 30px;">
+        <!-- Logo Telkom University pada loading screen -->
+        <img src="<?= base_url('assets/Tel-U_logo.png') ?>" class="loading-logo" alt="Telkom University Logo" style="width: 120px; margin-bottom: 25px; opacity: 0.9;">
+        
+        <div class="loading-spinner" style="border: 4px solid rgba(0, 123, 255, 0.1); border-top: 4px solid #007bff; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin: 0 auto 25px;"></div>
+        
+        <div class="loading-text" style="font-size: 18px; font-weight: 600; color: #343a40; margin-bottom: 10px;">Mengirim Form</div>
+        <div class="loading-subtext" style="font-size: 14px; color: #6c757d; max-width: 300px; line-height: 1.5; margin: 0 auto 20px;">Sedang mengirim formulir dan file eviden ke server...</div>
+        
+        <div class="loading-progress" style="width: 100%; background-color: #e9ecef; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 20px;">
+            <div class="loading-progress-bar" style="width: 0%; height: 100%; background-color: #007bff; transition: width 0.5s ease;"></div>
+        </div>
+    </div>
+</div>
+
 <fieldset id="step-upload">
     <div style="width: 100%;">
         <div style="margin-bottom: 20px;">
             <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333;">
                 <i class="fas fa-cloud-upload-alt"></i> Upload File Eviden
-                <span class="required-indicator">*</span>
+                <span style="color: #dc3545; margin-left: 4px; font-weight: bold;">*</span>
             </label>
             <p style="font-size: 13px; color: #6c757d; margin-bottom: 15px;">
                 Anda harus menambahkan minimal 1 file eviden untuk melanjutkan.
             </p>
             
             <!-- Validasi Message -->
-            <div id="validation-message" class="validation-message" style="display: none;">
+            <div id="validation-message" style="display: none; padding: 12px 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; margin-bottom: 15px; color: #856404; font-size: 14px; display: flex; align-items: center; gap: 8px; animation: fadeIn 0.3s ease;">
                 <i class="fas fa-exclamation-circle"></i> <span id="validation-text"></span>
             </div>
         </div>
@@ -2675,48 +2945,48 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
 </fieldset>
 
 <!-- Modal Preview File - PDF Viewer Style -->
-<div id="file-preview-modal" class="file-preview-modal">
-    <div class="modal-content-fullscreen">
+<div id="file-preview-modal" class="file-preview-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #202124; z-index: 10000;">
+    <div class="modal-content-fullscreen" style="width: 100%; height: 100%; display: flex; flex-direction: column; background: #202124;">
         <!-- Header Purple seperti PDF viewer -->
-        <div class="pdf-viewer-header">
-            <div class="pdf-header-left">
-                <button type="button" class="header-icon-btn" onclick="closePreviewModal()" title="Close">
+        <div class="pdf-viewer-header" style="background: linear-gradient(135deg, #7b5e9f 0%, #9370b8 100%); color: white; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);">
+            <div class="pdf-header-left" style="display: flex; align-items: center; gap: 15px; flex: 1; min-width: 0;">
+                <button type="button" class="header-icon-btn" onclick="closePreviewModal()" title="Close" style="background: transparent; border: none; color: white; width: 40px; height: 40px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 18px;">
                     <i class="fas fa-times"></i>
                 </button>
-                <span class="pdf-title" id="modal-file-title">Preview: document.pdf</span>
+                <span class="pdf-title" id="modal-file-title" style="font-size: 16px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white;">Preview: document.pdf</span>
             </div>
-            <div class="pdf-header-right">
-                <a id="btn-download-file" href="#" target="_blank" download class="header-icon-btn" title="Download">
+            <div class="pdf-header-right" style="display: flex; gap: 5px; align-items: center;">
+                <a id="btn-download-file" href="#" target="_blank" download class="header-icon-btn" title="Download" style="background: transparent; border: none; color: white; width: 40px; height: 40px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 18px; text-decoration: none;">
                     <i class="fas fa-download"></i>
                 </a>
-                <button type="button" class="header-icon-btn" onclick="window.print()" title="Print">
+                <button type="button" class="header-icon-btn" onclick="window.print()" title="Print" style="background: transparent; border: none; color: white; width: 40px; height: 40px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 18px;">
                     <i class="fas fa-print"></i>
                 </button>
-                <button type="button" class="header-icon-btn" title="More options">
+                <button type="button" class="header-icon-btn" title="More options" style="background: transparent; border: none; color: white; width: 40px; height: 40px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 18px;">
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
             </div>
         </div>
 
         <!-- Toolbar Dark seperti PDF viewer -->
-        <div class="pdf-viewer-toolbar">
-            <div class="toolbar-left">
-                <button type="button" class="toolbar-icon-btn" title="Menu">
+        <div class="pdf-viewer-toolbar" style="background: #323639; color: #e8eaed; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);">
+            <div class="toolbar-left" style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="toolbar-icon-btn" title="Menu" style="background: transparent; border: none; color: #e8eaed; width: 36px; height: 36px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 16px;">
                     <i class="fas fa-bars"></i>
                 </button>
-                <span class="page-indicator">
+                <span class="page-indicator" style="color: #e8eaed; font-size: 13px; padding: 0 12px; white-space: nowrap;">
                     <span id="current-page">1</span> / <span id="total-pages">1</span>
                 </span>
             </div>
             
-            <div class="toolbar-center">
-                <button type="button" class="toolbar-icon-btn" title="Zoom out" onclick="zoomOut()">
+            <div class="toolbar-center" style="flex: 1; justify-content: center; display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="toolbar-icon-btn" title="Zoom out" onclick="zoomOut()" style="background: transparent; border: none; color: #e8eaed; width: 36px; height: 36px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 16px;">
                     <i class="fas fa-minus"></i>
                 </button>
-                <button type="button" class="toolbar-icon-btn" title="Zoom in" onclick="zoomIn()">
+                <button type="button" class="toolbar-icon-btn" title="Zoom in" onclick="zoomIn()" style="background: transparent; border: none; color: #e8eaed; width: 36px; height: 36px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 16px;">
                     <i class="fas fa-plus"></i>
                 </button>
-                <select class="zoom-select" id="zoom-select">
+                <select class="zoom-select" id="zoom-select" style="background: #3c4043; border: 1px solid #5f6368; color: #e8eaed; padding: 6px 8px; border-radius: 4px; font-size: 13px; cursor: pointer; outline: none;">
                     <option value="50">50%</option>
                     <option value="75">75%</option>
                     <option value="100" selected>100%</option>
@@ -2724,28 +2994,28 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
                     <option value="150">150%</option>
                     <option value="200">200%</option>
                 </select>
-                <button type="button" class="toolbar-icon-btn" title="Rotate" onclick="rotateImage()">
+                <button type="button" class="toolbar-icon-btn" title="Rotate" onclick="rotateImage()" style="background: transparent; border: none; color: #e8eaed; width: 36px; height: 36px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 16px;">
                     <i class="fas fa-sync-alt"></i>
                 </button>
-                <button type="button" class="toolbar-icon-btn" title="Fit to page" onclick="fitToPage()">
+                <button type="button" class="toolbar-icon-btn" title="Fit to page" onclick="fitToPage()" style="background: transparent; border: none; color: #e8eaed; width: 36px; height: 36px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 16px;">
                     <i class="fas fa-expand"></i>
                 </button>
             </div>
 
-            <div class="toolbar-right">
-                <button type="button" class="toolbar-icon-btn" title="Undo">
+            <div class="toolbar-right" style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="toolbar-icon-btn" title="Undo" style="background: transparent; border: none; color: #e8eaed; width: 36px; height: 36px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 16px;">
                     <i class="fas fa-undo"></i>
                 </button>
-                <button type="button" class="toolbar-icon-btn" title="Redo">
+                <button type="button" class="toolbar-icon-btn" title="Redo" style="background: transparent; border: none; color: #e8eaed; width: 36px; height: 36px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; font-size: 16px;">
                     <i class="fas fa-redo"></i>
                 </button>
             </div>
         </div>
 
         <!-- Content Area -->
-        <div class="pdf-viewer-body">
-            <div id="preview-content" class="preview-container">
-                <div class="loading-spinner"></div>
+        <div class="pdf-viewer-body" style="flex: 1; overflow: auto; background: #202124; display: flex; justify-content: center; align-items: center; padding: 20px;">
+            <div id="preview-content" class="preview-container" style="width: 100%; max-width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100%;">
+                <div class="loading-spinner" style="border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 100px auto;"></div>
             </div>
         </div>
     </div>
@@ -2753,266 +3023,33 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
 
 <!-- BUTTON AREA -->
 <div class="button-area" style="margin-top:25px; text-align:center;">
-    <button type="button" class="btn btn-primary prev-btn rounded-pill btn-sm" style="padding: 6px 20px;">Back</button>
-    <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px; background: #6c757d; border-color: #6c757d; color: white; cursor: not-allowed;" disabled>
+    <button type="button" class="btn btn-primary prev-btn rounded-pill btn-sm" style="padding: 6px 20px; border-radius: 50px; background: #007bff; border: none; color: white; cursor: pointer;">Back</button>
+    <button type="button" class="action-btn next-btn rounded-pill btn-sm" style="padding: 6px 20px; border-radius: 50px; background: #6c757d; border-color: #6c757d; color: white; cursor: not-allowed;" disabled>
         <span id="next-btn-text">Continue</span>
     </button>
 </div>
 
 <style>
-/* Modal Styles - PDF Viewer Style */
-.file-preview-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #202124;
-    z-index: 10000;
+/* CSS Utama */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 .file-preview-modal.show {
     display: flex;
     flex-direction: column;
-}
-
-.modal-content-fullscreen {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    background: #202124;
-}
-
-/* PDF Viewer Header - Purple */
-.pdf-viewer-header {
-    background: linear-gradient(135deg, #7b5e9f 0%, #9370b8 100%);
-    color: white;
-    padding: 12px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.pdf-header-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    flex: 1;
-    min-width: 0;
-}
-
-.pdf-title {
-    font-size: 16px;
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: white;
-}
-
-.pdf-header-right {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-}
-
-.header-icon-btn {
-    background: transparent;
-    border: none;
-    color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-    font-size: 18px;
-    text-decoration: none;
-}
-
-.header-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/* PDF Viewer Toolbar - Dark */
-.pdf-viewer-toolbar {
-    background: #323639;
-    color: #e8eaed;
-    padding: 8px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.toolbar-left,
-.toolbar-center,
-.toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.toolbar-center {
-    flex: 1;
-    justify-content: center;
-}
-
-.toolbar-icon-btn {
-    background: transparent;
-    border: none;
-    color: #e8eaed;
-    width: 36px;
-    height: 36px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-    font-size: 16px;
-}
-
-.toolbar-icon-btn:hover {
-    background: rgba(255, 255,255, 0.1);
-}
-
-.page-indicator {
-    color: #e8eaed;
-    font-size: 13px;
-    padding: 0 12px;
-    white-space: nowrap;
-}
-
-.zoom-select {
-    background: #3c4043;
-    border: 1px solid #5f6368;
-    color: #e8eaed;
-    padding: 6px 8px;
-    border-radius: 4px;
-    font-size: 13px;
-    cursor: pointer;
-    outline: none;
-}
-
-.zoom-select:hover {
-    background: #484a4d;
-}
-
-/* PDF Viewer Body */
-.pdf-viewer-body {
-    flex: 1;
-    overflow: auto;
-    background: #202124;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-.preview-container {
-    width: 100%;
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100%;
-}
-
-.preview-image {
-    max-width: 90%;
-    max-height: 85vh;
-    height: auto;
-    width: auto;
-    border-radius: 4px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
-    background: transparent;
-    transition: transform 0.3s ease;
-    object-fit: contain;
-}
-
-.preview-pdf {
-    width: 100%;
-    height: calc(100vh - 120px);
-    border: none;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-}
-
-.preview-file-info {
-    text-align: center;
-    padding: 60px 40px;
-    background: #3c3f43;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-    max-width: 500px;
-    border: 1px solid #5f6368;
-}
-
-.preview-file-icon {
-    font-size: 100px;
-    margin-bottom: 25px;
-    opacity: 0.9;
-    color: #e8eaed;
-}
-
-.preview-file-name {
-    font-size: 20px;
-    font-weight: 600;
-    color: #e8eaed;
-    margin-bottom: 12px;
-    word-break: break-all;
-}
-
-.preview-file-type {
-    font-size: 15px;
-    color: #9aa0a6;
-    margin-bottom: 25px;
-}
-
-.btn-open-tab {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 12px 24px;
-    background: #1a73e8;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 14px;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
-}
-
-.btn-open-tab:hover {
-    background: #1557b0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
-}
-
-.btn-open-tab i {
-    margin-right: 8px;
-}
-
-/* Loading spinner */
-.loading-spinner {
-    border: 4px solid rgba(255, 255, 255, 0.3);
-    border-top: 4px solid white;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-    margin: 100px auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 /* Style untuk tombol upload */
@@ -3119,47 +3156,22 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
 }
 
 /* Validation Message */
-.validation-message {
-    padding: 12px 15px;
-    background-color: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    color: #856404;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    animation: fadeIn 0.3s ease;
-}
-
-.validation-message i {
-    font-size: 16px;
-}
-
 .validation-message.success {
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-    color: #155724;
+    background-color: #d4edda !important;
+    border-color: #c3e6cb !important;
+    color: #155724 !important;
 }
 
 .validation-message.error {
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-    color: #721c24;
+    background-color: #f8d7da !important;
+    border-color: #f5c6cb !important;
+    color: #721c24 !important;
 }
 
 .validation-message.info {
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
-    color: #0c5460;
-}
-
-/* Required Indicator */
-.required-indicator {
-    color: #dc3545;
-    margin-left: 4px;
-    font-weight: bold;
+    background-color: #d1ecf1 !important;
+    border-color: #bee5eb !important;
+    color: #0c5460 !important;
 }
 
 /* Button disabled state */
@@ -3192,17 +3204,6 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
     animation: fadeIn 0.5s ease;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
 .pulse-animation {
     animation: pulse 2s infinite;
 }
@@ -3210,24 +3211,24 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .pdf-viewer-header {
-        padding: 10px 15px;
+        padding: 10px 15px !important;
     }
     
     .pdf-title {
-        font-size: 14px;
+        font-size: 14px !important;
     }
     
     .toolbar-center {
-        gap: 4px;
+        gap: 4px !important;
     }
     
     .zoom-select {
-        width: 70px;
-        font-size: 12px;
+        width: 70px !important;
+        font-size: 12px !important;
     }
     
     .pdf-viewer-body {
-        padding: 10px;
+        padding: 10px !important;
     }
     
     .file-item {
@@ -3255,6 +3256,70 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
 // ========================================
 
 document.addEventListener("DOMContentLoaded", function () {
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingProgressBar = loadingScreen.querySelector('.loading-progress-bar');
+    const loadingText = loadingScreen.querySelector('.loading-text');
+    const loadingSubtext = loadingScreen.querySelector('.loading-subtext');
+    
+    // Fungsi untuk menampilkan loading screen
+    function showLoadingScreen() {
+        // Reset progress bar
+        if (loadingProgressBar) {
+            loadingProgressBar.style.width = '0%';
+        }
+        
+        // Update teks loading
+        if (loadingText && loadingSubtext) {
+            loadingText.textContent = 'Mengirim Form';
+            loadingSubtext.textContent = 'Sedang mengirim formulir dan file eviden ke server...';
+        }
+        
+        // Tampilkan loading screen dengan efek fade in
+        loadingScreen.style.display = 'flex';
+        setTimeout(() => {
+            loadingScreen.style.opacity = '1';
+        }, 10);
+        
+        // Animate progress bar
+        simulateSubmitProgress();
+    }
+    
+    // Fungsi untuk menyembunyikan loading screen
+    function hideLoadingScreen() {
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+        }, 500);
+    }
+    
+    // Simulasi progress untuk submit form
+    function simulateSubmitProgress() {
+        let progress = 0;
+        const interval = setInterval(function() {
+            progress += 10;
+            if (loadingProgressBar) {
+                loadingProgressBar.style.width = progress + '%';
+            }
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                // Progress selesai, form akan disubmit
+                setTimeout(() => {
+                    // Set progress 100% untuk efek selesai
+                    if (loadingProgressBar) {
+                        loadingProgressBar.style.width = '100%';
+                    }
+                    
+                    if (loadingText && loadingSubtext) {
+                        loadingText.textContent = 'Form Terkirim!';
+                        loadingSubtext.textContent = 'Formulir berhasil dikirim ke sistem';
+                    }
+                }, 300);
+            }
+        }, 200);
+    }
+    
+    // Inisialisasi variabel utama
     const evidenInput = document.getElementById("eviden");
     const uploadedDisplay = document.getElementById("uploaded-files-display");
     const filesList = document.getElementById("files-list");
@@ -3528,16 +3593,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 const img = new Image();
                 img.onload = function() {
                     previewContent.innerHTML = `
-                        <img src="${url}" alt="${filename}" class="preview-image">
+                        <img src="${url}" alt="${filename}" class="preview-image" style="max-width: 90%; max-height: 85vh; height: auto; width: auto; border-radius: 4px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7); background: transparent; transition: transform 0.3s ease; object-fit: contain;">
                     `;
                 };
                 img.onerror = function() {
                     previewContent.innerHTML = `
-                        <div class="preview-file-info">
-                            <div class="preview-file-icon">
+                        <div class="preview-file-info" style="text-align: center; padding: 60px 40px; background: #3c3f43; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); max-width: 500px; border: 1px solid #5f6368;">
+                            <div class="preview-file-icon" style="font-size: 100px; margin-bottom: 25px; opacity: 0.9; color: #e8eaed;">
                                 <i class="fas fa-exclamation-triangle" style="color: #ff6b6b;"></i>
                             </div>
-                            <div class="preview-file-name">Gagal Memuat Gambar</div>
+                            <div class="preview-file-name" style="font-size: 20px; font-weight: 600; color: #e8eaed; margin-bottom: 12px; word-break: break-all;">Gagal Memuat Gambar</div>
                             <p style="color: #999; font-size: 14px;">
                                 Tidak dapat menampilkan gambar ini.<br>
                                 Silakan coba download file.
@@ -3549,7 +3614,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } else if (ext === 'pdf') {
                 // PDF preview
                 previewContent.innerHTML = `
-                    <iframe src="${url}" class="preview-pdf" frameborder="0"></iframe>
+                    <iframe src="${url}" class="preview-pdf" frameborder="0" style="width: 100%; height: calc(100vh - 120px); border: none; background: white; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);"></iframe>
                 `;
             } else {
                 // Other file types - show info
@@ -3571,15 +3636,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 const iconHtml = getFileIcon(url);
                 
                 previewContent.innerHTML = `
-                    <div class="preview-file-info">
-                        <div class="preview-file-icon">${iconHtml}</div>
-                        <div class="preview-file-name">${filename}</div>
-                        <div class="preview-file-type">${fileType}</div>
+                    <div class="preview-file-info" style="text-align: center; padding: 60px 40px; background: #3c3f43; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); max-width: 500px; border: 1px solid #5f6368;">
+                        <div class="preview-file-icon" style="font-size: 100px; margin-bottom: 25px; opacity: 0.9; color: #e8eaed;">${iconHtml}</div>
+                        <div class="preview-file-name" style="font-size: 20px; font-weight: 600; color: #e8eaed; margin-bottom: 12px; word-break: break-all;">${filename}</div>
+                        <div class="preview-file-type" style="font-size: 15px; color: #9aa0a6; margin-bottom: 25px;">${fileType}</div>
                         <p style="color: #999; font-size: 14px; line-height: 1.6;">
                             Preview tidak tersedia untuk tipe file ini.<br>
                             Klik tombol "Download" di header untuk mengunduh.
                         </p>
-                        <a href="${url}" target="_blank" class="btn-open-tab">
+                        <a href="${url}" target="_blank" class="btn-open-tab" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #1a73e8; color: white; text-decoration: none; border-radius: 6px; font-weight: 500; font-size: 14px; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);">
                             <i class="fas fa-external-link-alt"></i> Buka di Tab Baru
                         </a>
                     </div>
@@ -3844,7 +3909,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     validateUploadStep();
                 }
             } 
-            // Jika sudah di step terakhir (Finish)
+            // Jika sudah di step terakhir (Finish) - INI YANG DIPERBAIKI
             else {
                 console.log("🚀 Submitting form...");
                 console.log("📎 Final eviden value:", evidenInput.value);
@@ -3866,18 +3931,21 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
                 
-                // Submit form
-                const msform = document.getElementById('msform');
-                if (msform) {
-                    // Show loading indicator
-                    nextBtn.disabled = true;
-                    nextBtnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
-                    
-                    // Delay sedikit agar user bisa melihat loading
-                    setTimeout(() => {
+                // TAMPILKAN LOADING SCREEN DI SINI
+                showLoadingScreen();
+                
+                // Disable tombol untuk mencegah double click
+                nextBtn.disabled = true;
+                nextBtnText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+                
+                // Submit form setelah progress loading selesai
+                setTimeout(() => {
+                    const msform = document.getElementById('msform');
+                    if (msform) {
+                        console.log("✅ Form sedang disubmit...");
                         msform.submit();
-                    }, 500);
-                }
+                    }
+                }, 2500); // Memberikan waktu untuk animasi loading selesai
             }
         });
     }
@@ -3944,7 +4012,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Event listener untuk mendeteksi perubahan step
-    // Jika Anda memiliki sistem navigation yang memicu event
     document.addEventListener('stepChanged', function(e) {
         if (e.detail && e.detail.step === 'upload') {
             loadExistingFiles();

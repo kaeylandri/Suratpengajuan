@@ -80,23 +80,17 @@
             text-align: center;
             text-transform: uppercase;
             font-size: 25px;
-            /* sedikit lebih besar */
             font-weight: bold;
             margin-bottom: 2px;
-            /* lebih rapat ke nomor */
             text-decoration: underline;
             text-underline-offset: 4px;
-            /* jarak garis ke teks */
         }
 
         .surat-number {
             text-align: center;
             font-size: 13px;
-            /* sedikit lebih besar dari sebelumnya */
             margin-top: -2px;
-            /* menaikkan sedikit agar lebih dekat */
             margin-bottom: 25px;
-            /* jarak ke isi */
         }
 
         /* Paragraf styling - TANPA INDENT */
@@ -194,7 +188,6 @@
             font-weight: bold;
             text-decoration: underline;
             line-height: 1;
-            /* jarak vertikal lebih rapat */
             margin-bottom: 2px;
         }
 
@@ -206,7 +199,6 @@
         .qr-centered {
             width: 90px;
             margin-bottom: 6px;
-            /* jarak QR ke nama */
             margin-top: 20px;
         }
 
@@ -224,7 +216,6 @@
 
         .qr-bottom {
             width: 90px;
-            /* ukuran sama seperti QR atas */
             margin-bottom: 6px;
         }
 
@@ -240,6 +231,17 @@
         .date {
             margin-top: 20px;
             margin-bottom: 60px;
+        }
+
+        /* Tembusan styling */
+        .tembusan-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .tembusan-item {
+            margin-bottom: 4px;
         }
     </style>
 
@@ -271,6 +273,19 @@ function tgl_indo($tanggal)
     }
     return $tanggal;
 }
+
+// Kode baru: Mengambil divisi unik dari data dosen untuk tembusan
+$divisi_tembusan = [];
+if (!empty($surat->dosen_data)) {
+    foreach ($surat->dosen_data as $dosen) {
+        if (!empty($dosen['divisi'])) {
+            $divisi_tembusan[] = $dosen['divisi'];
+        }
+    }
+}
+// Hapus duplikat dan urutkan
+$divisi_tembusan = array_unique($divisi_tembusan);
+sort($divisi_tembusan); // Urutkan agar konsisten
 ?>
 
 <body>
@@ -304,7 +319,6 @@ function tgl_indo($tanggal)
         <!-- Judul Surat -->
         <div class="surat-title">SURAT TUGAS</div>
         <div class="surat-number">Nomor : <?= $surat->nomor_surat ?? '-' ?></div>
-
 
         <p>Saya yang bertanda tangan di bawah ini :</p>
 
@@ -354,7 +368,7 @@ function tgl_indo($tanggal)
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" style="text-align:center;">Tidak ada data dosen</td>
+                        <td colspan="6" style="text-align:center;">Tidak ada data dosen</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -414,7 +428,6 @@ function tgl_indo($tanggal)
 
         <!-- SIGNATURE + QR -->
         <div class="signature-bottom">
-
             <?php if (!empty($qr_base64)): ?>
                 <div class="qr-bottom-box">
                     <img class="qr-bottom" src="data:image/png;base64,<?= $qr_base64 ?>" alt="QR Code">
@@ -426,12 +439,23 @@ function tgl_indo($tanggal)
             </div>
             <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
         </div>
-        <p>
-            <b>Tembusan</b><br>
-            1. Wakil Dekan Bidang Akaademik dan Dukungan Peneliltian FIK<br>
-            2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
-            3. Kaprodi S1 Desain Produk
-        </p>
+
+        <!-- TEMBUSAN dengan divisi dinamis dan penomoran terpisah -->
+        <p><b>Tembusan</b></p>
+        <div class="tembusan-list">
+            <div class="tembusan-item">1. Wakil Dekan Bidang Akademik dan Dukungan Penelitian FIK</div>
+            <div class="tembusan-item">2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK</div>
+            
+            <?php if (!empty($divisi_tembusan)): ?>
+                <?php $counter = 3; ?>
+                <?php foreach ($divisi_tembusan as $divisi): ?>
+                    <div class="tembusan-item"><?= $counter ?>. Kaprodi S1 <?= htmlspecialchars($divisi) ?></div>
+                    <?php $counter++; ?>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="tembusan-item">3. Kaprodi -</div>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
 
