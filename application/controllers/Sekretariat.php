@@ -270,27 +270,27 @@ private function countRejectedByMonthYear($month, $year, $lingkup_penugasan_filt
         if (!empty($jenis_penugasan_filter)) {
             if ($jenis_penugasan_filter === 'perorangan') {
                 $this->db->where("(
-                (`jenis_penugasan_perorangan` IS NOT NULL AND `jenis_penugasan_perorangan` != '' AND `jenis_penugasan_perorangan` != '-') AND
-                (`jenis_penugasan_kelompok` IS NULL OR `jenis_penugasan_kelompok` = '' OR `jenis_penugasan_kelompok` = '-')
+                (jenis_penugasan_perorangan IS NOT NULL AND jenis_penugasan_perorangan != '' AND jenis_penugasan_perorangan != '-') AND
+                (jenis_penugasan_kelompok IS NULL OR jenis_penugasan_kelompok = '' OR jenis_penugasan_kelompok = '-')
             ) OR (
-                (`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-') AND
-                (`penugasan_lainnya_kelompok` IS NULL OR `penugasan_lainnya_kelompok` = '' OR `penugasan_lainnya_kelompok` = '-')
+                (penugasan_lainnya_perorangan IS NOT NULL AND penugasan_lainnya_perorangan != '' AND penugasan_lainnya_perorangan != '-') AND
+                (penugasan_lainnya_kelompok IS NULL OR penugasan_lainnya_kelompok = '' OR penugasan_lainnya_kelompok = '-')
             )");
             } elseif ($jenis_penugasan_filter === 'kelompok') {
                 $this->db->where("(
-                (`jenis_penugasan_kelompok` IS NOT NULL AND `jenis_penugasan_kelompok` != '' AND `jenis_penugasan_kelompok` != '-') AND
-                (`jenis_penugasan_perorangan` IS NULL OR `jenis_penugasan_perorangan` = '' OR `jenis_penugasan_perorangan` = '-')
+                (jenis_penugasan_kelompok IS NOT NULL AND jenis_penugasan_kelompok != '' AND jenis_penugasan_kelompok != '-') AND
+                (jenis_penugasan_perorangan IS NULL OR jenis_penugasan_perorangan = '' OR jenis_penugasan_perorangan = '-')
             ) OR (
-                (`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-') AND
-                (`penugasan_lainnya_perorangan` IS NULL OR `penugasan_lainnya_perorangan` = '' OR `penugasan_lainnya_perorangan` = '-')
+                (penugasan_lainnya_kelompok IS NOT NULL AND penugasan_lainnya_kelompok != '' AND penugasan_lainnya_kelompok != '-') AND
+                (penugasan_lainnya_perorangan IS NULL OR penugasan_lainnya_perorangan = '' OR penugasan_lainnya_perorangan = '-')
             )");
             } elseif ($jenis_penugasan_filter === 'lainnya') {
                 $this->db->where("(
-                (`penugasan_lainnya_perorangan` IS NOT NULL AND `penugasan_lainnya_perorangan` != '' AND `penugasan_lainnya_perorangan` != '-') OR
-                (`penugasan_lainnya_kelompok` IS NOT NULL AND `penugasan_lainnya_kelompok` != '' AND `penugasan_lainnya_kelompok` != '-')
+                (penugasan_lainnya_perorangan IS NOT NULL AND penugasan_lainnya_perorangan != '' AND penugasan_lainnya_perorangan != '-') OR
+                (penugasan_lainnya_kelompok IS NOT NULL AND penugasan_lainnya_kelompok != '' AND penugasan_lainnya_kelompok != '-')
             ) AND (
-                (`jenis_penugasan_perorangan` IS NULL OR `jenis_penugasan_perorangan` = '' OR `jenis_penugasan_perorangan` = '-') AND
-                (`jenis_penugasan_kelompok` IS NULL OR `jenis_penugasan_kelompok` = '' OR `jenis_penugasan_kelompok` = '-')
+                (jenis_penugasan_perorangan IS NULL OR jenis_penugasan_perorangan = '' OR jenis_penugasan_perorangan = '-') AND
+                (jenis_penugasan_kelompok IS NULL OR jenis_penugasan_kelompok = '' OR jenis_penugasan_kelompok = '-')
             )");
             }
         }
@@ -1185,7 +1185,7 @@ public function edit_surat_sekretariat($id)
 
     // Cek status: tidak boleh edit jika sudah disetujui dekan
     if (strtolower($surat->status) === 'disetujui dekan') {
-        $this->session->set_flashdata('error', '⚠️ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
+        $this->session->set_flashdata('error', '⚠ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
         redirect('sekretariat');
         return;
     }
@@ -1807,7 +1807,7 @@ public function view_surat_pengajuan($id)
 
     // Cek status: tidak boleh edit jika sudah disetujui dekan
     if (strtolower($surat->status) === 'disetujui dekan') {
-        $this->session->set_flashdata('error', '⚠️ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
+        $this->session->set_flashdata('error', '⚠ Surat dengan status <strong>Disetujui Dekan</strong> tidak dapat diedit!');
         redirect('sekretariat');
         return;
     }
@@ -1900,7 +1900,7 @@ public function edit_surat($id)
     $status_lower = strtolower($surat->status);
 
     if ($status_lower !== 'ditolak dekan') {
-        $this->session->set_flashdata('error', '⚠️ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan! Status surat ini: ' . $surat->status);
+        $this->session->set_flashdata('error', '⚠ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan! Status surat ini: ' . $surat->status);
         redirect('sekretariat');
         return;
     }
@@ -1960,7 +1960,7 @@ public function update_surat($id = null)
     $status_lower = strtolower($surat->status);
 
     if ($status_lower !== 'ditolak dekan') {
-        $this->session->set_flashdata('error', '⚠️ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan!');
+        $this->session->set_flashdata('error', '⚠ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan!');
         redirect('sekretariat');
         return;
     }
