@@ -2135,7 +2135,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-
 <!-- Step 2 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -2144,30 +2143,30 @@ document.addEventListener('DOMContentLoaded', function () {
   <div class="custom-form" style="position: relative; z-index: 1;">
     <input type="hidden" name="user_id" id="user_id" value="632045c808b1c">
 
-    <!-- Nama kegiatan -->
+    <!-- Nama kegiatan (WAJIB) -->
     <div class="form-group mb-4">
       <input type="text" name="nama_kegiatan" id="nama_kegiatan" class="form-control" required autocomplete="off">
-      <label>Nama Kegiatan</label>
+      <label>Nama Kegiatan <span style="color: #dc3545;">*</span></label>
     </div>
 
-    <!-- Pilihan jenis tanggal -->
+    <!-- Pilihan jenis tanggal (WAJIB) -->
     <div class="form-group has-select mb-4">
       <select class="nice form-control" name="jenis_date" id="jenis_date" required>
-        <option disabled selected value="">Tanggal Kegiatan</option>
+        <option disabled selected value="">Tanggal Kegiatan <span style="color: #dc3545;">*</span></option>
         <option value="Periode">Periode</option>
         <option value="Custom">Custom</option>
       </select>
     </div>
 
     <div class="row">
-      <!-- Tanggal awal & akhir kegiatan -->
+      <!-- Tanggal awal & akhir kegiatan (WAJIB untuk Custom) -->
       <div class="col-md-4 mt-3">
         <div class="form-group">
           <input type="text" id="datepicker" class="form-control custom-form-control"
-                 required autocomplete="off" inputmode="none" readonly
+                 autocomplete="off" inputmode="none" readonly
                  placeholder="Klik untuk pilih tanggal">
 
-          <label id="lbl_mulai">Tanggal Awal s/d Akhir</label>
+          <label id="lbl_mulai">Tanggal Awal s/d Akhir <span style="color: #dc3545;">*</span></label>
 
           <!-- Hidden input -->
           <input type="hidden" id="tanggal_awal_kegiatan" name="tanggal_awal_kegiatan">
@@ -2206,7 +2205,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="form-group">
           <input type="text" name="periode_penugasan" id="datepicker3"
                  class="form-control custom-form-control"
-                 required autocomplete="off" inputmode="none" readonly
+                 autocomplete="off" inputmode="none" readonly
                  placeholder="Otomatis terisi">
 
           <label id="lbl_mulai1">Periode Penugasan</label>
@@ -2219,7 +2218,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="form-group">
           <input type="text" name="akhir_periode_penugasan" id="datepicker4"
                  class="form-control custom-form-control"
-                 required autocomplete="off" inputmode="none" readonly
+                 autocomplete="off" inputmode="none" readonly
                  placeholder="Otomatis terisi">
 
           <label id="lbl_akhir1">Akhir Penugasan</label>
@@ -2240,18 +2239,18 @@ document.addEventListener('DOMContentLoaded', function () {
       </select>
     </div>
 
-    <!-- Tempat kegiatan -->
+    <!-- Tempat kegiatan (OPSIONAL) -->
     <div class="form-group mb-4">
       <input type="text" name="tempat_kegiatan" class="form-control custom-form-control" 
-             required autocomplete="off">
-      <label>Tempat Kegiatan</label>
+             autocomplete="off">
+      <label>Tempat Kegiatan <span style="color: #6c757d; font-size: 12px;">(Opsional)</span></label>
     </div>
 
-    <!-- Penyelenggara -->
+    <!-- Penyelenggara (OPSIONAL) -->
     <div class="form-group mb-4">
       <input type="text" name="penyelenggara" class="form-control custom-form-control" 
-             required autocomplete="off">
-      <label>Penyelenggara</label>
+             autocomplete="off">
+      <label>Penyelenggara <span style="color: #6c757d; font-size: 12px;">(Opsional)</span></label>
     </div>
   </div>
 </fieldset>
@@ -2542,6 +2541,88 @@ document.addEventListener("DOMContentLoaded", function () {
         return false;
     }
 
+    // Fungsi untuk validasi Step 2 sebelum melanjutkan
+    function validateStep2() {
+        const namaKegiatan = document.getElementById("nama_kegiatan").value.trim();
+        const jenisDate = document.getElementById("jenis_date").value;
+        const datepickerInput = document.getElementById("datepicker");
+        const datepicker = window.datepicker; // Reference to flatpickr instance
+        const selectedDates = datepicker ? datepicker.selectedDates : [];
+        
+        let isValid = true;
+        let errorMessage = "";
+        
+        // Validasi 1: Nama Kegiatan harus diisi
+        if (!namaKegiatan) {
+            isValid = false;
+            errorMessage = "Nama Kegiatan harus diisi";
+            document.getElementById("nama_kegiatan").focus();
+        }
+        // Validasi 2: Jenis Tanggal harus dipilih
+        else if (!jenisDate) {
+            isValid = false;
+            errorMessage = "Pilih jenis tanggal kegiatan";
+            document.getElementById("jenis_date").focus();
+        }
+        // Validasi 3: Jika jenis Custom, tanggal harus dipilih
+        else if (jenisDate === "Custom" && selectedDates.length !== 2) {
+            isValid = false;
+            errorMessage = "Pilih tanggal awal dan akhir kegiatan";
+            datepickerInput.focus();
+        }
+        // Validasi 4: Jika jenis Periode, periode harus dipilih
+        else if (jenisDate === "Periode") {
+            const periodeValue = document.getElementById("periode_value").value;
+            if (!periodeValue) {
+                isValid = false;
+                errorMessage = "Pilih periode kegiatan";
+                document.getElementById("periode_value").focus();
+            }
+        }
+        
+        // Tampilkan pesan error jika validasi gagal
+        if (!isValid) {
+            alert("⚠ " + errorMessage);
+        }
+        
+        return isValid;
+    }
+
+    // Fungsi untuk mengupdate status tombol CONTINUE
+    function updateContinueButtonState() {
+        const nextBtn = document.querySelector('.next-btn');
+        const step2Fieldset = document.querySelector('fieldset:nth-of-type(2)');
+        
+        if (nextBtn && step2Fieldset && step2Fieldset.classList.contains('active')) {
+            // Hapus atribut disabled dan ubah style
+            nextBtn.disabled = false;
+            nextBtn.style.cursor = 'pointer';
+            nextBtn.style.backgroundColor = '#007bff';
+            nextBtn.style.borderColor = '#007bff';
+            nextBtn.style.opacity = '1';
+            
+            // Hapus validasi untuk kolom opsional
+            const tempatKegiatan = document.querySelector('input[name="tempat_kegiatan"]');
+            const penyelenggara = document.querySelector('input[name="penyelenggara"]');
+            
+            if (tempatKegiatan) {
+                tempatKegiatan.required = false;
+            }
+            
+            if (penyelenggara) {
+                penyelenggara.required = false;
+            }
+            
+            // Update text tombol
+            const nextBtnText = document.getElementById('next-btn-text');
+            if (nextBtnText) {
+                nextBtnText.textContent = 'Continue';
+            }
+            
+            console.log("✅ Tombol CONTINUE di Step 2 diaktifkan");
+        }
+    }
+
     // Inisialisasi flatpickr dengan validasi tanggal
     const minAllowedDate = getMinAllowedDate();
     const datepicker = flatpickr("#datepicker", {
@@ -2705,6 +2786,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 // Refresh calendar
                 instance.redraw();
             }
+            
+            // Update status tombol CONTINUE setelah perubahan tanggal
+            updateContinueButtonState();
         },
         onOpen: function(selectedDates, dateStr, instance) {
             // Update info tentang batasan tanggal
@@ -2743,12 +2827,18 @@ document.addEventListener("DOMContentLoaded", function () {
         const periodeSection = document.getElementById("periode_section");
         const datepickerInput = document.getElementById("datepicker");
         
-        periodeSection.style.display = this.value === "Periode" ? "block" : "none";
-        
-        // Jika memilih Custom, reset tanggal dan tampilkan info batas 60 hari
-        if (this.value === "Custom") {
+        if (this.value === "Periode") {
+            periodeSection.style.display = "block";
+            // Nonaktifkan datepicker
+            datepickerInput.disabled = true;
+            // Hapus tanggal yang sudah dipilih
             datepicker.clear();
-            selectedStartDate = null;
+        } else if (this.value === "Custom") {
+            periodeSection.style.display = "none";
+            // Aktifkan datepicker
+            datepickerInput.disabled = false;
+            // Reset periode value
+            document.getElementById("periode_value").value = "";
             
             // Tampilkan info awal
             const rangeInfo = document.getElementById("range_info");
@@ -2759,6 +2849,21 @@ document.addEventListener("DOMContentLoaded", function () {
                                       <small style="color: #666;">• Maksimal ${MAX_DAYS_LIMIT} hari dari tanggal awal</small>`;
             }
         }
+        
+        // Update status tombol CONTINUE setelah perubahan jenis tanggal
+        updateContinueButtonState();
+    });
+
+    // Event listener untuk dropdown periode
+    document.getElementById("periode_value").addEventListener("change", function() {
+        // Update status tombol CONTINUE setelah memilih periode
+        updateContinueButtonState();
+    });
+
+    // Event listener untuk input nama kegiatan
+    document.getElementById("nama_kegiatan").addEventListener("input", function() {
+        // Update status tombol CONTINUE setelah mengisi nama kegiatan
+        updateContinueButtonState();
     });
 
     // Tambahkan info batasan tanggal di halaman load
@@ -2776,6 +2881,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (dayLimitInfo) {
             dayLimitInfo.innerHTML = `<i class="fas fa-info-circle"></i> Maksimal ${MAX_DAYS_LIMIT} hari dari tanggal awal`;
         }
+        
+        // Update status tombol CONTINUE saat halaman dimuat
+        updateContinueButtonState();
         
         // Tambahkan event listener untuk menghitung ulang saat ada perubahan
         document.getElementById('datepicker').addEventListener('change', function() {
@@ -2803,64 +2911,76 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
     
-    // Fungsi untuk menampilkan notifikasi batas hari
-    function showDayLimitNotification(startDate) {
-        const maxDate = new Date(startDate);
-        maxDate.setDate(startDate.getDate() + MAX_DAYS_LIMIT);
+    // Simpan referensi datepicker ke window untuk akses dari fungsi validasi
+    window.datepicker = datepicker;
+    
+    // Fungsi untuk menangani klik tombol CONTINUE
+    function handleContinueButtonClick(e) {
+        const step2Fieldset = document.querySelector('fieldset:nth-of-type(2)');
         
-        // Buat elemen notifikasi
-        const notification = document.createElement('div');
-        notification.className = 'alert alert-info alert-dismissible fade show';
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 10000;
-            max-width: 300px;
-            animation: slideInRight 0.5s ease;
-        `;
-        notification.innerHTML = `
-            <strong><i class="fas fa-calendar-alt"></i> Batas Waktu</strong>
-            <p class="mb-1 small">Anda memilih tanggal awal: <strong>${formatDateIndonesian(startDate)}</strong></p>
-            <p class="mb-1 small">Anda dapat memilih tanggal akhir maksimal: <strong>${formatDateIndonesian(maxDate)}</strong></p>
-            <p class="mb-0 small text-muted">(${MAX_DAYS_LIMIT} hari dari tanggal awal)</p>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Hapus notifikasi setelah 5 detik
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 500);
+        // Cek apakah saat ini berada di Step 2
+        if (step2Fieldset && step2Fieldset.classList.contains('active')) {
+            // Validasi Step 2 sebelum melanjutkan
+            if (!validateStep2()) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
             }
-        }, 5000);
+        }
+        return true;
     }
     
-    // Tambahkan CSS untuk animasi notifikasi
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(100%);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+    // Attach event listener untuk tombol CONTINUE
+    document.addEventListener('DOMContentLoaded', function() {
+        const nextBtn = document.querySelector('.next-btn');
+        
+        if (nextBtn) {
+            // Hapus atribut disabled dari HTML
+            nextBtn.removeAttribute('disabled');
+            
+            // Atur style untuk tombol aktif
+            nextBtn.style.cursor = 'pointer';
+            nextBtn.style.backgroundColor = '#007bff';
+            nextBtn.style.borderColor = '#007bff';
+            nextBtn.style.opacity = '1';
+            
+            // Tambahkan event listener untuk validasi
+            nextBtn.addEventListener('click', function(e) {
+                const step2Fieldset = document.querySelector('fieldset:nth-of-type(2)');
+                
+                // Cek apakah saat ini berada di Step 2
+                if (step2Fieldset && step2Fieldset.classList.contains('active')) {
+                    // Validasi Step 2 sebelum melanjutkan
+                    if (!validateStep2()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                }
+            });
+            
+            console.log("✅ Tombol CONTINUE diinisialisasi");
         }
-        .alert {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-    `;
-    document.head.appendChild(style);
+        
+        // Event listener untuk step perubahan
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    const target = mutation.target;
+                    if (target.tagName === 'FIELDSET' && target.classList.contains('active')) {
+                        // Update status tombol ketika berpindah ke Step 2
+                        setTimeout(updateContinueButtonState, 100);
+                    }
+                }
+            });
+        });
+        
+        // Observe semua fieldset untuk perubahan class
+        const fieldsets = document.querySelectorAll('fieldset');
+        fieldsets.forEach(function(fieldset) {
+            observer.observe(fieldset, { attributes: true });
+        });
+    });
 });
 </script>
 
