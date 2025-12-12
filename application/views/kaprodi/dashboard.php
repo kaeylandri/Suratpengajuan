@@ -39,7 +39,7 @@
     .filter-container{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap}
     .filter-select{padding:10px 15px;border-radius:8px;border:2px solid #ddd;font-weight:600;cursor:pointer;min-width:200px}
     
-    /* Modal Styles */
+    /* Modal Styles - DIUBAH: Tidak bisa tutup dengan klik luar */
     .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
     .modal.show{display:flex}
     .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
@@ -640,6 +640,25 @@
     align-items: center;
     gap: 5px;
 }
+
+/* TAMBAHAN: TOMBOL BULK STYLE */
+.btn-bulk {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-bulk:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
 </style>
 </head>
 <body>
@@ -1032,11 +1051,11 @@
 </div>
 
 <!-- Detail Modal (untuk klik baris) -->
-<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
+<div id="detailModal" class="modal">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
-            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalWithRefresh('detailModal')">&times;</button>
         </div>
         <div class="detail-content" id="detailContent">
             <!-- Content akan diisi oleh JavaScript -->
@@ -1045,11 +1064,11 @@
 </div>
 
 <!-- Surat Modal (untuk tombol lihat detail - melihat surat) -->
-<div id="suratModal" class="modal" onclick="modalClickOutside(event,'suratModal')">
+<div id="suratModal" class="modal">
     <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 1100px;">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-invoice"></i> Surat Pengajuan</h3>
-            <button class="close-modal" onclick="closeModal('suratModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalWithRefresh('suratModal')">&times;</button>
         </div>
         <div class="detail-content" id="suratContent">
             <!-- Surat akan diisi oleh JavaScript -->
@@ -1058,11 +1077,11 @@
 </div>
 
 <!-- Eviden Modal (untuk multiple files) -->
-<div id="evidenModal" class="modal" onclick="modalClickOutside(event,'evidenModal')">
+<div id="evidenModal" class="modal">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-image"></i> File Evidence</h3>
-            <button class="close-modal" onclick="closeModal('evidenModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalWithRefresh('evidenModal')">&times;</button>
         </div>
         <div class="detail-content" id="evidenContent">
             <!-- Content akan diisi oleh JavaScript -->
@@ -1071,11 +1090,11 @@
 </div>
 
 <!-- Approve Modal -->
-<div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
+<div id="approveModal" class="modal">
     <div class="approve-modal-content" onclick="event.stopPropagation()">
         <div class="approve-modal-header">
             <h3><i class="fa-solid fa-check-circle"></i> Setujui Pengajuan</h3>
-            <button class="close-modal" onclick="closeModal('approveModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalWithRefresh('approveModal')">&times;</button>
         </div>
         <div class="approve-modal-body">
             <div class="approve-info-box">
@@ -1089,7 +1108,7 @@
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
                 
                 <div class="approve-modal-actions">
-                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
+                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModalWithRefresh('approveModal')">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
                     <button type="submit" class="approve-btn approve-btn-submit">
@@ -1126,11 +1145,11 @@
   </div>
 </div>
 <!-- Reject Modal (BARU - MIRIP SEPERTI APPROVE MODAL) -->
-<div id="rejectConfirmModal" class="modal" onclick="modalClickOutside(event,'rejectConfirmModal')">
+<div id="rejectConfirmModal" class="modal">
     <div class="reject-modal-content" onclick="event.stopPropagation()">
         <div class="reject-modal-header">
             <h3><i class="fa-solid fa-ban"></i> Konfirmasi Penolakan</h3>
-            <button class="close-modal" onclick="closeModal('rejectConfirmModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalWithRefresh('rejectConfirmModal')">&times;</button>
         </div>
         <div class="reject-modal-body">
             <div class="reject-info-box">
@@ -1160,7 +1179,7 @@
                 </div>
                 
                 <div class="reject-modal-actions">
-                    <button type="button" class="reject-btn reject-btn-cancel" onclick="closeModal('rejectConfirmModal')">
+                    <button type="button" class="reject-btn reject-btn-cancel" onclick="closeModalWithRefresh('rejectConfirmModal')">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
                     <button type="submit" class="reject-btn reject-btn-submit">
@@ -1173,11 +1192,11 @@
 </div>
 
 <!-- Success Result Modal untuk Reject (SAMA SEPERTI APPROVE) -->
-<div id="successRejectModal" class="modal" onclick="modalClickOutside(event,'successRejectModal')">
+<div id="successRejectModal" class="modal">
     <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #e74c3c;">
             <h3><i class="fa-solid fa-ban"></i> <span id="successRejectTitle">Pengajuan Berhasil Ditolak</span></h3>
-            <button class="close-modal" onclick="closeModal('successRejectModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalWithRefresh('successRejectModal')">&times;</button>
         </div>
         <div style="padding:25px;text-align:center">
             <div style="width:100px;height:100px;border-radius:50%;background:#f8d7da;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
@@ -1200,10 +1219,7 @@
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#e74c3c;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
-                <button class="btn-bulk" onclick="closeModal('successRejectModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                <button class="btn-bulk" onclick="closeModalWithRefresh('successRejectModal')" style="background:#e74c3c;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
             </div>
@@ -1211,11 +1227,11 @@
     </div>
 </div>
 <!-- Return Modal (SEDERHANA TANPA CATATAN) -->
-<div id="returnConfirmModal" class="modal" onclick="modalClickOutside(event,'returnConfirmModal')">
+<div id="returnConfirmModal" class="modal">
     <div class="approve-modal-content" onclick="event.stopPropagation()">
         <div class="approve-modal-header" style="background: #ff9800;">
             <h3><i class="fa-solid fa-undo"></i> Konfirmasi Pengembalian</h3>
-            <button class="close-modal" onclick="closeModal('returnConfirmModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalWithRefresh('returnConfirmModal')">&times;</button>
         </div>
         <div class="approve-modal-body">
             <div class="approve-info-box" style="background: #fff3e0; border-color: #ff9800;">
@@ -1228,7 +1244,7 @@
             </p>
             
             <div class="approve-modal-actions">
-                <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('returnConfirmModal')">
+                <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModalWithRefresh('returnConfirmModal')">
                     <i class="fa-solid fa-times"></i> Batal
                 </button>
                 <button type="button" class="approve-btn" style="background: #ff9800;" onclick="confirmReturn()">
@@ -1240,11 +1256,11 @@
 </div>
 
 <!-- Success Result Modal untuk Return -->
-<div id="successReturnModal" class="modal" onclick="modalClickOutside(event,'successReturnModal')">
+<div id="successReturnModal" class="modal">
     <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #ff9800;">
             <h3><i class="fa-solid fa-undo"></i> <span id="successReturnTitle">Pengajuan Berhasil Dikembalikan</span></h3>
-            <button class="close-modal" onclick="closeModal('successReturnModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalWithRefresh('successReturnModal')">&times;</button>
         </div>
         <div style="padding:25px;text-align:center">
             <div style="width:100px;height:100px;border-radius:50%;background:#fff3e0;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
@@ -1267,10 +1283,7 @@
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#ff9800;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
-                <button class="btn-bulk" onclick="closeModal('successReturnModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                <button class="btn-bulk" onclick="closeModalWithRefresh('successReturnModal')" style="background:#ff9800;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
             </div>
@@ -1278,11 +1291,11 @@
     </div>
 </div>
 <!-- Success Result Modal - SAMA SEPERTI DEKAN -->
-<div id="successResultModal" class="modal" onclick="modalClickOutside(event,'successResultModal')">
+<div id="successResultModal" class="modal">
     <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #27ae60;">
             <h3><i class="fa-solid fa-check-circle"></i> <span id="successResultTitle">Pengajuan Berhasil Disetujui</span></h3>
-            <button class="close-modal" onclick="closeModal('successResultModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalWithRefresh('successResultModal')">&times;</button>
         </div>
         <div style="padding:25px;text-align:center">
             <div style="width:100px;height:100px;border-radius:50%;background:#d4edda;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
@@ -1305,37 +1318,13 @@
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
-                <button class="btn-bulk" onclick="closeModal('successResultModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                <button class="btn-bulk" onclick="closeModalWithRefresh('successResultModal')" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Tambahkan juga tombol bulk style -->
-<style>
-.btn-bulk {
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-bulk:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 // Data dari controller
@@ -1347,12 +1336,41 @@ let currentReturnNamaKegiatan = null;
 let chartInstance = null;
 
 // ============================================
-// SUCCESS MODAL FUNCTIONS - UNTUK APPROVAL
+// FUNGSI UTAMA MODAL DENGAN REFRESH
 // ============================================
 
-function refreshPage() {
-    window.location.reload();
+// Fungsi baru untuk menutup modal dengan refresh halaman
+function closeModalWithRefresh(id) { 
+    document.getElementById(id).classList.remove('show');
+    
+    // Hanya refresh jika modal yang ditutup adalah modal sukses atau modal aksi
+    const modalTypesToRefresh = [
+        'successResultModal', 
+        'successRejectModal', 
+        'successReturnModal',
+        'approveModal',
+        'rejectConfirmModal',
+        'returnConfirmModal'
+    ];
+    
+    if (modalTypesToRefresh.includes(id)) {
+        // Delay sedikit sebelum refresh untuk memberikan waktu animasi
+        setTimeout(() => {
+            window.location.reload();
+        }, 300);
+    }
 }
+
+// Fungsi untuk menutup modal tanpa refresh (untuk preview)
+function closeModal(id) { 
+    document.getElementById(id).classList.remove('show'); 
+}
+
+// Hapus fungsi modalClickOutside karena modal tidak bisa ditutup dengan klik luar
+
+// ============================================
+// SUCCESS MODAL FUNCTIONS - UNTUK APPROVAL
+// ============================================
 
 // Fungsi untuk menampilkan success modal (dipanggil dari controller via session)
 function showSuccessModal(count, items, isSingle = false) {
@@ -2442,14 +2460,6 @@ function updateTahun(year) {
 // ============================================
 // FUNGSI HELPER
 // ============================================
-
-function closeModal(id) { 
-    document.getElementById(id).classList.remove('show'); 
-}
-
-function modalClickOutside(evt, id) { 
-    if (evt.target && evt.target.id === id) closeModal(id); 
-}
 
 function formatDate(d) {
     if (!d || d === '-' || d === '0000-00-00') return '-';

@@ -203,6 +203,9 @@
         .custom-form, .form-group, .form-control, .form-check, .form-check-label {
             font-family: 'Poppins', sans-serif !important;
         }
+        .custom-form label::after {
+        content: none !important;
+    }
 
         /* Font untuk table */
         table, th, td, .table, .badge {
@@ -1169,7 +1172,7 @@ i[class*="fa-"] {
                     <input type="text" name="nip[]" class="form-control nip-input" autocomplete="off" required>
                 </div>
 
-                <div class="col-md-2 position-relative">
+                <div class="col-md-3 position-relative">
                     <label>Nama Dosen</label>
                     <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" autocomplete="off" required>
                 </div>
@@ -1184,7 +1187,7 @@ i[class*="fa-"] {
                     <input type="text" name="kaprodi[]" class="form-control kaprodi-input" autocomplete="off" required>
                 </div>
 
-                <div class="col-md-3 position-relative peran-column">
+                <div class="col-md-2 position-relative peran-column">
                     <label>Peran</label>
                     <input type="text" name="peran[]" class="form-control peran-input" autocomplete="off" placeholder="Masukkan peran/posisi">
                 </div>
@@ -1250,6 +1253,10 @@ i[class*="fa-"] {
     background: #f1f8ff;
 }
 
+.autocomplete-item.autocomplete-item-active {
+    background: #e8f0fe !important;
+}
+
 .autocomplete-icon {
     width: 20px;
     height: 20px;
@@ -1276,7 +1283,7 @@ i[class*="fa-"] {
 .autocomplete-item .item-primary {
     font-size: 15px;
     color: #202124;
-    font-weight: 600; /* DIBUAT LEBIH TEBAL */
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1286,7 +1293,7 @@ i[class*="fa-"] {
 .autocomplete-item .item-secondary {
     font-size: 13px;
     color: #5f6368;
-    font-weight: 500; /* DIBUAT LEBIH TEBAL */
+    font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1294,7 +1301,7 @@ i[class*="fa-"] {
 }
 
 .query-match {
-    font-weight: 700; /* DIBUAT LEBIH TEBAL */
+    font-weight: 700;
     color: #1a73e8;
     background-color: #e8f0fe;
     padding: 0 2px;
@@ -1326,7 +1333,6 @@ i[class*="fa-"] {
 .autocomplete-box-fixed::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 10px;
-    
 }
 
 .autocomplete-box-fixed::-webkit-scrollbar-thumb {
@@ -1371,6 +1377,24 @@ i[class*="fa-"] {
     display: block !important;
 }
 
+/* Label tanpa bintang - SUDAH DIPERBAIKI */
+.panitia-row label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* Hapus tanda bintang dari label yang required */
+.panitia-row label::after {
+    content: none !important;
+}
+
+/* Style untuk input yang required */
+.panitia-row input[required] {
+    border-color: #ced4da;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1200px) {
     .panitia-row .col-md-2,
@@ -1413,6 +1437,12 @@ i[class*="fa-"] {
         max-height: 300px;
     }
 }
+
+@media (max-width: 768px) {
+    .panitia-row .col-md-3 {
+        width: 100% !important;
+    }
+}
 </style>
 
 <script>
@@ -1424,8 +1454,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const peranPeroranganHidden = document.getElementById('peran_perorangan');
     
     let rowCounter = 1;
+    let isSelectingAutocomplete = false;
 
-    // Mock data untuk testing (field divisi diubah menjadi kaprodi)
+    // Mock data untuk testing
     const mockData = [
         { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', kaprodi: 'DKV'},
         { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', kaprodi: 'DKV'},
@@ -1444,6 +1475,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentKeydownHandler = null;
     let currentClickHandler = null;
     let currentInputElement = null;
+    let currentAutocompleteItems = [];
 
     // Toggle visibility jenis penugasan berdasarkan jenis pengajuan
     function toggleJenisPenugasan() {
@@ -1465,39 +1497,30 @@ document.addEventListener('DOMContentLoaded', function () {
         const peranInputs = document.querySelectorAll('.peran-input');
         
         if (jenisPengajuan.value === 'Kelompok') {
-            // Tampilkan kolom peran dan set sebagai required
             peranColumns.forEach(column => {
                 column.classList.remove('hidden');
                 column.classList.add('visible');
                 column.style.display = 'block';
             });
             
-            // Set required untuk input peran
             peranInputs.forEach(input => {
                 input.required = true;
-                input.name = 'peran[]'; // Pastikan nama tetap 'peran[]'
+                input.name = 'peran[]';
             });
-            
-            console.log('Kolom peran ditampilkan dan required (Kelompok)');
         } else {
-            // Sembunyikan kolom peran dan hapus required
             peranColumns.forEach(column => {
                 column.classList.add('hidden');
                 column.classList.remove('visible');
                 column.style.display = 'none';
             });
             
-            // Hapus required dari input peran dan ubah nama agar tidak dikirim
             peranInputs.forEach(input => {
                 input.required = false;
-                input.name = 'peran_hidden[]'; // Ubah nama agar tidak dikirim ke server
-                input.value = ''; // Kosongkan nilai
+                input.name = 'peran_hidden[]';
+                input.value = '';
             });
             
-            // Set hidden input untuk peran perorangan (array kosong)
             peranPeroranganHidden.value = JSON.stringify([]);
-            
-            console.log('Kolom peran disembunyikan dan tidak required (Perorangan/Default)');
         }
     }
 
@@ -1509,12 +1532,10 @@ document.addEventListener('DOMContentLoaded', function () {
             buttonCells.forEach(btn => {
                 btn.style.display = 'flex';
             });
-            console.log('Button tambah ditampilkan (Kelompok)');
         } else {
             buttonCells.forEach(btn => {
                 btn.style.display = 'none';
             });
-            console.log('Button tambah disembunyikan (Perorangan)');
         }
     }
 
@@ -1524,7 +1545,6 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleKolomPeran();
         toggleButtonVisibility();
         
-        // PERBAIKAN: Pastikan autocomplete berfungsi untuk baris pertama
         if (jenisPengajuan.value === 'Perorangan') {
             setTimeout(() => {
                 initializeFirstRow();
@@ -1567,7 +1587,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
-    // Highlight matching text - DIUBAH LEBIH JELAS
+    // Highlight matching text
     function highlightMatch(text, query) {
         if (!query || !text) return text;
         const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1590,19 +1610,18 @@ document.addEventListener('DOMContentLoaded', function () {
             currentClickHandler = null;
         }
         currentInputElement = null;
+        currentAutocompleteItems = [];
     }
 
-    // Fetch suggestions from database - HANYA untuk NIP dan Nama Dosen
+    // Fetch suggestions
     async function fetchSuggestions(query, fieldType = 'nip') {
         if (!query) return [];
         
         try {
-            // Hanya tampilkan autocomplete untuk nip dan nama_dosen
             if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
                 return [];
             }
             
-            // Mock data untuk testing
             await new Promise(resolve => setTimeout(resolve, 150));
             const lowerQuery = query.toLowerCase();
             return mockData.filter(item => {
@@ -1615,11 +1634,41 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Show suggestion box - DIUBAH TAMPILANNYA
+    // Fungsi untuk memilih opsi autocomplete
+    function selectAutocompleteItem(item, inputElement, onSelect) {
+        if (!item) return;
+        
+        isSelectingAutocomplete = true;
+        
+        const fieldType = inputElement.classList.contains('nip-input') ? 'nip' : 'nama_dosen';
+        if (fieldType === 'nip') {
+            inputElement.value = item.nip || '';
+        } else {
+            inputElement.value = item.nama_dosen || '';
+        }
+        
+        if (typeof onSelect === 'function') {
+            onSelect(item);
+        }
+        
+        removeAutocompleteBox();
+        
+        setTimeout(() => {
+            isSelectingAutocomplete = false;
+        }, 300);
+        
+        setTimeout(() => {
+            if (fieldType === 'nip') {
+                const nextInput = inputElement.closest('.panitia-row').querySelector('.nama-dosen-input');
+                if (nextInput) nextInput.focus();
+            }
+        }, 50);
+    }
+
+    // Show suggestion box
     function showSuggestionBox(inputEl, items, onSelect, fieldType) {
         removeAutocompleteBox();
 
-        // Hanya tampilkan autocomplete untuk nip dan nama_dosen
         if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
             return;
         }
@@ -1647,6 +1696,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const query = inputEl.value.trim();
         let selectedIndex = -1;
+        currentAutocompleteItems = items;
 
         // Add header
         const header = document.createElement('div');
@@ -1662,6 +1712,7 @@ document.addEventListener('DOMContentLoaded', function () {
         items.forEach((item, idx) => {
             const option = document.createElement('div');
             option.className = `autocomplete-item type-${fieldType}`;
+            option.dataset.index = idx;
             
             let primaryText = '';
             let secondaryText = '';
@@ -1692,18 +1743,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
             `;
             
+            option.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                selectAutocompleteItem(item, inputEl, onSelect);
+            });
+            
             option.addEventListener('click', (e) => {
                 e.stopPropagation();
-                onSelect(item);
-                removeAutocompleteBox();
             });
             
             option.addEventListener('mouseenter', () => {
-                option.classList.add('active');
+                box.querySelectorAll('.autocomplete-item').forEach(el => {
+                    el.classList.remove('autocomplete-item-active');
+                });
+                option.classList.add('autocomplete-item-active');
             });
             
             option.addEventListener('mouseleave', () => {
-                option.classList.remove('active');
+                option.classList.remove('autocomplete-item-active');
             });
             
             box.appendChild(option);
@@ -1723,47 +1781,71 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 selectedIndex = Math.min(selectedIndex + 1, opts.length - 1);
-                opts.forEach((o, i) => o.classList.toggle('active', i === selectedIndex));
+                
+                opts.forEach(o => o.classList.remove('autocomplete-item-active'));
+                
                 if (opts[selectedIndex]) {
+                    opts[selectedIndex].classList.add('autocomplete-item-active');
                     opts[selectedIndex].scrollIntoView({ block: 'nearest' });
                 }
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
                 selectedIndex = Math.max(selectedIndex - 1, 0);
-                opts.forEach((o, i) => o.classList.toggle('active', i === selectedIndex));
+                
+                opts.forEach(o => o.classList.remove('autocomplete-item-active'));
+                
                 if (opts[selectedIndex]) {
+                    opts[selectedIndex].classList.add('autocomplete-item-active');
                     opts[selectedIndex].scrollIntoView({ block: 'nearest' });
                 }
             } else if (e.key === 'Enter') {
                 e.preventDefault();
-                if (selectedIndex >= 0 && opts[selectedIndex]) {
-                    opts[selectedIndex].click();
+                if (selectedIndex >= 0 && opts[selectedIndex] && currentAutocompleteItems[selectedIndex]) {
+                    selectAutocompleteItem(currentAutocompleteItems[selectedIndex], inputEl, onSelect);
+                } else if (opts.length > 0 && currentAutocompleteItems[0]) {
+                    selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
                 }
             } else if (e.key === 'Escape') {
                 removeAutocompleteBox();
+            } else if (e.key === 'Tab') {
+                e.preventDefault();
+                if (currentAutocompleteItems.length > 0) {
+                    selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
+                } else {
+                    removeAutocompleteBox();
+                }
             }
         };
         
         document.addEventListener('keydown', currentKeydownHandler);
 
-        // Close on outside click
         currentClickHandler = function(ev) {
             if (currentAutocompleteBox && !currentAutocompleteBox.contains(ev.target) && ev.target !== currentInputElement) {
-                removeAutocompleteBox();
+                if (!isSelectingAutocomplete) {
+                    removeAutocompleteBox();
+                }
             }
         };
         document.addEventListener('click', currentClickHandler);
+        
+        if (items.length > 0) {
+            setTimeout(() => {
+                const firstOption = box.querySelector('.autocomplete-item');
+                if (firstOption) {
+                    firstOption.classList.add('autocomplete-item-active');
+                    selectedIndex = 0;
+                }
+            }, 10);
+        }
     }
 
     // Initialize autocomplete for a row
     function initAutocompleteForRow(rowEl) {
-        // Pastikan rowEl valid
         if (!rowEl) {
             console.error('Row element tidak valid');
             return;
         }
         
-        // Hapus flag initialization sebelumnya
         delete rowEl.dataset.autocompleteInitialized;
 
         const inputNip = rowEl.querySelector('.nip-input');
@@ -1773,32 +1855,22 @@ document.addEventListener('DOMContentLoaded', function () {
         const inputPeran = rowEl.querySelector('.peran-input');
 
         if (!inputNip || !inputNama) {
-            console.log('Input elements not found in row:', rowEl);
             return;
         }
 
-        console.log('Initializing autocomplete for row:', rowEl.dataset.rowIndex);
-
-        // Fill all fields when item is selected
         function fillRowWith(item) {
             if (!item) return;
             
-            console.log('Filling row with data:', item);
-            
-            // Set values untuk field utama
             inputNip.value = item.nip || '';
             inputNama.value = item.nama_dosen || '';
             
-            // Untuk jabatan dan kaprodi, isi dari data mock
             if (inputJabatan) inputJabatan.value = item.jabatan || '';
             if (inputKaprodi) inputKaprodi.value = item.kaprodi || '';
             
-            // Hanya set peran jika jenis pengajuan adalah Kelompok dan field peran ada
             if (jenisPengajuan.value === 'Kelompok' && inputPeran) {
                 inputPeran.value = item.peran || '';
             }
             
-            // Trigger input events untuk validasi
             inputNip.dispatchEvent(new Event('input', { bubbles: true }));
             inputNama.dispatchEvent(new Event('input', { bubbles: true }));
             if (inputJabatan) inputJabatan.dispatchEvent(new Event('input', { bubbles: true }));
@@ -1808,125 +1880,85 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Create input handler untuk NIP dan Nama Dosen saja
         function createAutocompleteHandler(fieldType, inputElement) {
-            // Hanya autocomplete untuk nip dan nama_dosen
             if (fieldType !== 'nip' && fieldType !== 'nama_dosen') return;
 
             const handler = debounce(async function() {
-                const val = this.value.trim();
-                console.log(`Input detected in ${fieldType}:`, val);
+                if (isSelectingAutocomplete) {
+                    return;
+                }
                 
-                // Hanya tampilkan autocomplete jika user aktif mengetik
+                const val = this.value.trim();
+                
                 if (val.length < 2 || document.activeElement !== this) {
                     removeAutocompleteBox();
                     return;
                 }
 
                 const suggestions = await fetchSuggestions(val, fieldType);
-                console.log(`Suggestions for ${fieldType}:`, suggestions);
                 showSuggestionBox(inputElement, suggestions, fillRowWith, fieldType);
-            }, 300);
+            }, 250);
 
-            // Hapus event listener lama jika ada
             if (inputElement._currentHandler) {
                 inputElement.removeEventListener('input', inputElement._currentHandler);
             }
             
-            // Simpan reference ke handler baru
             inputElement._currentHandler = handler;
-            // Pasang event listener baru
             inputElement.addEventListener('input', handler);
-            
-            console.log(`Handler attached to ${fieldType}`);
         }
 
-        // Initialize autocomplete hanya untuk NIP dan Nama Dosen
         createAutocompleteHandler('nip', inputNip);
         createAutocompleteHandler('nama_dosen', inputNama);
         
-        // Untuk field jabatan, kaprodi, dan peran - TANPA AUTOCOMPLETE
-        if (inputJabatan) {
-            // Hapus autocomplete untuk jabatan
-            if (inputJabatan._currentHandler) {
-                inputJabatan.removeEventListener('input', inputJabatan._currentHandler);
-            }
-            // Bisa diisi manual atau dari data mock
-        }
-        
-        if (inputKaprodi) {
-            // Hapus autocomplete untuk kaprodi
-            if (inputKaprodi._currentHandler) {
-                inputKaprodi.removeEventListener('input', inputKaprodi._currentHandler);
-            }
-            // Bisa diisi manual atau dari data mock
-        }
-        
-        if (inputPeran) {
-            // Untuk field peran, tidak perlu autocomplete - user isi manual
-            if (inputPeran._currentHandler) {
-                inputPeran.removeEventListener('input', inputPeran._currentHandler);
-            }
-            // Tambahkan handler sederhana tanpa autocomplete
-            inputPeran.addEventListener('input', function() {
-                console.log('Input peran:', this.value);
-            });
-        }
-
-        // Focus handlers untuk close autocomplete
         const inputs = [inputNip, inputNama];
         
         inputs.forEach(input => {
             input.addEventListener('focus', () => {
-                removeAutocompleteBox();
+                const val = input.value.trim();
+                if (val.length >= 2) {
+                    setTimeout(() => {
+                        if (document.activeElement === input && !isSelectingAutocomplete) {
+                            const event = new Event('input', { bubbles: true });
+                            input.dispatchEvent(event);
+                        }
+                    }, 100);
+                }
             });
             
-            // Tambahkan event untuk blur (kehilangan fokus)
             input.addEventListener('blur', () => {
-                // Delay sedikit sebelum menutup autocomplete untuk memberi waktu klik opsi
-                setTimeout(() => {
-                    if (document.activeElement !== input && 
-                        (!currentAutocompleteBox || !currentAutocompleteBox.contains(document.activeElement))) {
+                if (!isSelectingAutocomplete) {
+                    setTimeout(() => {
                         removeAutocompleteBox();
-                    }
-                }, 150);
+                    }, 150);
+                }
             });
         });
 
-        // Set flag bahwa row sudah diinisialisasi
         rowEl.dataset.autocompleteInitialized = 'true';
     }
 
-    // PERBAIKAN: Inisialisasi baris pertama secara khusus
     function initializeFirstRow() {
         const firstRow = document.querySelector('.panitia-row[data-row-index="0"]');
         
         if (!firstRow) {
-            console.error('Baris pertama tidak ditemukan');
             return;
         }
         
-        // Jika belum diinisialisasi, inisialisasi sekarang
         if (!firstRow.dataset.autocompleteInitialized) {
-            console.log('Initializing FIRST ROW for Perorangan/Kelompok');
             initAutocompleteForRow(firstRow);
         }
     }
 
-    // Add new row function
     function addNewRow() {
         const originalRow = document.querySelector('.panitia-row');
         const newRow = originalRow.cloneNode(true);
         
-        // Update row index
         newRow.dataset.rowIndex = rowCounter++;
         
-        // Clear all input values
         newRow.querySelectorAll('input').forEach(input => {
             input.value = '';
         });
         
-        // Change add button to remove button
         const addBtn = newRow.querySelector('.add-row-btn');
         if (addBtn) {
             addBtn.classList.remove('btn-success', 'add-row-btn');
@@ -1935,24 +1967,17 @@ document.addEventListener('DOMContentLoaded', function () {
             addBtn.setAttribute('title', 'Hapus Baris');
         }
         
-        // Add to container
         panitiaContainer.appendChild(newRow);
         
-        // Update tampilan kolom peran berdasarkan jenis pengajuan saat ini
         updateKolomPeranForRow(newRow);
         
-        // Initialize autocomplete untuk row baru (hanya untuk nip dan nama_dosen)
         setTimeout(() => {
             initAutocompleteForRow(newRow);
         }, 100);
         
-        // Add animation
         animateNewRow(newRow);
-        
-        console.log('New row added:', newRow.dataset.rowIndex);
     }
 
-    // Update kolom peran untuk row tertentu
     function updateKolomPeranForRow(rowEl) {
         const peranColumn = rowEl.querySelector('.peran-column');
         const peranInput = rowEl.querySelector('.peran-input');
@@ -1960,19 +1985,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!peranColumn || !peranInput) return;
         
         if (jenisPengajuan.value === 'Kelompok') {
-            // Tampilkan kolom peran dan set sebagai required
             peranColumn.classList.remove('hidden');
             peranColumn.classList.add('visible');
             peranColumn.style.display = 'block';
             peranInput.required = true;
-            peranInput.name = 'peran[]'; // Pastikan nama 'peran[]'
+            peranInput.name = 'peran[]';
         } else {
-            // Sembunyikan kolom peran, hapus required, dan ubah nama
             peranColumn.classList.add('hidden');
             peranColumn.classList.remove('visible');
             peranColumn.style.display = 'none';
             peranInput.required = false;
-            peranInput.name = 'peran_hidden[]'; // Ubah nama agar tidak dikirim
+            peranInput.name = 'peran_hidden[]';
             peranInput.value = '';
         }
     }
@@ -1997,7 +2020,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 10);
     }
 
-    // Add/Remove row handlers
     panitiaContainer.addEventListener('click', function (e) {
         const addBtn = e.target.closest('.add-row-btn');
         const removeBtn = e.target.closest('.remove-row-btn');
@@ -2018,64 +2040,51 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Initialize autocomplete untuk semua existing rows
     function initializeAllRows() {
         const rows = panitiaContainer.querySelectorAll('.panitia-row');
-        console.log('Initializing all rows:', rows.length);
         
         rows.forEach((row, index) => {
             row.dataset.rowIndex = index;
-            // Hapus flag sebelumnya untuk memastikan inisialisasi ulang
             delete row.dataset.autocompleteInitialized;
             initAutocompleteForRow(row);
         });
     }
 
-    // PERBAIKAN: Inisialisasi yang lebih komprehensif
     function comprehensiveInitialize() {
-        console.log('Comprehensive initialization started...');
-        
-        // Selalu inisialisasi baris pertama terlebih dahulu
         initializeFirstRow();
         
-        // Kemudian inisialisasi semua baris
         setTimeout(() => {
             initializeAllRows();
         }, 100);
         
-        // Juga pastikan untuk kasus Perorangan saat load
         if (jenisPengajuan.value === 'Perorangan') {
-            console.log('Perorangan detected, ensuring autocomplete...');
             setTimeout(() => {
                 initializeFirstRow();
             }, 200);
         }
     }
 
-    // Initialize saat DOM ready
     setTimeout(() => {
         comprehensiveInitialize();
     }, 100);
 
-    // Close autocomplete ketika klik di luar
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.autocomplete-box-fixed') && 
             !e.target.closest('.nip-input') && 
             !e.target.closest('.nama-dosen-input')) {
-            removeAutocompleteBox();
+            if (!isSelectingAutocomplete) {
+                removeAutocompleteBox();
+            }
         }
     });
 
-    // Juga close autocomplete ketika tekan ESC di mana saja
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             removeAutocompleteBox();
         }
     });
 
-    // Form submit handler - persiapkan data sebelum dikirim
     document.querySelector('form').addEventListener('submit', function(e) {
-        // PERBAIKAN: Validasi khusus untuk Perorangan
         if (jenisPengajuan.value === 'Perorangan') {
             const nipInput = document.querySelector('.nip-input');
             const namaInput = document.querySelector('.nama-dosen-input');
@@ -2095,42 +2104,31 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
         
-        // Jika jenis pengajuan adalah Perorangan, pastikan peran tidak dikirim
         if (jenisPengajuan.value === 'Perorangan') {
-            // Ubah semua input peran_hidden[] menjadi peran[] dengan nilai kosong
             const peranHiddenInputs = document.querySelectorAll('input[name="peran_hidden[]"]');
             peranHiddenInputs.forEach(input => {
-                input.name = 'peran[]'; // Kembalikan nama ke peran[]
-                input.value = ''; // Pastikan nilai kosong
+                input.name = 'peran[]';
+                input.value = '';
             });
             
-            // Set hidden input untuk peran perorangan (array kosong)
             peranPeroranganHidden.value = JSON.stringify([]);
         } else if (jenisPengajuan.value === 'Kelompok') {
-            // Untuk kelompok, pastikan semua input peran memiliki nama yang benar
             const peranInputs = document.querySelectorAll('.peran-input');
             peranInputs.forEach(input => {
-                input.name = 'peran[]'; // Pastikan nama 'peran[]'
+                input.name = 'peran[]';
             });
         }
-        
-        console.log('Form submitted - Jenis Pengajuan:', jenisPengajuan.value);
     });
     
-    // PERBAIKAN: Tambahkan event listener untuk input NIP dan Nama di baris pertama
-    // saat dokumen sudah sepenuhnya dimuat
     document.addEventListener('readystatechange', function() {
         if (document.readyState === 'complete') {
-            console.log('Document fully loaded, ensuring first row autocomplete...');
             setTimeout(() => {
                 initializeFirstRow();
             }, 300);
         }
     });
     
-    // Juga trigger inisialisasi saat window load
     window.addEventListener('load', function() {
-        console.log('Window loaded, running comprehensive initialization...');
         setTimeout(() => {
             comprehensiveInitialize();
         }, 500);
@@ -5327,14 +5325,7 @@ $(document).ready(function() {
             console.log('⛔ Button disabled, tidak bisa lanjut');
             
             // Tampilkan pesan
-            let errorMessages = [];
-            if (currentStep === 0) {
-                errorMessages.push('❌ Lengkapi semua field yang required di Step 1');
-            } else if (currentStep === 1) {
-                errorMessages.push('❌ Lengkapi semua field yang required di Step 2');
-            } else if (currentStep === 2) {
-                errorMessages.push('❌ Lengkapi semua field yang required di Step 3');
-            }
+
             showValidationAlert(errorMessages);
             return false;
         }

@@ -274,18 +274,138 @@ function tgl_indo($tanggal)
     return $tanggal;
 }
 
+// Fungsi untuk mengonversi singkatan divisi ke nama lengkap
+function getNamaDivisiLengkap($singkatan) {
+    $mapping = [
+        // Desain Komunikasi Visual
+        'DKV' => 'Desain Komunikasi Visual',
+        'dkv' => 'Desain Komunikasi Visual',
+        'Desain Komunikasi Visual' => 'Desain Komunikasi Visual',
+        
+        // Desain Interior
+        'DI' => 'Desain Interior',
+        'di' => 'Desain Interior',
+        'Desain Interior' => 'Desain Interior',
+        
+        // Desain Produk
+        'DP' => 'Desain Produk',
+        'dp' => 'Desain Produk',
+        'Desain Produk' => 'Desain Produk',
+        
+        // Kriya
+        'KRIYA' => 'Kriya',
+        'kriya' => 'Kriya',
+        'Kriya' => 'Kriya',
+        
+        // Manajemen
+        'MAN' => 'Manajemen',
+        'man' => 'Manajemen',
+        'Manajemen' => 'Manajemen',
+        
+        // Akuntansi
+        'AKT' => 'Akuntansi',
+        'akt' => 'Akuntansi',
+        'Akuntansi' => 'Akuntansi',
+        
+        // Teknik Informatika
+        'TI' => 'Teknik Informatika',
+        'ti' => 'Teknik Informatika',
+        'Teknik Informatika' => 'Teknik Informatika',
+        
+        // Sistem Informasi
+        'SI' => 'Sistem Informasi',
+        'si' => 'Sistem Informasi',
+        'Sistem Informasi' => 'Sistem Informasi',
+        
+        // Teknik Elektro
+        'TE' => 'Teknik Elektro',
+        'te' => 'Teknik Elektro',
+        'Teknik Elektro' => 'Teknik Elektro',
+        
+        // Teknik Industri
+        'TIN' => 'Teknik Industri',
+        'tin' => 'Teknik Industri',
+        'Teknik Industri' => 'Teknik Industri',
+        
+        // Fakultas Industri Kreatif
+        'FIK' => 'Fakultas Industri Kreatif',
+        'fik' => 'Fakultas Industri Kreatif',
+        'Fakultas Industri Kreatif' => 'Fakultas Industri Kreatif',
+        
+        // Fakultas Ekonomi dan Bisnis
+        'FEB' => 'Fakultas Ekonomi dan Bisnis',
+        'feb' => 'Fakultas Ekonomi dan Bisnis',
+        'Fakultas Ekonomi dan Bisnis' => 'Fakultas Ekonomi dan Bisnis',
+        
+        // Fakultas Informatika
+        'FIF' => 'Fakultas Informatika',
+        'fif' => 'Fakultas Informatika',
+        'Fakultas Informatika' => 'Fakultas Informatika',
+        
+        // Fakultas Teknik
+        'FTE' => 'Fakultas Teknik',
+        'fte' => 'Fakultas Teknik',
+        'Fakultas Teknik' => 'Fakultas Teknik',
+        
+        // Admin
+        'ADMIN' => 'Administrasi',
+        'admin' => 'Administrasi',
+        'Administrasi' => 'Administrasi',
+        'Admin KK' => 'Administrasi KK',
+        'Admin' => 'Administrasi',
+        
+        // Lain-lain - tambahkan sesuai kebutuhan
+        'BAAK' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        'baak' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        
+        'BAA' => 'Biro Administrasi Akademik',
+        'baa' => 'Biro Administrasi Akademik',
+        
+        'BK' => 'Biro Keuangan',
+        'bk' => 'Biro Keuangan',
+        
+        'SDM' => 'Sumber Daya Manusia',
+        'sdm' => 'Sumber Daya Manusia',
+    ];
+    
+    // Trim dan cek apakah ada di mapping
+    $singkatan = trim($singkatan);
+    
+    // Jika ada di mapping, kembalikan nama lengkap
+    if (isset($mapping[$singkatan])) {
+        return $mapping[$singkatan];
+    }
+    
+    // Jika tidak ditemukan, kembalikan aslinya (mungkin sudah nama lengkap)
+    return $singkatan;
+}
+
 // Kode baru: Mengambil divisi unik dari data dosen untuk tembusan
 $divisi_tembusan = [];
 if (!empty($surat->dosen_data)) {
     foreach ($surat->dosen_data as $dosen) {
         if (!empty($dosen['divisi'])) {
-            $divisi_tembusan[] = $dosen['divisi'];
+            $divisi_singkatan = trim($dosen['divisi']);
+            $divisi_lengkap = getNamaDivisiLengkap($divisi_singkatan);
+            $divisi_tembusan[] = $divisi_lengkap;
         }
     }
 }
 // Hapus duplikat dan urutkan
 $divisi_tembusan = array_unique($divisi_tembusan);
-sort($divisi_tembusan); // Urutkan agar konsisten
+sort($divisi_tembusan);
+
+// Juga untuk tampilan di tabel
+$dosen_data_dengan_divisi_lengkap = [];
+if (!empty($surat->dosen_data)) {
+    foreach ($surat->dosen_data as $dosen) {
+        $dosen_copy = $dosen;
+        if (!empty($dosen['divisi'])) {
+            $dosen_copy['divisi'] = getNamaDivisiLengkap(trim($dosen['divisi']));
+        }
+        $dosen_data_dengan_divisi_lengkap[] = $dosen_copy;
+    }
+}
 ?>
 
 <body>
@@ -355,8 +475,8 @@ sort($divisi_tembusan); // Urutkan agar konsisten
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($surat->dosen_data)): ?>
-                    <?php foreach ($surat->dosen_data as $i => $d): ?>
+                <?php if (!empty($dosen_data_dengan_divisi_lengkap)): ?>
+                    <?php foreach ($dosen_data_dengan_divisi_lengkap as $i => $d): ?>
                         <tr>
                             <td class="table-number"><?= $i + 1 ?></td>
                             <td><?= htmlspecialchars($d['nama'] ?? '-') ?></td>
@@ -381,7 +501,7 @@ sort($divisi_tembusan); // Urutkan agar konsisten
             yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b>
 
             <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
-                pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b>
+                pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b> - <b><?= tgl_indo($surat->akhir_kegiatan ?? '-') ?></b>
             <?php else: ?>
                 selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
             <?php endif; ?>

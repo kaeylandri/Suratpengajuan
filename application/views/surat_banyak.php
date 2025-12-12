@@ -19,7 +19,7 @@
             color: #000;
         }
         
-         /* === HEADER === */
+        /* === HEADER === */
         .header {
             position: fixed;
             top: -70px;
@@ -137,25 +137,7 @@
             font-weight: normal;
         }
 
-        .qr-centered {
-            width: 90px;
-            margin-bottom: 6px;
-        }
-
-        /* QR Code selalu menyatu dengan tanda tangan */
-        .qr-box {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 100px;
-            page-break-inside: avoid;
-        }
-
-        img.qr-img {
-            width: 140px;
-        }
-
-         /* Identity section */
+        /* Identity section */
         .identity {
             margin: 15px 0;
             line-height: 1.6;
@@ -238,18 +220,131 @@ function tgl_indo($tanggal) {
     return $tanggal;
 }
 
+// Fungsi untuk mengonversi singkatan divisi ke nama lengkap
+function getNamaDivisiLengkap($singkatan) {
+    $mapping = [
+        // Desain Komunikasi Visual
+        'DKV' => 'Desain Komunikasi Visual',
+        'dkv' => 'Desain Komunikasi Visual',
+        'Desain Komunikasi Visual' => 'Desain Komunikasi Visual',
+        
+        // Desain Interior
+        'DI' => 'Desain Interior',
+        'di' => 'Desain Interior',
+        'Desain Interior' => 'Desain Interior',
+        
+        // Desain Produk
+        'DP' => 'Desain Produk',
+        'dp' => 'Desain Produk',
+        'Desain Produk' => 'Desain Produk',
+        
+        // Kriya
+        'KRIYA' => 'Kriya',
+        'kriya' => 'Kriya',
+        'Kriya' => 'Kriya',
+        
+        // Manajemen
+        'MAN' => 'Manajemen',
+        'man' => 'Manajemen',
+        'Manajemen' => 'Manajemen',
+        
+        // Akuntansi
+        'AKT' => 'Akuntansi',
+        'akt' => 'Akuntansi',
+        'Akuntansi' => 'Akuntansi',
+        
+        // Teknik Informatika
+        'TI' => 'Teknik Informatika',
+        'ti' => 'Teknik Informatika',
+        'Teknik Informatika' => 'Teknik Informatika',
+        
+        // Sistem Informasi
+        'SI' => 'Sistem Informasi',
+        'si' => 'Sistem Informasi',
+        'Sistem Informasi' => 'Sistem Informasi',
+        
+        // Teknik Elektro
+        'TE' => 'Teknik Elektro',
+        'te' => 'Teknik Elektro',
+        'Teknik Elektro' => 'Teknik Elektro',
+        
+        // Teknik Industri
+        'TIN' => 'Teknik Industri',
+        'tin' => 'Teknik Industri',
+        'Teknik Industri' => 'Teknik Industri',
+        
+        // Fakultas Industri Kreatif
+        'FIK' => 'Fakultas Industri Kreatif',
+        'fik' => 'Fakultas Industri Kreatif',
+        'Fakultas Industri Kreatif' => 'Fakultas Industri Kreatif',
+        
+        // Fakultas Ekonomi dan Bisnis
+        'FEB' => 'Fakultas Ekonomi dan Bisnis',
+        'feb' => 'Fakultas Ekonomi dan Bisnis',
+        'Fakultas Ekonomi dan Bisnis' => 'Fakultas Ekonomi dan Bisnis',
+        
+        // Fakultas Informatika
+        'FIF' => 'Fakultas Informatika',
+        'fif' => 'Fakultas Informatika',
+        'Fakultas Informatika' => 'Fakultas Informatika',
+        
+        // Fakultas Teknik
+        'FTE' => 'Fakultas Teknik',
+        'fte' => 'Fakultas Teknik',
+        'Fakultas Teknik' => 'Fakultas Teknik',
+        
+        // Admin
+        'ADMIN' => 'Administrasi',
+        'admin' => 'Administrasi',
+        'Administrasi' => 'Administrasi',
+        'Admin KK' => 'Administrasi KK',
+        'Admin' => 'Administrasi',
+        
+        // Lain-lain
+        'BAAK' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        'baak' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        
+        'BAA' => 'Biro Administrasi Akademik',
+        'baa' => 'Biro Administrasi Akademik',
+        
+        'BK' => 'Biro Keuangan',
+        'bk' => 'Biro Keuangan',
+        
+        'SDM' => 'Sumber Daya Manusia',
+        'sdm' => 'Sumber Daya Manusia',
+    ];
+    
+    $singkatan = trim($singkatan);
+    
+    if (isset($mapping[$singkatan])) {
+        return $mapping[$singkatan];
+    }
+    
+    return $singkatan;
+}
+
 // Kode baru: Mengambil divisi unik dari data dosen untuk tembusan
 $divisi_tembusan = [];
+$dosen_data_dengan_divisi_lengkap = [];
+
 if (!empty($surat->dosen_data)) {
     foreach ($surat->dosen_data as $dosen) {
         if (!empty($dosen['divisi'])) {
-            $divisi_tembusan[] = $dosen['divisi'];
+            $divisi_singkatan = trim($dosen['divisi']);
+            $divisi_lengkap = getNamaDivisiLengkap($divisi_singkatan);
+            $divisi_tembusan[] = $divisi_lengkap;
+            
+            // Salin data dosen dengan divisi lengkap
+            $dosen_copy = $dosen;
+            $dosen_copy['divisi'] = $divisi_lengkap;
+            $dosen_data_dengan_divisi_lengkap[] = $dosen_copy;
         }
     }
 }
+
 // Hapus duplikat dan urutkan
 $divisi_tembusan = array_unique($divisi_tembusan);
-sort($divisi_tembusan); // Urutkan agar konsisten
+sort($divisi_tembusan);
 ?>
 
 <body>
@@ -284,7 +379,6 @@ sort($divisi_tembusan); // Urutkan agar konsisten
         <div class="surat-title">SURAT TUGAS</div>
         <div class="surat-number">Nomor : <?= $surat->nomor_surat ?? '-' ?></div>
 
-
         <p>Saya yang bertanda tangan di bawah ini :</p>
         
         <div class="identity">
@@ -311,17 +405,14 @@ sort($divisi_tembusan); // Urutkan agar konsisten
         <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p><br>
 
         <p class="date">Bandung, <?php
-        // Default tanggal
         $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
         
-        // Jika approval_status berisi data mentah seperti contoh
         if (!empty($surat->approval_status)) {
-            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
             if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
                 $tanggalPengesahan = $matches[1];
             }
         }
-         // Format tanggal
+        
         $timestamp = strtotime($tanggalPengesahan);
         $bulan = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -345,7 +436,7 @@ sort($divisi_tembusan); // Urutkan agar konsisten
             <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
         </div><br><br>
 
-        <!-- TEMBUSAN dengan divisi dinamis dan penomoran terpisah -->
+        <!-- TEMBUSAN dengan divisi dinamis -->
         <div class="tembusan-list">
             <p><b>Tembusan</b></p>
             <div class="tembusan-item">1. Wakil Dekan Bidang Akademik dan Dukungan Penelitian FIK</div>
@@ -384,37 +475,34 @@ sort($divisi_tembusan); // Urutkan agar konsisten
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($surat->dosen_data)): ?>
-                    <?php foreach ($surat->dosen_data as $i => $d): ?>
+                <?php if (!empty($dosen_data_dengan_divisi_lengkap)): ?>
+                    <?php foreach ($dosen_data_dengan_divisi_lengkap as $i => $d): ?>
                     <tr>
                         <td><?= $i + 1 ?></td>
-                        <td><?= htmlspecialchars($d['nip']) ?></td>
-                        <td><?= htmlspecialchars($d['nama']) ?></td>
-                        <td><?= htmlspecialchars($d['jabatan']) ?></td>
-                        <td><?= htmlspecialchars($d['divisi']) ?></td>
-                        <td><?= htmlspecialchars($d['peran']) ?></td>
+                        <td><?= htmlspecialchars($d['nip'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars($d['nama'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars($d['jabatan'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars($d['divisi'] ?? '-') ?></td>
+                        <td><?= htmlspecialchars($d['peran'] ?? '-') ?></td>
                     </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" style="text-align:center;">Tidak ada data dosen</td>
+                        <td colspan="6" style="text-align:center;">Tidak ada data dosen</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
 
         <p class="date">Bandung, <?php
-        // Default tanggal
         $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
         
-        // Jika approval_status berisi data mentah seperti contoh
         if (!empty($surat->approval_status)) {
-            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
             if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
                 $tanggalPengesahan = $matches[1];
             }
         }
-         // Format tanggal
+        
         $timestamp = strtotime($tanggalPengesahan);
         $bulan = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
