@@ -14,7 +14,7 @@
             margin: 0;
             padding: 0;
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.15; /* Diubah dari 1.5 menjadi 1.15 */
             color: #000;
         }
 
@@ -178,6 +178,23 @@
         .tembusan-item {
             margin-bottom: 4px;
         }
+        
+        /* Spesifik untuk jarak Demikian ke Bandung */
+        .demikian-to-bandung {
+            margin-bottom: 1px; /* 1 spasi */
+        }
+        
+        /* Tambahan untuk jarak nama dekan dan jabatan di tanda tangan */
+        .nama-dekan-tanda-tangan {
+            line-height: 1;
+            margin-bottom: 1px; /* 1 spasi antara nama dan jabatan */
+            text-decoration: underline;
+        }
+        
+        .jabatan-dekan-tanda-tangan {
+            line-height: 1;
+            margin-top: 0;
+        }
     </style>
 
 </head>
@@ -301,9 +318,20 @@ function getNamaDivisiLengkap($singkatan) {
     return $singkatan;
 }
 
+// Fungsi untuk cek apakah nilai kosong/null/dash
+function isValueEmpty($value) {
+    return empty($value) || $value === '-' || $value === 'null' || $value === 'NULL';
+}
+
 // Ambil data dosen pertama untuk surat perorangan
 $dosen_pertama = !empty($surat->dosen_data) ? $surat->dosen_data[0] : [];
 $divisi_dosen = !empty($dosen_pertama['divisi']) ? getNamaDivisiLengkap(trim($dosen_pertama['divisi'])) : '-';
+
+// Tentukan jenis penugasan yang akan ditampilkan untuk surat perorangan
+$jenis_penugasan_perorangan_tampil = $surat->jenis_penugasan_perorangan  ?? '-';
+if (isset($jenis_penugasan_perorangan_tampil) && $jenis_penugasan_perorangan_tampil === 'Lainnya') {
+    $jenis_penugasan_perorangan_tampil = $surat->penugasan_lainnya_perorangan  ?? 'Lainnya';
+}
 ?>
 
 <body>
@@ -379,23 +407,20 @@ $divisi_dosen = !empty($dosen_pertama['divisi']) ? getNamaDivisiLengkap(trim($do
                 <div class="identity-row">
                     <div class="identity-label">Jabatan</div>
                     <div class="identity-separator">:</div>
-                    <div class="identity-value"><?= htmlspecialchars($dosen_pertama['jabatan'] ?? '-') ?></div>
+                    <div class="identity-value"><?= htmlspecialchars($dosen_pertama['jabatan'] ?? '-') ?>, <?= htmlspecialchars($divisi_dosen) ?></div>
                 </div>
-                <div class="identity-row">
-                    <div class="identity-label">Prodi/Unit</div>
-                    <div class="identity-separator">:</div>
-                    <div class="identity-value"><?= htmlspecialchars($divisi_dosen) ?></div>
-                </div>
-            </div>
         <?php else: ?>
             <p style="text-align:center;">Tidak ada data dosen</p>
         <?php endif; ?>
 
         <!-- Keterangan Penugasan -->
         <p>
-            <?= $surat->customize ?? '' ?> <b><?= $surat->jenis_penugasan ?? '-' ?></b> 
-            dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
-            yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
+            <?= $surat->customize ?? '' ?> <b><?= $jenis_penugasan_perorangan_tampil ?></b> 
+            dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b>
+            
+            <?php if (!isValueEmpty($surat->penyelenggara)): ?>
+                yang diselenggarakan oleh <b><?= $surat->penyelenggara ?></b>
+            <?php endif; ?>
 
             <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
                 pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?> - <?= tgl_indo($surat->akhir_kegiatan ?? '-') ?></b>
@@ -403,19 +428,22 @@ $divisi_dosen = !empty($dosen_pertama['divisi']) ? getNamaDivisiLengkap(trim($do
                 selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
             <?php endif; ?>
 
-            di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
+            <?php if (!isValueEmpty($surat->tempat_kegiatan)): ?>
+                di <b><?= $surat->tempat_kegiatan ?></b>
+            <?php endif; ?>
+            .
         </p>
 
         <!-- Periode Penugasan -->
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
 
         <!-- Penutup -->
-        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
-
+        <p class="demikian-to-bandung">Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
+        
         <!-- Tanggal -->
         <p class="date">Bandung, <?php
         $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
-        
+      
         if (!empty($surat->approval_status)) {
             if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
                 $tanggalPengesahan = $matches[1];
@@ -439,10 +467,12 @@ $divisi_dosen = !empty($dosen_pertama['divisi']) ? getNamaDivisiLengkap(trim($do
             </div>
             <?php endif; ?>
 
-            <div class="signature-bottom-text">
-                <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
+            <div class="nama-dekan-tanda-tangan">
+                <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b>
             </div>
-            <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
+            <div class="jabatan-dekan-tanda-tangan">
+                Dekan Fakultas Industri Kreatif
+            </div>
         </div>
 
         <!-- TEMBUSAN - hanya satu divisi sesuai dosen yang ditugaskan -->

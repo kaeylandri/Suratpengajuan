@@ -1138,7 +1138,7 @@ i[class*="fa-"] {
                 <option value="Juri">Juri</option>
                 <option value="Pembicara">Pembicara</option>
                 <option value="Narasumber">Narasumber</option>
-                <option value="Penugasan Lainnya">Lainnya</option>
+                <option value="Lainnya">Lainnya</option>
             </select>
 
             <input type="text" class="form-control custom-form-control"
@@ -1153,7 +1153,7 @@ i[class*="fa-"] {
                 <option disabled selected value="">Jenis Penugasan</option>
                 <option value="Tim">Tim</option>
                 <option value="Kepanitiaan">Kepanitiaan</option>
-                <option value="Penugasan Lainnya">Lainnya</option>
+                <option value="Lainnya">Lainnya</option>
             </select>
 
             <input type="text" class="form-control custom-form-control"
@@ -1563,8 +1563,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle "Lainnya" option untuk penugasan perorangan
     document.getElementById('jenis_penugasan_perorangan').addEventListener('change', function() {
         const lainnyaInput = document.getElementById('penugasan_lainnya_perorangan');
-        lainnyaInput.style.display = this.value === 'Penugasan Lainnya' ? 'block' : 'none';
-        if (this.value !== 'Penugasan Lainnya') {
+        lainnyaInput.style.display = this.value === 'Lainnya' ? 'block' : 'none';
+        if (this.value !== 'Lainnya') {
             lainnyaInput.value = '';
         }
     });
@@ -1572,8 +1572,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle "Lainnya" option untuk penugasan kelompok
     document.getElementById('jenis_penugasan_kelompok').addEventListener('change', function() {
         const lainnyaInput = document.getElementById('penugasan_lainnya_kelompok');
-        lainnyaInput.style.display = this.value === 'Penugasan Lainnya' ? 'block' : 'none';
-        if (this.value !== 'Penugasan Lainnya') {
+        lainnyaInput.style.display = this.value === 'Lainnya' ? 'block' : 'none';
+        if (this.value !== 'Lainnya') {
             lainnyaInput.value = '';
         }
     });
@@ -4555,7 +4555,7 @@ if (msform) {
             jQuery("#jenis_penugasan_perorangan").change(function() {
                 //  jQuery(this).val() == 'select' ? jQuery("#textarea").hide() : jQuery("#textarea").show();
                 var value = jQuery(this).val();
-                if (value == "Penugasan Lainnya") {
+                if (value == "Lainnya") {
                     jQuery("#penugasan_lainnya_perorangan").hide()
                     $("#penugasan_lainnya_perorangan").show();
                 } else {
@@ -4570,7 +4570,7 @@ if (msform) {
             jQuery("#jenis_penugasan_kelompok").change(function() {
                 //  jQuery(this).val() == 'select' ? jQuery("#textarea").hide() : jQuery("#textarea").show();
                 var value = jQuery(this).val();
-                if (value == "Penugasan Lainnya") {
+                if (value == "Lainnya") {
                     jQuery("#penugasan_lainnya_kelompok").hide()
                     $("#penugasan_lainnya_kelompok").show();
                 } else {
@@ -4974,7 +4974,7 @@ $(document).ready(function() {
         const isPerorangan = $(this).attr('id') === 'jenis_penugasan_perorangan';
         const lainnyaInput = isPerorangan ? $('#penugasan_lainnya_perorangan') : $('#penugasan_lainnya_kelompok');
         
-        if (value === 'Penugasan Lainnya') {
+        if (value === 'Lainnya') {
             lainnyaInput.show().focus();
         } else {
             lainnyaInput.hide().val('');
@@ -5088,7 +5088,7 @@ function checkStep1Validity() {
         }
         
         // Cek "Lainnya" jika dipilih
-        if (jenisPenugasanPerorangan === 'Penugasan Lainnya') {
+        if (jenisPenugasanPerorangan === 'Lainnya') {
             const penugasanLainnya = $('#penugasan_lainnya_perorangan').val().trim();
             if (!penugasanLainnya) {
                 isValid = false;
@@ -5101,7 +5101,7 @@ function checkStep1Validity() {
         }
         
         // Cek "Lainnya" jika dipilih
-        if (jenisPenugasanKelompok === 'Penugasan Lainnya') {
+        if (jenisPenugasanKelompok === 'Lainnya') {
             const penugasanLainnya = $('#penugasan_lainnya_kelompok').val().trim();
             if (!penugasanLainnya) {
                 isValid = false;
@@ -5542,7 +5542,7 @@ function validateStep1() {
             $('#jenis_penugasan_perorangan').removeClass('is-invalid');
             
             // Validasi "Lainnya" jika dipilih
-            if (jenisPenugasanPerorangan === 'Penugasan Lainnya') {
+            if (jenisPenugasanPerorangan === 'Lainnya') {
                 const penugasanLainnya = $('#penugasan_lainnya_perorangan').val().trim();
                 if (!penugasanLainnya) {
                     errorMessages.push('❌ Jenis Penugasan Lainnya harus diisi');
@@ -5563,7 +5563,7 @@ function validateStep1() {
             $('#jenis_penugasan_kelompok').removeClass('is-invalid');
             
             // Validasi "Lainnya" jika dipilih
-            if (jenisPenugasanKelompok === 'Penugasan Lainnya') {
+            if (jenisPenugasanKelompok === 'Lainnya') {
                 const penugasanLainnya = $('#penugasan_lainnya_kelompok').val().trim();
                 if (!penugasanLainnya) {
                     errorMessages.push('❌ Jenis Penugasan Lainnya harus diisi');

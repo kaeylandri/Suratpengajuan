@@ -1001,11 +1001,7 @@
                             <button class="btn btn-eviden" onclick="event.stopPropagation(); showEvidenModal(<?= $s->id ?>)" title="Lihat Eviden">
                                 <i class="fas fa-file-image"></i>
                             </button>
-                            
-                            <!-- Tombol Lihat Surat (Biru) -->
-                            <button class="btn btn-detail" onclick="event.stopPropagation(); showDetail(<?= $s->id ?>)" title="Lihat Surat">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
+                        
                             
                             <?php if($s->status == 'pengajuan'): ?>
                             <button class="btn btn-approve" onclick="event.stopPropagation(); showApproveModal(<?= $s->id ?>)" title="Setujui">

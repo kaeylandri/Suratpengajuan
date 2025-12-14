@@ -345,6 +345,11 @@ if (!empty($surat->dosen_data)) {
 // Hapus duplikat dan urutkan
 $divisi_tembusan = array_unique($divisi_tembusan);
 sort($divisi_tembusan);
+
+$jenis_penugasan_kelompok_tampil = $surat->jenis_penugasan_kelompok ?? '-';
+if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil === 'Lainnya') {
+    $jenis_penugasan_kelompok_tampil = $surat->penugasan_lainnya_kelompok ?? 'Lainnya';
+}
 ?>
 
 <body>
@@ -399,7 +404,8 @@ sort($divisi_tembusan);
             </div>
         </div>
 
-        <p class="section-title">Menugaskan kepada Dosen dan TPA yang tercantum dalam lampiran surat tugas ini, sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b> di kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b></p>
+        <p class="section-title">Menugaskan kepada Dosen dan TPA yang tercantum dalam lampiran surat tugas ini, <?= $surat->customize ?? '-' ?> <b><?= $jenis_penugasan_kelompok_tampil ?></b>
+         di kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b></p>
 
         <p>Surat tugas ini berlaku mulai tanggal sesuai tanggal kegiatan.</p>
         <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p><br>
@@ -461,7 +467,8 @@ sort($divisi_tembusan);
 
     <!-- LAMPIRAN TABEL -->
     <div class="content">
-        <h5><b><?= $surat->jenis_penugasan_kelompok ?? '-' ?> kegiatan <?= $surat->nama_kegiatan ?? '-' ?></b></h5>
+        <h5><b><?= $jenis_penugasan_kelompok_tampil ?>
+         kegiatan <?= $surat->nama_kegiatan ?? '-' ?></b></h5>
         
         <table>
             <thead>

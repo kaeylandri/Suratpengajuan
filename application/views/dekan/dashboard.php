@@ -1294,7 +1294,7 @@
 </div>
 
 <!-- Detail Modal -->
-<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
+<div id="detailModal" class="modal">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
@@ -1307,7 +1307,7 @@
 </div>
 
 <!-- Approve Modal -->
-<div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
+<div id="approveModal" class="modal">
     <div class="approve-modal-content" onclick="event.stopPropagation()">
         <div class="approve-modal-header">
             <h3><i class="fa-solid fa-check-circle"></i> Konfirmasi Persetujuan</h3>
@@ -1341,7 +1341,7 @@
 </div>
 
 <!-- Reject Modal (BARU - MIRIP SEPERTI APPROVE MODAL) -->
-<div id="rejectConfirmModal" class="modal" onclick="modalClickOutside(event,'rejectConfirmModal')">
+<div id="rejectConfirmModal" class="modal">
     <div class="reject-modal-content" onclick="event.stopPropagation()">
         <div class="reject-modal-header">
             <h3><i class="fa-solid fa-ban"></i> Konfirmasi Penolakan</h3>
@@ -1388,7 +1388,7 @@
 </div>
 
 <!-- Success Result Modal untuk Reject -->
-<div id="successRejectModal" class="modal" onclick="modalClickOutside(event,'successRejectModal')">
+<div id="successRejectModal" class="modal">
     <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #e74c3c;">
             <h3><i class="fa-solid fa-ban"></i> <span id="successRejectTitle">Pengajuan Berhasil Ditolak</span></h3>
@@ -1415,9 +1415,6 @@
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#e74c3c;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
                 <button class="btn-bulk" onclick="closeModal('successRejectModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
@@ -1426,7 +1423,7 @@
     </div>
 </div>
 <!-- Success Result Modal - DIUBAH SEPERTI DI HALAMAN PENDING -->
-<div id="successResultModal" class="modal" onclick="modalClickOutside(event,'successResultModal')">
+<div id="successResultModal" class="modal">
     <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #27ae60;">
             <h3><i class="fa-solid fa-check-circle"></i> <span id="successResultTitle">Pengajuan Berhasil Disetujui</span></h3>
@@ -1453,9 +1450,6 @@
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
                 <button class="btn-bulk" onclick="closeModal('successResultModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
@@ -1477,7 +1471,7 @@
     </div>
 </div>
 <!-- Return Modal (SEDERHANA TANPA CATATAN) -->
-<div id="returnConfirmModal" class="modal" onclick="modalClickOutside(event,'returnConfirmModal')">
+<div id="returnConfirmModal" class="modal">
     <div class="approve-modal-content" onclick="event.stopPropagation()">
         <div class="approve-modal-header" style="background: #ff9800;">
             <h3><i class="fa-solid fa-undo"></i> Konfirmasi Pengembalian</h3>
@@ -1506,7 +1500,7 @@
 </div>
 
 <!-- Success Result Modal untuk Return -->
-<div id="successReturnModal" class="modal" onclick="modalClickOutside(event,'successReturnModal')">
+<div id="successReturnModal" class="modal">
     <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #ff9800;">
             <h3><i class="fa-solid fa-undo"></i> <span id="successReturnTitle">Pengajuan Berhasil Dikembalikan</span></h3>
@@ -1533,9 +1527,6 @@
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#ff9800;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
                 <button class="btn-bulk" onclick="closeModal('successReturnModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
@@ -1544,7 +1535,7 @@
     </div>
 </div>
 <!-- Eviden Modal (untuk multiple files) -->
-<div id="evidenModal" class="modal" onclick="modalClickOutside(event,'evidenModal')">
+<div id="evidenModal" class="modal">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-image"></i> File Evidence</h3>
@@ -2281,9 +2272,6 @@ function closeModal(id) {
     document.getElementById(id).classList.remove('show'); 
 }
 
-function modalClickOutside(evt, id) { 
-    if (evt.target && evt.target.id === id) closeModal(id); 
-}
 
 // Helper functions
 function formatDate(d) {

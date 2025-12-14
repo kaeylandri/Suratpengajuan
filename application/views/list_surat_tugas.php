@@ -3552,7 +3552,79 @@
 #editList::-webkit-scrollbar-thumb:hover {
     background: #aaa;
 }
+/* Styling untuk perubahan */
+.change-item {
+    border-left: 3px solid #ff9800;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #fff;
+    border-radius: 0 6px 6px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
 
+.change-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.change-icon {
+    width: 24px;
+    height: 24px;
+    background: #ff9800;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.change-title {
+    font-weight: 600;
+    color: #333;
+    font-size: 13px;
+}
+
+.change-values {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.old-value {
+    flex: 1;
+    background: #fff3cd;
+    padding: 6px 8px;
+    border-radius: 4px;
+}
+
+.new-value {
+    flex: 1;
+    background: #d4edda;
+    padding: 6px 8px;
+    border-radius: 4px;
+}
+
+.value-label {
+    color: #856404;
+    font-weight: 600;
+    font-size: 11px;
+    margin-bottom: 2px;
+}
+
+.value-content {
+    color: #333;
+    font-size: 12px;
+}
+
+.change-timestamp {
+    font-size: 11px;
+    color: #6c757d;
+    margin-top: 5px;
+    text-align: right;
+}
     </style>
 </head>
 
@@ -3994,38 +4066,59 @@
                 </div>
             </div>
         </div>
-<!-- ===== SUCCESS MODAL UNTUK EDIT SURAT ===== -->
-<div id="successEditModal" class="modal" onclick="modalClickOutside(event,'successEditModal')">
-    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
-        <div class="modal-header" style="background: #ff9800;">
+<!-- ===== SUCCESS MODAL UNTUK EDIT SURAT - WITH CHANGES DETAIL ===== -->
+<div id="successEditModal" class="modal">
+    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 900px; height: 85vh; display: flex; flex-direction: column;">
+        <div class="modal-header" style="background: #ff9800; flex-shrink: 0;">
             <h3><i class="fa-solid fa-pen-to-square"></i> Edit Berhasil Disimpan</h3>
             <button class="close-modal" onclick="closeModal('successEditModal')">&times;</button>
         </div>
-        <div style="padding:25px;text-align:center">
-            <div style="width:100px;height:100px;border-radius:50%;background:#fff3e0;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
-                <i class="fas fa-check" style="font-size:50px;color:#ff9800"></i>
+        
+        <!-- Scrollable Content Area -->
+        <div style="flex: 1; overflow-y: auto; padding: 25px;">
+            <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px; flex-shrink: 0;">
+                <div style="width:80px;height:80px;border-radius:50%;background:#fff3e0;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+                    <i class="fas fa-check" style="font-size:40px;color:#ff9800"></i>
+                </div>
+                <div style="text-align:left;flex:1">
+                    <h3 style="color:#ff9800;margin-bottom:8px;font-size:22px">Berhasil Diperbarui</h3>
+                    <p style="color:#666;margin-bottom:5px;font-size:14px">
+                        <i class="fa-solid fa-clock"></i> Diperbarui pada: <strong id="editTimestamp">-</strong>
+                    </p>
+                    <p style="color:#666;font-size:13px">
+                        <i class="fa-solid fa-edit"></i> <span id="editChangesCount">0</span> perubahan berhasil disimpan
+                    </p>
+                </div>
             </div>
             
-            <h3 style="color:#ff9800;margin-bottom:10px">Berhasil Diperbarui</h3>
-            <p style="color:#666;margin-bottom:5px">
-                <i class="fa-solid fa-clock"></i> Diperbarui pada: <strong id="editTimestamp">-</strong>
-            </p>
-            
-            <div style="background:#fff3e0;border:1px solid #ffcc80;border-radius:8px;padding:15px;margin:20px 0">
-                <div style="font-weight:600;color:#e65100;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
-                    <span>Data Pengajuan</span>
+            <!-- Data Pengajuan Section -->
+            <div style="background:#fff3e0;border:1px solid #ffcc80;border-radius:8px;padding:15px;margin-bottom:15px; flex-shrink: 0;">
+                <div style="font-weight:600;color:#e65100;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+                    <span><i class="fa-solid fa-file-alt"></i> Informasi Pengajuan</span>
                     <span id="editItemCount" style="background:#ff9800;color:white;padding:4px 12px;border-radius:20px;font-size:12px">1 item</span>
                 </div>
-                <div id="editList" style="max-height:250px;overflow-y:auto;text-align:left">
+                <div id="editList" style="text-align:left; max-height: 200px; overflow-y: auto;">
                     <!-- List akan diisi oleh JavaScript -->
                 </div>
             </div>
             
-            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#ff9800;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
-                <button class="btn-bulk" onclick="closeModal('successEditModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+            <!-- Perubahan Detail Section -->
+            <div id="editChangesSection" style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:15px;margin-bottom:15px;display:none;">
+                <div style="font-weight:600;color:#495057;margin-bottom:12px;display:flex;align-items:center;gap:8px; flex-shrink: 0;">
+                    <i class="fa-solid fa-list-check" style="color:#ff9800"></i>
+                    <span>Detail Perubahan</span>
+                    <span id="editChangesBadge" style="background:#ff9800;color:white;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">0 changes</span>
+                </div>
+                <div id="editChangesList" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                    <!-- Changes akan diisi oleh JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons (Fixed at bottom) -->
+        <div style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 15px 25px; flex-shrink: 0;">
+            <div style="display:flex;gap:10px;justify-content:center">
+                <button class="btn-bulk" onclick="closeModal('successEditModal')" style="background:#6c757d;color:white;padding:12px 28px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
             </div>
@@ -4321,8 +4414,8 @@
                                 <?php endif; ?>
 
                                 <!-- Tombol Print -->
-                                <?php if ($is_approved_dekan): ?>
-                                    <a href="<?= base_url('surat/cetak/' . $s->id) ?>"
+                                <?php if ($is_approved_dekan && !empty($s->nomor_surat) && $s->nomor_surat !== '-' && $s->nomor_surat !== 'null'): ?>
+                                    <a href="<?= base_url('sekretariat/cetak/' . $s->id)?>"
                                         target="_blank"
                                         class="btn-icon-action btn-print"
                                         title="Cetak Surat Tugas">
@@ -4443,7 +4536,7 @@ $(document).ready(function() {
     setTimeout(updateAllDates, 100);
 });
 // ============================================
-// SUCCESS MODAL FUNCTIONS - UNTUK EDIT SURAT
+// SUCCESS MODAL FUNCTIONS - UNTUK EDIT SURAT DENGAN PERUBAHAN
 // ============================================
 function showSuccessEditModal(count, items, isSingle = false) {
     console.log('showSuccessEditModal called with items:', items);
@@ -4452,6 +4545,9 @@ function showSuccessEditModal(count, items, isSingle = false) {
     const timestamp = document.getElementById('editTimestamp');
     const itemCount = document.getElementById('editItemCount');
     const listContainer = document.getElementById('editList');
+    const changesList = document.getElementById('editChangesList');
+    const changesCount = document.getElementById('editChangesCount');
+    const changesSection = document.getElementById('editChangesSection');
     
     // Format timestamp
     const now = new Date();
@@ -4468,12 +4564,17 @@ function showSuccessEditModal(count, items, isSingle = false) {
     // Populate list dengan data
     listContainer.innerHTML = '';
     
+    // Populate changes list
+    changesList.innerHTML = '';
+    let totalChanges = 0;
+    
     items.forEach((item, index) => {
         const itemDiv = document.createElement('div');
         itemDiv.style.cssText = 'background:white;border:1px solid #ffcc80;border-radius:10px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.05)';
         
         // Status baru setelah di-edit
         const newStatus = item.new_status || 'pengajuan';
+        const oldStatus = item.old_status || '-';
         let statusColor = '#ff9800';
         let statusText = newStatus;
         
@@ -4505,26 +4606,97 @@ function showSuccessEditModal(count, items, isSingle = false) {
             ${dosenHtml}
         `;
         listContainer.appendChild(itemDiv);
+        
+        if (item.changes && Array.isArray(item.changes) && item.changes.length > 0) {
+    totalChanges += item.changes.length;
+    
+    // Buat section untuk perubahan item ini
+    const changesItemDiv = document.createElement('div');
+    changesItemDiv.style.cssText = 'margin-bottom:15px;padding:15px;background:#fff;border:1px solid #e0e0e0;border-radius:8px; flex-shrink: 0;';
+    
+    // Header untuk perubahan item
+    const changesHeader = document.createElement('div');
+    changesHeader.style.cssText = 'font-weight:600;color:#ff9800;margin-bottom:10px;display:flex;align-items:center;gap:8px;';
+    changesHeader.innerHTML = `<i class="fas fa-sync-alt"></i> ${escapeHtml(item.nama)} - ${item.changes.length} perubahan`;
+    changesItemDiv.appendChild(changesHeader);
+    
+    // Tampilkan setiap perubahan
+    item.changes.forEach((change, changeIndex) => {
+        const changeDiv = document.createElement('div');
+        changeDiv.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:10px;background:#f8f9fa;border-radius:6px;margin-bottom:8px;border-left:3px solid #ff9800; flex-shrink: 0;';
+        
+        // Icon berdasarkan tipe perubahan
+        let changeIcon = 'fas fa-edit';
+        let changeColor = '#ff9800';
+        
+        if (change.field === 'status') {
+            changeIcon = 'fas fa-exchange-alt';
+            changeColor = '#2196F3';
+        } else if (change.field === 'dosen' || change.field_label.includes('Jabatan') || change.field_label.includes('Peran')) {
+            changeIcon = 'fas fa-user-edit';
+            changeColor = '#4CAF50';
+        } else if (change.field === 'eviden') {
+            changeIcon = 'fas fa-file-edit';
+            changeColor = '#9C27B0';
+        }
+        
+        changeDiv.innerHTML = `
+            <div style="width:24px;height:24px;background:${changeColor};color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px">
+                <i class="${changeIcon}"></i>
+            </div>
+            <div style="flex:1;min-width:0">
+                <div style="font-weight:600;color:#333;font-size:13px;margin-bottom:5px">${escapeHtml(change.field_label)}</div>
+                <div style="display:flex;gap:10px;font-size:12px;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:250px;background:#fff3cd;padding:6px 8px;border-radius:4px;">
+                        <div style="color:#856404;font-weight:600;margin-bottom:2px;font-size:11px;">Nilai Lama:</div>
+                        <div style="color:#333;word-break:break-word;max-height:100px;overflow-y:auto;padding-right:5px;">${escapeHtml(change.old_value)}</div>
+                    </div>
+                    <div style="flex:1;min-width:250px;background:#d4edda;padding:6px 8px;border-radius:4px;">
+                        <div style="color:#155724;font-weight:600;margin-bottom:2px;font-size:11px;">Nilai Baru:</div>
+                        <div style="color:#333;word-break:break-word;max-height:100px;overflow-y:auto;padding-right:5px;">${escapeHtml(change.new_value)}</div>
+                    </div>
+                </div>
+                <div style="font-size:11px;color:#6c757d;margin-top:5px;text-align:right">
+                    <i class="far fa-clock"></i> ${change.timestamp || 'Baru saja'}
+                </div>
+            </div>
+        `;
+        changesItemDiv.appendChild(changeDiv);
     });
+    
+    changesList.appendChild(changesItemDiv);
+}
+    });
+    
+    // Update changes count
+    if (changesCount) {
+        changesCount.textContent = totalChanges;
+    }
+    
+    // Tampilkan atau sembunyikan section perubahan
+    if (changesSection) {
+        if (totalChanges > 0) {
+            changesSection.style.display = 'block';
+        } else {
+            changesSection.style.display = 'none';
+        }
+    }
     
     modal.classList.add('show');
 }
-// ============================================
-// HELPER FUNCTIONS
-// ============================================
 
-// Fungsi untuk generate HTML dosen di success modal - VERSI RAPI
+// ===== PERBAIKAN FINAL: DOSEN MUNCUL LANGSUNG DI BAWAH - INTEGRATED LIST =====
 function generateDosenHtmlForSuccessModal(dosenData) {
     console.log('=== generateDosenHtmlForSuccessModal ===');
+    console.log('dosenData:', dosenData);
     
     if (!dosenData || !Array.isArray(dosenData) || dosenData.length === 0) {
+        console.log('No dosen data');
         return '';
     }
     
     const maxVisible = 3;
     const isOverLimit = dosenData.length > maxVisible;
-    const visibleDosen = isOverLimit ? dosenData.slice(0, maxVisible) : dosenData;
-    const hiddenDosen = isOverLimit ? dosenData.slice(maxVisible) : [];
     const uniqueId = 'dosen-success-' + Date.now();
     
     let html = `
@@ -4536,138 +4708,164 @@ function generateDosenHtmlForSuccessModal(dosenData) {
             </span>
         </div>
         
-        <div id="${uniqueId}" style="max-height:200px;overflow-y:auto;">
+        <!-- Container untuk SEMUA dosen dalam satu list -->
+        <div id="${uniqueId}-container" style="display:flex;flex-direction:column;gap:8px;">
     `;
     
-    // Tampilkan dosen yang terlihat
-    visibleDosen.forEach((dosen, index) => {
+    // Loop SEMUA dosen dan tampilkan dalam satu list
+    dosenData.forEach((dosen, index) => {
         const nama = dosen.nama_dosen || dosen.nama || 'Tidak diketahui';
         const nip = dosen.nip || '-';
         const jabatan = dosen.jabatan || '-';
         const divisi = dosen.divisi || '-';
+        const peran = dosen.peran || '-';
         const initial = nama.charAt(0).toUpperCase();
         
+        // Tentukan apakah item ini hidden (index >= 3)
+        const isHidden = index >= maxVisible;
+        const displayStyle = isHidden ? 'none' : 'flex';
+        const hiddenClass = isHidden ? 'dosen-item-hidden' : '';
+        
+        // Warna gradient berbeda untuk variasi visual
+        const bgGradient = index % 2 === 0 
+            ? 'linear-gradient(135deg, #16A085 0%, #1ABC9C 100%)' 
+            : 'linear-gradient(135deg, #27AE60 0%, #2ECC71 100%)';
+        
         html += `
-        <div class="dosen-success-item" 
-             style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:white;border:1px solid #e8daef;border-radius:8px;margin-bottom:8px;transition:all 0.2s;">
-            <div style="width:36px;height:36px;border-radius:50%;background:#16A085;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0">
+        <div class="dosen-item ${hiddenClass}" 
+             data-index="${index}"
+             style="display:${displayStyle};align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e8daef;border-radius:8px;transition:all 0.3s ease;cursor:default;">
+            
+            <!-- Avatar dengan initial -->
+            <div style="width:40px;height:40px;border-radius:50%;background:${bgGradient};color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px;flex-shrink:0;box-shadow:0 2px 4px rgba(22,160,133,0.3)">
                 ${initial}
             </div>
+            
+            <!-- Info dosen -->
             <div style="flex:1;min-width:0;">
-                <div style="font-weight:600;color:#212529;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                <div style="font-weight:600;color:#212529;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
                     ${escapeHtml(nama)}
                 </div>
-                <div style="font-size:12px;color:#6c757d;display:flex;flex-wrap:wrap;gap:8px;">
-                    <span><i class="fas fa-id-card"></i> ${escapeHtml(nip)}</span>
-                    <span><i class="fas fa-briefcase"></i> ${escapeHtml(jabatan)}</span>
-                    ${divisi !== '-' ? `<span><i class="fas fa-building"></i> ${escapeHtml(divisi)}</span>` : ''}
+                <div style="font-size:12px;color:#6c757d;display:flex;flex-wrap:wrap;gap:8px;line-height:1.5;">
+                    <span style="white-space:nowrap;display:inline-flex;align-items:center;gap:4px">
+                        <i class="fas fa-id-card" style="font-size:11px"></i> 
+                        <strong>NIP:</strong> ${escapeHtml(nip)}
+                    </span>
+                    ${jabatan !== '-' ? `
+                    <span style="white-space:nowrap;display:inline-flex;align-items:center;gap:4px">
+                        <i class="fas fa-briefcase" style="font-size:11px"></i> 
+                        ${escapeHtml(jabatan)}
+                    </span>` : ''}
+                    ${divisi !== '-' ? `
+                    <span style="white-space:nowrap;display:inline-flex;align-items:center;gap:4px">
+                        <i class="fas fa-building" style="font-size:11px"></i> 
+                        ${escapeHtml(divisi)}
+                    </span>` : ''}
                 </div>
+                ${peran !== '-' && peran !== '' ? `
+                <div style="margin-top:6px">
+                    <span style="background:#ffeaa7;color:#2d3436;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap;display:inline-flex;align-items:center;gap:4px">
+                        <i class="fas fa-user-tag"></i> ${escapeHtml(peran)}
+                    </span>
+                </div>` : ''}
             </div>
         </div>
         `;
     });
     
-    html += `</div>`;
+    html += `</div>`; // Tutup container dosen
     
-    // Jika ada dosen yang tersembunyi, tambahkan tombol show more
+    // Jika ada dosen yang tersembunyi, tambahkan button toggle
     if (isOverLimit) {
+        const hiddenCount = dosenData.length - maxVisible;
+        
         html += `
-        <button onclick="toggleHiddenDosen('${uniqueId}', ${hiddenDosen.length}, this)" 
-                style="background:#16A085;color:white;border:none;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;transition:background 0.2s">
-            <i class="fa-solid fa-chevron-down"></i>
-            <span>Tampilkan ${hiddenDosen.length} Dosen Lainnya</span>
+        <button id="${uniqueId}-toggle-btn" 
+                onclick="toggleDosenList('${uniqueId}', ${hiddenCount})" 
+                data-expanded="false"
+                style="background:#16A085;color:white;border:none;border-radius:6px;padding:10px 16px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;transition:all 0.2s;font-weight:500;box-shadow:0 2px 4px rgba(22,160,133,0.2)">
+            <i class="fas fa-chevron-down" id="${uniqueId}-toggle-icon"></i>
+            <span id="${uniqueId}-toggle-text">Tampilkan ${hiddenCount} Dosen Lainnya</span>
         </button>
-        
-        <div id="${uniqueId}-hidden" style="display:none;margin-top:10px;">
         `;
-        
-        hiddenDosen.forEach((dosen, index) => {
-            const nama = dosen.nama_dosen || dosen.nama || 'Tidak diketahui';
-            const nip = dosen.nip || '-';
-            const jabatan = dosen.jabatan || '-';
-            const divisi = dosen.divisi || '-';
-            const initial = nama.charAt(0).toUpperCase();
-            
-            html += `
-            <div class="dosen-success-item-hidden" 
-                 style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:white;border:1px solid #e8daef;border-radius:8px;margin-bottom:8px;">
-                <div style="width:36px;height:36px;border-radius:50%;background:#7CB342;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0">
-                    ${initial}
-                </div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-weight:600;color:#212529;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                        ${escapeHtml(nama)}
-                    </div>
-                    <div style="font-size:12px;color:#6c757d;display:flex;flex-wrap:wrap;gap:8px;">
-                        <span><i class="fas fa-id-card"></i> ${escapeHtml(nip)}</span>
-                        <span><i class="fas fa-briefcase"></i> ${escapeHtml(jabatan)}</span>
-                        ${divisi !== '-' ? `<span><i class="fas fa-building"></i> ${escapeHtml(divisi)}</span>` : ''}
-                    </div>
-                </div>
-            </div>
-            `;
-        });
-        
-        html += `</div>`;
     }
     
-    html += `</div>`;
+    html += `</div>`; // Tutup section
     
     return html;
 }
 
-// Fungsi untuk toggle show/hide dosen
-function toggleHiddenDosen(containerId, hiddenCount, button) {
-    const hiddenContainer = document.getElementById(containerId + '-hidden');
-    const icon = button.querySelector('i');
-    const textSpan = button.querySelector('span');
+// ===== FUNGSI TOGGLE DOSEN LIST - VERSI INTEGRATED =====
+function toggleDosenList(uniqueId, hiddenCount) {
+    const container = document.getElementById(uniqueId + '-container');
+    const button = document.getElementById(uniqueId + '-toggle-btn');
+    const icon = document.getElementById(uniqueId + '-toggle-icon');
+    const text = document.getElementById(uniqueId + '-toggle-text');
     
-    if (hiddenContainer.style.display === 'none') {
-        hiddenContainer.style.display = 'block';
-        icon.className = 'fa-solid fa-chevron-up';
-        textSpan.textContent = 'Sembunyikan';
-    } else {
-        hiddenContainer.style.display = 'none';
-        icon.className = 'fa-solid fa-chevron-down';
-        textSpan.textContent = `Tampilkan ${hiddenCount} Dosen Lainnya`;
+    if (!container || !button) {
+        console.error('Container atau button tidak ditemukan');
+        return;
     }
-}
-// Fungsi untuk toggle show more/less dosen di success modal
-function toggleSuccessDosenList(containerId, button) {
-    const container = document.getElementById(containerId);
-    const hiddenItems = container.querySelectorAll('.success-dosen-hidden');
-    const icon = button.querySelector('i');
-    const textSpan = button.querySelector('span');
     
-    if (container.classList.contains('success-dosen-show-all')) {
-        // Collapse - sembunyikan dosen setelah 3
-        container.classList.remove('success-dosen-show-all');
-        icon.className = 'fa-solid fa-chevron-down';
-        textSpan.textContent = `Tampilkan ${hiddenItems.length} Dosen Lainnya`;
-    } else {
-        // Expand - tampilkan semua dosen
-        container.classList.add('success-dosen-show-all');
-        icon.className = 'fa-solid fa-chevron-up';
-        textSpan.textContent = 'Sembunyikan';
-    }
-}
-
-// Fungsi untuk inisialisasi dosen list di success modal
-function initSuccessDosenList() {
-    const containers = document.querySelectorAll('.success-dosen-list');
-    containers.forEach(container => {
-        const hiddenItems = container.querySelectorAll('.success-dosen-hidden');
-        const button = container.parentElement.querySelector('.success-dosen-more-btn');
+    // Ambil semua item yang hidden
+    const hiddenItems = container.querySelectorAll('.dosen-item-hidden');
+    
+    // Cek state saat ini
+    const isExpanded = button.dataset.expanded === 'true';
+    
+    if (isExpanded) {
+        // ===== COLLAPSE: Sembunyikan dosen tambahan =====
+        hiddenItems.forEach((item, index) => {
+            setTimeout(() => {
+                // Fade out dengan smooth transition
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(-10px)';
+                
+                // Setelah animasi selesai, hide element
+                setTimeout(() => {
+                    item.style.display = 'none';
+                }, 200);
+            }, index * 30); // Staggered animation
+        });
         
-        if (button && hiddenItems.length > 0) {
-            const textSpan = button.querySelector('span');
-            if (textSpan) {
-                textSpan.textContent = `Tampilkan ${hiddenItems.length} Dosen Lainnya`;
-            }
-        }
-    });
+        // Update button UI
+        setTimeout(() => {
+            if (icon) icon.className = 'fas fa-chevron-down';
+            if (text) text.textContent = `Tampilkan ${hiddenCount} Dosen Lainnya`;
+            button.dataset.expanded = 'false';
+            button.style.background = '#16A085';
+        }, 100);
+        
+    } else {
+        // ===== EXPAND: Tampilkan dosen tambahan =====
+        hiddenItems.forEach((item, index) => {
+            setTimeout(() => {
+                // Set initial state untuk animasi
+                item.style.display = 'flex';
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(-10px)';
+                
+                // Trigger reflow untuk smooth animation
+                item.offsetHeight;
+                
+                // Animate in
+                requestAnimationFrame(() => {
+                    item.style.transition = 'all 0.3s ease';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                });
+            }, index * 50); // Staggered animation
+        });
+        
+        // Update button UI
+        setTimeout(() => {
+            if (icon) icon.className = 'fas fa-chevron-up';
+            if (text) text.textContent = 'Sembunyikan';
+            button.dataset.expanded = 'true';
+            button.style.background = '#138D75';
+        }, 100);
+    }
 }
-
 // Fungsi untuk escape HTML
 function escapeHtml(unsafe) {
     if (unsafe === null || unsafe === undefined) return '-';
@@ -4689,10 +4887,6 @@ function closeModal(id) {
     document.getElementById(id).classList.remove('show'); 
 }
 
-// Fungsi untuk klik di luar modal
-function modalClickOutside(evt, id) { 
-    if (evt.target && evt.target.id === id) closeModal(id); 
-}
     // Toggle Sidebar for Mobile
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('active');
@@ -6153,33 +6347,7 @@ function showDosenModal(event, dosenList, namaKegiatan, suratId) {
             console.log('Autocomplete initialized');
         }, 500);
 
-        // Close modal ketika klik di luar
-        window.addEventListener('click', function(e) {
-            if (e.target.id === 'dosenModal') {
-                const dosenModal = document.getElementById('dosenModal');
-                dosenModal.classList.remove('show');
-                dosenModal.style.zIndex = '';
-            }
-            if (e.target.id === 'modalTambahDosen') {
-                tutupModalTambah();
-            }
-            if (e.target.id === 'modalKurangDosen') {
-                tutupModalKurang();
-            }
-            if (e.target.id === 'konfirmasiHapusModal') {
-                tutupKonfirmasiHapus();
-            }
-            if (e.target.id === 'modalDetail') {
-                const modalDetail = document.getElementById('modalDetail');
-                modalDetail.classList.remove('show');
-                modalDetail.style.zIndex = '';
-            }
-            if (e.target.id === 'previewModal') {
-                const previewModal = document.getElementById('previewModal');
-                previewModal.classList.remove('show');
-                previewModal.style.zIndex = '';
-            }
-        });
+      
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
@@ -6361,12 +6529,6 @@ function showDosenModal(event, dosenList, namaKegiatan, suratId) {
             });
         }
 
-        window.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-                modal.style.zIndex = '';
-            }
-        });
     });
 
     // ===== FUNGSI ALERT UNTUK BUTTON DISABLED =====
@@ -6986,7 +7148,7 @@ function showDosenModal(event, dosenList, namaKegiatan, suratId) {
                 
                 <div class="detail-row">
                     <div class="detail-label">Jenis Penugasan</div>
-                    <div class="detail-value">${escapeHtml(data.jenis_penugasan || data.jenis_penugasan_kelompok || '-')}</div>
+                    <div class="detail-value">${escapeHtml(data.jenis_penugasan_perorangan || data.jenis_penugasan_kelompok || '-')}</div>
                 </div>
                 
                 <div class="detail-row">
@@ -7188,19 +7350,6 @@ function showDosenModal(event, dosenList, namaKegiatan, suratId) {
             previewModal.css('z-index', '');
         });
 
-        $(window).click(function(e) {
-            if (e.target.id === 'modalDetail') {
-                const modalDetail = $('#modalDetail');
-                modalDetail.removeClass('show');
-                modalDetail.css('z-index', '');
-            }
-            if (e.target.id === 'previewModal') {
-                const previewModal = $('#previewModal');
-                previewModal.removeClass('show');
-                previewModal.css('z-index', '');
-            }
-        });
-
         // Prevent download link dari menutup modal
         $(document).on('click', '.download-btn, .preview-btn', function(e) {
             e.stopPropagation();
@@ -7250,7 +7399,7 @@ function showSuccessAddModal(count, items, isSingle = false) {
                     <div style="font-size:13px;color:#6c757d">${item.details}</div>
                 </div>
                 <span style="background:#27ae60;color:white;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;flex-shrink:0">
-                    Disetujui
+                    Pengajuan
                 </span>
             </div>
             ${dosenHtml}
@@ -7261,127 +7410,6 @@ function showSuccessAddModal(count, items, isSingle = false) {
     modal.classList.add('show');
 }
 
-// Fungsi untuk generate HTML dosen di success modal
-function generateDosenHtmlForSuccessModal(dosenData) {
-    console.log('=== generateDosenHtmlForSuccessModal ===');
-    console.log('dosenData:', dosenData);
-    
-    if (!dosenData || !Array.isArray(dosenData) || dosenData.length === 0) {
-        console.log('No dosen data');
-        return '';
-    }
-    
-    const maxVisible = 3;
-    const isOverLimit = dosenData.length > maxVisible;
-    const visibleDosen = isOverLimit ? dosenData.slice(0, maxVisible) : dosenData;
-    const hiddenDosen = isOverLimit ? dosenData.slice(maxVisible) : [];
-    const uniqueId = 'dosen-success-' + Date.now();
-    
-    let html = `
-    <div class="dosen-success-section" style="background:#f5eef8;border:1px solid #d7bde2;border-radius:8px;padding:15px;margin:15px 0;">
-        <div style="font-weight:600;color:#16A085;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between">
-            <span><i class="fas fa-users"></i> Dosen Terlibat</span>
-            <span style="background:#16A085;color:white;padding:2px 10px;border-radius:15px;font-size:12px;font-weight:600">
-                ${dosenData.length} Dosen
-            </span>
-        </div>
-        
-        <div id="${uniqueId}" style="max-height:200px;overflow-y:auto;">
-    `;
-    
-    // Tampilkan dosen yang terlihat
-    visibleDosen.forEach((dosen, index) => {
-        const nama = dosen.nama_dosen || dosen.nama || 'Tidak diketahui';
-        const nip = dosen.nip || '-';
-        const jabatan = dosen.jabatan || '-';
-        const divisi = dosen.divisi || '-';
-        const initial = nama.charAt(0).toUpperCase();
-        
-        html += `
-        <div class="dosen-success-item" 
-             style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:white;border:1px solid #e8daef;border-radius:8px;margin-bottom:8px;transition:all 0.2s;">
-            <div style="width:36px;height:36px;border-radius:50%;background:#16A085;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0">
-                ${initial}
-            </div>
-            <div style="flex:1;min-width:0;">
-                <div style="font-weight:600;color:#212529;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                    ${escapeHtml(nama)}
-                </div>
-                <div style="font-size:12px;color:#6c757d;display:flex;flex-wrap:wrap;gap:8px;">
-                    <span><i class="fas fa-id-card"></i> ${escapeHtml(nip)}</span>
-                    <span><i class="fas fa-briefcase"></i> ${escapeHtml(jabatan)}</span>
-                    ${divisi !== '-' ? `<span><i class="fas fa-building"></i> ${escapeHtml(divisi)}</span>` : ''}
-                </div>
-            </div>
-        </div>
-        `;
-    });
-    
-    html += `</div>`;
-    
-    // Jika ada dosen yang tersembunyi, tambahkan tombol show more
-    if (isOverLimit) {
-        html += `
-        <button onclick="toggleHiddenDosen('${uniqueId}', ${hiddenDosen.length}, this)" 
-                style="background:#16A085;color:white;border:none;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:10px;transition:background 0.2s">
-            <i class="fa-solid fa-chevron-down"></i>
-            <span>Tampilkan ${hiddenDosen.length} Dosen Lainnya</span>
-        </button>
-        
-        <div id="${uniqueId}-hidden" style="display:none;margin-top:10px;">
-        `;
-        
-        hiddenDosen.forEach((dosen, index) => {
-            const nama = dosen.nama_dosen || dosen.nama || 'Tidak diketahui';
-            const nip = dosen.nip || '-';
-            const jabatan = dosen.jabatan || '-';
-            const divisi = dosen.divisi || '-';
-            const initial = nama.charAt(0).toUpperCase();
-            
-            html += `
-            <div class="dosen-success-item-hidden" 
-                 style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:white;border:1px solid #e8daef;border-radius:8px;margin-bottom:8px;">
-                <div style="width:36px;height:36px;border-radius:50%;background:#7CB342;color:white;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;flex-shrink:0">
-                    ${initial}
-                </div>
-                <div style="flex:1;min-width:0;">
-                    <div style="font-weight:600;color:#212529;font-size:14px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-                        ${escapeHtml(nama)}
-                    </div>
-                    <div style="font-size:12px;color:#6c757d;display:flex;flex-wrap:wrap;gap:8px;">
-                        <span><i class="fas fa-id-card"></i> ${escapeHtml(nip)}</span>
-                        <span><i class="fas fa-briefcase"></i> ${escapeHtml(jabatan)}</span>
-                        ${divisi !== '-' ? `<span><i class="fas fa-building"></i> ${escapeHtml(divisi)}</span>` : ''}
-                    </div>
-                </div>
-            </div>
-            `;
-        });
-        
-        html += `</div>`;
-    }
-    
-    html += `</div>`;
-    
-    return html;
-}
-
-// Fungsi untuk toggle show/hide dosen
-function toggleHiddenDosen(containerId, hiddenCount, button) {
-    const hiddenContainer = document.getElementById(containerId + '-hidden');
-    const icon = button.querySelector('i');
-    const textSpan = button.querySelector('span');
-    
-    if (hiddenContainer.style.display === 'none') {
-        hiddenContainer.style.display = 'block';
-        icon.className = 'fa-solid fa-chevron-up';
-        textSpan.textContent = 'Sembunyikan';
-    } else {
-        hiddenContainer.style.display = 'none';
-        icon.className = 'fa-solid fa-chevron-down';
-        textSpan.textContent = `Tampilkan ${hiddenCount} Dosen Lainnya`;
-    }
-}
 
 // Fungsi untuk refresh halaman
 function refreshPage() {
@@ -7393,16 +7421,13 @@ function closeModal(id) {
     document.getElementById(id).classList.remove('show'); 
 }
 
-// Fungsi untuk klik di luar modal
-function modalClickOutside(evt, id) { 
-    if (evt.target && evt.target.id === id) closeModal(id); 
-}
+
 </script>
 <!-- ===== SUCCESS MODAL SETELAH SUBMIT ===== -->
-<div id="successModal" class="modal" onclick="modalClickOutside(event,'successModal')">
+<div id="successModal" class="modal">
     <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #27ae60;">
-            <h3><i class="fa-solid fa-circle-check"></i> Pengajuan Berhasil Disetujui</h3>
+            <h3><i class="fa-solid fa-circle-check"></i> Pengajuan Berhasil Dibuat</h3>
             <button class="close-modal" onclick="closeModal('successModal')">&times;</button>
         </div>
         <div style="padding:25px;text-align:center">
@@ -7410,9 +7435,9 @@ function modalClickOutside(evt, id) {
                 <i class="fas fa-check" style="font-size:50px;color:#27ae60"></i>
             </div>
             
-            <h3 style="color:#27ae60;margin-bottom:10px">Berhasil Disetujui</h3>
+            <h3 style="color:#27ae60;margin-bottom:10px">Berhasil Dibuat</h3>
             <p style="color:#666;margin-bottom:5px">
-                <i class="fa-solid fa-clock"></i> Disetujui pada: <strong id="successTimestamp">-</strong>
+                <i class="fa-solid fa-clock"></i> Dibuat pada: <strong id="successTimestamp">-</strong>
             </p>
             
             <div style="background:#d4edda;border:1px solid #c3e6cb;border-radius:8px;padding:15px;margin:20px 0">
@@ -7431,9 +7456,7 @@ function modalClickOutside(evt, id) {
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
+
                 <button class="btn-bulk" onclick="closeModal('successModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>

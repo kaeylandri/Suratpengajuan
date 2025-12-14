@@ -1697,7 +1697,7 @@ letter-spacing: 1px;
                                 <!-- TOMBOL BARU: CETAK SURAT (hanya jika nomor surat sudah terisi) -->
                                 <?php if($status == 'disetujui dekan' && !empty($s->nomor_surat) && $s->nomor_surat !== '-' && $s->nomor_surat !== 'null'): ?>
                                     <button class="btn btn-cetak" 
-                                            onclick="window.open('<?= site_url('sekretariat/cetak_surat/' . $s->id) ?>', '_blank')"
+                                            onclick="window.open('<?= site_url('sekretariat/cetak/' . $s->id) ?>', '_blank')"
                                             title="Cetak Surat"
                                             style="background:#9b59b6;color:white;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;">
                                         <i class="fa-solid fa-print"></i>

@@ -951,7 +951,6 @@ public function approve($id)
     
     $update_data = [
         'status' => 'disetujui dekan',
-        'nomor_surat' => $nomor_surat,
         'approval_status' => json_encode($approval),
         'updated_at' => date('Y-m-d H:i:s')
     ];
@@ -1402,9 +1401,19 @@ public function approve($id)
         
         // Ambil data dosen lengkap dari list_dosen
         $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($data['surat']->nip);
-        
-        // Load view surat_print2
-        $this->load->view('surat_print2', $data);
+        // Tentukan view berdasarkan jumlah dosen
+    $jumlah_dosen = count($data['dosen_data']);
+    
+    if ($jumlah_dosen == 1) {
+        $view_file = 'surat_print2_satu';
+    } elseif ($jumlah_dosen <= 5) {
+        $view_file = 'surat_print2';
+    } else {
+        $view_file = 'surat_print2_banyak';
+    }
+    
+    // Load view yang sesuai
+    $this->load->view($view_file, $data);
     }
 
     /* ================================
@@ -1423,10 +1432,19 @@ public function view_surat_print($id)
     // Ambil data dosen lengkap dari list_dosen
     $data['dosen_data'] = $this->get_dosen_data_from_nip_fixed($data['surat']->nip);
     
-    // Generate QR code jika diperlukan
+     // Tentukan view berdasarkan jumlah dosen
+    $jumlah_dosen = count($data['dosen_data']);
     
-    // Load view surat_print2.php
-    $this->load->view('surat_print2', $data);
+    if ($jumlah_dosen == 1) {
+        $view_file = 'surat_print2_satu';
+    } elseif ($jumlah_dosen <= 5) {
+        $view_file = 'surat_print2';
+    } else {
+        $view_file = 'surat_print2_banyak';
+    }
+    
+    // Load view yang sesuai
+    $this->load->view($view_file, $data);
 }
     
     /* ================================
