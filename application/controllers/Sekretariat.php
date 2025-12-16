@@ -1,4 +1,4 @@
-    <?php
+<?php
     defined('BASEPATH') or exit('No direct script access allowed');
     require_once FCPATH . 'vendor/autoload.php';
         use Dompdf\Dompdf;
@@ -1509,7 +1509,6 @@
                 $this->db->where('MONTH(created_at)', $bulan);
             }
             $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
-
             if (!empty($lingkup_penugasan_filter)) {
                 $this->db->where('lingkup_penugasan', $lingkup_penugasan_filter);
             }

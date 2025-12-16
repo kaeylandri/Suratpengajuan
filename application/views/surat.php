@@ -2243,14 +2243,14 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="form-group mb-4">
       <input type="text" name="tempat_kegiatan" class="form-control custom-form-control" 
              autocomplete="off">
-      <label>Tempat Kegiatan <span style="color: #6c757d; font-size: 12px;">(Opsional)</span></label>
+      <label>Tempat Kegiatan <span style="color: #6c757d; font-size: 12px;"></span></label>
     </div>
 
     <!-- Penyelenggara (OPSIONAL) -->
     <div class="form-group mb-4">
       <input type="text" name="penyelenggara" class="form-control custom-form-control" 
              autocomplete="off">
-      <label>Penyelenggara <span style="color: #6c757d; font-size: 12px;">(Opsional)</span></label>
+      <label>Penyelenggara <span style="color: #6c757d; font-size: 12px;"></span></label>
     </div>
   </div>
 </fieldset>
