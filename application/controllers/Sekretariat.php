@@ -1848,8 +1848,6 @@
         $approval_status = json_decode($surat->approval_status, true);
         if (!is_array($approval_status)) {
             $approval_status = [
-                'kk' => null,
-                'sekretariat' => null,
                 'dekan' => null
             ];
         }
@@ -1874,6 +1872,7 @@
 
         $update_data['approval_status'] = json_encode($approval_status);
         $update_data['updated_at'] = date('Y-m-d H:i:s');
+        
 
         $result = $this->Surat_model->update_surat($id, $update_data);
 
