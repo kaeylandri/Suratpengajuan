@@ -270,6 +270,15 @@ if (!empty($dosen_data) && count($dosen_data) > 0) {
     // Jika ingin mengambil nama divisi dari data dosen
     $divisi_dosen = $dosen_pertama['divisi'] ?? $surat->divisi_dosen ?? '-';
 }
+// Fungsi untuk cek apakah nilai kosong/null/dash
+function isValueEmpty($value) {
+    return empty($value) || $value === '-' || $value === 'null' || $value === 'NULL';
+}
+// Tentukan jenis penugasan yang akan ditampilkan untuk surat perorangan
+$jenis_penugasan_perorangan_tampil = $surat->jenis_penugasan_perorangan  ?? '-';
+if (isset($jenis_penugasan_perorangan_tampil) && $jenis_penugasan_perorangan_tampil === 'Lainnya') {
+    $jenis_penugasan_perorangan_tampil = $surat->penugasan_lainnya_perorangan  ?? 'Lainnya';
+}
 ?>
 
 <body>
@@ -327,20 +336,43 @@ if (!empty($dosen_data) && count($dosen_data) > 0) {
             <p style="text-align:center;">Tidak ada data dosen</p>
         <?php endif; ?>
 
-        <!-- Untuk Menghadiri Kegiatan -->
- <p>
-        <?= $surat->customize ?? '-' ?> <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b> 
-        dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
-        yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
+   <!-- Untuk Menghadiri Kegiatan -->
+        <p>
+            <?= $surat->customize ?? '-' ?> <b><?= $jenis_penugasan_perorangan_tampil ?></b>
+            dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b>
+            
+            <?php if (!isValueEmpty($surat->penyelenggara)): ?>
+                yang diselenggarakan oleh <b><?= $surat->penyelenggara ?></b>
+            <?php endif; ?>
 
-        <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
-            pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b>
-        <?php else: ?>
-            selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
-        <?php endif; ?>
+            <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
+                <?php
+                // Format tanggal
+                $tanggal_mulai = $surat->tanggal_kegiatan ?? '-';
+                $tanggal_akhir = $surat->akhir_kegiatan ?? '-';
+                
+                // Format menjadi tgl_indo
+                $tgl_mulai_formatted = tgl_indo($tanggal_mulai);
+                $tgl_akhir_formatted = tgl_indo($tanggal_akhir);
+                
+                // Cek apakah tanggal sama
+                if ($tanggal_mulai === $tanggal_akhir && $tanggal_mulai !== '-') {
+                    // Jika tanggal sama, tampilkan hanya satu tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b>";
+                } else {
+                    // Jika tanggal berbeda, tampilkan rentang tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b> - <b>$tgl_akhir_formatted</b>";
+                }
+                ?>
+            <?php else: ?>
+                selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
+            <?php endif; ?>
 
-        di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
-    </p>
+            <?php if (!isValueEmpty($surat->tempat_kegiatan)): ?>
+                di <b><?= $surat->tempat_kegiatan ?>.</b>
+            <?php endif; ?>
+        </p>
+
 
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
 

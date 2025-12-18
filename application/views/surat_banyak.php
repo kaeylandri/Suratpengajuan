@@ -408,7 +408,7 @@ if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil 
          di kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b></p>
 
         <p>Surat tugas ini berlaku mulai tanggal sesuai tanggal kegiatan.</p>
-        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p><br>
+        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
 
         <p class="date">Bandung, <?php
         $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');

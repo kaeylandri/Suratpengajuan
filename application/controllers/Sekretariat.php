@@ -1344,7 +1344,6 @@
         $update_data = [
             'status' => 'disetujui sekretariat',
             'approval_status' => json_encode($approval),
-            // 'nomor_surat' => $nomor_surat, // HAPUS atau biarkan null
             'updated_at' => date('Y-m-d H:i:s'),
         ];
 
@@ -1855,7 +1854,6 @@
         // Reset berdasarkan status saat ini
         if (in_array($current_status_lower, ['disetujui sekretariat', 'ditolak sekretariat'])) {
             // Reset ke disetujui KK
-            $approval_status['sekretariat'] = null;
             $approval_status['dekan'] = null; // Reset juga approval dekan jika ada
             
             $update_data['status'] = 'disetujui KK';
@@ -1872,7 +1870,6 @@
 
         $update_data['approval_status'] = json_encode($approval_status);
         $update_data['updated_at'] = date('Y-m-d H:i:s');
-        
 
         $result = $this->Surat_model->update_surat($id, $update_data);
 
@@ -1907,20 +1904,21 @@
     ================================= */
     public function edit_surat($id)
     {
-        $surat = $this->Surat_model->get_by_id($id);
+         $surat = $this->Surat_model->get_by_id($id);
 
-        if (!$surat) {
-            show_404();
-            return;
-        }
+    if (!$surat) {
+        show_404();
+        return;
+    }
 
-        $status_lower = strtolower($surat->status);
+    $status_lower = strtolower($surat->status);
 
-        if ($status_lower !== 'ditolak dekan') {
-            $this->session->set_flashdata('error', '⚠ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan! Status surat ini: ' . $surat->status);
-            redirect('sekretariat');
-            return;
-        }
+    // HANYA izinkan edit jika statusnya 'ditolak dekan'
+    if ($status_lower !== 'ditolak dekan') {
+        $this->session->set_flashdata('error', '⚠ Edit hanya dapat dilakukan untuk surat yang ditolak Dekan! Status surat ini: ' . $surat->status);
+        redirect('sekretariat');
+        return;
+    }
 
         // AMBIL DATA DOSEN DARI DATABASE - NIP/Nama/Divisi READONLY, Jabatan/Peran EDITABLE
         $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip, $surat->peran);
@@ -1957,7 +1955,6 @@
 
         $this->update_surat($id);
     }
-
     /* ================================
     UPDATE FUNGSI update_surat (KHUSUS DITOLAK DEKAN) - HANYA SIMPAN JABATAN & PERAN
     ================================= */
@@ -2169,228 +2166,232 @@
 
         redirect('sekretariat');
     }
-
-    /* ================================
-    FUNGSI DETECT CHANGES - HANYA CEK JABATAN & PERAN
-    ================================= */
-    private function detect_changes($surat, $post)
-    {
-        $changes = [];
-        
-        // Mapping field dengan label yang user-friendly
-        $field_labels = [
-            'nama_kegiatan' => 'Nama Kegiatan',
-            'jenis_pengajuan' => 'Jenis Pengajuan',
-            'lingkup_penugasan' => 'Lingkup Penugasan',
-            'jenis_penugasan_perorangan' => 'Jenis Penugasan (Perorangan)',
-            'jenis_penugasan_kelompok' => 'Jenis Penugasan (Kelompok)',
-            'penugasan_lainnya_perorangan' => 'Penugasan Lainnya (Perorangan)',
-            'penugasan_lainnya_kelompok' => 'Penugasan Lainnya (Kelompok)',
-            'penyelenggara' => 'Penyelenggara',
-            'tempat_kegiatan' => 'Tempat Kegiatan',
-            'jenis_date' => 'Jenis Tanggal',
-            'periode_value' => 'Periode Kegiatan',
-            'tanggal_kegiatan' => 'Tanggal Mulai Kegiatan',
-            'akhir_kegiatan' => 'Tanggal Akhir Kegiatan',
-            'periode_penugasan' => 'Periode Penugasan',
-            'akhir_periode_penugasan' => 'Akhir Periode Penugasan',
-            'customize' => 'Customize',
-            'eviden' => 'File Evidence'
-        ];
-        
-        // Cek perubahan untuk field text biasa
-        foreach ($field_labels as $field => $label) {
-            if ($field === 'nip' || $field === 'eviden' || $field === 'peran') {
-                continue; // Skip
-            }
-            
-            $old_value = isset($surat->$field) ? $surat->$field : '-';
-            $new_value = isset($post[$field]) ? $post[$field] : '-';
-            
-            // Normalisasi nilai kosong
-            if (empty($old_value) || $old_value === 'null' || $old_value === '') {
-                $old_value = '-';
-            }
-            if (empty($new_value) || $new_value === 'null' || $new_value === '') {
-                $new_value = '-';
-            }
-            
-            // Bandingkan
-            if (trim($old_value) !== trim($new_value)) {
-                $changes[] = [
-                    'field' => $field,
-                    'label' => $label,
-                    'old_value' => $old_value,
-                    'new_value' => $new_value,
-                    'type' => 'text'
-                ];
-            }
+   /* ================================
+FUNGSI DETECT CHANGES - UPDATE UNTUK CEK SEMUA PERUBAHAN DOSEN
+================================= */
+private function detect_changes($surat, $post)
+{
+    $changes = [];
+    
+    // Mapping field dengan label yang user-friendly
+    $field_labels = [
+        'nama_kegiatan' => 'Nama Kegiatan',
+        'jenis_pengajuan' => 'Jenis Pengajuan',
+        'lingkup_penugasan' => 'Lingkup Penugasan',
+        'jenis_penugasan_perorangan' => 'Jenis Penugasan (Perorangan)',
+        'jenis_penugasan_kelompok' => 'Jenis Penugasan (Kelompok)',
+        'penugasan_lainnya_perorangan' => 'Penugasan Lainnya (Perorangan)',
+        'penugasan_lainnya_kelompok' => 'Penugasan Lainnya (Kelompok)',
+        'penyelenggara' => 'Penyelenggara',
+        'tempat_kegiatan' => 'Tempat Kegiatan',
+        'jenis_date' => 'Jenis Tanggal',
+        'periode_value' => 'Periode Kegiatan',
+        'tanggal_kegiatan' => 'Tanggal Mulai Kegiatan',
+        'akhir_kegiatan' => 'Tanggal Akhir Kegiatan',
+        'periode_penugasan' => 'Periode Penugasan',
+        'akhir_periode_penugasan' => 'Akhir Periode Penugasan',
+        'customize' => 'Customize',
+        'eviden' => 'File Evidence'
+    ];
+    
+    // Cek perubahan untuk field text biasa
+    foreach ($field_labels as $field => $label) {
+        if ($field === 'nip' || $field === 'eviden' || $field === 'peran') {
+            continue;
         }
         
-        // ============= CEK PERUBAHAN JABATAN & PERAN =============
-        $old_peran_data = json_decode($surat->peran, true);
+        $old_value = isset($surat->$field) ? $surat->$field : '-';
+        $new_value = isset($post[$field]) ? $post[$field] : '-';
         
-        if (!is_array($old_peran_data)) {
-            $old_peran_data = [];
+        if (empty($old_value) || $old_value === 'null' || $old_value === '') {
+            $old_value = '-';
+        }
+        if (empty($new_value) || $new_value === 'null' || $new_value === '') {
+            $new_value = '-';
         }
         
-        // Build old dosen data (untuk display)
-        $old_dosen = $this->get_dosen_data_from_nip_fixed($surat->nip, $surat->peran);
-        
-        // Build new dosen data (hanya jabatan & peran yang berubah)
-        $new_nip = json_decode($surat->nip, true); // NIP tidak berubah, ambil dari database
-        $new_dosen = [];
-        
-        if (is_array($new_nip)) {
-            foreach ($new_nip as $key => $nip) {
-                if (!empty($nip)) {
-                    // Ambil data dari database (NIP, Nama, Divisi READONLY)
-                    $dosen_info = $this->db->get_where('list_dosen', ['nip' => $nip])->row();
-                    
-                    // Ambil jabatan & peran dari form (EDITABLE)
-                    $jabatan_value = isset($post['jabatan'][$key]) && !empty(trim($post['jabatan'][$key])) 
-                        ? trim($post['jabatan'][$key]) 
-                        : '-';
-                    
-                    $peran_value = isset($post['peran'][$key]) && !empty(trim($post['peran'][$key])) 
-                        ? trim($post['peran'][$key]) 
-                        : '-';
-                    
-                    $new_dosen[] = [
-                        'nip' => $nip,
-                        'nama' => $dosen_info ? $dosen_info->nama_dosen : 'Data tidak ditemukan',
-                        'jabatan' => $jabatan_value,
-                        'divisi' => $dosen_info ? $dosen_info->divisi : '-',
-                        'peran' => $peran_value
-                    ];
-                }
-            }
-        }
-        
-        // Bandingkan HANYA jabatan & peran
-        if ($this->isDifferentDosenJabatanPeran($old_dosen, $new_dosen)) {
+        if (trim($old_value) !== trim($new_value)) {
             $changes[] = [
-                'field' => 'dosen',
-                'label' => 'Jabatan & Peran Dosen',
-                'old_value' => $old_dosen,
-                'new_value' => $new_dosen,
-                'type' => 'dosen'
-            ];
-        }
-        
-        // Cek perubahan file evidence
-        $old_eviden = json_decode($surat->eviden, true) ?: [];
-        $deleted_files = $post['delete_eviden'] ?? [];
-        $existing_eviden = array_filter($old_eviden, function($f) use ($deleted_files) {
-            return !in_array($f, $deleted_files);
-        });
-        
-        $new_files_count = 0;
-        if (!empty($_FILES['new_eviden']['name'][0])) {
-            $new_files_count = count(array_filter($_FILES['new_eviden']['name']));
-        }
-        
-        if (!empty($deleted_files) || $new_files_count > 0) {
-            $changes[] = [
-                'field' => 'eviden',
-                'label' => 'File Evidence',
-                'old_value' => count($old_eviden) . ' file(s)',
-                'new_value' => count($existing_eviden) + $new_files_count . ' file(s)',
+                'field' => $field,
+                'label' => $label,
+                'old_value' => $old_value,
+                'new_value' => $new_value,
                 'type' => 'text'
             ];
         }
-        
-        return $changes;
     }
+    
+    // ============= CEK PERUBAHAN DATA DOSEN (NIP, NAMA, JABATAN, PERAN) =============
+    $old_dosen = $this->get_dosen_data_from_nip_fixed($surat->nip, $surat->peran);
+    
+    // Build new dosen data dari form
+    $new_dosen = [];
+    if (isset($post['nip']) && is_array($post['nip'])) {
+        foreach ($post['nip'] as $key => $nip) {
+            $clean_nip = trim($nip);
+            if (!empty($clean_nip)) {
+                $dosen_info = $this->db->get_where('list_dosen', ['nip' => $clean_nip])->row();
+                
+                $nama_dosen = isset($post['nama_dosen'][$key]) ? trim($post['nama_dosen'][$key]) : '';
+                if (empty($nama_dosen)) {
+                    $nama_dosen = $dosen_info ? $dosen_info->nama_dosen : 'Data tidak ditemukan';
+                }
+                
+                $jabatan_value = isset($post['jabatan'][$key]) && !empty(trim($post['jabatan'][$key])) 
+                    ? trim($post['jabatan'][$key]) 
+                    : '-';
+                
+                $peran_value = isset($post['peran'][$key]) && !empty(trim($post['peran'][$key])) 
+                    ? trim($post['peran'][$key]) 
+                    : '-';
+                
+                $new_dosen[] = [
+                    'nip' => $clean_nip,
+                    'nama' => $nama_dosen,
+                    'jabatan' => $jabatan_value,
+                    'divisi' => $dosen_info ? $dosen_info->divisi : '-',
+                    'peran' => $peran_value
+                ];
+            }
+        }
+    }
+    
+    // Bandingkan semua data dosen (NIP, Nama, Jabatan, Peran)
+    if ($this->isDifferentDosen($old_dosen, $new_dosen)) {
+        $changes[] = [
+            'field' => 'dosen',
+            'label' => 'Data Dosen',
+            'old_value' => $old_dosen,
+            'new_value' => $new_dosen,
+            'type' => 'dosen'
+        ];
+    }
+    
+    // Cek perubahan file evidence
+    $old_eviden = json_decode($surat->eviden, true) ?: [];
+    $deleted_files = $post['delete_eviden'] ?? [];
+    $existing_eviden = array_filter($old_eviden, function($f) use ($deleted_files) {
+        return !in_array($f, $deleted_files);
+    });
+    
+    $new_files_count = 0;
+    if (isset($_FILES['new_eviden']) && !empty($_FILES['new_eviden']['name'][0])) {
+        $new_files_count = count(array_filter($_FILES['new_eviden']['name']));
+    }
+    
+    if (!empty($deleted_files) || $new_files_count > 0) {
+        $changes[] = [
+            'field' => 'eviden',
+            'label' => 'File Evidence',
+            'old_value' => count($old_eviden) . ' file(s)',
+            'new_value' => count($existing_eviden) + $new_files_count . ' file(s)',
+            'type' => 'text'
+        ];
+    }
+    
+    return $changes;
+}
 
-    /* ================================
-    HELPER: CEK PERBEDAAN JABATAN & PERAN SAJA
-    ================================= */
-    private function isDifferentDosenJabatanPeran($old_dosen, $new_dosen)
-    {
-        if (count($old_dosen) !== count($new_dosen)) {
+/* ================================
+HELPER: CEK PERBEDAAN SEMUA DATA DOSEN
+================================= */
+private function isDifferentDosen($old_dosen, $new_dosen)
+{
+    // Cek jumlah dosen
+    if (count($old_dosen) !== count($new_dosen)) {
+        return true;
+    }
+    
+    // Bandingkan setiap data dosen
+    foreach ($old_dosen as $index => $old) {
+        if (!isset($new_dosen[$index])) {
             return true;
         }
         
-        // Bandingkan HANYA jabatan & peran
-        foreach ($old_dosen as $index => $old) {
-            if (!isset($new_dosen[$index])) {
-                return true;
-            }
-            
-            $new = $new_dosen[$index];
-            
-            // HANYA bandingkan Jabatan dan Peran (NIP, Nama, Divisi diabaikan karena readonly)
-            if ($old['jabatan'] !== $new['jabatan'] || 
-                $old['peran'] !== $new['peran']) {
-                return true;
-            }
-        }
+        $new = $new_dosen[$index];
         
-        return false;
-    }
-    /* ================================
-        HELPER: PROCESS EVIDEN FILES (reuse dari fungsi update_surat)
-        ================================= */
-        private function process_eviden_files($post, $surat)
-        {
-            $existing_eviden = json_decode($surat->eviden, true) ?: [];
-            $deleted_files = $post['delete_eviden'] ?? [];
-
-            // Remove deleted files
-            foreach ($deleted_files as $del_file) {
-                if ($del_file && trim($del_file) !== '') {
-                    $existing_eviden = array_filter($existing_eviden, function ($f) use ($del_file) {
-                        return $f !== $del_file;
-                    });
-
-                    // Delete physical file
-                    if (!filter_var($del_file, FILTER_VALIDATE_URL)) {
-                        $file_path = './uploads/eviden/' . $del_file;
-                        if (file_exists($file_path)) {
-                            @unlink($file_path);
-                        }
-                    }
-                }
-            }
-
-            // Upload new files
-            $new_files = [];
-            if (!empty($_FILES['new_eviden']['name'][0])) {
-                $upload_path = './uploads/eviden/';
-
-                if (!is_dir($upload_path)) {
-                    mkdir($upload_path, 0755, true);
-                }
-
-                $config['upload_path'] = $upload_path;
-                $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx';
-                $config['max_size'] = 10240;
-                $config['encrypt_name'] = TRUE;
-
-                $this->load->library('upload', $config);
-
-                $files_count = count($_FILES['new_eviden']['name']);
-
-                for ($i = 0; $i < $files_count; $i++) {
-                    if (!empty($_FILES['new_eviden']['name'][$i])) {
-                        $_FILES['file']['name'] = $_FILES['new_eviden']['name'][$i];
-                        $_FILES['file']['type'] = $_FILES['new_eviden']['type'][$i];
-                        $_FILES['file']['tmp_name'] = $_FILES['new_eviden']['tmp_name'][$i];
-                        $_FILES['file']['error'] = $_FILES['new_eviden']['error'][$i];
-                        $_FILES['file']['size'] = $_FILES['new_eviden']['size'][$i];
-
-                        if ($this->upload->do_upload('file')) {
-                            $upload_data = $this->upload->data();
-                            $new_files[] = $upload_data['file_name'];
-                        }
-                    }
-                }
-            }
-
-            $final_eviden = array_merge(array_values($existing_eviden), $new_files);
-            return json_encode($final_eviden);
+        // Bandingkan NIP, Nama, Jabatan, dan Peran
+        if ($old['nip'] !== $new['nip'] || 
+            $old['nama'] !== $new['nama'] ||
+            $old['jabatan'] !== $new['jabatan'] || 
+            $old['peran'] !== $new['peran']) {
+            return true;
         }
+    }
+    
+    return false;
+}
+    private function process_eviden_files($post, $surat)
+{
+    $existing_eviden = json_decode($surat->eviden, true) ?: [];
+    $deleted_files = $post['delete_eviden'] ?? [];
+
+    // Remove deleted files
+    foreach ($deleted_files as $del_file) {
+        if ($del_file && trim($del_file) !== '') {
+            $existing_eviden = array_filter($existing_eviden, function ($f) use ($del_file) {
+                return $f !== $del_file;
+            });
+
+            // Delete physical file
+            if (!filter_var($del_file, FILTER_VALIDATE_URL)) {
+                $file_path = './uploads/eviden/' . $del_file;
+                if (file_exists($file_path)) {
+                    @unlink($file_path);
+                }
+            }
+        }
+    }
+
+    // Upload new files - HANYA JIKA ADA FILE BARU
+    $new_files = [];
+    if (!empty($_FILES['new_eviden']['name'][0])) {
+        $upload_path = './uploads/eviden/';
+
+        if (!is_dir($upload_path)) {
+            mkdir($upload_path, 0755, true);
+        }
+
+        $config['upload_path'] = $upload_path;
+        $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx';
+        $config['max_size'] = 10240;
+        $config['encrypt_name'] = TRUE; // Auto rename untuk hindari nama sama
+
+        $this->load->library('upload', $config);
+
+        $files_count = count($_FILES['new_eviden']['name']);
+
+        for ($i = 0; $i < $files_count; $i++) {
+            // Validasi: hanya proses file yang benar-benar diupload
+            if (!empty($_FILES['new_eviden']['name'][$i]) && 
+                $_FILES['new_eviden']['error'][$i] === UPLOAD_ERR_OK) {
+                
+                $_FILES['file']['name'] = $_FILES['new_eviden']['name'][$i];
+                $_FILES['file']['type'] = $_FILES['new_eviden']['type'][$i];
+                $_FILES['file']['tmp_name'] = $_FILES['new_eviden']['tmp_name'][$i];
+                $_FILES['file']['error'] = $_FILES['new_eviden']['error'][$i];
+                $_FILES['file']['size'] = $_FILES['new_eviden']['size'][$i];
+
+                if ($this->upload->do_upload('file')) {
+                    $upload_data = $this->upload->data();
+                    $new_files[] = $upload_data['file_name'];
+                }
+            }
+        }
+    }
+
+    // Gabungkan file dengan mencegah duplikasi
+    $final_eviden = array_values($existing_eviden);
+    
+    foreach ($new_files as $new_file) {
+        // Cek apakah file sudah ada sebelum menambahkan
+        if (!in_array($new_file, $final_eviden)) {
+            $final_eviden[] = $new_file;
+        }
+    }
+    
+    return json_encode($final_eviden);
+}
         /* ================================
         HELPER: SAFE DATE (jika belum ada di controller)
         ================================= */
@@ -2873,7 +2874,7 @@
                 echo json_encode([]);
             }
         }
-    public function set_disposisi()
+public function set_disposisi()
 {
     $data = json_decode(file_get_contents("php://input"), true);
 
@@ -2881,21 +2882,66 @@
     $disposisi = $data["disposisi"];
     $catatan = $data["catatan"] ?? "";
 
-    // Jika disposisi adalah "Batal", ubah status menjadi "pengajuan"
+    // PERBAIKAN: Jika disposisi adalah "Batal", ubah status menjadi "ditolak sekretariat"
     if ($disposisi === "Batal") {
-        $status_baru = "pengajuan";
-        // Reset approval status dan catatan penolakan
+        $status_baru = "ditolak sekretariat";
+        
+        // Get current surat data untuk approval status
         $this->db->where("id", $id);
-        $this->db->update("surat", [
-            "disposisi_status" => $disposisi,
-            "disposisi_catatan" => $catatan,
-            "disposisi_updated_at" => date('Y-m-d H:i:s'),
-            "status" => $status_baru,
-            "approval_status" => json_encode([]), // Reset approval
-            "catatan_penolakan" => null // Hapus catatan penolakan lama
-        ]);
+        $surat = $this->db->get("surat")->row();
+        
+        if ($surat) {
+            $approval = json_decode($surat->approval_status, true);
+            if (!is_array($approval)) {
+                $approval = [];
+            }
+            
+            // Set timestamp untuk sekretariat (penolakan)
+            if (!isset($approval['pengirim'])) {
+                $approval['pengirim'] = date("Y-m-d H:i:s");
+            }
+            if (!isset($approval['kaprodi'])) {
+                $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+            }
+            $approval['sekretariat'] = date("Y-m-d H:i:s");
+            
+            // Update dengan status ditolak sekretariat
+            $this->db->where("id", $id);
+            $this->db->update("surat", [
+                "disposisi_status" => $disposisi,
+                "disposisi_catatan" => $catatan,
+                "disposisi_updated_at" => date('Y-m-d H:i:s'),
+                "status" => $status_baru,
+                "approval_status" => json_encode($approval),
+                "catatan_penolakan" => "Pengajuan dibatalkan melalui disposisi. " . ($catatan ? "Catatan: " . $catatan : "")
+            ]);
+            
+            // TAMBAHAN BARU: Ambil data dosen untuk ditampilkan di success modal
+            $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip, $surat->peran);
+            
+            // Set flashdata untuk success modal
+            $rejected_items = [[
+                'nama' => $surat->nama_kegiatan,
+                'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara,
+                'dosen_data' => $dosen_data,
+                'rejection_notes' => "Pengajuan dibatalkan melalui disposisi. " . ($catatan ? "Catatan: " . $catatan : "")
+            ]];
+            
+            // PENTING: Set session untuk AJAX response
+            $this->session->set_flashdata('rejected_items', $rejected_items);
+            $this->session->set_flashdata('is_single_reject', true);
+            
+            // Return dengan flag untuk menampilkan modal
+            echo json_encode([
+                "success" => true,
+                "show_modal" => true,
+                "rejected_items" => $rejected_items,
+                "is_single_reject" => true
+            ]);
+            return;
+        }
     } else {
-        // Untuk disposisi lain, hanya update disposisi
+        // Untuk disposisi lain (Lanjut Proses, Hold/Pending), hanya update disposisi
         $this->db->where("id", $id);
         $this->db->update("surat", [
             "disposisi_status" => $disposisi,
@@ -2944,7 +2990,8 @@
                 'approval_status' => json_encode($approval),
                 'catatan_penolakan' => null, // Hapus catatan penolakan jika ada
                 'disposisi_status' => 'none',
-                'disposisi_updated_at' => null
+                'disposisi_updated_at' => null,
+                'disposisi_catatan' => null
             ]);
 
             // Set flashdata untuk success return modal

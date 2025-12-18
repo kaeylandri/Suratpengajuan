@@ -318,15 +318,15 @@ function getNamaDivisiLengkap($singkatan) {
     return $singkatan;
 }
 
-// Fungsi untuk cek apakah nilai kosong/null/dash
-function isValueEmpty($value) {
-    return empty($value) || $value === '-' || $value === 'null' || $value === 'NULL';
-}
 
 // Ambil data dosen pertama untuk surat perorangan
 $dosen_pertama = !empty($surat->dosen_data) ? $surat->dosen_data[0] : [];
 $divisi_dosen = !empty($dosen_pertama['divisi']) ? getNamaDivisiLengkap(trim($dosen_pertama['divisi'])) : '-';
 
+// Fungsi untuk cek apakah nilai kosong/null/dash
+function isValueEmpty($value) {
+    return empty($value) || $value === '-' || $value === 'null' || $value === 'NULL';
+}
 // Tentukan jenis penugasan yang akan ditampilkan untuk surat perorangan
 $jenis_penugasan_perorangan_tampil = $surat->jenis_penugasan_perorangan  ?? '-';
 if (isset($jenis_penugasan_perorangan_tampil) && $jenis_penugasan_perorangan_tampil === 'Lainnya') {
@@ -413,9 +413,9 @@ if (isset($jenis_penugasan_perorangan_tampil) && $jenis_penugasan_perorangan_tam
             <p style="text-align:center;">Tidak ada data dosen</p>
         <?php endif; ?>
 
-        <!-- Keterangan Penugasan -->
+         <!-- Untuk Menghadiri Kegiatan -->
         <p>
-            <?= $surat->customize ?? '' ?> <b><?= $jenis_penugasan_perorangan_tampil ?></b> 
+            <?= $surat->customize ?? '-' ?> <b><?= $jenis_penugasan_perorangan_tampil ?></b>
             dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b>
             
             <?php if (!isValueEmpty($surat->penyelenggara)): ?>
@@ -423,16 +423,70 @@ if (isset($jenis_penugasan_perorangan_tampil) && $jenis_penugasan_perorangan_tam
             <?php endif; ?>
 
             <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
-                pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?> - <?= tgl_indo($surat->akhir_kegiatan ?? '-') ?></b>
+                <?php
+                // Format tanggal
+                $tanggal_mulai = $surat->tanggal_kegiatan ?? '-';
+                $tanggal_akhir = $surat->akhir_kegiatan ?? '-';
+                
+                // Format menjadi tgl_indo
+                $tgl_mulai_formatted = tgl_indo($tanggal_mulai);
+                $tgl_akhir_formatted = tgl_indo($tanggal_akhir);
+                
+                // Cek apakah tanggal sama
+                if ($tanggal_mulai === $tanggal_akhir && $tanggal_mulai !== '-') {
+                    // Jika tanggal sama, tampilkan hanya satu tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b>";
+                } else {
+                    // Jika tanggal berbeda, tampilkan rentang tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b> - <b>$tgl_akhir_formatted</b>";
+                }
+                ?>
             <?php else: ?>
                 selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
             <?php endif; ?>
 
             <?php if (!isValueEmpty($surat->tempat_kegiatan)): ?>
-                di <b><?= $surat->tempat_kegiatan ?></b>
+                di <b><?= $surat->tempat_kegiatan ?>.</b>
             <?php endif; ?>
-            .
         </p>
+
+        <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
+
+        <!-- Penutup -->
+        <p class="demikian-to-bandung">Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
+
+        <!-- Tanggal -->
+        <p class="date">Bandung,
+             <?php
+                                    // Default tanggal
+                                    $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
+
+                                    // Jika approval_status berisi data mentah seperti contoh
+                                    if (!empty($surat->approval_status)) {
+                                        // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
+                                        if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
+                                            $tanggalPengesahan = $matches[1];
+                                        }
+                                    }
+
+                                    // Format tanggal
+                                    $timestamp = strtotime($tanggalPengesahan);
+                                    $bulan = [
+                                        1 => 'Januari',
+                                        2 => 'Februari',
+                                        3 => 'Maret',
+                                        4 => 'April',
+                                        5 => 'Mei',
+                                        6 => 'Juni',
+                                        7 => 'Juli',
+                                        8 => 'Agustus',
+                                        9 => 'September',
+                                        10 => 'Oktober',
+                                        11 => 'November',
+                                        12 => 'Desember'
+                                    ];
+                                    echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
+                                    ?></p>
 
         <!-- Periode Penugasan -->
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>

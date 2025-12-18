@@ -530,226 +530,190 @@
                 return round(($completed / $total) * 100);
             }
 
-        /* ===========================================
-        SUBMIT FUNCTION - PERBAIKAN UTAMA DENGAN MODAL SUKSES
-    ============================================ */
-    public function submit()
-    {
-        // Aktifkan error reporting untuk debugging
-        error_reporting(E_ALL);
-        ini_set('display_errors', 1);
+public function submit()
+{
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
+    
+    log_message('debug', 'Submit function called - Manual Upload version');
+    
+    try {
+        $post = $this->input->post() ?? [];
+        $files = $_FILES ?? [];
         
-        log_message('debug', 'Submit function called');
+        // Debug: Lihat data yang diterima
+        log_message('debug', 'POST Data: ' . print_r($post, true));
+        log_message('debug', 'FILES Data: ' . print_r($files, true));
         
-        try {
-            $post = $this->input->post() ?? [];
-            
-            // Debug: Lihat data POST yang diterima
-            log_message('debug', 'POST Data: ' . print_r($post, true));
-            
-            // Validasi data yang diperlukan
-            if (empty($post)) {
-                throw new Exception('Data POST kosong');
+        // Validasi data yang diperlukan
+        if (empty($post)) {
+            throw new Exception('Data POST kosong');
+        }
+        
+        $nama_kegiatan = $post['nama_kegiatan'] ?? '';
+        $tanggal_kegiatan = $this->safe_date($post['tanggal_awal_kegiatan'] ?? null);
+        $user_id = $post['user_id'] ?? '';
+        
+        if (empty($user_id)) {
+            throw new Exception('User ID tidak ditemukan');
+        }
+        
+        // Clean array values
+        foreach ($post as $k => $v) {
+            if (is_array($v)) {
+                $post[$k] = array_values(array_filter($v, function($x) {
+                    return trim($x) !== "" && $x !== null;
+                }));
+            } else {
+                $post[$k] = ($v === "" || $v === null) ? "-" : $v;
             }
+        }
+        
+        /* ======================================================
+           PROSES EVIDEN - MANUAL UPLOAD
+           ====================================================== */
+        $saved_filenames = [];
+        
+        // Pastikan folder ada
+        $upload_dir = FCPATH . "uploads/eviden/";
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
+        
+        // Konfigurasi upload
+        $config['upload_path'] = $upload_dir;
+        $config['allowed_types'] = 'pdf|jpg|jpeg|png|doc|docx|xls|xlsx';
+        $config['max_size'] = 10240; // 10MB
+        $config['encrypt_name'] = true;
+        $config['overwrite'] = false;
+        
+        $this->load->library('upload', $config);
+        
+        // Handle multiple file uploads
+        if (!empty($_FILES['eviden_files']['name'][0])) {
+            log_message('debug', 'Processing manual upload files...');
             
-            $nama_kegiatan = $post['nama_kegiatan'] ?? '';
-            $tanggal_kegiatan = $this->safe_date($post['tanggal_awal_kegiatan'] ?? null);
-            $user_id = $post['user_id'] ?? '';
+            $files_count = count($_FILES['eviden_files']['name']);
+            log_message('debug', 'Total files to upload: ' . $files_count);
             
-            if (empty($user_id)) {
-                throw new Exception('User ID tidak ditemukan');
-            }
-            
-            // Cek apakah ada pengajuan yang sama dalam 5 menit terakhir
-            $five_minutes_ago = date('Y-m-d H:i:s', strtotime('-5 minutes'));
-            
-            $this->db->where('user_id', $user_id);
-            $this->db->where('nama_kegiatan', $nama_kegiatan);
-            $this->db->where('tanggal_kegiatan', $tanggal_kegiatan);
-            $this->db->where('created_at >=', $five_minutes_ago);
-            $existing = $this->db->get('surat')->row();
-            
-            if ($existing) {
-                $this->session->set_flashdata('error', 'Anda sudah mengajukan surat tugas dengan data yang sama baru-baru ini. Silakan tunggu beberapa saat atau periksa daftar pengajuan.');
-                redirect('list-surat-tugas');
-                return;
-            }
-            
-            // Clean array values
-            foreach ($post as $k => $v) {
-                if (is_array($v)) {
-                    $post[$k] = array_values(array_filter($v, function($x) {
-                        return trim($x) !== "" && $x !== null;
-                    }));
-                } else {
-                    $post[$k] = ($v === "" || $v === null) ? "-" : $v;
+            for ($i = 0; $i < $files_count; $i++) {
+                if (!empty($_FILES['eviden_files']['name'][$i])) {
+                    $_FILES['file']['name'] = $_FILES['eviden_files']['name'][$i];
+                    $_FILES['file']['type'] = $_FILES['eviden_files']['type'][$i];
+                    $_FILES['file']['tmp_name'] = $_FILES['eviden_files']['tmp_name'][$i];
+                    $_FILES['file']['error'] = $_FILES['eviden_files']['error'][$i];
+                    $_FILES['file']['size'] = $_FILES['eviden_files']['size'][$i];
+                    
+                    log_message('debug', 'Uploading file: ' . $_FILES['file']['name'] . 
+                               ' (' . $_FILES['file']['size'] . ' bytes)');
+                    
+                    if ($this->upload->do_upload('file')) {
+                        $upload_data = $this->upload->data();
+                        $saved_filenames[] = $upload_data['file_name'];
+                        
+                        log_message('info', 'File uploaded successfully: ' . $upload_data['file_name']);
+                    } else {
+                        $error = $this->upload->display_errors();
+                        log_message('error', 'Upload failed: ' . $error);
+                        throw new Exception('Gagal mengupload file: ' . $error);
+                    }
                 }
             }
-            
-            // Debug setelah cleaning
-            log_message('debug', 'POST Data setelah cleaning: ' . print_r($post, true));
-            
-            // Process tanggal dengan aman
+        }
+        
+        // Validasi minimal 1 file
+        if (empty($saved_filenames)) {
+            throw new Exception('Minimal 1 file eviden harus diupload');
+        }
+        log_message('debug', 'Total files saved: ' . count($saved_filenames));
+        // Process tanggal dengan aman
             $tanggal_kegiatan = $this->safe_date($post['tanggal_awal_kegiatan'] ?? null);
             $akhir_kegiatan = $this->safe_date($post['tanggal_akhir_kegiatan'] ?? null);
             $periode_penugasan = $this->safe_date($post['periode_penugasan'] ?? null);
             $akhir_periode_penugasan = $this->safe_date($post['akhir_periode_penugasan'] ?? null);
+        // ===============================
+        // PROSES NIP DAN PERAN
+        // ===============================
+        $nip_json = null;
+        $peran_json = null;
+        
+        // Tentukan jenis pengajuan
+        $jenis_pengajuan = $post['jenis_pengajuan'] ?? '';
+        log_message('debug', "Jenis Pengajuan: $jenis_pengajuan");
+        
+        // Tangani NIP berdasarkan jenis pengajuan
+        if (isset($post['nip']) && is_array($post['nip'])) {
+            $nip_array = array_values(array_filter($post['nip'], function($x) {
+                return trim($x) !== "" && $x !== null;
+            }));
             
-            // Debug tanggal
-            log_message('debug', "Tanggal: $tanggal_kegiatan s/d $akhir_kegiatan, Periode: $periode_penugasan s/d $akhir_periode_penugasan");
-            
-            /* ======================================================
-            PROSES EVIDEN
-            ====================================================== */
-            $eviden_raw = $post['eviden'] ?? "[]";
-            $eviden_urls = json_decode($eviden_raw, true);
-            
-            if (!is_array($eviden_urls)) {
-                $eviden_urls = [];
-            }
-            
-            $saved_filenames = [];
-            
-            // Pastikan folder ada
-            $upload_dir = FCPATH . "uploads/eviden/";
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
-            }
-            
-            foreach ($eviden_urls as $url) {
-                if (empty($url)) continue;
-                
-                $path = parse_url($url, PHP_URL_PATH);
-                $file_ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-                
-                if (!$file_ext) {
-                    $headers = @get_headers($url, 1);
-                    $mime = isset($headers["Content-Type"]) ? $headers["Content-Type"] : "application/octet-stream";
-                    
-                    $mime_to_ext = [
-                        "image/jpeg" => "jpg",
-                        "image/png" => "png",
-                        "image/webp" => "webp",
-                        "image/gif" => "gif",
-                        "application/pdf" => "pdf",
-                        "application/msword" => "doc",
-                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document" => "docx",
-                    ];
-                    
-                    $file_ext = isset($mime_to_ext[$mime]) ? $mime_to_ext[$mime] : "bin";  
-                }
-                
-                $filename = "eviden_" . time() . "_" . rand(1000,9999) . "." . $file_ext;
-                $save_path = $upload_dir . $filename;
-                
-                $file_data = @file_get_contents($url);
-                
-                if ($file_data !== false) {
-                    file_put_contents($save_path, $file_data);
-                    $saved_filenames[] = $filename;
-                }
-            }
-            
-            // ===============================
-            // 🆕 PROSES NIP DAN PERAN - FIXED
-            // ===============================
-            $nip_json = null;
-            $peran_json = null;
-            
-            // Tentukan jenis pengajuan
-            $jenis_pengajuan = $post['jenis_pengajuan'] ?? '';
-            log_message('debug', "Jenis Pengajuan: $jenis_pengajuan");
-            
-            // Tangani NIP berdasarkan jenis pengajuan
-            if (isset($post['nip']) && is_array($post['nip'])) {
-                $nip_array = array_values(array_filter($post['nip'], function($x) {
-                    return trim($x) !== "" && $x !== null;
-                }));
-                
-                log_message('debug', 'NIP Array sebelum diproses: ' . print_r($nip_array, true));
-                log_message('debug', 'Count NIP Array: ' . count($nip_array));
-                
-                if (!empty($nip_array)) {
-                    if ($jenis_pengajuan === 'Perorangan') {
-                        // Untuk Perorangan: ambil NIP pertama saja
-                        $nip_for_perorangan = [$nip_array[0]];
-                        $nip_json = json_encode($nip_for_perorangan);
-                        log_message('info', 'NIP data (Perorangan): ' . $nip_json . ' - NIP pertama: ' . $nip_array[0]);
-                    } else {
-                        // Untuk Kelompok: ambil semua NIP
-                        $nip_json = json_encode($nip_array);
-                        log_message('info', 'NIP data (Kelompok): ' . $nip_json . ' - Jumlah: ' . count($nip_array));
-                    }
+            if (!empty($nip_array)) {
+                if ($jenis_pengajuan === 'Perorangan') {
+                    // Untuk Perorangan: ambil NIP pertama saja
+                    $nip_for_perorangan = [$nip_array[0]];
+                    $nip_json = json_encode($nip_for_perorangan);
+                    log_message('info', 'NIP data (Perorangan): ' . $nip_json . ' - NIP pertama: ' . $nip_array[0]);
                 } else {
-                    $nip_json = json_encode([]);
-                    log_message('error', 'NIP kosong untuk pengajuan');
+                    // Untuk Kelompok: ambil semua NIP
+                    $nip_json = json_encode($nip_array);
+                    log_message('info', 'NIP data (Kelompok): ' . $nip_json . ' - Jumlah: ' . count($nip_array));
                 }
             } else {
                 $nip_json = json_encode([]);
-                log_message('error', 'NIP tidak ditemukan dalam POST atau bukan array');
+                log_message('error', 'NIP kosong untuk pengajuan');
             }
-            
-            // ===============================
-            // 🔥 PERBAIKAN: TANGANI PERAN BERDASARKAN JENIS PENGAJUAN
-            // ===============================
-            if ($jenis_pengajuan === 'Kelompok') {
-                // Untuk KELOMPOK: Ambil data peran dari POST
-                if (isset($post['peran']) && is_array($post['peran'])) {
-                    $peran_array = array_values(array_filter($post['peran'], function($x) {
-                        return trim($x) !== "" && $x !== null;
-                    }));
-                    
-                    if (!empty($peran_array)) {
-                        $peran_json = json_encode($peran_array);
-                        log_message('info', 'Peran data (Kelompok): ' . $peran_json);
-                    } else {
-                        // Jika array kosong, set ke array kosong dalam JSON
-                        $peran_json = json_encode([]);
-                        log_message('info', 'Peran data (Kelompok) kosong: []');
-                    }
+        } else {
+            $nip_json = json_encode([]);
+            log_message('error', 'NIP tidak ditemukan dalam POST atau bukan array');
+        }
+        
+        // PROSES PERAN
+        if ($jenis_pengajuan === 'Kelompok') {
+            // Untuk KELOMPOK: Ambil data peran dari POST
+            if (isset($post['peran']) && is_array($post['peran'])) {
+                $peran_array = array_values(array_filter($post['peran'], function($x) {
+                    return trim($x) !== "" && $x !== null;
+                }));
+                
+                if (!empty($peran_array)) {
+                    $peran_json = json_encode($peran_array);
+                    log_message('info', 'Peran data (Kelompok): ' . $peran_json);
                 } else {
-                    // Jika tidak ada data peran untuk kelompok, set ke array kosong
                     $peran_json = json_encode([]);
-                    log_message('warning', 'Peran tidak ditemukan untuk Kelompok, set ke []');
+                    log_message('info', 'Peran data (Kelompok) kosong: []');
                 }
             } else {
-                // ✅ Untuk PERORANGAN: Set peran ke array kosong (bukan NULL)
                 $peran_json = json_encode([]);
-                log_message('info', 'Peran data (Perorangan): [] (array kosong)');
+                log_message('warning', 'Peran tidak ditemukan untuk Kelompok, set ke []');
             }
-            
-            // ===============================
-            // VALIDASI: Pastikan ada NIP untuk semua jenis pengajuan
-            // ===============================
-            $nip_array_decoded = json_decode($nip_json, true);
-            if (empty($nip_array_decoded) || !is_array($nip_array_decoded)) {
-                throw new Exception('NIP harus diisi untuk pengajuan');
-            }
-            
-            // Debug data sebelum insert
-            log_message('debug', 'Data yang akan disimpan:');
-            log_message('debug', 'Jenis Pengajuan: ' . $jenis_pengajuan);
-            log_message('debug', 'NIP JSON: ' . $nip_json);
-            log_message('debug', 'Peran JSON: ' . ($peran_json ?? 'NULL'));
-            
-            if ($jenis_pengajuan === 'Perorangan') {
-            // Untuk perorangan, gunakan field jenis_penugasan
+        } else {
+            // Untuk PERORANGAN: Set peran ke array kosong
+            $peran_json = json_encode([]);
+            log_message('info', 'Peran data (Perorangan): [] (array kosong)');
+        }
+        
+        // VALIDASI: Pastikan ada NIP untuk semua jenis pengajuan
+        $nip_array_decoded = json_decode($nip_json, true);
+        if (empty($nip_array_decoded) || !is_array($nip_array_decoded)) {
+            throw new Exception('NIP harus diisi untuk pengajuan');
+        }
+        
+        
+        if ($jenis_pengajuan === 'Perorangan') {
             $jenis_penugasan_perorangan = $post['jenis_penugasan'] ?? $post['jenis_penugasan_perorangan'] ?? '-';
             
-            // Jika "Lainnya", ambil dari penugasan_lainnya_perorangan
             if ($jenis_penugasan_perorangan === 'Lainnya') {
                 $penugasan_lainnya_perorangan = $post['penugasan_lainnya_perorangan'] ?? '-';
             }
         } else if ($jenis_pengajuan === 'Kelompok') {
-            // Untuk kelompok, gunakan field jenis_penugasan_kelompok
             $jenis_penugasan_kelompok = $post['jenis_penugasan_kelompok'] ?? '-';
             
-            // Jika "Lainnya", ambil dari penugasan_lainnya_kelompok
             if ($jenis_penugasan_kelompok === 'Lainnya') {
                 $penugasan_lainnya_kelompok = $post['penugasan_lainnya_kelompok'] ?? '-';
             }
         }
-            // Siapkan data untuk insert
+        
+         // Siapkan data untuk insert
             $data = [
                 'user_id' => $post['user_id'] ?? '-',
                 'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
@@ -786,73 +750,88 @@
                 ]),
             ];
             
-            // Debug final data
-            log_message('debug', 'Final Data untuk Insert: ' . print_r($data, true));
+        
+        log_message('debug', 'Data untuk Insert: ' . print_r($data, true));
+        
+        // ===============================
+        // INSERT KE DATABASE
+        // ===============================
+        $this->db->insert('surat', $data);
+        $insert_id = $this->db->insert_id();
+        
+        if ($insert_id) {
+            log_message('info', 'Surat berhasil disubmit - ID: ' . $insert_id . 
+                       ' - Jenis: ' . $jenis_pengajuan . 
+                       ' - Files: ' . count($saved_filenames));
             
-            // Insert ke database
-            $insert_result = $this->Surat_model->insert_surat($data);
+            // 🔥 PERBAIKAN: Simpan data dosen dengan format yang benar
+            $dosen_data = $this->get_dosen_by_nip($nip_json, $peran_json);
             
-            if ($insert_result) {
-        log_message('info', 'Surat berhasil disubmit - Jenis: ' . $jenis_pengajuan);
-        log_message('info', 'Tanggal Kegiatan: ' . $tanggal_kegiatan . ' s/d ' . $akhir_kegiatan);
-        
-        // 🔥 PERBAIKAN UTAMA: Simpan data dosen dengan format yang benar
-        $dosen_data = $this->get_dosen_by_nip($nip_json, $peran_json);
-        
-        // Format data untuk modal
-        $added_item = [
-            'nama' => $nama_kegiatan,
-            'details' => '📅 ' . date('d M Y', strtotime($tanggal_kegiatan)) . 
-                        ($akhir_kegiatan && $akhir_kegiatan !== '-' ? ' - ' . date('d M Y', strtotime($akhir_kegiatan)) : '') . 
-                        ' | 📍 ' . ($post['tempat_kegiatan'] ?? '-'),
-            'dosen_data' => $dosen_data
-        ];
-        
-        log_message('debug', 'Added item data: ' . print_r($added_item, true));
-        log_message('debug', 'Dosen data count: ' . count($dosen_data));
-        
-        // 🔥 PERBAIKAN: Clear any output before setting flashdata
-        if (ob_get_length()) {
-            ob_end_clean();
-        }
-        
-        // 🔥 PERBAIKAN: Set flashdata dengan urutan yang benar
-        $this->session->set_flashdata('added_items', [$added_item]);
-        $this->session->set_flashdata('is_single_add', true);
-        
-        // 🔥 PERBAIKAN: Pastikan tidak ada output sebelum redirect
-        if (ob_get_length()) {
-            ob_end_clean();
-        }
-        
-        // 🔥 PERBAIKAN: Gunakan base_url untuk redirect
-        redirect(base_url('list-surat-tugas'));
-        return;
-
-
-                // 🔥 PERBAIKAN: Pastikan tidak ada output sebelum redirect
-                if (ob_get_length()) {
-                    ob_end_clean();
-                }
-                
-                // 🔥 PERBAIKAN: Gunakan base_url untuk redirect
-                redirect(base_url('list-surat-tugas'));
-                return;
-                
-            } else {
-                throw new Exception('Gagal menyimpan data ke database');
-            }
+            // Format data untuk modal success
+            $added_item = [
+                'id' => $insert_id,
+                'nama' => $nama_kegiatan,
+                'details' => '📅 ' . ($tanggal_kegiatan ? date('d M Y', strtotime($tanggal_kegiatan)) : '-') . 
+                            ($akhir_kegiatan && $akhir_kegiatan !== '-' ? ' - ' . date('d M Y', strtotime($akhir_kegiatan)) : '') . 
+                            ' | 📍 ' . ($post['tempat_kegiatan'] ?? '-'),
+                'dosen_data' => $dosen_data,
+                'file_count' => count($saved_filenames)
+            ];
             
-        } catch (Exception $e) {
-            log_message('error', 'Error in submit function: ' . $e->getMessage());
-            log_message('error', 'Trace: ' . $e->getTraceAsString());
+            log_message('debug', 'Added item data: ' . print_r($added_item, true));
             
-            // 🔥 PERBAIKAN: Clear output before flashdata
+            // 🔥 PERBAIKAN: Clear any output before setting flashdata
             if (ob_get_length()) {
                 ob_end_clean();
             }
             
-            $this->session->set_flashdata('error', 'Terjadi kesalahan saat mengirim pengajuan: ' . $e->getMessage());
+            // 🔥 PERBAIKAN: Set flashdata dengan urutan yang benar
+            $this->session->set_flashdata('added_items', [$added_item]);
+            $this->session->set_flashdata('is_single_add', true);
+            $this->session->set_flashdata('success', 'Pengajuan surat tugas berhasil dikirim!');
+            
+            // 🔥 PERBAIKAN: Pastikan tidak ada output sebelum redirect
+            if (ob_get_length()) {
+                ob_end_clean();
+            }
+            
+            // 🔥 PERBAIKAN: Response untuk AJAX atau redirect
+            if ($this->input->is_ajax_request()) {
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Pengajuan berhasil dikirim',
+                    'id' => $insert_id,
+                    'redirect' => base_url('list-surat-tugas')
+                ]);
+                return;
+            } else {
+                redirect(base_url('list-surat-tugas'));
+                return;
+            }
+            
+        } else {
+            throw new Exception('Gagal menyimpan data ke database');
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', 'Error in submit function: ' . $e->getMessage());
+        log_message('error', 'Trace: ' . $e->getTraceAsString());
+        
+        // 🔥 PERBAIKAN: Clear output before flashdata
+        if (ob_get_length()) {
+            ob_end_clean();
+        }
+        
+        $error_message = 'Terjadi kesalahan saat mengirim pengajuan: ' . $e->getMessage();
+        
+        if ($this->input->is_ajax_request()) {
+            echo json_encode([
+                'success' => false,
+                'message' => $error_message
+            ]);
+            return;
+        } else {
+            $this->session->set_flashdata('error', $error_message);
             
             // 🔥 PERBAIKAN: Clear output before redirect
             if (ob_get_length()) {
@@ -863,6 +842,7 @@
             return;
         }
     }
+}
             /* ===========================================
             DOWNLOAD EVIDEN
             ============================================*/
@@ -998,7 +978,6 @@
                 
                 return $urls;
             }
-
 public function edit($id)
 {
     $surat = $this->Surat_model->get_by_id($id);
@@ -1018,10 +997,62 @@ public function edit($id)
     $data['surat'] = (array)$surat;
     
     // ============================================
-    // 🆕 PERBAIKAN: Ambil data dosen dengan format jabatan+peran
+    // 🔥 PERBAIKAN: Format data dosen untuk view - DIUBAH
     // ============================================
-    $data['dosen_data'] = $this->get_dosen_with_role($surat->nip, $surat->peran);
+    $nip_data = json_decode($surat->nip, true);
+    $peran_data = json_decode($surat->peran, true);
     
+    if (!is_array($nip_data)) {
+        $nip_data = [];
+    }
+    if (!is_array($peran_data)) {
+        $peran_data = [];
+    }
+    
+    $dosen_array = [];
+    
+    foreach ($nip_data as $index => $nip) {
+        if (!empty($nip) && $nip !== '-') {
+            // Ambil data dari database
+            $dosen_info = $this->db->get_where('list_dosen', ['nip' => $nip])->row();
+            
+            // 🆕 PERBAIKAN: Parse peran dengan benar
+            $peran_value = '-';
+            $jabatan_value = $dosen_info ? $dosen_info->jabatan : '';
+            
+            // Jika ada data peran di array peran_data
+            if (isset($peran_data[$index]) && !empty($peran_data[$index])) {
+                // PERBAIKAN: Peran sudah berupa array, tidak perlu decode ulang
+                if (is_array($peran_data[$index])) {
+                    $peran_item = $peran_data[$index];
+                } else {
+                    // Jika masih string, decode
+                    $peran_item = json_decode($peran_data[$index], true);
+                }
+                
+                if (is_array($peran_item)) {
+                    $jabatan_value = $peran_item['jabatan'] ?? $jabatan_value;
+                    $peran_value = $peran_item['peran'] ?? '-';
+                } else {
+                    // Jika peran bukan array, langsung gunakan nilai
+                    $peran_value = $peran_data[$index];
+                }
+            }
+            
+            // Format data untuk view - SEDERHANAKAN
+            $dosen_array[] = [
+                'nip' => $nip,
+                'nama_dosen' => $dosen_info ? $dosen_info->nama_dosen : '',
+                'jabatan' => $jabatan_value,  // Gunakan jabatan dari peran jika ada
+                'divisi' => $dosen_info ? $dosen_info->divisi : '',
+                'peran' => $peran_value  // Nilai peran langsung
+            ];
+        }
+    }
+    
+    $data['dosen_data'] = $dosen_array;
+    
+    // Process eviden
     $eviden_raw = $surat->eviden ?? "[]";
     
     if (is_string($eviden_raw)) {
@@ -1036,44 +1067,12 @@ public function edit($id)
         return;
     }
 
-    // PROSES UPDATE - TRACK CHANGES
+    // ============================================
+    // 🔥 PROSES UPDATE - DENGAN TRACKING CHANGES
+    // ============================================
     $post = $this->input->post();
     
-    // Array untuk menyimpan perubahan
-    $changes = [];
-    
-    // Function helper untuk compare dan track changes
-    $trackChange = function($field, $field_label, $old_value, $new_value) use (&$changes) {
-        // Normalize values untuk perbandingan
-        $old_normalized = is_string($old_value) ? trim($old_value) : $old_value;
-        $new_normalized = is_string($new_value) ? trim($new_value) : $new_value;
-        
-        // Convert "-" to empty for comparison
-        if ($old_normalized === '-') $old_normalized = '';
-        if ($new_normalized === '-') $new_normalized = '';
-        
-        // Jika berbeda, catat perubahan
-        if ($old_normalized != $new_normalized) {
-            $change_data = [
-                'field' => $field,
-                'field_label' => $field_label,
-                'old_value' => $old_value ?: '-',
-                'new_value' => $new_value ?: '-',
-                'timestamp' => date('d M Y H:i:s')
-            ];
-            
-            $changes[] = $change_data;
-            
-            // Log untuk debugging
-            log_message('info', "Change tracked: {$field_label} | Old: {$old_value} | New: {$new_value}");
-        }
-    };
-    
-    // Log untuk debugging
-    log_message('info', '=== STARTING EDIT TRACKING ===');
-    log_message('info', 'Surat ID: ' . $id);
-    log_message('info', 'Old Status: ' . $surat->status);
-    
+    // Clean data
     foreach ($post as $k => $v) {
         if (is_array($v)) {
             $post[$k] = array_values(array_filter($v, function($x) {
@@ -1083,8 +1082,32 @@ public function edit($id)
             $post[$k] = ($v === "" ? "-" : $v);
         }
     }
-
-    // Track perubahan untuk setiap field
+    
+    // Array untuk menyimpan perubahan
+    $changes = [];
+    
+    // Function helper untuk track changes
+    $trackChange = function($field, $field_label, $old_value, $new_value) use (&$changes) {
+        $old_normalized = is_string($old_value) ? trim($old_value) : $old_value;
+        $new_normalized = is_string($new_value) ? trim($new_value) : $new_value;
+        
+        if ($old_normalized === '-') $old_normalized = '';
+        if ($new_normalized === '-') $new_normalized = '';
+        
+        if ($old_normalized != $new_normalized) {
+            $changes[] = [
+                'field' => $field,
+                'field_label' => $field_label,
+                'old_value' => $old_value ?: '-',
+                'new_value' => $new_value ?: '-',
+                'timestamp' => date('d M Y H:i:s')
+            ];
+            
+            log_message('info', "Change tracked: {$field_label} | Old: {$old_value} | New: {$new_value}");
+        }
+    };
+    
+    // Track perubahan field biasa
     $trackChange('nama_kegiatan', 'Nama Kegiatan', $surat->nama_kegiatan, $post['nama_kegiatan']);
     $trackChange('jenis_date', 'Jenis Tanggal', $surat->jenis_date, $post['jenis_date']);
     
@@ -1100,60 +1123,34 @@ public function edit($id)
         $new_akhir_kegiatan ? date('d M Y', strtotime($new_akhir_kegiatan)) : '-'
     );
     
-    $new_periode_penugasan = $this->safe_date($post['periode_penugasan']);
-    $trackChange('periode_penugasan', 'Periode Penugasan', 
-        $surat->periode_penugasan ? date('d M Y', strtotime($surat->periode_penugasan)) : '-',
-        $new_periode_penugasan ? date('d M Y', strtotime($new_periode_penugasan)) : '-'
-    );
-    
     $trackChange('tempat_kegiatan', 'Tempat Kegiatan', $surat->tempat_kegiatan, $post['tempat_kegiatan']);
     $trackChange('penyelenggara', 'Penyelenggara', $surat->penyelenggara, $post['penyelenggara']);
     $trackChange('jenis_pengajuan', 'Jenis Pengajuan', $surat->jenis_pengajuan, $post['jenis_pengajuan']);
-    $trackChange('lingkup_penugasan', 'Lingkup Penugasan', $surat->lingkup_penugasan, $post['lingkup_penugasan']);
     
     // ============================================
-    // 🆕 PROSES NIP DAN PERAN (JABATAN + PERAN)
+    // 🔥 PROSES NIP, JABATAN, DAN PERAN
     // ============================================
     $nip_array = $post['nip'] ?? [];
     $jabatan_array = $post['jabatan'] ?? [];
     $peran_array = $post['peran'] ?? [];
     
-    // Validasi: Pastikan semua array memiliki panjang yang sama
-    $count_nip = count($nip_array);
-    $count_jabatan = count($jabatan_array);
-    $count_peran = count($peran_array);
-    
-    if ($count_nip !== $count_jabatan || $count_nip !== $count_peran) {
-        log_message('error', "Array length mismatch - NIP: {$count_nip}, Jabatan: {$count_jabatan}, Peran: {$count_peran}");
-    }
-    
-    // ============================================
-    // 🆕 FORMAT PERAN BARU: Array of JSON objects
-    // ============================================
+    // Build peran JSON array (format: array of JSON strings)
     $peran_json_array = [];
     
-    for ($i = 0; $i < $count_nip; $i++) {
-        $nip = $nip_array[$i] ?? '';
-        $jabatan = $jabatan_array[$i] ?? '';
-        $peran = $peran_array[$i] ?? '';
-        
+    foreach ($nip_array as $index => $nip) {
         if (!empty($nip)) {
-            // Format: JSON object dengan jabatan dan peran
-            $peran_data = [
+            $jabatan = $jabatan_array[$index] ?? '';
+            $peran = $peran_array[$index] ?? '';
+            
+            // Simpan sebagai JSON string dengan jabatan dan peran
+            $peran_json_array[] = json_encode([
                 'jabatan' => $jabatan,
                 'peran' => $peran
-            ];
-            
-            $peran_json_array[] = json_encode($peran_data, JSON_UNESCAPED_UNICODE);
+            ], JSON_UNESCAPED_UNICODE);
         }
     }
     
-    // Simpan sebagai JSON array
-    $peran_json = json_encode($peran_json_array, JSON_UNESCAPED_UNICODE);
-    
-    log_message('info', 'Peran JSON hasil edit: ' . $peran_json);
-    
-    // Track perubahan NIP/Dosen dengan detail jabatan dan peran
+    // Track perubahan dosen
     $old_nip = json_decode($surat->nip, true) ?: [];
     $old_peran = json_decode($surat->peran, true) ?: [];
     
@@ -1161,8 +1158,7 @@ public function edit($id)
         json_encode($old_peran) !== json_encode($peran_json_array)) {
         
         $old_dosen_details = [];
-        for ($i = 0; $i < count($old_nip); $i++) {
-            $nip = $old_nip[$i] ?? '';
+        foreach ($old_nip as $i => $nip) {
             $peran_data = isset($old_peran[$i]) ? json_decode($old_peran[$i], true) : null;
             $jabatan_old = $peran_data['jabatan'] ?? '-';
             $peran_old = $peran_data['peran'] ?? '-';
@@ -1173,8 +1169,7 @@ public function edit($id)
         }
         
         $new_dosen_details = [];
-        for ($i = 0; $i < count($nip_array); $i++) {
-            $nip = $nip_array[$i] ?? '';
+        foreach ($nip_array as $i => $nip) {
             $jabatan = $jabatan_array[$i] ?? '-';
             $peran = $peran_array[$i] ?? '-';
             
@@ -1192,9 +1187,12 @@ public function edit($id)
         ];
     }
 
-    // PROSES EVIDEN
+    // ============================================
+    // 🔥 PROSES EVIDEN - PERBAIKAN
+    // ============================================
     $existing_eviden = json_decode($surat->eviden, true) ?: [];
     
+    // Hapus file yang ditandai untuk dihapus
     $deleted_files = $post['delete_eviden'] ?? [];
     foreach ($deleted_files as $del_file) {
         if ($del_file && trim($del_file) !== '') {
@@ -1202,6 +1200,7 @@ public function edit($id)
                 return $f !== $del_file;
             });
             
+            // Hapus file fisik dari server
             if (!filter_var($del_file, FILTER_VALIDATE_URL)) {
                 $file_path = './uploads/eviden/' . $del_file;
                 if (file_exists($file_path)) {
@@ -1211,90 +1210,84 @@ public function edit($id)
         }
     }
     
+    // Upload file baru
     $new_files = [];
-    if (!empty($_FILES['new_eviden']['name'][0])) {
-        $upload_path = './uploads/eviden/';
-        
-        if (!is_dir($upload_path)) {
-            mkdir($upload_path, 0755, true);
-        }
-        
-        $config['upload_path'] = $upload_path;
-        $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx';
-        $config['max_size'] = 10240;
-        $config['encrypt_name'] = TRUE;
-        
-        $this->load->library('upload', $config);
-        
-        $files_count = count($_FILES['new_eviden']['name']);
-        
-        for ($i = 0; $i < $files_count; $i++) {
-            if (!empty($_FILES['new_eviden']['name'][$i])) {
-                $_FILES['file']['name'] = $_FILES['new_eviden']['name'][$i];
-                $_FILES['file']['type'] = $_FILES['new_eviden']['type'][$i];
-                $_FILES['file']['tmp_name'] = $_FILES['new_eviden']['tmp_name'][$i];
-                $_FILES['file']['error'] = $_FILES['new_eviden']['error'][$i];
-                $_FILES['file']['size'] = $_FILES['new_eviden']['size'][$i];
+    $upload_path = './uploads/eviden/';
+    
+    if (!is_dir($upload_path)) {
+        mkdir($upload_path, 0755, true);
+    }
+    
+// PERBAIKAN: Handle multiple file uploads HANYA SATU KALI
+if (!empty($_FILES['new_eviden']['name'][0])) {
+    $files_count = count($_FILES['new_eviden']['name']);
+    
+    for ($i = 0; $i < $files_count; $i++) {
+        if (!empty($_FILES['new_eviden']['name'][$i])) {
+            $_FILES['file']['name'] = $_FILES['new_eviden']['name'][$i];
+            $_FILES['file']['type'] = $_FILES['new_eviden']['type'][$i];
+            $_FILES['file']['tmp_name'] = $_FILES['new_eviden']['tmp_name'][$i];
+            $_FILES['file']['error'] = $_FILES['new_eviden']['error'][$i];
+            $_FILES['file']['size'] = $_FILES['new_eviden']['size'][$i];
+            
+            $config['upload_path'] = $upload_path;
+            $config['allowed_types'] = 'jpg|jpeg|png|gif|pdf|doc|docx|xls|xlsx';
+            $config['max_size'] = 10240; // 10MB
+            $config['encrypt_name'] = TRUE;
+            $config['overwrite'] = FALSE;
+            
+            $this->load->library('upload', $config);
+            
+            if ($this->upload->do_upload('file')) {
+                $upload_data = $this->upload->data();
+                $new_files[] = $upload_data['file_name'];
                 
-                if ($this->upload->do_upload('file')) {
-                    $upload_data = $this->upload->data();
-                    $new_files[] = $upload_data['file_name'];
-                } else {
-                    log_message('error', 'Upload failed: ' . $this->upload->display_errors());
-                }
+                log_message('info', 'File uploaded: ' . $upload_data['file_name']);
+            } else {
+                log_message('error', 'File upload failed: ' . $this->upload->display_errors());
             }
         }
     }
+}
     
-    // Track eviden changes
-    if (!empty($deleted_files) || !empty($new_files)) {
-        $old_count = count($existing_eviden);
-        $new_count = count($existing_eviden) - count($deleted_files) + count($new_files);
-        
-        $changes[] = [
-            'field' => 'eviden',
-            'field_label' => 'File Eviden',
-            'old_value' => $old_count . ' file',
-            'new_value' => $new_count . ' file',
-            'timestamp' => date('d M Y H:i:s')
-        ];
-    }
-    
-    $final_eviden = array_merge(array_values($existing_eviden), $new_files);
-    $update_eviden = json_encode($final_eviden);
+// PERBAIKAN: Pastikan tidak ada duplikasi
+$existing_eviden = array_unique(array_values($existing_eviden));
+$new_files = array_unique($new_files);
 
-    // DATA UPDATE
+// Gabungkan tanpa duplikasi berdasarkan nama file
+$final_eviden = $existing_eviden;
+foreach ($new_files as $new_file) {
+    if (!in_array($new_file, $final_eviden)) {
+        $final_eviden[] = $new_file;
+    }
+}
+
+$update_eviden = json_encode(array_values($final_eviden));
+
+    // ============================================
+    // 🔥 BUILD UPDATE DATA
+    // ============================================
     $update = [
         'nama_kegiatan' => $post['nama_kegiatan'],
         'jenis_date' => $post['jenis_date'],
         'tanggal_kegiatan' => $new_tanggal_kegiatan,
         'akhir_kegiatan' => $new_akhir_kegiatan,
-        'periode_penugasan' => $new_periode_penugasan,
+        'periode_penugasan' => $this->safe_date($post['periode_penugasan']),
         'akhir_periode_penugasan' => $this->safe_date($post['akhir_periode_penugasan']),
         'periode_value' => $post['periode_value'],
         'tempat_kegiatan' => $post['tempat_kegiatan'],
         'penyelenggara' => $post['penyelenggara'],
         'jenis_pengajuan' => $post['jenis_pengajuan'],
         'lingkup_penugasan' => $post['lingkup_penugasan'],
-        'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'],
-        'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'],
-        'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'],
-        'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'],
-        'format' => $post['format'],
+        'jenis_penugasan_perorangan' => $post['jenis_penugasan_perorangan'] ?? '-',
+        'penugasan_lainnya_perorangan' => $post['penugasan_lainnya_perorangan'] ?? '-',
+        'jenis_penugasan_kelompok' => $post['jenis_penugasan_kelompok'] ?? '-',
+        'penugasan_lainnya_kelompok' => $post['penugasan_lainnya_kelompok'] ?? '-',
+        'format' => $post['format'] ?? '-',
         'nip' => json_encode($nip_array, JSON_UNESCAPED_UNICODE),
-        'peran' => $peran_json,  // 🆕 Format baru: array of JSON objects
+        'peran' => json_encode($peran_json_array, JSON_UNESCAPED_UNICODE),
         'eviden' => $update_eviden
     ];
-
-    // Reset status ke pengajuan ulang
-    $approval_status = json_decode($surat->approval_status, true);
-    if (!is_array($approval_status)) {
-        $approval_status = [
-            'kk' => null,
-            'sekretariat' => null,
-            'dekan' => null
-        ];
-    }
     
     // Tentukan status baru berdasarkan siapa yang menolak
     $new_status = 'pengajuan';
@@ -1319,29 +1312,24 @@ public function edit($id)
     // Track status change
     $trackChange('status', 'Status Pengajuan', $surat->status, $new_status);
     
-    // Update status dan approval_status
     $update['status'] = $new_status;
     $update['approval_status'] = json_encode($approval_status);
     $update['catatan_penolakan'] = null;
+    $update['updated_at'] = date('Y-m-d H:i:s');
 
-    // Update tanggal pengajuan ulang
-    if (!empty($post['created_at'])) {
-        $tp = $this->safe_date($post['created_at']);
-        if ($tp !== '-') $update['created_at'] = $tp;
-    }
-
-    // EKSEKUSI UPDATE
+    // ============================================
+    // 🔥 EKSEKUSI UPDATE
+    // ============================================
     $result = $this->Surat_model->update_surat($id, $update);
 
     if ($result) {
-        // Siapkan data untuk flashdata dengan changes
-        $dosen_data = $this->get_dosen_with_role($surat->nip, $surat->peran);
+        // Get updated data untuk flashdata
+        $updated_surat = $this->Surat_model->get_by_id($id);
+        $dosen_data = $this->get_dosen_by_nip($updated_surat->nip, $updated_surat->peran);
         
-        // Log changes untuk debugging
-        log_message('info', '=== CHANGES SUMMARY ===');
+        log_message('info', '=== EDIT COMPLETE ===');
         log_message('info', 'Total changes: ' . count($changes));
-        log_message('info', 'Changes data: ' . json_encode($changes));
-        log_message('info', 'New Peran JSON: ' . $peran_json);
+        log_message('info', 'New Status: ' . $new_status);
         
         $edited_item = [
             'id' => $id,
@@ -1354,102 +1342,24 @@ public function edit($id)
             'timestamp' => date('d M Y H:i:s'),
             'success' => true
         ];
-
-        log_message('info', 'Edited item data: ' . json_encode($edited_item));
-        
-        // Set flashdata dengan unset terlebih dahulu untuk memastikan data segar
-        $this->session->unset_userdata('edited_items');
-        $this->session->unset_userdata('is_single_edit');
-        $this->session->unset_userdata('edit_changes');
         
         $this->session->set_flashdata('edited_items', [$edited_item]);
         $this->session->set_flashdata('is_single_edit', true);
-        $this->session->set_flashdata('edit_changes', $changes);
+        $this->session->set_flashdata('success', '✅ Edit berhasil disimpan! ' . count($changes) . ' perubahan dilakukan.');
         
-        log_message('info', '=== EDIT TRACKING COMPLETE ===');
-        
-        $this->session->set_flashdata('success', 'Edit berhasil disimpan! ' . count($changes) . ' perubahan dilakukan.');
         redirect('list-surat-tugas');
     } else {
-        $this->session->set_flashdata('error', 'Gagal menyimpan perubahan!');
+        $this->session->set_flashdata('error', '❌ Gagal menyimpan perubahan!');
         redirect('list-surat-tugas');
     }
+    if ($this->input->is_ajax_request()) {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Berhasil menyimpan perubahan',
+        'redirect' => base_url('list-surat-tugas')
+    ]);
+    return;
 }
-
-// ============================================
-// 🆕 FUNGSI BARU: Get Dosen with Role
-// ============================================
-private function get_dosen_with_role($nip_data, $peran_data = null)
-{
-    // Handle berbagai tipe data input
-    if (empty($nip_data)) {
-        return [];
-    }
-    
-    $nip_array = [];
-    
-    // Jika sudah array, langsung gunakan
-    if (is_array($nip_data)) {
-        $nip_array = $nip_data;
-    } 
-    // Jika string JSON, decode
-    elseif (is_string($nip_data) && $nip_data !== '[]' && $nip_data !== '-') {
-        $decoded = json_decode($nip_data, true);
-        $nip_array = is_array($decoded) ? $decoded : [];
-    }
-    
-    if (empty($nip_array)) {
-        return [];
-    }
-    
-    // 🆕 Decode peran (array of JSON strings)
-    $peran_array = [];
-    if (!empty($peran_data)) {
-        if (is_array($peran_data)) {
-            $peran_array = $peran_data;
-        } elseif (is_string($peran_data)) {
-            $decoded_peran = json_decode($peran_data, true);
-            $peran_array = is_array($decoded_peran) ? $decoded_peran : [];
-        }
-    }
-    
-    $dosen_data = [];
-    
-    foreach ($nip_array as $index => $nip) {
-        if (!empty($nip) && $nip !== '-') {
-            // Cari dosen berdasarkan NIP dari tabel list_dosen
-            $this->db->where('nip', $nip);
-            $dosen = $this->db->get('list_dosen')->row();
-            
-            // 🆕 Parse jabatan dan peran dari peran_array
-            $jabatan_from_peran = '';
-            $peran_from_data = '';
-            
-            if (isset($peran_array[$index]) && !empty($peran_array[$index])) {
-                $peran_item = json_decode($peran_array[$index], true);
-                if ($peran_item && is_array($peran_item)) {
-                    $jabatan_from_peran = $peran_item['jabatan'] ?? '';
-                    $peran_from_data = $peran_item['peran'] ?? '';
-                }
-            }
-            
-            // Gunakan jabatan dari peran_data jika ada, jika tidak gunakan dari list_dosen
-            $final_jabatan = !empty($jabatan_from_peran) ? $jabatan_from_peran : ($dosen ? $dosen->jabatan : '');
-            
-            $dosen_data[] = [
-                'nip' => $dosen ? $dosen->nip : $nip,
-                'nama_dosen' => $dosen ? $dosen->nama_dosen : '',
-                'jabatan' => $final_jabatan,
-                'jabatan_original' => $dosen ? $dosen->jabatan : '', // Simpan jabatan original untuk referensi
-                'peran' => $peran_from_data,
-                'divisi' => $dosen ? $dosen->divisi : '',
-                'index' => $index,
-                'peran_raw' => isset($peran_array[$index]) ? $peran_array[$index] : null
-            ];
-        }
-    }
-    
-    return $dosen_data;
 }
         /* ===========================================
             DELETE DATA

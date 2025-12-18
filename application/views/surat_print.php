@@ -532,7 +532,24 @@ if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil 
             <?php endif; ?>
 
             <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
-                pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b> - <b><?= tgl_indo($surat->akhir_kegiatan ?? '-') ?></b>
+                <?php
+                // Format tanggal
+                $tanggal_mulai = $surat->tanggal_kegiatan ?? '-';
+                $tanggal_akhir = $surat->akhir_kegiatan ?? '-';
+                
+                // Format menjadi tgl_indo
+                $tgl_mulai_formatted = tgl_indo($tanggal_mulai);
+                $tgl_akhir_formatted = tgl_indo($tanggal_akhir);
+                
+                // Cek apakah tanggal sama
+                if ($tanggal_mulai === $tanggal_akhir && $tanggal_mulai !== '-') {
+                    // Jika tanggal sama, tampilkan hanya satu tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b>";
+                } else {
+                    // Jika tanggal berbeda, tampilkan rentang tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b> - <b>$tgl_akhir_formatted</b>";
+                }
+                ?>
             <?php else: ?>
                 selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
             <?php endif; ?>
@@ -540,8 +557,6 @@ if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil 
             <?php if (!isValueEmpty($surat->tempat_kegiatan)): ?>
                 di <b><?= $surat->tempat_kegiatan ?>.</b>
             <?php endif; ?>
-            
-        
         </p>
 
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>

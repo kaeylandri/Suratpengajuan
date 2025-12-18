@@ -535,6 +535,35 @@ i[class*="fa-"] {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+/* Hilangkan SEMUA tanda bintang */
+label::after {
+    content: "" !important;
+    display: none !important;
+}
+
+/* Hilangkan span bintang */
+label span:contains("*"),
+label span[style*="color: #dc3545"],
+label span[style*="color:red"],
+label span.text-danger {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    font-size: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Untuk asterisk di dalam label */
+label {
+    position: relative;
+}
+
+label:has(> span:contains("*"))::after,
+label:has(> span[style*="#dc3545"])::after {
+    content: "" !important;
+}   
     </style>
 </head>
 
@@ -619,7 +648,7 @@ i[class*="fa-"] {
 
             <div class="divider show-mobile" style="margin-top:20px"></div>
             <div class="card">
-                <a href="<?= base_url('list-surat-tugas') ?>" class="btn"><span class="fas fa-palette"></span> List Surat Tugas</a>
+                <a href="<?= base_url('list-surat-tugas') ?>" class="btn"><span class="fas fa-palette"></span> List Pengajuan</a>
             </div>
             <div class="card">
                 <a href="https://ifik.telkomuniversity.ac.id/Pic_kk/input_surat" class="btn"><span class="fas fa-envelope-open-text"></span> Surat Tugas</a>
@@ -2146,13 +2175,13 @@ document.addEventListener('DOMContentLoaded', function () {
     <!-- Nama kegiatan (WAJIB) -->
     <div class="form-group mb-4">
       <input type="text" name="nama_kegiatan" id="nama_kegiatan" class="form-control" required autocomplete="off">
-      <label>Nama Kegiatan <span style="color: #dc3545;">*</span></label>
+     <label>Nama Kegiatan</label>
     </div>
 
     <!-- Pilihan jenis tanggal (WAJIB) -->
     <div class="form-group has-select mb-4">
       <select class="nice form-control" name="jenis_date" id="jenis_date" required>
-        <option disabled selected value="">Tanggal Kegiatan <span style="color: #dc3545;">*</span></option>
+        <option disabled selected value="">Tanggal Kegiatan</option>
         <option value="Periode">Periode</option>
         <option value="Custom">Custom</option>
       </select>
@@ -2164,9 +2193,9 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="form-group">
           <input type="text" id="datepicker" class="form-control custom-form-control"
                  autocomplete="off" inputmode="none" readonly
-                 placeholder="Klik untuk pilih tanggal">
+                >
 
-          <label id="lbl_mulai">Tanggal Awal s/d Akhir <span style="color: #dc3545;">*</span></label>
+          <label id="lbl_mulai">Tanggal Awal s/d Akhir</label>
 
           <!-- Hidden input -->
           <input type="hidden" id="tanggal_awal_kegiatan" name="tanggal_awal_kegiatan">
@@ -2206,7 +2235,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <input type="text" name="periode_penugasan" id="datepicker3"
                  class="form-control custom-form-control"
                  autocomplete="off" inputmode="none" readonly
-                 placeholder="Otomatis terisi">
+                 >
 
           <label id="lbl_mulai1">Periode Penugasan</label>
           <div class="info-message small" id="info_periode">Akan terisi otomatis</div>
@@ -2219,7 +2248,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <input type="text" name="akhir_periode_penugasan" id="datepicker4"
                  class="form-control custom-form-control"
                  autocomplete="off" inputmode="none" readonly
-                 placeholder="Otomatis terisi">
+                 >
 
           <label id="lbl_akhir1">Akhir Penugasan</label>
           <div class="info-message small" id="info_akhir">Akan terisi otomatis</div>
@@ -2984,11 +3013,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- ===== UPLOADCARE CDN ===== -->
-<script>
-UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
-</script>
-<script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
 <!-- Loading Screen (Hidden by default) -->
 <div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.5s ease;">
@@ -3006,61 +3030,594 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
         </div>
     </div>
 </div>
-
 <fieldset id="step-upload">
     <div style="width: 100%;">
         <div style="margin-bottom: 20px;">
             <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333;">
                 <i class="fas fa-cloud-upload-alt"></i> Upload File Eviden
-                <span style="color: #dc3545; margin-left: 4px; font-weight: bold;">*</span>
             </label>
             <p style="font-size: 13px; color: #6c757d; margin-bottom: 15px;">
-                Anda harus menambahkan minimal 1 file eviden untuk melanjutkan.
+                Upload file pendukung (PDF, JPG, PNG, DOC, XLS). Maksimal 10MB per file.
+                <span style="color: #dc3545; font-weight: 600;">Minimal 1 file.</span>
             </p>
             
-            <!-- Validasi Message -->
-            <div id="validation-message" style="display: none; padding: 12px 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; margin-bottom: 15px; color: #856404; font-size: 14px; display: flex; align-items: center; gap: 8px; animation: fadeIn 0.3s ease;">
-                <i class="fas fa-exclamation-circle"></i> <span id="validation-text"></span>
-            </div>
-        </div>
-
-        <!-- BUTTON UNTUK UPLOAD FILE -->
-        <div style="margin-bottom: 20px;">
-            <button type="button" id="upload-btn" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px; background: #007bff; border: none; color: white; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
-                <i class="fas fa-plus-circle"></i> Tambah File
-            </button>
-            <span id="file-count-indicator" style="margin-left: 15px; font-size: 14px; color: #6c757d;">
-                <i class="fas fa-file"></i> <span id="current-file-count">0</span> file ditambahkan
-            </span>
-        </div>
-
-        <!-- KONTAINER UPLOADCARE (akan muncul saat button diklik) -->
-        <div id="eviden-panel" style="display: none; min-height: 420px; border:1px solid #ddd; border-radius:10px; margin-bottom: 20px;"></div>
-
-        <!-- Hidden input untuk simpan URL -->
-        <input type="hidden" name="eviden" id="eviden" value="[]">
-        
-        <!-- Display uploaded files -->
-        <div id="uploaded-files-display" style="display: none;">
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; border: 1px solid #dee2e6;">
-                <h6 style="font-weight: 600; margin-bottom: 10px; color: #495057;">
-                    <i class="fas fa-check-circle" style="color: #28a745;"></i> File yang sudah diupload (<span id="total-files">0</span>):
-                </h6>
-                <div id="files-list"></div>
-            </div>
-        </div>
-        
-        <!-- Upload Progress -->
-        <div id="upload-progress" style="display: none; margin-top: 20px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="flex: 1; background-color: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
-                    <div id="progress-bar" style="width: 0%; height: 100%; background-color: #28a745; transition: width 0.3s ease;"></div>
+            <!-- Drag & Drop Upload Zone -->
+            <div id="drop-zone" class="drop-zone" style="border: 2px dashed #17a2b8; border-radius: 12px; padding: 40px; text-align: center; background: #f8f9fa; transition: all 0.3s ease; cursor: pointer;">
+                <div class="drop-zone-content">
+                    <div class="upload-icon" style="font-size: 60px; color: #6c757d; margin-bottom: 20px; opacity: 0.7;">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="drop-text" style="font-size: 18px; color: #495057; font-weight: 500; margin-bottom: 10px;">
+                        Drag & Drop file di sini
+                    </div>
+                    <div class="drop-or" style="font-size: 14px; color: #6c757d; margin: 15px 0;">
+                        atau
+                    </div>
+                    <label for="file-input" class="choose-file-btn" style="background: #17a2b8; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-block;">
+                        <i class="fas fa-folder-open"></i> Pilih File
+                    </label>
+                    <input type="file" name="eviden_files[]" id="file-input" 
+                           class="form-control d-none" multiple 
+                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" 
+                           required>
+                    <p class="mt-3" style="font-size: 12px; color: #6c757d;">
+                        Format: PDF, JPG, PNG, DOC, XLS (Maks. 10MB per file)
+                    </p>
                 </div>
-                <span id="progress-text" style="font-size: 12px; color: #6c757d;">0%</span>
+            </div>
+
+            <!-- File Preview -->
+            <div id="file-preview" class="mt-4" style="display: none;">
+                <h6 style="font-weight: 600; color: #333; margin-bottom: 15px;">
+                    <i class="fas fa-paperclip"></i> File yang akan diupload:
+                    <span id="file-count" style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 5px;">0</span>
+                </h6>
+                <div id="files-list" class="files-list"></div>
+            </div>
+            
+            <!-- Validation Message -->
+            <div id="validation-message" class="validation-message mt-3" style="display: none; padding: 12px; border-radius: 6px; border: 1px solid #ddd;">
+                <div style="display: flex; align-items: center;">
+                    <i id="validation-icon" class="fas mr-2"></i>
+                    <span id="validation-text"></span>
+                </div>
             </div>
         </div>
     </div>
 </fieldset>
+
+<script>
+// Preview file sebelum upload
+document.getElementById('manual-file-input').addEventListener('change', function(e) {
+    const fileList = document.getElementById('file-list');
+    const previewDiv = document.getElementById('file-preview');
+    fileList.innerHTML = '';
+    
+    if (this.files.length > 0) {
+        previewDiv.style.display = 'block';
+        
+        Array.from(this.files).forEach((file, index) => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+            li.innerHTML = `
+                <div>
+                    <i class="fas fa-file"></i> 
+                    ${file.name} 
+                    <small class="text-muted">(${(file.size / 1024 / 1024).toFixed(2)} MB)</small>
+                </div>
+                <button type="button" class="btn btn-sm btn-danger remove-file-btn" data-index="${index}">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            fileList.appendChild(li);
+        });
+        
+        // Tambahkan event listener untuk tombol hapus
+        document.querySelectorAll('.remove-file-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const index = parseInt(this.dataset.index);
+                const dt = new DataTransfer();
+                const input = document.getElementById('manual-file-input');
+                
+                // Hapus file dari input
+                for (let i = 0; i < input.files.length; i++) {
+                    if (i !== index) {
+                        dt.items.add(input.files[i]);
+                    }
+                }
+                
+                input.files = dt.files;
+                input.dispatchEvent(new Event('change'));
+            });
+        });
+    } else {
+        previewDiv.style.display = 'none';
+    }
+});
+</script>   
+
+<!-- CSS untuk Upload Zone -->
+<style>
+.drop-zone {
+    border: 2px dashed #17a2b8;
+    border-radius: 12px;
+    padding: 60px 40px;
+    text-align: center;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.drop-zone.dragover {
+    background: #e7f5f8;
+    border-color: #0c5460;
+    transform: scale(1.02);
+}
+
+.drop-zone-content {
+    pointer-events: none;
+}
+
+.upload-icon {
+    font-size: 80px;
+    color: #6c757d;
+    margin-bottom: 20px;
+    opacity: 0.7;
+}
+
+.drop-text {
+    font-size: 18px;
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.drop-or {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 15px 0;
+}
+
+.choose-file-btn {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    pointer-events: all;
+}
+
+.choose-file-btn:hover {
+    background: #138496;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.file-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: #17a2b8;
+}
+
+.file-icon {
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    border-radius: 8px;
+    margin-right: 15px;
+}
+
+.file-icon i {
+    font-size: 22px;
+}
+
+.file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.file-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-size {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.file-remove {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-remove:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.btn-show-files {
+    background: transparent;
+    border: 1px solid #17a2b8;
+    color: #17a2b8;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-show-files:hover {
+    background: #17a2b8;
+    color: white;
+}
+
+.validation-message {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .drop-zone {
+        padding: 40px 20px;
+    }
+    
+    .upload-icon {
+        font-size: 60px;
+    }
+    
+    .drop-text {
+        font-size: 16px;
+    }
+}
+</style>
+<script>
+    // ========================================
+// DRAG & DROP FILE UPLOAD DENGAN VALIDASI
+// ========================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const filesList = document.getElementById('files-list');
+    const filePreview = document.getElementById('file-preview');
+    const fileCount = document.getElementById('file-count');
+    const validationMessage = document.getElementById('validation-message');
+    const validationIcon = document.getElementById('validation-icon');
+    const validationText = document.getElementById('validation-text');
+    const nextBtn = document.querySelector('.next-btn');
+    
+    // Array untuk menyimpan file
+    let selectedFiles = [];
+    
+    // Event Listeners untuk Drag & Drop
+    // dropZone.addEventListener('click', function() {
+    //     fileInput.click();
+    // });
+    
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.style.background = '#e7f5f8';
+        dropZone.style.borderColor = '#0c5460';
+        dropZone.style.transform = 'scale(1.02)';
+    });
+    
+    dropZone.addEventListener('dragleave', function() {
+        dropZone.style.background = '#f8f9fa';
+        dropZone.style.borderColor = '#17a2b8';
+        dropZone.style.transform = 'scale(1)';
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.style.background = '#f8f9fa';
+        dropZone.style.borderColor = '#17a2b8';
+        dropZone.style.transform = 'scale(1)';
+        
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+    
+    // Event Listener untuk file input
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+    
+    // Fungsi untuk menangani file
+    function handleFiles(files) {
+        const newFiles = Array.from(files);
+        const validFiles = [];
+        
+        // Filter file yang valid
+        newFiles.forEach(file => {
+            // Validasi ukuran file (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showValidation(`File "${file.name}" melebihi 10MB`, 'error');
+                return;
+            }
+            
+            // Validasi tipe file
+            const validExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx', '.xls', '.xlsx'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(fileExtension)) {
+                showValidation(`Format file "${file.name}" tidak didukung`, 'error');
+                return;
+            }
+            
+            validFiles.push(file);
+        });
+        
+        // Tambahkan file yang valid ke array
+        selectedFiles = [...selectedFiles, ...validFiles];
+        
+        // Update tampilan
+        updateFileList();
+        updateButtonState();
+        
+        // Tampilkan pesan sukses
+        if (validFiles.length > 0) {
+            showValidation(`${validFiles.length} file berhasil ditambahkan`, 'success');
+        }
+    }
+    
+    // Fungsi untuk update daftar file
+    function updateFileList() {
+        filesList.innerHTML = '';
+        
+        if (selectedFiles.length === 0) {
+            filePreview.style.display = 'none';
+            return;
+        }
+        
+        filePreview.style.display = 'block';
+        fileCount.textContent = selectedFiles.length;
+        
+        selectedFiles.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            // Get file icon based on extension
+            const ext = file.name.split('.').pop().toLowerCase();
+            let icon = 'fa-file';
+            let iconColor = '#6c757d';
+            
+            if (['pdf'].includes(ext)) {
+                icon = 'fa-file-pdf';
+                iconColor = '#dc3545';
+            } else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+                icon = 'fa-file-image';
+                iconColor = '#17a2b8';
+            } else if (['doc', 'docx'].includes(ext)) {
+                icon = 'fa-file-word';
+                iconColor = '#2b579a';
+            } else if (['xls', 'xlsx'].includes(ext)) {
+                icon = 'fa-file-excel';
+                iconColor = '#217346';
+            }
+            
+            fileItem.innerHTML = `
+                <div class="file-icon" style="background: ${iconColor + '20'};">
+                    <i class="fas ${icon}" style="color: ${iconColor};"></i>
+                </div>
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                </div>
+                <button type="button" class="file-remove" onclick="removeFile(${index})" title="Hapus file">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            filesList.appendChild(fileItem);
+        });
+    }
+    
+    // Fungsi untuk menghapus file
+    window.removeFile = function(index) {
+        if (confirm('Hapus file ini?')) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            updateButtonState();
+            showValidation('File berhasil dihapus', 'info');
+        }
+    };
+    
+    // Fungsi untuk format ukuran file
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Fungsi untuk menampilkan pesan validasi
+    function showValidation(message, type = 'info') {
+        validationMessage.style.display = 'block';
+        validationText.textContent = message;
+        
+        // Set icon dan warna berdasarkan tipe
+        switch(type) {
+            case 'success':
+                validationIcon.className = 'fas fa-check-circle';
+                validationMessage.style.background = '#d4edda';
+                validationMessage.style.borderColor = '#c3e6cb';
+                validationMessage.style.color = '#155724';
+                break;
+            case 'error':
+                validationIcon.className = 'fas fa-exclamation-triangle';
+                validationMessage.style.background = '#f8d7da';
+                validationMessage.style.borderColor = '#f5c6cb';
+                validationMessage.style.color = '#721c24';
+                break;
+            case 'info':
+                validationIcon.className = 'fas fa-info-circle';
+                validationMessage.style.background = '#d1ecf1';
+                validationMessage.style.borderColor = '#bee5eb';
+                validationMessage.style.color = '#0c5460';
+                break;
+        }
+        
+        // Auto hide setelah 5 detik
+        setTimeout(() => {
+            validationMessage.style.display = 'none';
+        }, 5000);
+    }
+    
+    // Fungsi untuk update state tombol
+    function updateButtonState() {
+        if (!nextBtn) return;
+        
+        const isValid = selectedFiles.length >= 1;
+        
+        if (isValid) {
+            nextBtn.disabled = false;
+            nextBtn.style.cursor = 'pointer';
+            nextBtn.style.opacity = '1';
+            nextBtn.style.background = '#28a745';
+            nextBtn.style.borderColor = '#28a745';
+        } else {
+            nextBtn.disabled = true;
+            nextBtn.style.cursor = 'not-allowed';
+            nextBtn.style.opacity = '0.6';
+            nextBtn.style.background = '#6c757d';
+            nextBtn.style.borderColor = '#6c757d';
+        }
+    }
+    
+    // Fungsi untuk validasi step 3
+    function validateStep3() {
+        if (selectedFiles.length === 0) {
+            showValidation('Minimal upload 1 file eviden sebelum melanjutkan', 'error');
+            
+            // Highlight drop zone
+            dropZone.style.animation = 'pulse 0.5s 3';
+            setTimeout(() => {
+                dropZone.style.animation = '';
+            }, 1500);
+            
+            return false;
+        }
+        
+        // Validasi tambahan: total ukuran file tidak melebihi 50MB
+        const totalSize = selectedFiles.reduce((total, file) => total + file.size, 0);
+        if (totalSize > 50 * 1024 * 1024) {
+            showValidation('Total ukuran file melebihi 50MB', 'error');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Update hidden input dengan file yang dipilih
+    function updateFormFiles() {
+        // Hapus file input lama
+        const dataTransfer = new DataTransfer();
+        
+        // Tambahkan semua file ke DataTransfer
+        selectedFiles.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+        
+        // Update file input
+        fileInput.files = dataTransfer.files;
+    }
+    
+    // Event listener untuk tombol next di step 3
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            const stepUploadFieldset = document.getElementById('step-upload');
+            
+            // Cek apakah sedang di step upload
+            if (stepUploadFieldset && stepUploadFieldset.classList.contains('active')) {
+                // Update form files terlebih dahulu
+                updateFormFiles();
+                
+                // Validasi step 3
+                if (!validateStep3()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                
+                console.log('✅ Step 3 validated:', selectedFiles.length, 'files');
+            }
+        });
+    }
+    
+    // Initialize button state
+    updateButtonState();
+    
+    console.log('✅ Drag & Drop upload initialized');
+});
+
+// CSS Animation untuk pulse effect
+const style = document.createElement('style');
+style.textContent = `
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+`;
+document.head.appendChild(style);
+</script>
 
 <!-- Modal Preview File - PDF Viewer Style -->
 <div id="file-preview-modal" class="file-preview-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #202124; z-index: 10000;">
@@ -3830,7 +4387,7 @@ document.addEventListener("DOMContentLoaded", function () {
             multipleMin: 1,
             previewStep: true,
             tabs: "file url camera dropbox gdrive",
-            publicKey: "3438a2ee1b7dd183914c",
+            publicKey: "48f975cd90d221e0ee3",
             imagesOnly: false,
             clearable: true
         });
@@ -4226,13 +4783,13 @@ if (msform) {
         });
         var dateToday = new Date();
         $(document).ready(function() {
-            $(function() {
-                $("#datepicker2").datepicker({
-                    minDate: -49,
-                    maxDate: 180,
-                    dateFormat: 'dd-mm-yy'
+                $(function() {
+                    $("#datepicker2").datepicker({
+                        minDate: -49,
+                        maxDate: 180,
+                        dateFormat: 'dd-mm-yy'
+                    });
                 });
-            });
             $(function() {
                 $("#datepicker3").datepicker({
                     minDate: -49,
@@ -5639,92 +6196,42 @@ function validateStep1() {
     
     return isValid;
 }
-
-// Fungsi untuk validasi Step 2
-function validateStep2() {
+// Fungsi untuk mengecek apakah Step 2 valid
+function checkStep2Validity() {
     let isValid = true;
-    let errorMessages = [];
     
-    // Validasi Nama Kegiatan
+    // Cek Nama Kegiatan
     const namaKegiatan = $('#nama_kegiatan').val().trim();
     if (!namaKegiatan) {
-        errorMessages.push('❌ Nama Kegiatan harus diisi');
-        $('#nama_kegiatan').addClass('is-invalid');
         isValid = false;
-    } else {
-        $('#nama_kegiatan').removeClass('is-invalid');
     }
     
-    // Validasi Jenis Tanggal
+    // Cek Jenis Tanggal
     const jenisDate = $('#jenis_date').val();
     if (!jenisDate || jenisDate === '') {
-        errorMessages.push('❌ Tanggal Pengajuan harus dipilih');
-        $('#jenis_date').addClass('is-invalid');
         isValid = false;
     } else {
-        $('#jenis_date').removeClass('is-invalid');
-        
-        // Validasi berdasarkan jenis tanggal
+        // Cek berdasarkan jenis tanggal
         if (jenisDate === 'Periode') {
             const periodeValue = $('#periode_value').val();
             if (!periodeValue || periodeValue === '') {
-                errorMessages.push('❌ Periode harus dipilih');
-                $('#periode_value').addClass('is-invalid');
                 isValid = false;
-            } else {
-                $('#periode_value').removeClass('is-invalid');
             }
         } else if (jenisDate === 'Custom') {
-            // Validasi tanggal custom
             const tanggalAwal = $('#tanggal_awal_kegiatan').val();
             const tanggalAkhir = $('#tanggal_akhir_kegiatan').val();
             
-            if (!tanggalAwal) {
-                errorMessages.push('❌ Tanggal Awal Kegiatan harus diisi');
-                $('#datepicker').addClass('is-invalid');
+            if (!tanggalAwal || !tanggalAkhir) {
                 isValid = false;
-            } else {
-                $('#datepicker').removeClass('is-invalid');
-            }
-            
-            if (!tanggalAkhir) {
-                errorMessages.push('❌ Tanggal Akhir Kegiatan harus diisi');
-                $('#datepicker').addClass('is-invalid');
-                isValid = false;
-            } else {
-                $('#datepicker').removeClass('is-invalid');
             }
         }
     }
     
-    // Validasi Tempat Kegiatan
-    const tempatKegiatan = $('input[name="tempat_kegiatan"]').val().trim();
-    if (!tempatKegiatan) {
-        errorMessages.push('❌ Tempat Kegiatan harus diisi');
-        $('input[name="tempat_kegiatan"]').addClass('is-invalid');
-        isValid = false;
-    } else {
-        $('input[name="tempat_kegiatan"]').removeClass('is-invalid');
-    }
-    
-    // Validasi Penyelenggara
-    const penyelenggara = $('input[name="penyelenggara"]').val().trim();
-    if (!penyelenggara) {
-        errorMessages.push('❌ Penyelenggara harus diisi');
-        $('input[name="penyelenggara"]').addClass('is-invalid');
-        isValid = false;
-    } else {
-        $('input[name="penyelenggara"]').removeClass('is-invalid');
-    }
-    
-    // Tampilkan pesan error jika ada
-    if (!isValid) {
-        showValidationAlert(errorMessages);
-    }
+    // HAPUS validasi Tempat Kegiatan dan Penyelenggara
+    // Field ini sekarang opsional, tidak perlu divalidasi
     
     return isValid;
 }
-
 // Fungsi untuk validasi Step 3
 function validateStep3() {
     // Step 3 selalu valid karena upload file bersifat opsional
@@ -5857,7 +6364,323 @@ opacity: 1;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-
+<script>
+// ========================================
+// MULTI-STEP FORM NAVIGATION - FIXED
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Initializing multi-step form...');
+    
+    const fieldsets = document.querySelectorAll('fieldset');
+    const nextBtn = document.querySelector('.next-btn');
+    const prevBtn = document.querySelector('.prev-btn');
+    const progressBar = document.getElementById('progressBar');
+    const currentStepSpan = document.getElementById('currentStep');
+    const totalStepsSpan = document.getElementById('totalSteps');
+    
+    let currentStep = 0;
+    const totalSteps = fieldsets.length;
+    
+    // Set total steps
+    if (totalStepsSpan) {
+        totalStepsSpan.textContent = totalSteps;
+    }
+    
+    // Update progress bar
+    function updateProgress() {
+        const percent = ((currentStep + 1) / totalSteps) * 100;
+        
+        if (progressBar) {
+            progressBar.style.width = percent + '%';
+        }
+        
+        if (currentStepSpan) {
+            currentStepSpan.textContent = currentStep + 1;
+        }
+        
+        // Toggle prev button
+        if (prevBtn) {
+            prevBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
+        }
+        
+        // Update next button text
+        if (nextBtn) {
+            const nextBtnText = document.getElementById('next-btn-text');
+            if (currentStep === totalSteps - 1) {
+                if (nextBtnText) {
+                    nextBtnText.textContent = 'Finish';
+                } else {
+                    nextBtn.textContent = 'Finish';
+                }
+                nextBtn.classList.remove('btn-primary');
+                nextBtn.classList.add('btn-success');
+            } else {
+                if (nextBtnText) {
+                    nextBtnText.textContent = 'Continue';
+                } else {
+                    nextBtn.textContent = 'Continue';
+                }
+                nextBtn.classList.remove('btn-success');
+                nextBtn.classList.add('btn-primary');
+            }
+        }
+        
+        console.log('📊 Step:', currentStep + 1, '/', totalSteps);
+    }
+    
+    // Validasi Step 1
+    function validateStep1() {
+        const jenisPengajuan = document.getElementById('jenis_pengajuan').value;
+        const lingkupPenugasan = document.getElementById('lingkup_penugasan').value;
+        
+        if (!jenisPengajuan || jenisPengajuan === '') {
+            alert('❌ Pilih Jenis Pengajuan terlebih dahulu!');
+            return false;
+        }
+        
+        if (!lingkupPenugasan || lingkupPenugasan === '') {
+            alert('❌ Pilih Status Kepegawaian terlebih dahulu!');
+            return false;
+        }
+        
+        // Validasi jenis penugasan
+        if (jenisPengajuan === 'Perorangan') {
+            const jenisPenugasanPerorangan = document.getElementById('jenis_penugasan_perorangan').value;
+            if (!jenisPenugasanPerorangan || jenisPenugasanPerorangan === '') {
+                alert('❌ Pilih Jenis Penugasan terlebih dahulu!');
+                return false;
+            }
+        } else if (jenisPengajuan === 'Kelompok') {
+            const jenisPenugasanKelompok = document.getElementById('jenis_penugasan_kelompok').value;
+            if (!jenisPenugasanKelompok || jenisPenugasanKelompok === '') {
+                alert('❌ Pilih Jenis Penugasan terlebih dahulu!');
+                return false;
+            }
+        }
+        
+        // Validasi minimal 1 dosen dengan data lengkap
+        const panitiaRows = document.querySelectorAll('.panitia-row');
+        let hasValidDosen = false;
+        
+        panitiaRows.forEach(row => {
+            const nip = row.querySelector('.nip-input').value.trim();
+            const nama = row.querySelector('.nama-dosen-input').value.trim();
+            const jabatan = row.querySelector('.jabatan-input').value.trim();
+            const kaprodi = row.querySelector('.kaprodi-input').value.trim();
+            
+            if (nip && nama && jabatan && kaprodi) {
+                hasValidDosen = true;
+            }
+        });
+        
+        if (!hasValidDosen) {
+            alert('❌ Minimal harus ada 1 dosen dengan data lengkap (NIP, Nama, Jabatan, Kaprodi)!');
+            return false;
+        }
+        
+        console.log('✅ Step 1 validation passed');
+        return true;
+    }
+    
+    // Validasi Step 2 - LEBIH PERMISIF
+    function validateStep2() {
+        const namaKegiatan = document.getElementById('nama_kegiatan').value.trim();
+        const jenisDate = document.getElementById('jenis_date').value;
+        
+        if (!namaKegiatan) {
+            alert('❌ Nama Kegiatan harus diisi!');
+            document.getElementById('nama_kegiatan').focus();
+            return false;
+        }
+        
+        if (!jenisDate || jenisDate === '') {
+            alert('❌ Pilih Jenis Tanggal terlebih dahulu!');
+            document.getElementById('jenis_date').focus();
+            return false;
+        }
+        
+        // Validasi berdasarkan jenis tanggal
+        if (jenisDate === 'Custom') {
+            const tanggalAwal = document.getElementById('tanggal_awal_kegiatan').value;
+            const tanggalAkhir = document.getElementById('tanggal_akhir_kegiatan').value;
+            
+            if (!tanggalAwal || !tanggalAkhir) {
+                alert('❌ Pilih tanggal awal dan akhir kegiatan!');
+                return false;
+            }
+        } else if (jenisDate === 'Periode') {
+            const periodeValue = document.getElementById('periode_value').value;
+            
+            if (!periodeValue || periodeValue === '') {
+                alert('❌ Pilih Periode terlebih dahulu!');
+                document.getElementById('periode_value').focus();
+                return false;
+            }
+        }
+        
+        // FIELD OPSIONAL - TIDAK PERLU VALIDASI
+        // - Tempat Kegiatan
+        // - Penyelenggara
+        
+        console.log('✅ Step 2 validation passed');
+        return true;
+    }
+    
+    // Validasi Step 3
+    function validateStep3() {
+        const fileInput = document.getElementById('file-input');
+        
+        // Cek apakah ada file yang dipilih
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            // Cek dari selectedFiles global variable
+            if (typeof selectedFiles === 'undefined' || selectedFiles.length === 0) {
+                alert('❌ Minimal upload 1 file eviden sebelum submit!');
+                return false;
+            }
+        }
+        
+        console.log('✅ Step 3 validation passed');
+        return true;
+    }
+    
+    // Next Button Handler
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            console.log('🔘 Next button clicked - Current step:', currentStep + 1);
+            
+            // Validasi step saat ini
+            let isValid = true;
+            
+            if (currentStep === 0) {
+                isValid = validateStep1();
+            } else if (currentStep === 1) {
+                isValid = validateStep2();
+            } else if (currentStep === 2) {
+                isValid = validateStep3();
+            }
+            
+            if (!isValid) {
+                console.log('❌ Validation failed for step', currentStep + 1);
+                return;
+            }
+            
+            // Jika belum step terakhir, pindah ke step berikutnya
+            if (currentStep < totalSteps - 1) {
+                fieldsets[currentStep].classList.remove('active');
+                currentStep++;
+                fieldsets[currentStep].classList.add('active');
+                updateProgress();
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                console.log('➡️ Moved to step', currentStep + 1);
+            } else {
+                // Step terakhir - submit form
+                console.log('📤 Submitting form...');
+                
+                const form = document.getElementById('msform');
+                if (form) {
+                    // Tampilkan loading screen jika ada
+                    const loadingScreen = document.getElementById('loading-screen');
+                    if (loadingScreen) {
+                        loadingScreen.style.display = 'flex';
+                        setTimeout(() => {
+                            loadingScreen.style.opacity = '1';
+                        }, 10);
+                    }
+                    
+                    form.submit();
+                }
+            }
+        });
+    }
+    
+    // Previous Button Handler
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (currentStep > 0) {
+                fieldsets[currentStep].classList.remove('active');
+                currentStep--;
+                fieldsets[currentStep].classList.add('active');
+                updateProgress();
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                console.log('⬅️ Moved back to step', currentStep + 1);
+            }
+        });
+    }
+    
+    // Initialize
+    updateProgress();
+    
+    console.log('✅ Multi-step form initialized');
+});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hapus semua span dengan warna merah (#dc3545) di dalam label
+        const labels = document.querySelectorAll('label');
+        labels.forEach(label => {
+            const spans = label.querySelectorAll('span');
+            spans.forEach(span => {
+                if (span.style.color === 'rgb(220, 53, 69)' || 
+                    span.style.color === '#dc3545' ||
+                    span.textContent === '*') {
+                    span.style.display = 'none';
+                     span.remove();
+                }
+            });
+        });
+        
+        console.log('✅ Semua bintang merah telah disembunyikan');
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+    // Hapus semua tanda bintang
+    setTimeout(function() {
+        // Method 1: Hapus span dengan bintang
+        document.querySelectorAll('label span').forEach(span => {
+            if (span.textContent.includes('*') || 
+                span.style.color === '#dc3545' || 
+                span.style.color === 'rgb(220, 53, 69)' ||
+                span.classList.contains('text-danger')) {
+                span.remove();
+            }
+        });
+        
+        // Method 2: Hapus konten after dari label
+        const style = document.createElement('style');
+        style.textContent = `
+            label::after {
+                content: "" !important;
+                display: none !important;
+            }
+            label span {
+                display: none !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Method 3: Iterasi semua label
+        document.querySelectorAll('label').forEach(label => {
+            let html = label.innerHTML;
+            // Hapus semua <span> yang mengandung bintang atau warna merah
+            html = html.replace(/<span[^>]*>[\s\S]*?\*[\s\S]*?<\/span>/g, '');
+            html = html.replace(/<span[^>]*style=["'][^"']*color.*?#dc3545[^"']*["'][^>]*>[\s\S]*?<\/span>/g, '');
+            html = html.replace(/\*/g, '');
+            label.innerHTML = html;
+        });
+        
+        console.log('✅ Semua tanda bintang telah dihapus');
+    }, 500);
+});
+</script>
 </body>
 
 </html>
