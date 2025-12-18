@@ -535,6 +535,35 @@ i[class*="fa-"] {
     from { opacity: 0; }
     to { opacity: 1; }
 }
+/* Hilangkan SEMUA tanda bintang */
+label::after {
+    content: "" !important;
+    display: none !important;
+}
+
+/* Hilangkan span bintang */
+label span:contains("*"),
+label span[style*="color: #dc3545"],
+label span[style*="color:red"],
+label span.text-danger {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    font-size: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Untuk asterisk di dalam label */
+label {
+    position: relative;
+}
+
+label:has(> span:contains("*"))::after,
+label:has(> span[style*="#dc3545"])::after {
+    content: "" !important;
+}   
     </style>
 </head>
 
@@ -619,7 +648,7 @@ i[class*="fa-"] {
 
             <div class="divider show-mobile" style="margin-top:20px"></div>
             <div class="card">
-                <a href="<?= base_url('list-surat-tugas') ?>" class="btn"><span class="fas fa-palette"></span> List Surat Tugas</a>
+                <a href="<?= base_url('list-surat-tugas') ?>" class="btn"><span class="fas fa-palette"></span> List Pengajuan</a>
             </div>
             <div class="card">
                 <a href="https://ifik.telkomuniversity.ac.id/Pic_kk/input_surat" class="btn"><span class="fas fa-envelope-open-text"></span> Surat Tugas</a>
@@ -1132,7 +1161,7 @@ i[class*="fa-"] {
         </div>
 
         <!-- Jenis Penugasan Perorangan -->
-        <div class="form-group has-select mb-3" id="jenis_penugasan_perorangan_container">
+        <div class="form-group has-select mb-3" id="jenis_penugasan_perorangan_container" style="display: none;">
             <select class="form-control" name="jenis_penugasan" id="jenis_penugasan_perorangan">
                 <option disabled selected value="">Jenis Penugasan</option>
                 <option value="Juri">Juri</option>
@@ -1148,7 +1177,7 @@ i[class*="fa-"] {
         </div>
 
         <!-- Jenis Penugasan Kelompok -->
-        <div class="form-group has-select mb-3" id="jenis_penugasan_kelompok_container">
+        <div class="form-group has-select mb-3" id="jenis_penugasan_kelompok_container" style="display: none;">
             <select class="form-control" name="jenis_penugasan_kelompok" id="jenis_penugasan_kelompok">
                 <option disabled selected value="">Jenis Penugasan</option>
                 <option value="Tim">Tim</option>
@@ -1162,9 +1191,22 @@ i[class*="fa-"] {
                    style="margin-top:12px; display:none;">
         </div>
 
+        <!-- Field Input Jumlah Baris (Hanya untuk Kelompok) -->
+        <div class="form-group mb-4" id="jumlah_baris_container" style="display: none;">
+            <label for="jumlah_baris">Jumlah Anggota Kelompok</label>
+            <div class="input-group">
+                <input type="number" class="form-control" id="jumlah_baris" name="jumlah_baris" 
+                       min="1" max="20" value="1" placeholder="Masukkan jumlah anggota">
+                <button type="button" class="btn btn-primary" id="generate_rows_btn">
+                    <i class="fas fa-sync-alt"></i> Generate Baris
+                </button>
+            </div>
+            <small class="form-text text-muted">Masukkan jumlah anggota kelompok (maksimal 20)</small>
+        </div>
 
         <!-- FORM PANITIA -->
         <div id="panitiaContainer" class="mt-4">
+            <!-- Baris pertama untuk perorangan -->
             <div class="row g-3 align-items-end panitia-row" data-row-index="0">
 
                 <div class="col-md-2 position-relative">
@@ -1395,6 +1437,36 @@ i[class*="fa-"] {
     border-color: #ced4da;
 }
 
+/* Styling untuk jumlah baris */
+#jumlah_baris_container {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    margin-top: 20px;
+}
+
+#jumlah_baris_container label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #495057;
+}
+
+#generate_rows_btn {
+    min-width: 140px;
+}
+
+/* Styling untuk tampilan awal (belum memilih jenis pengajuan) */
+.form-disabled .panitia-row {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.form-disabled .panitia-row input {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1200px) {
     .panitia-row .col-md-2,
@@ -1436,6 +1508,16 @@ i[class*="fa-"] {
         right: 5% !important;
         max-height: 300px;
     }
+    
+    /* Responsive jumlah baris */
+    #jumlah_baris_container .input-group {
+        flex-direction: column;
+    }
+    
+    #generate_rows_btn {
+        margin-top: 10px;
+        width: 100%;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1451,6 +1533,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const jenisPengajuan = document.getElementById('jenis_pengajuan');
     const jenisPenugasanPeroranganContainer = document.getElementById('jenis_penugasan_perorangan_container');
     const jenisPenugasanKelompokContainer = document.getElementById('jenis_penugasan_kelompok_container');
+    const jumlahBarisContainer = document.getElementById('jumlah_baris_container');
+    const jumlahBarisInput = document.getElementById('jumlah_baris');
+    const generateRowsBtn = document.getElementById('generate_rows_btn');
     const peranPeroranganHidden = document.getElementById('peran_perorangan');
     
     let rowCounter = 1;
@@ -1482,12 +1567,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (jenisPengajuan.value === 'Perorangan') {
             jenisPenugasanPeroranganContainer.style.display = 'block';
             jenisPenugasanKelompokContainer.style.display = 'none';
+            jumlahBarisContainer.style.display = 'none';
         } else if (jenisPengajuan.value === 'Kelompok') {
             jenisPenugasanPeroranganContainer.style.display = 'none';
             jenisPenugasanKelompokContainer.style.display = 'block';
+            jumlahBarisContainer.style.display = 'block';
         } else {
+            // Jika belum memilih jenis pengajuan, sembunyikan semuanya
             jenisPenugasanPeroranganContainer.style.display = 'none';
             jenisPenugasanKelompokContainer.style.display = 'none';
+            jumlahBarisContainer.style.display = 'none';
         }
     }
 
@@ -1539,16 +1628,129 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Toggle form enabled/disabled state based on jenis pengajuan
+    function toggleFormState() {
+        const formRows = document.querySelectorAll('.panitia-row');
+        
+        if (jenisPengajuan.value === '') {
+            // Jika belum memilih jenis pengajuan, tambah class form-disabled
+            panitiaContainer.classList.add('form-disabled');
+            
+            // Disable semua input
+            formRows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.disabled = true;
+                    input.required = false;
+                });
+            });
+        } else {
+            // Jika sudah memilih jenis pengajuan, hapus class form-disabled
+            panitiaContainer.classList.remove('form-disabled');
+            
+            // Enable semua input
+            formRows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.disabled = false;
+                    input.required = true;
+                });
+            });
+        }
+    }
+
     // Update semua tampilan berdasarkan jenis pengajuan
     function updateViewBasedOnPengajuan() {
+        console.log('Updating view for:', jenisPengajuan.value);
+        
         toggleJenisPenugasan();
         toggleKolomPeran();
         toggleButtonVisibility();
+        toggleFormState();
         
-        if (jenisPengajuan.value === 'Perorangan') {
+        // Hanya untuk Kelompok: Sembunyikan semua baris dan tampilkan form kosong
+        if (jenisPengajuan.value === 'Kelompok') {
+            // Kosongkan container
+            panitiaContainer.innerHTML = '';
+            
+            // Reset row counter
+            rowCounter = 0;
+            
+            // Gunakan nilai dari input jumlah baris (default 1)
+            const jumlah = parseInt(jumlahBarisInput.value) || 1;
+            
+            // Buat baris sesuai jumlah
+            for (let i = 0; i < jumlah; i++) {
+                const rowEl = createRowElement(i, true); // true = untuk kelompok
+                panitiaContainer.appendChild(rowEl);
+                rowCounter++;
+            }
+            
+            // Pastikan form enabled
+            panitiaContainer.classList.remove('form-disabled');
+            
+            // Inisialisasi autocomplete untuk semua baris
             setTimeout(() => {
-                initializeFirstRow();
-            }, 50);
+                initializeAllRows();
+            }, 100);
+            
+        } else if (jenisPengajuan.value === 'Perorangan') {
+            // Untuk perorangan, tampilkan 1 baris yang sudah ada
+            // Pastikan hanya ada 1 baris
+            const existingRows = panitiaContainer.querySelectorAll('.panitia-row');
+            if (existingRows.length === 0) {
+                // Buat 1 baris untuk perorangan
+                const rowEl = createRowElement(0, false); // false = untuk perorangan
+                panitiaContainer.appendChild(rowEl);
+                rowCounter = 1;
+            } else if (existingRows.length > 1) {
+                // Hapus baris tambahan, hanya sisakan 1
+                for (let i = 1; i < existingRows.length; i++) {
+                    existingRows[i].remove();
+                }
+                rowCounter = 1;
+            }
+            
+            // Kosongkan nilai input pada baris pertama
+            const firstRow = panitiaContainer.querySelector('.panitia-row');
+            if (firstRow) {
+                firstRow.querySelectorAll('input').forEach(input => {
+                    if (!input.classList.contains('peran-input')) {
+                        input.value = '';
+                    }
+                });
+            }
+            
+            // Pastikan form enabled
+            panitiaContainer.classList.remove('form-disabled');
+            
+            // Inisialisasi autocomplete
+            setTimeout(() => {
+                initializeAllRows();
+            }, 100);
+        } else {
+            // Jika belum memilih jenis pengajuan, tetap tampilkan 1 baris default
+            // Tapi kosongkan semua input
+            const firstRow = panitiaContainer.querySelector('.panitia-row');
+            if (firstRow) {
+                firstRow.querySelectorAll('input').forEach(input => {
+                    input.value = '';
+                });
+            }
+            
+            // Sembunyikan kolom peran
+            const peranColumns = document.querySelectorAll('.peran-column');
+            peranColumns.forEach(column => {
+                column.classList.add('hidden');
+                column.classList.remove('visible');
+                column.style.display = 'none';
+            });
+            
+            // Sembunyikan tombol
+            const buttonCells = document.querySelectorAll('.button-cell');
+            buttonCells.forEach(btn => {
+                btn.style.display = 'none';
+            });
         }
     }
 
@@ -1557,8 +1759,59 @@ document.addEventListener('DOMContentLoaded', function () {
         updateViewBasedOnPengajuan();
     });
 
+    // Event listener untuk tombol generate baris
+    generateRowsBtn.addEventListener('click', function() {
+        if (jenisPengajuan.value === 'Kelompok') {
+            const jumlah = parseInt(jumlahBarisInput.value) || 1;
+            if (jumlah < 1) {
+                alert('Jumlah baris minimal 1');
+                jumlahBarisInput.value = 1;
+                return;
+            }
+            if (jumlah > 20) {
+                alert('Jumlah baris maksimal 20');
+                jumlahBarisInput.value = 20;
+                return;
+            }
+            
+            // Kosongkan container
+            panitiaContainer.innerHTML = '';
+            rowCounter = 0;
+            
+            // Buat baris baru sesuai jumlah
+            for (let i = 0; i < jumlah; i++) {
+                const rowEl = createRowElement(i, true);
+                panitiaContainer.appendChild(rowEl);
+                rowCounter++;
+            }
+            
+            // Pastikan form enabled
+            panitiaContainer.classList.remove('form-disabled');
+            
+            // Inisialisasi autocomplete
+            setTimeout(() => {
+                initializeAllRows();
+            }, 100);
+        }
+    });
+
+    // Event listener untuk input jumlah baris (enter untuk generate)
+    jumlahBarisInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            generateRowsBtn.click();
+        }
+    });
+
     // Inisialisasi awal
-    updateViewBasedOnPengajuan();
+    // Saat halaman load, jenis pengajuan masih kosong
+    window.addEventListener('load', function() {
+        // Panggil update untuk mengatur tampilan awal
+        updateViewBasedOnPengajuan();
+        
+        // Inisialisasi autocomplete (tapi form dalam keadaan disabled)
+        initializeAllRows();
+    });
 
     // Handle "Lainnya" option untuk penugasan perorangan
     document.getElementById('jenis_penugasan_perorangan').addEventListener('change', function() {
@@ -1577,6 +1830,61 @@ document.addEventListener('DOMContentLoaded', function () {
             lainnyaInput.value = '';
         }
     });
+
+    // Fungsi untuk membuat elemen baris
+    function createRowElement(index, isKelompok = false) {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row g-3 align-items-end panitia-row';
+        rowEl.dataset.rowIndex = index;
+        
+        const buttonHtml = isKelompok ? 
+            '<button type="button" class="btn btn-danger remove-row-btn" title="Hapus Baris"><i class="fas fa-minus"></i></button>' :
+            '<button type="button" class="btn btn-success add-row-btn" title="Tambah Baris"><i class="fas fa-plus"></i></button>';
+        
+        rowEl.innerHTML = `
+            <div class="col-md-2 position-relative">
+                <label>NIP</label>
+                <input type="text" name="nip[]" class="form-control nip-input" autocomplete="off" required>
+            </div>
+
+            <div class="col-md-3 position-relative">
+                <label>Nama Dosen</label>
+                <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" autocomplete="off" required>
+            </div>
+
+            <div class="col-md-2 position-relative">
+                <label>Jabatan</label>
+                <input type="text" name="jabatan[]" class="form-control jabatan-input" autocomplete="off" required>
+            </div>
+
+            <div class="col-md-2 position-relative">
+                <label>Kaprodi</label>
+                <input type="text" name="kaprodi[]" class="form-control kaprodi-input" autocomplete="off" required>
+            </div>
+
+            <div class="col-md-2 position-relative peran-column">
+                <label>Peran</label>
+                <input type="text" name="peran[]" class="form-control peran-input" autocomplete="off" placeholder="Masukkan peran/posisi">
+            </div>
+
+            <div class="col-md-1 text-center button-cell">
+                ${buttonHtml}
+            </div>
+        `;
+        
+        // Update kolom peran berdasarkan jenis pengajuan
+        updateKolomPeranForRow(rowEl);
+        
+        // Enable input jika jenis pengajuan sudah dipilih
+        if (jenisPengajuan.value !== '') {
+            const inputs = rowEl.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.disabled = false;
+            });
+        }
+        
+        return rowEl;
+    }
 
     // Debounce function
     function debounce(fn, delay = 300) {
@@ -1667,6 +1975,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Show suggestion box
     function showSuggestionBox(inputEl, items, onSelect, fieldType) {
+        // Jangan tampilkan autocomplete jika form disabled
+        if (jenisPengajuan.value === '' || inputEl.disabled) {
+            return;
+        }
+        
         removeAutocompleteBox();
 
         if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
@@ -1888,6 +2201,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
                 
+                // Jangan proses jika input disabled
+                if (this.disabled || jenisPengajuan.value === '') {
+                    return;
+                }
+                
                 const val = this.value.trim();
                 
                 if (val.length < 2 || document.activeElement !== this) {
@@ -1914,6 +2232,11 @@ document.addEventListener('DOMContentLoaded', function () {
         
         inputs.forEach(input => {
             input.addEventListener('focus', () => {
+                // Jangan aktifkan autocomplete jika input disabled
+                if (input.disabled || jenisPengajuan.value === '') {
+                    return;
+                }
+                
                 const val = input.value.trim();
                 if (val.length >= 2) {
                     setTimeout(() => {
@@ -1935,47 +2258,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         rowEl.dataset.autocompleteInitialized = 'true';
-    }
-
-    function initializeFirstRow() {
-        const firstRow = document.querySelector('.panitia-row[data-row-index="0"]');
-        
-        if (!firstRow) {
-            return;
-        }
-        
-        if (!firstRow.dataset.autocompleteInitialized) {
-            initAutocompleteForRow(firstRow);
-        }
-    }
-
-    function addNewRow() {
-        const originalRow = document.querySelector('.panitia-row');
-        const newRow = originalRow.cloneNode(true);
-        
-        newRow.dataset.rowIndex = rowCounter++;
-        
-        newRow.querySelectorAll('input').forEach(input => {
-            input.value = '';
-        });
-        
-        const addBtn = newRow.querySelector('.add-row-btn');
-        if (addBtn) {
-            addBtn.classList.remove('btn-success', 'add-row-btn');
-            addBtn.classList.add('btn-danger', 'remove-row-btn');
-            addBtn.innerHTML = '<i class="fas fa-minus"></i>';
-            addBtn.setAttribute('title', 'Hapus Baris');
-        }
-        
-        panitiaContainer.appendChild(newRow);
-        
-        updateKolomPeranForRow(newRow);
-        
-        setTimeout(() => {
-            initAutocompleteForRow(newRow);
-        }, 100);
-        
-        animateNewRow(newRow);
     }
 
     function updateKolomPeranForRow(rowEl) {
@@ -2001,13 +2283,49 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function removeRowWithAnimation(rowEl) {
-        rowEl.style.opacity = '0';
-        rowEl.style.transform = 'translateX(20px)';
+        // Jika hanya tersisa 1 baris, jangan hapus
+        const totalRows = panitiaContainer.querySelectorAll('.panitia-row').length;
+        if (totalRows <= 1) {
+            alert('Minimal harus ada 1 baris data');
+            return;
+        }
+        
+        rowEl.classList.add('removing');
         setTimeout(() => {
             if (rowEl.parentNode) {
                 rowEl.remove();
+                // Update jumlah baris input
+                if (jenisPengajuan.value === 'Kelompok') {
+                    const currentRows = panitiaContainer.querySelectorAll('.panitia-row').length;
+                    jumlahBarisInput.value = currentRows;
+                }
             }
         }, 300);
+    }
+
+    // Fungsi untuk menambah baris individual (untuk perorangan - sebenarnya tidak digunakan karena perorangan hanya 1 baris)
+    function addNewRow() {
+        if (jenisPengajuan.value === 'Perorangan') {
+            return; // Perorangan hanya 1 baris
+        }
+        
+        const rowEl = createRowElement(rowCounter, true);
+        panitiaContainer.appendChild(rowEl);
+        rowCounter++;
+        
+        updateKolomPeranForRow(rowEl);
+        
+        setTimeout(() => {
+            initAutocompleteForRow(rowEl);
+        }, 100);
+        
+        // Update jumlah baris input
+        if (jenisPengajuan.value === 'Kelompok') {
+            const currentRows = panitiaContainer.querySelectorAll('.panitia-row').length;
+            jumlahBarisInput.value = currentRows;
+        }
+        
+        animateNewRow(rowEl);
     }
 
     function animateNewRow(rowEl) {
@@ -2020,6 +2338,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 10);
     }
 
+    function initializeAllRows() {
+        const rows = panitiaContainer.querySelectorAll('.panitia-row');
+        
+        rows.forEach((row, index) => {
+            row.dataset.rowIndex = index;
+            delete row.dataset.autocompleteInitialized;
+            initAutocompleteForRow(row);
+            updateKolomPeranForRow(row);
+        });
+        
+        // Update button visibility
+        toggleButtonVisibility();
+    }
+
+    // Event listener untuk tombol tambah/hapus baris
     panitiaContainer.addEventListener('click', function (e) {
         const addBtn = e.target.closest('.add-row-btn');
         const removeBtn = e.target.closest('.remove-row-btn');
@@ -2034,39 +2367,11 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             e.stopPropagation();
             const rowEl = removeBtn.closest('.panitia-row');
-            if (rowEl && panitiaContainer.querySelectorAll('.panitia-row').length > 1) {
+            if (rowEl) {
                 removeRowWithAnimation(rowEl);
             }
         }
     });
-
-    function initializeAllRows() {
-        const rows = panitiaContainer.querySelectorAll('.panitia-row');
-        
-        rows.forEach((row, index) => {
-            row.dataset.rowIndex = index;
-            delete row.dataset.autocompleteInitialized;
-            initAutocompleteForRow(row);
-        });
-    }
-
-    function comprehensiveInitialize() {
-        initializeFirstRow();
-        
-        setTimeout(() => {
-            initializeAllRows();
-        }, 100);
-        
-        if (jenisPengajuan.value === 'Perorangan') {
-            setTimeout(() => {
-                initializeFirstRow();
-            }, 200);
-        }
-    }
-
-    setTimeout(() => {
-        comprehensiveInitialize();
-    }, 100);
 
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.autocomplete-box-fixed') && 
@@ -2085,6 +2390,14 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.querySelector('form').addEventListener('submit', function(e) {
+        // Validasi harus memilih jenis pengajuan terlebih dahulu
+        if (!jenisPengajuan.value) {
+            e.preventDefault();
+            alert('Mohon pilih Jenis Pengajuan terlebih dahulu');
+            jenisPengajuan.focus();
+            return;
+        }
+        
         if (jenisPengajuan.value === 'Perorangan') {
             const nipInput = document.querySelector('.nip-input');
             const namaInput = document.querySelector('.nama-dosen-input');
@@ -2117,21 +2430,17 @@ document.addEventListener('DOMContentLoaded', function () {
             peranInputs.forEach(input => {
                 input.name = 'peran[]';
             });
+            
+            // Validasi jumlah baris
+            const totalRows = panitiaContainer.querySelectorAll('.panitia-row').length;
+            const inputJumlah = parseInt(jumlahBarisInput.value) || 1;
+            
+            if (totalRows !== inputJumlah) {
+                e.preventDefault();
+                alert(`Jumlah baris yang diisi (${totalRows}) tidak sesuai dengan jumlah yang diminta (${inputJumlah}). Silahkan klik tombol "Generate Baris" untuk memperbarui.`);
+                return;
+            }
         }
-    });
-    
-    document.addEventListener('readystatechange', function() {
-        if (document.readyState === 'complete') {
-            setTimeout(() => {
-                initializeFirstRow();
-            }, 300);
-        }
-    });
-    
-    window.addEventListener('load', function() {
-        setTimeout(() => {
-            comprehensiveInitialize();
-        }, 500);
     });
 });
 </script>
@@ -2146,13 +2455,13 @@ document.addEventListener('DOMContentLoaded', function () {
     <!-- Nama kegiatan (WAJIB) -->
     <div class="form-group mb-4">
       <input type="text" name="nama_kegiatan" id="nama_kegiatan" class="form-control" required autocomplete="off">
-      <label>Nama Kegiatan <span style="color: #dc3545;">*</span></label>
+     <label>Nama Kegiatan</label>
     </div>
 
     <!-- Pilihan jenis tanggal (WAJIB) -->
     <div class="form-group has-select mb-4">
       <select class="nice form-control" name="jenis_date" id="jenis_date" required>
-        <option disabled selected value="">Tanggal Kegiatan <span style="color: #dc3545;">*</span></option>
+        <option disabled selected value="">Tanggal Kegiatan</option>
         <option value="Periode">Periode</option>
         <option value="Custom">Custom</option>
       </select>
@@ -2164,9 +2473,9 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="form-group">
           <input type="text" id="datepicker" class="form-control custom-form-control"
                  autocomplete="off" inputmode="none" readonly
-                 placeholder="Klik untuk pilih tanggal">
+                >
 
-          <label id="lbl_mulai">Tanggal Awal s/d Akhir <span style="color: #dc3545;">*</span></label>
+          <label id="lbl_mulai">Tanggal Awal s/d Akhir</label>
 
           <!-- Hidden input -->
           <input type="hidden" id="tanggal_awal_kegiatan" name="tanggal_awal_kegiatan">
@@ -2206,7 +2515,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <input type="text" name="periode_penugasan" id="datepicker3"
                  class="form-control custom-form-control"
                  autocomplete="off" inputmode="none" readonly
-                 placeholder="Otomatis terisi">
+                 >
 
           <label id="lbl_mulai1">Periode Penugasan</label>
           <div class="info-message small" id="info_periode">Akan terisi otomatis</div>
@@ -2219,7 +2528,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <input type="text" name="akhir_periode_penugasan" id="datepicker4"
                  class="form-control custom-form-control"
                  autocomplete="off" inputmode="none" readonly
-                 placeholder="Otomatis terisi">
+                 >
 
           <label id="lbl_akhir1">Akhir Penugasan</label>
           <div class="info-message small" id="info_akhir">Akan terisi otomatis</div>
@@ -2243,14 +2552,14 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="form-group mb-4">
       <input type="text" name="tempat_kegiatan" class="form-control custom-form-control" 
              autocomplete="off">
-      <label>Tempat Kegiatan <span style="color: #6c757d; font-size: 12px;"></span></label>
+      <label>Tempat Kegiatan <span style="color: #6c757d; font-size: 12px;">(Opsional)</span></label>
     </div>
 
     <!-- Penyelenggara (OPSIONAL) -->
     <div class="form-group mb-4">
       <input type="text" name="penyelenggara" class="form-control custom-form-control" 
              autocomplete="off">
-      <label>Penyelenggara <span style="color: #6c757d; font-size: 12px;"></span></label>
+      <label>Penyelenggara <span style="color: #6c757d; font-size: 12px;">(Opsional)</span></label>
     </div>
   </div>
 </fieldset>
@@ -2984,11 +3293,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-<!-- ===== UPLOADCARE CDN ===== -->
-<script>
-UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
-</script>
-<script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
 
 <!-- Loading Screen (Hidden by default) -->
 <div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; justify-content: center; align-items: center; z-index: 9999; opacity: 0; transition: opacity 0.5s ease;">
@@ -3006,61 +3310,714 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
         </div>
     </div>
 </div>
-
+<!-- Step 3 -->
 <fieldset id="step-upload">
     <div style="width: 100%;">
         <div style="margin-bottom: 20px;">
             <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333;">
                 <i class="fas fa-cloud-upload-alt"></i> Upload File Eviden
-                <span style="color: #dc3545; margin-left: 4px; font-weight: bold;">*</span>
             </label>
             <p style="font-size: 13px; color: #6c757d; margin-bottom: 15px;">
-                Anda harus menambahkan minimal 1 file eviden untuk melanjutkan.
+                Upload file pendukung (PDF, JPG, PNG, DOC, XLS). Maksimal 10MB per file.
+                <span style="color: #dc3545; font-weight: 600;">Minimal 1 file.</span>
             </p>
             
-            <!-- Validasi Message -->
-            <div id="validation-message" style="display: none; padding: 12px 15px; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; margin-bottom: 15px; color: #856404; font-size: 14px; display: flex; align-items: center; gap: 8px; animation: fadeIn 0.3s ease;">
-                <i class="fas fa-exclamation-circle"></i> <span id="validation-text"></span>
-            </div>
-        </div>
-
-        <!-- BUTTON UNTUK UPLOAD FILE -->
-        <div style="margin-bottom: 20px;">
-            <button type="button" id="upload-btn" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px; background: #007bff; border: none; color: white; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 8px;">
-                <i class="fas fa-plus-circle"></i> Tambah File
-            </button>
-            <span id="file-count-indicator" style="margin-left: 15px; font-size: 14px; color: #6c757d;">
-                <i class="fas fa-file"></i> <span id="current-file-count">0</span> file ditambahkan
-            </span>
-        </div>
-
-        <!-- KONTAINER UPLOADCARE (akan muncul saat button diklik) -->
-        <div id="eviden-panel" style="display: none; min-height: 420px; border:1px solid #ddd; border-radius:10px; margin-bottom: 20px;"></div>
-
-        <!-- Hidden input untuk simpan URL -->
-        <input type="hidden" name="eviden" id="eviden" value="[]">
-        
-        <!-- Display uploaded files -->
-        <div id="uploaded-files-display" style="display: none;">
-            <div style="background: #f8f9fa; border-radius: 8px; padding: 15px; border: 1px solid #dee2e6;">
-                <h6 style="font-weight: 600; margin-bottom: 10px; color: #495057;">
-                    <i class="fas fa-check-circle" style="color: #28a745;"></i> File yang sudah diupload (<span id="total-files">0</span>):
-                </h6>
-                <div id="files-list"></div>
-            </div>
-        </div>
-        
-        <!-- Upload Progress -->
-        <div id="upload-progress" style="display: none; margin-top: 20px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="flex: 1; background-color: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
-                    <div id="progress-bar" style="width: 0%; height: 100%; background-color: #28a745; transition: width 0.3s ease;"></div>
+            <!-- Drag & Drop Upload Zone -->
+            <div id="drop-zone" class="drop-zone" style="border: 2px dashed #17a2b8; border-radius: 12px; padding: 40px; text-align: center; background: #f8f9fa; transition: all 0.3s ease; cursor: pointer;">
+                <div class="drop-zone-content">
+                    <div class="upload-icon" style="font-size: 60px; color: #6c757d; margin-bottom: 20px; opacity: 0.7;">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="drop-text" style="font-size: 18px; color: #495057; font-weight: 500; margin-bottom: 10px;">
+                        Drag & Drop file di sini
+                    </div>
+                    <div class="drop-or" style="font-size: 14px; color: #6c757d; margin: 15px 0;">
+                        atau
+                    </div>
+                    <label for="file-input" class="choose-file-btn" style="background: #17a2b8; color: white; border: none; padding: 12px 30px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-block;">
+                        <i class="fas fa-folder-open"></i> Pilih File
+                    </label>
+                    <input type="file" name="eviden_files[]" id="file-input" 
+                           class="form-control d-none" multiple 
+                           accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx" 
+                           required>
+                    <p class="mt-3" style="font-size: 12px; color: #6c757d;">
+                        Format: PDF, JPG, PNG, DOC, XLS (Maks. 10MB per file)
+                    </p>
                 </div>
-                <span id="progress-text" style="font-size: 12px; color: #6c757d;">0%</span>
+            </div>
+
+            <!-- PROGRESS BAR AREA - BARU DITAMBAHKAN -->
+            <div id="upload-progress-bar" class="upload-progress-container" style="display: none; margin-top: 20px; background: #f8f9fa; border-radius: 8px; padding: 15px; border: 1px solid #e9ecef;">
+                <div class="progress-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span class="progress-title" style="font-weight: 600; color: #495057; font-size: 14px;">
+                        <i class="fas fa-upload"></i> Sedang Mengupload File...
+                    </span>
+                    <span class="progress-percentage" id="progress-percentage" style="font-weight: 600; color: #17a2b8; font-size: 14px;">
+                        0%
+                    </span>
+                </div>
+                <div class="progress-bar-container" style="background: #e9ecef; border-radius: 4px; overflow: hidden; height: 10px;">
+                    <div id="progress-bar-fill" class="progress-bar-fill" style="height: 100%; background: linear-gradient(90deg, #17a2b8 0%, #20c997 100%); width: 0%; border-radius: 4px; transition: width 0.3s ease;"></div>
+                </div>
+                <div class="progress-details" style="display: flex; justify-content: space-between; margin-top: 8px;">
+                    <span class="progress-filename" id="progress-filename" style="font-size: 12px; color: #6c757d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 70%;">
+                        Menyiapkan upload...
+                    </span>
+                    <span class="progress-stats" id="progress-stats" style="font-size: 12px; color: #6c757d;">
+                        <span id="current-file">0</span> dari <span id="total-files">0</span> file
+                    </span>
+                </div>
+            </div>
+
+            <!-- File Preview -->
+            <div id="file-preview" class="mt-4" style="display: none;">
+                <h6 style="font-weight: 600; color: #333; margin-bottom: 15px;">
+                    <i class="fas fa-paperclip"></i> File yang akan diupload:
+                    <span id="file-count" style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 5px;">0</span>
+                </h6>
+                <div id="files-list" class="files-list"></div>
+            </div>
+            
+            <!-- Validation Message -->
+            <div id="validation-message" class="validation-message mt-3" style="display: none; padding: 12px; border-radius: 6px; border: 1px solid #ddd;">
+                <div style="display: flex; align-items: center;">
+                    <i id="validation-icon" class="fas mr-2"></i>
+                    <span id="validation-text"></span>
+                </div>
             </div>
         </div>
     </div>
 </fieldset>
+
+<!-- CSS untuk Upload Zone -->
+<style>
+.drop-zone {
+    border: 2px dashed #17a2b8;
+    border-radius: 12px;
+    padding: 60px 40px;
+    text-align: center;
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.drop-zone.dragover {
+    background: #e7f5f8;
+    border-color: #0c5460;
+    transform: scale(1.02);
+}
+
+.drop-zone-content {
+    pointer-events: none;
+}
+
+.upload-icon {
+    font-size: 80px;
+    color: #6c757d;
+    margin-bottom: 20px;
+    opacity: 0.7;
+}
+
+.drop-text {
+    font-size: 18px;
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.drop-or {
+    font-size: 14px;
+    color: #6c757d;
+    margin: 15px 0;
+}
+
+.choose-file-btn {
+    background: #17a2b8;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    pointer-events: all;
+}
+
+.choose-file-btn:hover {
+    background: #138496;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.file-item:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: #17a2b8;
+}
+
+.file-icon {
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    border-radius: 8px;
+    margin-right: 15px;
+}
+
+.file-icon i {
+    font-size: 22px;
+}
+
+.file-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.file-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-size {
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.file-remove {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-remove:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+.btn-show-files {
+    background: transparent;
+    border: 1px solid #17a2b8;
+    color: #17a2b8;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-show-files:hover {
+    background: #17a2b8;
+    color: white;
+}
+
+.validation-message {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Progress Bar Styles - BARU DITAMBAHKAN */
+.upload-progress-container {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.progress-bar-fill {
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: linear-gradient(
+        -45deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 50px 50px;
+    animation: move 2s linear infinite;
+}
+
+@keyframes move {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 50px 50px;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .drop-zone {
+        padding: 40px 20px;
+    }
+    
+    .upload-icon {
+        font-size: 60px;
+    }
+    
+    .drop-text {
+        font-size: 16px;
+    }
+    
+    .progress-details {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .progress-filename {
+        max-width: 100% !important;
+    }
+}
+</style>
+
+<script>
+// ========================================
+// DRAG & DROP FILE UPLOAD DENGAN VALIDASI DAN PROGRESS BAR
+// ========================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const filesList = document.getElementById('files-list');
+    const filePreview = document.getElementById('file-preview');
+    const fileCount = document.getElementById('file-count');
+    const validationMessage = document.getElementById('validation-message');
+    const validationIcon = document.getElementById('validation-icon');
+    const validationText = document.getElementById('validation-text');
+    const nextBtn = document.querySelector('.next-btn');
+    
+    // Elemen progress bar - BARU DITAMBAHKAN
+    const uploadProgressBar = document.getElementById('upload-progress-bar');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const progressPercentage = document.getElementById('progress-percentage');
+    const progressFilename = document.getElementById('progress-filename');
+    const progressStats = document.getElementById('progress-stats');
+    const currentFileElement = document.getElementById('current-file');
+    const totalFilesElement = document.getElementById('total-files');
+    
+    // Array untuk menyimpan file
+    let selectedFiles = [];
+    
+    // Event Listeners untuk Drag & Drop
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.style.background = '#e7f5f8';
+        dropZone.style.borderColor = '#0c5460';
+        dropZone.style.transform = 'scale(1.02)';
+    });
+    
+    dropZone.addEventListener('dragleave', function() {
+        dropZone.style.background = '#f8f9fa';
+        dropZone.style.borderColor = '#17a2b8';
+        dropZone.style.transform = 'scale(1)';
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.style.background = '#f8f9fa';
+        dropZone.style.borderColor = '#17a2b8';
+        dropZone.style.transform = 'scale(1)';
+        
+        const files = e.dataTransfer.files;
+        handleFiles(files);
+    });
+    
+    // Event Listener untuk file input
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+    
+    // Fungsi untuk menangani file dengan progress bar
+    function handleFiles(files) {
+        const newFiles = Array.from(files);
+        const validFiles = [];
+        
+        // Validasi awal sebelum upload
+        newFiles.forEach(file => {
+            // Validasi ukuran file (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showValidation(`File "${file.name}" melebihi 10MB`, 'error');
+                return;
+            }
+            
+            // Validasi tipe file
+            const validExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx', '.xls', '.xlsx'];
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            
+            if (!validExtensions.includes(fileExtension)) {
+                showValidation(`Format file "${file.name}" tidak didukung`, 'error');
+                return;
+            }
+            
+            validFiles.push(file);
+        });
+        
+        if (validFiles.length === 0) {
+            return;
+        }
+        
+        // Tampilkan progress bar
+        showUploadProgress(validFiles);
+        
+        // Simulasi upload dengan progress bar
+        simulateUploadWithProgress(validFiles);
+    }
+    
+    // Fungsi untuk menampilkan progress bar - BARU DITAMBAHKAN
+    function showUploadProgress(files) {
+        uploadProgressBar.style.display = 'block';
+        progressBarFill.style.width = '0%';
+        progressPercentage.textContent = '0%';
+        progressFilename.textContent = 'Mempersiapkan upload...';
+        currentFileElement.textContent = '0';
+        totalFilesElement.textContent = files.length;
+        
+        // Animate progress bar
+        progressBarFill.style.animation = 'move 2s linear infinite';
+    }
+    
+    // Fungsi untuk mensimulasikan upload dengan progress bar - BARU DITAMBAHKAN
+    function simulateUploadWithProgress(files) {
+        let uploadedCount = 0;
+        const totalFiles = files.length;
+        
+        // Update progress stats
+        progressStats.textContent = `0 dari ${totalFiles} file`;
+        
+        // Simulasi upload setiap file
+        files.forEach((file, index) => {
+            setTimeout(() => {
+                // Update progress untuk file saat ini
+                progressFilename.textContent = `Mengupload: ${file.name}`;
+                currentFileElement.textContent = (index + 1).toString();
+                
+                // Simulasi waktu upload berdasarkan ukuran file
+                const fileSizeMB = file.size / (1024 * 1024);
+                const uploadTime = Math.min(2000, Math.max(500, fileSizeMB * 500)); // 500ms per MB, min 500ms, max 2000ms
+                
+                // Simulasi progress untuk file ini
+                let fileProgress = 0;
+                const fileInterval = setInterval(() => {
+                    fileProgress += 5;
+                    const overallProgress = Math.floor(((index + fileProgress / 100) / totalFiles) * 100);
+                    
+                    // Update progress bar
+                    progressBarFill.style.width = overallProgress + '%';
+                    progressPercentage.textContent = overallProgress + '%';
+                    
+                    if (fileProgress >= 100) {
+                        clearInterval(fileInterval);
+                        uploadedCount++;
+                        
+                        // Tambahkan file ke array setelah "upload selesai"
+                        selectedFiles.push(file);
+                        
+                        // Update tampilan setelah semua file selesai
+                        if (uploadedCount === totalFiles) {
+                            setTimeout(() => {
+                                // Sembunyikan progress bar
+                                uploadProgressBar.style.display = 'none';
+                                progressBarFill.style.animation = '';
+                                
+                                // Update tampilan file
+                                updateFileList();
+                                updateButtonState();
+                                
+                                // Tampilkan pesan sukses
+                                showValidation(`${totalFiles} file berhasil diupload`, 'success');
+                            }, 500);
+                        } else {
+                            // Update untuk file berikutnya
+                            const nextIndex = index + 1;
+                            if (nextIndex < totalFiles) {
+                                progressFilename.textContent = `Mengupload: ${files[nextIndex].name}`;
+                            }
+                        }
+                    }
+                }, uploadTime / 20); // Bagi waktu upload menjadi 20 bagian
+            }, index * 300); // Delay antar file
+        });
+    }
+    
+    // Fungsi untuk menyembunyikan progress bar - BARU DITAMBAHKAN
+    function hideUploadProgress() {
+        uploadProgressBar.style.display = 'none';
+        progressBarFill.style.animation = '';
+    }
+    
+    // Fungsi untuk update daftar file
+    function updateFileList() {
+        filesList.innerHTML = '';
+        
+        if (selectedFiles.length === 0) {
+            filePreview.style.display = 'none';
+            return;
+        }
+        
+        filePreview.style.display = 'block';
+        fileCount.textContent = selectedFiles.length;
+        
+        selectedFiles.forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'file-item';
+            
+            // Get file icon based on extension
+            const ext = file.name.split('.').pop().toLowerCase();
+            let icon = 'fa-file';
+            let iconColor = '#6c757d';
+            
+            if (['pdf'].includes(ext)) {
+                icon = 'fa-file-pdf';
+                iconColor = '#dc3545';
+            } else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) {
+                icon = 'fa-file-image';
+                iconColor = '#17a2b8';
+            } else if (['doc', 'docx'].includes(ext)) {
+                icon = 'fa-file-word';
+                iconColor = '#2b579a';
+            } else if (['xls', 'xlsx'].includes(ext)) {
+                icon = 'fa-file-excel';
+                iconColor = '#217346';
+            }
+            
+            fileItem.innerHTML = `
+                <div class="file-icon" style="background: ${iconColor + '20'};">
+                    <i class="fas ${icon}" style="color: ${iconColor};"></i>
+                </div>
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                </div>
+                <button type="button" class="file-remove" onclick="removeFile(${index})" title="Hapus file">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            filesList.appendChild(fileItem);
+        });
+    }
+    
+    // Fungsi untuk menghapus file
+    window.removeFile = function(index) {
+        if (confirm('Hapus file ini?')) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            updateButtonState();
+            showValidation('File berhasil dihapus', 'info');
+        }
+    };
+    
+    // Fungsi untuk format ukuran file
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Fungsi untuk menampilkan pesan validasi
+    function showValidation(message, type = 'info') {
+        validationMessage.style.display = 'block';
+        validationText.textContent = message;
+        
+        // Set icon dan warna berdasarkan tipe
+        switch(type) {
+            case 'success':
+                validationIcon.className = 'fas fa-check-circle';
+                validationMessage.style.background = '#d4edda';
+                validationMessage.style.borderColor = '#c3e6cb';
+                validationMessage.style.color = '#155724';
+                break;
+            case 'error':
+                validationIcon.className = 'fas fa-exclamation-triangle';
+                validationMessage.style.background = '#f8d7da';
+                validationMessage.style.borderColor = '#f5c6cb';
+                validationMessage.style.color = '#721c24';
+                break;
+            case 'info':
+                validationIcon.className = 'fas fa-info-circle';
+                validationMessage.style.background = '#d1ecf1';
+                validationMessage.style.borderColor = '#bee5eb';
+                validationMessage.style.color = '#0c5460';
+                break;
+        }
+        
+        // Auto hide setelah 5 detik
+        setTimeout(() => {
+            validationMessage.style.display = 'none';
+        }, 5000);
+    }
+    
+    // Fungsi untuk update state tombol
+    function updateButtonState() {
+        if (!nextBtn) return;
+        
+        const isValid = selectedFiles.length >= 1;
+        
+        if (isValid) {
+            nextBtn.disabled = false;
+            nextBtn.style.cursor = 'pointer';
+            nextBtn.style.opacity = '1';
+            nextBtn.style.background = '#28a745';
+            nextBtn.style.borderColor = '#28a745';
+        } else {
+            nextBtn.disabled = true;
+            nextBtn.style.cursor = 'not-allowed';
+            nextBtn.style.opacity = '0.6';
+            nextBtn.style.background = '#6c757d';
+            nextBtn.style.borderColor = '#6c757d';
+        }
+    }
+    
+    // Fungsi untuk validasi step 3
+    function validateStep3() {
+        if (selectedFiles.length === 0) {
+            showValidation('Minimal upload 1 file eviden sebelum melanjutkan', 'error');
+            
+            // Highlight drop zone
+            dropZone.style.animation = 'pulse 0.5s 3';
+            setTimeout(() => {
+                dropZone.style.animation = '';
+            }, 1500);
+            
+            return false;
+        }
+        
+        // Validasi tambahan: total ukuran file tidak melebihi 50MB
+        const totalSize = selectedFiles.reduce((total, file) => total + file.size, 0);
+        if (totalSize > 50 * 1024 * 1024) {
+            showValidation('Total ukuran file melebihi 50MB', 'error');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    // Update hidden input dengan file yang dipilih
+    function updateFormFiles() {
+        // Hapus file input lama
+        const dataTransfer = new DataTransfer();
+        
+        // Tambahkan semua file ke DataTransfer
+        selectedFiles.forEach(file => {
+            dataTransfer.items.add(file);
+        });
+        
+        // Update file input
+        fileInput.files = dataTransfer.files;
+    }
+    
+    // Event listener untuk tombol next di step 3
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            const stepUploadFieldset = document.getElementById('step-upload');
+            
+            // Cek apakah sedang di step upload
+            if (stepUploadFieldset && stepUploadFieldset.classList.contains('active')) {
+                // Update form files terlebih dahulu
+                updateFormFiles();
+                
+                // Validasi step 3
+                if (!validateStep3()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                
+                console.log('✅ Step 3 validated:', selectedFiles.length, 'files');
+            }
+        });
+    }
+    
+    // Initialize button state
+    updateButtonState();
+    
+    console.log('✅ Drag & Drop upload dengan progress bar initialized');
+});
+
+// CSS Animation untuk pulse effect
+const style = document.createElement('style');
+style.textContent = `
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+`;
+document.head.appendChild(style);
+</script>
 
 <!-- Modal Preview File - PDF Viewer Style -->
 <div id="file-preview-modal" class="file-preview-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #202124; z-index: 10000;">
@@ -3364,6 +4321,10 @@ UPLOADCARE_PUBLIC_KEY = "3438a2ee1b7dd183914c";
         justify-content: flex-end;
         gap: 5px;
         margin-top: 8px;
+    }
+    
+    .upload-progress-container {
+        padding: 12px !important;
     }
 }
 </style>
@@ -3830,7 +4791,7 @@ document.addEventListener("DOMContentLoaded", function () {
             multipleMin: 1,
             previewStep: true,
             tabs: "file url camera dropbox gdrive",
-            publicKey: "3438a2ee1b7dd183914c",
+            publicKey: "48f975cd90d221e0ee3",
             imagesOnly: false,
             clearable: true
         });
@@ -3930,10 +4891,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Event listener untuk tombol upload
-    uploadBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        openUploadPanel();
-    });
+    if (uploadBtn) {
+        uploadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openUploadPanel();
+        });
+    }
 
     // ========================================
     // FORM NAVIGATION DENGAN VALIDASI KONSISTEN
@@ -3979,10 +4942,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     validationMessage.style.display = 'flex';
                     
                     // Highlight upload button
-                    uploadBtn.classList.add('pulse-animation');
-                    setTimeout(() => {
-                        uploadBtn.classList.remove('pulse-animation');
-                    }, 2000);
+                    if (uploadBtn) {
+                        uploadBtn.classList.add('pulse-animation');
+                        setTimeout(() => {
+                            uploadBtn.classList.remove('pulse-animation');
+                        }, 2000);
+                    }
                     
                     // Scroll ke validation message
                     validationMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -4226,13 +5191,13 @@ if (msform) {
         });
         var dateToday = new Date();
         $(document).ready(function() {
-            $(function() {
-                $("#datepicker2").datepicker({
-                    minDate: -49,
-                    maxDate: 180,
-                    dateFormat: 'dd-mm-yy'
+                $(function() {
+                    $("#datepicker2").datepicker({
+                        minDate: -49,
+                        maxDate: 180,
+                        dateFormat: 'dd-mm-yy'
+                    });
                 });
-            });
             $(function() {
                 $("#datepicker3").datepicker({
                     minDate: -49,
@@ -5639,92 +6604,42 @@ function validateStep1() {
     
     return isValid;
 }
-
-// Fungsi untuk validasi Step 2
-function validateStep2() {
+// Fungsi untuk mengecek apakah Step 2 valid
+function checkStep2Validity() {
     let isValid = true;
-    let errorMessages = [];
     
-    // Validasi Nama Kegiatan
+    // Cek Nama Kegiatan
     const namaKegiatan = $('#nama_kegiatan').val().trim();
     if (!namaKegiatan) {
-        errorMessages.push('❌ Nama Kegiatan harus diisi');
-        $('#nama_kegiatan').addClass('is-invalid');
         isValid = false;
-    } else {
-        $('#nama_kegiatan').removeClass('is-invalid');
     }
     
-    // Validasi Jenis Tanggal
+    // Cek Jenis Tanggal
     const jenisDate = $('#jenis_date').val();
     if (!jenisDate || jenisDate === '') {
-        errorMessages.push('❌ Tanggal Pengajuan harus dipilih');
-        $('#jenis_date').addClass('is-invalid');
         isValid = false;
     } else {
-        $('#jenis_date').removeClass('is-invalid');
-        
-        // Validasi berdasarkan jenis tanggal
+        // Cek berdasarkan jenis tanggal
         if (jenisDate === 'Periode') {
             const periodeValue = $('#periode_value').val();
             if (!periodeValue || periodeValue === '') {
-                errorMessages.push('❌ Periode harus dipilih');
-                $('#periode_value').addClass('is-invalid');
                 isValid = false;
-            } else {
-                $('#periode_value').removeClass('is-invalid');
             }
         } else if (jenisDate === 'Custom') {
-            // Validasi tanggal custom
             const tanggalAwal = $('#tanggal_awal_kegiatan').val();
             const tanggalAkhir = $('#tanggal_akhir_kegiatan').val();
             
-            if (!tanggalAwal) {
-                errorMessages.push('❌ Tanggal Awal Kegiatan harus diisi');
-                $('#datepicker').addClass('is-invalid');
+            if (!tanggalAwal || !tanggalAkhir) {
                 isValid = false;
-            } else {
-                $('#datepicker').removeClass('is-invalid');
-            }
-            
-            if (!tanggalAkhir) {
-                errorMessages.push('❌ Tanggal Akhir Kegiatan harus diisi');
-                $('#datepicker').addClass('is-invalid');
-                isValid = false;
-            } else {
-                $('#datepicker').removeClass('is-invalid');
             }
         }
     }
     
-    // Validasi Tempat Kegiatan
-    const tempatKegiatan = $('input[name="tempat_kegiatan"]').val().trim();
-    if (!tempatKegiatan) {
-        errorMessages.push('❌ Tempat Kegiatan harus diisi');
-        $('input[name="tempat_kegiatan"]').addClass('is-invalid');
-        isValid = false;
-    } else {
-        $('input[name="tempat_kegiatan"]').removeClass('is-invalid');
-    }
-    
-    // Validasi Penyelenggara
-    const penyelenggara = $('input[name="penyelenggara"]').val().trim();
-    if (!penyelenggara) {
-        errorMessages.push('❌ Penyelenggara harus diisi');
-        $('input[name="penyelenggara"]').addClass('is-invalid');
-        isValid = false;
-    } else {
-        $('input[name="penyelenggara"]').removeClass('is-invalid');
-    }
-    
-    // Tampilkan pesan error jika ada
-    if (!isValid) {
-        showValidationAlert(errorMessages);
-    }
+    // HAPUS validasi Tempat Kegiatan dan Penyelenggara
+    // Field ini sekarang opsional, tidak perlu divalidasi
     
     return isValid;
 }
-
 // Fungsi untuk validasi Step 3
 function validateStep3() {
     // Step 3 selalu valid karena upload file bersifat opsional
@@ -5857,7 +6772,323 @@ opacity: 1;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-
+<script>
+// ========================================
+// MULTI-STEP FORM NAVIGATION - FIXED
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Initializing multi-step form...');
+    
+    const fieldsets = document.querySelectorAll('fieldset');
+    const nextBtn = document.querySelector('.next-btn');
+    const prevBtn = document.querySelector('.prev-btn');
+    const progressBar = document.getElementById('progressBar');
+    const currentStepSpan = document.getElementById('currentStep');
+    const totalStepsSpan = document.getElementById('totalSteps');
+    
+    let currentStep = 0;
+    const totalSteps = fieldsets.length;
+    
+    // Set total steps
+    if (totalStepsSpan) {
+        totalStepsSpan.textContent = totalSteps;
+    }
+    
+    // Update progress bar
+    function updateProgress() {
+        const percent = ((currentStep + 1) / totalSteps) * 100;
+        
+        if (progressBar) {
+            progressBar.style.width = percent + '%';
+        }
+        
+        if (currentStepSpan) {
+            currentStepSpan.textContent = currentStep + 1;
+        }
+        
+        // Toggle prev button
+        if (prevBtn) {
+            prevBtn.style.display = currentStep > 0 ? 'inline-block' : 'none';
+        }
+        
+        // Update next button text
+        if (nextBtn) {
+            const nextBtnText = document.getElementById('next-btn-text');
+            if (currentStep === totalSteps - 1) {
+                if (nextBtnText) {
+                    nextBtnText.textContent = 'Finish';
+                } else {
+                    nextBtn.textContent = 'Finish';
+                }
+                nextBtn.classList.remove('btn-primary');
+                nextBtn.classList.add('btn-success');
+            } else {
+                if (nextBtnText) {
+                    nextBtnText.textContent = 'Continue';
+                } else {
+                    nextBtn.textContent = 'Continue';
+                }
+                nextBtn.classList.remove('btn-success');
+                nextBtn.classList.add('btn-primary');
+            }
+        }
+        
+        console.log('📊 Step:', currentStep + 1, '/', totalSteps);
+    }
+    
+    // Validasi Step 1
+    function validateStep1() {
+        const jenisPengajuan = document.getElementById('jenis_pengajuan').value;
+        const lingkupPenugasan = document.getElementById('lingkup_penugasan').value;
+        
+        if (!jenisPengajuan || jenisPengajuan === '') {
+            alert('❌ Pilih Jenis Pengajuan terlebih dahulu!');
+            return false;
+        }
+        
+        if (!lingkupPenugasan || lingkupPenugasan === '') {
+            alert('❌ Pilih Status Kepegawaian terlebih dahulu!');
+            return false;
+        }
+        
+        // Validasi jenis penugasan
+        if (jenisPengajuan === 'Perorangan') {
+            const jenisPenugasanPerorangan = document.getElementById('jenis_penugasan_perorangan').value;
+            if (!jenisPenugasanPerorangan || jenisPenugasanPerorangan === '') {
+                alert('❌ Pilih Jenis Penugasan terlebih dahulu!');
+                return false;
+            }
+        } else if (jenisPengajuan === 'Kelompok') {
+            const jenisPenugasanKelompok = document.getElementById('jenis_penugasan_kelompok').value;
+            if (!jenisPenugasanKelompok || jenisPenugasanKelompok === '') {
+                alert('❌ Pilih Jenis Penugasan terlebih dahulu!');
+                return false;
+            }
+        }
+        
+        // Validasi minimal 1 dosen dengan data lengkap
+        const panitiaRows = document.querySelectorAll('.panitia-row');
+        let hasValidDosen = false;
+        
+        panitiaRows.forEach(row => {
+            const nip = row.querySelector('.nip-input').value.trim();
+            const nama = row.querySelector('.nama-dosen-input').value.trim();
+            const jabatan = row.querySelector('.jabatan-input').value.trim();
+            const kaprodi = row.querySelector('.kaprodi-input').value.trim();
+            
+            if (nip && nama && jabatan && kaprodi) {
+                hasValidDosen = true;
+            }
+        });
+        
+        if (!hasValidDosen) {
+            alert('❌ Minimal harus ada 1 dosen dengan data lengkap (NIP, Nama, Jabatan, Kaprodi)!');
+            return false;
+        }
+        
+        console.log('✅ Step 1 validation passed');
+        return true;
+    }
+    
+    // Validasi Step 2 - LEBIH PERMISIF
+    function validateStep2() {
+        const namaKegiatan = document.getElementById('nama_kegiatan').value.trim();
+        const jenisDate = document.getElementById('jenis_date').value;
+        
+        if (!namaKegiatan) {
+            alert('❌ Nama Kegiatan harus diisi!');
+            document.getElementById('nama_kegiatan').focus();
+            return false;
+        }
+        
+        if (!jenisDate || jenisDate === '') {
+            alert('❌ Pilih Jenis Tanggal terlebih dahulu!');
+            document.getElementById('jenis_date').focus();
+            return false;
+        }
+        
+        // Validasi berdasarkan jenis tanggal
+        if (jenisDate === 'Custom') {
+            const tanggalAwal = document.getElementById('tanggal_awal_kegiatan').value;
+            const tanggalAkhir = document.getElementById('tanggal_akhir_kegiatan').value;
+            
+            if (!tanggalAwal || !tanggalAkhir) {
+                alert('❌ Pilih tanggal awal dan akhir kegiatan!');
+                return false;
+            }
+        } else if (jenisDate === 'Periode') {
+            const periodeValue = document.getElementById('periode_value').value;
+            
+            if (!periodeValue || periodeValue === '') {
+                alert('❌ Pilih Periode terlebih dahulu!');
+                document.getElementById('periode_value').focus();
+                return false;
+            }
+        }
+        
+        // FIELD OPSIONAL - TIDAK PERLU VALIDASI
+        // - Tempat Kegiatan
+        // - Penyelenggara
+        
+        console.log('✅ Step 2 validation passed');
+        return true;
+    }
+    
+    // Validasi Step 3
+    function validateStep3() {
+        const fileInput = document.getElementById('file-input');
+        
+        // Cek apakah ada file yang dipilih
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+            // Cek dari selectedFiles global variable
+            if (typeof selectedFiles === 'undefined' || selectedFiles.length === 0) {
+                alert('❌ Minimal upload 1 file eviden sebelum submit!');
+                return false;
+            }
+        }
+        
+        console.log('✅ Step 3 validation passed');
+        return true;
+    }
+    
+    // Next Button Handler
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            console.log('🔘 Next button clicked - Current step:', currentStep + 1);
+            
+            // Validasi step saat ini
+            let isValid = true;
+            
+            if (currentStep === 0) {
+                isValid = validateStep1();
+            } else if (currentStep === 1) {
+                isValid = validateStep2();
+            } else if (currentStep === 2) {
+                isValid = validateStep3();
+            }
+            
+            if (!isValid) {
+                console.log('❌ Validation failed for step', currentStep + 1);
+                return;
+            }
+            
+            // Jika belum step terakhir, pindah ke step berikutnya
+            if (currentStep < totalSteps - 1) {
+                fieldsets[currentStep].classList.remove('active');
+                currentStep++;
+                fieldsets[currentStep].classList.add('active');
+                updateProgress();
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                console.log('➡️ Moved to step', currentStep + 1);
+            } else {
+                // Step terakhir - submit form
+                console.log('📤 Submitting form...');
+                
+                const form = document.getElementById('msform');
+                if (form) {
+                    // Tampilkan loading screen jika ada
+                    const loadingScreen = document.getElementById('loading-screen');
+                    if (loadingScreen) {
+                        loadingScreen.style.display = 'flex';
+                        setTimeout(() => {
+                            loadingScreen.style.opacity = '1';
+                        }, 10);
+                    }
+                    
+                    form.submit();
+                }
+            }
+        });
+    }
+    
+    // Previous Button Handler
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            if (currentStep > 0) {
+                fieldsets[currentStep].classList.remove('active');
+                currentStep--;
+                fieldsets[currentStep].classList.add('active');
+                updateProgress();
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                console.log('⬅️ Moved back to step', currentStep + 1);
+            }
+        });
+    }
+    
+    // Initialize
+    updateProgress();
+    
+    console.log('✅ Multi-step form initialized');
+});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hapus semua span dengan warna merah (#dc3545) di dalam label
+        const labels = document.querySelectorAll('label');
+        labels.forEach(label => {
+            const spans = label.querySelectorAll('span');
+            spans.forEach(span => {
+                if (span.style.color === 'rgb(220, 53, 69)' || 
+                    span.style.color === '#dc3545' ||
+                    span.textContent === '*') {
+                    span.style.display = 'none';
+                     span.remove();
+                }
+            });
+        });
+        
+        console.log('✅ Semua bintang merah telah disembunyikan');
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+    // Hapus semua tanda bintang
+    setTimeout(function() {
+        // Method 1: Hapus span dengan bintang
+        document.querySelectorAll('label span').forEach(span => {
+            if (span.textContent.includes('*') || 
+                span.style.color === '#dc3545' || 
+                span.style.color === 'rgb(220, 53, 69)' ||
+                span.classList.contains('text-danger')) {
+                span.remove();
+            }
+        });
+        
+        // Method 2: Hapus konten after dari label
+        const style = document.createElement('style');
+        style.textContent = `
+            label::after {
+                content: "" !important;
+                display: none !important;
+            }
+            label span {
+                display: none !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Method 3: Iterasi semua label
+        document.querySelectorAll('label').forEach(label => {
+            let html = label.innerHTML;
+            // Hapus semua <span> yang mengandung bintang atau warna merah
+            html = html.replace(/<span[^>]*>[\s\S]*?\*[\s\S]*?<\/span>/g, '');
+            html = html.replace(/<span[^>]*style=["'][^"']*color.*?#dc3545[^"']*["'][^>]*>[\s\S]*?<\/span>/g, '');
+            html = html.replace(/\*/g, '');
+            label.innerHTML = html;
+        });
+        
+        console.log('✅ Semua tanda bintang telah dihapus');
+    }, 500);
+});
+</script>
 </body>
 
 </html>
