@@ -112,7 +112,6 @@ class Kaprodi extends CI_Controller
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->or_like('nama_dosen', $search);
             $this->db->group_end();
         }
 
@@ -293,7 +292,6 @@ class Kaprodi extends CI_Controller
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->or_like('nama_dosen', $search);
             $this->db->group_end();
         }
 
@@ -357,7 +355,6 @@ class Kaprodi extends CI_Controller
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->or_like('nama_dosen', $search);
             $this->db->group_end();
         }
 
@@ -421,7 +418,6 @@ class Kaprodi extends CI_Controller
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->or_like('nama_dosen', $search);
             $this->db->group_end();
         }
 
@@ -547,7 +543,6 @@ class Kaprodi extends CI_Controller
             $this->db->like('nama_kegiatan', $search);
             $this->db->or_like('penyelenggara', $search);
             $this->db->or_like('jenis_pengajuan', $search);
-            $this->db->or_like('nama_dosen', $search);
             $this->db->group_end();
         }
 
