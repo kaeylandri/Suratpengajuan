@@ -893,6 +893,133 @@
     align-items: center;
     gap: 5px;
 }
+/* ============================================
+   RETURN MODAL STYLES (MIRIP SEPERTI REJECT/APPROVE MODAL)
+================================= */
+.return-modal-content {
+    background: white;
+    padding: 0;
+    border-radius: 15px;
+    max-width: 550px;
+    width: 95%;
+    max-height: 85vh;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.return-modal-body {
+    padding: 25px;
+}
+
+.return-modal-header {
+    background: #ff9800;
+    color: white;
+    padding: 20px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 15px 15px 0 0;
+}
+
+.return-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.return-info-box {
+    background: #fff3e0;
+    border: 1px solid #ffb74d;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.return-info-box strong {
+    color: #ff9800;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.return-info-box span {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.return-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.return-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.return-btn-cancel {
+    background: #95a5a6;
+    color: white;
+}
+
+.return-btn-cancel:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+.return-btn-submit {
+    background: #ff9800;
+    color: white;
+}
+
+.return-btn-submit:hover {
+    background: #f57c00;
+    transform: translateY(-2px);
+}
+
+/* Textarea khusus untuk return modal */
+.return-textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #ffcc80;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.return-textarea:focus {
+    outline: none;
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+}
+
+.return-textarea::placeholder {
+    color: #bdc3c7;
+}
+
+.return-form-hint {
+    color: #ff9800;
+    font-size: 12px;
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
 </style>
 </head>
 <body>
@@ -1056,101 +1183,7 @@
     </div>
 </div>
 
-    <!-- Tabel -->
-    <div class="card">
-        <div class="card-header">
-            <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Surat</h3>
-            <div>
-                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">Menampilkan: Semua Data (<?= $total_all ?> data)</span>
-            </div>
-        </div>
-        
-        <div style="overflow-x:auto">
-            <table>
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Kegiatan</th>
-                        <th>Penyelenggara</th>
-                        <th>Tanggal Pengajuan</th>
-                        <th>Tanggal Kegiatan</th>
-                        <th>Jenis</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <?php if(isset($surat_list) && !empty($surat_list)): $no=1; foreach($surat_list as $s): 
-                       // Tentukan warna berdasarkan kata kunci
-
-                        $st_l = strtolower($s['status']); // Pastikan ini sudah didefinisikan sebelumnya
-
-                        if (strpos($st_l, 'setuju') !== false || strpos($st_l, 'disetujui') !== false) {
-                            $st_key = 'approved';
-                            $badge = '<span class="badge badge-approved">'.ucwords($s['status']).'</span>';
-
-                        } elseif (strpos($st_l, 'tolak') !== false || strpos($st_l, 'ditolak') !== false) {
-                            $st_key = 'rejected';
-                            $badge = '<span class="badge badge-rejected">'.ucwords($s['status']).'</span>';
-
-                        } else {
-                            // selain itu dianggap pending atau proses
-                            $st_key = 'pending';
-                            $badge = '<span class="badge badge-pending">'.ucwords($s['status']).'</span>';
-                        }
-
-                       
-                        $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
-                        $tgl_kegiatan = isset($s['tanggal_kegiatan']) && $s['tanggal_kegiatan'] ? date('d M Y', strtotime($s['tanggal_kegiatan'])) : '-';
-                    ?>
-                    <tr onclick="showRowDetail(<?= $s['id'] ?>)" style="cursor: pointer;" class="clickable-row">
-                        <td><?= $no++ ?></td>
-                        <td><strong><?= htmlspecialchars($s['nama_kegiatan']) ?></strong></td>
-                        <td><?= htmlspecialchars($s['penyelenggara']) ?></td>
-                        <td><?= $tgl_pengajuan ?></td>
-                        <td><?= $tgl_kegiatan ?></td>
-                        <td><?= htmlspecialchars($s['jenis_pengajuan']) ?></td>
-                        <td><?= $badge ?></td>
-                        <!-- Di bagian tabel, ganti tombol status menjadi tombol eviden -->
-                        <td>
-                            <div style="display:flex;gap:6px">
-                                <button class="btn btn-eviden" onclick="event.stopPropagation(); showEvidenModal(<?= $s['id']; ?>)" title="Lihat Eviden">
-                                    <i class="fas fa-file-image"></i>
-                                </button>
-                                
-                                <!-- Tombol Lihat Detail -->
-                                <button class="btn btn-detail" onclick="event.stopPropagation(); showDetail(<?= $s['id']?>)" title="Lihat Detail">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                                
-                                <?php if($s['status']== 'disetujui sekretariat'): ?>
-                                    <button class="btn btn-approve" onclick="event.stopPropagation(); showApproveModal(<?= $s['id'] ?>)" title="Setujui">
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModalNew(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'])) ?>')" title="Tolak">
-                                    <i class="fa-solid fa-times"></i>
-                                </button>
-                                    <?php elseif(in_array($s['status'], ['disetujui dekan', 'ditolak dekan'])): ?>
-                                    <!-- Tombol Return: Kembalikan ke status awal -->
-                                    <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModal(<?= $s['id'] ?>, '<?= htmlspecialchars($s['nama_kegiatan'], ENT_QUOTES) ?>')" title="Kembalikan Pengajuan">
-                                        <i class="fa-solid fa-undo"></i>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; else: ?>
-                    <tr id="emptyRow">
-                        <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
-                            <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
-                            <strong>Belum ada pengajuan</strong>
-                        </td>
-                    </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    
 </div>
 
 <!-- Preview Modal -->
@@ -1167,7 +1200,7 @@
 </div>
 
 <!-- Detail Modal -->
-<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
+<div id="detailModal" class="modal">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
@@ -1180,7 +1213,7 @@
 </div>
 
 <!-- Approve Modal -->
-<div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
+<div id="approveModal" class="modal">
     <div class="approve-modal-content" onclick="event.stopPropagation()">
         <div class="approve-modal-header">
             <h3><i class="fa-solid fa-check-circle"></i> Konfirmasi Persetujuan</h3>
@@ -1214,7 +1247,7 @@
 </div>
 
 <!-- Reject Modal (BARU - MIRIP SEPERTI APPROVE MODAL) -->
-<div id="rejectConfirmModal" class="modal" onclick="modalClickOutside(event,'rejectConfirmModal')">
+<div id="rejectConfirmModal" class="modal">
     <div class="reject-modal-content" onclick="event.stopPropagation()">
         <div class="reject-modal-header">
             <h3><i class="fa-solid fa-ban"></i> Konfirmasi Penolakan</h3>
@@ -1261,7 +1294,7 @@
 </div>
 
 <!-- Success Result Modal untuk Reject -->
-<div id="successRejectModal" class="modal" onclick="modalClickOutside(event,'successRejectModal')">
+<div id="successRejectModal" class="modal">
     <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #e74c3c;">
             <h3><i class="fa-solid fa-ban"></i> <span id="successRejectTitle">Pengajuan Berhasil Ditolak</span></h3>
@@ -1288,9 +1321,6 @@
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#e74c3c;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
                 <button class="btn-bulk" onclick="closeModal('successRejectModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
@@ -1299,7 +1329,7 @@
     </div>
 </div>
 <!-- Success Result Modal - DIUBAH SEPERTI DI HALAMAN PENDING -->
-<div id="successResultModal" class="modal" onclick="modalClickOutside(event,'successResultModal')">
+<div id="successResultModal" class="modal">
     <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
         <div class="modal-header" style="background: #27ae60;">
             <h3><i class="fa-solid fa-check-circle"></i> <span id="successResultTitle">Pengajuan Berhasil Disetujui</span></h3>
@@ -1326,9 +1356,6 @@
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
                 <button class="btn-bulk" onclick="closeModal('successResultModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
@@ -1349,40 +1376,72 @@
         </div>
     </div>
 </div>
-<!-- Return Modal -->
-<div id="returnModal" class="modal" onclick="modalClickOutside(event,'returnModal')">
+<!-- Return Modal (SEDERHANA TANPA CATATAN) -->
+<div id="returnConfirmModal" class="modal">
     <div class="approve-modal-content" onclick="event.stopPropagation()">
         <div class="approve-modal-header" style="background: #ff9800;">
-            <h3><i class="fa-solid fa-undo"></i> Kembalikan Pengajuan</h3>
-            <button class="close-modal" onclick="closeModal('returnModal')">&times;</button>
+            <h3><i class="fa-solid fa-undo"></i> Konfirmasi Pengembalian</h3>
+            <button class="close-modal" onclick="closeModal('returnConfirmModal')">&times;</button>
         </div>
         <div class="approve-modal-body">
             <div class="approve-info-box" style="background: #fff3e0; border-color: #ff9800;">
                 <strong style="color: #ff9800;"><i class="fa-solid fa-exclamation-triangle"></i> Peringatan</strong>
-                <span id="returnNamaKegiatan"></span>
+                <span id="returnNamaKegiatan">-</span>
             </div>
             
             <p style="margin-bottom:20px;color:#e65100;font-weight:600">
-                ⚠️ Pengajuan ini akan dikembalikan ke status <strong>"Menunggu Persetujuan"</strong> dan dapat diajukan ulang.
+                ⚠️ Pengajuan ini akan dikembalikan ke status sebelumnya dan dapat diajukan ulang.
             </p>
             
-            <form id="returnForm" method="POST" action="">
-                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                
-                <div class="approve-modal-actions">
-                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('returnModal')">
-                        <i class="fa-solid fa-times"></i> Batal
-                    </button>
-                    <button type="submit" class="approve-btn" style="background: #ff9800;">
-                        <i class="fa-solid fa-undo"></i> Ya, Kembalikan
-                    </button>
+            <div class="approve-modal-actions">
+                <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('returnConfirmModal')">
+                    <i class="fa-solid fa-times"></i> Batal
+                </button>
+                <button type="button" class="approve-btn" style="background: #ff9800;" onclick="confirmReturn()">
+                    <i class="fa-solid fa-undo"></i> Ya, Kembalikan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Result Modal untuk Return -->
+<div id="successReturnModal" class="modal">
+    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
+        <div class="modal-header" style="background: #ff9800;">
+            <h3><i class="fa-solid fa-undo"></i> <span id="successReturnTitle">Pengajuan Berhasil Dikembalikan</span></h3>
+            <button class="close-modal" onclick="closeModal('successReturnModal')">&times;</button>
+        </div>
+        <div style="padding:25px;text-align:center">
+            <div style="width:100px;height:100px;border-radius:50%;background:#fff3e0;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
+                <i class="fas fa-undo" style="font-size:50px;color:#ff9800"></i>
+            </div>
+            
+            <h3 style="color:#ff9800;margin-bottom:10px">Berhasil Dikembalikan</h3>
+            <p style="color:#666;margin-bottom:5px">
+                <i class="fa-solid fa-clock"></i> Dikembalikan pada: <strong id="returnTimestamp">-</strong>
+            </p>
+            
+            <div style="background:#fff3e0;border:1px solid #ffcc80;border-radius:8px;padding:15px;margin:20px 0">
+                <div style="font-weight:600;color:#e65100;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+                    <span>Daftar Pengajuan</span>
+                    <span id="returnItemCount" style="background:#ff9800;color:white;padding:4px 12px;border-radius:20px;font-size:12px">0 item</span>
                 </div>
-            </form>
+                <div id="returnList" style="max-height:250px;overflow-y:auto;text-align:left">
+                    <!-- List akan diisi oleh JavaScript -->
+                </div>
+            </div>
+            
+            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
+                <button class="btn-bulk" onclick="closeModal('successReturnModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
         </div>
     </div>
 </div>
 <!-- Eviden Modal (untuk multiple files) -->
-<div id="evidenModal" class="modal" onclick="modalClickOutside(event,'evidenModal')">
+<div id="evidenModal" class="modal">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-image"></i> File Evidence</h3>
@@ -1401,6 +1460,7 @@ const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($s
 let currentRejectId = null;
 let currentRejectNamaKegiatan = null;
 let currentApproveId = null;
+let currentReturnNamaKegiatan = null;
 
 // Fungsi untuk menampilkan success reject modal
 function showSuccessRejectModal(count, items, isSingle = false) {
@@ -1559,38 +1619,151 @@ function updateRejectButtons() {
         }, 500);
     });
 <?php endif; ?>
+// ============================================
+// SUCCESS RETURN MODAL FUNCTIONS
+// ============================================
 
-// Update reject buttons saat DOM loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM siap, inisialisasi...');
-    setTimeout(initChart, 100);
+// Fungsi untuk menampilkan success return modal
+function showSuccessReturnModal(count, items, isSingle = false) {
+    const modal = document.getElementById('successReturnModal');
+    const title = document.getElementById('successReturnTitle');
+    const timestamp = document.getElementById('returnTimestamp');
+    const itemCount = document.getElementById('returnItemCount');
+    const listContainer = document.getElementById('returnList');
     
-    // Inisialisasi clickable rows
-    makeRowsClickable();
+    title.textContent = isSingle ? 'Pengajuan Berhasil Dikembalikan' : 'Pengajuan Berhasil Dikembalikan (Multiple)';
     
-    // Update tombol reject
-    updateRejectButtons();
+    // Format timestamp
+    const now = new Date();
+    timestamp.textContent = now.toLocaleDateString('id-ID', { 
+        day: '2-digit', 
+        month: 'long', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) + ' WIB';
     
-    // Check for success modal data
-    <?php if($this->session->flashdata('approved_items')): ?>
-        const approvedItems = <?= json_encode($this->session->flashdata('approved_items')) ?>;
-        const isSingle = <?= json_encode($this->session->flashdata('is_single_approve')) ?>;
+    itemCount.textContent = `${count} item`;
+    
+    // Populate list dengan data
+    listContainer.innerHTML = '';
+    items.forEach((item, index) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.style.cssText = 'background:white;border:1px solid #ffcc80;border-radius:6px;margin-bottom:8px;overflow:hidden';
         
-        setTimeout(function() {
-            showSuccessModal(approvedItems.length, approvedItems, isSingle);
-        }, 500);
-    <?php endif; ?>
-    
-    // Check for success reject modal data
-    <?php if($this->session->flashdata('rejected_items')): ?>
-        const rejectedItems = <?= json_encode($this->session->flashdata('rejected_items')) ?>;
-        const isSingleReject = <?= json_encode($this->session->flashdata('is_single_reject')) ?>;
+        // Generate HTML untuk data tambahan jika ada
+        let additionalInfo = '';
+        if (item.return_notes) {
+            additionalInfo = `
+            <div style="background:#fff3e0;border-top:1px solid #f0f0f0;padding:10px;font-size:12px;">
+                <div style="font-weight:600;color:#ff9800;margin-bottom:5px">Catatan Pengembalian:</div>
+                <div style="color:#e65100">${escapeHtml(item.return_notes)}</div>
+            </div>`;
+        }
         
-        setTimeout(function() {
-            showSuccessRejectModal(rejectedItems.length, rejectedItems, isSingleReject);
-        }, 500);
-    <?php endif; ?>
-});
+        // Status baru setelah di-return
+        const newStatusBadge = `<span class="badge badge-pending" style="background:#fff3cd;color:#856404;flex-shrink:0">${item.new_status}</span>`;
+        
+        itemDiv.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #f0f0f0;">
+                <i class="fas fa-undo" style="color:#ff9800;font-size:20px;flex-shrink:0"></i>
+                <div style="flex:1;text-align:left">
+                    <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(item.nama)}</div>
+                    <div style="font-size:12px;color:#6c757d">${item.details}</div>
+                </div>
+                ${newStatusBadge}
+            </div>
+            ${additionalInfo}
+        `;
+        listContainer.appendChild(itemDiv);
+    });
+    
+    modal.classList.add('show');
+}
+
+// ============================================
+// RETURN MODAL FUNCTIONS - VERSI BARU
+// ============================================
+
+// Fungsi untuk menampilkan return modal baru (TANPA CATATAN)
+function showReturnModalNew(id, namaKegiatan) {
+    currentReturnId = id;
+    currentReturnNamaKegiatan = namaKegiatan;
+    
+    // Set data ke modal
+    document.getElementById('returnNamaKegiatan').textContent = namaKegiatan;
+    
+    // Tampilkan modal
+    document.getElementById('returnConfirmModal').classList.add('show');
+}
+// Fungsi untuk konfirmasi return (SEDERHANA TANPA CATATAN)
+function confirmReturn() {
+    if (!currentReturnId) return;
+    
+    // Buat form dan submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= base_url("dekan/return_pengajuan/") ?>' + currentReturnId;
+    
+    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
+    
+    // Tambahkan CSRF token
+    const inpCsrf = document.createElement('input');
+    inpCsrf.type = 'hidden';
+    inpCsrf.name = csrfName;
+    inpCsrf.value = csrfHash;
+    form.appendChild(inpCsrf);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Fungsi untuk meng-update tombol return di tabel
+function updateReturnButtons() {
+    // Update semua tombol return di tabel
+    const returnButtons = document.querySelectorAll('button[onclick*="showReturnModal"]');
+    returnButtons.forEach(button => {
+        const onclickAttr = button.getAttribute('onclick');
+        if (onclickAttr) {
+            // Cek pattern untuk showReturnModal(id, namaKegiatan)
+            const match = onclickAttr.match(/showReturnModal\((\d+),\s*'([^']+)'\)/);
+            if (match) {
+                const id = match[1];
+                const namaKegiatan = match[2];
+                
+                // Update onclick attribute ke modal baru
+                button.setAttribute('onclick', `event.stopPropagation(); showReturnModalNew(${id}, '${escapeHtml(namaKegiatan.replace(/'/g, "\\'"))}')`);
+            } else {
+                // Cek pattern lama showReturnModal(id)
+                const match2 = onclickAttr.match(/showReturnModal\((\d+)\)/);
+                if (match2) {
+                    const id = match2[1];
+                    const row = button.closest('tr');
+                    const namaKegiatan = row.querySelector('td:nth-child(2) strong')?.textContent || 'Nama Kegiatan';
+                    
+                    // Update onclick attribute ke modal baru
+                    button.setAttribute('onclick', `event.stopPropagation(); showReturnModalNew(${id}, '${escapeHtml(namaKegiatan)}')`);
+                }
+            }
+        }
+    });
+    
+    // Update tombol return di modal detail
+    const modalReturnButtons = document.querySelectorAll('button[style*="background: #ff9800"][onclick*="showReturnModal"]');
+    modalReturnButtons.forEach(button => {
+        const onclickAttr = button.getAttribute('onclick');
+        if (onclickAttr) {
+            const match = onclickAttr.match(/showReturnModal\((\d+),\s*'([^']+)'\)/);
+            if (match) {
+                const id = match[1];
+                const namaKegiatan = match[2];
+                
+                button.setAttribute('onclick', `event.stopPropagation(); closeModal('detailModal'); showReturnModalNew(${id}, '${escapeHtml(namaKegiatan.replace(/'/g, "\\'"))}')`);
+            }
+        }
+    });
+}
 // PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
 function getSuratDetail(id) {
     return fetch('<?= site_url("dekan/getDetailPengajuan/") ?>' + id)
@@ -1909,8 +2082,7 @@ function generateMultipleEvidenContent(item, evidenFiles) {
         </div>
     `;
 }
-
-// REVISI: Function showDetail untuk menampilkan surat pengajuan
+// Fungsi showDetail untuk menampilkan surat pengajuan dengan scroll lengkap
 async function showDetail(id) {
     try {
         // Tampilkan loading
@@ -1922,15 +2094,18 @@ async function showDetail(id) {
         `;
         document.getElementById('detailModal').classList.add('show');
 
-        // Load surat pengajuan via iframe
+        // Load surat pengajuan via iframe TANPA batasan tinggi
         const suratUrl = '<?= base_url("dekan/view_surat_pengajuan/") ?>' + id;
+        
         document.getElementById('detailContent').innerHTML = `
-            <iframe 
-                src="${suratUrl}" 
-                style="width:100%; height:70vh; border:none; border-radius:8px;"
-                onload="this.style.opacity=1"
-                style="opacity:0; transition: opacity 0.3s;"
-            ></iframe>
+            <div style="width:100%; overflow:hidden; border-radius:8px;">
+                <iframe 
+                    id="suratIframe"
+                    src="${suratUrl}" 
+                    style="width:100%; height:70vh; border:none;"
+                    onload="adjustIframeHeight()"
+                ></iframe>
+            </div>
             <div class="modal-actions">
                 <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
                     <i class="fa-solid fa-times"></i> Tutup
@@ -1949,6 +2124,43 @@ async function showDetail(id) {
                 </button>
             </div>
         `;
+    }
+}
+
+// Fungsi untuk menyesuaikan tinggi iframe berdasarkan konten
+function adjustIframeHeight() {
+    const iframe = document.getElementById('suratIframe');
+    if (!iframe) return;
+    
+    try {
+        // Tunggu sedikit untuk konten selesai dimuat
+        setTimeout(() => {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const body = iframeDoc.body;
+                const html = iframeDoc.documentElement;
+                
+                // Hitung tinggi maksimum
+                const height = Math.max(
+                    body.scrollHeight,
+                    body.offsetHeight,
+                    html.clientHeight,
+                    html.scrollHeight,
+                    html.offsetHeight
+                );
+                
+                // Set tinggi iframe
+                iframe.style.height = (height + 50) + 'px'; // Tambah margin
+                
+                console.log('Iframe height adjusted to:', height);
+            } catch (e) {
+                console.error('Error adjusting iframe height:', e);
+                // Fallback: set tinggi tetap
+                iframe.style.height = '1000px';
+            }
+        }, 500); // Tunggu 500ms untuk konten selesai dimuat
+    } catch (e) {
+        console.error('Error accessing iframe content:', e);
     }
 }
 // Update fungsi showApproveModal untuk kompatibilitas
@@ -2005,9 +2217,6 @@ function closeModal(id) {
     document.getElementById(id).classList.remove('show'); 
 }
 
-function modalClickOutside(evt, id) { 
-    if (evt.target && evt.target.id === id) closeModal(id); 
-}
 
 // Helper functions
 function formatDate(d) {
@@ -2718,13 +2927,19 @@ function makeRowsClickable() {
     });
 }
 
-// Panggil fungsi setelah DOM loaded
+// Update DOM saat dimuat
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM siap, inisialisasi...');
     setTimeout(initChart, 100);
     
     // Inisialisasi clickable rows
     makeRowsClickable();
+    
+    // Update tombol reject
+    updateRejectButtons();
+    
+    // Update tombol return
+    updateReturnButtons();
     
     // Check for success modal data
     <?php if($this->session->flashdata('approved_items')): ?>
@@ -2734,6 +2949,30 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
             showSuccessModal(approvedItems.length, approvedItems, isSingle);
         }, 500);
+    <?php endif; ?>
+    
+    // Check for success reject modal data
+    <?php if($this->session->flashdata('rejected_items')): ?>
+        const rejectedItems = <?= json_encode($this->session->flashdata('rejected_items')) ?>;
+        const isSingleReject = <?= json_encode($this->session->flashdata('is_single_reject')) ?>;
+        
+        setTimeout(function() {
+            showSuccessRejectModal(rejectedItems.length, rejectedItems, isSingleReject);
+        }, 500);
+    <?php endif; ?>
+    
+    // Check for success return modal data
+    <?php if($this->session->flashdata('returned_items')): ?>
+        console.log('Ada data returned_items dari session');
+        const returnedItems = <?= json_encode($this->session->flashdata('returned_items')) ?>;
+        const isSingleReturn = <?= json_encode($this->session->flashdata('is_single_return')) ?>;
+        
+        setTimeout(function() {
+            console.log('Menampilkan success return modal dengan data:', returnedItems);
+            showSuccessReturnModal(returnedItems.length, returnedItems, isSingleReturn);
+        }, 800);
+    <?php else: ?>
+        console.log('Tidak ada data returned_items dari session');
     <?php endif; ?>
 });
 

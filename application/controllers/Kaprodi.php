@@ -18,19 +18,6 @@ private function get_dosen_data_for_display($surat)
 {
     $dosen_list = [];
     
-    // 1. Cek nama_dosen langsung
-    if (!empty($surat->nama_dosen) && $surat->nama_dosen !== '-') {
-        // Jika nama_dosen berisi multiple names (separated by comma)
-        if (strpos($surat->nama_dosen, ',') !== false) {
-            $names = explode(',', $surat->nama_dosen);
-            foreach ($names as $name) {
-                $dosen_list[] = trim($name);
-            }
-        } else {
-            $dosen_list[] = $surat->nama_dosen;
-        }
-        return $dosen_list;
-    }
     
     // 2. Cek dosen_list
     if (!empty($surat->dosen_list)) {
@@ -104,7 +91,7 @@ private function get_dosen_data_for_display($surat)
             $this->db->where('MONTH(created_at)', $bulan);
         }
         
-        $this->db->where_in('status', ['pengajuan', 'disetujui KK', 'ditolak KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat']);
+        $this->db->where_in('status', ['pengajuan', 'disetujui KK', 'ditolak KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
         
         // Filter search
         if (!empty($search)) {
@@ -126,7 +113,7 @@ private function get_dosen_data_for_display($surat)
                     $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan']);
                     break;
                 case 'rejected':
-                    $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
+                    $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan']);
                     break;
             }
         }
@@ -169,7 +156,7 @@ private function get_dosen_data_for_display($surat)
         if ($bulan !== 'all') {
             $this->db->where('MONTH(created_at)', $bulan);
         }
-        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
+        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan'])
                                           ->count_all_results('surat');
 
         // Grafik data - dengan dukungan filter bulan
@@ -248,7 +235,7 @@ public function check_nama_dosen_field()
     {
         $this->db->where('YEAR(created_at)', $year);
         $this->db->where('MONTH(created_at)', $month);
-        $this->db->where_in('status', ['pengajuan', 'disetujui KK', 'ditolak KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat']);
+        $this->db->where_in('status', ['pengajuan', 'disetujui KK', 'ditolak KK', 'disetujui sekretariat', 'disetujui dekan', 'ditolak sekretariat', 'ditolak dekan']);
         return $this->db->count_all_results('surat');
     }
 
@@ -264,7 +251,7 @@ public function check_nama_dosen_field()
     {
         $this->db->where('YEAR(created_at)', $year);
         $this->db->where('MONTH(created_at)', $month);
-        $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
+        $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan']);
         return $this->db->count_all_results('surat');
     }
 
@@ -326,7 +313,7 @@ public function check_nama_dosen_field()
         if ($bulan !== 'all') {
             $this->db->where('MONTH(created_at)', $bulan);
         }
-        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
+        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan'])
                                           ->count_all_results('surat');
 
         $this->load->view('kaprodi/halaman_pending', $data);
@@ -390,7 +377,7 @@ public function check_nama_dosen_field()
         if ($bulan !== 'all') {
             $this->db->where('MONTH(created_at)', $bulan);
         }
-        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
+        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan'])
                                           ->count_all_results('surat');
 
         $this->load->view('kaprodi/halaman_disetujui', $data);
@@ -414,7 +401,7 @@ public function check_nama_dosen_field()
         if ($bulan !== 'all') {
             $this->db->where('MONTH(created_at)', $bulan);
         }
-        $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
+        $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan']);
 
         if (!empty($search)) {
             $this->db->group_start();
@@ -454,7 +441,7 @@ public function check_nama_dosen_field()
         if ($bulan !== 'all') {
             $this->db->where('MONTH(created_at)', $bulan);
         }
-        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
+        $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan'])
                                           ->count_all_results('surat');
 
         $this->load->view('kaprodi/halaman_ditolak', $data);
@@ -501,7 +488,7 @@ public function semua()
                 $this->db->where_in('status', ['disetujui KK', 'disetujui sekretariat', 'disetujui dekan']);
                 break;
             case 'rejected':
-                $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
+                $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan']);
                 break;
             case 'dekan_approved':
                 $this->db->where('status', 'disetujui dekan');
@@ -550,7 +537,7 @@ public function semua()
         $this->db->like('nama_kegiatan', $search);
         $this->db->or_like('penyelenggara', $search);
         $this->db->or_like('jenis_pengajuan', $search);
-        $this->db->or_like('nama_dosen', $search);
+
         $this->db->group_end();
     }
 
@@ -599,7 +586,7 @@ public function semua()
     if ($bulan !== 'all') {
         $this->db->where('MONTH(created_at)', $bulan);
     }
-    $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat'])
+    $data['rejected_count'] = $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan'])
                                       ->count_all_results('surat');
 
     $this->load->view('kaprodi/halaman_total', $data);
@@ -607,6 +594,216 @@ public function semua()
     /* ================================
        GET DETAIL PENGAJUAN (AJAX) - DENGAN PROGRESS TIMELINE
     ================================= */
+/* ================================
+   PROCESS MULTI APPROVE - DENGAN SUCCESS MODAL
+================================= */
+public function process_multi_approve()
+{
+    if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+        $this->session->set_flashdata('error', 'Invalid request method.');
+        redirect('kaprodi/pending');
+        return;
+    }
+
+    $selected_ids = explode(',', $this->input->post('selected_ids'));
+    
+    if (empty($selected_ids) || !is_array($selected_ids)) {
+        $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
+        redirect('kaprodi/pending');
+        return;
+    }
+    
+    $success_count = 0;
+    $error_count = 0;
+    $error_messages = [];
+    $approved_items = [];
+    
+    foreach ($selected_ids as $id) {
+        $id = trim($id);
+        
+        if (empty($id)) {
+            continue;
+        }
+        
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+        
+        if (!$surat) {
+            $error_count++;
+            $error_messages[] = "Data tidak ditemukan (ID: $id)";
+            continue;
+        }
+        
+        // Validasi status - hanya bisa approve jika status = 'pengajuan'
+        if ($surat->status !== 'pengajuan') {
+            $error_count++;
+            $error_messages[] = "Pengajuan '{$surat->nama_kegiatan}' sudah diproses";
+            continue;
+        }
+        
+        $approval = json_decode($surat->approval_status, true) ?? [];
+        
+        if (!isset($approval['pengirim'])) {
+            $approval['pengirim'] = $surat->created_at;
+        }
+        
+        $approval['kk'] = date("Y-m-d H:i:s");
+        
+        $update_data = [
+            'status' => 'disetujui KK',
+            'approval_status' => json_encode($approval),
+            'updated_at' => date('Y-m-d H:i:s'),
+            'disposisi_status' => 'none'
+        ];
+        
+        $this->db->where('id', $id);
+        if ($this->db->update('surat', $update_data)) {
+            $success_count++;
+            
+            // Ambil data dosen untuk ditampilkan di success modal
+            $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
+            
+            $approved_items[] = [
+                'nama' => $surat->nama_kegiatan,
+                'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara,
+                'dosen_data' => $dosen_data
+            ];
+        } else {
+            $error_count++;
+            $error_messages[] = "Gagal update database (ID: $id)";
+        }
+    }
+    
+    if ($success_count > 0) {
+        $message = "✅ Berhasil menyetujui $success_count pengajuan.";
+        if ($error_count > 0) {
+            $message .= " ⚠️ $error_count pengajuan gagal: " . implode(', ', $error_messages);
+        }
+        
+        $this->session->set_flashdata('approved_items', $approved_items);
+        $this->session->set_flashdata('is_multi_approve', true);
+        $this->session->set_flashdata('success', $message);
+    } else {
+        $this->session->set_flashdata('error', "❌ Gagal menyetujui semua pengajuan: " . implode(', ', $error_messages));
+    }
+    
+    redirect('kaprodi');
+}
+
+/* ================================
+   PROCESS MULTI REJECT
+================================= */
+public function process_multi_reject()
+{
+    if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+        $this->session->set_flashdata('error', 'Invalid request method.');
+        redirect('kaprodi/pending');
+        return;
+    }
+
+    $selected_ids = $this->input->post('selected_ids');
+    $rejection_notes_array = $this->input->post('rejection_notes');
+    
+    if (empty($selected_ids) || !is_array($selected_ids)) {
+        $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
+        redirect('kaprodi/pending');
+        return;
+    }
+    
+    if (empty($rejection_notes_array) || !is_array($rejection_notes_array)) {
+        $this->session->set_flashdata('error', 'Alasan penolakan harus diisi.');
+        redirect('kaprodi/pending');
+        return;
+    }
+    
+    if (count($selected_ids) !== count($rejection_notes_array)) {
+        $this->session->set_flashdata('error', 'Jumlah pengajuan dan alasan penolakan tidak sesuai.');
+        redirect('kaprodi/pending');
+        return;
+    }
+    
+    $success_count = 0;
+    $error_count = 0;
+    $error_messages = [];
+    $rejected_items = [];
+    
+    foreach ($selected_ids as $index => $id) {
+        $id = trim($id);
+        $rejection_notes = isset($rejection_notes_array[$index]) ? trim($rejection_notes_array[$index]) : '';
+        
+        if (empty($id)) {
+            continue;
+        }
+        
+        if (empty($rejection_notes)) {
+            $error_count++;
+            $error_messages[] = "Alasan penolakan kosong untuk ID: $id";
+            continue;
+        }
+        
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+        
+        if (!$surat) {
+            $error_count++;
+            $error_messages[] = "Data tidak ditemukan (ID: $id)";
+            continue;
+        }
+        
+        // Validasi status - hanya bisa reject jika status = 'pengajuan'
+        if ($surat->status !== 'pengajuan') {
+            $error_count++;
+            $error_messages[] = "Pengajuan '{$surat->nama_kegiatan}' sudah diproses";
+            continue;
+        }
+        
+        $approval = json_decode($surat->approval_status, true) ?? [];
+        
+        if (!isset($approval['pengirim'])) {
+            $approval['pengirim'] = $surat->created_at;
+        }
+        
+        $approval['kk'] = date("Y-m-d H:i:s");
+        
+        $update_data = [
+            'status' => 'ditolak KK',
+            'approval_status' => json_encode($approval),
+            'catatan_penolakan' => $rejection_notes,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('id', $id);
+        if ($this->db->update('surat', $update_data)) {
+            $success_count++;
+            
+            // Ambil data dosen untuk ditampilkan di success modal
+            $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
+            
+            $rejected_items[] = [
+                'nama' => $surat->nama_kegiatan,
+                'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara,
+                'dosen_data' => $dosen_data,
+                'rejection_notes' => $rejection_notes
+            ];
+        } else {
+            $error_count++;
+            $error_messages[] = "Gagal update database (ID: $id)";
+        }
+    }
+    
+    if ($success_count > 0) {
+        $message = "✅ Berhasil menolak $success_count pengajuan.";
+        if ($error_count > 0) {
+            $message .= " ⚠️ $error_count pengajuan gagal: " . implode(', ', $error_messages);
+        }
+        
+        $this->session->set_flashdata('rejected_items', $rejected_items);
+        $this->session->set_flashdata('is_multi_reject', true);
+        $this->session->set_flashdata('success', $message);
+    } else {
+        $this->session->set_flashdata('error', "❌ Gagal menolak semua pengajuan: " . implode(', ', $error_messages));
+    }
+    
+    redirect('kaprodi');
+}
     public function getDetailPengajuan($id)
     {
         $this->db->where('id', $id);
@@ -978,7 +1175,8 @@ public function approve($id)
     $update_data = [
         'status' => 'disetujui KK',
         'approval_status' => json_encode($approval),
-        'updated_at' => date('Y-m-d H:i:s')
+        'updated_at' => date('Y-m-d H:i:s'),
+        'disposisi_status' => 'none'
     ];
 
     $result = $this->db->where('id', $id)->update('surat', $update_data);
@@ -1070,187 +1268,6 @@ public function reject($id)
     redirect('kaprodi');
 }
 
-    /* ================================
-       PROCESS MULTI APPROVE - DENGAN SUCCESS MODAL
-    ================================= */
-    public function process_multi_approve()
-    {
-        if ($this->input->server('REQUEST_METHOD') !== 'POST') {
-            $this->session->set_flashdata('error', 'Invalid request method.');
-            redirect('kaprodi/pending');
-            return;
-        }
-
-        $selected_ids = $this->input->post('selected_ids');
-        
-        if (empty($selected_ids) || !is_array($selected_ids)) {
-            $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
-            redirect('kaprodi/pending');
-            return;
-        }
-        
-        $success_count = 0;
-        $error_count = 0;
-        $error_messages = [];
-        $approved_items = [];
-        
-        foreach ($selected_ids as $id) {
-            $id = trim($id);
-            
-            if (empty($id)) {
-                continue;
-            }
-            
-            $surat = $this->db->get_where('surat', ['id' => $id])->row();
-            
-            if (!$surat) {
-                $error_count++;
-                $error_messages[] = "Data tidak ditemukan (ID: $id)";
-                continue;
-            }
-            
-            $approval = json_decode($surat->approval_status, true);
-            if (!is_array($approval)) {
-                $approval = [];
-            }
-            
-            if (!isset($approval['pengirim'])) {
-                $approval['pengirim'] = $surat->created_at;
-            }
-            
-            $approval['kk'] = date("Y-m-d H:i:s");
-            
-            $update_data = [
-                'status' => 'disetujui KK',
-                'approval_status' => json_encode($approval),
-            ];
-            
-            $this->db->where('id', $id);
-            if ($this->db->update('surat', $update_data)) {
-                $success_count++;
-                
-                $approved_items[] = [
-                    'nama' => $surat->nama_kegiatan,
-                    'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara
-                ];
-            } else {
-                $error_count++;
-                $error_messages[] = "Gagal update database (ID: $id)";
-            }
-        }
-        
-        if ($success_count > 0) {
-            $message = "✅ Berhasil menyetujui $success_count pengajuan.";
-            if ($error_count > 0) {
-                $message .= " ⚠️ $error_count pengajuan gagal: " . implode(', ', $error_messages);
-            }
-            
-            $this->session->set_flashdata('approved_items', $approved_items);
-            $this->session->set_flashdata('is_single_approve', false);
-            $this->session->set_flashdata('success', $message);
-        } else {
-            $this->session->set_flashdata('error', "❌ Gagal menyetujui semua pengajuan: " . implode(', ', $error_messages));
-        }
-        
-        redirect('kaprodi/pending');
-    }
-
-    /* ================================
-       PROCESS MULTI REJECT
-    ================================= */
-    public function process_multi_reject()
-    {
-        if ($this->input->server('REQUEST_METHOD') !== 'POST') {
-            $this->session->set_flashdata('error', 'Invalid request method.');
-            redirect('kaprodi/pending');
-            return;
-        }
-
-        $selected_ids = $this->input->post('selected_ids');
-        $rejection_notes_array = $this->input->post('rejection_notes');
-        
-        if (empty($selected_ids) || !is_array($selected_ids)) {
-            $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
-            redirect('kaprodi/pending');
-            return;
-        }
-        
-        if (empty($rejection_notes_array) || !is_array($rejection_notes_array)) {
-            $this->session->set_flashdata('error', 'Alasan penolakan harus diisi.');
-            redirect('kaprodi/pending');
-            return;
-        }
-        
-        if (count($selected_ids) !== count($rejection_notes_array)) {
-            $this->session->set_flashdata('error', 'Jumlah pengajuan dan alasan penolakan tidak sesuai.');
-            redirect('kaprodi/pending');
-            return;
-        }
-        
-        $success_count = 0;
-        $error_count = 0;
-        $error_messages = [];
-        
-        foreach ($selected_ids as $index => $id) {
-            $id = trim($id);
-            $rejection_notes = isset($rejection_notes_array[$index]) ? trim($rejection_notes_array[$index]) : '';
-            
-            if (empty($id)) {
-                continue;
-            }
-            
-            if (empty($rejection_notes)) {
-                $error_count++;
-                $error_messages[] = "Alasan penolakan kosong untuk ID: $id";
-                continue;
-            }
-            
-            $surat = $this->db->get_where('surat', ['id' => $id])->row();
-            
-            if (!$surat) {
-                $error_count++;
-                $error_messages[] = "Data tidak ditemukan (ID: $id)";
-                continue;
-            }
-            
-            $approval = json_decode($surat->approval_status, true);
-            if (!is_array($approval)) {
-                $approval = [];
-            }
-            
-            if (!isset($approval['pengirim'])) {
-                $approval['pengirim'] = $surat->created_at;
-            }
-            
-            $approval['kk'] = date("Y-m-d H:i:s");
-            
-            $update_data = [
-                'status' => 'ditolak KK',
-                'approval_status' => json_encode($approval),
-                'catatan_penolakan' => $rejection_notes,
-            ];
-            
-            $this->db->where('id', $id);
-            if ($this->db->update('surat', $update_data)) {
-                $success_count++;
-            } else {
-                $error_count++;
-                $error_messages[] = "Gagal update database (ID: $id)";
-            }
-        }
-        
-        if ($success_count > 0) {
-            $message = "✅ Berhasil menolak $success_count pengajuan.";
-            if ($error_count > 0) {
-                $message .= " ⚠️ $error_count pengajuan gagal: " . implode(', ', $error_messages);
-            }
-            $this->session->set_flashdata('success', $message);
-        } else {
-            $this->session->set_flashdata('error', "❌ Gagal menolak semua pengajuan: " . implode(', ', $error_messages));
-        }
-        
-        redirect('kaprodi/pending');
-    }
 
     /* ================================
        GET DASHBOARD COUNTS (AJAX) - DENGAN FILTER BULAN
@@ -1284,7 +1301,7 @@ public function reject($id)
         if ($bulan !== 'all') {
             $this->db->where('MONTH(created_at)', $bulan);
         }
-        $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat']);
+        $this->db->where_in('status', ['ditolak KK', 'ditolak sekretariat', 'ditolak dekan']);
         $rejected = $this->db->count_all_results('surat');
 
         $counts = [
@@ -1533,8 +1550,19 @@ public function check_dosen_field()
         'catatan_penolakan' => null, // Hapus catatan penolakan jika ada
     ]);
 
-    $this->session->set_flashdata('success', '✅ Pengajuan berhasil dikembalikan ke status awal (Menunggu Persetujuan).');
+    // Set flashdata untuk success return modal
+    $surat = $this->db->get_where('surat', ['id' => $id])->row();
     
+    $returned_items = [
+        [
+            'nama' => $surat->nama_kegiatan,
+            'details' => "{$surat->penyelenggara} - " . date('d M Y', strtotime($surat->tanggal_kegiatan)),
+            'new_status' => $surat->status
+        ]
+    ];
+    
+    $this->session->set_flashdata('returned_items', $returned_items);
+    $this->session->set_flashdata('is_single_return', true);
     $this->redirectToPreviousPage();
 }
 

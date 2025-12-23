@@ -106,13 +106,38 @@
         transform: scale(1.05);
     }
     
+    /* Tombol Return - WARNA ORANGE/KUNING (SAMA SEPERTI DASHBOARD UTAMA) */
+    .btn-return {
+        background: #ff9800 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 6px 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s ease-in-out;
+        font-size: 14px;
+        height: 32px;
+    }
+
+    .btn-return i {
+        font-size: 14px;
+    }
+
+    .btn-return:hover {
+        background: #f57c00 !important;
+        transform: scale(1.05);
+    }
+    
     /* Pagination Info */
     .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
     
     /* Modal Styles */
     .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
     .modal.show{display:flex}
-    .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    .modal-content{background:white;padding:0;border-radius:15px;max-width:1100px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
     .modal-header{background:#FB8C00;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
     .modal-header h3{margin:0;font-size:18px;font-weight:600}
@@ -240,6 +265,100 @@
     .approve-btn-submit{background:#27ae60;color:white}
     .approve-btn-submit:hover{background:#229954;transform:translateY(-2px)}
     
+    /* Return Modal Styles (SAMA SEPERTI DASHBOARD UTAMA) */
+    .return-modal-content {
+        background: white;
+        padding: 0;
+        border-radius: 15px;
+        max-width: 500px;
+        width: 95%;
+        max-height: 85vh;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .return-modal-body {
+        padding: 25px;
+    }
+    
+    .return-modal-header {
+        background: #ff9800;
+        color: white;
+        padding: 20px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .return-modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    
+    .return-info-box {
+        background: #fff3e0;
+        border: 1px solid #ffb74d;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .return-info-box strong {
+        color: #ff9800;
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .return-info-box span {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .return-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .return-btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .return-btn-cancel {
+        background: #95a5a6;
+        color: white;
+    }
+    
+    .return-btn-cancel:hover {
+        background: #7f8c8d;
+        transform: translateY(-2px);
+    }
+    
+    .return-btn-submit {
+        background: #ff9800;
+        color: white;
+    }
+    
+    .return-btn-submit:hover {
+        background: #f57c00;
+        transform: translateY(-2px);
+    }
+    
     /* Clickable Row Styles */
     .clickable-row {
         cursor: pointer !important;
@@ -270,122 +389,6 @@
         pointer-events: all;
     }
     
-    /* Progress Bar Styles */
-    .progress-track {
-        display: flex;
-        justify-content: space-between;
-        position: relative;
-        margin: 40px 0;
-    }
-
-    .progress-track::before {
-        content: '';
-        position: absolute;
-        top: 20px;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: #e0e0e0;
-        z-index: 1;
-    }
-
-    .progress-step {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        z-index: 2;
-    }
-
-    .step-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        margin-bottom: 10px;
-        border: 3px solid #e0e0e0;
-        background: white;
-    }
-
-    .step-text {
-        font-size: 12px;
-        text-align: center;
-        max-width: 100px;
-        color: #666;
-    }
-
-    .step-date {
-        font-size: 11px;
-        color: #999;
-        margin-top: 5px;
-        display: none !important;
-    }
-
-    /* Progress Line */
-    .progress-line {
-        position: absolute;
-        top: 20px;
-        left: 0;
-        height: 4px;
-        background: #4caf50;
-        z-index: 2;
-        transition: width 0.5s ease;
-    }
-
-    /* Status Colors */
-    .progress-step.completed .step-icon {
-        background-color: #28a745;
-        border-color: #28a745;
-        color: white;
-    }
-
-    .progress-step.status-completed i {
-        color: white !important;
-    }
-
-    .progress-step.in-progress .step-icon {
-        background: #ffc107;
-        border-color: #ffc107;
-        color: white;
-    }
-
-    .progress-step.rejected .step-icon {
-        background: #dc3545;
-        border-color: #dc3545;
-        color: white;
-    }
-
-    .progress-step.pending .step-icon {
-        background: #e0e0e0;
-        border-color: #e0e0e0;
-        color: #666;
-    }
-
-    .progress-estimasi {
-        width: 100%;
-        text-align: center;
-        margin-top: 5px;
-        font-size: 12px;
-        color: #777;
-    }
-
-    .rejection-reason {
-        background: #fff5f5;
-        border: 1px solid #f8cccc;
-        padding: 15px;
-        border-radius: 10px;
-        margin-top: 15px;
-    }
-
-    .rejection-reason h6 {
-        color: #e63946;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-
     /* Status Modal Styles */
     .status-modal {
         display: none;
@@ -509,26 +512,6 @@
         .approve-modal-body{padding:15px}
         .approve-modal-actions{flex-direction:column}
         .approve-btn{justify-content:center}
-        .progress-track {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 30px;
-            padding: 0 10px;
-        }
-        .progress-track::before {
-            display: none;
-        }
-        .progress-step {
-            flex-direction: row;
-            align-items: center;
-            gap: 15px;
-            width: 100%;
-        }
-        .step-text {
-            text-align: left;
-            max-width: none;
-            flex: 1;
-        }
         #suratTugasModal .modal-content {
             max-width: 95%;
             height: 90vh;
@@ -680,7 +663,7 @@
                                     <i class="fas fa-file-image"></i>
                                 </button>
 
-                                <!-- Tombol Mata (Surat Tugas) - PERUBAHAN UTAMA DI SINI -->
+                                <!-- Tombol Mata (Surat Tugas) -->
                                 <button class="btn btn-detail" onclick="event.stopPropagation(); showSuratTugasModal(<?= (int)$s['id'] ?>)" title="Lihat Surat Tugas">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
@@ -691,6 +674,12 @@
                                     </button>
                                     <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModal(<?= $s['id'] ?>)" title="Tolak">
                                         <i class="fa-solid fa-times"></i>
+                                    </button>
+                                <!-- TAMBAHKAN TOMBOL RETURN DI SINI (SAMA SEPERTI DASHBOARD UTAMA) -->
+                                <?php elseif(in_array($s['status'], ['disetujui dekan', 'ditolak dekan'])): ?>
+                                    <!-- Tombol Return: Kembalikan ke status awal -->
+                                    <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModalNew(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'] ?? '')) ?>')" title="Kembalikan Pengajuan">
+                                        <i class="fa-solid fa-undo"></i>
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -824,6 +813,35 @@
     </div>
 </div>
 
+<!-- Return Modal (BARU - SAMA SEPERTI DASHBOARD UTAMA) -->
+<div id="returnConfirmModal" class="modal">
+    <div class="return-modal-content" onclick="event.stopPropagation()">
+        <div class="return-modal-header">
+            <h3><i class="fa-solid fa-undo"></i> Konfirmasi Pengembalian</h3>
+            <button class="close-modal" onclick="closeModal('returnConfirmModal')">&times;</button>
+        </div>
+        <div class="return-modal-body">
+            <div class="return-info-box">
+                <strong style="color: #ff9800;"><i class="fa-solid fa-exclamation-triangle"></i> Peringatan</strong>
+                <span id="returnNamaKegiatan">-</span>
+            </div>
+            
+            <p style="margin-bottom:20px;color:#e65100;font-weight:600">
+                ⚠️ Pengajuan ini akan dikembalikan ke status sebelumnya dan dapat diajukan ulang.
+            </p>
+            
+            <div class="return-modal-actions">
+                <button type="button" class="return-btn return-btn-cancel" onclick="closeModal('returnConfirmModal')">
+                    <i class="fa-solid fa-times"></i> Batal
+                </button>
+                <button type="button" class="return-btn return-btn-submit" onclick="confirmReturn()">
+                    <i class="fa-solid fa-undo"></i> Ya, Kembalikan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Status Modal -->
 <div id="statusModal" class="status-modal">
     <div class="status-content">
@@ -930,6 +948,80 @@ const suratList = <?= isset($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
 let currentApproveId = null;
 let currentSuratId = null;
+let currentReturnId = null;
+let currentReturnNamaKegiatan = null;
+
+// ============================================
+// FUNGSI RETURN MODAL (SAMA SEPERTI DASHBOARD UTAMA)
+// ============================================
+
+// Fungsi untuk menampilkan return modal baru
+function showReturnModalNew(id, namaKegiatan) {
+    currentReturnId = id;
+    currentReturnNamaKegiatan = namaKegiatan;
+    
+    // Set data ke modal
+    document.getElementById('returnNamaKegiatan').textContent = namaKegiatan;
+    
+    // Tampilkan modal
+    document.getElementById('returnConfirmModal').classList.add('show');
+}
+
+// Fungsi untuk konfirmasi return
+function confirmReturn() {
+    if (!currentReturnId) return;
+    
+    const searchParams = new URLSearchParams(window.location.search);
+    const from = 'total';
+    const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
+    const jenis_penugasan = searchParams.get('jenis_penugasan') || '';
+    
+    let actionUrl = `<?= base_url("dekan/return_pengajuan/") ?>${currentReturnId}?from=${from}&tahun=${tahun}`;
+    if (jenis_penugasan) {
+        actionUrl += `&jenis_penugasan=${jenis_penugasan}`;
+    }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = actionUrl;
+
+    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
+    const inpCsrf = document.createElement('input');
+    inpCsrf.type = 'hidden';
+    inpCsrf.name = csrfName;
+    inpCsrf.value = csrfHash;
+    form.appendChild(inpCsrf);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
+// Fungsi untuk meng-update tombol return di tabel
+function updateReturnButtons() {
+    const returnButtons = document.querySelectorAll('button[onclick*="showReturnModal"]');
+    returnButtons.forEach(button => {
+        const onclickAttr = button.getAttribute('onclick');
+        if (onclickAttr) {
+            const match = onclickAttr.match(/showReturnModal\((\d+),\s*'([^']+)'\)/);
+            if (match) {
+                const id = match[1];
+                const namaKegiatan = match[2];
+                
+                button.setAttribute('onclick', `event.stopPropagation(); showReturnModalNew(${id}, '${escapeHtml(namaKegiatan.replace(/'/g, "\\'"))}')`);
+            } else {
+                const match2 = onclickAttr.match(/showReturnModal\((\d+)\)/);
+                if (match2) {
+                    const id = match2[1];
+                    const row = button.closest('tr');
+                    const namaKegiatan = row.querySelector('td:nth-child(2) strong')?.textContent || 'Nama Kegiatan';
+                    
+                    button.setAttribute('onclick', `event.stopPropagation(); showReturnModalNew(${id}, '${escapeHtml(namaKegiatan)}')`);
+                }
+            }
+        }
+    });
+}
 
 // ============================================
 // FUNGSI UTAMA UNTUK SURAT TUGAS MODAL
@@ -938,77 +1030,84 @@ let currentSuratId = null;
 // Fungsi untuk membuka surat tugas dalam modal popup
 function showSuratTugasModal(id) {
     try {
-        currentSuratId = id;
+        // Tampilkan loading
+        document.getElementById('detailContent').innerHTML = `
+            <div style="text-align:center;padding:40px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
+                <p style="margin-top:10px;color:#7f8c8d">Memuat surat pengajuan...</p>
+            </div>
+        `;
+        document.getElementById('detailModal').classList.add('show');
+
+        // Load surat pengajuan via iframe TANPA batasan tinggi
+        const suratUrl = '<?= base_url("dekan/view_surat_pengajuan/") ?>' + id;
         
-        // Tampilkan modal
-        const modal = document.getElementById('suratTugasModal');
-        if (!modal) {
-            console.error('Modal suratTugasModal tidak ditemukan!');
-            // Fallback: buka di tab baru
-            const suratUrl = '<?= site_url("dekan/view_surat_print/") ?>' + id;
-            window.open(suratUrl, '_blank');
-            return;
-        }
-        
-        modal.classList.add('show');
-        
-        // Reset dan tampilkan loading
-        const loading = document.getElementById('suratLoading');
-        const iframe = document.getElementById('suratIframe');
-        
-        if (loading) {
-            loading.style.display = 'flex';
-            loading.innerHTML = `
-                <div style="text-align:center;padding:40px;">
-                    <i class="fa-solid fa-spinner fa-spin" style="font-size:48px;color:#FB8C00"></i>
-                    <p style="margin-top:20px;color:#7f8c8d">Memuat surat tugas...</p>
-                </div>
-            `;
-        }
-        
-        if (iframe) {
-            iframe.style.display = 'none';
-            iframe.src = '';
-        }
-        
-        // Bangun URL surat tugas
-        const suratUrl = '<?= site_url("dekan/view_surat_print/") ?>' + id;
-        
-        // Set timeout untuk memuat iframe
-        setTimeout(() => {
-            if (iframe) {
-                iframe.src = suratUrl;
-                
-                // Event ketika iframe selesai load
-                iframe.onload = function() {
-                    if (loading) loading.style.display = 'none';
-                    iframe.style.display = 'block';
-                };
-                
-                // Event jika error loading iframe
-                iframe.onerror = function() {
-                    if (loading) {
-                        loading.style.display = 'flex';
-                        loading.innerHTML = `
-                            <div style="color:#e74c3c; text-align:center;">
-                                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
-                                <p>Gagal memuat surat tugas</p>
-                                <button class="btn btn-primary" onclick="window.open('${suratUrl}', '_blank')" style="margin-top:15px">
-                                    <i class="fa-solid fa-external-link-alt"></i> Buka di Tab Baru
-                                </button>
-                            </div>
-                        `;
-                    }
-                };
-            }
-        }, 100);
+        document.getElementById('detailContent').innerHTML = `
+            <div style="width:100%; overflow:hidden; border-radius:8px;">
+                <iframe 
+                    id="suratIframe"
+                    src="${suratUrl}" 
+                    style="width:100%; height:70vh; border:none;"
+                    onload="adjustIframeHeight()"
+                ></iframe>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        `;
         
     } catch (error) {
         console.error('Error loading surat:', error);
-        alert('Gagal memuat surat tugas: ' + error.message);
+        document.getElementById('detailContent').innerHTML = `
+            <div style="text-align:center;padding:40px;color:#e74c3c">
+                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
+                <p>Gagal memuat surat: ${error.message}</p>
+                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')" style="margin-top:20px">
+                    <i class="fa-solid fa-times"></i> Tutup
+                </button>
+            </div>
+        `;
     }
 }
 
+// Fungsi untuk menyesuaikan tinggi iframe berdasarkan konten
+function adjustIframeHeight() {
+    const iframe = document.getElementById('suratIframe');
+    if (!iframe) return;
+    
+    try {
+        // Tunggu sedikit untuk konten selesai dimuat
+        setTimeout(() => {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const body = iframeDoc.body;
+                const html = iframeDoc.documentElement;
+                
+                // Hitung tinggi maksimum
+                const height = Math.max(
+                    body.scrollHeight,
+                    body.offsetHeight,
+                    html.clientHeight,
+                    html.scrollHeight,
+                    html.offsetHeight
+                );
+                
+                // Set tinggi iframe
+                iframe.style.height = (height + 50) + 'px'; // Tambah margin
+                
+                console.log('Iframe height adjusted to:', height);
+            } catch (e) {
+                console.error('Error adjusting iframe height:', e);
+                // Fallback: set tinggi tetap
+                iframe.style.height = '1000px';
+            }
+        }, 500); // Tunggu 500ms untuk konten selesai dimuat
+    } catch (e) {
+        console.error('Error accessing iframe content:', e);
+    }
+}
 // Fungsi untuk mencetak surat
 function cetakSurat() {
     const iframe = document.getElementById('suratIframe');
@@ -1064,7 +1163,7 @@ function closeSuratModal() {
 }
 
 // ============================================
-// FUNGSI-FUNGSI LAINNYA (DARI SEBELUMNYA)
+// FUNGSI-FUNGSI LAINNYA
 // ============================================
 
 // Fungsi untuk mengambil data detail via AJAX
@@ -1133,13 +1232,14 @@ async function showRowDetail(id) {
     }
 }
 
-// Fungsi untuk generate konten detail (sama seperti sebelumnya)
+// Fungsi untuk generate konten detail
 function generateDetailContentEnhanced(item) {
     const getVal = (k) => {
         const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
         return value;
     };
 
+    // Format status badge
     let statusBadge = '';
     const status = getVal('status').toLowerCase();
 
@@ -1151,39 +1251,67 @@ function generateDetailContentEnhanced(item) {
         statusBadge = `<span class="badge badge-pending">${getVal('status')}</span>`;
     }
 
+    // Ambil data dosen
     const dosenData = item.dosen_data || [];
 
+    // Generate HTML untuk data dosen - SESUAI FORMAT CONTOH
     let dosenHtml = '';
     if (dosenData && dosenData.length > 0) {
+        // Perbaikan: Format sesuai contoh yang diberikan
         dosenHtml = `
-        <div class="dosen-list">
-            ${dosenData.map((dosen, index) => `
-            <div class="dosen-item">
-                <div class="dosen-avatar">
-                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
-                </div>
-                <div class="dosen-info">
-                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
-                    <div class="dosen-details">
-                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
-                    </div>
-                </div>
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
             </div>
-            `).join('')}
+            <div class="dosen-list">
+                ${dosenData.map((dosen, index) => {
+                    // Pastikan data dosen valid
+                    const nama = escapeHtml(dosen.nama || 'Data tidak tersedia');
+                    const nip = escapeHtml(dosen.nip || '-');
+                    const jabatan = escapeHtml(dosen.jabatan || 'Dosen');
+                    const divisi = escapeHtml(dosen.divisi || '-');
+                    
+                    // Format sesuai contoh: Nama, Gelar | NIP: XXXXX | Jabatan | Divisi: XXX
+                    return `
+                    <div class="dosen-item">
+                        <div class="dosen-avatar">
+                            ${nama ? nama.charAt(0).toUpperCase() : '?'}
+                        </div>
+                        <div class="dosen-info">
+                            <div class="dosen-name">${nama}</div>
+                            <div class="dosen-details">
+                                NIP: ${nip} | ${jabatan} | Divisi: ${divisi}
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('')}
+            </div>
         </div>`;
     } else {
+        // Fallback jika tidak ada data dosen
         dosenHtml = `
-        <div class="dosen-item">
-            <div class="dosen-avatar">
-                ?
+        <div class="detail-section">
+            <div class="detail-section-title">
+                <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
             </div>
-            <div class="dosen-info">
-                <div class="dosen-name">Data dosen tidak tersedia</div>
-                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+            <div class="dosen-list">
+                <div class="dosen-item">
+                    <div class="dosen-avatar">
+                        ?
+                    </div>
+                    <div class="dosen-info">
+                        <div class="dosen-name">Data dosen tidak tersedia</div>
+                        <div class="dosen-details">
+                            NIP: - | Dosen | Divisi: -
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>`;
     }
 
+    // Tampilkan nomor surat jika sudah disetujui
     let nomorSuratHtml = '';
     if (getVal('nomor_surat') && getVal('nomor_surat') !== '-') {
         nomorSuratHtml = `
@@ -1197,6 +1325,7 @@ function generateDetailContentEnhanced(item) {
         </div>`;
     }
 
+    // Tampilkan catatan penolakan jika ada
     let rejectionHtml = '';
     if (getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-') {
         rejectionHtml = `
@@ -1210,20 +1339,24 @@ function generateDetailContentEnhanced(item) {
         </div>`;
     }
 
+    // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date
     const jenisDate = getVal('jenis_date');
     const periodeValue = getVal('periode_value');
     const tanggalKegiatan = getVal('tanggal_kegiatan');
     const akhirKegiatan = getVal('akhir_kegiatan');
 
+    // Tentukan tampilan untuk Periode dan Tanggal Mulai
     let periodeDisplay = '-';
     let tanggalMulaiDisplay = '-';
     let tanggalAkhirDisplay = '-';
 
     if (jenisDate === 'Periode') {
+        // Jika Periode: tampilkan periode_value, kosongkan tanggal
         periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
         tanggalMulaiDisplay = '-';
         tanggalAkhirDisplay = '-';
     } else if (jenisDate === 'Custom') {
+        // Jika Custom: tampilkan tanggal, kosongkan periode
         periodeDisplay = '-';
         if (tanggalKegiatan !== '-' && tanggalKegiatan) {
             tanggalMulaiDisplay = formatDate(tanggalKegiatan);
@@ -1232,6 +1365,7 @@ function generateDetailContentEnhanced(item) {
             tanggalAkhirDisplay = formatDate(akhirKegiatan);
         }
     } else {
+        // Fallback jika jenis_date tidak ada (data lama)
         if (periodeValue && periodeValue !== '-') {
             periodeDisplay = periodeValue;
         } else if (tanggalKegiatan && tanggalKegiatan !== '-') {
@@ -1269,12 +1403,8 @@ function generateDetailContentEnhanced(item) {
         </div>
     </div>
     
-    <div class="detail-section">
-        <div class="detail-section-title">
-            <i class="fa-solid fa-users"></i> Dosen Terkait
-        </div>
-        ${dosenHtml}
-    </div>
+    <!-- Bagian Dosen Terkait yang sudah diperbaiki -->
+    ${dosenHtml}
     
     <div class="detail-section">
         <div class="detail-section-title">
@@ -1322,10 +1452,10 @@ function generateDetailContentEnhanced(item) {
         </button>
         ${getVal('status') === 'disetujui sekretariat' ? `
         <div style="display:flex;gap:10px;margin-left:auto">
-            <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); showRejectModal(${item.id})">
+            <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); closeModal('detailModal'); showRejectModalNew(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
                 <i class="fa-solid fa-times"></i> Tolak
             </button>
-            <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+            <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); closeModal('detailModal'); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
                 <i class="fa-solid fa-check"></i> Setujui
             </button>
         </div>
@@ -1333,7 +1463,6 @@ function generateDetailContentEnhanced(item) {
     </div>`;
 }
 
-// Fungsi showEvidenModal, showStatusModal, dan lainnya tetap sama...
 async function showEvidenModal(suratId) {
     try {
         const item = await getSuratDetail(suratId);
@@ -1874,6 +2003,7 @@ function makeRowsClickable() {
 
 document.addEventListener('DOMContentLoaded', function() {
     makeRowsClickable();
+    updateReturnButtons();
     
     const closeBtn = document.querySelector('.close-status');
     const modal = document.getElementById('statusModal');
@@ -1953,4 +2083,4 @@ function showDetailModal(id) {
 }
 </script>
 </body>
-</html> 
+</html>

@@ -15,7 +15,7 @@
             margin: 0;
             padding: 0;
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.25; /* Diubah dari 1.5 menjadi 1.15 */
             color: #000;
         }
 
@@ -80,23 +80,17 @@
             text-align: center;
             text-transform: uppercase;
             font-size: 25px;
-            /* sedikit lebih besar */
             font-weight: bold;
             margin-bottom: 2px;
-            /* lebih rapat ke nomor */
             text-decoration: underline;
             text-underline-offset: 4px;
-            /* jarak garis ke teks */
         }
 
         .surat-number {
             text-align: center;
             font-size: 13px;
-            /* sedikit lebih besar dari sebelumnya */
             margin-top: -2px;
-            /* menaikkan sedikit agar lebih dekat */
             margin-bottom: 25px;
-            /* jarak ke isi */
         }
 
         /* Paragraf styling - TANPA INDENT */
@@ -194,7 +188,6 @@
             font-weight: bold;
             text-decoration: underline;
             line-height: 1;
-            /* jarak vertikal lebih rapat */
             margin-bottom: 2px;
         }
 
@@ -206,7 +199,6 @@
         .qr-centered {
             width: 90px;
             margin-bottom: 6px;
-            /* jarak QR ke nama */
             margin-top: 20px;
         }
 
@@ -224,7 +216,6 @@
 
         .qr-bottom {
             width: 90px;
-            /* ukuran sama seperti QR atas */
             margin-bottom: 6px;
         }
 
@@ -240,6 +231,34 @@
         .date {
             margin-top: 20px;
             margin-bottom: 60px;
+        }
+
+        /* Tembusan styling */
+        .tembusan-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .tembusan-item {
+            margin-bottom: 4px;
+        }
+
+        /* Spesifik untuk jarak Demikian ke Bandung */
+        .demikian-to-bandung {
+            margin-bottom: 1px; /* 1 spasi */
+        }
+        
+        /* Tambahan untuk jarak nama dekan dan jabatan di tanda tangan */
+        .nama-dekan-tanda-tangan {
+            line-height: 1;
+            margin-bottom: 1px; /* 1 spasi antara nama dan jabatan */
+            text-decoration: underline;
+        }
+        
+        .jabatan-dekan-tanda-tangan {
+            line-height: 1;
+            margin-top: 0;
         }
     </style>
 
@@ -270,6 +289,150 @@ function tgl_indo($tanggal)
         return $pecah[2] . ' ' . $bulan[(int)$pecah[1]] . ' ' . $pecah[0];
     }
     return $tanggal;
+}
+
+// Fungsi untuk mengonversi singkatan divisi ke nama lengkap
+function getNamaDivisiLengkap($singkatan) {
+    $mapping = [
+        // Desain Komunikasi Visual
+        'DKV' => 'Desain Komunikasi Visual',
+        'dkv' => 'Desain Komunikasi Visual',
+        'Desain Komunikasi Visual' => 'Desain Komunikasi Visual',
+        
+        // Desain Interior
+        'DI' => 'Desain Interior',
+        'di' => 'Desain Interior',
+        'Desain Interior' => 'Desain Interior',
+        
+        // Desain Produk
+        'DP' => 'Desain Produk',
+        'dp' => 'Desain Produk',
+        'Desain Produk' => 'Desain Produk',
+        
+        // Kriya
+        'KRIYA' => 'Kriya',
+        'kriya' => 'Kriya',
+        'Kriya' => 'Kriya',
+        
+        // Manajemen
+        'MAN' => 'Manajemen',
+        'man' => 'Manajemen',
+        'Manajemen' => 'Manajemen',
+        
+        // Akuntansi
+        'AKT' => 'Akuntansi',
+        'akt' => 'Akuntansi',
+        'Akuntansi' => 'Akuntansi',
+        
+        // Teknik Informatika
+        'TI' => 'Teknik Informatika',
+        'ti' => 'Teknik Informatika',
+        'Teknik Informatika' => 'Teknik Informatika',
+        
+        // Sistem Informasi
+        'SI' => 'Sistem Informasi',
+        'si' => 'Sistem Informasi',
+        'Sistem Informasi' => 'Sistem Informasi',
+        
+        // Teknik Elektro
+        'TE' => 'Teknik Elektro',
+        'te' => 'Teknik Elektro',
+        'Teknik Elektro' => 'Teknik Elektro',
+        
+        // Teknik Industri
+        'TIN' => 'Teknik Industri',
+        'tin' => 'Teknik Industri',
+        'Teknik Industri' => 'Teknik Industri',
+        
+        // Fakultas Industri Kreatif
+        'FIK' => 'Fakultas Industri Kreatif',
+        'fik' => 'Fakultas Industri Kreatif',
+        'Fakultas Industri Kreatif' => 'Fakultas Industri Kreatif',
+        
+        // Fakultas Ekonomi dan Bisnis
+        'FEB' => 'Fakultas Ekonomi dan Bisnis',
+        'feb' => 'Fakultas Ekonomi dan Bisnis',
+        'Fakultas Ekonomi dan Bisnis' => 'Fakultas Ekonomi dan Bisnis',
+        
+        // Fakultas Informatika
+        'FIF' => 'Fakultas Informatika',
+        'fif' => 'Fakultas Informatika',
+        'Fakultas Informatika' => 'Fakultas Informatika',
+        
+        // Fakultas Teknik
+        'FTE' => 'Fakultas Teknik',
+        'fte' => 'Fakultas Teknik',
+        'Fakultas Teknik' => 'Fakultas Teknik',
+        
+        // Admin
+        'ADMIN' => 'Administrasi',
+        'admin' => 'Administrasi',
+        'Administrasi' => 'Administrasi',
+        'Admin KK' => 'Administrasi KK',
+        'Admin' => 'Administrasi',
+        
+        // Lain-lain - tambahkan sesuai kebutuhan
+        'BAAK' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        'baak' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        
+        'BAA' => 'Biro Administrasi Akademik',
+        'baa' => 'Biro Administrasi Akademik',
+        
+        'BK' => 'Biro Keuangan',
+        'bk' => 'Biro Keuangan',
+        
+        'SDM' => 'Sumber Daya Manusia',
+        'sdm' => 'Sumber Daya Manusia',
+    ];
+    
+    // Trim dan cek apakah ada di mapping
+    $singkatan = trim($singkatan);
+    
+    // Jika ada di mapping, kembalikan nama lengkap
+    if (isset($mapping[$singkatan])) {
+        return $mapping[$singkatan];
+    }
+    
+    // Jika tidak ditemukan, kembalikan aslinya (mungkin sudah nama lengkap)
+    return $singkatan;
+}
+
+// Fungsi untuk cek apakah nilai kosong/null/dash
+function isValueEmpty($value) {
+    return empty($value) || $value === '-' || $value === 'null' || $value === 'NULL';
+}
+
+// Kode baru: Mengambil divisi unik dari data dosen untuk tembusan
+$divisi_tembusan = [];
+if (!empty($surat->dosen_data)) {
+    foreach ($surat->dosen_data as $dosen) {
+        if (!empty($dosen['divisi'])) {
+            $divisi_singkatan = trim($dosen['divisi']);
+            $divisi_lengkap = getNamaDivisiLengkap($divisi_singkatan);
+            $divisi_tembusan[] = $divisi_lengkap;
+        }
+    }
+}
+// Hapus duplikat dan urutkan
+$divisi_tembusan = array_unique($divisi_tembusan);
+sort($divisi_tembusan);
+
+// Juga untuk tampilan di tabel
+$dosen_data_dengan_divisi_lengkap = [];
+if (!empty($surat->dosen_data)) {
+    foreach ($surat->dosen_data as $dosen) {
+        $dosen_copy = $dosen;
+        if (!empty($dosen['divisi'])) {
+            $dosen_copy['divisi'] = getNamaDivisiLengkap(trim($dosen['divisi']));
+        }
+        $dosen_data_dengan_divisi_lengkap[] = $dosen_copy;
+    }
+}
+
+// Tentukan jenis penugasan yang akan ditampilkan
+$jenis_penugasan_kelompok_tampil = $surat->jenis_penugasan_kelompok ?? '-';
+if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil === 'Lainnya') {
+    $jenis_penugasan_kelompok_tampil = $surat->penugasan_lainnya_kelompok ?? 'Lainnya';
 }
 ?>
 
@@ -304,7 +467,6 @@ function tgl_indo($tanggal)
         <!-- Judul Surat -->
         <div class="surat-title">SURAT TUGAS</div>
         <div class="surat-number">Nomor : <?= $surat->nomor_surat ?? '-' ?></div>
-
 
         <p>Saya yang bertanda tangan di bawah ini :</p>
 
@@ -341,8 +503,8 @@ function tgl_indo($tanggal)
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($surat->dosen_data)): ?>
-                    <?php foreach ($surat->dosen_data as $i => $d): ?>
+                <?php if (!empty($dosen_data_dengan_divisi_lengkap)): ?>
+                    <?php foreach ($dosen_data_dengan_divisi_lengkap as $i => $d): ?>
                         <tr>
                             <td class="table-number"><?= $i + 1 ?></td>
                             <td><?= htmlspecialchars($d['nama'] ?? '-') ?></td>
@@ -354,7 +516,7 @@ function tgl_indo($tanggal)
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" style="text-align:center;">Tidak ada data dosen</td>
+                        <td colspan="6" style="text-align:center;">Tidak ada data dosen</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -362,23 +524,45 @@ function tgl_indo($tanggal)
 
         <!-- Untuk Menghadiri Kegiatan -->
         <p>
-            sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b>
+            <?= $surat->customize ?? '-' ?> <b><?= $jenis_penugasan_kelompok_tampil ?></b>
             dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b>
-            yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b>
+            
+            <?php if (!isValueEmpty($surat->penyelenggara)): ?>
+                yang diselenggarakan oleh <b><?= $surat->penyelenggara ?></b>
+            <?php endif; ?>
 
             <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
-                pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b>
+                <?php
+                // Format tanggal
+                $tanggal_mulai = $surat->tanggal_kegiatan ?? '-';
+                $tanggal_akhir = $surat->akhir_kegiatan ?? '-';
+                
+                // Format menjadi tgl_indo
+                $tgl_mulai_formatted = tgl_indo($tanggal_mulai);
+                $tgl_akhir_formatted = tgl_indo($tanggal_akhir);
+                
+                // Cek apakah tanggal sama
+                if ($tanggal_mulai === $tanggal_akhir && $tanggal_mulai !== '-') {
+                    // Jika tanggal sama, tampilkan hanya satu tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b>";
+                } else {
+                    // Jika tanggal berbeda, tampilkan rentang tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b> - <b>$tgl_akhir_formatted</b>";
+                }
+                ?>
             <?php else: ?>
                 selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
             <?php endif; ?>
 
-            di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
+            <?php if (!isValueEmpty($surat->tempat_kegiatan)): ?>
+                di <b><?= $surat->tempat_kegiatan ?>.</b>
+            <?php endif; ?>
         </p>
 
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
 
         <!-- Penutup -->
-        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
+        <p class="demikian-to-bandung">Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
 
         <!-- Tanggal -->
         <p class="date">Bandung, <?php
@@ -414,24 +598,36 @@ function tgl_indo($tanggal)
 
         <!-- SIGNATURE + QR -->
         <div class="signature-bottom">
-
             <?php if (!empty($qr_base64)): ?>
                 <div class="qr-bottom-box">
                     <img class="qr-bottom" src="data:image/png;base64,<?= $qr_base64 ?>" alt="QR Code">
                 </div>
             <?php endif; ?>
 
-            <div class="signature-bottom-text">
-                <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
+            <div class="nama-dekan-tanda-tangan">
+                <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b>
             </div>
-            <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
+            <div class="jabatan-dekan-tanda-tangan">
+                Dekan Fakultas Industri Kreatif
+            </div>
         </div>
-        <p>
-            <b>Tembusan</b><br>
-            1. Wakil Dekan Bidang Akaademik dan Dukungan Peneliltian FIK<br>
-            2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
-            3. Kaprodi S1 Desain Produk
-        </p>
+
+        <!-- TEMBUSAN dengan divisi dinamis dan penomoran terpisah -->
+        <p><b>Tembusan</b></p>
+        <div class="tembusan-list">
+            <div class="tembusan-item">1. Wakil Dekan Bidang Akademik dan Dukungan Penelitian FIK</div>
+            <div class="tembusan-item">2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK</div>
+            
+            <?php if (!empty($divisi_tembusan)): ?>
+                <?php $counter = 3; ?>
+                <?php foreach ($divisi_tembusan as $divisi): ?>
+                    <div class="tembusan-item"><?= $counter ?>. Kaprodi S1 <?= htmlspecialchars($divisi) ?></div>
+                    <?php $counter++; ?>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="tembusan-item">3. Kaprodi -</div>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
 

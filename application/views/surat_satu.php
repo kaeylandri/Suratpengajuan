@@ -14,7 +14,7 @@
             margin: 0;
             padding: 0;
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.25; /* Diubah dari 1.5 menjadi 1.15 */
             color: #000;
         }
 
@@ -75,20 +75,21 @@
         }
 
         .surat-title {
-        text-align: center;
-        text-transform: uppercase;
-        font-size: 25px;        /* sedikit lebih besar */
-        font-weight: bold;
-        margin-bottom: 2px;     /* lebih rapat ke nomor */
-        text-decoration: underline; 
-        text-underline-offset: 4px;   /* jarak garis ke teks */
-    }
+            text-align: center;
+            text-transform: uppercase;
+            font-size: 25px;
+            font-weight: bold;
+            margin-bottom: 2px;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+        
         .surat-number {
-        text-align: center;
-        font-size: 13px;        /* sedikit lebih besar dari sebelumnya */
-        margin-top: -2px;       /* menaikkan sedikit agar lebih dekat */
-        margin-bottom: 25px;    /* jarak ke isi */
-    }
+            text-align: center;
+            font-size: 13px;
+            margin-top: -2px;
+            margin-bottom: 25px;
+        }
 
         /* Paragraf styling - TANPA INDENT */
         .content p {
@@ -137,41 +138,25 @@
         }
 
         .signature-bottom-text {
-        margin-top: 5px;
-        font-weight: bold;
-        text-decoration: underline;
-        line-height: 1;      /* jarak vertikal lebih rapat */
-        margin-bottom: 2px;   
+            margin-top: 5px;
+            font-weight: bold;
+            text-decoration: underline;
+            line-height: 1;
+            margin-bottom: 2px;
         }
+        
         .signature-position {
-        margin-top: 2px;
-        font-weight: bold;
-    }
-        .qr-centered {
-            width: 90px;
-            margin-bottom: 6px; /* jarak QR ke nama */
-            margin-top: 20px;
+            margin-top: 2px;
+            font-weight: bold;
         }
 
-        .qr-box {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 100px;
-            page-break-inside: avoid;
-        }
         .qr-bottom-box {
-        margin-top: 5px;
+            margin-top: 5px;
         }
 
         .qr-bottom {
-            width: 90px;   /* ukuran sama seperti QR atas */
+            width: 90px;
             margin-bottom: 6px;
-        }
-
-        img.qr-img {
-            width: 100px;
-            height: auto;
         }
 
         b {
@@ -179,8 +164,36 @@
         }
 
         .date {
-            margin-top: 15px;
+            margin-top: 20px;
             margin-bottom: 60px;
+        }
+
+        /* Tembusan styling */
+        .tembusan-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .tembusan-item {
+            margin-bottom: 4px;
+        }
+        
+        /* Spesifik untuk jarak Demikian ke Bandung */
+        .demikian-to-bandung {
+            margin-bottom: 1px; /* 1 spasi */
+        }
+        
+        /* Tambahan untuk jarak nama dekan dan jabatan di tanda tangan */
+        .nama-dekan-tanda-tangan {
+            line-height: 1;
+            margin-bottom: 1px; /* 1 spasi antara nama dan jabatan */
+            text-decoration: underline;
+        }
+        
+        .jabatan-dekan-tanda-tangan {
+            line-height: 1;
+            margin-top: 0;
         }
     </style>
 
@@ -202,46 +215,122 @@ function tgl_indo($tanggal) {
     return $tanggal;
 }
 
-// Function untuk format tanggal berdasarkan jenis_date
-function format_tanggal_surat($surat) {
-    $jenis_date = $surat->jenis_date ?? 'custom';
-    
-    if ($jenis_date === 'periode') {
-        // Untuk periode, tampilkan periode_value
-        return $surat->periode_value ?? '-';
-    } else {
-        // Untuk custom, tampilkan tanggal_kegiatan dan akhir_kegiatan
-        $tanggal_mulai = tgl_indo($surat->tanggal_kegiatan ?? '-');
-        $tanggal_akhir = tgl_indo($surat->akhir_kegiatan ?? '-');
+// Fungsi untuk mengonversi singkatan divisi ke nama lengkap
+function getNamaDivisiLengkap($singkatan) {
+    $mapping = [
+        // Desain Komunikasi Visual
+        'DKV' => 'Desain Komunikasi Visual',
+        'dkv' => 'Desain Komunikasi Visual',
+        'Desain Komunikasi Visual' => 'Desain Komunikasi Visual',
         
-        if ($tanggal_akhir && $tanggal_akhir !== '-' && $tanggal_akhir !== $tanggal_mulai) {
-            return $tanggal_mulai . ' sampai dengan ' . $tanggal_akhir;
-        } else {
-            return $tanggal_mulai;
-        }
+        // Desain Interior
+        'DI' => 'Desain Interior',
+        'di' => 'Desain Interior',
+        'Desain Interior' => 'Desain Interior',
+        
+        // Desain Produk
+        'DP' => 'Desain Produk',
+        'dp' => 'Desain Produk',
+        'Desain Produk' => 'Desain Produk',
+        
+        // Kriya
+        'KRIYA' => 'Kriya',
+        'kriya' => 'Kriya',
+        'Kriya' => 'Kriya',
+        
+        // Manajemen
+        'MAN' => 'Manajemen',
+        'man' => 'Manajemen',
+        'Manajemen' => 'Manajemen',
+        
+        // Akuntansi
+        'AKT' => 'Akuntansi',
+        'akt' => 'Akuntansi',
+        'Akuntansi' => 'Akuntansi',
+        
+        // Teknik Informatika
+        'TI' => 'Teknik Informatika',
+        'ti' => 'Teknik Informatika',
+        'Teknik Informatika' => 'Teknik Informatika',
+        
+        // Sistem Informasi
+        'SI' => 'Sistem Informasi',
+        'si' => 'Sistem Informasi',
+        'Sistem Informasi' => 'Sistem Informasi',
+        
+        // Teknik Elektro
+        'TE' => 'Teknik Elektro',
+        'te' => 'Teknik Elektro',
+        'Teknik Elektro' => 'Teknik Elektro',
+        
+        // Teknik Industri
+        'TIN' => 'Teknik Industri',
+        'tin' => 'Teknik Industri',
+        'Teknik Industri' => 'Teknik Industri',
+        
+        // Fakultas Industri Kreatif
+        'FIK' => 'Fakultas Industri Kreatif',
+        'fik' => 'Fakultas Industri Kreatif',
+        'Fakultas Industri Kreatif' => 'Fakultas Industri Kreatif',
+        
+        // Fakultas Ekonomi dan Bisnis
+        'FEB' => 'Fakultas Ekonomi dan Bisnis',
+        'feb' => 'Fakultas Ekonomi dan Bisnis',
+        'Fakultas Ekonomi dan Bisnis' => 'Fakultas Ekonomi dan Bisnis',
+        
+        // Fakultas Informatika
+        'FIF' => 'Fakultas Informatika',
+        'fif' => 'Fakultas Informatika',
+        'Fakultas Informatika' => 'Fakultas Informatika',
+        
+        // Fakultas Teknik
+        'FTE' => 'Fakultas Teknik',
+        'fte' => 'Fakultas Teknik',
+        'Fakultas Teknik' => 'Fakultas Teknik',
+        
+        // Admin
+        'ADMIN' => 'Administrasi',
+        'admin' => 'Administrasi',
+        'Administrasi' => 'Administrasi',
+        'Ketua KK' => 'Ketua KK',
+        'Admin' => 'Administrasi',
+        
+        // Lain-lain
+        'BAAK' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        'baak' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        
+        'BAA' => 'Biro Administrasi Akademik',
+        'baa' => 'Biro Administrasi Akademik',
+        
+        'BK' => 'Biro Keuangan',
+        'bk' => 'Biro Keuangan',
+        
+        'SDM' => 'Sumber Daya Manusia',
+        'sdm' => 'Sumber Daya Manusia',
+    ];
+    
+    $singkatan = trim($singkatan);
+    
+    if (isset($mapping[$singkatan])) {
+        return $mapping[$singkatan];
     }
+    
+    return $singkatan;
 }
 
-// Function untuk format periode penugasan
-function format_periode_penugasan($surat) {
-    $jenis_date = $surat->jenis_date ?? 'custom';
-    
-    if ($jenis_date === 'periode') {
-        // Untuk periode, tampilkan periode_value
-        return 'selama periode ' . ($surat->periode_value ?? '-');
-    } else {
-        // Untuk custom, tampilkan periode_penugasan dan akhir_periode_penugasan
-        $periode_mulai = tgl_indo($surat->periode_penugasan ?? '-');
-        $periode_akhir = tgl_indo($surat->akhir_periode_penugasan ?? '-');
-        
-        if ($periode_akhir && $periode_akhir !== '-' && $periode_akhir !== $periode_mulai) {
-            return 'pada tanggal ' . $periode_mulai . ' sampai dengan ' . $periode_akhir;
-        } else if ($periode_mulai && $periode_mulai !== '-') {
-            return 'pada tanggal ' . $periode_mulai;
-        } else {
-            return 'sesuai dengan tanggal kegiatan';
-        }
-    }
+
+// Ambil data dosen pertama untuk surat perorangan
+$dosen_pertama = !empty($surat->dosen_data) ? $surat->dosen_data[0] : [];
+$divisi_dosen = !empty($dosen_pertama['divisi']) ? getNamaDivisiLengkap(trim($dosen_pertama['divisi'])) : '-';
+
+// Fungsi untuk cek apakah nilai kosong/null/dash
+function isValueEmpty($value) {
+    return empty($value) || $value === '-' || $value === 'null' || $value === 'NULL';
+}
+// Tentukan jenis penugasan yang akan ditampilkan untuk surat perorangan
+$jenis_penugasan_perorangan_tampil = $surat->jenis_penugasan_perorangan  ?? '-';
+if (isset($jenis_penugasan_perorangan_tampil) && $jenis_penugasan_perorangan_tampil === 'Lainnya') {
+    $jenis_penugasan_perorangan_tampil = $surat->penugasan_lainnya_perorangan  ?? 'Lainnya';
 }
 ?>
 
@@ -273,7 +362,7 @@ function format_periode_penugasan($surat) {
     </div>
 
     <!-- CONTENT -->
-     <br><br>
+    <br><br>
     <div class="content">
         <!-- Judul Surat -->
         <div class="surat-title">SURAT TUGAS</div>
@@ -304,72 +393,117 @@ function format_periode_penugasan($surat) {
         <p class="section-title">Menugaskan kepada :</p>
 
         <?php if (!empty($surat->dosen_data) && count($surat->dosen_data) > 0): ?>
-            <?php $dosen = $surat->dosen_data[0]; ?>
             <div class="identity">
                 <div class="identity-row">
                     <div class="identity-label">Nama</div>
                     <div class="identity-separator">:</div>
-                    <div class="identity-value"><?= htmlspecialchars($dosen['nama'] ?? '-') ?></div>
+                    <div class="identity-value"><?= htmlspecialchars($dosen_pertama['nama'] ?? '-') ?></div>
                 </div>
                 <div class="identity-row">
                     <div class="identity-label">NIP</div>
                     <div class="identity-separator">:</div>
-                    <div class="identity-value"><?= htmlspecialchars($dosen['nip'] ?? '-') ?></div>
+                    <div class="identity-value"><?= htmlspecialchars($dosen_pertama['nip'] ?? '-') ?></div>
                 </div>
                 <div class="identity-row">
                     <div class="identity-label">Jabatan</div>
                     <div class="identity-separator">:</div>
-                    <div class="identity-value"><?= htmlspecialchars($dosen['jabatan'] ?? '-') ?></div>
+                    <div class="identity-value"><?= htmlspecialchars($dosen_pertama['jabatan'] ?? '-') ?>, <?= htmlspecialchars($divisi_dosen) ?></div>
                 </div>
-                <div class="identity-row">
-                    <div class="identity-label">Prodi/Unit</div>
-                    <div class="identity-separator">:</div>
-                    <div class="identity-value"><?= htmlspecialchars($dosen['divisi'] ?? '-') ?></div>
-                </div>
-            </div>
         <?php else: ?>
             <p style="text-align:center;">Tidak ada data dosen</p>
         <?php endif; ?>
 
+         <!-- Untuk Menghadiri Kegiatan -->
         <p>
-        sebagai <b><?= $surat->jenis_penugasan_kelompok ?? '-' ?></b> 
-        dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b> 
-        yang diselenggarakan oleh <b><?= $surat->penyelenggara ?? '-' ?></b> 
+            <?= $surat->customize ?? '-' ?> <b><?= $jenis_penugasan_perorangan_tampil ?></b>
+            dalam kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b>
+            
+            <?php if (!isValueEmpty($surat->penyelenggara)): ?>
+                yang diselenggarakan oleh <b><?= $surat->penyelenggara ?></b>
+            <?php endif; ?>
 
-        <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'custom'): ?>
-            pada tanggal <b><?= tgl_indo($surat->tanggal_kegiatan ?? '-') ?></b>
-        <?php else: ?>
-            selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
-        <?php endif; ?>
+            <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
+                <?php
+                // Format tanggal
+                $tanggal_mulai = $surat->tanggal_kegiatan ?? '-';
+                $tanggal_akhir = $surat->akhir_kegiatan ?? '-';
+                
+                // Format menjadi tgl_indo
+                $tgl_mulai_formatted = tgl_indo($tanggal_mulai);
+                $tgl_akhir_formatted = tgl_indo($tanggal_akhir);
+                
+                // Cek apakah tanggal sama
+                if ($tanggal_mulai === $tanggal_akhir && $tanggal_mulai !== '-') {
+                    // Jika tanggal sama, tampilkan hanya satu tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b>";
+                } else {
+                    // Jika tanggal berbeda, tampilkan rentang tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b> - <b>$tgl_akhir_formatted</b>";
+                }
+                ?>
+            <?php else: ?>
+                selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
+            <?php endif; ?>
 
-        di <b><?= $surat->tempat_kegiatan ?? '-' ?></b>.
-    </p>
+            <?php if (!isValueEmpty($surat->tempat_kegiatan)): ?>
+                di <b><?= $surat->tempat_kegiatan ?>.</b>
+            <?php endif; ?>
+        </p>
 
-
-        <!-- Periode Penugasan -->
-        <?php if (($surat->jenis_date ?? 'custom') === 'custom' && (!empty($surat->periode_penugasan) && $surat->periode_penugasan !== '-')): ?>
-            <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
-    
-        <?php else: ?>
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
-        <?php endif; ?>
 
         <!-- Penutup -->
-        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
+        <p class="demikian-to-bandung">Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
 
         <!-- Tanggal -->
-        <p class="date">Bandung, <?php
-        // Default tanggal
-        $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
+        <p class="date">Bandung,
+             <?php
+                                    // Default tanggal
+                                    $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
+
+                                    // Jika approval_status berisi data mentah seperti contoh
+                                    if (!empty($surat->approval_status)) {
+                                        // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
+                                        if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
+                                            $tanggalPengesahan = $matches[1];
+                                        }
+                                    }
+
+                                    // Format tanggal
+                                    $timestamp = strtotime($tanggalPengesahan);
+                                    $bulan = [
+                                        1 => 'Januari',
+                                        2 => 'Februari',
+                                        3 => 'Maret',
+                                        4 => 'April',
+                                        5 => 'Mei',
+                                        6 => 'Juni',
+                                        7 => 'Juli',
+                                        8 => 'Agustus',
+                                        9 => 'September',
+                                        10 => 'Oktober',
+                                        11 => 'November',
+                                        12 => 'Desember'
+                                    ];
+                                    echo date('d', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
+                                    ?></p>
+
+        <!-- Periode Penugasan -->
+        <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
+
+        <!-- Penutup -->
+        <p class="demikian-to-bandung">Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
         
-        // Jika approval_status berisi data mentah seperti contoh
+        <!-- Tanggal -->
+        <p class="date">Bandung, <?php
+        $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');
+      
         if (!empty($surat->approval_status)) {
-            // Cari pattern tanggal (YYYY-MM-DD) setelah "dekan"
             if (preg_match('/dekan["\']?\s*:\s*["\']?(\d{4}-\d{2}-\d{2})/', $surat->approval_status, $matches)) {
                 $tanggalPengesahan = $matches[1];
             }
         }
-         // Format tanggal
+        
         $timestamp = strtotime($tanggalPengesahan);
         $bulan = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -380,25 +514,28 @@ function format_periode_penugasan($surat) {
         ?></p>
 
         <!-- SIGNATURE + QR -->
-         <div class="signature-bottom">
+        <div class="signature-bottom">
+            <?php if (!empty($qr_base64)): ?>
+            <div class="qr-bottom-box">
+                <img class="qr-bottom" src="data:image/png;base64,<?= $qr_base64 ?>" alt="QR Code">
+            </div>
+            <?php endif; ?>
 
-    <?php if (!empty($qr_base64)): ?>
-    <div class="qr-bottom-box">
-        <img class="qr-bottom" src="data:image/png;base64,<?= $qr_base64 ?>" alt="QR Code">
-    </div>
-    <?php endif; ?>
+            <div class="nama-dekan-tanda-tangan">
+                <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b>
+            </div>
+            <div class="jabatan-dekan-tanda-tangan">
+                Dekan Fakultas Industri Kreatif
+            </div>
+        </div>
 
-    <div class="signature-bottom-text">
-        <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
-    </div>
-        <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
-</div>
-<p>
-    <b>Tembusan</b><br>
-1.	Wakil Dekan Bidang Akaademik dan Dukungan Peneliltian FIK<br>
-2.	Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
-3.	Kaprodi S1 Desain Produk
-</p>
+        <!-- TEMBUSAN - hanya satu divisi sesuai dosen yang ditugaskan -->
+        <p><b>Tembusan</b></p>
+        <div class="tembusan-list">
+            <div class="tembusan-item">1. Wakil Dekan Bidang Akademik dan Dukungan Penelitian FIK</div>
+            <div class="tembusan-item">2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK</div>
+            <div class="tembusan-item">3. Kaprodi S1 <?= htmlspecialchars($divisi_dosen) ?></div>
+        </div>
     </div>
     
 </body>
