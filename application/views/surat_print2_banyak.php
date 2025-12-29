@@ -461,6 +461,17 @@ if (!empty($dosen_data)) {
     }
 }
 
+// Kode baru: Mengambil divisi unik dari data dosen untuk tembusan
+$divisi_tembusan = [];
+if (!empty($dosen_data_dengan_jabatan_peran)) {
+    foreach ($dosen_data_dengan_jabatan_peran as $dosen) {
+        if (!empty($dosen['divisi'])) {
+            $divisi_singkatan = trim($dosen['divisi']);
+            $divisi_lengkap = getNamaDivisiLengkap($divisi_singkatan);
+            $divisi_tembusan[] = $divisi_lengkap;
+        }
+    }
+}
 // Hapus duplikat dan urutkan
 $divisi_tembusan = array_unique($divisi_tembusan);
 sort($divisi_tembusan);

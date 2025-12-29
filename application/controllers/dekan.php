@@ -850,10 +850,7 @@ public function halaman_total()
         }
     }
 
-    /* ================================
-   FUNGSI AMBIL DATA DOSEN - SIMPLIFIED & FIXED
-================================= */
-private function get_dosen_data_from_nip_fixed($nip_data)
+ private function get_dosen_data_from_nip_fixed($nip_data)
 {
     $dosen_data = array();
     
@@ -867,7 +864,8 @@ private function get_dosen_data_from_nip_fixed($nip_data)
             'nama' => 'Data dosen tidak tersedia',
             'nip' => '-',
             'jabatan' => 'Dosen',
-            'divisi' => '-'
+            'divisi' => '-',
+            'foto' => '' // TAMBAHKAN FOTO
         )];
     }
     
@@ -946,12 +944,13 @@ private function get_dosen_data_from_nip_fixed($nip_data)
             'nama' => 'Data dosen tidak ditemukan',
             'nip' => '-',
             'jabatan' => 'Dosen',
-            'divisi' => '-'
+            'divisi' => '-',
+            'foto' => '' // TAMBAHKAN FOTO
         )];
     }
     
-    // 2. Query ke database
-    $this->db->select('nip, nama_dosen, jabatan, divisi');
+    // 2. Query ke database - TAMBAHKAN FOTO
+    $this->db->select('nip, nama_dosen, jabatan, divisi, foto');
     $this->db->from('list_dosen');
     
     // Coba query dengan IN terlebih dahulu
@@ -967,7 +966,7 @@ private function get_dosen_data_from_nip_fixed($nip_data)
     if ($query->num_rows() > 0) {
         $results = $query->result_array();
         
-        // Create mapping by NIP
+        // Create mapping by NIP - TAMBAHKAN FOTO
         $dosen_map = array();
         foreach ($results as $row) {
             $clean_nip = preg_replace('/[^\d]/', '', $row['nip']);
@@ -975,7 +974,8 @@ private function get_dosen_data_from_nip_fixed($nip_data)
                 'nama' => $row['nama_dosen'],
                 'nip' => $row['nip'],
                 'jabatan' => $row['jabatan'] ?? 'Dosen',
-                'divisi' => $row['divisi'] ?? '-'
+                'divisi' => $row['divisi'] ?? '-',
+                'foto' => $row['foto'] ?? '' // TAMBAHKAN FOTO
             );
         }
         
@@ -988,25 +988,27 @@ private function get_dosen_data_from_nip_fixed($nip_data)
             if (isset($dosen_map[$clean_nip])) {
                 $dosen_data[] = $dosen_map[$clean_nip];
             } else {
-                // Jika tidak ditemukan, tambahkan dengan data minimal
+                // Jika tidak ditemukan, tambahkan dengan data minimal - TAMBAHKAN FOTO
                 $dosen_data[] = array(
                     'nama' => 'NIP: ' . $clean_nip,
                     'nip' => $clean_nip,
                     'jabatan' => 'Dosen',
-                    'divisi' => '-'
+                    'divisi' => '-',
+                    'foto' => '' // TAMBAHKAN FOTO
                 );
             }
         }
     } else {
         log_message('debug', 'No dosen found in database');
-        // Jika tidak ditemukan sama sekali
+        // Jika tidak ditemukan sama sekali - TAMBAHKAN FOTO
         foreach ($nip_array as $nip) {
             $clean_nip = preg_replace('/[^\d]/', '', $nip);
             $dosen_data[] = array(
                 'nama' => 'Data tidak ditemukan (NIP: ' . $clean_nip . ')',
                 'nip' => $clean_nip,
                 'jabatan' => 'Dosen',
-                'divisi' => '-'
+                'divisi' => '-',
+                'foto' => '' // TAMBAHKAN FOTO
             );
         }
     }
@@ -1016,6 +1018,7 @@ private function get_dosen_data_from_nip_fixed($nip_data)
     
     return $dosen_data;
 }
+
 public function approve($id)
 {
     // Generate nomor surat otomatis jika tidak diisi

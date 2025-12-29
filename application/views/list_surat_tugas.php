@@ -3809,6 +3809,30 @@
                 box-shadow: none;
             }
         }
+         /* Tombol Cetak - WARNA UNGU */
+    .btn-cetak {
+        background: #077fc0ff !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 6px 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s ease-in-out;
+        font-size: 14px;
+        height: 32px;
+    }
+
+    .btn-cetak i {
+        font-size: 14px;
+    }
+
+    .btn-cetak:hover {
+        background: #8e44ad !important;
+        transform: scale(1.05);
+    }
         /* Style untuk durasi dengan menit */
 .step-estimasi.minutes-only {
     background: #e3f2fd !important;
@@ -3832,6 +3856,148 @@
     border-color: #c62828 !important;
     font-weight: 600;
 }
+/* ===== PERBAIKAN: Avatar dengan Foto Support ===== */
+.dosen-avatar {
+    width: 40px;
+    height: 40px;
+    background: #ff9800;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.dosen-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.dosen-avatar-initial {
+    position: relative;
+    z-index: 1;
+}
+
+/* Avatar untuk modal detail (lebih besar) */
+.dosen-item-detail .dosen-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+}
+
+/* Avatar untuk modal tambah dosen */
+.selected-dosen-item .dosen-avatar-tambah {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #FB8C00 0%, #FF9800 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.selected-dosen-item .dosen-avatar-tambah img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Avatar untuk modal kurang dosen */
+.dosen-avatar-hapus {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FB8C00 0%, #FF9800 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.dosen-avatar-hapus img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Avatar untuk autocomplete */
+.autocomplete-item .dosen-avatar-auto {
+    width: 32px;
+    height: 32px;
+    background: #FB8C00;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    overflow: hidden;
+    position: relative;
+}
+
+.autocomplete-item .dosen-avatar-auto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Avatar untuk konfirmasi hapus */
+.dosen-hapus-initial {
+    width: 30px;
+    height: 30px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-right: 10px;
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.dosen-hapus-initial img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
     </style>
 </head>
 
@@ -4406,18 +4572,21 @@
                     $nama_dosen_array = [];
                     $jabatan_array = [];
                     $divisi_array = [];
+                    $foto_array = []; // ✅ TAMBAHKAN INI
 
                     foreach ($dosen_data as $dosen) {
                         $nip_array[] = $dosen['nip'];
                         $nama_dosen_array[] = $dosen['nama_dosen'];
                         $jabatan_array[] = $dosen['jabatan'];
                         $divisi_array[] = $dosen['divisi'];
+                         $foto_array[] = $dosen['foto'] ?? ''; // ✅ TAMBAHKAN INI
                     }
 
                     $detail['nip'] = $nip_array;
                     $detail['nama_dosen'] = $nama_dosen_array;
                     $detail['jabatan'] = $jabatan_array;
                     $detail['divisi'] = $divisi_array;
+                    $detail['foto'] = $foto_array; // ✅ TAMBAHKAN INI
 
                     // ===== PERBAIKAN UTAMA: Handle eviden data dengan benar =====
                     $eviden_data = [];
@@ -4589,12 +4758,11 @@
 
                                 <!-- Tombol Print -->
                                 <?php if ($is_approved_dekan && !empty($s->nomor_surat) && $s->nomor_surat !== '-' && $s->nomor_surat !== 'null'): ?>
-                                    <a href="<?= base_url('surat/cetak/' . $s->id) ?>', '_blank')"
-                                        target="_blank"
-                                        class="btn-icon-action btn-print"
-                                        title="Cetak Surat Tugas">
-                                        <i class="fas fa-print"></i>
-                                    </a>
+                                   <button class="btn btn-cetak" 
+                                            onclick="event.stopPropagation(); window.open('<?= site_url('surat/cetak/' . $s->id) ?>', '_blank')"
+                                            title="Cetak Surat">
+                                        <i class="fa-solid fa-print"></i>
+                                    </button>
                                 <?php else: ?>
                                     <button class="btn-icon-action btn-print btn-print-disabled"
                                         title="Cetak hanya untuk surat disetujui dekan"
@@ -4694,16 +4862,17 @@ function formatTanggalIndonesia(dateString) {
         return dateString;
     }
 }
-
-// ===== FUNGSI UNTUK SHOW MODAL DOSEN =====
 function showDosenModal(event, dosenList, namaKegiatan, suratId) {
     event.stopPropagation();
 
     // Validasi: hanya tampilkan modal jika ada lebih dari 1 dosen
     if (!dosenList || dosenList.length <= 1) {
-        // Tampilkan info dosen tunggal di tooltip
         if (dosenList && dosenList.length === 1) {
             const dosen = dosenList[0];
+            const initial = (dosen.nama_dosen || '?').charAt(0).toUpperCase();
+            const hasFoto = dosen.foto && dosen.foto.trim() !== '';
+            
+            // ✅ RENDER FOTO DI SWEETALERT
             Swal.fire({
                 icon: 'info',
                 title: 'Informasi Dosen',
@@ -4711,8 +4880,12 @@ function showDosenModal(event, dosenList, namaKegiatan, suratId) {
                     <div style="text-align: left; padding: 10px;">
                         <div style="margin-bottom: 15px; font-weight: 600; color: #FB8C00;">${namaKegiatan}</div>
                         <div style="display: flex; align-items: center; gap: 15px; background: #f8f9fa; padding: 15px; border-radius: 10px;">
-                            <div style="width: 50px; height: 50px; background: #FB8C00; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 20px;">
-                                ${(dosen.nama_dosen || '?').charAt(0).toUpperCase()}
+                            <div style="width: 50px; height: 50px; background: #FB8C00; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 20px; overflow: hidden; flex-shrink: 0;">
+                                ${hasFoto ? `
+                                    <img src="${dosen.foto}" alt="${dosen.nama_dosen}" 
+                                         style="width: 100%; height: 100%; object-fit: cover;"
+                                         onerror="this.style.display='none'; this.parentElement.innerHTML='${initial}';">
+                                ` : initial}
                             </div>
                             <div style="flex: 1;">
                                 <div style="font-weight: 600; color: #212529; font-size: 16px;">${dosen.nama_dosen || '-'}</div>
@@ -4742,7 +4915,7 @@ function showDosenModal(event, dosenList, namaKegiatan, suratId) {
 
     // Update judul dan konten
     document.getElementById("kegiatanTitle").innerText = namaKegiatan || "Kegiatan";
-    updateDosenListDisplay();
+    updateDosenListDisplay(); // ✅ Ini akan render foto
 
     // Tampilkan tombol aksi jika ada lebih dari 1 dosen
     const actionButtons = document.getElementById("dosenActionButtons");
@@ -4757,8 +4930,6 @@ function showDosenModal(event, dosenList, namaKegiatan, suratId) {
     dosenModal.classList.add('show');
     dosenModal.style.zIndex = '1055';
 }
-
-// ===== PERBAIKAN UTAMA: UPDATE TAMPILAN DOSEN DENGAN TANDA =====
 function updateDosenListDisplay() {
     const container = document.getElementById("dosenListContainer");
     if (!container) return;
@@ -4781,8 +4952,10 @@ function updateDosenListDisplay() {
             item.setAttribute('data-nip', d.nip || '');
 
             const initial = (d.nama_dosen || "-").charAt(0).toUpperCase();
-
-            // Tentukan apakah dosen ini baru ditambahkan
+            
+            // ✅ CEK FOTO - Jika ada foto tampilkan, jika tidak tampilkan initial
+            const hasFoto = d.foto && d.foto.trim() !== '';
+            
             const isNewDosen = newDosenList.some(newDosen => newDosen.nip === d.nip);
             const isRemovedDosen = removedDosenList.some(removedDosen => removedDosen.nip === d.nip);
             
@@ -4792,9 +4965,18 @@ function updateDosenListDisplay() {
                 item.classList.add('removed-dosen');
             }
 
+            // ✅ RENDER DENGAN FOTO ATAU INITIAL
             item.innerHTML = `
             <div class="dosen-avatar" style="position: relative;">
-                ${initial}
+                ${hasFoto ? `
+                    <img src="${d.foto}" 
+                         alt="${d.nama_dosen}" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                         style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    <div class="dosen-avatar-initial" style="display: none;">${initial}</div>
+                ` : `
+                    <div class="dosen-avatar-initial">${initial}</div>
+                `}
                 ${isNewDosen ? '<span class="dosen-new-badge">+</span>' : ''}
                 ${isRemovedDosen ? '<span class="dosen-removed-badge">-</span>' : ''}
             </div>
@@ -4828,7 +5010,6 @@ function updateDosenListDisplay() {
         }
     }
 }
-
 // ===== PERBAIKAN UTAMA: FUNGSI UNTUK MENUTUP SEMUA MODAL =====
 function tutupSemuaModalKecuali(modalId = null) {
     const modals = [
@@ -5198,7 +5379,6 @@ function showModalKurangDosen() {
     modalKurang.classList.add('show');
     modalKurang.style.zIndex = '1060';
 }
-
 function updateDosenHapusList() {
     const container = document.getElementById('listDosenHapus');
     const emptyMessage = document.getElementById('pesanDosenKosong');
@@ -5219,7 +5399,7 @@ function updateDosenHapusList() {
     
     if (emptyMessage) emptyMessage.style.display = 'none';
     
-    // Tampilkan setiap dosen dengan checkbox
+    // Tampilkan setiap dosen dengan checkbox dan foto
     dosenBisaDihapus.forEach((dosen, index) => {
         const actualIndex = index + 1;
         const item = document.createElement('div');
@@ -5228,22 +5408,32 @@ function updateDosenHapusList() {
         item.dataset.nip = dosen.nip;
         
         const initial = (dosen.nama_dosen || "?").charAt(0).toUpperCase();
+        const hasFoto = dosen.foto && dosen.foto.trim() !== ''; // ✅ CEK FOTO
         const isSelected = selectedDosenToDelete.includes(dosen.nip);
         
         item.innerHTML = `
             <input type="checkbox" class="checkbox-hapus" ${isSelected ? 'checked' : ''}>
-            <div class="dosen-avatar-hapus">${initial}</div>
+            <div class="dosen-avatar-hapus">
+                ${hasFoto ? `
+                    <img src="${escapeHtml(dosen.foto)}" 
+                         alt="${escapeHtml(dosen.nama_dosen)}" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="dosen-avatar-initial" style="display: none;">${initial}</div>
+                ` : `
+                    <div class="dosen-avatar-initial">${initial}</div>
+                `}
+            </div>
             <div class="dosen-info-hapus">
-                <div class="dosen-nama-hapus">${dosen.nama_dosen || '-'}</div>
+                <div class="dosen-nama-hapus">${escapeHtml(dosen.nama_dosen || '-')}</div>
                 <div class="dosen-detail-hapus">
-                    NIP: ${dosen.nip || '-'} | 
-                    Jabatan: ${dosen.jabatan || '-'} | 
-                    Divisi: ${dosen.divisi || '-'}
+                    NIP: ${escapeHtml(dosen.nip || '-')} | 
+                    Jabatan: ${escapeHtml(dosen.jabatan || '-')} | 
+                    Divisi: ${escapeHtml(dosen.divisi || '-')}
                 </div>
             </div>
         `;
         
-        // Tambahkan event listener untuk checkbox
+        // Event listeners... (sama seperti sebelumnya)
         const checkbox = item.querySelector('.checkbox-hapus');
         checkbox.addEventListener('change', function(e) {
             e.stopPropagation();
@@ -5260,19 +5450,16 @@ function updateDosenHapusList() {
                 }
             }
             
-            // Update UI
             updateItemSelection(item, this.checked);
             updateMultiHapusHeader();
             updateHapusButtonState();
         });
         
-        // Juga bisa select dengan klik item
         item.addEventListener('click', function(e) {
             if (e.target === checkbox || e.target.type === 'checkbox') {
                 return;
             }
             
-            // Toggle checkbox
             checkbox.checked = !checkbox.checked;
             const nip = dosen.nip;
             
@@ -5287,13 +5474,11 @@ function updateDosenHapusList() {
                 }
             }
             
-            // Update UI
             updateItemSelection(item, checkbox.checked);
             updateMultiHapusHeader();
             updateHapusButtonState();
         });
         
-        // Set initial selection state
         updateItemSelection(item, isSelected);
         
         container.appendChild(item);
@@ -5413,28 +5598,37 @@ function showKonfirmasiHapusMultiModal() {
             `;
         }
     } else {
-        // Tampilkan multi info
-        singleInfo.style.display = 'none';
-        multiInfo.style.display = 'block';
+    // Tampilkan multi info
+    singleInfo.style.display = 'none';
+    multiInfo.style.display = 'block';
+    
+    if (jumlahElement) jumlahElement.textContent = dosenToDelete.length;
+    
+    // Clear dan isi list dengan foto
+    listContainer.innerHTML = '';
+    dosenToDelete.forEach(dosen => {
+        const initial = (dosen.nama_dosen || "?").charAt(0).toUpperCase();
+        const hasFoto = dosen.foto && dosen.foto.trim() !== ''; // ✅ CEK FOTO
         
-        if (jumlahElement) jumlahElement.textContent = dosenToDelete.length;
-        
-        // Clear dan isi list
-        listContainer.innerHTML = '';
-        dosenToDelete.forEach(dosen => {
-            const initial = (dosen.nama_dosen || "?").charAt(0).toUpperCase();
-            const item = document.createElement('div');
-            item.className = 'dosen-hapus-item';
-            item.innerHTML = `
-                <div class="dosen-hapus-initial">${initial}</div>
-                <div class="dosen-hapus-info">
-                    <div class="dosen-hapus-nama">${dosen.nama_dosen || '-'}</div>
-                    <div class="dosen-hapus-nip">NIP: ${dosen.nip || '-'}</div>
-                </div>
-            `;
-            listContainer.appendChild(item);
-        });
-    }
+        const item = document.createElement('div');
+        item.className = 'dosen-hapus-item';
+        item.innerHTML = `
+            <div class="dosen-hapus-initial">
+                ${hasFoto ? `
+                    <img src="${escapeHtml(dosen.foto)}" 
+                         alt="${escapeHtml(dosen.nama_dosen)}" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div style="display: none;">${initial}</div>
+                ` : initial}
+            </div>
+            <div class="dosen-hapus-info">
+                <div class="dosen-hapus-nama">${escapeHtml(dosen.nama_dosen || '-')}</div>
+                <div class="dosen-hapus-nip">NIP: ${escapeHtml(dosen.nip || '-')}</div>
+            </div>
+        `;
+        listContainer.appendChild(item);
+    });
+}
     
     // Tampilkan modal konfirmasi dengan z-index lebih tinggi
     const konfirmasiModal = document.getElementById('konfirmasiHapusModal');
@@ -5695,8 +5889,6 @@ function hapusDosenDariList(index) {
         });
     }
 }
-
-// ===== FUNGSI UPDATE TAMPILAN DOSEN YANG DIPILIH =====
 function updateSelectedDosenList() {
     const container = document.getElementById('selectedDosenList');
     if (!container) return;
@@ -5726,70 +5918,71 @@ function updateSelectedDosenList() {
     // Clear container
     container.innerHTML = '';
     
-    // Buat list dosen
-    selectedDosenList.forEach((dosen, index) => {
-        const item = document.createElement('div');
-        item.className = 'selected-dosen-item';
-        item.style.cssText = `
+   // Buat list dosen dengan foto
+selectedDosenList.forEach((dosen, index) => {
+    const item = document.createElement('div');
+    item.className = 'selected-dosen-item';
+    item.style.cssText = `
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 15px;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        transition: all 0.2s;
+    `;
+    
+    const initial = (dosen.nama_dosen || '?').charAt(0).toUpperCase();
+    const foto = dosen.foto || '';
+    const hasFoto = foto && foto.trim() !== '' && foto !== 'null';
+    
+    console.log('Modal Tambah - Dosen:', dosen.nama_dosen, 'Foto:', foto, 'Has Foto:', hasFoto); // ✅ DEBUG
+    
+    item.innerHTML = `
+        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #FB8C00 0%, #FF9800 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 16px; overflow: hidden; flex-shrink: 0; position: relative;">
+            ${hasFoto ? `
+                <img src="${escapeHtml(foto)}" 
+                     alt="${escapeHtml(dosen.nama_dosen)}" 
+                     style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0;"
+                     onerror="console.error('Image load error:', this.src); this.style.display='none';">
+                <span style="position: relative; z-index: 1;">${initial}</span>
+            ` : `
+                <span style="position: relative; z-index: 1;">${initial}</span>
+            `}
+        </div>
+        <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 600; color: #333; font-size: 14px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                ${escapeHtml(dosen.nama_dosen || '-')}
+            </div>
+            <div style="font-size: 12px; color: #6c757d; display: flex; flex-wrap: wrap; gap: 10px;">
+                <span><i class="fas fa-id-card"></i> ${escapeHtml(dosen.nip || '-')}</span>
+                <span><i class="fas fa-briefcase"></i> ${escapeHtml(dosen.jabatan || '-')}</span>
+                <span><i class="fas fa-building"></i> ${escapeHtml(dosen.divisi || '-')}</span>
+            </div>
+        </div>
+        <button type="button" onclick="hapusDosenDariList(${index})" style="
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 15px;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            transition: all 0.2s;
-        `;
-        
-        item.innerHTML = `
-            <div style="
-                width: 40px;
-                height: 40px;
-                background: linear-gradient(135deg, #FB8C00 0%, #FF9800 100%);
-                color: white;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: 600;
-                font-size: 16px;
-                flex-shrink: 0;
-            ">
-                ${(dosen.nama_dosen || '?').charAt(0).toUpperCase()}
-            </div>
-            <div style="flex: 1; min-width: 0;">
-                <div style="font-weight: 600; color: #333; font-size: 14px; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    ${dosen.nama_dosen || '-'}
-                </div>
-                <div style="font-size: 12px; color: #6c757d; display: flex; flex-wrap: wrap; gap: 10px;">
-                    <span><i class="fas fa-id-card"></i> ${dosen.nip || '-'}</span>
-                    <span><i class="fas fa-briefcase"></i> ${dosen.jabatan || '-'}</span>
-                    <span><i class="fas fa-building"></i> ${dosen.divisi || '-'}</span>
-                </div>
-            </div>
-            <button type="button" onclick="hapusDosenDariList(${index})" style="
-                background: #dc3545;
-                color: white;
-                border: none;
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                flex-shrink: 0;
-                transition: background 0.2s;
-            ">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        container.appendChild(item);
-    });
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        ">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(item);
+});
 }
-
 // ===== FUNGSI UPDATE STATE TOMBOL =====
 function updateButtonState() {
     const btnSubmit = document.getElementById('btnTambahSubmit');
@@ -5934,72 +6127,79 @@ function setupAutocomplete() {
                 resultsContainer.style.display = 'none';
             });
     });
-
-    // Display results
-    function displayAutocompleteResults(results) {
-        resultsContainer.innerHTML = '';
+function displayAutocompleteResults(results) {
+    resultsContainer.innerHTML = '';
+    
+    // Filter out dosen yang sudah dipilih
+    const filteredResults = results.filter(dosen => 
+        !selectedDosenList.some(selected => selected.nip === dosen.nip)
+    );
+    
+    if (filteredResults.length === 0) {
+        resultsContainer.innerHTML = `
+            <div style="padding: 15px; text-align: center; color: #6c757d;">
+                <i class="fas fa-check-circle"></i>
+                <div style="margin-top: 5px;">Semua dosen yang cocok sudah dipilih</div>
+            </div>
+        `;
+        resultsContainer.style.display = 'block';
+        return;
+    }
+    
+    filteredResults.forEach((dosen, index) => {
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.style.cssText = 'padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;';
+        item.dataset.index = index;
         
-        // Filter out dosen yang sudah dipilih
-        const filteredResults = results.filter(dosen => 
-            !selectedDosenList.some(selected => selected.nip === dosen.nip)
-        );
+        const initial = (dosen.nama_dosen || '?').charAt(0).toUpperCase();
+        const hasFoto = dosen.foto && dosen.foto.trim() !== ''; // ✅ CEK FOTO
         
-        if (filteredResults.length === 0) {
-            resultsContainer.innerHTML = `
-                <div style="padding: 15px; text-align: center; color: #6c757d;">
-                    <i class="fas fa-check-circle"></i>
-                    <div style="margin-top: 5px;">Semua dosen yang cocok sudah dipilih</div>
+        item.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="dosen-avatar-auto">
+                    ${hasFoto ? `
+                        <img src="${escapeHtml(dosen.foto)}" 
+                             alt="${escapeHtml(dosen.nama_dosen)}" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="dosen-avatar-initial" style="display: none;">${initial}</div>
+                    ` : `
+                        <div class="dosen-avatar-initial">${initial}</div>
+                    `}
                 </div>
-            `;
-            resultsContainer.style.display = 'block';
-            return;
-        }
-        
-        filteredResults.forEach((dosen, index) => {
-            const item = document.createElement('div');
-            item.className = 'autocomplete-item';
-            item.style.cssText = 'padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;';
-            item.dataset.index = index;
-            
-            item.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 32px; height: 32px; background: #FB8C00; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600;">
-                        ${(dosen.nama_dosen || '?').charAt(0).toUpperCase()}
-                    </div>
-                    <div style="flex: 1;">
-                        <div style="font-weight: 600; color: #333;">${dosen.nama_dosen || '-'}</div>
-                        <div style="font-size: 12px; color: #666;">
-                            NIP: ${dosen.nip || '-'} | 
-                            ${dosen.jabatan || '-'}
-                        </div>
-                    </div>
-                    <div style="color: #28a745; font-size: 12px;">
-                        <i class="fas fa-plus-circle"></i> Pilih
+                <div style="flex: 1;">
+                    <div style="font-weight: 600; color: #333;">${escapeHtml(dosen.nama_dosen || '-')}</div>
+                    <div style="font-size: 12px; color: #666;">
+                        NIP: ${escapeHtml(dosen.nip || '-')} | 
+                        ${escapeHtml(dosen.jabatan || '-')}
                     </div>
                 </div>
-            `;
-            
-            // Hover effect
-            item.addEventListener('mouseenter', function() {
-                this.style.backgroundColor = '#f8f9fa';
-            });
-            
-            item.addEventListener('mouseleave', function() {
-                this.style.backgroundColor = '';
-            });
-            
-            // Click handler
-            item.addEventListener('click', function() {
-                selectDosenFromAutocomplete(dosen);
-                input.value = '';
-                input.focus();
-            });
-            
-            resultsContainer.appendChild(item);
+                <div style="color: #28a745; font-size: 12px;">
+                    <i class="fas fa-plus-circle"></i> Pilih
+                </div>
+            </div>
+        `;
+        
+        // Event handlers...
+        item.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
         });
         
-        resultsContainer.style.display = 'block';
-    }
+        item.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+        });
+        
+        item.addEventListener('click', function() {
+            selectDosenFromAutocomplete(dosen);
+            input.value = '';
+            input.focus();
+        });
+        
+        resultsContainer.appendChild(item);
+    });
+    
+    resultsContainer.style.display = 'block';
+}
 
     // Select dosen dari autocomplete
     function selectDosenFromAutocomplete(dosen) {
@@ -7285,39 +7485,47 @@ $('#tabelSurat tbody').on('click', 'tr.row-detail', function(e) {
         </div>
     `;
 
-        // === Dosen Section ===
-        if (data.nama_dosen && Array.isArray(data.nama_dosen) && data.nama_dosen.length > 0) {
-            html += `
-            <div class="detail-section">
-                <div class="detail-section-title">
-                    <i class="fas fa-user-graduate"></i>
-                    Dosen Terkait
+     // === Dosen Section ===
+if (data.nama_dosen && Array.isArray(data.nama_dosen) && data.nama_dosen.length > 0) {
+    html += `
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fas fa-user-graduate"></i>
+            Dosen Terkait
+        </div>
+        <div class="dosen-list">
+    `;
+
+    data.nama_dosen.forEach((nama, index) => {
+        const nip = (data.nip && data.nip[index]) ? data.nip[index] : '-';
+        const jabatan = (data.jabatan && data.jabatan[index]) ? data.jabatan[index] : '-';
+        const divisi = (data.divisi && data.divisi[index]) ? data.divisi[index] : '-';
+        const foto = (data.foto && data.foto[index]) ? data.foto[index] : '';
+        
+        // ✅ PERBAIKAN: Hapus inisial, tampilkan foto saja
+        const hasFoto = foto && foto.trim() !== '' && foto !== 'null';
+
+        html += `
+        <div class="dosen-item-detail">
+            <div class="dosen-avatar" style="width: 40px; height: 40px; background: #ff9800; border-radius: 50%; overflow: hidden; position: relative; flex-shrink: 0;">
+                ${hasFoto ? `
+                    <img src="${escapeHtml(foto)}" 
+                         alt="${escapeHtml(nama)}" 
+                         style="width: 100%; height: 100%; object-fit: cover;">
+                ` : ''}
+            </div>
+            <div class="dosen-info">
+                <div class="dosen-name-detail">${escapeHtml(nama)}</div>
+                <div class="dosen-details-detail">
+                    NIP: ${escapeHtml(nip)} | Jabatan: ${escapeHtml(jabatan)} | Divisi: ${escapeHtml(divisi)}
                 </div>
-                <div class="dosen-list">
+            </div>
+        </div>
         `;
+    });
 
-            data.nama_dosen.forEach((nama, index) => {
-                const nip = (data.nip && data.nip[index]) ? data.nip[index] : '-';
-                const jabatan = (data.jabatan && data.jabatan[index]) ? data.jabatan[index] : '-';
-                const divisi = (data.divisi && data.divisi[index]) ? data.divisi[index] : '-';
-                const initial = nama ? nama.charAt(0).toUpperCase() : '?';
-
-                html += `
-                <div class="dosen-item-detail">
-                    <div class="dosen-avatar">${initial}</div>
-                    <div class="dosen-info">
-                        <div class="dosen-name-detail">${escapeHtml(nama)}</div>
-                        <div class="dosen-details-detail">
-                            NIP: ${escapeHtml(nip)} | Jabatan: ${escapeHtml(jabatan)} | Divisi: ${escapeHtml(divisi)}
-                        </div>
-                    </div>
-                </div>
-            `;
-            });
-
-            html += `</div></div>`;
-        }
-
+    html += `</div></div>`;
+}
         // === File Evidence Section ===
         if (data.eviden && Array.isArray(data.eviden) && data.eviden.length > 0) {
             html += `

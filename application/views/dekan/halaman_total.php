@@ -520,6 +520,46 @@
             height: calc(90vh - 130px) !important;
         }
     }
+    /* MODIFIKASI CSS untuk dosen-avatar */
+/* Tambahkan atau replace CSS yang ada dengan ini */
+
+.dosen-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #FB8C00;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    overflow: hidden; /* Untuk memastikan gambar tidak keluar dari border-radius */
+    flex-shrink: 0; /* Prevent shrinking */
+    position: relative;
+}
+
+/* Style untuk gambar di dalam avatar */
+.dosen-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* Fallback ketika gambar error */
+.dosen-avatar > div {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FB8C00;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 50%;
+}
 </style>
 </head>
 <body>
@@ -1254,62 +1294,74 @@ function generateDetailContentEnhanced(item) {
     // Ambil data dosen
     const dosenData = item.dosen_data || [];
 
-    // Generate HTML untuk data dosen - SESUAI FORMAT CONTOH
-    let dosenHtml = '';
-    if (dosenData && dosenData.length > 0) {
-        // Perbaikan: Format sesuai contoh yang diberikan
-        dosenHtml = `
-        <div class="detail-section">
-            <div class="detail-section-title">
-                <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
-            </div>
-            <div class="dosen-list">
-                ${dosenData.map((dosen, index) => {
-                    // Pastikan data dosen valid
-                    const nama = escapeHtml(dosen.nama || 'Data tidak tersedia');
-                    const nip = escapeHtml(dosen.nip || '-');
-                    const jabatan = escapeHtml(dosen.jabatan || 'Dosen');
-                    const divisi = escapeHtml(dosen.divisi || '-');
-                    
-                    // Format sesuai contoh: Nama, Gelar | NIP: XXXXX | Jabatan | Divisi: XXX
-                    return `
-                    <div class="dosen-item">
-                        <div class="dosen-avatar">
-                            ${nama ? nama.charAt(0).toUpperCase() : '?'}
-                        </div>
-                        <div class="dosen-info">
-                            <div class="dosen-name">${nama}</div>
-                            <div class="dosen-details">
-                                NIP: ${nip} | ${jabatan} | Divisi: ${divisi}
-                            </div>
-                        </div>
-                    </div>
-                    `;
-                }).join('')}
-            </div>
-        </div>`;
-    } else {
-        // Fallback jika tidak ada data dosen
-        dosenHtml = `
-        <div class="detail-section">
-            <div class="detail-section-title">
-                <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
-            </div>
-            <div class="dosen-list">
+    
+// Generate HTML untuk data dosen - DENGAN FOTO PROFIL
+let dosenHtml = '';
+if (dosenData && dosenData.length > 0) {
+    dosenHtml = `
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
+        </div>
+        <div class="dosen-list">
+            ${dosenData.map((dosen, index) => {
+                // Pastikan data dosen valid
+                const nama = escapeHtml(dosen.nama || 'Data tidak tersedia');
+                const nip = escapeHtml(dosen.nip || '-');
+                const jabatan = escapeHtml(dosen.jabatan || 'Dosen');
+                const divisi = escapeHtml(dosen.divisi || '-');
+                const foto = dosen.foto || '';
+                
+                // Generate foto URL atau initial
+                let avatarContent = '';
+                if (foto && foto !== '' && foto !== '-') {
+                    const fotoUrl = '<?= base_url("uploads/foto/") ?>' + foto;
+                    avatarContent = `<img src="${fotoUrl}" alt="${nama}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                   <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#FB8C00; color:white; font-size:12px; font-weight:600; border-radius:50%;">
+                                       ${nama ? nama.charAt(0).toUpperCase() : '?'}
+                                   </div>`;
+                } else {
+                    avatarContent = nama ? nama.charAt(0).toUpperCase() : '?';
+                }
+                
+                return `
                 <div class="dosen-item">
                     <div class="dosen-avatar">
-                        ?
+                        ${avatarContent}
                     </div>
                     <div class="dosen-info">
-                        <div class="dosen-name">Data dosen tidak tersedia</div>
+                        <div class="dosen-name">${nama}</div>
                         <div class="dosen-details">
-                            NIP: - | Dosen | Divisi: -
+                            NIP: ${nip} | ${jabatan} | Divisi: ${divisi}
                         </div>
                     </div>
                 </div>
+                `;
+            }).join('')}
+        </div>
+    </div>`;
+} else {
+    // Fallback jika tidak ada data dosen
+    dosenHtml = `
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
+        </div>
+        <div class="dosen-list">
+            <div class="dosen-item">
+                <div class="dosen-avatar">
+                    ?
+                </div>
+                <div class="dosen-info">
+                    <div class="dosen-name">Data dosen tidak tersedia</div>
+                    <div class="dosen-details">
+                        NIP: - | Dosen | Divisi: -
+                    </div>
+                </div>
             </div>
-        </div>`;
-    }
+        </div>
+    </div>`;
+}
 
     // Tampilkan nomor surat jika sudah disetujui
     let nomorSuratHtml = '';

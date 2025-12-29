@@ -1363,10 +1363,6 @@ async function showEvidenModal(suratId) {
     }
 }
 
-// ============================================
-// FUNGSI GENERATE DETAIL CONTENT
-// ============================================
-
 function generateDetailContent(item) {
     // Helper function untuk mendapatkan nilai
     const getVal = (k) => {
@@ -1389,37 +1385,52 @@ function generateDetailContent(item) {
     // Ambil data dosen
     const dosenData = item.dosen_data || [];
     
-    // Generate HTML untuk data dosen
-    let dosenHtml = '';
-    if (dosenData && dosenData.length > 0) {
-        dosenHtml = `
-        <div class="dosen-list">
-            ${dosenData.map((dosen, index) => `
-            <div class="dosen-item">
-                <div class="dosen-avatar">
-                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
-                </div>
-                <div class="dosen-info">
-                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
-                    <div class="dosen-details">
-                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
-                    </div>
-                </div>
-            </div>
-            `).join('')}
-        </div>`;
-    } else {
-        dosenHtml = `
+    // ✅ Generate HTML untuk data dosen DENGAN FOTO (TANPA INITIAL)
+let dosenHtml = '';
+if (dosenData && dosenData.length > 0) {
+    dosenHtml = `
+    <div class="dosen-list">
+        ${dosenData.map((dosen, index) => {
+            const initial = dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?';
+            const foto = dosen.foto || '';
+            const hasFoto = foto && foto.trim() !== '' && foto !== 'null';
+            
+            console.log(`Dosen ${index + 1}:`, dosen.nama, 'Foto:', foto, 'Has Foto:', hasFoto); // ✅ DEBUG
+            
+            return `
         <div class="dosen-item">
-            <div class="dosen-avatar">
-                ?
+            <div class="dosen-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #8E44AD; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; overflow: hidden; position: relative;">
+                ${hasFoto ? `
+                    <img src="${escapeHtml(foto)}" 
+                         alt="${escapeHtml(dosen.nama)}" 
+                         style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2;"
+                         onerror="console.error('Image load error:', this.src); this.style.display='none'; this.parentElement.style.background='#8E44AD';">
+                ` : `
+                    <span style="position: relative; z-index: 1;">${initial}</span>
+                `}
             </div>
             <div class="dosen-info">
-                <div class="dosen-name">Data dosen tidak tersedia</div>
-                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+                <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
+                <div class="dosen-details">
+                    NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
+                </div>
             </div>
-        </div>`;
-    }
+        </div>
+            `;
+        }).join('')}
+    </div>`;
+} else {
+    dosenHtml = `
+    <div class="dosen-item">
+        <div class="dosen-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #8E44AD; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600;">
+            <span>?</span>
+        </div>
+        <div class="dosen-info">
+            <div class="dosen-name">Data dosen tidak tersedia</div>
+            <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+        </div>
+    </div>`;
+}
     
     // Tampilkan catatan penolakan jika ada
     let rejectionHtml = '';

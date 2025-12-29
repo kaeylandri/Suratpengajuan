@@ -804,13 +804,144 @@ public function process_multi_reject()
     
     redirect('kaprodi');
 }
+/**
+ * Fungsi untuk ambil data dosen dengan FOTO
+ */
+private function get_dosen_data_from_nip_with_foto($nip_data, $peran_data = null)
+{
+    $dosen_data = array();
+    
+    if (empty($nip_data) || $nip_data === '-' || $nip_data === '[]' || $nip_data === 'null') {
+        return [array(
+            'nama' => 'Data dosen tidak tersedia',
+            'nip' => '-',
+            'jabatan' => '-',
+            'divisi' => '-',
+            'foto' => '' // ✅ TAMBAHKAN FOTO
+        )];
+    }
+    
+    // Parse NIP
+    $nip_array = array();
+    
+    if (is_string($nip_data)) {
+        $trimmed_data = trim($nip_data);
+        
+        if (preg_match('/^\[.*\]$/', $trimmed_data)) {
+            $decoded = json_decode($trimmed_data, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $nip_array = $decoded;
+            } else {
+                preg_match_all('/\d+/', $trimmed_data, $matches);
+                $nip_array = $matches[0] ?? [$trimmed_data];
+            }
+        } else {
+            $nip_array = [$trimmed_data];
+        }
+    } elseif (is_array($nip_data)) {
+        $nip_array = $nip_data;
+    } else {
+        $nip_array = [$nip_data];
+    }
+    
+    $nip_array = array_filter(array_map(function($nip) {
+        if (is_array($nip)) {
+            return !empty($nip) ? trim(strval($nip[0])) : null;
+        }
+        return trim(strval($nip));
+    }, $nip_array), function($nip) {
+        return !empty($nip) && $nip !== '-' && $nip !== 'null' && $nip !== '[]';
+    });
+    
+    if (empty($nip_array)) {
+        return [array(
+            'nama' => 'Data dosen tidak tersedia',
+            'nip' => '-',
+            'jabatan' => '-',
+            'divisi' => '-',
+            'foto' => ''
+        )];
+    }
+    
+    // ✅ PENTING: Query ambil data dosen TERMASUK FOTO
+    $this->db->select('nip, nama_dosen, jabatan, divisi, foto'); // ✅ TAMBAHKAN FOTO
+    $this->db->from('list_dosen');
+    
+    if (count($nip_array) === 1) {
+        $this->db->where('nip', $nip_array[0]);
+    } else {
+        $this->db->where_in('nip', $nip_array);
+    }
+    
+    $query = $this->db->get();
+    
+    if ($query->num_rows() > 0) {
+        $results = $query->result_array();
+        
+        $dosen_by_nip = [];
+        foreach ($results as $row) {
+            // ✅ PROSES FOTO - SAMA SEPERTI DI SURAT.PHP
+            $foto_url = '';
+            if (!empty($row['foto'])) {
+                // Cek apakah foto adalah URL lengkap
+                if (filter_var($row['foto'], FILTER_VALIDATE_URL)) {
+                    $foto_url = $row['foto'];
+                } else {
+                    // Jika hanya nama file, buat URL lengkap
+                    $foto_path = FCPATH . 'uploads/foto/' . $row['foto'];
+                    
+                    // Cek apakah file exist
+                    if (file_exists($foto_path)) {
+                        $foto_url = base_url('uploads/foto/' . $row['foto']);
+                    }
+                }
+            }
+            
+            $dosen_by_nip[trim($row['nip'])] = array(
+                'nama' => $row['nama_dosen'],
+                'nip' => $row['nip'],
+                'jabatan' => $row['jabatan'],
+                'divisi' => $row['divisi'],
+                'foto' => $foto_url // ✅ TAMBAHKAN FOTO
+            );
+        }
+        
+        foreach ($nip_array as $nip) {
+            $clean_nip = trim(strval($nip));
+            if (isset($dosen_by_nip[$clean_nip])) {
+                $dosen_data[] = $dosen_by_nip[$clean_nip];
+            } else {
+                $dosen_data[] = array(
+                    'nama' => 'Data tidak ditemukan',
+                    'nip' => $clean_nip,
+                    'jabatan' => '-',
+                    'divisi' => '-',
+                    'foto' => ''
+                );
+            }
+        }
+    } else {
+        foreach ($nip_array as $nip) {
+            $clean_nip = trim(strval($nip));
+            $dosen_data[] = array(
+                'nama' => 'Data dari NIP: ' . $clean_nip,
+                'nip' => $clean_nip,
+                'jabatan' => '-',
+                'divisi' => '-',
+                'foto' => ''
+            );
+        }
+    }
+    
+    return $dosen_data;
+}
     public function getDetailPengajuan($id)
     {
         $this->db->where('id', $id);
         $pengajuan = $this->db->get('surat')->row();
         
         if ($pengajuan) {
-            $dosen_data = $this->get_dosen_data_from_nip_fixed($pengajuan->nip);
+            $dosen_data = $this->get_dosen_data_from_nip_with_foto($pengajuan->nip, $pengajuan->peran);
             
             // Ambil progress timeline yang lengkap
             $progress_timeline = $this->getProgressTimeline($id);

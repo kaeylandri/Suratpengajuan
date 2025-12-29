@@ -41,7 +41,7 @@
                 return (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
             }
 
-            private function get_dosen_by_nip($nip_data, $peran_data = null)
+private function get_dosen_by_nip($nip_data, $peran_data = null)
 {
     // Handle berbagai tipe data input
     if (empty($nip_data)) {
@@ -64,7 +64,7 @@
         return [];
     }
     
-    // 🆕 Decode peran (array of JSON strings)
+    // Decode peran (array of JSON strings)
     $peran_array = [];
     if (!empty($peran_data)) {
         if (is_array($peran_data)) {
@@ -79,11 +79,12 @@
     
     foreach ($nip_array as $index => $nip) {
         if (!empty($nip) && $nip !== '-') {
-            // Cari dosen berdasarkan NIP dari tabel list_dosen
+            // ✅ SELECT FOTO DARI DATABASE
+            $this->db->select('nip, nama_dosen, jabatan, divisi, foto');
             $this->db->where('nip', $nip);
             $dosen = $this->db->get('list_dosen')->row();
             
-            // 🆕 Parse jabatan dan peran dari peran_array
+            // Parse jabatan dan peran dari peran_array
             $jabatan_from_peran = '';
             $peran_from_data = '';
             
@@ -98,6 +99,25 @@
             // Gunakan jabatan dari peran_data jika ada, jika tidak gunakan dari list_dosen
             $final_jabatan = !empty($jabatan_from_peran) ? $jabatan_from_peran : ($dosen ? $dosen->jabatan : '');
             
+            // ✅ PROSES FOTO - DARI FOLDER uploads/foto/
+            $foto_url = '';
+            if ($dosen && !empty($dosen->foto)) {
+                // Cek apakah foto adalah URL lengkap
+                if (filter_var($dosen->foto, FILTER_VALIDATE_URL)) {
+                    $foto_url = $dosen->foto;
+                } 
+                // Jika hanya nama file, buat URL lengkap
+                else {
+                    // Path file di server
+                    $foto_path = FCPATH . 'uploads/foto/' . $dosen->foto;
+                    
+                    // Cek apakah file exist
+                    if (file_exists($foto_path)) {
+                        $foto_url = base_url('uploads/foto/' . $dosen->foto);
+                    }
+                }
+            }
+            
             $dosen_data[] = [
                 'nip' => $dosen ? $dosen->nip : $nip,
                 'nama_dosen' => $dosen ? $dosen->nama_dosen : '',
@@ -105,6 +125,7 @@
                 'jabatan_original' => $dosen ? $dosen->jabatan : '',
                 'peran' => $peran_from_data,
                 'divisi' => $dosen ? $dosen->divisi : '',
+                'foto' => $foto_url, // ✅ URL FOTO LENGKAP
                 'index' => $index
             ];
         }
