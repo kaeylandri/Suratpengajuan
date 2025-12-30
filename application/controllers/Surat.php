@@ -852,7 +852,7 @@ public function submit()
                 ]);
                 return;
             } else {
-                redirect(base_url('list-surat-tugas'));
+                redirect(base_url('surat/wa_redirect/' . $insert_id));
                 return;
             }
             
@@ -885,7 +885,7 @@ public function submit()
                 ob_end_clean();
             }
             
-            redirect(base_url('list-surat-tugas'));
+            redirect(base_url('surat/wa_redirect/' . $insert_id));
             return;
         }
     }
@@ -2631,6 +2631,31 @@ public function edit($id)
                     ]);
                 }
             }
+            public function wa_redirect($id)
+{
+    $surat = $this->db->get_where('surat', ['id' => $id])->row();
+
+    if (!$surat) {
+        redirect('list-surat-tugas');
+        return;
+    }
+
+    $nomor = '6282119509135'; // 🔴 GANTI NOMOR TUJUAN
+
+    $pesan = urlencode(
+        "📄 Pengajuan Surat Tugas Baru\n\n" .
+        "Nama Kegiatan: {$surat->nama_kegiatan}\n" .
+        "Jenis: {$surat->jenis_pengajuan}\n" .
+        "Tanggal: " . ($surat->created_at ? date('d M Y', strtotime($surat->created_at)) : '-') . "\n\n" .
+        "Silakan cek dashboard."
+    );
+
+    $data['wa_url'] = "https://wa.me/{$nomor}?text={$pesan}";
+    $data['fallback'] = base_url('list-surat-tugas');
+
+    $this->load->view('wa_redirect', $data);
+}
+
 
             /* ===========================================
             DEBUG FUNCTION - Untuk troubleshooting
