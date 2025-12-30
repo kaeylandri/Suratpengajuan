@@ -36,7 +36,7 @@
             margin: 0;
             padding: 0;
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.15;
             color: #000;
         }
 
@@ -190,6 +190,11 @@
         .table-prodi {
             width: 80px;
         }
+        
+        /* Tambahan untuk kolom peran */
+        .table-peran {
+            width: 80px;
+        }
 
         /* Section title */
         .section-title {
@@ -245,6 +250,34 @@
             margin-top: 20px;
             margin-bottom: 60px;
         }
+        
+        /* Spesifik untuk jarak Demikian ke Bandung */
+        .demikian-to-bandung {
+            margin-bottom: 1px; /* 1 spasi */
+        }
+        
+        /* Tambahan untuk jarak nama dekan dan jabatan di tanda tangan */
+        .nama-dekan-tanda-tangan {
+            line-height: 1;
+            margin-bottom: 1px; /* 1 spasi antara nama dan jabatan */
+            text-decoration: underline;
+        }
+        
+        .jabatan-dekan-tanda-tangan {
+            line-height: 1;
+            margin-top: 0;
+        }
+        
+        /* Tembusan styling */
+        .tembusan-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .tembusan-item {
+            margin-bottom: 4px;
+        }
     </style>
 
 </head>
@@ -264,10 +297,184 @@ function tgl_indo($tanggal) {
     }
     return $tanggal;
 }
+
+// Fungsi untuk mengonversi singkatan divisi ke nama lengkap
+function getNamaDivisiLengkap($singkatan) {
+    $mapping = [
+        // Desain Komunikasi Visual
+        'DKV' => 'Desain Komunikasi Visual',
+        'dkv' => 'Desain Komunikasi Visual',
+        'Desain Komunikasi Visual' => 'Desain Komunikasi Visual',
+        
+        // Desain Interior
+        'DI' => 'Desain Interior',
+        'di' => 'Desain Interior',
+        'Desain Interior' => 'Desain Interior',
+        
+        // Desain Produk
+        'DP' => 'Desain Produk',
+        'dp' => 'Desain Produk',
+        'Desain Produk' => 'Desain Produk',
+        
+        // Kriya
+        'KRIYA' => 'Kriya',
+        'kriya' => 'Kriya',
+        'Kriya' => 'Kriya',
+        
+        // Manajemen
+        'MAN' => 'Manajemen',
+        'man' => 'Manajemen',
+        'Manajemen' => 'Manajemen',
+        
+        // Akuntansi
+        'AKT' => 'Akuntansi',
+        'akt' => 'Akuntansi',
+        'Akuntansi' => 'Akuntansi',
+        
+        // Teknik Informatika
+        'TI' => 'Teknik Informatika',
+        'ti' => 'Teknik Informatika',
+        'Teknik Informatika' => 'Teknik Informatika',
+        
+        // Sistem Informasi
+        'SI' => 'Sistem Informasi',
+        'si' => 'Sistem Informasi',
+        'Sistem Informasi' => 'Sistem Informasi',
+        
+        // Teknik Elektro
+        'TE' => 'Teknik Elektro',
+        'te' => 'Teknik Elektro',
+        'Teknik Elektro' => 'Teknik Elektro',
+        
+        // Teknik Industri
+        'TIN' => 'Teknik Industri',
+        'tin' => 'Teknik Industri',
+        'Teknik Industri' => 'Teknik Industri',
+        
+        // Fakultas Industri Kreatif
+        'FIK' => 'Fakultas Industri Kreatif',
+        'fik' => 'Fakultas Industri Kreatif',
+        'Fakultas Industri Kreatif' => 'Fakultas Industri Kreatif',
+        
+        // Fakultas Ekonomi dan Bisnis
+        'FEB' => 'Fakultas Ekonomi dan Bisnis',
+        'feb' => 'Fakultas Ekonomi dan Bisnis',
+        'Fakultas Ekonomi dan Bisnis' => 'Fakultas Ekonomi dan Bisnis',
+        
+        // Fakultas Informatika
+        'FIF' => 'Fakultas Informatika',
+        'fif' => 'Fakultas Informatika',
+        'Fakultas Informatika' => 'Fakultas Informatika',
+        
+        // Fakultas Teknik
+        'FTE' => 'Fakultas Teknik',
+        'fte' => 'Fakultas Teknik',
+        'Fakultas Teknik' => 'Fakultas Teknik',
+        
+        // Admin
+        'ADMIN' => 'Administrasi',
+        'admin' => 'Administrasi',
+        'Administrasi' => 'Administrasi',
+        'Admin KK' => 'Administrasi KK',
+        'Admin' => 'Administrasi',
+        
+        // Lain-lain - tambahkan sesuai kebutuhan
+        'BAAK' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        'baak' => 'Biro Administrasi Akademik dan Kemahasiswaan',
+        
+        'BAA' => 'Biro Administrasi Akademik',
+        'baa' => 'Biro Administrasi Akademik',
+        
+        'BK' => 'Biro Keuangan',
+        'bk' => 'Biro Keuangan',
+        
+        'SDM' => 'Sumber Daya Manusia',
+        'sdm' => 'Sumber Daya Manusia',
+    ];
+    
+    // Trim dan cek apakah ada di mapping
+    $singkatan = trim($singkatan);
+    
+    // Jika ada di mapping, kembalikan nama lengkap
+    if (isset($mapping[$singkatan])) {
+        return $mapping[$singkatan];
+    }
+    
+    // Jika tidak ditemukan, kembalikan aslinya (mungkin sudah nama lengkap)
+    return $singkatan;
+}
+
+// Tentukan jenis penugasan yang akan ditampilkan
 $jenis_penugasan_kelompok_tampil = $surat->jenis_penugasan_kelompok ?? '-';
 if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil === 'Lainnya') {
     $jenis_penugasan_kelompok_tampil = $surat->penugasan_lainnya_kelompok ?? 'Lainnya';
 }
+
+// ===== PARSING DATA DOSEN DENGAN JABATAN & PERAN DARI JSON =====
+// Decode peran data dari database (JSON array)
+$peran_array = [];
+if (!empty($surat->peran)) {
+    if (is_string($surat->peran)) {
+        $peran_array = json_decode($surat->peran, true);
+        if ($peran_array === null) {
+            $peran_array = [];
+        }
+    } elseif (is_array($surat->peran)) {
+        $peran_array = $surat->peran;
+    }
+}
+
+// Proses data dosen dengan mengambil jabatan dan peran dari JSON
+$dosen_data_dengan_jabatan_peran = [];
+if (!empty($dosen_data)) {
+    foreach ($dosen_data as $index => $dosen) {
+        $dosen_info = $dosen;
+        
+        // Default values
+        $jabatan_value = $dosen['jabatan'] ?? '-';
+        $peran_value = '-';
+        
+        // Coba ambil jabatan dan peran dari peran_array jika ada
+        if (isset($peran_array[$index])) {
+            $peran_item = $peran_array[$index];
+            
+            if (is_string($peran_item)) {
+                // Decode string JSON
+                $decoded = json_decode($peran_item, true);
+                if (is_array($decoded)) {
+                    $jabatan_value = $decoded['jabatan'] ?? $dosen['jabatan'] ?? '-';
+                    $peran_value = $decoded['peran'] ?? '-';
+                } else {
+                    // Jika bukan JSON, mungkin hanya peran saja
+                    $peran_value = $peran_item;
+                }
+            } elseif (is_array($peran_item)) {
+                // Sudah dalam bentuk array
+                $jabatan_value = $peran_item['jabatan'] ?? $dosen['jabatan'] ?? '-';
+                $peran_value = $peran_item['peran'] ?? '-';
+            }
+        }
+        
+        $dosen_info['jabatan'] = $jabatan_value;
+        $dosen_info['peran'] = $peran_value;
+        $dosen_data_dengan_jabatan_peran[] = $dosen_info;
+    }
+}
+
+// Kode baru: Mengambil divisi unik dari data dosen untuk tembusan
+$divisi_tembusan = [];
+if (!empty($dosen_data_dengan_jabatan_peran)) {
+    foreach ($dosen_data_dengan_jabatan_peran as $dosen) {
+        if (!empty($dosen['divisi'])) {
+            $divisi_singkatan = trim($dosen['divisi']);
+            $divisi_lengkap = getNamaDivisiLengkap($divisi_singkatan);
+            $divisi_tembusan[] = $divisi_lengkap;
+        }
+    }
+}
+// Hapus duplikat dan urutkan
+$divisi_tembusan = array_unique($divisi_tembusan);
+sort($divisi_tembusan);
 ?>
 
 <body>
@@ -300,13 +507,13 @@ if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil 
             </div>
         </div>
 
-            <p class="section-title">Menugaskan kepada Dosen dan TPA yang tercantum dalam lampiran surat tugas ini, <?= $surat->customize ?? '-' ?> <b><?= $jenis_penugasan_kelompok_tampil ?></b>
+        <p class="section-title">Menugaskan kepada Dosen dan TPA yang tercantum dalam lampiran surat tugas ini, <?= $surat->customize ?? '-' ?> <b><?= $jenis_penugasan_kelompok_tampil ?></b>
          di kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b></p>
 
         <p>Surat tugas ini berlaku sesuai tanggal kegiatan di atas.</p>
 
         <!-- Penutup -->
-        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
+        <p class="demikian-to-bandung">Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
 
         <!-- Tanggal -->
         <p class="date">Bandung, <?php
@@ -340,17 +547,30 @@ if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil 
         </div>
         <?php endif; ?>
 
-        <div class="signature-bottom-text">
-            <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
+        <div class="nama-dekan-tanda-tangan">
+            <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b>
         </div>
-            <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
+        <div class="jabatan-dekan-tanda-tangan">
+            Dekan Fakultas Industri Kreatif
+        </div>
     </div>
-    <p>
-    <b>Tembusan</b><br>
-    1.	Wakil Dekan Bidang Akaademik dan Dukungan Peneliltian FIK<br>
-    2.	Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK<br>
-    3.	Kaprodi S1 Desain Produk
-    </p>
+
+    <!-- TEMBUSAN dengan divisi dinamis dan penomoran terpisah -->
+    <p><b>Tembusan</b></p>
+    <div class="tembusan-list">
+        <div class="tembusan-item">1. Wakil Dekan Bidang Akademik dan Dukungan Penelitian FIK</div>
+        <div class="tembusan-item">2. Wakil Dekan Bidang Keuangan dan Sumber Daya dan Kemahasiswaan FIK</div>
+        
+        <?php if (!empty($divisi_tembusan)): ?>
+            <?php $counter = 3; ?>
+            <?php foreach ($divisi_tembusan as $divisi): ?>
+                <div class="tembusan-item"><?= $counter ?>. Kaprodi S1 <?= htmlspecialchars($divisi) ?></div>
+                <?php $counter++; ?>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="tembusan-item">3. Kaprodi -</div>
+        <?php endif; ?>
+    </div>
         
         
     <!-- PAGE BREAK untuk halaman lampiran -->
@@ -361,31 +581,33 @@ if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil 
         <h5><b><?= $jenis_penugasan_kelompok_tampil ?>
          kegiatan <?= $surat->nama_kegiatan ?? '-' ?></b></h5>
         
-         <!-- Tabel Dosen dari list_dosen -->
+         <!-- Tabel Dosen dari list_dosen - DENGAN KOLOM PERAN -->
         <table class="tabel-dosen">
             <thead>
                 <tr>
-                    <th>No</th>
+                    <th class="table-number">No</th>
                     <th>Nama</th>
-                    <th>NIP</th>
+                    <th class="table-nip">NIP</th>
                     <th>Jabatan</th>
-                    <th>Prodi/Unit</th>
+                    <th class="table-prodi">Prodi/Unit</th>
+                    <th class="table-peran">Peran</th> <!-- KOLOM BARU -->
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($dosen_data)): ?>
-                    <?php $no = 1; foreach ($dosen_data as $dosen): ?>
+                <?php if (!empty($dosen_data_dengan_jabatan_peran)): ?>
+                    <?php $no = 1; foreach ($dosen_data_dengan_jabatan_peran as $dosen): ?>
                         <tr>
-                            <td><?= $no++ ?></td>
+                            <td class="table-number"><?= $no++ ?></td>
                             <td><?= htmlspecialchars($dosen['nama'] ?? 'Tidak ada data dosen') ?></td>
-                            <td><?= htmlspecialchars($dosen['nip'] ?? '-') ?></td>
+                            <td class="table-nip"><?= htmlspecialchars($dosen['nip'] ?? '-') ?></td>
                             <td><?= htmlspecialchars($dosen['jabatan'] ?? '-') ?></td>
-                            <td><?= htmlspecialchars($dosen['divisi'] ?? '-') ?></td>
+                            <td class="table-prodi"><?= htmlspecialchars($dosen['divisi'] ?? '-') ?></td>
+                            <td class="table-peran"><?= htmlspecialchars($dosen['peran'] ?? '-') ?></td> <!-- DATA PERAN -->
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="5" style="text-align: center;">Tidak ada data dosen</td>
+                        <td colspan="6" style="text-align: center;">Tidak ada data dosen</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
@@ -416,10 +638,12 @@ if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil 
             </div>
             <?php endif; ?>
 
-            <div class="signature-bottom-text">
-                <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b><br>
+            <div class="nama-dekan-tanda-tangan">
+                <b>Dandi Yunidar, S.Sn., M.Ds., Ph.D.</b>
             </div>
-            <div class="signature-position">Dekan Fakultas Industri Kreatif</div>
+            <div class="jabatan-dekan-tanda-tangan">
+                Dekan Fakultas Industri Kreatif
+            </div>
         </div>
     </div>
     </div>

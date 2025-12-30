@@ -244,6 +244,30 @@
             border-bottom: none;
         }
     }
+    /* Tombol Return - WARNA ORANGE/KUNING */
+.btn-return {
+    background: #ff9800 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 5px !important;
+    padding: 6px 10px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.2s ease-in-out;
+    font-size: 14px;
+    height: 32px;
+}
+
+.btn-return i {
+    font-size: 14px;
+}
+
+.btn-return:hover {
+    background: #f57c00 !important;
+    transform: scale(1.05);
+}
 </style>
 </head>
 <body>
@@ -514,18 +538,18 @@
                                 <button class="btn btn-eviden" onclick="event.stopPropagation(); showEvidenModal(<?= $s->id ?? 0 ?>)" title="Lihat Eviden">
                                     <i class="fas fa-file-image"></i>
                                 </button>
-                                
-                                <!-- Tombol Lihat Surat (Biru) -->
-                                <button class="btn btn-detail" onclick="event.stopPropagation(); showDetail(<?= $s->id ?? 0 ?>)" title="Lihat Surat">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                                
+
                                 <?php if(($s->status ?? '') == 'pengajuan'): ?>
                                     <button class="btn btn-approve" onclick="event.stopPropagation(); showApproveModal(<?= $s->id ?? 0 ?>)" title="Setujui">
                                         <i class="fa-solid fa-check"></i>
                                     </button>
                                     <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModal(<?= $s->id ?? 0 ?>)" title="Tolak">
                                         <i class="fa-solid fa-times"></i>
+                                    </button>
+                                <?php elseif(in_array($s->status ?? '', ['disetujui KK', 'ditolak KK'])): ?>
+                                    <!-- Tombol Return: Kembalikan ke status awal -->
+                                    <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModal(<?= $s->id ?? 0 ?>, '<?= htmlspecialchars($s->nama_kegiatan ?? '', ENT_QUOTES) ?>')" title="Kembalikan Pengajuan">
+                                        <i class="fa-solid fa-undo"></i>
                                     </button>
                                 <?php endif; ?>
                             </div>
@@ -561,7 +585,36 @@
 <!-- ============================================
 MODAL-MODAL - SAMA SEPERTI DASHBOARD
 ============================================ -->
-
+<!-- Return Modal -->
+<div id="returnConfirmModal" class="modal">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header" style="background: #ff9800;">
+            <h3><i class="fa-solid fa-undo"></i> Konfirmasi Pengembalian</h3>
+            <button class="close-modal" onclick="closeModal('returnConfirmModal')">&times;</button>
+        </div>
+        <div style="padding:25px">
+            <div style="background:#fff3e0; border:1px solid #ff9800; border-radius:8px; padding:15px; margin-bottom:20px">
+                <strong style="color:#ff9800; display:block; margin-bottom:5px">
+                    <i class="fa-solid fa-exclamation-triangle"></i> Peringatan
+                </strong>
+                <span id="returnNamaKegiatan">-</span>
+            </div>
+            
+            <p style="margin-bottom:20px; color:#e65100; font-weight:600">
+                ⚠️ Pengajuan ini akan dikembalikan ke status sebelumnya dan dapat diajukan ulang.
+            </p>
+            
+            <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:25px; padding-top:20px; border-top:1px solid #e9ecef">
+                <button type="button" class="btn" style="background:#95a5a6; color:white" onclick="closeModal('returnConfirmModal')">
+                    <i class="fa-solid fa-times"></i> Batal
+                </button>
+                <button type="button" class="btn" style="background:#ff9800; color:white" onclick="confirmReturn()">
+                    <i class="fa-solid fa-undo"></i> Ya, Kembalikan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Preview Modal (untuk single file preview) -->
 <div id="previewModal" class="preview-modal">
     <div class="preview-content">
@@ -671,12 +724,47 @@ MODAL-MODAL - SAMA SEPERTI DASHBOARD
 const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
 let currentRejectId = null;
 let currentApproveId = null;
-
+let currentReturnId = null;
+let currentReturnNamaKegiatan = null;
 // Fungsi untuk submit filter secara otomatis
 function submitFilter() {
     document.getElementById('filterForm').submit();
 }
 
+// Fungsi untuk menampilkan return modal
+function showReturnModal(id, namaKegiatan) {
+    currentReturnId = id;
+    currentReturnNamaKegiatan = namaKegiatan;
+    
+    // Set data ke modal
+    document.getElementById('returnNamaKegiatan').textContent = namaKegiatan;
+    
+    // Tampilkan modal
+    document.getElementById('returnConfirmModal').classList.add('show');
+}
+
+// Fungsi untuk konfirmasi return
+function confirmReturn() {
+    if (!currentReturnId) return;
+    
+    // Buat form dan submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= base_url("kaprodi/return_pengajuan/") ?>' + currentReturnId;
+    
+    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
+    
+    // Tambahkan CSRF token
+    const inpCsrf = document.createElement('input');
+    inpCsrf.type = 'hidden';
+    inpCsrf.name = csrfName;
+    inpCsrf.value = csrfHash;
+    form.appendChild(inpCsrf);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
 // PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
 function getSuratDetail(id) {
     return fetch('<?= site_url("kaprodi/getDetailPengajuan/") ?>' + id)
@@ -1113,37 +1201,52 @@ function generateDetailContent(item) {
     // Ambil data dosen
     const dosenData = item.dosen_data || [];
     
-    // Generate HTML untuk data dosen
-    let dosenHtml = '';
-    if (dosenData && dosenData.length > 0) {
-        dosenHtml = `
-        <div class="dosen-list">
-            ${dosenData.map((dosen, index) => `
-            <div class="dosen-item">
-                <div class="dosen-avatar">
-                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
-                </div>
-                <div class="dosen-info">
-                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
-                    <div class="dosen-details">
-                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
-                    </div>
-                </div>
-            </div>
-            `).join('')}
-        </div>`;
-    } else {
-        dosenHtml = `
+    // ✅ Generate HTML untuk data dosen DENGAN FOTO (TANPA INITIAL)
+let dosenHtml = '';
+if (dosenData && dosenData.length > 0) {
+    dosenHtml = `
+    <div class="dosen-list">
+        ${dosenData.map((dosen, index) => {
+            const initial = dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?';
+            const foto = dosen.foto || '';
+            const hasFoto = foto && foto.trim() !== '' && foto !== 'null';
+            
+            console.log(`Dosen ${index + 1}:`, dosen.nama, 'Foto:', foto, 'Has Foto:', hasFoto); // ✅ DEBUG
+            
+            return `
         <div class="dosen-item">
-            <div class="dosen-avatar">
-                ?
+            <div class="dosen-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #8E44AD; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; overflow: hidden; position: relative;">
+                ${hasFoto ? `
+                    <img src="${escapeHtml(foto)}" 
+                         alt="${escapeHtml(dosen.nama)}" 
+                         style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2;"
+                         onerror="console.error('Image load error:', this.src); this.style.display='none'; this.parentElement.style.background='#8E44AD';">
+                ` : `
+                    <span style="position: relative; z-index: 1;">${initial}</span>
+                `}
             </div>
             <div class="dosen-info">
-                <div class="dosen-name">Data dosen tidak tersedia</div>
-                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+                <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
+                <div class="dosen-details">
+                    NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
+                </div>
             </div>
-        </div>`;
-    }
+        </div>
+            `;
+        }).join('')}
+    </div>`;
+} else {
+    dosenHtml = `
+    <div class="dosen-item">
+        <div class="dosen-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #8E44AD; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600;">
+            <span>?</span>
+        </div>
+        <div class="dosen-info">
+            <div class="dosen-name">Data dosen tidak tersedia</div>
+            <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+        </div>
+    </div>`;
+}
     
     // Tampilkan catatan penolakan jika ada
     let rejectionHtml = '';

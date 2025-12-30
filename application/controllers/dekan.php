@@ -367,17 +367,21 @@ class Dekan extends CI_Controller
 
         $this->load->view('dekan/halaman_ditolak', $data);
     }
-
-    /* ================================
-   GET DETAIL PENGAJUAN - UNTUK MODAL DETAIL (API ENDPOINT)
+/* ================================
+   GET DETAIL PENGAJUAN - DENGAN LOGGING DETAILED
 ================================= */
 public function getDetailPengajuan($id)
 {
     try {
+        header('Content-Type: application/json; charset=utf-8');
+        
+        log_message('debug', '=== START getDetailPengajuan ID: ' . $id . ' ===');
+        
         $this->db->where('id', $id);
         $surat = $this->db->get('surat')->row_array();
         
         if (!$surat) {
+            log_message('debug', 'Surat not found for ID: ' . $id);
             echo json_encode([
                 'success' => false,
                 'message' => 'Data tidak ditemukan'
@@ -385,16 +389,61 @@ public function getDetailPengajuan($id)
             return;
         }
         
-        // Ambil data dosen
-        $surat['dosen_data'] = $this->get_dosen_data_from_nip_fixed($surat['nip'] ?? '');
+        log_message('debug', 'Surat found: ' . json_encode($surat));
+        log_message('debug', 'NIP field value: ' . ($surat['nip'] ?? 'NULL'));
+        log_message('debug', 'Nama Dosen field value: ' . ($surat['nama_dosen'] ?? 'NULL'));
+        
+        // PENTING: Ambil data dosen
+        log_message('debug', 'Calling get_dosen_data_from_nip_fixed...');
+        $dosen_data = $this->get_dosen_data_from_nip_fixed($surat['nip'] ?? '');
+        log_message('debug', 'Dosen data returned: ' . json_encode($dosen_data));
+        
+        // Jika dosen_data tidak valid, coba gunakan nama_dosen dari tabel surat
+        if (empty($dosen_data) || (count($dosen_data) === 1 && 
+            ($dosen_data[0]['nama'] === 'Data dosen tidak tersedia' || 
+             $dosen_data[0]['nama'] === 'Data dosen tidak ditemukan'))) {
+            
+            log_message('debug', 'Dosen data invalid, trying alternative...');
+            
+            if (!empty($surat['nama_dosen'])) {
+                log_message('debug', 'Using nama_dosen from surat table: ' . $surat['nama_dosen']);
+                $dosen_data = [array(
+                    'nama' => $surat['nama_dosen'],
+                    'nip' => $surat['nip'] ?? '-',
+                    'jabatan' => 'Dosen',
+                    'divisi' => '-'
+                )];
+            } else {
+                log_message('debug', 'No alternative data available');
+            }
+        }
+        
+        // Pastikan dosen_data ter-assign dengan benar
+        $surat['dosen_data'] = $dosen_data;
+        log_message('debug', 'Assigned dosen_data to surat');
+        
+        // Debug: tambahkan info ke response
+        $surat['_debug'] = array(
+            'input_nip' => $surat['nip'] ?? 'null',
+            'dosen_count' => count($dosen_data),
+            'first_dosen_name' => isset($dosen_data[0]['nama']) ? $dosen_data[0]['nama'] : 'null',
+            'timestamp' => date('Y-m-d H:i:s')
+        );
         
         // Format data eviden jika perlu
         if (!empty($surat['eviden'])) {
             $eviden = $surat['eviden'];
             if (is_string($eviden) && (strpos($eviden, '[') === 0 || strpos($eviden, '{') === 0)) {
-                $surat['eviden'] = json_decode($eviden, true);
+                try {
+                    $surat['eviden'] = json_decode($eviden, true);
+                    log_message('debug', 'Successfully decoded eviden JSON');
+                } catch (Exception $e) {
+                    log_message('debug', 'Failed to decode eviden JSON: ' . $e->getMessage());
+                }
             }
         }
+        
+        log_message('debug', '=== END getDetailPengajuan ===');
         
         echo json_encode([
             'success' => true,
@@ -402,13 +451,14 @@ public function getDetailPengajuan($id)
         ]);
         
     } catch (Exception $e) {
+        log_message('error', 'Error in getDetailPengajuan: ' . $e->getMessage());
         echo json_encode([
             'success' => false,
-            'message' => 'Error: ' . $e->getMessage()
+            'message' => 'Error: ' . $e->getMessage(),
+            'trace' => $e->getTraceAsString()
         ]);
     }
 }
-
 /* ================================
    GET EVIDEN DETAIL - UNTUK MODAL EVIDEN (API ENDPOINT)
 ================================= */
@@ -800,115 +850,175 @@ public function halaman_total()
         }
     }
 
-    /* ================================
-       FUNGSI AMBIL DATA DOSEN
-    ================================= */
-    private function get_dosen_data_from_nip_fixed($nip_data)
-    {
-        $dosen_data = array();
+ private function get_dosen_data_from_nip_fixed($nip_data)
+{
+    $dosen_data = array();
+    
+    // DEBUG: Log input
+    log_message('debug', '======= get_dosen_data_from_nip_fixed =======');
+    log_message('debug', 'Input NIP Data: ' . print_r($nip_data, true));
+    
+    if (empty($nip_data) || $nip_data === '-' || $nip_data === '[]' || $nip_data === 'null' || $nip_data === '' || $nip_data === '""') {
+        log_message('debug', 'NIP data is empty or invalid, returning default');
+        return [array(
+            'nama' => 'Data dosen tidak tersedia',
+            'nip' => '-',
+            'jabatan' => 'Dosen',
+            'divisi' => '-',
+            'foto' => '' // TAMBAHKAN FOTO
+        )];
+    }
+    
+    // 1. Normalisasi data NIP menjadi array sederhana
+    $nip_array = array();
+    
+    // Jika string, coba parse
+    if (is_string($nip_data)) {
+        $clean_data = trim($nip_data);
         
-        if (empty($nip_data) || $nip_data === '-' || $nip_data === '[]' || $nip_data === 'null') {
-            return [array(
-                'nama' => 'Data dosen tidak tersedia',
-                'nip' => '-',
-                'jabatan' => '-',
-                'divisi' => '-'
-            )];
-        }
-        
-        // Handle berbagai format NIP
-        $nip_array = array();
-        
-        if (is_string($nip_data)) {
-            $trimmed_data = trim($nip_data);
-            
-            if (preg_match('/^\[.*\]$/', $trimmed_data)) {
-                $decoded = json_decode($trimmed_data, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                    $nip_array = $decoded;
-                } else {
-                    preg_match_all('/\d+/', $trimmed_data, $matches);
-                    $nip_array = $matches[0] ?? [$trimmed_data];
+        // Cek jika JSON array
+        if (strpos($clean_data, '[') === 0 && strpos($clean_data, ']') === strlen($clean_data) - 1) {
+            try {
+                $decoded = json_decode($clean_data, true);
+                if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
+                    foreach ($decoded as $item) {
+                        if (is_array($item)) {
+                            $nip_array = array_merge($nip_array, $item);
+                        } else {
+                            $nip_array[] = (string)$item;
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                // Jika gagal decode, anggap sebagai string biasa
+                $nip_array = array($clean_data);
+            }
+        } else {
+            // Split by comma jika ada
+            if (strpos($clean_data, ',') !== false) {
+                $parts = explode(',', $clean_data);
+                foreach ($parts as $part) {
+                    $trimmed = trim($part);
+                    if (!empty($trimmed) && $trimmed !== '-' && $trimmed !== 'null') {
+                        $nip_array[] = $trimmed;
+                    }
                 }
             } else {
-                $nip_array = [$trimmed_data];
-            }
-        } elseif (is_array($nip_data)) {
-            $nip_array = $nip_data;
-        } else {
-            $nip_array = [$nip_data];
-        }
-        
-        $nip_array = array_filter(array_map(function($nip) {
-            if (is_array($nip)) {
-                return !empty($nip) ? trim(strval($nip[0])) : null;
-            }
-            return trim(strval($nip));
-        }, $nip_array), function($nip) {
-            return !empty($nip) && $nip !== '-' && $nip !== 'null' && $nip !== '[]';
-        });
-        
-        if (empty($nip_array)) {
-            return [array(
-                'nama' => 'Data dosen tidak tersedia',
-                'nip' => '-',
-                'jabatan' => '-',
-                'divisi' => '-'
-            )];
-        }
-        
-        // Ambil data dosen dari tabel list_dosen
-        $this->db->select('nip, nama_dosen, jabatan, divisi');
-        $this->db->from('list_dosen');
-        
-        if (count($nip_array) === 1) {
-            $this->db->where('nip', $nip_array[0]);
-        } else {
-            $this->db->where_in('nip', $nip_array);
-        }
-        
-        $query = $this->db->get();
-        
-        if ($query->num_rows() > 0) {
-            $results = $query->result_array();
-            
-            $dosen_by_nip = [];
-            foreach ($results as $row) {
-                $dosen_by_nip[trim($row['nip'])] = array(
-                    'nama' => $row['nama_dosen'],
-                    'nip' => $row['nip'],
-                    'jabatan' => $row['jabatan'],
-                    'divisi' => $row['divisi']
-                );
-            }
-            
-            foreach ($nip_array as $nip) {
-                $clean_nip = trim(strval($nip));
-                if (isset($dosen_by_nip[$clean_nip])) {
-                    $dosen_data[] = $dosen_by_nip[$clean_nip];
-                } else {
-                    $dosen_data[] = array(
-                        'nama' => 'Data tidak ditemukan',
-                        'nip' => $clean_nip,
-                        'jabatan' => '-',
-                        'divisi' => '-'
-                    );
-                }
-            }
-        } else {
-            foreach ($nip_array as $nip) {
-                $clean_nip = trim(strval($nip));
-                $dosen_data[] = array(
-                    'nama' => 'Data dari NIP: ' . $clean_nip,
-                    'nip' => $clean_nip,
-                    'jabatan' => '-',
-                    'divisi' => '-'
-                );
+                // Single NIP
+                $nip_array[] = $clean_data;
             }
         }
-        
-        return $dosen_data;
     }
+    // Jika sudah array
+    elseif (is_array($nip_data)) {
+        foreach ($nip_data as $item) {
+            if (is_array($item)) {
+                $nip_array = array_merge($nip_array, $item);
+            } else {
+                $nip_array[] = (string)$item;
+            }
+        }
+    }
+    
+    // Filter dan clean array
+    $nip_array = array_filter(array_map(function($nip) {
+        if (is_array($nip)) {
+            return implode(',', $nip);
+        }
+        $clean = trim((string)$nip);
+        // Hapus karakter non-digit dan spasi
+        $clean = preg_replace('/[^\d]/', '', $clean);
+        return $clean;
+    }, $nip_array), function($nip) {
+        return !empty($nip) && strlen($nip) >= 8; // Minimal 8 digit untuk NIP
+    });
+    
+    // Remove duplicates
+    $nip_array = array_unique($nip_array);
+    
+    log_message('debug', 'Cleaned NIP Array: ' . print_r($nip_array, true));
+    
+    if (empty($nip_array)) {
+        log_message('debug', 'No valid NIP found after cleaning');
+        return [array(
+            'nama' => 'Data dosen tidak ditemukan',
+            'nip' => '-',
+            'jabatan' => 'Dosen',
+            'divisi' => '-',
+            'foto' => '' // TAMBAHKAN FOTO
+        )];
+    }
+    
+    // 2. Query ke database - TAMBAHKAN FOTO
+    $this->db->select('nip, nama_dosen, jabatan, divisi, foto');
+    $this->db->from('list_dosen');
+    
+    // Coba query dengan IN terlebih dahulu
+    if (count($nip_array) === 1) {
+        $this->db->where('nip', $nip_array[0]);
+    } else {
+        $this->db->where_in('nip', $nip_array);
+    }
+    
+    $query = $this->db->get();
+    log_message('debug', 'Query: ' . $this->db->last_query());
+    
+    if ($query->num_rows() > 0) {
+        $results = $query->result_array();
+        
+        // Create mapping by NIP - TAMBAHKAN FOTO
+        $dosen_map = array();
+        foreach ($results as $row) {
+            $clean_nip = preg_replace('/[^\d]/', '', $row['nip']);
+            $dosen_map[$clean_nip] = array(
+                'nama' => $row['nama_dosen'],
+                'nip' => $row['nip'],
+                'jabatan' => $row['jabatan'] ?? 'Dosen',
+                'divisi' => $row['divisi'] ?? '-',
+                'foto' => $row['foto'] ?? '' // TAMBAHKAN FOTO
+            );
+        }
+        
+        log_message('debug', 'Dosen found in DB: ' . count($results));
+        log_message('debug', 'Dosen Map: ' . print_r($dosen_map, true));
+        
+        // Return dosen in the same order as nip_array
+        foreach ($nip_array as $nip) {
+            $clean_nip = preg_replace('/[^\d]/', '', $nip);
+            if (isset($dosen_map[$clean_nip])) {
+                $dosen_data[] = $dosen_map[$clean_nip];
+            } else {
+                // Jika tidak ditemukan, tambahkan dengan data minimal - TAMBAHKAN FOTO
+                $dosen_data[] = array(
+                    'nama' => 'NIP: ' . $clean_nip,
+                    'nip' => $clean_nip,
+                    'jabatan' => 'Dosen',
+                    'divisi' => '-',
+                    'foto' => '' // TAMBAHKAN FOTO
+                );
+            }
+        }
+    } else {
+        log_message('debug', 'No dosen found in database');
+        // Jika tidak ditemukan sama sekali - TAMBAHKAN FOTO
+        foreach ($nip_array as $nip) {
+            $clean_nip = preg_replace('/[^\d]/', '', $nip);
+            $dosen_data[] = array(
+                'nama' => 'Data tidak ditemukan (NIP: ' . $clean_nip . ')',
+                'nip' => $clean_nip,
+                'jabatan' => 'Dosen',
+                'divisi' => '-',
+                'foto' => '' // TAMBAHKAN FOTO
+            );
+        }
+    }
+    
+    log_message('debug', 'Final Dosen Data: ' . print_r($dosen_data, true));
+    log_message('debug', '==========================================');
+    
+    return $dosen_data;
+}
+
 public function approve($id)
 {
     // Generate nomor surat otomatis jika tidak diisi
@@ -940,8 +1050,8 @@ public function approve($id)
     if (!isset($approval['pengirim'])) {
         $approval['pengirim'] = date("Y-m-d H:i:s");
     }
-    if (!isset($approval['kaprodi'])) {
-        $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+    if (!isset($approval['kk'])) {
+        $approval['kk'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
     }
     if (!isset($approval['sekretariat'])) {
         $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
@@ -1010,8 +1120,8 @@ public function approve($id)
         if (!isset($approval['pengirim'])) {
             $approval['pengirim'] = date("Y-m-d H:i:s");
         }
-        if (!isset($approval['kaprodi'])) {
-            $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+        if (!isset($approval['kk'])) {
+            $approval['kk'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
         }
         if (!isset($approval['sekretariat'])) {
             $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
@@ -1028,7 +1138,8 @@ public function approve($id)
             'status' => 'ditolak dekan',
             'approval_status' => json_encode($approval),
             'catatan_penolakan' => $notes,
-            'updated_at' => date('Y-m-d H:i:s')
+            'updated_at' => date('Y-m-d H:i:s'),
+            'disposisi_status' => 'Lanjut Proses ✔'
         ];
 
          $result = $this->db->where('id', $id)->update('surat', $update_data);
@@ -1055,194 +1166,233 @@ public function approve($id)
         
         $this->redirectToPreviousPage();
     }
-
-    public function process_multi_approve()
-    {
-        if ($this->input->post()) {
-            $selected_ids = $this->input->post('selected_ids');
-            
-            if (empty($selected_ids)) {
-                $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih');
-                redirect('dekan/halaman_pending');
-                return;
-            }
-            
-            $success_count = 0;
-            $error_count = 0;
-            $errors = [];
-            $approved_items = []; // TAMBAHAN: Array untuk menyimpan data yang disetujui
-            
-            foreach ($selected_ids as $id) {
-                $surat = $this->db->get_where('surat', ['id' => $id])->row();
-                
-                if ($surat) {
-                    // Validasi status yang lebih fleksibel
-                    $allowed_statuses = ['disetujui sekretariat', 'pending', 'menunggu persetujuan dekan'];
-                    
-                    if (!in_array($surat->status, $allowed_statuses)) {
-                        $error_count++;
-                        $errors[] = "ID $id: Status tidak valid ($surat->status)";
-                        continue;
-                    }
-                    
-                    // Update approval status dengan format yang mendukung progress bar
-                    $approval = json_decode($surat->approval_status, true) ?? [];
-                    
-                    // Pastikan semua tahap sebelumnya ada
-                    if (!isset($approval['pengirim'])) {
-                        $approval['pengirim'] = date("Y-m-d H:i:s");
-                    }
-                    if (!isset($approval['kaprodi'])) {
-                        $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
-                    }
-                    if (!isset($approval['sekretariat'])) {
-                        $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
-                    }
-                    
-                    $approval['dekan'] = date("Y-m-d H:i:s");
-                    
-                    $result = $this->db->where('id', $id)->update('surat', [
-                        'status' => 'disetujui dekan',
-                        'nomor_surat' => $this->generate_nomor_surat_dekan(),
-                        'approval_status' => json_encode($approval),
-                        'updated_at' => date('Y-m-d H:i:s')
-                    ]);
-                    
-                    if ($result) {
-                        $success_count++;
-                        
-                        // TAMBAHAN: Simpan data yang berhasil disetujui
-                        $approved_items[] = [
-                            'nama' => $surat->nama_kegiatan,
-                            'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara
-                        ];
-                    } else {
-                        $error_count++;
-                        $errors[] = "ID $id: Gagal update database";
-                    }
-                } else {
-                    $error_count++;
-                    $errors[] = "ID $id: Data tidak ditemukan";
-                }
-            }
-            
-            if ($success_count > 0) {
-                $message = "Berhasil menyetujui $success_count pengajuan";
-                if ($error_count > 0) {
-                    $message .= ". Gagal: $error_count pengajuan";
-                }
-                
-                // PERBAIKAN UTAMA: Set flashdata untuk success modal
-                $this->session->set_flashdata('approved_items', $approved_items);
-                $this->session->set_flashdata('is_single_approve', false);
-                $this->session->set_flashdata('success', $message);
-            } else {
-                $this->session->set_flashdata('error', 'Gagal menyetujui semua pengajuan yang dipilih');
-            }
-            
-            redirect('dekan/halaman_pending');
-        } else {
-            $this->session->set_flashdata('error', 'Metode request tidak valid');
-            redirect('dekan/halaman_pending');
-        }
+/* ================================
+   PROCESS MULTI APPROVE - DENGAN SUCCESS MODAL
+================================= */
+public function process_multi_approve()
+{
+    if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+        $this->session->set_flashdata('error', 'Invalid request method.');
+        redirect('dekan/halaman_pending');
+        return;
     }
 
-    /* ================================
-       BULK REJECT - DIPERBAIKI DENGAN PROGRESS BAR
-    ================================= */
-    public function process_multi_reject()
-    {
-        if ($this->input->post()) {
-            $selected_ids = $this->input->post('selected_ids');
-            $rejection_notes = $this->input->post('rejection_notes');
+    $selected_ids = explode(',', $this->input->post('selected_ids'));
+    
+    if (empty($selected_ids) || !is_array($selected_ids)) {
+        $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
+        redirect('dekan/halaman_pending');
+        return;
+    }
+    
+    $success_count = 0;
+    $error_count = 0;
+    $error_messages = [];
+    $approved_items = [];
+    
+    foreach ($selected_ids as $id) {
+        $id = trim($id);
+        
+        if (empty($id)) {
+            continue;
+        }
+        
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+        
+        if (!$surat) {
+            $error_count++;
+            $error_messages[] = "Data tidak ditemukan (ID: $id)";
+            continue;
+        }
+        
+        // Validasi status - hanya bisa approve jika status = 'disetujui sekretariat'
+        if ($surat->status !== 'disetujui sekretariat') {
+            $error_count++;
+            $error_messages[] = "Pengajuan '{$surat->nama_kegiatan}' sudah diproses";
+            continue;
+        }
+        
+        $approval = json_decode($surat->approval_status, true) ?? [];
+        
+        // Pastikan semua tahap sebelumnya ada
+        if (!isset($approval['pengirim'])) {
+            $approval['pengirim'] = $surat->created_at;
+        }
+        if (!isset($approval['kk'])) {
+            $approval['kk'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+        }
+        if (!isset($approval['sekretariat'])) {
+            $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
+        }
+        
+        $approval['dekan'] = date("Y-m-d H:i:s");
+        
+        // Generate nomor surat
+        $nomor_surat = $this->generate_nomor_surat_dekan();
+        
+        $update_data = [
+            'status' => 'disetujui dekan',
+            'nomor_surat' => $nomor_surat,
+            'approval_status' => json_encode($approval),
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('id', $id);
+        if ($this->db->update('surat', $update_data)) {
+            $success_count++;
             
-            if (empty($selected_ids)) {
-                $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih');
-                redirect('dekan/halaman_pending');
-            }
+            // Ambil data dosen untuk ditampilkan di success modal
+            $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
             
-            if (empty($rejection_notes)) {
-                $this->session->set_flashdata('error', 'Alasan penolakan harus diisi');
-                redirect('dekan/halaman_pending');
-            }
-            
-            $success_count = 0;
-            $error_count = 0;
-            $errors = [];
-            
-            foreach ($selected_ids as $index => $id) {
-                $surat = $this->db->get_where('surat', ['id' => $id])->row();
-                
-                if ($surat) {
-                    // Validasi status yang lebih fleksibel
-                    $allowed_statuses = ['disetujui sekretariat', 'pending', 'menunggu persetujuan dekan'];
-                    
-                    if (!in_array($surat->status, $allowed_statuses)) {
-                        $error_count++;
-                        $errors[] = "ID $id: Status tidak valid ($surat->status)";
-                        continue;
-                    }
-                    
-                    // Update approval status dengan format yang mendukung progress bar
-                    $approval = json_decode($surat->approval_status, true) ?? [];
-                    
-                    // Pastikan semua tahap sebelumnya ada
-                    if (!isset($approval['pengirim'])) {
-                        $approval['pengirim'] = date("Y-m-d H:i:s");
-                    }
-                    if (!isset($approval['kaprodi'])) {
-                        $approval['kaprodi'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
-                    }
-                    if (!isset($approval['sekretariat'])) {
-                        $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
-                    }
-                    
-                    $approval['dekan'] = date("Y-m-d H:i:s");
-
-                    // Handle rejection notes
-                    if (is_array($rejection_notes)) {
-                        $catatan = isset($rejection_notes[$index]) ? $rejection_notes[$index] : 'Tidak ada catatan';
-                    } else {
-                        $catatan = $rejection_notes;
-                    }
-                    
-                    $catatan = is_array($catatan) ? implode(', ', $catatan) : $catatan;
-
-                    $result = $this->db->where('id', $id)->update('surat', [
-                        'status' => 'ditolak dekan',
-                        'approval_status' => json_encode($approval),
-                        'catatan_penolakan' => $catatan,
-                        'updated_at' => date('Y-m-d H:i:s')
-                    ]);
-                    
-                    if ($result) {
-                        $success_count++;
-                    } else {
-                        $error_count++;
-                        $errors[] = "ID $id: Gagal update database";
-                    }
-                } else {
-                    $error_count++;
-                    $errors[] = "ID $id: Data tidak ditemukan";
-                }
-            }
-            
-            if ($success_count > 0) {
-                $message = "Berhasil menolak $success_count pengajuan";
-                if ($error_count > 0) {
-                    $message .= ". Gagal: $error_count pengajuan";
-                }
-                $this->session->set_flashdata('success', $message);
-            } else {
-                $this->session->set_flashdata('error', 'Gagal menolak semua pengajuan yang dipilih');
-            }
-            
-            redirect('dekan/halaman_pending');
+            $approved_items[] = [
+                'nama' => $surat->nama_kegiatan,
+                'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara,
+                'dosen_data' => $dosen_data
+            ];
         } else {
-            $this->session->set_flashdata('error', 'Metode request tidak valid');
-            redirect('dekan/halaman_pending');
+            $error_count++;
+            $error_messages[] = "Gagal update database (ID: $id)";
         }
     }
+    
+    if ($success_count > 0) {
+        $message = "✅ Berhasil menyetujui $success_count pengajuan.";
+        if ($error_count > 0) {
+            $message .= " ⚠️ $error_count pengajuan gagal: " . implode(', ', $error_messages);
+        }
+        
+        $this->session->set_flashdata('approved_items', $approved_items);
+        $this->session->set_flashdata('is_multi_approve', true);
+        $this->session->set_flashdata('success', $message);
+    } else {
+        $this->session->set_flashdata('error', "❌ Gagal menyetujui semua pengajuan: " . implode(', ', $error_messages));
+    }
+    
+    redirect('dekan');
+}
+
+/* ================================
+   PROCESS MULTI REJECT - DENGAN SUCCESS MODAL
+================================= */
+public function process_multi_reject()
+{
+    if ($this->input->server('REQUEST_METHOD') !== 'POST') {
+        $this->session->set_flashdata('error', 'Invalid request method.');
+        redirect('dekan/halaman_pending');
+        return;
+    }
+
+    $selected_ids = $this->input->post('selected_ids');
+    $rejection_notes_array = $this->input->post('rejection_notes');
+    
+    if (empty($selected_ids) || !is_array($selected_ids)) {
+        $this->session->set_flashdata('error', 'Tidak ada pengajuan yang dipilih.');
+        redirect('dekan/halaman_pending');
+        return;
+    }
+    
+    if (empty($rejection_notes_array) || !is_array($rejection_notes_array)) {
+        $this->session->set_flashdata('error', 'Alasan penolakan harus diisi.');
+        redirect('dekan/halaman_pending');
+        return;
+    }
+    
+    if (count($selected_ids) !== count($rejection_notes_array)) {
+        $this->session->set_flashdata('error', 'Jumlah pengajuan dan alasan penolakan tidak sesuai.');
+        redirect('dekan/halaman_pending');
+        return;
+    }
+    
+    $success_count = 0;
+    $error_count = 0;
+    $error_messages = [];
+    $rejected_items = [];
+    
+    foreach ($selected_ids as $index => $id) {
+        $id = trim($id);
+        $rejection_notes = isset($rejection_notes_array[$index]) ? trim($rejection_notes_array[$index]) : '';
+        
+        if (empty($id)) {
+            continue;
+        }
+        
+        if (empty($rejection_notes)) {
+            $error_count++;
+            $error_messages[] = "Alasan penolakan kosong untuk ID: $id";
+            continue;
+        }
+        
+        $surat = $this->db->get_where('surat', ['id' => $id])->row();
+        
+        if (!$surat) {
+            $error_count++;
+            $error_messages[] = "Data tidak ditemukan (ID: $id)";
+            continue;
+        }
+        
+        // Validasi status - hanya bisa reject jika status = 'disetujui sekretariat'
+        if ($surat->status !== 'disetujui sekretariat') {
+            $error_count++;
+            $error_messages[] = "Pengajuan '{$surat->nama_kegiatan}' sudah diproses";
+            continue;
+        }
+        
+        $approval = json_decode($surat->approval_status, true) ?? [];
+        
+        // Pastikan semua tahap sebelumnya ada
+        if (!isset($approval['pengirim'])) {
+            $approval['pengirim'] = $surat->created_at;
+        }
+        if (!isset($approval['kk'])) {
+            $approval['kk'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +1 hour'));
+        }
+        if (!isset($approval['sekretariat'])) {
+            $approval['sekretariat'] = date("Y-m-d H:i:s", strtotime($surat->created_at . ' +2 hours'));
+        }
+        
+        $approval['dekan'] = date("Y-m-d H:i:s");
+        
+        $update_data = [
+            'status' => 'ditolak dekan',
+            'approval_status' => json_encode($approval),
+            'catatan_penolakan' => $rejection_notes,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        $this->db->where('id', $id);
+        if ($this->db->update('surat', $update_data)) {
+            $success_count++;
+            
+            // Ambil data dosen untuk ditampilkan di success modal
+            $dosen_data = $this->get_dosen_data_from_nip_fixed($surat->nip);
+            
+            $rejected_items[] = [
+                'nama' => $surat->nama_kegiatan,
+                'details' => '📅 ' . date('d M Y', strtotime($surat->tanggal_kegiatan)) . ' | 📍 ' . $surat->penyelenggara,
+                'dosen_data' => $dosen_data,
+                'rejection_notes' => $rejection_notes
+            ];
+        } else {
+            $error_count++;
+            $error_messages[] = "Gagal update database (ID: $id)";
+        }
+    }
+    
+    if ($success_count > 0) {
+        $message = "✅ Berhasil menolak $success_count pengajuan.";
+        if ($error_count > 0) {
+            $message .= " ⚠️ $error_count pengajuan gagal: " . implode(', ', $error_messages);
+        }
+        
+        $this->session->set_flashdata('rejected_items', $rejected_items);
+        $this->session->set_flashdata('is_multi_reject', true);
+        $this->session->set_flashdata('success', $message);
+    } else {
+        $this->session->set_flashdata('error', "❌ Gagal menolak semua pengajuan: " . implode(', ', $error_messages));
+    }
+    
+    redirect('dekan');
+}
 
     /* ================================
        HELPER FUNCTION UNTUK REDIRECT
@@ -1587,7 +1737,8 @@ public function return_pengajuan($id)
         $this->redirectToPreviousPage();
         return;
     }
-
+ // Cek apakah sudah disetujui oleh pihak selanjutnya (Sekretariat/Dekan)
+    $approval = json_decode($surat->approval_status, true) ?? [];
     // Update: Kembalikan ke status pengajuan & hapus approval Kaprodi
     if (isset($approval['dekan'])) {
         unset($approval['dekan']);
@@ -1614,7 +1765,7 @@ public function return_pengajuan($id)
     $this->session->set_flashdata('returned_items', $returned_items);
     $this->session->set_flashdata('is_single_return', true);
     
-    $this->redirectToPreviousPage();
+    redirect('dekan/dashboard');
 }
 
 }

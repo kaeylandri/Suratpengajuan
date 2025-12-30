@@ -1206,41 +1206,7 @@ label:has(> span[style*="#dc3545"])::after {
 
         <!-- FORM PANITIA -->
         <div id="panitiaContainer" class="mt-4">
-            <!-- Baris pertama untuk perorangan -->
-            <div class="row g-3 align-items-end panitia-row" data-row-index="0">
-
-                <div class="col-md-2 position-relative">
-                    <label>NIP</label>
-                    <input type="text" name="nip[]" class="form-control nip-input" autocomplete="off" required>
-                </div>
-
-                <div class="col-md-3 position-relative">
-                    <label>Nama Dosen</label>
-                    <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" autocomplete="off" required>
-                </div>
-
-                <div class="col-md-2 position-relative">
-                    <label>Jabatan</label>
-                    <input type="text" name="jabatan[]" class="form-control jabatan-input" autocomplete="off" required>
-                </div>
-
-                <div class="col-md-2 position-relative">
-                    <label>Kaprodi</label>
-                    <input type="text" name="kaprodi[]" class="form-control kaprodi-input" autocomplete="off" required>
-                </div>
-
-                <div class="col-md-2 position-relative peran-column">
-                    <label>Peran</label>
-                    <input type="text" name="peran[]" class="form-control peran-input" autocomplete="off" placeholder="Masukkan peran/posisi">
-                </div>
-
-                <div class="col-md-1 text-center button-cell">
-                    <button type="button" class="btn btn-success add-row-btn" title="Tambah Baris">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                </div>
-
-            </div>
+            <!-- Baris akan dibuat secara dinamis -->
         </div>
 
         <!-- Hidden input untuk menangkap peran untuk jenis perorangan -->
@@ -1250,10 +1216,36 @@ label:has(> span[style*="#dc3545"])::after {
 </fieldset>
 
 <style>
-.button-cell { display: none; justify-content: center; align-items: center; }
-.add-row-btn, .remove-row-btn { width: 35px; height: 35px; border-radius: 50%; padding: 0; }
-.panitia-row { transition: all 0.3s ease; opacity: 1; transform: translateY(0); }
-.panitia-row.removing { opacity: 0; transform: translateX(20px); }
+.button-cell { 
+    display: none !important; /* Default: disembunyikan */
+    justify-content: center; 
+    align-items: center; 
+    padding-top: 28px;
+}
+.button-cell.show {
+    display: flex !important; /* Ditampilkan hanya untuk Kelompok */
+}
+.add-row-btn, .remove-row-btn { 
+    width: 35px; 
+    height: 35px; 
+    border-radius: 50%; 
+    padding: 0;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+.panitia-row { 
+    transition: all 0.3s ease; 
+    opacity: 1; 
+    transform: translateY(0); 
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+.panitia-row.removing { 
+    opacity: 0; 
+    transform: translateX(20px); 
+}
 
 /* PERBAIKAN AUTCOMPLETE: Lebih jelas dan tebal */
 .autocomplete-box-fixed {
@@ -1400,12 +1392,6 @@ label:has(> span[style*="#dc3545"])::after {
     margin-top: 12px;
 }
 
-.panitia-row {
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
-}
-
 .panitia-row:last-child {
     border-bottom: none;
 }
@@ -1468,19 +1454,6 @@ label:has(> span[style*="#dc3545"])::after {
 }
 
 /* Responsive adjustments */
-@media (max-width: 1200px) {
-    .panitia-row .col-md-2,
-    .panitia-row .col-md-3 {
-        flex: 0 0 auto;
-        width: 20%;
-    }
-    
-    .panitia-row .col-md-1 {
-        flex: 0 0 auto;
-        width: 10%;
-    }
-}
-
 @media (max-width: 992px) {
     .panitia-row .col-md-2,
     .panitia-row .col-md-3,
@@ -1492,7 +1465,8 @@ label:has(> span[style*="#dc3545"])::after {
     
     .button-cell {
         justify-content: flex-start;
-        margin-top: 10px;
+        margin-top: 0;
+        padding-top: 0;
     }
     
     /* Adjust kolom peran untuk tampilan mobile */
@@ -1519,12 +1493,6 @@ label:has(> span[style*="#dc3545"])::after {
         width: 100%;
     }
 }
-
-@media (max-width: 768px) {
-    .panitia-row .col-md-3 {
-        width: 100% !important;
-    }
-}
 </style>
 
 <script>
@@ -1538,7 +1506,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const generateRowsBtn = document.getElementById('generate_rows_btn');
     const peranPeroranganHidden = document.getElementById('peran_perorangan');
     
-    let rowCounter = 1;
     let isSelectingAutocomplete = false;
 
     // Mock data untuk testing
@@ -1552,7 +1519,7 @@ document.addEventListener('DOMContentLoaded', function () {
         { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', kaprodi: 'DI'},
         { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', kaprodi: 'DKV'},
         { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', kaprodi: 'DP' },
-        { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', kaprodi: 'Admin KK'  }
+        { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', kaprodi: 'Ketua KK'  }
     ];
 
     // Global state untuk autocomplete
@@ -1562,8 +1529,73 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentInputElement = null;
     let currentAutocompleteItems = [];
 
-    // Toggle visibility jenis penugasan berdasarkan jenis pengajuan
-    function toggleJenisPenugasan() {
+    // Fungsi untuk membuat elemen baris dengan tombol yang benar
+    function createRowElement(index, showButtons = false, isFirstRow = false) {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row g-3 align-items-end panitia-row';
+        rowEl.dataset.rowIndex = index;
+        
+        let buttonHtml = '';
+        let buttonCellClass = 'button-cell';
+        
+        if (showButtons) {
+            buttonCellClass += ' show';
+            if (isFirstRow) {
+                // Baris pertama: tombol tambah
+                buttonHtml = `
+                    <button type="button" class="btn btn-success add-row-btn" title="Tambah Baris">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                `;
+            } else {
+                // Baris lainnya: tombol kurang
+                buttonHtml = `
+                    <button type="button" class="btn btn-danger remove-row-btn" title="Hapus Baris">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                `;
+            }
+        }
+        
+        rowEl.innerHTML = `
+            <div class="col-md-2 position-relative">
+                <label>NIP</label>
+                <input type="text" name="nip[]" class="form-control nip-input" autocomplete="off" required>
+            </div>
+
+            <div class="col-md-3 position-relative">
+                <label>Nama Dosen</label>
+                <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" autocomplete="off" required>
+            </div>
+
+            <div class="col-md-2 position-relative">
+                <label>Jabatan</label>
+                <input type="text" name="jabatan[]" class="form-control jabatan-input" autocomplete="off" required>
+            </div>
+
+            <div class="col-md-2 position-relative">
+                <label>Kaprodi</label>
+                <input type="text" name="kaprodi[]" class="form-control kaprodi-input" autocomplete="off" required>
+            </div>
+
+            <div class="col-md-2 position-relative peran-column">
+                <label>Peran</label>
+                <input type="text" name="peran[]" class="form-control peran-input" autocomplete="off" placeholder="Masukkan peran/posisi">
+            </div>
+
+            <div class="col-md-1 text-center ${buttonCellClass}">
+                ${buttonHtml}
+            </div>
+        `;
+        
+        return rowEl;
+    }
+
+    // Update semua tampilan berdasarkan jenis pengajuan
+    function updateViewBasedOnPengajuan() {
+        console.log('Updating view for:', jenisPengajuan.value);
+        
+        // Toggle visibility jenis penugasan
         if (jenisPengajuan.value === 'Perorangan') {
             jenisPenugasanPeroranganContainer.style.display = 'block';
             jenisPenugasanKelompokContainer.style.display = 'none';
@@ -1578,180 +1610,65 @@ document.addEventListener('DOMContentLoaded', function () {
             jenisPenugasanKelompokContainer.style.display = 'none';
             jumlahBarisContainer.style.display = 'none';
         }
-    }
-
-    // Toggle kolom peran berdasarkan jenis pengajuan
-    function toggleKolomPeran() {
-        const peranColumns = document.querySelectorAll('.peran-column');
-        const peranInputs = document.querySelectorAll('.peran-input');
+        
+        // Kosongkan container
+        panitiaContainer.innerHTML = '';
         
         if (jenisPengajuan.value === 'Kelompok') {
-            peranColumns.forEach(column => {
-                column.classList.remove('hidden');
-                column.classList.add('visible');
-                column.style.display = 'block';
-            });
-            
-            peranInputs.forEach(input => {
-                input.required = true;
-                input.name = 'peran[]';
-            });
-        } else {
-            peranColumns.forEach(column => {
-                column.classList.add('hidden');
-                column.classList.remove('visible');
-                column.style.display = 'none';
-            });
-            
-            peranInputs.forEach(input => {
-                input.required = false;
-                input.name = 'peran_hidden[]';
-                input.value = '';
-            });
-            
-            peranPeroranganHidden.value = JSON.stringify([]);
-        }
-    }
-
-    // Toggle button visibility based on jenis pengajuan
-    function toggleButtonVisibility() {
-        const buttonCells = document.querySelectorAll('.button-cell');
-        
-        if (jenisPengajuan.value === 'Kelompok') {
-            buttonCells.forEach(btn => {
-                btn.style.display = 'flex';
-            });
-        } else {
-            buttonCells.forEach(btn => {
-                btn.style.display = 'none';
-            });
-        }
-    }
-
-    // Toggle form enabled/disabled state based on jenis pengajuan
-    function toggleFormState() {
-        const formRows = document.querySelectorAll('.panitia-row');
-        
-        if (jenisPengajuan.value === '') {
-            // Jika belum memilih jenis pengajuan, tambah class form-disabled
-            panitiaContainer.classList.add('form-disabled');
-            
-            // Disable semua input
-            formRows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                inputs.forEach(input => {
-                    input.disabled = true;
-                    input.required = false;
-                });
-            });
-        } else {
-            // Jika sudah memilih jenis pengajuan, hapus class form-disabled
-            panitiaContainer.classList.remove('form-disabled');
-            
-            // Enable semua input
-            formRows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                inputs.forEach(input => {
-                    input.disabled = false;
-                    input.required = true;
-                });
-            });
-        }
-    }
-
-    // Update semua tampilan berdasarkan jenis pengajuan
-    function updateViewBasedOnPengajuan() {
-        console.log('Updating view for:', jenisPengajuan.value);
-        
-        toggleJenisPenugasan();
-        toggleKolomPeran();
-        toggleButtonVisibility();
-        toggleFormState();
-        
-        // Hanya untuk Kelompok: Sembunyikan semua baris dan tampilkan form kosong
-        if (jenisPengajuan.value === 'Kelompok') {
-            // Kosongkan container
-            panitiaContainer.innerHTML = '';
-            
-            // Reset row counter
-            rowCounter = 0;
-            
-            // Gunakan nilai dari input jumlah baris (default 1)
+            // Untuk kelompok: buat baris sesuai jumlah dengan TAMPILKAN TOMBOL
             const jumlah = parseInt(jumlahBarisInput.value) || 1;
             
-            // Buat baris sesuai jumlah
             for (let i = 0; i < jumlah; i++) {
-                const rowEl = createRowElement(i, true); // true = untuk kelompok
+                const isFirstRow = (i === 0);
+                const rowEl = createRowElement(i, true, isFirstRow); // true = showButtons
                 panitiaContainer.appendChild(rowEl);
-                rowCounter++;
             }
             
-            // Pastikan form enabled
-            panitiaContainer.classList.remove('form-disabled');
+            // Tampilkan kolom peran
+            document.querySelectorAll('.peran-column').forEach(col => {
+                col.style.display = 'block';
+                col.classList.remove('hidden');
+                col.classList.add('visible');
+            });
             
-            // Inisialisasi autocomplete untuk semua baris
-            setTimeout(() => {
-                initializeAllRows();
-            }, 100);
+            // Enable form dan hapus disabled state
+            panitiaContainer.classList.remove('form-disabled');
             
         } else if (jenisPengajuan.value === 'Perorangan') {
-            // Untuk perorangan, tampilkan 1 baris yang sudah ada
-            // Pastikan hanya ada 1 baris
-            const existingRows = panitiaContainer.querySelectorAll('.panitia-row');
-            if (existingRows.length === 0) {
-                // Buat 1 baris untuk perorangan
-                const rowEl = createRowElement(0, false); // false = untuk perorangan
-                panitiaContainer.appendChild(rowEl);
-                rowCounter = 1;
-            } else if (existingRows.length > 1) {
-                // Hapus baris tambahan, hanya sisakan 1
-                for (let i = 1; i < existingRows.length; i++) {
-                    existingRows[i].remove();
-                }
-                rowCounter = 1;
-            }
-            
-            // Kosongkan nilai input pada baris pertama
-            const firstRow = panitiaContainer.querySelector('.panitia-row');
-            if (firstRow) {
-                firstRow.querySelectorAll('input').forEach(input => {
-                    if (!input.classList.contains('peran-input')) {
-                        input.value = '';
-                    }
-                });
-            }
-            
-            // Pastikan form enabled
-            panitiaContainer.classList.remove('form-disabled');
-            
-            // Inisialisasi autocomplete
-            setTimeout(() => {
-                initializeAllRows();
-            }, 100);
-        } else {
-            // Jika belum memilih jenis pengajuan, tetap tampilkan 1 baris default
-            // Tapi kosongkan semua input
-            const firstRow = panitiaContainer.querySelector('.panitia-row');
-            if (firstRow) {
-                firstRow.querySelectorAll('input').forEach(input => {
-                    input.value = '';
-                });
-            }
+            // Untuk perorangan: hanya 1 baris TANPA TOMBOL
+            const rowEl = createRowElement(0, false, false); // false = showButtons
+            panitiaContainer.appendChild(rowEl);
             
             // Sembunyikan kolom peran
-            const peranColumns = document.querySelectorAll('.peran-column');
-            peranColumns.forEach(column => {
-                column.classList.add('hidden');
-                column.classList.remove('visible');
-                column.style.display = 'none';
+            document.querySelectorAll('.peran-column').forEach(col => {
+                col.style.display = 'none';
+                col.classList.add('hidden');
+                col.classList.remove('visible');
             });
             
-            // Sembunyikan tombol
-            const buttonCells = document.querySelectorAll('.button-cell');
-            buttonCells.forEach(btn => {
-                btn.style.display = 'none';
+            // Enable form
+            panitiaContainer.classList.remove('form-disabled');
+            
+        } else {
+            // Belum memilih: 1 baris kosong TANPA TOMBOL
+            const rowEl = createRowElement(0, false, false); // false = showButtons
+            panitiaContainer.appendChild(rowEl);
+            
+            // Sembunyikan kolom peran
+            document.querySelectorAll('.peran-column').forEach(col => {
+                col.style.display = 'none';
+                col.classList.add('hidden');
+                col.classList.remove('visible');
             });
+            
+            // Disable form
+            panitiaContainer.classList.add('form-disabled');
         }
+        
+        // Inisialisasi autocomplete
+        setTimeout(() => {
+            initializeAllRows();
+        }, 100);
     }
 
     // Event listener untuk jenis pengajuan
@@ -1774,24 +1691,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             
-            // Kosongkan container
-            panitiaContainer.innerHTML = '';
-            rowCounter = 0;
-            
-            // Buat baris baru sesuai jumlah
-            for (let i = 0; i < jumlah; i++) {
-                const rowEl = createRowElement(i, true);
-                panitiaContainer.appendChild(rowEl);
-                rowCounter++;
-            }
-            
-            // Pastikan form enabled
-            panitiaContainer.classList.remove('form-disabled');
-            
-            // Inisialisasi autocomplete
-            setTimeout(() => {
-                initializeAllRows();
-            }, 100);
+            updateViewBasedOnPengajuan();
         }
     });
 
@@ -1804,13 +1704,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Inisialisasi awal
-    // Saat halaman load, jenis pengajuan masih kosong
     window.addEventListener('load', function() {
-        // Panggil update untuk mengatur tampilan awal
         updateViewBasedOnPengajuan();
-        
-        // Inisialisasi autocomplete (tapi form dalam keadaan disabled)
-        initializeAllRows();
     });
 
     // Handle "Lainnya" option untuk penugasan perorangan
@@ -1964,13 +1859,6 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => {
             isSelectingAutocomplete = false;
         }, 300);
-        
-        setTimeout(() => {
-            if (fieldType === 'nip') {
-                const nextInput = inputElement.closest('.panitia-row').querySelector('.nama-dosen-input');
-                if (nextInput) nextInput.focus();
-            }
-        }, 50);
     }
 
     // Show suggestion box
@@ -1992,8 +1880,6 @@ document.addEventListener('DOMContentLoaded', function () {
         box.style.left = rect.left + 'px';
         box.style.top = (rect.bottom + 4) + 'px';
         box.style.width = Math.max(rect.width, 350) + 'px';
-        box.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-        box.style.border = '1px solid #dadce0';
 
         if (!items || !items.length) {
             const empty = document.createElement('div');
@@ -2010,17 +1896,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const query = inputEl.value.trim();
         let selectedIndex = -1;
         currentAutocompleteItems = items;
-
-        // Add header
-        const header = document.createElement('div');
-        header.style.padding = '12px 16px';
-        header.style.fontSize = '13px';
-        header.style.color = '#5f6368';
-        header.style.fontWeight = '600';
-        header.style.borderBottom = '1px solid #f0f0f0';
-        header.style.backgroundColor = '#f8f9fa';
-        header.textContent = fieldType === 'nip' ? 'Hasil pencarian NIP' : 'Hasil pencarian Nama';
-        box.appendChild(header);
 
         items.forEach((item, idx) => {
             const option = document.createElement('div');
@@ -2062,75 +1937,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectAutocompleteItem(item, inputEl, onSelect);
             });
             
-            option.addEventListener('click', (e) => {
-                e.stopPropagation();
-            });
-            
-            option.addEventListener('mouseenter', () => {
-                box.querySelectorAll('.autocomplete-item').forEach(el => {
-                    el.classList.remove('autocomplete-item-active');
-                });
-                option.classList.add('autocomplete-item-active');
-            });
-            
-            option.addEventListener('mouseleave', () => {
-                option.classList.remove('autocomplete-item-active');
-            });
-            
             box.appendChild(option);
         });
 
         document.body.appendChild(box);
         currentAutocompleteBox = box;
         currentInputElement = inputEl;
-
-        // Keyboard navigation
-        currentKeydownHandler = function(e) {
-            if (!currentAutocompleteBox) return;
-            
-            const opts = currentAutocompleteBox.querySelectorAll('.autocomplete-item');
-            if (!opts.length) return;
-
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                selectedIndex = Math.min(selectedIndex + 1, opts.length - 1);
-                
-                opts.forEach(o => o.classList.remove('autocomplete-item-active'));
-                
-                if (opts[selectedIndex]) {
-                    opts[selectedIndex].classList.add('autocomplete-item-active');
-                    opts[selectedIndex].scrollIntoView({ block: 'nearest' });
-                }
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                selectedIndex = Math.max(selectedIndex - 1, 0);
-                
-                opts.forEach(o => o.classList.remove('autocomplete-item-active'));
-                
-                if (opts[selectedIndex]) {
-                    opts[selectedIndex].classList.add('autocomplete-item-active');
-                    opts[selectedIndex].scrollIntoView({ block: 'nearest' });
-                }
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                if (selectedIndex >= 0 && opts[selectedIndex] && currentAutocompleteItems[selectedIndex]) {
-                    selectAutocompleteItem(currentAutocompleteItems[selectedIndex], inputEl, onSelect);
-                } else if (opts.length > 0 && currentAutocompleteItems[0]) {
-                    selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
-                }
-            } else if (e.key === 'Escape') {
-                removeAutocompleteBox();
-            } else if (e.key === 'Tab') {
-                e.preventDefault();
-                if (currentAutocompleteItems.length > 0) {
-                    selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
-                } else {
-                    removeAutocompleteBox();
-                }
-            }
-        };
-        
-        document.addEventListener('keydown', currentKeydownHandler);
 
         currentClickHandler = function(ev) {
             if (currentAutocompleteBox && !currentAutocompleteBox.contains(ev.target) && ev.target !== currentInputElement) {
@@ -2140,24 +1952,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
         document.addEventListener('click', currentClickHandler);
-        
-        if (items.length > 0) {
-            setTimeout(() => {
-                const firstOption = box.querySelector('.autocomplete-item');
-                if (firstOption) {
-                    firstOption.classList.add('autocomplete-item-active');
-                    selectedIndex = 0;
-                }
-            }, 10);
-        }
     }
 
     // Initialize autocomplete for a row
     function initAutocompleteForRow(rowEl) {
-        if (!rowEl) {
-            console.error('Row element tidak valid');
-            return;
-        }
+        if (!rowEl) return;
         
         delete rowEl.dataset.autocompleteInitialized;
 
@@ -2176,21 +1975,8 @@ document.addEventListener('DOMContentLoaded', function () {
             
             inputNip.value = item.nip || '';
             inputNama.value = item.nama_dosen || '';
-            
             if (inputJabatan) inputJabatan.value = item.jabatan || '';
             if (inputKaprodi) inputKaprodi.value = item.kaprodi || '';
-            
-            if (jenisPengajuan.value === 'Kelompok' && inputPeran) {
-                inputPeran.value = item.peran || '';
-            }
-            
-            inputNip.dispatchEvent(new Event('input', { bubbles: true }));
-            inputNama.dispatchEvent(new Event('input', { bubbles: true }));
-            if (inputJabatan) inputJabatan.dispatchEvent(new Event('input', { bubbles: true }));
-            if (inputKaprodi) inputKaprodi.dispatchEvent(new Event('input', { bubbles: true }));
-            if (jenisPengajuan.value === 'Kelompok' && inputPeran) {
-                inputPeran.dispatchEvent(new Event('input', { bubbles: true }));
-            }
         }
 
         function createAutocompleteHandler(fieldType, inputElement) {
@@ -2201,7 +1987,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
                 
-                // Jangan proses jika input disabled
                 if (this.disabled || jenisPengajuan.value === '') {
                     return;
                 }
@@ -2227,63 +2012,40 @@ document.addEventListener('DOMContentLoaded', function () {
 
         createAutocompleteHandler('nip', inputNip);
         createAutocompleteHandler('nama_dosen', inputNama);
-        
-        const inputs = [inputNip, inputNama];
-        
-        inputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                // Jangan aktifkan autocomplete jika input disabled
-                if (input.disabled || jenisPengajuan.value === '') {
-                    return;
-                }
-                
-                const val = input.value.trim();
-                if (val.length >= 2) {
-                    setTimeout(() => {
-                        if (document.activeElement === input && !isSelectingAutocomplete) {
-                            const event = new Event('input', { bubbles: true });
-                            input.dispatchEvent(event);
-                        }
-                    }, 100);
-                }
-            });
-            
-            input.addEventListener('blur', () => {
-                if (!isSelectingAutocomplete) {
-                    setTimeout(() => {
-                        removeAutocompleteBox();
-                    }, 150);
-                }
-            });
-        });
 
         rowEl.dataset.autocompleteInitialized = 'true';
     }
 
-    function updateKolomPeranForRow(rowEl) {
-        const peranColumn = rowEl.querySelector('.peran-column');
-        const peranInput = rowEl.querySelector('.peran-input');
+    // Tambah baris baru (untuk kelompok)
+    function addNewRow() {
+        if (jenisPengajuan.value !== 'Kelompok') return;
         
-        if (!peranColumn || !peranInput) return;
+        const currentRows = panitiaContainer.querySelectorAll('.panitia-row').length;
+        const newRow = createRowElement(currentRows, true, false); // true = showButtons, false = bukan baris pertama
+        panitiaContainer.appendChild(newRow);
         
-        if (jenisPengajuan.value === 'Kelompok') {
-            peranColumn.classList.remove('hidden');
-            peranColumn.classList.add('visible');
-            peranColumn.style.display = 'block';
-            peranInput.required = true;
-            peranInput.name = 'peran[]';
-        } else {
-            peranColumn.classList.add('hidden');
-            peranColumn.classList.remove('visible');
-            peranColumn.style.display = 'none';
-            peranInput.required = false;
-            peranInput.name = 'peran_hidden[]';
-            peranInput.value = '';
-        }
+        // Update jumlah di input
+        jumlahBarisInput.value = currentRows + 1;
+        
+        // Inisialisasi autocomplete untuk baris baru
+        setTimeout(() => {
+            initAutocompleteForRow(newRow);
+            // Tambah event listener untuk tombol kurang
+            const removeBtn = newRow.querySelector('.remove-row-btn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    removeRow(newRow);
+                });
+            }
+        }, 100);
     }
 
-    function removeRowWithAnimation(rowEl) {
-        // Jika hanya tersisa 1 baris, jangan hapus
+    // Hapus baris (untuk kelompok)
+    function removeRow(rowEl) {
+        if (jenisPengajuan.value !== 'Kelompok') return;
+        
         const totalRows = panitiaContainer.querySelectorAll('.panitia-row').length;
         if (totalRows <= 1) {
             alert('Minimal harus ada 1 baris data');
@@ -2294,11 +2056,9 @@ document.addEventListener('DOMContentLoaded', function () {
         setTimeout(() => {
             if (rowEl.parentNode) {
                 rowEl.remove();
-                // Update jumlah baris input
-                if (jenisPengajuan.value === 'Kelompok') {
-                    const currentRows = panitiaContainer.querySelectorAll('.panitia-row').length;
-                    jumlahBarisInput.value = currentRows;
-                }
+                // Update jumlah di input
+                const currentRows = panitiaContainer.querySelectorAll('.panitia-row').length;
+                jumlahBarisInput.value = currentRows;
             }
         }, 300);
     }
@@ -2328,16 +2088,7 @@ document.addEventListener('DOMContentLoaded', function () {
         animateNewRow(rowEl);
     }
 
-    function animateNewRow(rowEl) {
-        rowEl.style.opacity = '0';
-        rowEl.style.transform = 'translateY(-10px)';
-        setTimeout(() => {
-            rowEl.style.transition = 'all 0.3s ease';
-            rowEl.style.opacity = '1';
-            rowEl.style.transform = 'translateY(0)';
-        }, 10);
-    }
-
+    // Initialize semua baris
     function initializeAllRows() {
         const rows = panitiaContainer.querySelectorAll('.panitia-row');
         
@@ -2345,15 +2096,35 @@ document.addEventListener('DOMContentLoaded', function () {
             row.dataset.rowIndex = index;
             delete row.dataset.autocompleteInitialized;
             initAutocompleteForRow(row);
-            updateKolomPeranForRow(row);
+            
+            // Setup event listeners untuk tombol (hanya untuk Kelompok)
+            if (jenisPengajuan.value === 'Kelompok') {
+                const addBtn = row.querySelector('.add-row-btn');
+                const removeBtn = row.querySelector('.remove-row-btn');
+                
+                if (addBtn) {
+                    addBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        addNewRow();
+                    });
+                }
+                
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        removeRow(row);
+                    });
+                }
+            }
         });
-        
-        // Update button visibility
-        toggleButtonVisibility();
     }
 
-    // Event listener untuk tombol tambah/hapus baris
+    // Event delegation untuk container (fallback)
     panitiaContainer.addEventListener('click', function (e) {
+        if (jenisPengajuan.value !== 'Kelompok') return;
+        
         const addBtn = e.target.closest('.add-row-btn');
         const removeBtn = e.target.closest('.remove-row-btn');
 
@@ -2368,78 +2139,18 @@ document.addEventListener('DOMContentLoaded', function () {
             e.stopPropagation();
             const rowEl = removeBtn.closest('.panitia-row');
             if (rowEl) {
-                removeRowWithAnimation(rowEl);
+                removeRow(rowEl);
             }
         }
     });
 
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.autocomplete-box-fixed') && 
-            !e.target.closest('.nip-input') && 
-            !e.target.closest('.nama-dosen-input')) {
-            if (!isSelectingAutocomplete) {
-                removeAutocompleteBox();
-            }
-        }
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            removeAutocompleteBox();
-        }
-    });
-
-    document.querySelector('form').addEventListener('submit', function(e) {
-        // Validasi harus memilih jenis pengajuan terlebih dahulu
+    // Submit form validation
+    document.querySelector('form')?.addEventListener('submit', function(e) {
         if (!jenisPengajuan.value) {
             e.preventDefault();
             alert('Mohon pilih Jenis Pengajuan terlebih dahulu');
             jenisPengajuan.focus();
             return;
-        }
-        
-        if (jenisPengajuan.value === 'Perorangan') {
-            const nipInput = document.querySelector('.nip-input');
-            const namaInput = document.querySelector('.nama-dosen-input');
-            
-            if (!nipInput || !nipInput.value.trim()) {
-                e.preventDefault();
-                alert('Mohon isi NIP untuk pengajuan perorangan');
-                nipInput.focus();
-                return;
-            }
-            
-            if (!namaInput || !namaInput.value.trim()) {
-                e.preventDefault();
-                alert('Mohon isi Nama Dosen untuk pengajuan perorangan');
-                namaInput.focus();
-                return;
-            }
-        }
-        
-        if (jenisPengajuan.value === 'Perorangan') {
-            const peranHiddenInputs = document.querySelectorAll('input[name="peran_hidden[]"]');
-            peranHiddenInputs.forEach(input => {
-                input.name = 'peran[]';
-                input.value = '';
-            });
-            
-            peranPeroranganHidden.value = JSON.stringify([]);
-        } else if (jenisPengajuan.value === 'Kelompok') {
-            const peranInputs = document.querySelectorAll('.peran-input');
-            peranInputs.forEach(input => {
-                input.name = 'peran[]';
-            });
-            
-            // Validasi jumlah baris
-            const totalRows = panitiaContainer.querySelectorAll('.panitia-row').length;
-            const inputJumlah = parseInt(jumlahBarisInput.value) || 1;
-            
-            if (totalRows !== inputJumlah) {
-                e.preventDefault();
-                alert(`Jumlah baris yang diisi (${totalRows}) tidak sesuai dengan jumlah yang diminta (${inputJumlah}). Silahkan klik tombol "Generate Baris" untuk memperbarui.`);
-                return;
-            }
         }
     });
 });
@@ -4006,7 +3717,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Drag & Drop upload dengan progress bar initialized');
 });
-
 // CSS Animation untuk pulse effect
 const style = document.createElement('style');
 style.textContent = `

@@ -1183,101 +1183,7 @@
     </div>
 </div>
 
-    <!-- Tabel -->
-    <div class="card">
-        <div class="card-header">
-            <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Surat</h3>
-            <div>
-                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">Menampilkan: Semua Data (<?= $total_all ?> data)</span>
-            </div>
-        </div>
-        
-        <div style="overflow-x:auto">
-            <table>
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Kegiatan</th>
-                        <th>Penyelenggara</th>
-                        <th>Tanggal Pengajuan</th>
-                        <th>Tanggal Kegiatan</th>
-                        <th>Jenis</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <?php if(isset($surat_list) && !empty($surat_list)): $no=1; foreach($surat_list as $s): 
-                       // Tentukan warna berdasarkan kata kunci
-
-                        $st_l = strtolower($s['status']); // Pastikan ini sudah didefinisikan sebelumnya
-
-                        if (strpos($st_l, 'setuju') !== false || strpos($st_l, 'disetujui') !== false) {
-                            $st_key = 'approved';
-                            $badge = '<span class="badge badge-approved">'.ucwords($s['status']).'</span>';
-
-                        } elseif (strpos($st_l, 'tolak') !== false || strpos($st_l, 'ditolak') !== false) {
-                            $st_key = 'rejected';
-                            $badge = '<span class="badge badge-rejected">'.ucwords($s['status']).'</span>';
-
-                        } else {
-                            // selain itu dianggap pending atau proses
-                            $st_key = 'pending';
-                            $badge = '<span class="badge badge-pending">'.ucwords($s['status']).'</span>';
-                        }
-
-                       
-                        $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
-                        $tgl_kegiatan = isset($s['tanggal_kegiatan']) && $s['tanggal_kegiatan'] ? date('d M Y', strtotime($s['tanggal_kegiatan'])) : '-';
-                    ?>
-                    <tr onclick="showRowDetail(<?= $s['id'] ?>)" style="cursor: pointer;" class="clickable-row">
-                        <td><?= $no++ ?></td>
-                        <td><strong><?= htmlspecialchars($s['nama_kegiatan']) ?></strong></td>
-                        <td><?= htmlspecialchars($s['penyelenggara']) ?></td>
-                        <td><?= $tgl_pengajuan ?></td>
-                        <td><?= $tgl_kegiatan ?></td>
-                        <td><?= htmlspecialchars($s['jenis_pengajuan']) ?></td>
-                        <td><?= $badge ?></td>
-                        <!-- Di bagian tabel, ganti tombol status menjadi tombol eviden -->
-                        <td>
-                            <div style="display:flex;gap:6px">
-                                <button class="btn btn-eviden" onclick="event.stopPropagation(); showEvidenModal(<?= $s['id']; ?>)" title="Lihat Eviden">
-                                    <i class="fas fa-file-image"></i>
-                                </button>
-                                
-                                <!-- Tombol Lihat Detail -->
-                                <button class="btn btn-detail" onclick="event.stopPropagation(); showDetail(<?= $s['id']?>)" title="Lihat Detail">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                                
-                                <?php if($s['status']== 'disetujui sekretariat'): ?>
-                                    <button class="btn btn-approve" onclick="event.stopPropagation(); showApproveModal(<?= $s['id'] ?>)" title="Setujui">
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModalNew(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'])) ?>')" title="Tolak">
-                                    <i class="fa-solid fa-times"></i>
-                                </button>
-                                    <?php elseif(in_array($s['status'], ['disetujui dekan', 'ditolak dekan'])): ?>
-                                    <!-- Tombol Return: Kembalikan ke status awal -->
-                                    <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModalNew(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'])) ?>')" title="Kembalikan Pengajuan">
-                                    <i class="fa-solid fa-undo"></i>
-                                </button>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; else: ?>
-                    <tr id="emptyRow">
-                        <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
-                            <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
-                            <strong>Belum ada pengajuan</strong>
-                        </td>
-                    </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    
 </div>
 
 <!-- Preview Modal -->
@@ -2176,8 +2082,7 @@ function generateMultipleEvidenContent(item, evidenFiles) {
         </div>
     `;
 }
-
-// REVISI: Function showDetail untuk menampilkan surat pengajuan
+// Fungsi showDetail untuk menampilkan surat pengajuan dengan scroll lengkap
 async function showDetail(id) {
     try {
         // Tampilkan loading
@@ -2189,15 +2094,18 @@ async function showDetail(id) {
         `;
         document.getElementById('detailModal').classList.add('show');
 
-        // Load surat pengajuan via iframe
+        // Load surat pengajuan via iframe TANPA batasan tinggi
         const suratUrl = '<?= base_url("dekan/view_surat_pengajuan/") ?>' + id;
+        
         document.getElementById('detailContent').innerHTML = `
-            <iframe 
-                src="${suratUrl}" 
-                style="width:100%; height:70vh; border:none; border-radius:8px;"
-                onload="this.style.opacity=1"
-                style="opacity:0; transition: opacity 0.3s;"
-            ></iframe>
+            <div style="width:100%; overflow:hidden; border-radius:8px;">
+                <iframe 
+                    id="suratIframe"
+                    src="${suratUrl}" 
+                    style="width:100%; height:70vh; border:none;"
+                    onload="adjustIframeHeight()"
+                ></iframe>
+            </div>
             <div class="modal-actions">
                 <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
                     <i class="fa-solid fa-times"></i> Tutup
@@ -2216,6 +2124,43 @@ async function showDetail(id) {
                 </button>
             </div>
         `;
+    }
+}
+
+// Fungsi untuk menyesuaikan tinggi iframe berdasarkan konten
+function adjustIframeHeight() {
+    const iframe = document.getElementById('suratIframe');
+    if (!iframe) return;
+    
+    try {
+        // Tunggu sedikit untuk konten selesai dimuat
+        setTimeout(() => {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const body = iframeDoc.body;
+                const html = iframeDoc.documentElement;
+                
+                // Hitung tinggi maksimum
+                const height = Math.max(
+                    body.scrollHeight,
+                    body.offsetHeight,
+                    html.clientHeight,
+                    html.scrollHeight,
+                    html.offsetHeight
+                );
+                
+                // Set tinggi iframe
+                iframe.style.height = (height + 50) + 'px'; // Tambah margin
+                
+                console.log('Iframe height adjusted to:', height);
+            } catch (e) {
+                console.error('Error adjusting iframe height:', e);
+                // Fallback: set tinggi tetap
+                iframe.style.height = '1000px';
+            }
+        }, 500); // Tunggu 500ms untuk konten selesai dimuat
+    } catch (e) {
+        console.error('Error accessing iframe content:', e);
     }
 }
 // Update fungsi showApproveModal untuk kompatibilitas

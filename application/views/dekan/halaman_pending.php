@@ -6,6 +6,42 @@
 <title>Pengajuan Menunggu Persetujuan - Dashboard Dekan</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
+    /* Tambahkan di bagian CSS yang sudah ada */
+.select-checkbox {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.select-checkbox:focus {
+    outline: 2px solid #FB8C00;
+    outline-offset: 2px;
+}
+
+/* Style untuk row yang dipilih */
+tr.clickable-row.selected {
+    background-color: rgba(251, 140, 0, 0.1) !important;
+    box-shadow: inset 3px 0 0 #FB8C00;
+}
+
+/* Style untuk checkbox di dalam row yang dipilih */
+tr.clickable-row.selected .row-checkbox {
+    accent-color: #FB8C00;
+}
+
+/* Animasi untuk toolbar bulk action */
+.bulk-action-toolbar {
+    transition: all 0.3s ease;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+.bulk-action-toolbar.show {
+    opacity: 1;
+    max-height: 100px;
+    margin-bottom: 15px;
+}
     /* STYLE UTAMA (SAMA DENGAN DASHBOARD) */
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f5f7fa;}
@@ -71,17 +107,17 @@
     /* Pagination Info */
     .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
     
-    /* Modal Styles - SAMA DENGAN DASHBOARD */
+   /* Modal Styles */
     .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
     .modal.show{display:flex}
-    .modal-content{background:white;padding:0;border-radius:15px;max-width:800px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    .modal-content{background:white;padding:0;border-radius:15px;max-width:1100px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
     .modal-header{background:#FB8C00;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
     .modal-header h3{margin:0;font-size:18px;font-weight:600}
     .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
     .close-modal:hover{background:rgba(255,255,255,0.2)}
     
-    /* Detail Content Styles - SAMA DENGAN DASHBOARD */
+/* Detail Content Styles - IMPROVED (SAMA DENGAN DASHBOARD SEKRETARIAT) */
     .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
     .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
     .detail-section:last-child{margin-bottom:0}
@@ -661,6 +697,261 @@
             margin: 10px 0;
         }
     }
+/* New Styles for Multi-Select */
+    .select-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #FB8C00;
+    }
+
+    .bulk-action-toolbar {
+        display: none;
+        background: linear-gradient(135deg, #fef9e7 0%, #fdebd0 100%);
+        border: 1px solid #fb8c00;
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 15px;
+        align-items: center;
+        gap: 15px;
+        animation: slideDown 0.3s ease;
+        box-shadow: 0 2px 8px rgba(251, 140, 0, 0.1);
+    }
+
+    .bulk-action-toolbar.show {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .selected-count {
+        font-weight: 600;
+        color: #FB8C00;
+        background: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid #FB8C00;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .bulk-btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .bulk-approve {
+        background: #27ae60;
+        color: white;
+    }
+
+    .bulk-approve:hover {
+        background: #229954;
+        transform: translateY(-1px);
+    }
+
+    .bulk-reject {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .bulk-reject:hover {
+        background: #c0392b;
+        transform: translateY(-1px);
+    }
+
+    .bulk-clear {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .bulk-clear:hover {
+        background: #7f8c8d;
+        transform: translateY(-1px);
+    }
+
+    /* Select all checkbox */
+    .select-all-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 15px;
+        padding: 10px 15px;
+        background: #fef9e7;
+        border-radius: 8px;
+        border: 1px solid #fb8c00;
+    }
+
+    /* Styling untuk baris yang dipilih */
+    .clickable-row.selected {
+        background-color: #fef9e7 !important;
+        box-shadow: inset 0 0 0 2px #FB8C00;
+        position: relative;
+    }
+
+    .clickable-row.selected::after {
+        content: "✓";
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #27ae60;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    /* Bulk reject modal specific styles */
+    .bulk-reject-modal-content {
+        background: white;
+        padding: 0;
+        border-radius: 15px;
+        max-width: 600px;
+        width: 95%;
+        max-height: 85vh;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .bulk-reject-body {
+        padding: 25px;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    .bulk-item {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 12px;
+    }
+
+    .bulk-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .bulk-item-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 14px;
+    }
+
+    .bulk-item-details {
+        font-size: 12px;
+        color: #7f8c8d;
+    }
+
+    .bulk-reject-textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 2px solid #f8cccc;
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 13px;
+        resize: vertical;
+        min-height: 80px;
+        margin-top: 8px;
+    }
+
+    .bulk-reject-textarea:focus {
+        outline: none;
+        border-color: #e74c3c;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+    }
+
+    /* Success modal untuk bulk actions */
+    .success-modal-content {
+        background: white;
+        padding: 0;
+        border-radius: 15px;
+        max-width: 500px;
+        width: 95%;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .success-modal-header {
+        background: #27ae60;
+        color: white;
+        padding: 20px 25px;
+        border-radius: 15px 15px 0 0;
+        text-align: center;
+    }
+
+    .success-modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .success-modal-body {
+        padding: 25px;
+        text-align: center;
+    }
+
+    .success-icon {
+        font-size: 48px;
+        color: #27ae60;
+        margin-bottom: 15px;
+    }
+
+    .success-items {
+        margin-top: 20px;
+        text-align: left;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    .success-item {
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 13px;
+    }
+
+    .success-item:last-child {
+        border-bottom: none;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .bulk-action-toolbar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .bulk-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .selected-count {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 </head>
 <body>
@@ -698,19 +989,32 @@
             </div>
         </div>
         
-        <!-- Bulk Actions -->
-        <div class="bulk-actions" id="bulkActions" style="display: none;">
-            <input type="checkbox" id="selectAll" class="bulk-checkbox" onchange="toggleSelectAll()">
-            <div class="bulk-info" id="selectedCount">0 item dipilih</div>
-            <button class="btn-bulk btn-bulk-approve" onclick="processBulkApprove()" id="bulkApproveBtn">
+        <!-- Toolbar Aksi Massal -->
+        <div id="bulkActionToolbar" class="bulk-action-toolbar">
+            <div class="selected-count">
+                <i class="fa-solid fa-check-circle"></i>
+                <span id="selectedCount">0</span> dipilih
+            </div>
+            <button class="bulk-btn bulk-approve" onclick="showBulkApproveModal()">
                 <i class="fa-solid fa-check"></i> Setujui yang Dipilih
             </button>
-            <button class="btn-bulk btn-bulk-reject" onclick="showBulkRejectModalNew()" id="bulkRejectBtn">
+            <button class="bulk-btn bulk-reject" onclick="showBulkRejectModal()">
                 <i class="fa-solid fa-times"></i> Tolak yang Dipilih
             </button>
-            <button class="btn-bulk" onclick="clearSelection()" style="background: #95a5a6; color: white;">
-                <i class="fa-solid fa-times"></i> Batal
+            <button class="bulk-btn bulk-clear" onclick="clearAllSelection()">
+                <i class="fa-solid fa-times-circle"></i> Hapus Pilihan
             </button>
+        </div>
+
+        <!-- Checkbox Select All -->
+        <div class="select-all-container">
+            <input type="checkbox" id="selectAll" class="select-checkbox" onchange="toggleSelectAll(this)">
+            <label for="selectAll" style="font-weight:600;color:#2c3e50;cursor:pointer">
+                Pilih Semua
+            </label>
+            <span style="margin-left:auto;font-size:13px;color:#7f8c8d">
+                <i class="fa-solid fa-info-circle"></i> Centang untuk memilih beberapa pengajuan
+            </span>
         </div>
         
         <!-- Search Box -->
@@ -744,9 +1048,9 @@
         <div style="overflow-x:auto">
             <table>
                 <thead>
-                    <tr>
-                        <th width="40">
-                            <input type="checkbox" id="selectAllHeader" onchange="toggleSelectAllHeader()">
+                <tr>
+                    <th style="width:40px">
+                        <input type="checkbox" id="selectAllHeader" class="select-checkbox" onclick="handleSelectAllHeader(this)">
                         </th>
                         <th>No</th>
                         <th>Nama Kegiatan</th>
@@ -767,9 +1071,15 @@
                             $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
                             $tgl_kegiatan = isset($s['tanggal_kegiatan']) && $s['tanggal_kegiatan'] ? date('d M Y', strtotime($s['tanggal_kegiatan'])) : '-';
                     ?>
-                    <tr onclick="showRowDetail(<?= $s['id'] ?>)" style="cursor: pointer;" class="clickable-row">
-                        <td onclick="event.stopPropagation()">
-                            <input type="checkbox" class="row-checkbox" value="<?= $s['id'] ?? 0 ?>" onchange="updateBulkActions()">
+                    <tr onclick="showRowDetail(<?= $s['id'] ?>)" style="cursor: pointer;" class="clickable-row" id="row-<?= $s['id'] ?>">
+                       <!-- GANTI bagian checkbox di setiap baris -->
+                        <td onclick="event.stopPropagation();">
+                            <input type="checkbox" class="select-checkbox row-checkbox" 
+                                value="<?= $s['id'] ?? 0 ?>" 
+                                data-nama="<?= htmlspecialchars($s['nama_kegiatan'] ?? '') ?>"
+                                data-details="<?= htmlspecialchars($tgl_kegiatan) ?> | <?= htmlspecialchars($s['penyelenggara'] ?? '') ?>"
+                                onchange="toggleRowCheckbox(this)"
+                                onclick="event.stopPropagation();">
                         </td>
                         <td><?= $i ?></td>
                         <td><strong><?= htmlspecialchars($s['nama_kegiatan'] ?? '-') ?></strong></td>
@@ -821,6 +1131,83 @@
             <?php
             echo "Menampilkan: Semua Data (" . (isset($total_surat) ? $total_surat : '0') . " data)";
             ?>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Approve Modal -->
+<div id="bulkApproveModal" class="modal" onclick="modalClickOutside(event,'bulkApproveModal')">
+    <div class="approve-modal-content" onclick="event.stopPropagation()">
+        <div class="approve-modal-header">
+            <h3><i class="fa-solid fa-check-circle"></i> Setujui Pengajuan Terpilih</h3>
+            <button class="close-modal" onclick="closeModal('bulkApproveModal')">&times;</button>
+        </div>
+        <div class="approve-modal-body">
+            <div class="approve-info-box">
+                <strong><i class="fa-solid fa-info-circle"></i> Informasi</strong>
+                <span id="bulkApproveCount">0 pengajuan</span> akan disetujui
+            </div>
+            
+            <div id="bulkApproveItems" style="max-height:200px;overflow-y:auto;margin-bottom:20px">
+                <!-- Daftar pengajuan akan diisi oleh JavaScript -->
+            </div>
+            
+            <p style="margin-bottom:20px;color:#7f8c8d">
+                <i class="fa-solid fa-exclamation-triangle"></i> 
+                Apakah Anda yakin ingin menyetujui semua pengajuan yang dipilih?
+            </p>
+            
+            <form id="bulkApproveForm" method="POST" action="<?= base_url('dekan/process_multi_approve') ?>">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                <input type="hidden" name="selected_ids" id="bulkApproveIds">
+                
+                <div class="approve-modal-actions">
+                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('bulkApproveModal')">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="approve-btn approve-btn-submit">
+                        <i class="fa-solid fa-check"></i> Ya, Setujui Semua
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Reject Modal -->
+<div id="bulkRejectModal" class="modal" onclick="modalClickOutside(event,'bulkRejectModal')">
+    <div class="bulk-reject-modal-content" onclick="event.stopPropagation()">
+        <div class="reject-modal-header">
+            <h3><i class="fa-solid fa-ban"></i> Tolak Pengajuan Terpilih</h3>
+            <button class="close-modal" onclick="closeModal('bulkRejectModal')">&times;</button>
+        </div>
+        <div class="bulk-reject-body">
+            <div class="reject-info-box">
+                <strong><i class="fa-solid fa-exclamation-triangle"></i> Anda akan menolak:</strong>
+                <span id="bulkRejectCount">0 pengajuan</span>
+            </div>
+            
+            <p style="margin-bottom:15px;color:#7f8c8d">
+                <i class="fa-solid fa-info-circle"></i> 
+                Berikan alasan penolakan untuk masing-masing pengajuan:
+            </p>
+            
+            <form id="bulkRejectForm" method="POST" action="<?= base_url('dekan/process_multi_reject') ?>">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <div id="bulkRejectItems">
+                    <!-- Item pengajuan dengan textarea akan diisi oleh JavaScript -->
+                </div>
+                
+                <div class="reject-modal-actions">
+                    <button type="button" class="reject-btn reject-btn-cancel" onclick="closeModal('bulkRejectModal')">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="reject-btn reject-btn-submit">
+                        <i class="fa-solid fa-ban"></i> Ya, Tolak Semua
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -1104,7 +1491,151 @@ let currentApproveId = null;
 let currentApproveNamaKegiatan = null;
 let currentSearchTerm = '';
 let selectedIds = [];
+let selectedItems = new Set(); // Untuk menyimpan ID yang dipilih
 
+// ============================================
+// FUNGSI UNTUK MULTI SELECTION
+// ============================================
+
+// Fungsi untuk update selection
+function updateSelection() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    selectedItems.clear();
+    
+    checkboxes.forEach(checkbox => {
+        selectedItems.add(checkbox.value);
+    });
+    
+    const selectedCount = selectedItems.size;
+    document.getElementById('selectedCount').textContent = selectedCount;
+    
+    // Tampilkan/sembunyikan toolbar
+    const toolbar = document.getElementById('bulkActionToolbar');
+    if (selectedCount > 0) {
+        toolbar.classList.add('show');
+    } else {
+        toolbar.classList.remove('show');
+    }
+    
+    // Update select all checkbox
+    const allCheckboxes = document.querySelectorAll('.row-checkbox');
+    const allChecked = allCheckboxes.length > 0 && Array.from(allCheckboxes).every(cb => cb.checked);
+    document.getElementById('selectAll').checked = allChecked;
+    document.getElementById('selectAllHeader').checked = allChecked;
+    
+    // Tambah/hapus class selected pada baris
+    allCheckboxes.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        if (checkbox.checked) {
+            row.classList.add('selected');
+        } else {
+            row.classList.remove('selected');
+        }
+    });
+}
+
+// Fungsi untuk select semua
+function toggleSelectAll(checkbox) {
+    const isChecked = checkbox.checked;
+    const allCheckboxes = document.querySelectorAll('.row-checkbox');
+    
+    allCheckboxes.forEach(cb => {
+        cb.checked = isChecked;
+    });
+    
+    updateSelection();
+}
+
+// Fungsi untuk select semua dari header
+function toggleSelectAllHeader(checkbox) {
+    toggleSelectAll(checkbox);
+}
+
+// Fungsi untuk clear semua selection
+function clearAllSelection() {
+    const allCheckboxes = document.querySelectorAll('.row-checkbox');
+    allCheckboxes.forEach(cb => {
+        cb.checked = false;
+    });
+    updateSelection();
+}
+// Fungsi untuk menampilkan modal bulk approve (PERBAIKAN)
+function showBulkApproveModal() {
+    const selectedCount = selectedItems.size;
+    if (selectedCount === 0) {
+        alert('Pilih setidaknya satu pengajuan untuk disetujui.');
+        return;
+    }
+    
+    document.getElementById('bulkApproveCount').textContent = selectedCount + ' pengajuan';
+    document.getElementById('bulkApproveIds').value = Array.from(selectedItems).join(',');
+    
+    // Isi daftar pengajuan yang akan disetujui
+    const itemsContainer = document.getElementById('bulkApproveItems');
+    itemsContainer.innerHTML = '';
+    
+    selectedItems.forEach(id => {
+        const checkbox = document.querySelector(`.row-checkbox[value="${id}"]`);
+        if (checkbox) {
+            const nama = checkbox.dataset.nama || 'Tanpa Nama';
+            const details = checkbox.dataset.details || '';
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'bulk-item';
+            itemDiv.innerHTML = `
+                <div class="bulk-item-header">
+                    <div class="bulk-item-name">${escapeHtml(nama)}</div>
+                </div>
+                <div class="bulk-item-details">${escapeHtml(details)}</div>
+            `;
+            itemsContainer.appendChild(itemDiv);
+        }
+    });
+    
+    document.getElementById('bulkApproveModal').classList.add('show');
+}
+
+// Fungsi untuk menampilkan modal bulk reject (PERBAIKAN)
+function showBulkRejectModal() {
+    const selectedCount = selectedItems.size;
+    if (selectedCount === 0) {
+        alert('Pilih setidaknya satu pengajuan untuk ditolak.');
+        return;
+    }
+    
+    document.getElementById('bulkRejectCount').textContent = selectedCount + ' pengajuan';
+    
+    // Isi form dengan textarea untuk setiap pengajuan
+    const itemsContainer = document.getElementById('bulkRejectItems');
+    itemsContainer.innerHTML = '';
+    
+    selectedItems.forEach(id => {
+        const checkbox = document.querySelector(`.row-checkbox[value="${id}"]`);
+        if (checkbox) {
+            const nama = checkbox.dataset.nama || 'Tanpa Nama';
+            const details = checkbox.dataset.details || '';
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'bulk-item';
+            itemDiv.innerHTML = `
+                <div class="bulk-item-header">
+                    <div class="bulk-item-name">${escapeHtml(nama)}</div>
+                </div>
+                <div class="bulk-item-details">${escapeHtml(details)}</div>
+                <textarea 
+                    name="rejection_notes[]" 
+                    class="bulk-reject-textarea" 
+                    placeholder="Masukkan alasan penolakan untuk pengajuan ini..."
+                    required
+                ></textarea>
+                <input type="hidden" name="selected_ids[]" value="${id}">
+            `;
+            itemsContainer.appendChild(itemDiv);
+        }
+    });
+    
+    document.getElementById('bulkRejectModal').classList.add('show');
+}
 // ============================================
 // BULK ACTION FUNCTIONS
 // ============================================
@@ -1673,7 +2204,8 @@ function generateMultipleEvidenContent(item, evidenFiles) {
     `;
 }
 
-// Fungsi untuk menampilkan detail (SAMA DENGAN DASHBOARD)
+
+// Fungsi showDetail untuk menampilkan surat pengajuan dengan scroll lengkap
 async function showDetail(id) {
     try {
         // Tampilkan loading
@@ -1685,15 +2217,18 @@ async function showDetail(id) {
         `;
         document.getElementById('detailModal').classList.add('show');
 
-        // Load surat pengajuan via iframe
+        // Load surat pengajuan via iframe TANPA batasan tinggi
         const suratUrl = '<?= base_url("dekan/view_surat_pengajuan/") ?>' + id;
+        
         document.getElementById('detailContent').innerHTML = `
-            <iframe 
-                src="${suratUrl}" 
-                style="width:100%; height:70vh; border:none; border-radius:8px;"
-                onload="this.style.opacity=1"
-                style="opacity:0; transition: opacity 0.3s;"
-            ></iframe>
+            <div style="width:100%; overflow:hidden; border-radius:8px;">
+                <iframe 
+                    id="suratIframe"
+                    src="${suratUrl}" 
+                    style="width:100%; height:70vh; border:none;"
+                    onload="adjustIframeHeight()"
+                ></iframe>
+            </div>
             <div class="modal-actions">
                 <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
                     <i class="fa-solid fa-times"></i> Tutup
@@ -1712,6 +2247,43 @@ async function showDetail(id) {
                 </button>
             </div>
         `;
+    }
+}
+
+// Fungsi untuk menyesuaikan tinggi iframe berdasarkan konten
+function adjustIframeHeight() {
+    const iframe = document.getElementById('suratIframe');
+    if (!iframe) return;
+    
+    try {
+        // Tunggu sedikit untuk konten selesai dimuat
+        setTimeout(() => {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const body = iframeDoc.body;
+                const html = iframeDoc.documentElement;
+                
+                // Hitung tinggi maksimum
+                const height = Math.max(
+                    body.scrollHeight,
+                    body.offsetHeight,
+                    html.clientHeight,
+                    html.scrollHeight,
+                    html.offsetHeight
+                );
+                
+                // Set tinggi iframe
+                iframe.style.height = (height + 50) + 'px'; // Tambah margin
+                
+                console.log('Iframe height adjusted to:', height);
+            } catch (e) {
+                console.error('Error adjusting iframe height:', e);
+                // Fallback: set tinggi tetap
+                iframe.style.height = '1000px';
+            }
+        }, 500); // Tunggu 500ms untuk konten selesai dimuat
+    } catch (e) {
+        console.error('Error accessing iframe content:', e);
     }
 }
 
@@ -1776,37 +2348,71 @@ function generateDetailContentEnhanced(item) {
     // Ambil data dosen
     const dosenData = item.dosen_data || [];
 
-    // Generate HTML untuk data dosen
-    let dosenHtml = '';
-    if (dosenData && dosenData.length > 0) {
-        dosenHtml = `
+   // Generate HTML untuk data dosen - DENGAN FOTO PROFIL
+let dosenHtml = '';
+if (dosenData && dosenData.length > 0) {
+    dosenHtml = `
+    <div class="detail-section">
         <div class="dosen-list">
-            ${dosenData.map((dosen, index) => `
+            ${dosenData.map((dosen, index) => {
+                // Pastikan data dosen valid
+                const nama = escapeHtml(dosen.nama || 'Data tidak tersedia');
+                const nip = escapeHtml(dosen.nip || '-');
+                const jabatan = escapeHtml(dosen.jabatan || 'Dosen');
+                const divisi = escapeHtml(dosen.divisi || '-');
+                const foto = dosen.foto || '';
+                
+                // Generate foto URL atau initial
+                let avatarContent = '';
+                if (foto && foto !== '' && foto !== '-') {
+                    const fotoUrl = '<?= base_url("uploads/foto/") ?>' + foto;
+                    avatarContent = `<img src="${fotoUrl}" alt="${nama}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                   <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#FB8C00; color:white; font-size:12px; font-weight:600; border-radius:50%;">
+                                       ${nama ? nama.charAt(0).toUpperCase() : '?'}
+                                   </div>`;
+                } else {
+                    avatarContent = nama ? nama.charAt(0).toUpperCase() : '?';
+                }
+                
+                return `
+                <div class="dosen-item">
+                    <div class="dosen-avatar">
+                        ${avatarContent}
+                    </div>
+                    <div class="dosen-info">
+                        <div class="dosen-name">${nama}</div>
+                        <div class="dosen-details">
+                            NIP: ${nip} | ${jabatan} | Divisi: ${divisi}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('')}
+        </div>
+    </div>`;
+} else {
+    // Fallback jika tidak ada data dosen
+    dosenHtml = `
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
+        </div>
+        <div class="dosen-list">
             <div class="dosen-item">
                 <div class="dosen-avatar">
-                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
+                    ?
                 </div>
                 <div class="dosen-info">
-                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
+                    <div class="dosen-name">Data dosen tidak tersedia</div>
                     <div class="dosen-details">
-                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
+                        NIP: - | Dosen | Divisi: -
                     </div>
                 </div>
             </div>
-            `).join('')}
-        </div>`;
-    } else {
-        dosenHtml = `
-        <div class="dosen-item">
-            <div class="dosen-avatar">
-                ?
-            </div>
-            <div class="dosen-info">
-                <div class="dosen-name">Data dosen tidak tersedia</div>
-                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
-            </div>
-        </div>`;
-    }
+        </div>
+    </div>`;
+}
+
 
     // Tampilkan nomor surat jika sudah disetujui
     let nomorSuratHtml = '';
@@ -1980,7 +2586,216 @@ function getSuratDetail(id) {
             throw error;
         });
 }
+// ============================================
+// FIXED FUNGSI UNTUK MULTI SELECTION
+// ============================================
 
+// Variabel global untuk melacak status select all
+let isSelectAll = false;
+
+// Fungsi untuk handle select all dari header
+function handleSelectAllHeader(checkbox) {
+    const isChecked = checkbox.checked;
+    isSelectAll = isChecked;
+    
+    // Update semua checkbox di tabel
+    const allCheckboxes = document.querySelectorAll('.row-checkbox');
+    allCheckboxes.forEach(cb => {
+        cb.checked = isChecked;
+    });
+    
+    // Update checkbox di container select all
+    document.getElementById('selectAll').checked = isChecked;
+    
+    updateSelection();
+}
+
+// Fungsi untuk handle select all dari container
+function handleSelectAll(checkbox) {
+    const isChecked = checkbox.checked;
+    isSelectAll = isChecked;
+    
+    // Update semua checkbox di tabel
+    const allCheckboxes = document.querySelectorAll('.row-checkbox');
+    allCheckboxes.forEach(cb => {
+        cb.checked = isChecked;
+    });
+    
+    // Update checkbox di header
+    document.getElementById('selectAllHeader').checked = isChecked;
+    
+    updateSelection();
+}
+
+// Fungsi utama untuk update selection
+function updateSelection() {
+    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+    selectedItems.clear();
+    
+    checkboxes.forEach(checkbox => {
+        selectedItems.add(checkbox.value);
+    });
+    
+    const selectedCount = selectedItems.size;
+    document.getElementById('selectedCount').textContent = selectedCount;
+    
+    // Tampilkan/sembunyikan toolbar
+    const toolbar = document.getElementById('bulkActionToolbar');
+    if (selectedCount > 0) {
+        toolbar.classList.add('show');
+    } else {
+        toolbar.classList.remove('show');
+    }
+    
+    // Update status select all
+    const allCheckboxes = document.querySelectorAll('.row-checkbox');
+    const allChecked = allCheckboxes.length > 0 && Array.from(allCheckboxes).every(cb => cb.checked);
+    
+    // Sync kedua checkbox
+    document.getElementById('selectAll').checked = allChecked;
+    document.getElementById('selectAllHeader').checked = allChecked;
+    isSelectAll = allChecked;
+    
+    // Tambah/hapus class selected pada baris
+    allCheckboxes.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        if (checkbox.checked) {
+            row.classList.add('selected');
+        } else {
+            row.classList.remove('selected');
+        }
+    });
+}
+
+// Fungsi untuk clear semua selection
+function clearAllSelection() {
+    const allCheckboxes = document.querySelectorAll('.row-checkbox');
+    allCheckboxes.forEach(cb => {
+        cb.checked = false;
+    });
+    
+    // Reset semua checkbox select all
+    document.getElementById('selectAll').checked = false;
+    document.getElementById('selectAllHeader').checked = false;
+    isSelectAll = false;
+    
+    updateSelection();
+}
+
+// Fungsi untuk toggle individual checkbox (dipanggil dari onchange)
+function toggleRowCheckbox(checkbox) {
+    // Stop propagation agar tidak memicu click row
+    if (event) event.stopPropagation();
+    
+    // Update status select all jika perlu
+    const allCheckboxes = document.querySelectorAll('.row-checkbox');
+    const allChecked = allCheckboxes.length > 0 && Array.from(allCheckboxes).every(cb => cb.checked);
+    
+    document.getElementById('selectAll').checked = allChecked;
+    document.getElementById('selectAllHeader').checked = allChecked;
+    isSelectAll = allChecked;
+    
+    updateSelection();
+}
+
+// ============================================
+// EVENT LISTENERS TAMBAHAN
+// ============================================
+
+// Fungsi untuk mencegah event propagation pada checkbox
+function preventRowClick(event) {
+    if (event.target.type === 'checkbox' || event.target.closest('input[type="checkbox"]')) {
+        event.stopPropagation();
+    }
+}
+
+// Fungsi untuk handle klik pada row
+function handleRowClick(row, event) {
+    // Jika yang diklik adalah checkbox, biarkan fungsi checkbox yang menangani
+    if (event.target.type === 'checkbox' || event.target.closest('input[type="checkbox"]')) {
+        return;
+    }
+    
+    // Tampilkan detail pengajuan
+    const suratId = row.querySelector('.row-checkbox').value;
+    showRowDetail(suratId);
+}
+
+// ============================================
+// INISIALISASI SETELAH DOM LOADED
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Apply filters
+    applyFilters();
+    
+    // Enter key support for search
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    });
+    
+    // Auto reset when input is cleared
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        if (e.target.value === '') {
+            currentSearchTerm = '';
+            applyFilters();
+        }
+    });
+    
+    // Event listener untuk mencegah klik pada checkbox memicu row click
+    const rows = document.querySelectorAll('#tableBody tr.clickable-row');
+    rows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            handleRowClick(this, e);
+        });
+        
+        // Tambahkan event listener untuk checkbox di dalam row
+        const checkbox = row.querySelector('.row-checkbox');
+        if (checkbox) {
+            checkbox.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    });
+    
+    // Inisialisasi selectedItems
+    if (typeof selectedItems === 'undefined') {
+        selectedItems = new Set();
+    }
+    
+    // Inisialisasi toolbar
+    const toolbar = document.getElementById('bulkActionToolbar');
+    if (toolbar) {
+        toolbar.classList.remove('show');
+    }
+    
+    // Check if there's success data from session
+    <?php if($this->session->flashdata('approved_items')): ?>
+        const approvedItems = <?= json_encode($this->session->flashdata('approved_items')) ?>;
+        const isSingle = <?= json_encode($this->session->flashdata('is_single_approve')) ?>;
+        setTimeout(function() {
+            showSuccessModal(approvedItems.length, approvedItems, isSingle);
+        }, 500);
+    <?php endif; ?>
+    
+    // Check for success reject modal data
+    <?php if($this->session->flashdata('rejected_items')): ?>
+        const rejectedItems = <?= json_encode($this->session->flashdata('rejected_items')) ?>;
+        const isSingleReject = <?= json_encode($this->session->flashdata('is_single_reject')) ?>;
+        setTimeout(function() {
+            showSuccessRejectModal(rejectedItems.length, rejectedItems, isSingleReject);
+        }, 500);
+    <?php endif; ?>
+    
+    // Event listener untuk preview modal
+    window.addEventListener('click', function(e) {
+        if (e.target.id === 'previewModal') {
+            closePreviewModal();
+        }
+    });
+});
 // ============================================
 // SEARCH FUNCTIONALITY
 // ============================================
@@ -2364,6 +3179,116 @@ function makeRowsClickable() {
         }
     });
 }
+
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Event listener untuk preview modal
+    window.addEventListener('click', function(e) {
+        if (e.target.id === 'previewModal') {
+            closePreviewModal();
+        }
+    });
+    
+    // Search functionality
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            if (!searchInput.value.trim()) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    if (searchInput) {
+        const searchValue = '<?= $this->input->get('search') ?>';
+        if (searchValue) {
+            searchInput.focus();
+            searchInput.setSelectionRange(searchValue.length, searchValue.length);
+        }
+    }
+    
+    // Handle bulk form submissions
+    const bulkApproveForm = document.getElementById('bulkApproveForm');
+    if (bulkApproveForm) {
+        bulkApproveForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Validasi sebelum submit
+            if (selectedItems.size === 0) {
+                alert('Tidak ada pengajuan yang dipilih.');
+                return false;
+            }
+            
+            // Tampilkan loading
+            const submitBtn = this.querySelector('.approve-btn-submit');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            submitBtn.disabled = true;
+            
+            // Submit form
+            this.submit();
+        });
+    }
+    
+    const bulkRejectForm = document.getElementById('bulkRejectForm');
+    if (bulkRejectForm) {
+        bulkRejectForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validasi textarea
+            const textareas = this.querySelectorAll('textarea[name="rejection_notes[]"]');
+            let isValid = true;
+            textareas.forEach(textarea => {
+                if (!textarea.value.trim()) {
+                    isValid = false;
+                    textarea.style.borderColor = '#e74c3c';
+                    textarea.focus();
+                } else {
+                    textarea.style.borderColor = '';
+                }
+            });
+            
+            if (!isValid) {
+                alert('Semua alasan penolakan harus diisi.');
+                return false;
+            }
+            
+            // Tampilkan loading
+            const submitBtn = this.querySelector('.reject-btn-submit');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            submitBtn.disabled = true;
+            
+            // Submit form
+            this.submit();
+        });
+    }
+    
+    // Cek jika ada flashdata untuk menampilkan success modal
+    <?php if($this->session->flashdata('success') && $this->session->flashdata('approved_items')): ?>
+        showSuccessModal(
+            'Pengajuan Disetujui',
+            '<?= $this->session->flashdata('success') ?>',
+            <?= json_encode($this->session->flashdata('approved_items')) ?>
+        );
+    <?php elseif($this->session->flashdata('success') && $this->session->flashdata('rejected_items')): ?>
+        showSuccessModal(
+            'Pengajuan Ditolak',
+            '<?= $this->session->flashdata('success') ?>',
+            <?= json_encode($this->session->flashdata('rejected_items')) ?>
+        );
+    <?php elseif($this->session->flashdata('success')): ?>
+        showSuccessModal(
+            'Berhasil',
+            '<?= $this->session->flashdata('success') ?>',
+            []
+        );
+    <?php endif; ?>
+});
 </script>
 </body>
 </html>

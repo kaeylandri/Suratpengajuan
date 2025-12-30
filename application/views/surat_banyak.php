@@ -15,7 +15,7 @@
             margin: 0;
             padding: 0;
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.25;
             color: #000;
         }
         
@@ -323,6 +323,10 @@ function getNamaDivisiLengkap($singkatan) {
     return $singkatan;
 }
 
+// Fungsi untuk cek apakah nilai kosong/null/dash
+function isValueEmpty($value) {
+    return empty($value) || $value === '-' || $value === 'null' || $value === 'NULL';
+}
 // Kode baru: Mengambil divisi unik dari data dosen untuk tembusan
 $divisi_tembusan = [];
 $dosen_data_dengan_divisi_lengkap = [];
@@ -405,10 +409,41 @@ if (isset($jenis_penugasan_kelompok_tampil) && $jenis_penugasan_kelompok_tampil 
         </div>
 
         <p class="section-title">Menugaskan kepada Dosen dan TPA yang tercantum dalam lampiran surat tugas ini, <?= $surat->customize ?? '-' ?> <b><?= $jenis_penugasan_kelompok_tampil ?></b>
-         di kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b></p>
+            di kegiatan <b><?= $surat->nama_kegiatan ?? '-' ?></b>
+            
+            <?php if (!isValueEmpty($surat->penyelenggara)): ?>
+                yang diselenggarakan oleh <b><?= $surat->penyelenggara ?></b>
+            <?php endif; ?>
+
+            <?php if (isset($surat->jenis_date) && $surat->jenis_date == 'Custom'): ?>
+                <?php
+                // Format tanggal
+                $tanggal_mulai = $surat->tanggal_kegiatan ?? '-';
+                $tanggal_akhir = $surat->akhir_kegiatan ?? '-';
+                
+                // Format menjadi tgl_indo
+                $tgl_mulai_formatted = tgl_indo($tanggal_mulai);
+                $tgl_akhir_formatted = tgl_indo($tanggal_akhir);
+                
+                // Cek apakah tanggal sama
+                if ($tanggal_mulai === $tanggal_akhir && $tanggal_mulai !== '-') {
+                    // Jika tanggal sama, tampilkan hanya satu tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b>";
+                } else {
+                    // Jika tanggal berbeda, tampilkan rentang tanggal
+                    echo "pada tanggal <b>$tgl_mulai_formatted</b> - <b>$tgl_akhir_formatted</b>";
+                }
+                ?>
+            <?php else: ?>
+                selama <b>Periode <?= $surat->periode_value ?? '-' ?></b>
+            <?php endif; ?>
+
+            <?php if (!isValueEmpty($surat->tempat_kegiatan)): ?>
+                di <b><?= $surat->tempat_kegiatan ?>.</b>
+            <?php endif; ?></p>
 
         <p>Surat tugas ini berlaku mulai tanggal sesuai tanggal kegiatan.</p>
-        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p><br>
+        <p>Demikian penugasan ini untuk dilaksanakan dengan penuh tanggung jawab.</p>
 
         <p class="date">Bandung, <?php
         $tanggalPengesahan = $surat->created_at ?? date('Y-m-d');

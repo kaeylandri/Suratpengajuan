@@ -1482,242 +1482,6 @@ letter-spacing: 1px;
             <canvas id="grafikSurat"></canvas>
         </div>
     </div>
-
-    <!-- Tabel -->
-    <div class="card">
-        <div class="card-header">
-            <h3><i class="fa-solid fa-table"></i> Daftar Pengajuan Surat</h3>
-            <div>
-                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">Menampilkan: Semua Data (<?= $total_all ?> data)</span>
-            </div>
-        </div>
-        
-        <div style="overflow-x:auto">
-            <table>
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Kegiatan</th>
-                        <th>Penyelenggara</th>
-                        <th>Tanggal Pengajuan</th>
-                        <th>Tanggal Kegiatan</th>
-                        <th>Jenis</th>
-                        <th>Disposisi</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <?php if(isset($surat_list) && !empty($surat_list)): $no=1; foreach($surat_list as $s): 
-                        $status = $s->status ?? '';
-                        $st_key = 'unknown';
-                        $badge_text = ucwords($status);
-                        
-                        if ($status == 'disetujui KK') {
-                            $st_key = 'pending';
-                            $badge = '<span class="badge badge-pending">Menunggu Sekretariat</span>';
-                        } elseif ($status == 'disetujui sekretariat') {
-                            $st_key = 'approved';
-                            $badge = '<span class="badge badge-approved">Disetujui Sekretariat</span>';
-                        } elseif ($status == 'ditolak sekretariat') {
-                            $st_key = 'rejected';
-                            $badge = '<span class="badge badge-rejected">Ditolak Sekretariat</span>';
-                        } elseif ($status == 'disetujui dekan') {
-                            $st_key = 'completed';
-                            $badge = '<span class="badge badge-completed">Disetujui Dekan</span>';
-                        } elseif ($status == 'ditolak dekan') {
-                            $st_key = 'rejected';
-                            $badge = '<span class="badge badge-rejected">Ditolak Dekan</span>';
-                        } elseif (strpos($status, 'pengajuan') !== false || strpos($status, 'pending') !== false || strpos($status, 'menunggu') !== false) {
-                            $st_key = 'pending';
-                            $badge = '<span class="badge badge-pending">' . $badge_text . '</span>';
-                        } elseif (strpos($status, 'setuju') !== false || strpos($status, 'approved') !== false) {
-                            $st_key = 'approved';
-                            $badge = '<span class="badge badge-approved">' . $badge_text . '</span>';
-                        } elseif (strpos($status, 'tolak') !== false || strpos($status, 'rejected') !== false) {
-                            $st_key = 'rejected';
-                            $badge = '<span class="badge badge-rejected">' . $badge_text . '</span>';
-                        } else {
-                            $st_key = 'unknown';
-                            $badge = '<span class="badge badge-pending">' . $badge_text . '</span>';
-                        }
-
-                        $tgl_pengajuan = isset($s->created_at) && $s->created_at ? date('d M Y', strtotime($s->created_at)) : '-';
-                        $tgl_kegiatan = isset($s->tanggal_kegiatan) && $s->tanggal_kegiatan ? date('d M Y', strtotime($s->tanggal_kegiatan)) : '-';
-                    ?>
-                    <tr data-status="<?= $st_key ?>">
-                        <td><?= $no++ ?></td>
-                        <td><strong><?= htmlspecialchars($s->nama_kegiatan) ?></strong></td>
-                        <td><?= htmlspecialchars($s->penyelenggara) ?></td>
-                        <td><?= $tgl_pengajuan ?></td>
-                        <td><?= $tgl_kegiatan ?></td>
-                        <td><?= htmlspecialchars($s->jenis_pengajuan) ?></td>
-                        <td>
-                        <!-- Tombol Tentukan -->
-                        <button 
-                            class="btn btn-disposisi" 
-                            onclick="openPinModal(<?= $s->id ?>)" 
-                            style="background:#f1c40f;color:#000;border:none;padding:6px 12px;border-radius:5px;cursor:pointer">
-                            <i class="fas fa-shuffle"></i> Tentukan
-                        </button>
-
-                        <!-- Dropdown Disposisi (disembunyikan sampai PIN benar) -->
-                        <div id="disposisiBox<?= $s->id ?>" class="disposisi-card" style="display:none;">
-                            <label class="label-disposisi">Pilih Disposisi</label>
-                            <select id="disposisiSelect<?= $s->id ?>"
-                                    class="select-disposisi"
-                                    onchange="onDisposisiChange(<?= $s->id ?>)">
-                                <option value="">-- Pilih Disposisi --</option>
-                                <option value="Lanjut Proses ✔">Lanjut Proses</option>
-                                <option value="Hold/Pending">Hold/Pending</option>
-                                <option value="Batal">Batal</option>
-                            </select>
-
-                            <label id="labelCatatan<?= $s->id ?>" 
-                                class="label-disposisi" 
-                                style="display:none;margin-top:10px;">
-                                Catatan
-                            </label>
-
-                            <textarea id="catatanDisposisi<?= $s->id ?>"
-                                    class="textarea-disposisi"
-                                    placeholder="Catatan diperlukan..."
-                                    style="display:none;">
-                            </textarea>
-
-                            <button class="btn-disposisi" 
-                                    onclick="saveDisposisi(<?= $s->id ?>)" 
-                                    id="btnSaveDisposisi<?= $s->id ?>"
-                                    style="display:none;">
-                                Simpan
-                            </button>
-                        </div>
-                        <br>
-
-                        <!-- TAMBAHAN BARU: Tampilkan status bila sudah ada -->
-                        <?php if (!empty($s->disposisi_status)): ?>
-                            <div style="margin-top:8px;padding:8px;background:#f8f9fa;border-radius:6px;border-left:3px solid #16A085;">
-                                <small style="display:block;margin-bottom:4px;">
-                                    <strong style="color:#16A085;">Status:</strong> 
-                                    <span style="color:#2c3e50;font-weight:600;"><?= htmlspecialchars($s->disposisi_status) ?></span>
-                                </small>
-                                
-                                <!-- TIMESTAMP DISPOSISI -->
-                                <?php if (!empty($s->disposisi_updated_at)): ?>
-                                    <small style="display:block;color:#7f8c8d;font-size:11px;margin-bottom:4px;">
-                                        <i class="far fa-clock"></i> 
-                                        <?= date('d M Y H:i', strtotime($s->disposisi_updated_at)) ?>
-                                    </small>
-                                <?php endif; ?>
-                                
-                                <!-- CATATAN DISPOSISI -->
-                                <?php if (!empty($s->disposisi_catatan)): ?>
-                                    <small style="display:block;color:#7f8c8d;font-size:11px;font-style:italic;margin-top:4px;padding:4px 6px;background:white;border-radius:4px;">
-                                        <i class="far fa-comment"></i> 
-                                        <?= htmlspecialchars($s->disposisi_catatan) ?>
-                                    </small>
-                                <?php endif; ?>
-                               <!-- APPROVAL STATUS SEKRETARIAT (jika disposisi = Lanjut Proses dan sudah disetujui/ditolak) -->
-                                <?php if ($s->disposisi_status === 'Lanjut Proses ✔' && !empty($s->status)): ?>
-                                    <?php if (in_array($s->status, ['disetujui sekretariat', 'ditolak sekretariat', 'disetujui dekan', 'ditolak dekan'])): ?>
-                                        <div style="margin-top:8px;padding:6px 8px;border-radius:4px;background:<?= in_array($s->status, ['disetujui sekretariat', 'disetujui dekan']) ? '#d4edda' : '#f8d7da' ?>;">
-                                            <small style="display:block;font-weight:700;color:<?= in_array($s->status, ['disetujui sekretariat', 'disetujui dekan']) ? '#155724' : '#721c24' ?>;">
-                                                <i class="fas fa-<?= in_array($s->status, ['disetujui sekretariat', 'disetujui dekan']) ? 'check-circle' : 'times-circle' ?>"></i>
-                                                <?= $s->status === 'disetujui sekretariat' ? 'Disetujui Sekretariat' : 
-                                                ($s->status === 'ditolak sekretariat' ? 'Ditolak Sekretariat' : 
-                                                ($s->status === 'disetujui dekan' ? 'Disetujui Dekan' : 
-                                                ($s->status === 'ditolak dekan' ? 'Ditolak Dekan' : $s->status))) ?>
-                                            </small>
-                                            <?php if (!empty($s->updated_at)): ?>
-                                                <small style="display:block;color:#6c757d;font-size:10px;margin-top:2px;">
-                                                    <?= date('d M Y H:i', strtotime($s->updated_at)) ?>
-                                                </small>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            </div>
-                        <?php endif; ?>
-                    </td>
-                        <td>
-                            <div style="display:flex;gap:6px">
-                                <!-- Tombol Lihat Eviden -->
-                                <button class="btn btn-eviden" title="Lihat Eviden" onclick="showEvidenModal(<?= $s->id; ?>)">
-                                    <i class="fas fa-file-image"></i>
-                                </button>
-                                
-                                <!-- Tombol Lihat Detail -->
-                                <button class="btn btn-detail" onclick="showDetail(<?= $s->id ?>)" title="Lihat Detail">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                                
-                                <!-- TOMBOL EDIT BARU -->
-                                <?php if(in_array($s->status, ['disetujui KK', 'disetujui sekretariat', 'ditolak sekretariat'])): ?>
-                                    <a href="<?= site_url('sekretariat/edit_surat_sekretariat/' . $s->id) ?>" 
-                                    class="btn btn-warning" 
-                                    title="Edit Pengajuan"
-                                    style="background:#ffc107;color:#000;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;text-decoration:none;">
-                                        <i class="fas fa-pen"></i>
-                                    </a>
-                                <?php endif; ?>
-                                
-                                <!-- Tombol lain yang sudah ada -->
-                                <?php if($status == 'disetujui KK' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
-                                    <button class="btn btn-approve" onclick="showApproveModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')" title="Approve">
-                                        <i class="fa-solid fa-check"></i>
-                                    </button>
-                                    <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModalNew(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')" title="Rejected">
-                                        <i class="fa-solid fa-times"></i>
-                                    </button>
-                                <?php elseif(in_array($s->status, ['disetujui sekretariat', 'ditolak sekretariat'])): ?>
-                                    <!-- Tombol Return -->
-                                    <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModal(<?= $s->id ?>, '<?= htmlspecialchars($s->nama_kegiatan, ENT_QUOTES) ?>')" title="Return">
-                                        <i class="fa-solid fa-undo"></i>
-                                    </button>
-                                <?php endif; ?>
-                                
-                                <!-- Tombol edit khusus untuk ditolak dekan -->
-                                <?php if($status == 'ditolak dekan' && $s->disposisi_status == 'Lanjut Proses ✔'): ?>
-                                    <a href="<?= site_url('sekretariat/edit_surat/' . $s->id) ?>" 
-                                    class="btn btn-warning" 
-                                    title="Edit & Ajukan Ulang ke Dekan"
-                                    style="background:#ffc107;color:#000;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;text-decoration:none;">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                <?php endif; ?>
-                                <!-- TOMBOL BARU: TAMBAH NOMOR SURAT (hanya untuk status disetujui dekan) -->
-                                <?php if($status == 'disetujui dekan'): ?>
-                                    <button class="btn btn-nomor" 
-                                            onclick="openNomorSuratModal(<?= $s->id ?>, '<?= htmlspecialchars(addslashes($s->nama_kegiatan)) ?>')"
-                                            title="Masukkan Nomor Surat"
-                                            style="background:#3498db;color:white;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;">
-                                        <i class="fa-solid fa-hashtag"></i>
-                                    </button>
-                                <?php endif; ?>
-                                
-                                <!-- TOMBOL BARU: CETAK SURAT (hanya jika nomor surat sudah terisi) -->
-                                <?php if($status == 'disetujui dekan' && !empty($s->nomor_surat) && $s->nomor_surat !== '-' && $s->nomor_surat !== 'null'): ?>
-                                    <button class="btn btn-cetak" 
-                                            onclick="window.open('<?= site_url('sekretariat/cetak/' . $s->id) ?>', '_blank')"
-                                            title="Cetak Surat"
-                                            style="background:#9b59b6;color:white;border:none;border-radius:5px;padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:0.2s ease-in-out;font-size:14px;height:32px;">
-                                        <i class="fa-solid fa-print"></i>
-                                    </button>
-                                <?php endif; ?>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; else: ?>
-                    <tr id="emptyRow">
-                        <td colspan="8" style="text-align:center;padding:40px;color:#7f8c8d">
-                            <i class="fa-solid fa-inbox" style="font-size:48px;margin-bottom:10px;display:block;opacity:0.3"></i>
-                            <strong>Belum ada pengajuan</strong>
-                        </td>
-                    </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 
 <!-- Preview Modal -->
@@ -1738,7 +1502,7 @@ letter-spacing: 1px;
     <div class="modal-content">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
-            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
+            <button class="close-modal" onclick="closeModalPre('detailModal')">&times;</button>
         </div>
         <div class="detail-content" id="detailContent">
             <!-- Content akan diisi oleh JavaScript -->
@@ -1776,7 +1540,7 @@ letter-spacing: 1px;
 <div class="approve-modal-content" style="max-width: 500px;">
     <div class="approve-modal-header">
         <h3><i class="fa-solid fa-hashtag"></i> Masukkan Nomor Surat</h3>
-        <button class="close-modal" onclick="closeModal('nomorSuratModal')">&times;</button>
+        <button class="close-modal" onclick="closeModalPre('nomorSuratModal')">&times;</button>
     </div>
     <div class="approve-modal-body">
         <div class="approve-info-box" id="nomorSuratInfoBox">
@@ -1952,7 +1716,7 @@ letter-spacing: 1px;
             <div class="modal-content">
                 <div class="modal-header">
                     <h3><i class="fa-solid fa-file-image"></i> File Evidence</h3>
-                    <button class="close-modal" onclick="closeModal('evidenModal')">&times;</button>
+                    <button class="close-modal" onclick="closeModalPre('evidenModal')">&times;</button>
                 </div>
                 <div class="detail-content" id="evidenContent">
                     <!-- Content akan diisi oleh JavaScript -->
@@ -2418,9 +2182,7 @@ try {
     const data = await response.json();
     
     if (data.success) {
-        // Tutup modal nomor surat
-        closeModal('nomorSuratModal');
-        
+
         // Tampilkan success modal
         showSuccessNomorSuratModal(currentNomorSuratNama, data.nomor_surat);
         
@@ -3963,11 +3725,18 @@ function refreshTable() {
             
             function closeModal(id) { 
                 document.getElementById(id).classList.remove('show'); 
+                
                 // Refresh halaman setelah modal ditutup
                 setTimeout(() => {
                     window.location.reload();
                 }, 300);
             }
+
+            // Fungsi untuk menutup modal tanpa refresh (untuk preview)
+                function closeModalPre(id) {
+                    document.getElementById(id).classList.remove('show'); 
+                }
+
 
             // Hapus fungsi modalClickOutside karena tidak ingin tutup modal dengan klik luar
 
@@ -4102,40 +3871,55 @@ function refreshTable() {
                         catatanTextarea.focus();
                     }, 100);
                 }
+                // SIMPAN DISPOSISI - UPDATED
+                function saveDisposisi(id) {
+                    let disposisi = document.getElementById("disposisiSelect" + id).value;
+                    let catatan = document.getElementById("catatanDisposisi" + id).value;
 
+                    if (!disposisi) {
+                        alert("Pilih disposisi dulu!");
+                        return;
+                    }
 
+                    if ((disposisi === "Hold/Pending" || disposisi === "Batal") && catatan === "") {
+                        alert("Wajib Mengisi Catatan!");
+                        return;
+                    }
 
-            // SIMPAN DISPOSISI
-            function saveDisposisi(id) {
+                    // Konfirmasi khusus untuk disposisi Batal
+                    if (disposisi === "Batal") {
+                        if (!confirm("⚠️ Pengajuan ini akan DITOLAK oleh Sekretariat.\n\nLanjutkan?")) {
+                            return;
+                        }
+                    }
 
-                let disposisi = document.getElementById("disposisiSelect" + id).value;
-                let catatan = document.getElementById("catatanDisposisi" + id).value;
-
-                if (!disposisi) {
-                    alert("Pilih disposisi dulu!");
-                    return;
-                }
-
-                if ((disposisi === "Hold/Pending" || disposisi === "Batal") && catatan === "") {
-                    alert("Wajib Mengisi Catatan!");
-                    return;
-                }
-
-                fetch("<?= base_url('sekretariat/set_disposisi') ?>", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        id: id,
-                        disposisi: disposisi,
-                        catatan: catatan
+                    fetch("<?= base_url('sekretariat/set_disposisi') ?>", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            id: id,
+                            disposisi: disposisi,
+                            catatan: catatan
+                        })
                     })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    alert("Disposisi tersimpan!");
-                    location.reload();
-                });
-            }
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (disposisi === "Batal") {
+                                alert("✅ Disposisi tersimpan!\n\n📌 Status pengajuan diubah menjadi: DITOLAK SEKRETARIAT");
+                            } else {
+                                alert("✅ Disposisi tersimpan!");
+                            }
+                            location.reload();
+                        } else {
+                            alert("❌ Gagal menyimpan disposisi. Silakan coba lagi.");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("❌ Terjadi kesalahan. Silakan coba lagi.");
+                    });
+                }
             function openUbahPinModal() {
                 document.getElementById("ubahPinModal").style.display = "flex";
             }

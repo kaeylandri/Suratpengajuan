@@ -892,6 +892,39 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                 left: 5vw !important;
             }
         }
+        /* Disabled Button State */
+        .btn-disabled {
+            background: #95a5a6 !important;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+
+        .btn-disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        /* New File Item Styles */
+.new-file-item {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%) !important;
+    border: 2px solid #4caf50 !important;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+.new-file-badge {
+    background: #4caf50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 8px;
+}
     </style>
 </head>
 
@@ -1437,8 +1470,11 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
             const fileCounter = document.getElementById('fileCounter');
             const submitBtn = document.getElementById('submitBtn');
             
-            let selectedFilesCount = 0;
-            let selectedFilesData = [];
+            let fileCounterNumber = 0;
+            let uploadedFiles = [];
+            let totalFiles = 0;
+            let uploadedCount = 0;
+            let isProcessing = false; // Flag untuk mencegah duplikasi
 
             // Click on upload area
             uploadArea.addEventListener('click', function() {
@@ -1451,9 +1487,25 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                 fileInput.click();
             });
             
+
             // File input change
             fileInput.addEventListener('change', function(e) {
-                handleFiles(e.target.files);
+                if (isProcessing) return;
+                isProcessing = true;
+                
+                const files = Array.from(e.target.files);
+                handleFiles(files);
+                
+                // Reset input untuk memungkinkan upload file yang sama lagi
+                setTimeout(() => {
+                    fileInput.value = '';
+                    isProcessing = false;
+                }, 100);
+            });
+
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
             });
             
             // Drag and drop functionality
@@ -1583,37 +1635,176 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                         </div>
                     `;
                     
-                    selectedFiles.appendChild(fileItem);
-                });
+                    filesList.appendChild(fileItem);
+                    
+                    // Simulate upload with progress
+                    simulateUpload(file, i);
+                }
+                
+                // Show loading bar
+                loadingBarContainer.style.display = 'block';
+                loadingBar.style.width = '0%';
+                loadingText.textContent = '0%';
             }
             
-            // Remove new file from selection
-            window.removeNewFile = function(index) {
-                if (confirm('Hapus file ini dari daftar upload?')) {
-                    selectedFilesData.splice(index, 1);
-                    updateSelectedFilesDisplay();
-                }
-            };
-            
-            // Form submission - prepare files
-            submitBtn.addEventListener('click', function(e) {
-                // Validasi minimal satu file (baik yang sudah ada atau baru)
-                const existingFiles = document.querySelectorAll('.existing-file-item:not(.file-deleted)');
-                const existingFileInputs = document.querySelectorAll('.existing-file-input[value!=""]');
-                const hasExistingFiles = existingFileInputs.length > 0;
+            // Simulate file upload with progress
+            function simulateUpload(file, index) {
+                const fileItem = document.getElementById(`file-${index}`);
+                const statusDiv = fileItem.querySelector('.uploaded-file-status');
                 
-                if (!hasExistingFiles && selectedFilesData.length === 0) {
-                    if (!confirm('Anda belum memilih file eviden. Lanjutkan tanpa file?')) {
-                        e.preventDefault();
-                        return;
+                // Show uploading status
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                statusDiv.className = 'uploaded-file-status status-uploading';
+                
+                // Simulate progress (in real app, this would be actual upload progress)
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 20;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                        
+                        // Update status to success
+                        statusDiv.innerHTML = '<i class="fas fa-check"></i> Selesai';
+                        statusDiv.className = 'uploaded-file-status status-success';
+                        
+                        // Add file to uploaded files array
+                        uploadedFiles.push(file);
+                        uploadedCount++;
+                        
+                        // Update overall progress
+                        const overallProgress = Math.round((uploadedCount / totalFiles) * 100);
+                        loadingBar.style.width = `${overallProgress}%`;
+                        loadingText.textContent = `${overallProgress}%`;
+                        
+                        // If all files uploaded
+                        if (uploadedCount === totalFiles) {
+                            setTimeout(() => {
+                                loadingBarContainer.style.display = 'none';
+                                uploadSuccess.classList.add('show');
+                                
+                                // Add files to form as actual file inputs
+                                addFilesToForm();
+                                
+                                // Hide preview after 3 seconds
+                                setTimeout(() => {
+                                    uploadedFilesPreview.classList.remove('show');
+                                }, 3000);
+                            }, 500);
+                        }
+                    } else {
+                        loadingBar.style.width = `${progress}%`;
+                        loadingText.textContent = `${Math.round(progress)}%`;
                     }
+                }, 200);
+            }
+            
+              // Add files to form as actual file inputs
+function addFilesToForm() {
+    // Clear existing new file inputs
+    newFilesContainer.innerHTML = '';
+    newFilesContainer.classList.remove('show');
+    hiddenFilesContainer.innerHTML = '';
+    
+    // Create a new input for each uploaded file
+    uploadedFiles.forEach((file, index) => {
+        // Create wrapper for display
+        const wrapper = document.createElement('div');
+        wrapper.className = 'new-file-input-wrapper new-file-item'; // Tambahkan class new-file-item
+        wrapper.id = `file-wrapper-${index}`;
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.value = file.name;
+        input.readOnly = true;
+        input.style.borderLeft = '4px solid #4caf50'; // Tambahkan border kiri hijau
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-new-file';
+        removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        removeBtn.title = 'Hapus file';
+        
+        // Create hidden file input for form submission
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.name = 'new_eviden[]';
+        fileInput.style.display = 'none';
+        fileInput.id = `hidden-file-${index}`;
+        
+        // Store the file in a data attribute
+        fileInput.dataset.fileName = file.name;
+        fileInput.dataset.fileSize = file.size;
+        fileInput.dataset.fileType = file.type;
+        
+        // Add event listener to remove button
+        removeBtn.addEventListener('click', function() {
+            // Remove from displayed list
+            wrapper.remove();
+            
+            // Remove from hidden inputs
+            const hiddenInput = document.getElementById(`hidden-file-${index}`);
+            if (hiddenInput) hiddenInput.remove();
+            
+            // Update counter
+            fileCounterNumber--;
+            fileCounter.textContent = `Anda memilih ${fileCounterNumber} file${fileCounterNumber !== 1 ? 's' : ''}.`;
+            
+            // Remove from uploadedFiles array
+            uploadedFiles = uploadedFiles.filter(f => f !== file);
+            
+            // If no more files, hide the container
+            if (newFilesContainer.children.length === 0) {
+                newFilesContainer.classList.remove('show');
+            }
+        });
+        
+        wrapper.appendChild(input);
+        wrapper.appendChild(removeBtn);
+        newFilesContainer.appendChild(wrapper);
+        hiddenFilesContainer.appendChild(fileInput);
+    });
+    
+    // Show the container
+    if (uploadedFiles.length > 0) {
+        newFilesContainer.classList.add('show');
+        
+        // Tambahkan pesan bahwa file baru akan ditambahkan
+        const infoMessage = document.createElement('div');
+        infoMessage.className = 'info-alert';
+        infoMessage.style.marginTop = '10px';
+        infoMessage.style.background = '#e8f5e9';
+        infoMessage.style.borderColor = '#4caf50';
+         infoMessage.innerHTML = `
+            <i class="fas fa-info-circle" style="color: #4caf50;"></i>
+            <span><strong>${uploadedFiles.length} file baru akan ditambahkan setelah disimpan.</strong> File baru ditandai dengan warna hijau.</span>
+        `;
+    }
+    
+    console.log('Files ready for upload:', uploadedFiles);
+    // Trigger change detection
+    setTimeout(() => {
+        if (window.updateFormButtonState) {
+            window.updateFormButtonState();
+        }
+    }, 500);
+}
+            
+            // Show files link
+            showFilesLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (uploadedFiles.length > 0) {
+                    alert(`${uploadedFiles.length} file(s) ready for upload:\n` + 
+                          uploadedFiles.map(f => f.name).join('\n'));
+                } else {
+                    alert('Belum ada file yang dipilih untuk diupload.');
                 }
-                
-                // Show loading
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-                submitBtn.disabled = true;
-                
-                // Create a DataTransfer object to hold files
+            });
+            
+            // Form submission
+            mainForm.addEventListener('submit', function(e) {
+                // Update the file input with all files before submitting
                 const dataTransfer = new DataTransfer();
                 selectedFilesData.forEach(file => {
                     dataTransfer.items.add(file);
@@ -1949,6 +2140,11 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                     newRow.style.transform = 'translateY(0)';
                 }, 10);
             }, 10);
+            setTimeout(() => {
+        if (window.updateFormButtonState) {
+            window.updateFormButtonState();
+        }
+    }, 500);
         }
 
         function removeDosen(button) {
@@ -1967,6 +2163,11 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                     tbody.appendChild(emptyRow);
                 }
             }, 300);
+            setTimeout(() => {
+        if (window.updateFormButtonState) {
+            window.updateFormButtonState();
+        }
+    }, 500);
         }
 
         // ===== EXISTING FUNCTIONS =====
@@ -1982,6 +2183,11 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
             fileItem.style.opacity = '0';
             fileItem.style.transform = 'translateX(-20px)';
             setTimeout(() => fileItem.style.display = 'none', 300);
+            setTimeout(() => {
+            if (window.updateFormButtonState) {
+                window.updateFormButtonState();
+            }
+        }, 500);
         }
 
         // Preview File Functions
@@ -2319,5 +2525,451 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
             });
         });
     </script>
+    <script>
+// ===== CHANGE DETECTION - PREVENT SAVE IF NO CHANGES =====
+(function() {
+    const initialData = <?= $initial_data ?? '{}' ?>;
+    const submitBtn = document.getElementById('submitBtn');
+    const mainForm = document.getElementById('mainForm');
+    let hasChanges = false;
+    
+    // Normalize value untuk comparison
+    function normalizeValue(val) {
+        if (val === null || val === undefined || val === '') return '-';
+        if (typeof val === 'string') return val.trim();
+        return val;
+    }
+    
+    // Check if arrays are equal
+    function arraysEqual(arr1, arr2) {
+        if (!Array.isArray(arr1) || !Array.isArray(arr2)) return false;
+        if (arr1.length !== arr2.length) return false;
+        
+        for (let i = 0; i < arr1.length; i++) {
+            if (typeof arr1[i] === 'object' && typeof arr2[i] === 'object') {
+                if (JSON.stringify(arr1[i]) !== JSON.stringify(arr2[i])) return false;
+            } else {
+                if (normalizeValue(arr1[i]) !== normalizeValue(arr2[i])) return false;
+            }
+        }
+        return true;
+    }
+    
+    // Get current form data
+    function getCurrentFormData() {
+        const formData = new FormData(mainForm);
+        const currentData = {
+            nama_kegiatan: normalizeValue(formData.get('nama_kegiatan')),
+            jenis_date: normalizeValue(formData.get('jenis_date')),
+            tanggal_kegiatan: normalizeValue(formData.get('tanggal_kegiatan')),
+            akhir_kegiatan: normalizeValue(formData.get('akhir_kegiatan')),
+            tempat_kegiatan: normalizeValue(formData.get('tempat_kegiatan')),
+            penyelenggara: normalizeValue(formData.get('penyelenggara')),
+            jenis_pengajuan: normalizeValue(formData.get('jenis_pengajuan')),
+            lingkup_penugasan: normalizeValue(formData.get('lingkup_penugasan')),
+            jenis_penugasan_perorangan: normalizeValue(formData.get('jenis_penugasan_perorangan')),
+            penugasan_lainnya_perorangan: normalizeValue(formData.get('penugasan_lainnya_perorangan')),
+            jenis_penugasan_kelompok: normalizeValue(formData.get('jenis_penugasan_kelompok')),
+            penugasan_lainnya_kelompok: normalizeValue(formData.get('penugasan_lainnya_kelompok')),
+            periode_value: normalizeValue(formData.get('periode_value')),
+            nip: formData.getAll('nip[]').filter(v => v).map(v => normalizeValue(v)),
+            peran: formData.getAll('peran[]').filter(v => v).map(v => normalizeValue(v))
+        };
+        
+        // Get eviden data
+        const existingEviden = [];
+        document.querySelectorAll('.existing-file-input').forEach(input => {
+            if (input.value && !input.closest('.file-deleted')) {
+                existingEviden.push(normalizeValue(input.value));
+            }
+        });
+        
+        const deletedEviden = [];
+        document.querySelectorAll('.delete-flag').forEach(input => {
+            if (input.value) {
+                deletedEviden.push(normalizeValue(input.value));
+            }
+        });
+        
+        // Check if there are new files
+        const hasNewFiles = document.querySelectorAll('.new-file-item').length > 0;
+        
+        currentData.eviden = existingEviden;
+        currentData.hasDeletedFiles = deletedEviden.length > 0;
+        currentData.hasNewFiles = hasNewFiles;
+        
+        return currentData;
+    }
+    
+    // Check for changes
+    function checkForChanges() {
+        const current = getCurrentFormData();
+        let changes = [];
+        
+        // Check basic fields
+        const basicFields = [
+            'nama_kegiatan', 'jenis_date', 'tanggal_kegiatan', 'akhir_kegiatan',
+            'tempat_kegiatan', 'penyelenggara', 'jenis_pengajuan', 'lingkup_penugasan',
+            'jenis_penugasan_perorangan', 'penugasan_lainnya_perorangan',
+            'jenis_penugasan_kelompok', 'penugasan_lainnya_kelompok', 'periode_value'
+        ];
+        
+        basicFields.forEach(field => {
+            const initialVal = normalizeValue(initialData[field]);
+            const currentVal = normalizeValue(current[field]);
+            if (initialVal !== currentVal) {
+                changes.push(field);
+            }
+        });
+        
+        // Check NIP array
+        if (!arraysEqual(initialData.nip || [], current.nip || [])) {
+            changes.push('nip');
+        }
+        
+        // Check Peran array
+        const initialPeran = (initialData.peran || []).map(p => {
+            if (typeof p === 'string') {
+                try {
+                    const parsed = JSON.parse(p);
+                    return normalizeValue(parsed.peran || '-');
+                } catch {
+                    return normalizeValue(p);
+                }
+            }
+            return normalizeValue(p.peran || '-');
+        });
+        
+        const currentPeran = current.peran || [];
+        
+        if (!arraysEqual(initialPeran, currentPeran)) {
+            changes.push('peran');
+        }
+        
+        // Check eviden
+        const initialEviden = (initialData.eviden || []).map(e => normalizeValue(e)).sort();
+        const currentEviden = (current.eviden || []).map(e => normalizeValue(e)).sort();
+        
+        if (!arraysEqual(initialEviden, currentEviden)) {
+            changes.push('eviden');
+        }
+        
+        // Check deleted files
+        if (current.hasDeletedFiles) {
+            changes.push('deleted_files');
+        }
+        
+        // Check new files
+        if (current.hasNewFiles) {
+            changes.push('new_files');
+        }
+        
+        hasChanges = changes.length > 0;
+        
+        console.log('Changes detected:', changes);
+        console.log('Has changes:', hasChanges);
+        
+        return hasChanges;
+    }
+    
+    // Update button state
+    function updateButtonState() {
+        const hasChanges = checkForChanges();
+        
+        if (hasChanges) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.classList.remove('btn-disabled');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-ban"></i> Tidak Ada Perubahan';
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.classList.add('btn-disabled');
+        }
+    }
+    
+    // Add event listeners to all form inputs
+    function attachChangeListeners() {
+        // Text inputs, selects, textareas
+        mainForm.querySelectorAll('input, select, textarea').forEach(element => {
+            element.addEventListener('input', updateButtonState);
+            element.addEventListener('change', updateButtonState);
+        });
+        
+        // File inputs
+        document.getElementById('fileInput')?.addEventListener('change', updateButtonState);
+        
+        // Observer for dynamic elements (dosen rows, file items)
+        const observer = new MutationObserver(function(mutations) {
+            updateButtonState();
+        });
+        
+        observer.observe(document.getElementById('dosenTableBody'), {
+            childList: true,
+            subtree: true
+        });
+        
+        observer.observe(document.getElementById('existingFilesContainer'), {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class']
+        });
+        
+        observer.observe(document.getElementById('newFilesContainer'), {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    // Prevent form submission if no changes
+    mainForm.addEventListener('submit', function(e) {
+        if (!checkForChanges()) {
+            e.preventDefault();
+            alert('⚠️ Tidak ada perubahan yang perlu disimpan!');
+            return false;
+        }
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        attachChangeListeners();
+        updateButtonState();
+        
+        // Check for changes every 2 seconds (fallback)
+        setInterval(updateButtonState, 2000);
+    });
+    
+    // Make functions globally accessible
+    window.checkFormChanges = checkForChanges;
+    window.updateFormButtonState = updateButtonState;
+})();
+</script>
+<script>
+// ===== CHANGE DETECTION - PREVENT SAVE IF NO CHANGES =====
+(function() {
+    const initialData = <?= $initial_data ?? '{}' ?>;
+    const submitBtn = document.getElementById('submitBtn');
+    const mainForm = document.getElementById('mainForm');
+    let hasChanges = false;
+    
+    // Normalize value untuk comparison
+    function normalizeValue(val) {
+        if (val === null || val === undefined || val === '') return '-';
+        if (typeof val === 'string') return val.trim();
+        return val;
+    }
+    
+    // Check if arrays are equal
+    function arraysEqual(arr1, arr2) {
+        if (!Array.isArray(arr1) || !Array.isArray(arr2)) return false;
+        if (arr1.length !== arr2.length) return false;
+        
+        for (let i = 0; i < arr1.length; i++) {
+            if (typeof arr1[i] === 'object' && typeof arr2[i] === 'object') {
+                if (JSON.stringify(arr1[i]) !== JSON.stringify(arr2[i])) return false;
+            } else {
+                if (normalizeValue(arr1[i]) !== normalizeValue(arr2[i])) return false;
+            }
+        }
+        return true;
+    }
+    
+    // Get current form data
+    function getCurrentFormData() {
+        const formData = new FormData(mainForm);
+        const currentData = {
+            nama_kegiatan: normalizeValue(formData.get('nama_kegiatan')),
+            jenis_date: normalizeValue(formData.get('jenis_date')),
+            tanggal_kegiatan: normalizeValue(formData.get('tanggal_kegiatan')),
+            akhir_kegiatan: normalizeValue(formData.get('akhir_kegiatan')),
+            tempat_kegiatan: normalizeValue(formData.get('tempat_kegiatan')),
+            penyelenggara: normalizeValue(formData.get('penyelenggara')),
+            jenis_pengajuan: normalizeValue(formData.get('jenis_pengajuan')),
+            lingkup_penugasan: normalizeValue(formData.get('lingkup_penugasan')),
+            jenis_penugasan_perorangan: normalizeValue(formData.get('jenis_penugasan_perorangan')),
+            penugasan_lainnya_perorangan: normalizeValue(formData.get('penugasan_lainnya_perorangan')),
+            jenis_penugasan_kelompok: normalizeValue(formData.get('jenis_penugasan_kelompok')),
+            penugasan_lainnya_kelompok: normalizeValue(formData.get('penugasan_lainnya_kelompok')),
+            periode_value: normalizeValue(formData.get('periode_value')),
+            nip: formData.getAll('nip[]').filter(v => v).map(v => normalizeValue(v)),
+            peran: formData.getAll('peran[]').filter(v => v).map(v => normalizeValue(v))
+        };
+        
+        // Get eviden data
+        const existingEviden = [];
+        document.querySelectorAll('.existing-file-input').forEach(input => {
+            if (input.value && !input.closest('.file-deleted')) {
+                existingEviden.push(normalizeValue(input.value));
+            }
+        });
+        
+        const deletedEviden = [];
+        document.querySelectorAll('.delete-flag').forEach(input => {
+            if (input.value) {
+                deletedEviden.push(normalizeValue(input.value));
+            }
+        });
+        
+        // Check if there are new files
+        const hasNewFiles = document.querySelectorAll('.new-file-item').length > 0;
+        
+        currentData.eviden = existingEviden;
+        currentData.hasDeletedFiles = deletedEviden.length > 0;
+        currentData.hasNewFiles = hasNewFiles;
+        
+        return currentData;
+    }
+    
+    // Check for changes
+    function checkForChanges() {
+        const current = getCurrentFormData();
+        let changes = [];
+        
+        // Check basic fields
+        const basicFields = [
+            'nama_kegiatan', 'jenis_date', 'tanggal_kegiatan', 'akhir_kegiatan',
+            'tempat_kegiatan', 'penyelenggara', 'jenis_pengajuan', 'lingkup_penugasan',
+            'jenis_penugasan_perorangan', 'penugasan_lainnya_perorangan',
+            'jenis_penugasan_kelompok', 'penugasan_lainnya_kelompok', 'periode_value'
+        ];
+        
+        basicFields.forEach(field => {
+            const initialVal = normalizeValue(initialData[field]);
+            const currentVal = normalizeValue(current[field]);
+            if (initialVal !== currentVal) {
+                changes.push(field);
+            }
+        });
+        
+        // Check NIP array
+        if (!arraysEqual(initialData.nip || [], current.nip || [])) {
+            changes.push('nip');
+        }
+        
+        // Check Peran array
+        const initialPeran = (initialData.peran || []).map(p => {
+            if (typeof p === 'string') {
+                try {
+                    const parsed = JSON.parse(p);
+                    return normalizeValue(parsed.peran || '-');
+                } catch {
+                    return normalizeValue(p);
+                }
+            }
+            return normalizeValue(p.peran || '-');
+        });
+        
+        const currentPeran = current.peran || [];
+        
+        if (!arraysEqual(initialPeran, currentPeran)) {
+            changes.push('peran');
+        }
+        
+        // Check eviden
+        const initialEviden = (initialData.eviden || []).map(e => normalizeValue(e)).sort();
+        const currentEviden = (current.eviden || []).map(e => normalizeValue(e)).sort();
+        
+        if (!arraysEqual(initialEviden, currentEviden)) {
+            changes.push('eviden');
+        }
+        
+        // Check deleted files
+        if (current.hasDeletedFiles) {
+            changes.push('deleted_files');
+        }
+        
+        // Check new files
+        if (current.hasNewFiles) {
+            changes.push('new_files');
+        }
+        
+        hasChanges = changes.length > 0;
+        
+        console.log('Changes detected:', changes);
+        console.log('Has changes:', hasChanges);
+        
+        return hasChanges;
+    }
+    
+    // Update button state
+    function updateButtonState() {
+        const hasChanges = checkForChanges();
+        
+        if (hasChanges) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.classList.remove('btn-disabled');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-ban"></i> Tidak Ada Perubahan';
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.classList.add('btn-disabled');
+        }
+    }
+    
+    // Add event listeners to all form inputs
+    function attachChangeListeners() {
+        // Text inputs, selects, textareas
+        mainForm.querySelectorAll('input, select, textarea').forEach(element => {
+            element.addEventListener('input', updateButtonState);
+            element.addEventListener('change', updateButtonState);
+        });
+        
+        // File inputs
+        document.getElementById('fileInput')?.addEventListener('change', updateButtonState);
+        
+        // Observer for dynamic elements (dosen rows, file items)
+        const observer = new MutationObserver(function(mutations) {
+            updateButtonState();
+        });
+        
+        observer.observe(document.getElementById('dosenTableBody'), {
+            childList: true,
+            subtree: true
+        });
+        
+        observer.observe(document.getElementById('existingFilesContainer'), {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class']
+        });
+        
+        observer.observe(document.getElementById('newFilesContainer'), {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    // Prevent form submission if no changes
+    mainForm.addEventListener('submit', function(e) {
+        if (!checkForChanges()) {
+            e.preventDefault();
+            alert('⚠️ Tidak ada perubahan yang perlu disimpan!');
+            return false;
+        }
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        attachChangeListeners();
+        updateButtonState();
+        
+        // Check for changes every 2 seconds (fallback)
+        setInterval(updateButtonState, 2000);
+    });
+    
+    // Make functions globally accessible
+    window.checkFormChanges = checkForChanges;
+    window.updateFormButtonState = updateButtonState;
+})();
+</script>
 </body>
 </html>

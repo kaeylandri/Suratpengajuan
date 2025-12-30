@@ -153,7 +153,88 @@
     .modal-btn-close{background:#6c757d;color:white}
     .modal-btn-close:hover{background:#5a6268;transform:translateY(-2px)}
     
-    /* Clickable Row Styles - SAMA SEPERTI TOTAL */
+    /* Rejection Notes Styles */
+    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:20px;margin-top:15px}
+    .rejection-notes .detail-label{color:#dc3545;font-weight:700}
+    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:14px;line-height:1.5;min-height:auto;padding:12px}
+    
+    /* Nomor Surat Styles */
+    .nomor-surat-container {
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+        border: 2px solid #8E44AD;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    
+    .nomor-surat-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #8E44AD;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .nomor-surat-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #6c3483;
+        font-family: 'Courier New', monospace;
+    }
+    
+    /* Tombol Eviden - WARNA HIJAU */
+    .btn-eviden {
+        background: #28a745 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 6px 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s ease-in-out;
+        font-size: 14px;
+        height: 32px;
+    }
+
+    .btn-eviden i {
+        font-size: 14px;
+    }
+
+    .btn-eviden:hover {
+        background: #218838 !important;
+        transform: scale(1.05);
+    }
+    
+    /* Tombol Return - WARNA ORANGE/KUNING */
+    .btn-return {
+        background: #ff9800 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 6px 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s ease-in-out;
+        font-size: 14px;
+        height: 32px;
+    }
+
+    .btn-return i {
+        font-size: 14px;
+    }
+
+    .btn-return:hover {
+        background: #f57c00 !important;
+        transform: scale(1.05);
+    }
+
+    /* Clickable Row Styles */
     .clickable-row:hover {
         background-color: #f0f8ff !important;
         box-shadow: inset 0 0 0 2px #3498db;
@@ -164,6 +245,181 @@
     .clickable-row:active {
         background-color: #e3f2fd !important;
         transform: scale(0.995);
+    }
+
+    /* Return Modal Styles */
+    .return-modal-content {
+        background: white;
+        padding: 0;
+        border-radius: 15px;
+        max-width: 550px;
+        width: 95%;
+        max-height: 85vh;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .return-modal-body {
+        padding: 25px;
+    }
+
+    .return-modal-header {
+        background: #ff9800;
+        color: white;
+        padding: 20px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 15px 15px 0 0;
+    }
+
+    .return-modal-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .return-info-box {
+        background: #fff3e0;
+        border: 1px solid #ffcc80;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .return-info-box strong {
+        color: #ff9800;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .return-info-box span {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .return-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .return-btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .return-btn-cancel {
+        background: #95a5a6;
+        color: white;
+    }
+
+    .return-btn-cancel:hover {
+        background: #7f8c8d;
+        transform: translateY(-2px);
+    }
+
+    .return-btn-submit {
+        background: #ff9800;
+        color: white;
+    }
+
+    .return-btn-submit:hover {
+        background: #f57c00;
+        transform: translateY(-2px);
+    }
+    
+    /* PAGINATION STYLES */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .pagination {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+    
+    .pagination-btn {
+        min-width: 36px;
+        height: 36px;
+        border: 1px solid #ddd;
+        background: white;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: #495057;
+        transition: all 0.2s;
+    }
+    
+    .pagination-btn:hover {
+        background: #f8f9fa;
+        border-color: #8E44AD;
+        color: #8E44AD;
+    }
+    
+    .pagination-btn.active {
+        background: #8E44AD;
+        border-color: #8E44AD;
+        color: white;
+    }
+    
+    .pagination-btn.disabled {
+        background: #f8f9fa;
+        color: #adb5bd;
+        cursor: not-allowed;
+        border-color: #e9ecef;
+    }
+    
+    .pagination-btn.disabled:hover {
+        background: #f8f9fa;
+        color: #adb5bd;
+        border-color: #e9ecef;
+    }
+    
+    .page-info {
+        font-size: 14px;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .pagination-select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: white;
+        color: #495057;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .pagination-select:focus {
+        outline: none;
+        border-color: #8E44AD;
+        box-shadow: 0 0 0 2px rgba(142,68,173,0.1);
     }
     
     /* Responsive - SAMA SEPERTI TOTAL */
@@ -176,6 +432,24 @@
         .filter-select{width:100%}
         .modal-actions{flex-direction:column}
         .modal-btn{justify-content:center}
+        .pagination-container {
+            flex-direction: column;
+            gap: 15px;
+            align-items: stretch;
+        }
+        .page-info {
+            text-align: center;
+        }
+        .pagination {
+            justify-content: center;
+        }
+        .search-box {
+            flex-direction: column;
+        }
+        .btn-cari {
+            width: 100%;
+            justify-content: center;
+        }
         
         /* Table responsive */
         .clickable-row {
@@ -332,129 +606,58 @@
                                 } elseif (is_array($s->dosen_list)) {
                                     $dosen_data = $s->dosen_list;
                                 }
-                                
-                                // Proses array dosen_data
-                                if (is_array($dosen_data) && !empty($dosen_data)) {
-                                    foreach ($dosen_data as $item) {
-                                        if (is_array($item) && isset($item['nama'])) {
-                                            $dosen_display_list[] = $item['nama'];
-                                        } elseif (is_string($item)) {
-                                            $dosen_display_list[] = $item;
-                                        } elseif (is_object($item) && isset($item->nama)) {
-                                            $dosen_display_list[] = $item->nama;
-                                        }
-                                    }
-                                }
                             }
                             
-                            // Cek 3: Apakah ada NIP dan perlu diambil dari database?
-                            elseif (!empty($s->nip) && $s->nip != '-' && $s->nip != 'null') {
-                                // Jika NIP adalah string JSON
-                                $nip_data = $s->nip;
-                                if (is_string($nip_data)) {
-                                    // Coba decode JSON terlebih dahulu
-                                    $decoded_nip = json_decode($nip_data, true);
-                                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded_nip) && !empty($decoded_nip)) {
-                                        // Ini adalah array NIP dalam format JSON
-                                        $nip_array = $decoded_nip;
-                                    } else {
-                                        // Ini adalah string NIP biasa
-                                        $nip_array = [$nip_data];
-                                    }
-                                } elseif (is_array($nip_data)) {
-                                    // Sudah dalam format array
-                                    $nip_array = $nip_data;
-                                } else {
-                                    // Format lainnya
-                                    $nip_array = [];
-                                }
-                                
-                                // Jika ada NIP array, ambil data dosen dari database
-                                if (!empty($nip_array)) {
-                                    // Pastikan semua elemen adalah string untuk query
-                                    $valid_nips = [];
-                                    foreach ($nip_array as $nip_item) {
-                                        if (is_string($nip_item) && !empty($nip_item) && $nip_item != '-' && $nip_item != 'null') {
-                                            $valid_nips[] = $nip_item;
-                                        } elseif (is_numeric($nip_item)) {
-                                            $valid_nips[] = (string)$nip_item;
-                                        }
-                                    }
-                                    
-                                    if (!empty($valid_nips)) {
-                                        $this->db->select('nama_dosen');
-                                        $this->db->from('list_dosen');
-                                        $this->db->where_in('nip', $valid_nips);
-                                        $dosen_db = $this->db->get()->result_array();
-                                        
-                                        if (!empty($dosen_db)) {
-                                            $dosen_display_list = array_column($dosen_db, 'nama_dosen');
-                                        }
+                            // Daftar dosen untuk ditampilkan
+                            $dosen_display_list = [];
+                            if (isset($s->dosen_display_list) && is_array($s->dosen_display_list) && !empty($s->dosen_display_list)) {
+                                $dosen_display_list = $s->dosen_display_list;
+                            } elseif (isset($s->nama_dosen) && !empty($s->nama_dosen)) {
+                                $dosen_display_list = [$s->nama_dosen];
+                            } elseif (isset($s->dosen_data) && is_array($s->dosen_data) && !empty($s->dosen_data)) {
+                                foreach ($s->dosen_data as $dosen) {
+                                    if (isset($dosen['nama']) && !empty($dosen['nama'])) {
+                                        $dosen_display_list[] = $dosen['nama'];
                                     }
                                 }
-                            }
-                            
-                            // Cek 4: Apakah ada field lain yang mungkin berisi nama dosen?
-                            if (empty($dosen_display_list)) {
-                                // Coba cek field-field lain yang mungkin berisi nama dosen
-                                $possible_fields = ['dosen', 'nama_pengaju', 'pengaju', 'user_nama', 'created_by'];
-                                foreach ($possible_fields as $field) {
-                                    if (isset($s->$field) && !empty($s->$field) && $s->$field != '-' && $s->$field != 'null') {
-                                        $dosen_display_list[] = $s->$field;
-                                        break;
-                                    }
-                                }
-                            }
-                            
-                            // Generate HTML untuk tampilan nama dosen - SAMA SEPERTI TOTAL
-                            if (!empty($dosen_display_list)) {
-                                $dosen_display_html = '<div style="display: flex; flex-direction: column; gap: 4px;">';
-                                foreach ($dosen_display_list as $index => $nama) {
-                                    $dosen_display_html .= '
-                                        <div style="display: flex; align-items: center; gap: 6px;">
-                                            <span style="
-                                                background: #8E44AD;
-                                                color: white;
-                                                border-radius: 50%;
-                                                width: 20px;
-                                                height: 20px;
-                                                display: inline-flex;
-                                                align-items: center;
-                                                justify-content: center;
-                                                font-size: 10px;
-                                                font-weight: 600;
-                                                flex-shrink: 0;
-                                            ">' . ($index + 1) . '</span>
-                                            <span style="
-                                                font-size: 13px;
-                                                color: #2c3e50;
-                                                line-height: 1.4;
-                                            ">' . htmlspecialchars($nama) . '</span>
-                                        </div>';
-                                }
-                                $dosen_display_html .= '</div>';
-                            } else {
-                                $dosen_display_html = '<span style="color: #95a5a6; font-style: italic;">Data dosen tidak tersedia</span>';
                             }
                     ?>
-                    <!-- BARIS TABEL BISA DIKLIK UNTUK DETAIL - SAMA SEPERTI TOTAL -->
-                    <tr onclick="showRowDetail(<?= $s->id ?? 0 ?>)" style="cursor: pointer;" class="clickable-row">
-                        <td data-label="No"><?= $no++ ?></td>
+                    <!-- BARIS TABEL BISA DIKLIK UNTUK DETAIL -->
+                    <tr onclick="showRowDetail(<?= $s->id ?? 0 ?>)" style="cursor: pointer;" class="clickable-row data-row" 
+                        data-nama="<?= strtolower(htmlspecialchars($s->nama_kegiatan ?? '')) ?>" 
+                        data-penyelenggara="<?= strtolower(htmlspecialchars($s->penyelenggara ?? '')) ?>" 
+                        data-jenis="<?= strtolower(htmlspecialchars($s->jenis_pengajuan ?? '')) ?>"
+                        data-id="<?= $s->id ?? 0 ?>">
+                        <td class="row-number" data-label="No"><?= $no++ ?></td>
                         <td data-label="Nama Kegiatan"><strong><?= htmlspecialchars($s->nama_kegiatan ?? '-') ?></strong></td>
                         <td data-label="Penyelenggara"><?= htmlspecialchars($s->penyelenggara ?? '-') ?></td>
                         <td data-label="Tanggal Pengajuan"><?= $tgl_pengajuan ?></td>
                         <td data-label="Tanggal Kegiatan"><?= $tgl_kegiatan ?></td>
-                        <td data-label="Nama Dosen">
-                            <?= $dosen_display_html ?>
+                        <td data-label="Jenis"><?= htmlspecialchars($s->jenis_pengajuan ?? '-') ?></td>
+                        <td data-label="Status">
+                            <span class="badge badge-approved">
+                                <?= 
+                                    isset($s->status) ? 
+                                    (strpos(strtolower($s->status), 'disetujui') !== false ? 
+                                        ucwords($s->status) : 
+                                        'Disetujui') : 
+                                    'Disetujui' 
+                                ?>
+                            </span>
                         </td>
-                        <td data-label="Status"><?= $badge ?></td>
-                        <!-- TOMBOL AKSI - SAMA SEPERTI TOTAL (HANYA EVIDEN) -->
                         <td data-label="Aksi">
                             <div style="display:flex;gap:6px">
                                 <!-- Tombol Eviden (Hijau) -->
                                 <button class="btn btn-eviden" onclick="event.stopPropagation(); showEvidenModal(<?= $s->id ?? 0 ?>)" title="Lihat Eviden">
                                     <i class="fas fa-file-image"></i>
                                 </button>
+                                
+                                <?php if(in_array($s->status, ['disetujui KK', 'ditolak KK'])): ?>
+                            <!-- Tombol Return: Kembalikan ke status awal -->
+                            <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModal(<?= $s->id ?>, '<?= htmlspecialchars($s->nama_kegiatan, ENT_QUOTES) ?>')" title="Kembalikan Pengajuan">
+                                <i class="fa-solid fa-undo"></i>
+                            </button>
+                        <?php endif; ?>
                             </div>
                         </td>
                     </tr>
@@ -477,10 +680,6 @@
     </div>
 </div>
 
-<!-- ============================================
-MODAL-MODAL - SAMA SEPERTI TOTAL
-============================================ -->
-
 <!-- Preview Modal (untuk single file preview) -->
 <div id="previewModal" class="preview-modal">
     <div class="preview-content">
@@ -495,7 +694,7 @@ MODAL-MODAL - SAMA SEPERTI TOTAL
 </div>
 
 <!-- Detail Modal (untuk klik baris) -->
-<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
+<div id="detailModal" class="modal">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
@@ -507,21 +706,8 @@ MODAL-MODAL - SAMA SEPERTI TOTAL
     </div>
 </div>
 
-<!-- Surat Modal (untuk tombol lihat detail - melihat surat) -->
-<div id="suratModal" class="modal surat-modal" onclick="modalClickOutside(event,'suratModal')">
-    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 1100px;">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-file-invoice"></i> Surat Pengajuan</h3>
-            <button class="close-modal" onclick="closeModal('suratModal')">&times;</button>
-        </div>
-        <div class="detail-content" id="suratContent">
-            <!-- Surat akan diisi oleh JavaScript -->
-        </div>
-    </div>
-</div>
-
 <!-- Eviden Modal (untuk multiple files) -->
-<div id="evidenModal" class="modal eviden-modal" onclick="modalClickOutside(event,'evidenModal')">
+<div id="evidenModal" class="modal">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-image"></i> File Evidence</h3>
@@ -533,22 +719,279 @@ MODAL-MODAL - SAMA SEPERTI TOTAL
     </div>
 </div>
 
+<!-- Return Modal -->
+<div id="returnModal" class="modal">
+    <div class="return-modal-content" onclick="event.stopPropagation()">
+        <div class="return-modal-header">
+            <h3><i class="fa-solid fa-undo"></i> Konfirmasi Pengembalian</h3>
+            <button class="close-modal" onclick="closeModal('returnModal')">&times;</button>
+        </div>
+        <div class="return-modal-body">
+            <div class="return-info-box">
+                <strong><i class="fa-solid fa-exclamation-triangle"></i> Peringatan</strong>
+                <span id="returnNamaKegiatan">-</span>
+            </div>
+            
+            <p style="margin-bottom:20px;color:#e65100;font-weight:600">
+                ⚠️ Pengajuan ini akan dikembalikan ke status sebelumnya dan dapat diajukan ulang.
+            </p>
+            
+            <form id="returnForm" method="POST" action="">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <div class="return-modal-actions">
+                    <button type="button" class="return-btn return-btn-cancel" onclick="closeModal('returnModal')">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="return-btn return-btn-submit">
+                        <i class="fa-solid fa-undo"></i> Ya, Kembalikan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 const suratList = <?= isset($surat_list) && !empty($surat_list) ? json_encode($surat_list) : '[]' ?>;
+let currentReturnId = null;
 
-// ============================================
-// FUNGSI FILTER - TANPA FILTER STATUS
-// ============================================
+// PAGINATION VARIABLES
+let currentPage = 1;
+let totalPages = 1;
+let pageSize = 10;
+let filteredData = [];
+let allRows = [];
+let currentSearchTerm = '';
 
-function submitFilter() {
-    document.getElementById('filterForm').submit();
+// Initialize Pagination
+document.addEventListener('DOMContentLoaded', function() {
+    initializePagination();
+    setupEventListeners();
+});
+
+function initializePagination() {
+    // Get all data rows
+    allRows = Array.from(document.querySelectorAll('#tableBody tr.data-row'));
+    filteredData = [...allRows];
+    
+    // Set page size from select or default
+    pageSize = parseInt(document.getElementById('pageSizeSelect').value) || 10;
+    
+    // Calculate total pages
+    totalPages = Math.ceil(allRows.length / pageSize);
+    
+    // Show first page
+    updateTable();
+    updatePaginationControls();
+}
+
+function setupEventListeners() {
+    const searchInput = document.getElementById('searchInput');
+    const pageSizeSelect = document.getElementById('pageSizeSelect');
+    
+    // Search input with debounce
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentPage = 1; // Reset to first page on search
+            filterTable();
+        }, 300);
+    });
+    
+    // Page size change
+    pageSizeSelect.addEventListener('change', function() {
+        pageSize = parseInt(this.value);
+        currentPage = 1; // Reset to first page on size change
+        totalPages = Math.ceil(filteredData.length / pageSize);
+        updateTable();
+        updatePaginationControls();
+    });
+}
+
+function filterTable() {
+    const searchValue = document.getElementById('searchInput').value.toLowerCase().trim();
+    currentSearchTerm = searchValue;
+    
+    filteredData = allRows.filter(row => {
+        const rowNama = row.getAttribute('data-nama');
+        const rowPenyelenggara = row.getAttribute('data-penyelenggara');
+        const rowJenis = row.getAttribute('data-jenis');
+        
+        // Check search filter
+        const searchMatch = !searchValue || 
+            rowNama.includes(searchValue) || 
+            rowPenyelenggara.includes(searchValue) || 
+            rowJenis.includes(searchValue);
+        
+        return searchMatch;
+    });
+    
+    totalPages = Math.ceil(filteredData.length / pageSize);
+    if (currentPage > totalPages) {
+        currentPage = totalPages || 1;
+    }
+    
+    updateTable();
+    updatePaginationControls();
+}
+
+function updateTable() {
+    // Hide all rows
+    allRows.forEach(row => row.style.display = 'none');
+    
+    // Show empty message if no data
+    const emptyRow = document.getElementById('emptyRow');
+    if (filteredData.length === 0) {
+        if (emptyRow) emptyRow.style.display = '';
+        return;
+    }
+    
+    if (emptyRow) emptyRow.style.display = 'none';
+    
+    // Calculate start and end index for current page
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = Math.min(startIndex + pageSize, filteredData.length);
+    
+    // Show only rows for current page
+    for (let i = startIndex; i < endIndex; i++) {
+        const row = filteredData[i];
+        if (row) {
+            row.style.display = '';
+            // Update row number
+            const rowNumberCell = row.querySelector('.row-number');
+            if (rowNumberCell) {
+                rowNumberCell.textContent = i + 1;
+            }
+        }
+    }
+}
+
+function updatePaginationControls() {
+    const pageNumbers = document.getElementById('pageNumbers');
+    const pageInfoText = document.getElementById('pageInfoText');
+    const prevPageBtn = document.getElementById('prevPageBtn');
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    const firstPageBtn = document.getElementById('firstPageBtn');
+    const lastPageBtn = document.getElementById('lastPageBtn');
+    
+    // Update page info
+    const startIndex = (currentPage - 1) * pageSize + 1;
+    const endIndex = Math.min(currentPage * pageSize, filteredData.length);
+    const totalData = filteredData.length;
+    
+    let searchInfo = currentSearchTerm ? ` (Hasil pencarian: "${currentSearchTerm}")` : '';
+    
+    pageInfoText.textContent = filteredData.length > 0 
+        ? `Menampilkan ${startIndex}-${endIndex} dari ${totalData} data${searchInfo}` 
+        : `Tidak ada data${searchInfo}`;
+    
+    // Update button states
+    prevPageBtn.disabled = currentPage <= 1;
+    prevPageBtn.classList.toggle('disabled', currentPage <= 1);
+    nextPageBtn.disabled = currentPage >= totalPages;
+    nextPageBtn.classList.toggle('disabled', currentPage >= totalPages);
+    firstPageBtn.disabled = currentPage <= 1;
+    firstPageBtn.classList.toggle('disabled', currentPage <= 1);
+    lastPageBtn.disabled = currentPage >= totalPages;
+    lastPageBtn.classList.toggle('disabled', currentPage >= totalPages);
+    
+    // Generate page number buttons
+    pageNumbers.innerHTML = '';
+    
+    // Always show first page
+    pageNumbers.appendChild(createPageButton(1));
+    
+    // Calculate range of pages to show
+    let startPage = Math.max(2, currentPage - 2);
+    let endPage = Math.min(totalPages - 1, currentPage + 2);
+    
+    // Adjust if near start
+    if (currentPage <= 3) {
+        endPage = Math.min(5, totalPages - 1);
+    }
+    
+    // Adjust if near end
+    if (currentPage >= totalPages - 2) {
+        startPage = Math.max(2, totalPages - 4);
+    }
+    
+    // Add ellipsis after first page if needed
+    if (startPage > 2) {
+        const ellipsis = document.createElement('span');
+        ellipsis.className = 'pagination-btn disabled';
+        ellipsis.textContent = '...';
+        ellipsis.style.cursor = 'default';
+        pageNumbers.appendChild(ellipsis);
+    }
+    
+    // Add middle pages
+    for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.appendChild(createPageButton(i));
+    }
+    
+    // Add ellipsis before last page if needed
+    if (endPage < totalPages - 1) {
+        const ellipsis = document.createElement('span');
+        ellipsis.className = 'pagination-btn disabled';
+        ellipsis.textContent = '...';
+        ellipsis.style.cursor = 'default';
+        pageNumbers.appendChild(ellipsis);
+    }
+    
+    // Always show last page if there is more than one page
+    if (totalPages > 1) {
+        pageNumbers.appendChild(createPageButton(totalPages));
+    }
+}
+
+function createPageButton(pageNum) {
+    const button = document.createElement('button');
+    button.className = 'pagination-btn';
+    if (pageNum === currentPage) {
+        button.classList.add('active');
+    }
+    button.textContent = pageNum;
+    button.onclick = () => changePage(pageNum);
+    return button;
+}
+
+function changePage(page) {
+    if (page < 1 || page > totalPages || page === currentPage) return;
+    currentPage = page;
+    updateTable();
+    updatePaginationControls();
+}
+
+function prevPage() {
+    if (currentPage > 1) {
+        changePage(currentPage - 1);
+    }
+}
+
+function nextPage() {
+    if (currentPage < totalPages) {
+        changePage(currentPage + 1);
+    }
+}
+
+function handleSearch() {
+    filterTable();
 }
 
 // ============================================
-// FUNGSI DETAIL - SAMA SEPERTI TOTAL
+// FUNGSI UTAMA MODAL
 // ============================================
 
-// Fungsi untuk mengambil data detail via AJAX
+function closeModal(id) { 
+    document.getElementById(id).classList.remove('show'); 
+}
+
+// ============================================
+// FUNGSI UNTUK MENGAMBIL DATA DETAIL
+// ============================================
+
 function getSuratDetail(id) {
     return fetch('<?= site_url("kaprodi/getDetailPengajuan/") ?>' + id)
         .then(response => response.json())
@@ -566,74 +1009,9 @@ function getSuratDetail(id) {
 }
 
 // ============================================
-// PREVIEW FILE FUNCTIONS - SAMA SEPERTI TOTAL
+// FITUR BARU: KLIK BARIS UNTUK DETAIL (showRowDetail)
 // ============================================
 
-function previewFile(fileUrl, fileName) {
-    const previewModal = document.getElementById('previewModal');
-    const previewTitle = document.getElementById('previewTitle');
-    const previewBody = document.getElementById('previewBody');
-    
-    previewTitle.textContent = 'Preview: ' + fileName;
-    previewBody.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #8E44AD;"></i>
-            <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
-        </div>
-    `;
-    
-    previewModal.classList.add('show');
-
-    const fileExtension = fileName.split('.').pop().toLowerCase();
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-    const pdfExtensions = ['pdf'];
-    
-    setTimeout(() => {
-        if (imageExtensions.includes(fileExtension)) {
-            const img = new Image();
-            img.onload = function() {
-                previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
-            };
-            img.onerror = function() {
-                showUnsupportedPreview(fileUrl, fileName);
-            };
-            img.src = fileUrl;
-        } else if (pdfExtensions.includes(fileExtension)) {
-            previewBody.innerHTML = `
-                <iframe 
-                    src="${fileUrl}" 
-                    class="preview-iframe" 
-                    frameborder="0"
-                ></iframe>
-            `;
-        } else {
-            showUnsupportedPreview(fileUrl, fileName);
-        }
-    }, 100);
-}
-
-function showUnsupportedPreview(fileUrl, fileName) {
-    document.getElementById('previewBody').innerHTML = `
-        <div class="preview-unsupported">
-            <i class="fas fa-eye-slash"></i>
-            <h4>Preview Tidak Tersedia</h4>
-            <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
-            <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank" style="margin-top: 15px;">
-                <i class="fas fa-download"></i> Download File
-            </a>
-        </div>
-    `;
-}
-
-function closePreviewModal() {
-    document.getElementById('previewModal').classList.remove('show');
-}
-
-// ============================================
-// FITUR BARU: KLIK BARIS UNTUK DETAIL - SAMA SEPERTI TOTAL
-// ============================================
-
-// Fungsi untuk menampilkan detail saat baris diklik
 async function showRowDetail(id) {
     try {
         // Tampilkan loading
@@ -671,60 +1049,215 @@ async function showRowDetail(id) {
         `;
     }
 }
-
-// ============================================
-// FITUR BARU: TOMBOL LIHAT SURAT - SAMA SEPERTI TOTAL
-// ============================================
-
-// Fungsi untuk menampilkan surat pengajuan (iframe)
-async function showDetail(id) {
-    try {
-        // Tampilkan loading
-        document.getElementById('suratContent').innerHTML = `
-            <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#8E44AD"></i>
-                <p style="margin-top:10px;color:#7f8c8d">Memuat surat pengajuan...</p>
-            </div>
-        `;
-        
-        // Tampilkan modal
-        document.getElementById('suratModal').classList.add('show');
-        
-        // Load surat pengajuan via iframe
-        const suratUrl = '<?= base_url("kaprodi/view_surat_pengajuan/") ?>' + id;
-        document.getElementById('suratContent').innerHTML = `
-            <iframe 
-                src="${suratUrl}" 
-                style="width:100%; height:70vh; border:none; border-radius:8px;"
-                onload="this.style.opacity=1"
-                style="opacity:0; transition: opacity 0.3s;"
-            ></iframe>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-close" onclick="closeModal('suratModal')">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
-        
-    } catch (error) {
-        console.error('Error loading surat:', error);
-        document.getElementById('suratContent').innerHTML = `
-            <div style="text-align:center;padding:40px;color:#e74c3c">
-                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
-                <p>Gagal memuat surat: ${error.message}</p>
-                <button class="modal-btn modal-btn-close" onclick="closeModal('suratModal')" style="margin-top:20px">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
+function generateDetailContent(item) {
+    // Helper function untuk mendapatkan nilai
+    const getVal = (k) => {
+        const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+        return value;
+    };
+    
+    // Format status badge
+    let statusBadge = '';
+    const status = getVal('status').toLowerCase();
+    
+    if (status.includes('setuju')) {
+        statusBadge = `<span class="badge badge-approved">${getVal('status')}</span>`;
+    } else if (status.includes('tolak')) {
+        statusBadge = `<span class="badge badge-rejected">${getVal('status')}</span>`;
+    } else {
+        statusBadge = `<span class="badge badge-pending">${getVal('status')}</span>`;
     }
+    
+    // Ambil data dosen
+    const dosenData = item.dosen_data || [];
+    
+    // ✅ Generate HTML untuk data dosen DENGAN FOTO (TANPA INITIAL)
+let dosenHtml = '';
+if (dosenData && dosenData.length > 0) {
+    dosenHtml = `
+    <div class="dosen-list">
+        ${dosenData.map((dosen, index) => {
+            const initial = dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?';
+            const foto = dosen.foto || '';
+            const hasFoto = foto && foto.trim() !== '' && foto !== 'null';
+            
+            console.log(`Dosen ${index + 1}:`, dosen.nama, 'Foto:', foto, 'Has Foto:', hasFoto); // ✅ DEBUG
+            
+            return `
+        <div class="dosen-item">
+            <div class="dosen-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #8E44AD; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600; overflow: hidden; position: relative;">
+                ${hasFoto ? `
+                    <img src="${escapeHtml(foto)}" 
+                         alt="${escapeHtml(dosen.nama)}" 
+                         style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2;"
+                         onerror="console.error('Image load error:', this.src); this.style.display='none'; this.parentElement.style.background='#8E44AD';">
+                ` : `
+                    <span style="position: relative; z-index: 1;">${initial}</span>
+                `}
+            </div>
+            <div class="dosen-info">
+                <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
+                <div class="dosen-details">
+                    NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
+                </div>
+            </div>
+        </div>
+            `;
+        }).join('')}
+    </div>`;
+} else {
+    dosenHtml = `
+    <div class="dosen-item">
+        <div class="dosen-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: #8E44AD; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600;">
+            <span>?</span>
+        </div>
+        <div class="dosen-info">
+            <div class="dosen-name">Data dosen tidak tersedia</div>
+            <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+        </div>
+    </div>`;
+}
+    
+    // Tampilkan catatan penolakan jika ada
+    let rejectionHtml = '';
+    if (getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-') {
+        rejectionHtml = `
+        <div class="rejection-notes">
+            <div class="detail-label">
+                <i class="fa-solid fa-comment-dots"></i> Catatan Penolakan
+            </div>
+            <div class="detail-value">
+                ${escapeHtml(getVal('catatan_penolakan'))}
+            </div>
+        </div>`;
+    }
+    
+    // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date
+    const jenisDate = getVal('jenis_date');
+    const periodeValue = getVal('periode_value');
+    const tanggalKegiatan = getVal('tanggal_kegiatan');
+    const akhirKegiatan = getVal('akhir_kegiatan');
+    
+    // Tentukan tampilan untuk Periode dan Tanggal Mulai
+    let periodeDisplay = '-';
+    let tanggalMulaiDisplay = '-';
+    let tanggalAkhirDisplay = '-';
+    
+    if (jenisDate === 'Periode') {
+        // Jika Periode: tampilkan periode_value, kosongkan tanggal
+        periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
+        tanggalMulaiDisplay = '-';
+        tanggalAkhirDisplay = '-';
+    } else if (jenisDate === 'Custom') {
+        // Jika Custom: tampilkan tanggal, kosongkan periode
+        periodeDisplay = '-';
+        if (tanggalKegiatan !== '-' && tanggalKegiatan) {
+            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+        }
+        if (akhirKegiatan !== '-' && akhirKegiatan) {
+            tanggalAkhirDisplay = formatDate(akhirKegiatan);
+        }
+    } else {
+        // Fallback jika jenis_date tidak ada (data lama)
+        if (periodeValue && periodeValue !== '-') {
+            periodeDisplay = periodeValue;
+        } else if (tanggalKegiatan && tanggalKegiatan !== '-') {
+            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+            if (akhirKegiatan && akhirKegiatan !== '-') {
+                tanggalAkhirDisplay = formatDate(akhirKegiatan);
+            }
+        }
+    }
+
+    return `
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-info-circle"></i> Informasi Utama
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Nama Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status Pengajuan</div>
+                <div class="detail-value">${statusBadge}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Pengajuan</div>
+                <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Lingkup Penugasan</div>
+                <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-users"></i> Dosen Terkait
+        </div>
+        ${dosenHtml}
+    </div>
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Penyelenggara</div>
+                <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Tanggal</div>
+                <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Periode Kegiatan</div>
+                <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">${escapeHtml(periodeDisplay)}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Mulai</div>
+                <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
+            </div>
+            ${tanggalAkhirDisplay !== '-' ? `
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Akhir</div>
+                <div class="detail-value">${tanggalAkhirDisplay}</div>
+            </div>
+            ` : ''}
+            <div class="detail-row">
+                <div class="detail-label">Tempat Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Pengajuan</div>
+                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+            </div>
+        </div>
+    </div>
+    
+    ${rejectionHtml}
+    
+    <div class="modal-actions">
+        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+            <i class="fa-solid fa-times"></i> Tutup
+        </button>
+        <button class="modal-btn" style="background: #ff9800;" onclick="event.stopPropagation(); closeModal('detailModal'); showReturnModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+            <i class="fa-solid fa-undo"></i> Kembalikan
+        </button>
+        <button class="btn btn-eviden" style="background: #28a745 !important;" onclick="event.stopPropagation(); closeModal('detailModal'); showEvidenModal(${item.id})">
+            <i class="fas fa-file-image"></i> Lihat Eviden
+        </button>
+    </div>`;
 }
 
 // ============================================
-// FITUR BARU: TOMBOL EVIDEN - SAMA SEPERTI TOTAL
+// FITUR BARU: TOMBOL EVIDEN (showEvidenModal)
 // ============================================
 
-// Fungsi untuk menampilkan modal eviden
 async function showEvidenModal(suratId) {
     try {
         // Ambil data detail via AJAX
@@ -957,211 +1490,94 @@ function generateMultipleEvidenContent(item, evidenFiles) {
 }
 
 // ============================================
-// FUNGSI GENERATE DETAIL CONTENT - SAMA SEPERTI TOTAL
+// FUNGSI RETURN MODAL
 // ============================================
 
-function generateDetailContent(item) {
-    // Helper function untuk mendapatkan nilai
-    const getVal = (k) => {
-        const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
-        return value;
-    };
+function showReturnModal(id, namaKegiatan) {
+    currentReturnId = id;
     
-    // Format status badge
-    let statusBadge = '';
-    const status = getVal('status').toLowerCase();
+    // Set data ke modal
+    document.getElementById('returnNamaKegiatan').textContent = namaKegiatan;
+    document.getElementById('returnForm').action = '<?= base_url("kaprodi/return_pengajuan/") ?>' + id;
     
-    if (status.includes('setuju')) {
-        statusBadge = `<span class="badge badge-approved">${getVal('status')}</span>`;
-    } else if (status.includes('tolak')) {
-        statusBadge = `<span class="badge badge-rejected">${getVal('status')}</span>`;
-    } else {
-        statusBadge = `<span class="badge badge-pending">${getVal('status')}</span>`;
-    }
-    
-    // Ambil data dosen
-    const dosenData = item.dosen_data || [];
-    
-    // Generate HTML untuk data dosen
-    let dosenHtml = '';
-    if (dosenData && dosenData.length > 0) {
-        dosenHtml = `
-        <div class="dosen-list">
-            ${dosenData.map((dosen, index) => `
-            <div class="dosen-item">
-                <div class="dosen-avatar">
-                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
-                </div>
-                <div class="dosen-info">
-                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
-                    <div class="dosen-details">
-                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
-                    </div>
-                </div>
-            </div>
-            `).join('')}
-        </div>`;
-    } else {
-        dosenHtml = `
-        <div class="dosen-item">
-            <div class="dosen-avatar">
-                ?
-            </div>
-            <div class="dosen-info">
-                <div class="dosen-name">Data dosen tidak tersedia</div>
-                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
-            </div>
-        </div>`;
-    }
-    
-    // Tampilkan catatan penolakan jika ada
-    let rejectionHtml = '';
-    if (getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-') {
-        rejectionHtml = `
-        <div style="margin-top: 20px;">
-            <div style="font-weight: 600; color: #495057; font-size: 13px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
-                <i class="fa-solid fa-comment-dots"></i> Catatan Penolakan
-            </div>
-            <div style="color: #212529; font-size: 14px; background: white; padding: 10px 15px; border-radius: 8px; border: 1px solid #e9ecef;">
-                ${escapeHtml(getVal('catatan_penolakan'))}
-            </div>
-        </div>`;
-    }
-    
-    // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date
-    const jenisDate = getVal('jenis_date');
-    const periodeValue = getVal('periode_value');
-    const tanggalKegiatan = getVal('tanggal_kegiatan');
-    const akhirKegiatan = getVal('akhir_kegiatan');
-    
-    // Tentukan tampilan untuk Periode dan Tanggal Mulai
-    let periodeDisplay = '-';
-    let tanggalMulaiDisplay = '-';
-    let tanggalAkhirDisplay = '-';
-    
-    if (jenisDate === 'Periode') {
-        // Jika Periode: tampilkan periode_value, kosongkan tanggal
-        periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
-        tanggalMulaiDisplay = '-';
-        tanggalAkhirDisplay = '-';
-    } else if (jenisDate === 'Custom') {
-        // Jika Custom: tampilkan tanggal, kosongkan periode
-        periodeDisplay = '-';
-        if (tanggalKegiatan !== '-' && tanggalKegiatan) {
-            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
-        }
-        if (akhirKegiatan !== '-' && akhirKegiatan) {
-            tanggalAkhirDisplay = formatDate(akhirKegiatan);
-        }
-    } else {
-        // Fallback jika jenis_date tidak ada (data lama)
-        if (periodeValue && periodeValue !== '-') {
-            periodeDisplay = periodeValue;
-        } else if (tanggalKegiatan && tanggalKegiatan !== '-') {
-            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
-            if (akhirKegiatan && akhirKegiatan !== '-') {
-                tanggalAkhirDisplay = formatDate(akhirKegiatan);
-            }
-        }
-    }
-
-    return `
-    <div class="detail-section">
-        <div class="detail-section-title">
-            <i class="fa-solid fa-info-circle"></i> Informasi Utama
-        </div>
-        <div class="detail-grid">
-            <div class="detail-row">
-                <div class="detail-label">Nama Kegiatan</div>
-                <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Status Pengajuan</div>
-                <div class="detail-value">${statusBadge}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Jenis Pengajuan</div>
-                <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Lingkup Penugasan</div>
-                <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Jenis Penugasan</div>
-                <div class="detail-value">${escapeHtml(getVal('jenis_penugasan'))}</div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="detail-section">
-        <div class="detail-section-title">
-            <i class="fa-solid fa-users"></i> Dosen Terkait
-        </div>
-        ${dosenHtml}
-    </div>
-    
-    <div class="detail-section">
-        <div class="detail-section-title">
-            <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
-        </div>
-        <div class="detail-grid">
-            <div class="detail-row">
-                <div class="detail-label">Penyelenggara</div>
-                <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Jenis Tanggal</div>
-                <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Periode Kegiatan</div>
-                <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">${escapeHtml(periodeDisplay)}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Mulai</div>
-                <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
-            </div>
-            ${tanggalAkhirDisplay !== '-' ? `
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Akhir</div>
-                <div class="detail-value">${tanggalAkhirDisplay}</div>
-            </div>
-            ` : ''}
-            <div class="detail-row">
-                <div class="detail-label">Tempat Kegiatan</div>
-                <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Pengajuan</div>
-                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
-            </div>
-        </div>
-    </div>
-    
-    ${rejectionHtml}
-    
-    <div class="modal-actions">
-        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-            <i class="fa-solid fa-times"></i> Tutup
-        </button>
-    </div>`;
+    // Tampilkan modal
+    document.getElementById('returnModal').classList.add('show');
 }
 
 // ============================================
-// FUNGSI UTAMA MODAL - SAMA SEPERTI TOTAL
+// PREVIEW FILE FUNCTIONS
 // ============================================
 
-function closeModal(id) { 
-    document.getElementById(id).classList.remove('show'); 
+function previewFile(fileUrl, fileName) {
+    console.log('Preview File:', {
+        fileName: fileName,
+        fileUrl: fileUrl,
+        fullUrl: fileUrl
+    });
+    
+    const previewModal = document.getElementById('previewModal');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewBody = document.getElementById('previewBody');
+    
+    previewTitle.textContent = 'Preview: ' + fileName;
+    previewBody.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #8E44AD;"></i>
+            <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
+        </div>
+    `;
+    
+    previewModal.classList.add('show');
+
+    const fileExtension = fileName.split('.').pop().toLowerCase();
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+    const pdfExtensions = ['pdf'];
+    
+    setTimeout(() => {
+        if (imageExtensions.includes(fileExtension)) {
+            const img = new Image();
+            img.onload = function() {
+                console.log('Image loaded successfully');
+                previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
+            };
+            img.onerror = function() {
+                console.error('Error loading image:', fileUrl);
+                showUnsupportedPreview(fileUrl, fileName);
+            };
+            img.src = fileUrl;
+        } else if (pdfExtensions.includes(fileExtension)) {
+            previewBody.innerHTML = `
+                <iframe 
+                    src="${fileUrl}" 
+                    class="preview-iframe" 
+                    frameborder="0"
+                ></iframe>
+            `;
+        } else {
+            showUnsupportedPreview(fileUrl, fileName);
+        }
+    }, 100);
 }
 
-function modalClickOutside(evt, id) { 
-    if (evt.target && evt.target.id === id) closeModal(id); 
+function showUnsupportedPreview(fileUrl, fileName) {
+    document.getElementById('previewBody').innerHTML = `
+        <div class="preview-unsupported">
+            <i class="fas fa-eye-slash"></i>
+            <h4>Preview Tidak Tersedia</h4>
+            <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
+            <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank" style="margin-top: 15px;">
+                <i class="fas fa-download"></i> Download File
+            </a>
+        </div>
+    `;
+}
+
+function closePreviewModal() {
+    document.getElementById('previewModal').classList.remove('show');
 }
 
 // ============================================
-// FUNGSI HELPER - SAMA SEPERTI TOTAL
+// HELPER FUNCTIONS
 // ============================================
 
 function formatDate(d) {
@@ -1180,6 +1596,24 @@ function escapeHtml(unsafe) {
        .replace(/"/g, "&quot;")
        .replace(/'/g, "&#039;");
 }
+
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
+// Enter key support for search
+document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        handleSearch();
+    }
+});
+
+// Auto reset when input is cleared
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    if (e.target.value === '') {
+        filterTable();
+    }
+});
 </script>
 </body>
 </html>

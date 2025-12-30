@@ -1007,6 +1007,39 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 left: 5vw !important;
             }
         }
+        /* Disabled Button State */
+.btn-disabled {
+    background: #95a5a6 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+.btn-disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+/* New File Item Styles */
+.new-file-item {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%) !important;
+    border: 2px solid #4caf50 !important;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+.new-file-badge {
+    background: #4caf50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 8px;
+}
     </style>
 </head>
 
@@ -1200,10 +1233,6 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                     <label>Penyelenggara</label>
                     <input type="text" name="penyelenggara" class="form-control" value="<?= htmlspecialchars($surat['penyelenggara'] ?? ''); ?>">
                 </div>
-                <div class="form-group">
-                    <label>Customize</label>
-                    <input type="text" name="customize" class="form-control" value="<?= htmlspecialchars($surat['customize'] ?? ''); ?>">
-                </div>
             </div>
 
             <!-- Jenis Pengajuan -->
@@ -1265,103 +1294,93 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 </div>
             </div>
 
-            <!-- Dosen Terkait Section - DIUBAH MENJADI TABEL SEPERTI edit.php -->
-            <div class="form-section">
-                <h5><i class="fas fa-users"></i> Dosen Terkait</h5>
-                
-                <div class="table-responsive">
-                    <table class="table-dosen">
-                        <thead>
-                            <tr>
-                                <th>NIP</th>
-                                <th>Nama Dosen</th>
-                                <th>Jabatan</th>
-                                <th>Divisi</th>
-                                <th>Peran</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dosenTableBody">
-                            <?php if (!empty($dosen_data)): ?>
-                                <?php foreach ($dosen_data as $index => $dosen): ?>
-                                    <?php
-                                    // Parse data peran jika ada dalam format JSON
-                                    $peran_value = '-';
-                                    $jabatan_value = $dosen['jabatan'] ?? '-';
-                                    
-                                    if (isset($dosen['peran']) && $dosen['peran'] !== '-') {
-                                        $decoded = json_decode($dosen['peran'], true);
-                                        if (is_array($decoded) && isset($decoded['jabatan'])) {
-                                            $jabatan_value = $decoded['jabatan'];
-                                            $peran_value = $decoded['peran'] ?? '-';
-                                        } else {
-                                            $peran_value = $dosen['peran'];
-                                        }
-                                    }
-                                    ?>
-                                    <tr class="dosen-row" data-index="<?= $index ?>">
-                                        <td>
-                                            <input type="text" 
-                                                   name="nip[]" 
-                                                   value="<?= htmlspecialchars($dosen['nip']) ?>" 
-                                                   class="form-control form-control-sm nip-input" 
-                                                   data-index="<?= $index ?>"
-                                                   placeholder="Ketik NIP"
-                                                   required
-                                                   style="border: 2px solid #FF8C00; background: #fff3e0;">
-                                        </td>
-                                        <td>
-                                            <input type="text" 
-                                                   name="nama_dosen[]" 
-                                                   value="<?= htmlspecialchars($dosen['nama_dosen']) ?>" 
-                                                   class="form-control form-control-sm nama-dosen-input" 
-                                                   placeholder="Ketik Nama Dosen"
-                                                   style="border: 2px solid #FF8C00; background: #fff3e0;">
-                                        </td>
-                                        <td>
-                                            <input type="text" 
-                                                   name="jabatan[]" 
-                                                   value="<?= htmlspecialchars($jabatan_value) ?>" 
-                                                   class="form-control form-control-sm jabatan-input" 
-                                                   placeholder="Contoh: Lektor"
-                                                   style="border: 2px solid #FF8C00; background: #fff3e0;">
-                                        </td>
-                                        <td>
-                                            <input type="text" 
-                                                   name="divisi[]" 
-                                                   value="<?= htmlspecialchars($dosen['divisi']) ?>" 
-                                                   class="form-control form-control-sm divisi-input" 
-                                                   placeholder="Contoh: DI"
-                                                   style="border: 2px solid #FF8C00; background: #fff3e0;">
-                                        </td>
-                                        <td>
-                                            <input type="text" 
-                                                   name="peran[]" 
-                                                   value="<?= htmlspecialchars($peran_value) ?>" 
-                                                   class="form-control form-control-sm peran-input" 
-                                                   placeholder="Contoh: Ketua Tim"
-                                                   style="border: 2px solid #FF8C00; background: #fff3e0;">
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btn-danger btn-sm btn-remove-dosen" onclick="removeDosen(this)">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">Belum ada dosen terkait</td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <button type="button" class="btn-add-dosen" onclick="addDosenRow()">
-                    <i class="fas fa-plus"></i> Tambah Dosen
-                </button>
-            </div>
+           <!-- Dosen Terkait Section - DIUBAH MENJADI TABEL SEPERTI edit.php -->
+<div class="form-section">
+    <h5><i class="fas fa-users"></i> Dosen Terkait</h5>
+    
+    <div class="table-responsive">
+        <table class="table-dosen">
+            <thead>
+                <tr>
+                    <th>NIP</th>
+                    <th>Nama Dosen</th>
+                    <th>Jabatan</th>
+                    <th>Divisi</th>
+                    <th>Peran</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="dosenTableBody">
+                <?php if (!empty($dosen_data)): ?>
+                    <?php foreach ($dosen_data as $index => $dosen): ?>
+                        <?php
+                        // 🆕 PERBAIKAN: Ambil nilai peran langsung
+                        $peran_value = isset($dosen['peran']) ? $dosen['peran'] : '-';
+                        $jabatan_value = isset($dosen['jabatan']) ? $dosen['jabatan'] : '-';
+                        ?>
+                        <tr class="dosen-row" data-index="<?= $index ?>">
+                            <td>
+                                <input type="text" 
+                                       name="nip[]" 
+                                       value="<?= htmlspecialchars($dosen['nip'] ?? '') ?>" 
+                                       class="form-control form-control-sm nip-input" 
+                                       data-index="<?= $index ?>"
+                                       placeholder="Ketik NIP"
+                                       required
+                                       style="border: 2px solid #FF8C00; background: #fff3e0;">
+                            </td>
+                            <td>
+                                <input type="text" 
+                                       name="nama_dosen[]" 
+                                       value="<?= htmlspecialchars($dosen['nama_dosen'] ?? '') ?>" 
+                                       class="form-control form-control-sm nama-dosen-input" 
+                                       placeholder="Ketik Nama Dosen"
+                                       style="border: 2px solid #FF8C00; background: #fff3e0;">
+                            </td>
+                            <td>
+                                <input type="text" 
+                                       name="jabatan[]" 
+                                       value="<?= htmlspecialchars($jabatan_value) ?>" 
+                                       class="form-control form-control-sm jabatan-input" 
+                                       placeholder="Contoh: Lektor"
+                                       style="border: 2px solid #FF8C00; background: #fff3e0;">
+                            </td>
+                            <td>
+                                <input type="text" 
+                                       name="divisi[]" 
+                                       value="<?= htmlspecialchars($dosen['divisi'] ?? '') ?>" 
+                                       class="form-control form-control-sm divisi-input" 
+                                       placeholder="Contoh: DI"
+                                       style="border: 2px solid #FF8C00; background: #fff3e0;">
+                            </td>
+                            <td>
+                                <input type="text" 
+                                       name="peran[]" 
+                                       value="<?= htmlspecialchars($peran_value) ?>" 
+                                       class="form-control form-control-sm peran-input" 
+                                       placeholder="Contoh: Ketua Tim"
+                                       style="border: 2px solid #FF8C00; background: #fff3e0;">
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm btn-remove-dosen" onclick="removeDosen(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Belum ada dosen terkait</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    
+    <button type="button" class="btn-add-dosen" onclick="addDosenRow()">
+        <i class="fas fa-plus"></i> Tambah Dosen
+    </button>
+</div>
 
             <!-- File Eviden -->
             <div class="form-section">
@@ -1612,530 +1631,9 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
 
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script>
+     <script>
+        // ===== FILE UPLOAD FUNCTIONALITY - WITH LOADING PROGRESS BAR =====
         document.addEventListener('DOMContentLoaded', function() {
-            // ===== AUTCOMPLETE DOSEN FUNCTIONALITY =====
-            const dosenTableBody = document.getElementById('dosenTableBody');
-            const jenisPengajuan = document.getElementById('jenis_pengajuan');
-            
-            let isSelectingAutocomplete = false;
-
-            // Global state untuk autocomplete
-            let currentAutocompleteBox = null;
-            let currentKeydownHandler = null;
-            let currentClickHandler = null;
-            let currentInputElement = null;
-            let currentAutocompleteItems = [];
-
-            // Mock data untuk testing
-            const mockData = [
-                { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', divisi: 'DKV'},
-                { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', divisi: 'DKV'},
-                { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
-                { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', divisi: 'DI'},
-                { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', divisi: 'DKV'},
-                { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DI'},
-                { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', divisi: 'DI'},
-                { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DKV'},
-                { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', divisi: 'DP' },
-                { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', divisi: 'Admin KK'  }
-            ];
-
-            // Debounce function
-            function debounce(fn, delay = 300) {
-                let timeout;
-                return function(...args) {
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => fn.apply(this, args), delay);
-                };
-            }
-
-            // Highlight matching text
-            function highlightMatch(text, query) {
-                if (!query || !text) return text;
-                const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp(`(${escapedQuery})`, 'gi');
-                return text.replace(regex, '<span class="query-match">$1</span>');
-            }
-
-            // Remove existing autocomplete box
-            function removeAutocompleteBox() {
-                if (currentAutocompleteBox) {
-                    currentAutocompleteBox.remove();
-                    currentAutocompleteBox = null;
-                }
-                if (currentKeydownHandler) {
-                    document.removeEventListener('keydown', currentKeydownHandler);
-                    currentKeydownHandler = null;
-                }
-                if (currentClickHandler) {
-                    document.removeEventListener('click', currentClickHandler);
-                    currentClickHandler = null;
-                }
-                currentInputElement = null;
-                currentAutocompleteItems = [];
-            }
-
-            // Fetch suggestions from database
-            async function fetchSuggestions(query, fieldType = 'nip') {
-                if (!query) return [];
-                
-                try {
-                    // Untuk field selain nip dan nama_dosen, return kosong
-                    if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
-                        return [];
-                    }
-                    
-                    // Simulate API call delay
-                    await new Promise(resolve => setTimeout(resolve, 150));
-                    
-                    // Filter mock data berdasarkan query
-                    const lowerQuery = query.toLowerCase();
-                    return mockData.filter(item => {
-                        if (fieldType === 'nip') {
-                            return item.nip.toLowerCase().includes(lowerQuery);
-                        } else if (fieldType === 'nama_dosen') {
-                            return item.nama_dosen.toLowerCase().includes(lowerQuery);
-                        }
-                        return false;
-                    });
-                } catch (error) {
-                    console.error('Autocomplete error:', error);
-                    return [];
-                }
-            }
-
-            // Fungsi untuk memilih opsi autocomplete
-            function selectAutocompleteItem(item, inputElement, onSelect) {
-                if (!item) return;
-                
-                isSelectingAutocomplete = true;
-                
-                const fieldType = inputElement.classList.contains('nip-input') ? 'nip' : 'nama_dosen';
-                if (fieldType === 'nip') {
-                    inputElement.value = item.nip || '';
-                } else {
-                    inputElement.value = item.nama_dosen || '';
-                }
-                
-                // Fill other fields in the same row
-                const rowEl = inputElement.closest('.dosen-row');
-                if (rowEl) {
-                    const otherNip = fieldType === 'nip' ? null : rowEl.querySelector('.nip-input');
-                    const otherNama = fieldType === 'nama_dosen' ? null : rowEl.querySelector('.nama-dosen-input');
-                    const jabatanInput = rowEl.querySelector('.jabatan-input');
-                    const divisiInput = rowEl.querySelector('.divisi-input');
-                    
-                    if (otherNip) otherNip.value = item.nip || '';
-                    if (otherNama) otherNama.value = item.nama_dosen || '';
-                    if (jabatanInput) jabatanInput.value = item.jabatan || '';
-                    if (divisiInput) divisiInput.value = item.divisi || '';
-                }
-                
-                if (typeof onSelect === 'function') {
-                    onSelect(item);
-                }
-                
-                removeAutocompleteBox();
-                
-                setTimeout(() => {
-                    isSelectingAutocomplete = false;
-                }, 300);
-                
-                // Auto-focus ke input berikutnya
-                setTimeout(() => {
-                    if (fieldType === 'nip') {
-                        const nextInput = inputElement.closest('.dosen-row').querySelector('.nama-dosen-input');
-                        if (nextInput) nextInput.focus();
-                    }
-                }, 50);
-            }
-
-            // Show suggestion box
-            function showSuggestionBox(inputEl, items, onSelect, fieldType) {
-                removeAutocompleteBox();
-
-                // Hanya tampilkan untuk nip dan nama_dosen
-                if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
-                    return;
-                }
-
-                const rect = inputEl.getBoundingClientRect();
-                const box = document.createElement('div');
-                box.className = 'autocomplete-box-fixed';
-                box.style.left = rect.left + 'px';
-                box.style.top = (rect.bottom + 4) + 'px';
-                box.style.width = Math.max(rect.width, 350) + 'px';
-                box.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-                box.style.border = '1px solid #dadce0';
-
-                if (!items || !items.length) {
-                    const empty = document.createElement('div');
-                    empty.className = 'autocomplete-empty';
-                    empty.innerHTML = '<i class="fas fa-search" style="margin-right: 8px; opacity: 0.6;"></i>Tidak ada data ditemukan';
-                    box.appendChild(empty);
-                    document.body.appendChild(box);
-                    currentAutocompleteBox = box;
-                    currentInputElement = inputEl;
-                    setTimeout(() => removeAutocompleteBox(), 2000);
-                    return;
-                }
-
-                const query = inputEl.value.trim();
-                let selectedIndex = -1;
-                currentAutocompleteItems = items;
-
-                // Add header
-                const header = document.createElement('div');
-                header.style.padding = '12px 16px';
-                header.style.fontSize = '13px';
-                header.style.color = '#5f6368';
-                header.style.fontWeight = '600';
-                header.style.borderBottom = '1px solid #f0f0f0';
-                header.style.backgroundColor = '#f8f9fa';
-                header.textContent = fieldType === 'nip' ? 'Hasil pencarian NIP' : 'Hasil pencarian Nama';
-                box.appendChild(header);
-
-                items.forEach((item, idx) => {
-                    const option = document.createElement('div');
-                    option.className = `autocomplete-item type-${fieldType}`;
-                    option.dataset.index = idx;
-                    
-                    let primaryText = '';
-                    let secondaryText = '';
-                    
-                    switch(fieldType) {
-                        case 'nip':
-                            primaryText = highlightMatch(item.nip, query);
-                            secondaryText = item.nama_dosen;
-                            break;
-                        case 'nama_dosen':
-                            primaryText = highlightMatch(item.nama_dosen, query);
-                            secondaryText = `NIP: ${item.nip}`;
-                            break;
-                        default:
-                            primaryText = item[fieldType] || '-';
-                            secondaryText = `${item.nama_dosen} (${item.nip})`;
-                    }
-
-                    option.innerHTML = `
-                        <div class="autocomplete-icon">
-                            <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#4285f4"></path>
-                            </svg>
-                        </div>
-                        <div class="autocomplete-content">
-                            <div class="item-primary">${primaryText || '-'}</div>
-                            ${secondaryText ? '<div class="item-secondary">' + secondaryText + '</div>' : ''}
-                        </div>
-                    `;
-                    
-                    option.addEventListener('mousedown', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        selectAutocompleteItem(item, inputEl, onSelect);
-                    });
-                    
-                    option.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                    });
-                    
-                    option.addEventListener('mouseenter', () => {
-                        box.querySelectorAll('.autocomplete-item').forEach(el => {
-                            el.classList.remove('autocomplete-item-active');
-                        });
-                        option.classList.add('autocomplete-item-active');
-                    });
-                    
-                    option.addEventListener('mouseleave', () => {
-                        option.classList.remove('autocomplete-item-active');
-                    });
-                    
-                    box.appendChild(option);
-                });
-
-                document.body.appendChild(box);
-                currentAutocompleteBox = box;
-                currentInputElement = inputEl;
-
-                // Keyboard navigation
-                currentKeydownHandler = function(e) {
-                    if (!currentAutocompleteBox) return;
-                    
-                    const opts = currentAutocompleteBox.querySelectorAll('.autocomplete-item');
-                    if (!opts.length) return;
-
-                    if (e.key === 'ArrowDown') {
-                        e.preventDefault();
-                        selectedIndex = Math.min(selectedIndex + 1, opts.length - 1);
-                        
-                        opts.forEach(o => o.classList.remove('autocomplete-item-active'));
-                        
-                        if (opts[selectedIndex]) {
-                            opts[selectedIndex].classList.add('autocomplete-item-active');
-                            opts[selectedIndex].scrollIntoView({ block: 'nearest' });
-                        }
-                    } else if (e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        selectedIndex = Math.max(selectedIndex - 1, 0);
-                        
-                        opts.forEach(o => o.classList.remove('autocomplete-item-active'));
-                        
-                        if (opts[selectedIndex]) {
-                            opts[selectedIndex].classList.add('autocomplete-item-active');
-                            opts[selectedIndex].scrollIntoView({ block: 'nearest' });
-                        }
-                    } else if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (selectedIndex >= 0 && opts[selectedIndex] && currentAutocompleteItems[selectedIndex]) {
-                            selectAutocompleteItem(currentAutocompleteItems[selectedIndex], inputEl, onSelect);
-                        } else if (opts.length > 0 && currentAutocompleteItems[0]) {
-                            selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
-                        }
-                    } else if (e.key === 'Escape') {
-                        removeAutocompleteBox();
-                    } else if (e.key === 'Tab') {
-                        e.preventDefault();
-                        if (currentAutocompleteItems.length > 0) {
-                            selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
-                        } else {
-                            removeAutocompleteBox();
-                        }
-                    }
-                };
-                
-                document.addEventListener('keydown', currentKeydownHandler);
-
-                currentClickHandler = function(ev) {
-                    if (currentAutocompleteBox && !currentAutocompleteBox.contains(ev.target) && ev.target !== currentInputElement) {
-                        if (!isSelectingAutocomplete) {
-                            removeAutocompleteBox();
-                        }
-                    }
-                };
-                document.addEventListener('click', currentClickHandler);
-                
-                // Auto-select first item
-                if (items.length > 0) {
-                    setTimeout(() => {
-                        const firstOption = box.querySelector('.autocomplete-item');
-                        if (firstOption) {
-                            firstOption.classList.add('autocomplete-item-active');
-                            selectedIndex = 0;
-                        }
-                    }, 10);
-                }
-            }
-
-            // Initialize autocomplete for a row
-            function initAutocompleteForRow(rowEl) {
-                if (!rowEl) {
-                    return;
-                }
-                
-                // Mark as initialized
-                delete rowEl.dataset.autocompleteInitialized;
-
-                const inputNip = rowEl.querySelector('.nip-input');
-                const inputNama = rowEl.querySelector('.nama-dosen-input');
-
-                if (!inputNip || !inputNama) {
-                    return;
-                }
-
-                function fillRowWith(item) {
-                    if (!item) return;
-                    
-                    inputNip.value = item.nip || '';
-                    inputNama.value = item.nama_dosen || '';
-                    
-                    // Fill jabatan and divisi if fields exist
-                    const jabatanInput = rowEl.querySelector('.jabatan-input');
-                    const divisiInput = rowEl.querySelector('.divisi-input');
-                    
-                    if (jabatanInput) jabatanInput.value = item.jabatan || '';
-                    if (divisiInput) divisiInput.value = item.divisi || '';
-                    
-                    // Trigger input events
-                    inputNip.dispatchEvent(new Event('input', { bubbles: true }));
-                    inputNama.dispatchEvent(new Event('input', { bubbles: true }));
-                    if (jabatanInput) jabatanInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    if (divisiInput) divisiInput.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-
-                function createAutocompleteHandler(fieldType, inputElement) {
-                    // Hanya buat handler untuk nip dan nama_dosen
-                    if (fieldType !== 'nip' && fieldType !== 'nama_dosen') return;
-
-                    const handler = debounce(async function() {
-                        if (isSelectingAutocomplete) {
-                            return;
-                        }
-                        
-                        const val = this.value.trim();
-                        
-                        if (val.length < 2 || document.activeElement !== this) {
-                            removeAutocompleteBox();
-                            return;
-                        }
-
-                        const suggestions = await fetchSuggestions(val, fieldType);
-                        showSuggestionBox(inputElement, suggestions, fillRowWith, fieldType);
-                    }, 250);
-
-                    // Remove old event listener if exists
-                    if (inputElement._currentHandler) {
-                        inputElement.removeEventListener('input', inputElement._currentHandler);
-                    }
-                    
-                    // Save reference to new handler
-                    inputElement._currentHandler = handler;
-                    // Attach new event listener
-                    inputElement.addEventListener('input', handler);
-                }
-
-                // Create autocomplete handlers for nip and nama_dosen
-                createAutocompleteHandler('nip', inputNip);
-                createAutocompleteHandler('nama_dosen', inputNama);
-                
-                // Setup focus/blur events
-                const inputs = [inputNip, inputNama];
-                
-                inputs.forEach(input => {
-                    input.addEventListener('focus', () => {
-                        const val = input.value.trim();
-                        if (val.length >= 2) {
-                            setTimeout(() => {
-                                if (document.activeElement === input && !isSelectingAutocomplete) {
-                                    const event = new Event('input', { bubbles: true });
-                                    input.dispatchEvent(event);
-                                }
-                            }, 100);
-                        }
-                    });
-                    
-                    input.addEventListener('blur', () => {
-                        if (!isSelectingAutocomplete) {
-                            setTimeout(() => {
-                                removeAutocompleteBox();
-                            }, 150);
-                        }
-                    });
-                });
-
-                // Mark row as initialized
-                rowEl.dataset.autocompleteInitialized = 'true';
-            }
-
-            // Initialize all rows
-            function initializeAllRows() {
-                const rows = dosenTableBody.querySelectorAll('.dosen-row');
-                
-                rows.forEach((row, index) => {
-                    row.dataset.index = index;
-                    delete row.dataset.autocompleteInitialized;
-                    initAutocompleteForRow(row);
-                });
-            }
-
-            // ===== DOSEN FUNCTIONS =====
-            function addDosenRow() {
-                const tbody = dosenTableBody;
-                const index = tbody.querySelectorAll('tr.dosen-row').length;
-                
-                const emptyRow = tbody.querySelector('tr td[colspan="6"]');
-                if (emptyRow) {
-                    emptyRow.closest('tr').remove();
-                }
-                
-                const newRow = document.createElement('tr');
-                newRow.className = 'dosen-row';
-                newRow.dataset.index = index;
-                newRow.innerHTML = `
-                    <td>
-                        <input type="text" 
-                               name="nip[]" 
-                               class="form-control form-control-sm nip-input" 
-                               data-index="${index}"
-                               placeholder="Ketik NIP"
-                               required
-                               style="border: 2px solid #FF8C00; background: #fff3e0;">
-                    </td>
-                    <td>
-                        <input type="text" 
-                               name="nama_dosen[]" 
-                               class="form-control form-control-sm nama-dosen-input" 
-                               placeholder="Ketik Nama Dosen"
-                               style="border: 2px solid #FF8C00; background: #fff3e0;">
-                    </td>
-                    <td>
-                        <input type="text" 
-                               name="jabatan[]" 
-                               class="form-control form-control-sm jabatan-input" 
-                               placeholder="Contoh: Lektor"
-                               style="border: 2px solid #FF8C00; background: #fff3e0;">
-                    </td>
-                    <td>
-                        <input type="text" 
-                               name="divisi[]" 
-                               class="form-control form-control-sm divisi-input" 
-                               placeholder="Contoh: DI"
-                               style="border: 2px solid #FF8C00; background: #fff3e0;">
-                    </td>
-                    <td>
-                        <input type="text" 
-                               name="peran[]" 
-                               class="form-control form-control-sm peran-input" 
-                               placeholder="Contoh: Ketua Tim"
-                               style="border: 2px solid #FF8C00; background: #fff3e0;">
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-danger btn-sm btn-remove-dosen" onclick="removeDosen(this)">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                
-                tbody.appendChild(newRow);
-                
-                // Initialize autocomplete for new row
-                setTimeout(() => {
-                    initAutocompleteForRow(newRow);
-                    
-                    // Animation
-                    newRow.style.opacity = '0';
-                    newRow.style.transform = 'translateY(-10px)';
-                    setTimeout(() => {
-                        newRow.style.transition = 'all 0.3s ease';
-                        newRow.style.opacity = '1';
-                        newRow.style.transform = 'translateY(0)';
-                    }, 10);
-                }, 10);
-            }
-
-            function removeDosen(button) {
-                const row = button.closest('tr');
-                const tbody = dosenTableBody;
-                
-                row.style.opacity = '0';
-                row.style.transform = 'translateX(20px)';
-                
-                setTimeout(() => {
-                    row.remove();
-                    
-                    if (tbody.querySelectorAll('tr.dosen-row').length === 0) {
-                        const emptyRow = document.createElement('tr');
-                        emptyRow.innerHTML = '<td colspan="6" class="text-center text-muted">Belum ada dosen terkait</td>';
-                        tbody.appendChild(emptyRow);
-                    }
-                }, 300);
-            }
-
-            // Expose to global scope
-            window.removeDosen = removeDosen;
-            window.addDosenRow = addDosenRow;
-
-            // ===== FILE UPLOAD FUNCTIONALITY =====
             const uploadArea = document.getElementById('uploadArea');
             const chooseFileBtn = document.getElementById('chooseFileBtn');
             const fileInput = document.getElementById('fileInput');
@@ -2152,11 +1650,13 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             const uploadedFilesPreview = document.getElementById('uploadedFilesPreview');
             const filesList = document.getElementById('filesList');
             const submitBtn = document.getElementById('submitBtn');
+            const mainForm = document.getElementById('mainForm');
             
             let fileCounterNumber = 0;
             let uploadedFiles = [];
             let totalFiles = 0;
             let uploadedCount = 0;
+            let isProcessing = false; // Flag untuk mencegah duplikasi
 
             // Click on upload area
             uploadArea.addEventListener('click', function() {
@@ -2169,10 +1669,25 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 fileInput.click();
             });
             
-            // File input change
-            fileInput.addEventListener('change', function(e) {
-                handleFiles(e.target.files);
-            });
+// File input change
+fileInput.addEventListener('change', function(e) {
+    if (isProcessing) return;
+    isProcessing = true;
+    
+    const files = Array.from(e.target.files);
+    handleFiles(files);
+    
+    // Reset input untuk memungkinkan upload file yang sama lagi
+    setTimeout(() => {
+        fileInput.value = '';
+        isProcessing = false;
+    }, 100);
+});
+
+// Drag and drop functionality
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadArea.addEventListener(eventName, preventDefaults, false);
+});
             
             // Drag and drop functionality
             ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -2315,7 +1830,7 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
                 statusDiv.className = 'uploaded-file-status status-uploading';
                 
-                // Simulate progress
+                // Simulate progress (in real app, this would be actual upload progress)
                 let progress = 0;
                 const interval = setInterval(() => {
                     progress += Math.random() * 20;
@@ -2358,77 +1873,99 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 }, 200);
             }
             
-            // Add files to form as actual file inputs
-            function addFilesToForm() {
-                // Clear existing new file inputs
-                newFilesContainer.innerHTML = '';
+// Add files to form as actual file inputs
+function addFilesToForm() {
+    // Clear existing new file inputs
+    newFilesContainer.innerHTML = '';
+    newFilesContainer.classList.remove('show');
+    hiddenFilesContainer.innerHTML = '';
+    
+    // Create a new input for each uploaded file
+    uploadedFiles.forEach((file, index) => {
+        // Create wrapper for display
+        const wrapper = document.createElement('div');
+        wrapper.className = 'new-file-input-wrapper new-file-item'; // Tambahkan class new-file-item
+        wrapper.id = `file-wrapper-${index}`;
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.value = file.name;
+        input.readOnly = true;
+        input.style.borderLeft = '4px solid #4caf50'; // Tambahkan border kiri hijau
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-new-file';
+        removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        removeBtn.title = 'Hapus file';
+        
+        // Create hidden file input for form submission
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.name = 'new_eviden[]';
+        fileInput.style.display = 'none';
+        fileInput.id = `hidden-file-${index}`;
+        
+        // Store the file in a data attribute
+        fileInput.dataset.fileName = file.name;
+        fileInput.dataset.fileSize = file.size;
+        fileInput.dataset.fileType = file.type;
+        
+        // Add event listener to remove button
+        removeBtn.addEventListener('click', function() {
+            // Remove from displayed list
+            wrapper.remove();
+            
+            // Remove from hidden inputs
+            const hiddenInput = document.getElementById(`hidden-file-${index}`);
+            if (hiddenInput) hiddenInput.remove();
+            
+            // Update counter
+            fileCounterNumber--;
+            fileCounter.textContent = `Anda memilih ${fileCounterNumber} file${fileCounterNumber !== 1 ? 's' : ''}.`;
+            
+            // Remove from uploadedFiles array
+            uploadedFiles = uploadedFiles.filter(f => f !== file);
+            
+            // If no more files, hide the container
+            if (newFilesContainer.children.length === 0) {
                 newFilesContainer.classList.remove('show');
-                hiddenFilesContainer.innerHTML = '';
-                
-                // Create a new input for each uploaded file
-                uploadedFiles.forEach((file, index) => {
-                    // Create wrapper for display
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'new-file-input-wrapper';
-                    wrapper.id = `file-wrapper-${index}`;
-                    
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'form-control';
-                    input.value = file.name;
-                    input.readOnly = true;
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.type = 'button';
-                    removeBtn.className = 'btn-remove-new-file';
-                    removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
-                    removeBtn.title = 'Hapus file';
-                    
-                    // Create hidden file input for form submission
-                    const fileInput = document.createElement('input');
-                    fileInput.type = 'file';
-                    fileInput.name = 'new_eviden[]';
-                    fileInput.style.display = 'none';
-                    fileInput.id = `hidden-file-${index}`;
-                    
-                    // Store the file in a data attribute
-                    fileInput.dataset.fileName = file.name;
-                    fileInput.dataset.fileSize = file.size;
-                    fileInput.dataset.fileType = file.type;
-                    
-                    // Add event listener to remove button
-                    removeBtn.addEventListener('click', function() {
-                        // Remove from displayed list
-                        wrapper.remove();
-                        
-                        // Remove from hidden inputs
-                        const hiddenInput = document.getElementById(`hidden-file-${index}`);
-                        if (hiddenInput) hiddenInput.remove();
-                        
-                        // Update counter
-                        fileCounterNumber--;
-                        fileCounter.textContent = `You've chosen ${fileCounterNumber} file${fileCounterNumber !== 1 ? 's' : ''}.`;
-                        
-                        // Remove from uploadedFiles array
-                        uploadedFiles = uploadedFiles.filter(f => f !== file);
-                        
-                        // If no more files, hide the container
-                        if (newFilesContainer.children.length === 0) {
-                            newFilesContainer.classList.remove('show');
-                        }
-                    });
-                    
-                    wrapper.appendChild(input);
-                    wrapper.appendChild(removeBtn);
-                    newFilesContainer.appendChild(wrapper);
-                    hiddenFilesContainer.appendChild(fileInput);
-                });
-                
-                // Show the container
-                if (uploadedFiles.length > 0) {
-                    newFilesContainer.classList.add('show');
-                }
             }
+        });
+        
+        wrapper.appendChild(input);
+        wrapper.appendChild(removeBtn);
+        newFilesContainer.appendChild(wrapper);
+        hiddenFilesContainer.appendChild(fileInput);
+    });
+    
+    // Show the container
+    if (uploadedFiles.length > 0) {
+        newFilesContainer.classList.add('show');
+        
+        // Tambahkan pesan bahwa file baru akan ditambahkan
+        const infoMessage = document.createElement('div');
+        infoMessage.className = 'info-alert';
+        infoMessage.style.marginTop = '10px';
+        infoMessage.style.background = '#e8f5e9';
+        infoMessage.style.borderColor = '#4caf50';
+        infoMessage.innerHTML = `
+            <i class="fas fa-info-circle" style="color: #4caf50;"></i>
+            <span><strong>${uploadedFiles.length} file baru akan ditambahkan setelah disimpan.</strong> File baru ditandai dengan warna hijau.</span>
+        `;
+        
+        
+    
+    console.log('Files ready for upload:', uploadedFiles);
+}
+    // Trigger change detection
+    setTimeout(() => {
+        if (window.updateFormButtonState) {
+            window.updateFormButtonState();
+        }
+    }, 500);
+}
             
             // Show files link
             showFilesLink.addEventListener('click', function(e) {
@@ -2442,7 +1979,7 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             });
             
             // Form submission
-            document.getElementById('mainForm').addEventListener('submit', function(e) {
+            mainForm.addEventListener('submit', function(e) {
                 // Update the file input with all files before submitting
                 const dataTransfer = new DataTransfer();
                 
@@ -2466,303 +2003,888 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
                 submitBtn.disabled = true;
             });
+        });
 
-            // ===== FLATPICKR INITIALIZATION =====
-            let selectedStartDate = null;
-            const MAX_DAYS_LIMIT = 60;
+        // ===== AUTOCOMPLETE FUNCTIONALITY SAMA SEPERTI STEP 1 =====
+        const BASE_URL = '<?= rtrim(base_url(), "/") ?>';
+        let currentAutocompleteBox = null;
+        let currentKeydownHandler = null;
+        let currentClickHandler = null;
+        let currentInputElement = null;
+        let currentAutocompleteItems = [];
+        let isSelectingAutocomplete = false;
 
-            function getMinAllowedDate() {
-                const today = new Date();
-                const minDate = new Date(today);
-                minDate.setDate(today.getDate() - 30);
-                return minDate;
+        // Mock data untuk testing - SAMA SEPERTI STEP 1
+        const mockData = [
+            { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', divisi: 'DKV'},
+            { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', divisi: 'DKV'},
+            { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
+            { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', divisi: 'DI'},
+            { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', divisi: 'DKV'},
+            { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DI'},
+            { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', divisi: 'DI'},
+            { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DKV'},
+            { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', divisi: 'DP' },
+            { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', divisi: 'Ketua KK'  }
+        ];
+
+        // Debounce function
+        function debounce(fn, delay = 300) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        // Highlight matching text
+        function highlightMatch(text, query) {
+            if (!query || !text) return text;
+            const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(${escapedQuery})`, 'gi');
+            return text.replace(regex, '<span class="query-match">$1</span>');
+        }
+
+        // Remove existing autocomplete box
+        function removeAutocompleteBox() {
+            if (currentAutocompleteBox) {
+                currentAutocompleteBox.remove();
+                currentAutocompleteBox = null;
+            }
+            if (currentKeydownHandler) {
+                document.removeEventListener('keydown', currentKeydownHandler);
+                currentKeydownHandler = null;
+            }
+            if (currentClickHandler) {
+                document.removeEventListener('click', currentClickHandler);
+                currentClickHandler = null;
+            }
+            currentInputElement = null;
+            currentAutocompleteItems = [];
+        }
+
+        // Fetch suggestions - SAMA SEPERTI STEP 1
+        async function fetchSuggestions(query, fieldType = 'nip') {
+            if (!query) return [];
+            
+            try {
+                if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
+                    return [];
+                }
+                
+                // Coba dari API dulu
+                try {
+                    const response = await fetch(`${BASE_URL}/surat/autocomplete_nip?q=${encodeURIComponent(query)}&field=${fieldType}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (Array.isArray(data) && data.length > 0) {
+                            return data;
+                        }
+                    }
+                } catch (apiError) {
+                    console.log('API error, menggunakan mock data:', apiError);
+                }
+                
+                // Fallback ke mock data
+                await new Promise(resolve => setTimeout(resolve, 150));
+                const lowerQuery = query.toLowerCase();
+                return mockData.filter(item => {
+                    const searchIn = item[fieldType] ? item[fieldType].toLowerCase() : '';
+                    return searchIn.includes(lowerQuery);
+                });
+            } catch (error) {
+                console.error('Autocomplete error:', error);
+                return [];
+            }
+        }
+
+        // Fungsi untuk memilih opsi autocomplete - SAMA SEPERTI STEP 1
+        function selectAutocompleteItem(item, inputElement, onSelect) {
+            if (!item) return;
+            
+            isSelectingAutocomplete = true;
+            
+            const fieldType = inputElement.classList.contains('nip-input') ? 'nip' : 'nama_dosen';
+            if (fieldType === 'nip') {
+                inputElement.value = item.nip || '';
+            } else {
+                inputElement.value = item.nama_dosen || '';
+            }
+            
+            if (typeof onSelect === 'function') {
+                onSelect(item);
+            }
+            
+            removeAutocompleteBox();
+            
+            setTimeout(() => {
+                isSelectingAutocomplete = false;
+            }, 300);
+            
+            setTimeout(() => {
+                if (fieldType === 'nip') {
+                    const row = inputElement.closest('.dosen-row');
+                    if (row) {
+                        const nextInput = row.querySelector('.nama-dosen-input');
+                        if (nextInput) nextInput.focus();
+                    }
+                }
+            }, 50);
+        }
+
+        // Show suggestion box - SAMA SEPERTI STEP 1
+        function showSuggestionBox(inputEl, items, onSelect, fieldType) {
+            removeAutocompleteBox();
+
+            if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
+                return;
             }
 
-            function formatDateIndonesian(date) {
-                const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-                const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                               'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                
-                const dayName = days[date.getDay()];
-                const day = date.getDate();
-                const month = months[date.getMonth()];
-                const year = date.getFullYear();
-                
-                return `${dayName}, ${day} ${month} ${year}`;
+            const rect = inputEl.getBoundingClientRect();
+            const box = document.createElement('div');
+            box.className = 'autocomplete-box-fixed';
+            box.style.left = rect.left + 'px';
+            box.style.top = (rect.bottom + 4) + 'px';
+            box.style.width = Math.max(rect.width, 350) + 'px';
+            box.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+            box.style.border = '1px solid #dadce0';
+
+            if (!items || !items.length) {
+                const empty = document.createElement('div');
+                empty.className = 'autocomplete-empty';
+                empty.innerHTML = '<i class="fas fa-search" style="margin-right: 8px; opacity: 0.6;"></i>Tidak ada data ditemukan';
+                box.appendChild(empty);
+                document.body.appendChild(box);
+                currentAutocompleteBox = box;
+                currentInputElement = inputEl;
+                setTimeout(() => removeAutocompleteBox(), 2000);
+                return;
             }
 
-            function formatDateLocal(date) {
-                const y = date.getFullYear();
-                const m = (date.getMonth() + 1).toString().padStart(2, "0");
-                const d = date.getDate().toString().padStart(2, "0");
-                return `${y}-${m}-${d}`;
+            const query = inputEl.value.trim();
+            let selectedIndex = -1;
+            currentAutocompleteItems = items;
+
+            // Add header
+            const header = document.createElement('div');
+            header.style.padding = '12px 16px';
+            header.style.fontSize = '13px';
+            header.style.color = '#5f6368';
+            header.style.fontWeight = '600';
+            header.style.borderBottom = '1px solid #f0f0f0';
+            header.style.backgroundColor = '#f8f9fa';
+            header.textContent = fieldType === 'nip' ? 'Hasil pencarian NIP' : 'Hasil pencarian Nama';
+            box.appendChild(header);
+
+            items.forEach((item, idx) => {
+                const option = document.createElement('div');
+                option.className = `autocomplete-item type-${fieldType}`;
+                option.dataset.index = idx;
+                
+                let primaryText = '';
+                let secondaryText = '';
+                
+                switch(fieldType) {
+                    case 'nip':
+                        primaryText = highlightMatch(item.nip, query);
+                        secondaryText = item.nama_dosen;
+                        break;
+                    case 'nama_dosen':
+                        primaryText = highlightMatch(item.nama_dosen, query);
+                        secondaryText = `NIP: ${item.nip}`;
+                        break;
+                    default:
+                        primaryText = item[fieldType] || '-';
+                        secondaryText = `${item.nama_dosen} (${item.nip})`;
+                }
+
+                option.innerHTML = `
+                    <div class="autocomplete-icon">
+                        <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#FF8C00"></path>
+                        </svg>
+                    </div>
+                    <div class="autocomplete-content">
+                        <div class="item-primary">${primaryText || '-'}</div>
+                        ${secondaryText ? '<div class="item-secondary">' + secondaryText + '</div>' : ''}
+                    </div>
+                `;
+                
+                option.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    selectAutocompleteItem(item, inputEl, onSelect);
+                });
+                
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+                
+                option.addEventListener('mouseenter', () => {
+                    box.querySelectorAll('.autocomplete-item').forEach(el => {
+                        el.classList.remove('autocomplete-item-active');
+                    });
+                    option.classList.add('autocomplete-item-active');
+                });
+                
+                option.addEventListener('mouseleave', () => {
+                    option.classList.remove('autocomplete-item-active');
+                });
+                
+                box.appendChild(option);
+            });
+
+            document.body.appendChild(box);
+            currentAutocompleteBox = box;
+            currentInputElement = inputEl;
+
+            // Keyboard navigation
+            currentKeydownHandler = function(e) {
+                if (!currentAutocompleteBox) return;
+                
+                const opts = currentAutocompleteBox.querySelectorAll('.autocomplete-item');
+                if (!opts.length) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, opts.length - 1);
+                    
+                    opts.forEach(o => o.classList.remove('autocomplete-item-active'));
+                    
+                    if (opts[selectedIndex]) {
+                        opts[selectedIndex].classList.add('autocomplete-item-active');
+                        opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, 0);
+                    
+                    opts.forEach(o => o.classList.remove('autocomplete-item-active'));
+                    
+                    if (opts[selectedIndex]) {
+                        opts[selectedIndex].classList.add('autocomplete-item-active');
+                        opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && opts[selectedIndex] && currentAutocompleteItems[selectedIndex]) {
+                        selectAutocompleteItem(currentAutocompleteItems[selectedIndex], inputEl, onSelect);
+                    } else if (opts.length > 0 && currentAutocompleteItems[0]) {
+                        selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
+                    }
+                } else if (e.key === 'Escape') {
+                    removeAutocompleteBox();
+                } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    if (currentAutocompleteItems.length > 0) {
+                        selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
+                    } else {
+                        removeAutocompleteBox();
+                    }
+                }
+            };
+            
+            document.addEventListener('keydown', currentKeydownHandler);
+
+            currentClickHandler = function(ev) {
+                if (currentAutocompleteBox && !currentAutocompleteBox.contains(ev.target) && ev.target !== currentInputElement) {
+                    if (!isSelectingAutocomplete) {
+                        removeAutocompleteBox();
+                    }
+                }
+            };
+            document.addEventListener('click', currentClickHandler);
+            
+            if (items.length > 0) {
+                setTimeout(() => {
+                    const firstOption = box.querySelector('.autocomplete-item');
+                    if (firstOption) {
+                        firstOption.classList.add('autocomplete-item-active');
+                        selectedIndex = 0;
+                    }
+                }, 10);
+            }
+        }
+
+        // Initialize autocomplete for a row - SAMA SEPERTI STEP 1
+        function initAutocompleteForRow(rowEl) {
+            if (!rowEl) {
+                console.error('Row element tidak valid');
+                return;
+            }
+            
+            delete rowEl.dataset.autocompleteInitialized;
+
+            const inputNip = rowEl.querySelector('.nip-input');
+            const inputNama = rowEl.querySelector('.nama-dosen-input');
+            const inputJabatan = rowEl.querySelector('.jabatan-input');
+            const inputDivisi = rowEl.querySelector('.divisi-input');
+            const inputPeran = rowEl.querySelector('.peran-input');
+
+            if (!inputNip || !inputNama) {
+                return;
             }
 
-            function calculateDayDifference(startDate, endDate) {
-                const oneDay = 24 * 60 * 60 * 1000;
-                const diffDays = Math.round(Math.abs((endDate - startDate) / oneDay));
-                return diffDays;
+            function fillRowWith(item) {
+                if (!item) return;
+                
+                inputNip.value = item.nip || '';
+                inputNama.value = item.nama_dosen || '';
+                
+                if (inputJabatan) inputJabatan.value = item.jabatan || '';
+                if (inputDivisi) inputDivisi.value = item.divisi || '';
+                
+                const jenisPengajuan = document.getElementById('jenis_pengajuan');
+                if (jenisPengajuan && jenisPengajuan.value === 'Kelompok' && inputPeran) {
+                    inputPeran.value = item.peran || '';
+                }
+                
+                inputNip.dispatchEvent(new Event('input', { bubbles: true }));
+                inputNama.dispatchEvent(new Event('input', { bubbles: true }));
+                if (inputJabatan) inputJabatan.dispatchEvent(new Event('input', { bubbles: true }));
+                if (inputDivisi) inputDivisi.dispatchEvent(new Event('input', { bubbles: true }));
+                if (jenisPengajuan && jenisPengajuan.value === 'Kelompok' && inputPeran) {
+                    inputPeran.dispatchEvent(new Event('input', { bubbles: true }));
+                }
             }
 
-            // Set initial dates jika ada
-            const tanggalAwal = document.getElementById('tanggal_awal_kegiatan').value;
-            const tanggalAkhir = document.getElementById('tanggal_akhir_kegiatan').value;
-            let initialDate = [];
+            function createAutocompleteHandler(fieldType, inputElement) {
+                if (fieldType !== 'nip' && fieldType !== 'nama_dosen') return;
 
-            if (tanggalAwal && tanggalAkhir) {
-                initialDate = [tanggalAwal, tanggalAkhir];
+                const handler = debounce(async function() {
+                    if (isSelectingAutocomplete) {
+                        return;
+                    }
+                    
+                    const val = this.value.trim();
+                    
+                    if (val.length < 2 || document.activeElement !== this) {
+                        removeAutocompleteBox();
+                        return;
+                    }
+
+                    const suggestions = await fetchSuggestions(val, fieldType);
+                    showSuggestionBox(inputElement, suggestions, fillRowWith, fieldType);
+                }, 250);
+
+                if (inputElement._currentHandler) {
+                    inputElement.removeEventListener('input', inputElement._currentHandler);
+                }
                 
-                document.getElementById('datepicker').value = `${tanggalAwal} s/d ${tanggalAkhir}`;
+                inputElement._currentHandler = handler;
+                inputElement.addEventListener('input', handler);
+            }
+
+            createAutocompleteHandler('nip', inputNip);
+            createAutocompleteHandler('nama_dosen', inputNama);
+            
+            const inputs = [inputNip, inputNama];
+            
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    const val = input.value.trim();
+                    if (val.length >= 2) {
+                        setTimeout(() => {
+                            if (document.activeElement === input && !isSelectingAutocomplete) {
+                                const event = new Event('input', { bubbles: true });
+                                input.dispatchEvent(event);
+                            }
+                        }, 100);
+                    }
+                });
                 
+                input.addEventListener('blur', () => {
+                    if (!isSelectingAutocomplete) {
+                        setTimeout(() => {
+                            removeAutocompleteBox();
+                        }, 150);
+                    }
+                });
+            });
+
+            rowEl.dataset.autocompleteInitialized = 'true';
+        }
+
+        // ===== DOSEN FUNCTIONS =====
+        function addDosenRow() {
+            const tbody = document.getElementById('dosenTableBody');
+            const originalRow = document.querySelector('.dosen-row');
+            const newRow = originalRow.cloneNode(true);
+            const index = tbody.querySelectorAll('tr.dosen-row').length;
+            
+            newRow.dataset.index = index;
+            
+            // Reset semua input
+            newRow.querySelectorAll('input').forEach(input => {
+                input.value = '';
+            });
+            
+            // Update button aksi
+            const aksiCell = newRow.querySelector('.aksi-cell');
+            if (aksiCell) {
+                aksiCell.innerHTML = '';
+                
+                // Buat tombol hapus untuk baris baru
+                const hapusBtn = document.createElement('button');
+                hapusBtn.type = 'button';
+                hapusBtn.className = 'btn-hapus';
+                hapusBtn.setAttribute('title', 'Hapus Dosen');
+                hapusBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                hapusBtn.onclick = function() { removeDosen(this); };
+                
+                aksiCell.appendChild(hapusBtn);
+            }
+            
+            tbody.appendChild(newRow);
+            
+            // Update kolom peran untuk row baru
+            updateKolomPeranForRow(newRow);
+            
+            // Inisialisasi autocomplete untuk row baru
+            setTimeout(() => {
+                initAutocompleteForRow(newRow);
+                
+                // Animation
+                newRow.style.opacity = '0';
+                newRow.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    newRow.style.transition = 'all 0.3s ease';
+                    newRow.style.opacity = '1';
+                    newRow.style.transform = 'translateY(0)';
+                }, 10);
+            }, 100);
+            
+            // Update button visibility
+            updateButtonVisibility();
+            // Trigger change detection
+    setTimeout(() => {
+        if (window.updateFormButtonState) {
+            window.updateFormButtonState();
+        }
+    }, 500);
+        }
+
+        function removeDosen(button) {
+            const row = button.closest('.dosen-row');
+            const tbody = document.getElementById('dosenTableBody');
+            
+            row.style.opacity = '0';
+            row.style.transform = 'translateX(20px)';
+            
+            setTimeout(() => {
+                if (row && tbody.querySelectorAll('tr.dosen-row').length > 1) {
+                    row.remove();
+                }
+                
+                // Re-index rows
+                const rows = tbody.querySelectorAll('.dosen-row');
+                rows.forEach((row, index) => {
+                    row.dataset.index = index;
+                });
+            }, 300);
+            // Trigger change detection
+    setTimeout(() => {
+        if (window.updateFormButtonState) {
+            window.updateFormButtonState();
+        }
+    }, 500);
+        }
+
+        function updateKolomPeranForRow(rowEl) {
+            const peranColumn = rowEl.querySelector('td.peran-column');
+            const peranInput = rowEl.querySelector('.peran-input');
+            
+            if (!peranColumn || !peranInput) return;
+            
+            const jenisPengajuan = document.getElementById('jenis_pengajuan');
+            
+            if (jenisPengajuan && jenisPengajuan.value === 'Kelompok') {
+                peranColumn.classList.remove('hidden');
+                peranColumn.classList.add('visible');
+                peranColumn.style.display = 'table-cell';
+                if (peranInput) peranInput.required = true;
+                if (peranInput) peranInput.name = 'peran[]';
+            } else {
+                peranColumn.classList.add('hidden');
+                peranColumn.classList.remove('visible');
+                peranColumn.style.display = 'none';
+                if (peranInput) peranInput.required = false;
+                if (peranInput) peranInput.name = 'peran_hidden[]';
+                if (peranInput) peranInput.value = '';
+            }
+        }
+
+        function updateButtonVisibility() {
+            const jenisPengajuan = document.getElementById('jenis_pengajuan');
+            const buttonCells = document.querySelectorAll('.aksi-cell');
+            
+            if (jenisPengajuan && jenisPengajuan.value === 'Kelompok') {
+                buttonCells.forEach(btn => {
+                    btn.style.display = 'table-cell';
+                });
+            } else {
+                buttonCells.forEach(btn => {
+                    btn.style.display = 'none';
+                });
+            }
+        }
+
+        // ===== EXISTING FUNCTIONS =====
+        function deleteExistingFile(index, filename) {
+            if (!confirm('Yakin ingin menghapus file "' + filename + '"?')) return;
+            const fileItem = document.querySelector(`.existing-file-item[data-file-index="${index}"]`);
+            if (!fileItem) return;
+            const deleteFlag = fileItem.querySelector('.delete-flag');
+            const existingInput = fileItem.querySelector('.existing-file-input');
+            if (deleteFlag) deleteFlag.value = filename;
+            if (existingInput) existingInput.remove();
+            fileItem.classList.add('file-deleted');
+            fileItem.style.opacity = '0';
+            fileItem.style.transform = 'translateX(-20px)';
+            setTimeout(() => fileItem.style.display = 'none', 300);
+            // Trigger change detection
+            setTimeout(() => {
+                if (window.updateFormButtonState) {
+                    window.updateFormButtonState();
+                }
+            }, 500);
+        }
+
+        // Preview File Functions
+        function previewFile(fileUrl, fileName) {
+            const previewModal = document.getElementById('previewModal');
+            const previewTitle = document.getElementById('previewTitle');
+            const previewBody = document.getElementById('previewBody');
+
+            previewTitle.textContent = 'Preview: ' + fileName;
+            previewBody.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FF8C00;"></i>
+                    <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
+                </div>
+            `;
+
+            previewModal.classList.add('show');
+
+            const fileExtension = fileName.split('.').pop().toLowerCase();
+            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+            const pdfExtensions = ['pdf'];
+
+            setTimeout(() => {
+                if (imageExtensions.includes(fileExtension)) {
+                    const img = new Image();
+                    img.onload = function() {
+                        previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
+                    };
+                    img.onerror = function() {
+                        showUnsupportedPreview(fileUrl, fileName);
+                    };
+                    img.src = fileUrl;
+                } else if (pdfExtensions.includes(fileExtension)) {
+                    previewBody.innerHTML = `
+                        <iframe 
+                            src="${fileUrl}" 
+                            class="preview-iframe" 
+                            frameborder="0"
+                        ></iframe>
+                    `;
+                } else {
+                    showUnsupportedPreview(fileUrl, fileName);
+                }
+            }, 100);
+        }
+
+        function showUnsupportedPreview(fileUrl, fileName) {
+            document.getElementById('previewBody').innerHTML = `
+                <div class="preview-unsupported">
+                    <i class="fas fa-eye-slash"></i>
+                    <h4>Preview Tidak Tersedia</h4>
+                    <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
+                    <a href="${fileUrl}" class="btn btn-primary" download="${fileName}" target="_blank" style="margin-top: 15px;">
+                        <i class="fas fa-download"></i> Download File
+                    </a>
+                </div>
+            `;
+        }
+
+        function closePreviewModal() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+
+        function escapeHtml(unsafe) {
+            if (unsafe === null || unsafe === undefined) return '-';
+            return String(unsafe)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // ===== FLATPICKR INITIALIZATION =====
+        let selectedStartDate = null;
+        const MAX_DAYS_LIMIT = 60;
+
+        function getMinAllowedDate() {
+            const today = new Date();
+            const minDate = new Date(today);
+            minDate.setDate(today.getDate() - 30);
+            return minDate;
+        }
+
+        function formatDateIndonesian(date) {
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
+                           'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            
+            const dayName = days[date.getDay()];
+            const day = date.getDate();
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            
+            return `${dayName}, ${day} ${month} ${year}`;
+        }
+
+        function formatDateLocal(date) {
+            const y = date.getFullYear();
+            const m = (date.getMonth() + 1).toString().padStart(2, "0");
+            const d = date.getDate().toString().padStart(2, "0");
+            return `${y}-${m}-${d}`;
+        }
+
+        function calculateDayDifference(startDate, endDate) {
+            const oneDay = 24 * 60 * 60 * 1000;
+            const diffDays = Math.round(Math.abs((endDate - startDate) / oneDay));
+            return diffDays;
+        }
+
+        // Set initial dates jika ada
+        const tanggalAwal = document.getElementById('tanggal_awal_kegiatan').value;
+        const tanggalAkhir = document.getElementById('tanggal_akhir_kegiatan').value;
+        let initialDate = [];
+
+        if (tanggalAwal && tanggalAkhir) {
+            initialDate = [tanggalAwal, tanggalAkhir];
+            
+            document.getElementById('datepicker').value = `${tanggalAwal} s/d ${tanggalAkhir}`;
+            
+            const konfirmasiDiv = document.getElementById("konfirmasi_tanggal");
+            const dayCounter = document.getElementById("day_counter");
+            const rangeInfo = document.getElementById("range_info");
+            
+            const awal = new Date(tanggalAwal);
+            const akhir = new Date(tanggalAkhir);
+            const dayDifference = calculateDayDifference(awal, akhir);
+            
+            dayCounter.textContent = `${dayDifference} hari`;
+            document.getElementById("konfirmasi_awal").innerHTML = `<strong>Awal:</strong> ${formatDateIndonesian(awal)}`;
+            document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Akhir:</strong> ${formatDateIndonesian(akhir)}`;
+            konfirmasiDiv.style.display = 'block';
+            rangeInfo.style.display = 'none';
+            
+            document.getElementById("datepicker3").value = tanggalAwal;
+            document.getElementById("datepicker4").value = tanggalAkhir;
+            document.getElementById("info_periode").innerHTML = "Terisi otomatis ✓";
+            document.getElementById("info_akhir").innerHTML = "Terisi otomatis ✓";
+            
+            document.getElementById("datepicker3").classList.add("auto-filled");
+            document.getElementById("datepicker4").classList.add("auto-filled");
+        }
+
+        // Inisialisasi flatpickr
+        const minAllowedDate = getMinAllowedDate();
+
+        const datepicker = flatpickr("#datepicker", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            allowInput: false,
+            minDate: minAllowedDate,
+            locale: {
+                firstDayOfWeek: 1
+            },
+            defaultDate: initialDate,
+            onChange: function(selectedDates, dateStr, instance) {
                 const konfirmasiDiv = document.getElementById("konfirmasi_tanggal");
                 const dayCounter = document.getElementById("day_counter");
                 const rangeInfo = document.getElementById("range_info");
+                const dayLimitInfo = document.getElementById("day_limit_info");
                 
-                const awal = new Date(tanggalAwal);
-                const akhir = new Date(tanggalAkhir);
-                const dayDifference = calculateDayDifference(awal, akhir);
-                
-                dayCounter.textContent = `${dayDifference} hari`;
-                document.getElementById("konfirmasi_awal").innerHTML = `<strong>Awal:</strong> ${formatDateIndonesian(awal)}`;
-                document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Akhir:</strong> ${formatDateIndonesian(akhir)}`;
-                konfirmasiDiv.style.display = 'block';
-                rangeInfo.style.display = 'none';
-                
-                document.getElementById("datepicker3").value = tanggalAwal;
-                document.getElementById("datepicker4").value = tanggalAkhir;
-                document.getElementById("info_periode").innerHTML = "Terisi otomatis ✓";
-                document.getElementById("info_akhir").innerHTML = "Terisi otomatis ✓";
-                
-                document.getElementById("datepicker3").classList.add("auto-filled");
-                document.getElementById("datepicker4").classList.add("auto-filled");
-            }
-
-            // Inisialisasi flatpickr
-            const minAllowedDate = getMinAllowedDate();
-
-            const datepicker = flatpickr("#datepicker", {
-                mode: "range",
-                dateFormat: "Y-m-d",
-                allowInput: false,
-                minDate: minAllowedDate,
-                locale: {
-                    firstDayOfWeek: 1
-                },
-                defaultDate: initialDate,
-                onChange: function(selectedDates, dateStr, instance) {
-                    const konfirmasiDiv = document.getElementById("konfirmasi_tanggal");
-                    const dayCounter = document.getElementById("day_counter");
-                    const rangeInfo = document.getElementById("range_info");
-                    const dayLimitInfo = document.getElementById("day_limit_info");
-                    
-                    if (selectedDates.length === 1) {
-                        dayLimitInfo.style.display = 'block';
-                        selectedStartDate = selectedDates[0];
-                    } else {
-                        dayLimitInfo.style.display = 'none';
-                        selectedStartDate = null;
-                    }
-                    
-                    if (selectedDates.length === 2) {
-                        const awal = selectedDates[0];
-                        const akhir = selectedDates[1];
-                        const dayDifference = calculateDayDifference(awal, akhir);
-                        
-                        selectedStartDate = awal;
-                        
-                        const awalFormatted = formatDateLocal(awal);
-                        const akhirFormatted = formatDateLocal(akhir);
-                        
-                        const awalDisplay = formatDateIndonesian(awal);
-                        const akhirDisplay = formatDateIndonesian(akhir);
-                        
-                        document.getElementById("tanggal_awal_kegiatan").value = awalFormatted;
-                        document.getElementById("tanggal_akhir_kegiatan").value = akhirFormatted;
-                        
-                        document.getElementById("datepicker3").value = awalFormatted;
-                        document.getElementById("datepicker4").value = akhirFormatted;
-                        
-                        dayCounter.textContent = `${dayDifference} hari`;
-                        
-                        document.getElementById("konfirmasi_awal").innerHTML = `<strong>Awal:</strong> ${awalDisplay}`;
-                        document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Akhir:</strong> ${akhirDisplay}`;
-                        konfirmasiDiv.style.display = 'block';
-                        rangeInfo.style.display = 'none';
-                        dayLimitInfo.style.display = 'none';
-                        
-                        document.getElementById("info_periode").innerHTML = "Terisi otomatis ✓";
-                        document.getElementById("info_akhir").innerHTML = "Terisi otomatis ✓";
-                        
-                        document.getElementById("datepicker3").classList.add("auto-filled", "highlight-animation");
-                        document.getElementById("datepicker4").classList.add("auto-filled", "highlight-animation");
-                        
-                        setTimeout(() => {
-                            document.getElementById("datepicker3").classList.remove("highlight-animation");
-                            document.getElementById("datepicker4").classList.remove("highlight-animation");
-                        }, 1000);
-                        
-                    } else if (selectedDates.length === 1) {
-                        const awalDisplay = formatDateIndonesian(selectedDates[0]);
-                        
-                        selectedStartDate = selectedDates[0];
-                        document.getElementById("konfirmasi_awal").innerHTML = `<strong>Tanggal awal:</strong> ${awalDisplay}`;
-                        document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Tanggal akhir:</strong> Pilih tanggal akhir (maks ${MAX_DAYS_LIMIT} hari)`;
-                        konfirmasiDiv.style.display = 'block';
-                        dayCounter.textContent = '';
-                        rangeInfo.style.display = 'none';
-                        dayLimitInfo.style.display = 'block';
-                        
-                        instance.redraw();
-                    } else {
-                        selectedStartDate = null;
-                        konfirmasiDiv.style.display = 'none';
-                        dayCounter.textContent = '';
-                        rangeInfo.style.display = 'block';
-                        dayLimitInfo.style.display = 'none';
-                        
-                        document.getElementById("datepicker3").value = "";
-                        document.getElementById("datepicker4").value = "";
-                        document.getElementById("info_periode").innerHTML = "Akan terisi otomatis";
-                        document.getElementById("info_akhir").innerHTML = "Akan terisi otomatis";
-                        
-                        document.getElementById("datepicker3").classList.remove("auto-filled");
-                        document.getElementById("datepicker4").classList.remove("auto-filled");
-                        
-                        instance.redraw();
-                    }
+                if (selectedDates.length === 1) {
+                    dayLimitInfo.style.display = 'block';
+                    selectedStartDate = selectedDates[0];
+                } else {
+                    dayLimitInfo.style.display = 'none';
+                    selectedStartDate = null;
                 }
-            });
-
-            flatpickr("#datepicker3", {
-                dateFormat: "Y-m-d",
-                allowInput: false
-            });
-
-            flatpickr("#datepicker4", {
-                dateFormat: "Y-m-d",
-                allowInput: false
-            });
-
-            document.getElementById("jenis_date").addEventListener("change", function () {
-                const customSection = document.getElementById("custom_date");
-                const periodeSection = document.getElementById("periode_date");
                 
-                const isCustom = this.value === "Custom";
-                const isPeriode = this.value === "Periode";
-                
-                customSection.classList.toggle('active', isCustom);
-                periodeSection.classList.toggle('active', isPeriode);
-                customSection.style.display = isCustom ? 'block' : 'none';
-                periodeSection.style.display = isPeriode ? 'block' : 'none';
-                
-                if (isCustom) {
-                    const rangeInfo = document.getElementById("range_info");
-                    if (rangeInfo) {
-                        const minDate = getMinAllowedDate();
-                        rangeInfo.innerHTML = `Klik tanggal awal, lalu klik tanggal akhir (opsional)<br>
-                                              <small style="color: #666;">• Tidak bisa memilih tanggal sebelum ${formatDateIndonesian(minDate)}</small><br>
-                                              <small style="color: #666;">• Maksimal ${MAX_DAYS_LIMIT} hari dari tanggal awal</small>`;
-                    }
+                if (selectedDates.length === 2) {
+                    const awal = selectedDates[0];
+                    const akhir = selectedDates[1];
+                    const dayDifference = calculateDayDifference(awal, akhir);
+                    
+                    selectedStartDate = awal;
+                    
+                    const awalFormatted = formatDateLocal(awal);
+                    const akhirFormatted = formatDateLocal(akhir);
+                    
+                    const awalDisplay = formatDateIndonesian(awal);
+                    const akhirDisplay = formatDateIndonesian(akhir);
+                    
+                    document.getElementById("tanggal_awal_kegiatan").value = awalFormatted;
+                    document.getElementById("tanggal_akhir_kegiatan").value = akhirFormatted;
+                    
+                    document.getElementById("datepicker3").value = awalFormatted;
+                    document.getElementById("datepicker4").value = akhirFormatted;
+                    
+                    dayCounter.textContent = `${dayDifference} hari`;
+                    
+                    document.getElementById("konfirmasi_awal").innerHTML = `<strong>Awal:</strong> ${awalDisplay}`;
+                    document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Akhir:</strong> ${akhirDisplay}`;
+                    konfirmasiDiv.style.display = 'block';
+                    rangeInfo.style.display = 'none';
+                    dayLimitInfo.style.display = 'none';
+                    
+                    document.getElementById("info_periode").innerHTML = "Terisi otomatis ✓";
+                    document.getElementById("info_akhir").innerHTML = "Terisi otomatis ✓";
+                    
+                    document.getElementById("datepicker3").classList.add("auto-filled", "highlight-animation");
+                    document.getElementById("datepicker4").classList.add("auto-filled", "highlight-animation");
+                    
+                    setTimeout(() => {
+                        document.getElementById("datepicker3").classList.remove("highlight-animation");
+                        document.getElementById("datepicker4").classList.remove("highlight-animation");
+                    }, 1000);
+                    
+                } else if (selectedDates.length === 1) {
+                    const awalDisplay = formatDateIndonesian(selectedDates[0]);
+                    
+                    selectedStartDate = selectedDates[0];
+                    document.getElementById("konfirmasi_awal").innerHTML = `<strong>Tanggal awal:</strong> ${awalDisplay}`;
+                    document.getElementById("konfirmasi_akhir").innerHTML = `<strong>Tanggal akhir:</strong> Pilih tanggal akhir (maks ${MAX_DAYS_LIMIT} hari)`;
+                    konfirmasiDiv.style.display = 'block';
+                    dayCounter.textContent = '';
+                    rangeInfo.style.display = 'none';
+                    dayLimitInfo.style.display = 'block';
+                    
+                    instance.redraw();
+                } else {
+                    selectedStartDate = null;
+                    konfirmasiDiv.style.display = 'none';
+                    dayCounter.textContent = '';
+                    rangeInfo.style.display = 'block';
+                    dayLimitInfo.style.display = 'none';
+                    
+                    document.getElementById("datepicker3").value = "";
+                    document.getElementById("datepicker4").value = "";
+                    document.getElementById("info_periode").innerHTML = "Akan terisi otomatis";
+                    document.getElementById("info_akhir").innerHTML = "Akan terisi otomatis";
+                    
+                    document.getElementById("datepicker3").classList.remove("auto-filled");
+                    document.getElementById("datepicker4").classList.remove("auto-filled");
+                    
+                    instance.redraw();
                 }
+            }
+        });
+
+        flatpickr("#datepicker3", {
+            dateFormat: "Y-m-d",
+            allowInput: false
+        });
+
+        flatpickr("#datepicker4", {
+            dateFormat: "Y-m-d",
+            allowInput: false
+        });
+
+        document.getElementById("jenis_date").addEventListener("change", function () {
+            const customSection = document.getElementById("custom_date");
+            const periodeSection = document.getElementById("periode_date");
+            
+            const isCustom = this.value === "Custom";
+            const isPeriode = this.value === "Periode";
+            
+            customSection.style.display = isCustom ? 'block' : 'none';
+            periodeSection.style.display = isPeriode ? 'block' : 'none';
+            
+            if (isCustom) {
+                const rangeInfo = document.getElementById("range_info");
+                if (rangeInfo) {
+                    const minDate = getMinAllowedDate();
+                    rangeInfo.innerHTML = `Klik tanggal awal, lalu klik tanggal akhir (opsional)<br>
+                                          <small style="color: #666;">• Tidak bisa memilih tanggal sebelum ${formatDateIndonesian(minDate)}</small><br>
+                                          <small style="color: #666;">• Maksimal ${MAX_DAYS_LIMIT} hari dari tanggal awal</small>`;
+                }
+            }
+        });
+
+        // ===== INITIALIZE ON DOM READY =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize autocomplete untuk semua rows yang ada
+            document.querySelectorAll('.dosen-row').forEach(row => {
+                initAutocompleteForRow(row);
             });
 
-            // ===== EXISTING FUNCTIONS =====
-            window.deleteExistingFile = function(index, filename) {
-                if (!confirm('Yakin ingin menghapus file "' + filename + '"?')) return;
-                const fileItem = document.querySelector(`.existing-file-item[data-file-index="${index}"]`);
-                if (!fileItem) return;
-                const deleteFlag = fileItem.querySelector('.delete-flag');
-                const existingInput = fileItem.querySelector('.existing-file-input');
-                if (deleteFlag) deleteFlag.value = filename;
-                if (existingInput) existingInput.remove();
-                fileItem.classList.add('file-deleted');
-                fileItem.style.opacity = '0';
-                fileItem.style.transform = 'translateX(-20px)';
-                setTimeout(() => fileItem.style.display = 'none', 300);
+            // Toggle sections based on selections
+            const jenisPengajuan = document.getElementById('jenis_pengajuan');
+            if (jenisPengajuan) {
+                jenisPengajuan.addEventListener('change', function() {
+                    const isPerorangan = this.value === 'Perorangan';
+                    const isKelompok = this.value === 'Kelompok';
+                    
+                    document.getElementById('perorangan_box').style.display = isPerorangan ? 'block' : 'none';
+                    document.getElementById('kelompok_box').style.display = isKelompok ? 'block' : 'none';
+                    
+                    // Update semua kolom peran
+                    document.querySelectorAll('.dosen-row').forEach(row => {
+                        updateKolomPeranForRow(row);
+                    });
+                    
+                    // Update button visibility
+                    updateButtonVisibility();
+                });
+                
+                // Trigger change event untuk inisialisasi awal
+                jenisPengajuan.dispatchEvent(new Event('change'));
             }
 
-            // Preview File Functions
-            window.previewFile = function(fileUrl, fileName) {
-                const previewModal = document.getElementById('previewModal');
-                const previewTitle = document.getElementById('previewTitle');
-                const previewBody = document.getElementById('previewBody');
+            if (document.getElementById('jenis_penugasan_perorangan')) {
+                document.getElementById('jenis_penugasan_perorangan').addEventListener('change', function() {
+                    document.getElementById('lainnya_perorangan_box').style.display = this.value === 'Lainnya' ? 'block' : 'none';
+                });
+            }
 
-                previewTitle.textContent = 'Preview: ' + fileName;
-                previewBody.innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FF8C00;"></i>
-                        <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
-                    </div>
-                `;
+            if (document.getElementById('jenis_penugasan_kelompok')) {
+                document.getElementById('jenis_penugasan_kelompok').addEventListener('change', function() {
+                    document.getElementById('lainnya_kelompok_box').style.display = this.value === 'Lainnya' ? 'block' : 'none';
+                });
+            }
 
-                previewModal.classList.add('show');
+            // Preview file handlers
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.btn-view-file')) {
+                    const btn = e.target.closest('.btn-view-file');
+                    const src = btn.dataset.src || '';
+                    const fileName = btn.closest('.existing-file-item').querySelector('.file-name').textContent.trim() || 'file';
 
-                const fileExtension = fileName.split('.').pop().toLowerCase();
-                const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-                const pdfExtensions = ['pdf'];
-
-                setTimeout(() => {
-                    if (imageExtensions.includes(fileExtension)) {
-                        const img = new Image();
-                        img.onload = function() {
-                            previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
-                        };
-                        img.onerror = function() {
-                            showUnsupportedPreview(fileUrl, fileName);
-                        };
-                        img.src = fileUrl;
-                    } else if (pdfExtensions.includes(fileExtension)) {
-                        previewBody.innerHTML = `
-                            <iframe 
-                                src="${fileUrl}" 
-                                class="preview-iframe" 
-                                frameborder="0"
-                            ></iframe>
-                        `;
-                    } else {
-                        showUnsupportedPreview(fileUrl, fileName);
+                    if (!src) {
+                        alert('File tidak ditemukan');
+                        return;
                     }
-                }, 100);
-            }
 
-            function showUnsupportedPreview(fileUrl, fileName) {
-                document.getElementById('previewBody').innerHTML = `
-                    <div class="preview-unsupported">
-                        <i class="fas fa-eye-slash"></i>
-                        <h4>Preview Tidak Tersedia</h4>
-                        <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
-                        <a href="${fileUrl}" class="btn btn-primary" download="${fileName}" target="_blank" style="margin-top: 15px;">
-                            <i class="fas fa-download"></i> Download File
-                        </a>
-                    </div>
-                `;
-            }
+                    let finalSrc = src;
+                    if (!/^https?:\/\//i.test(src)) {
+                        finalSrc = BASE_URL + '/' + src.replace(/^\/+/, '');
+                    }
 
-            window.closePreviewModal = function() {
-                document.getElementById('previewModal').classList.remove('show');
-            }
-
-            function escapeHtml(unsafe) {
-                if (unsafe === null || unsafe === undefined) return '-';
-                return String(unsafe)
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#039;");
-            }
-
-            // Initialize on window load
-            window.addEventListener('load', function() {
-                setTimeout(() => {
-                    initializeAllRows();
-                }, 500);
+                    previewFile(finalSrc, fileName);
+                }
             });
 
             // Close autocomplete when clicking outside
             document.addEventListener('click', function(e) {
-                if (!e.target.closest('.autocomplete-box-fixed') && 
-                    !e.target.closest('.nip-input') && 
+                if (!e.target.closest('.autocomplete-box-fixed') &&
+                    !e.target.closest('.nip-input') &&
                     !e.target.closest('.nama-dosen-input')) {
                     if (!isSelectingAutocomplete) {
                         removeAutocompleteBox();
@@ -2777,6 +2899,269 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 }
             });
         });
+        // ===== PREVENT FILE DUPLICATION =====
+function preventFileDuplication() {
+    const hiddenFilesContainer = document.getElementById('hiddenFilesContainer');
+    const uploadedFiles = new Set(); // Gunakan Set untuk tracking file unik
+    
+    // Reset container hidden files
+    hiddenFilesContainer.innerHTML = '';
+    
+    // Track files yang sudah dipilih
+    const selectedFiles = new Set();
+    
+    // Event listener untuk file input
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        
+        // Filter file yang belum dipilih
+        const uniqueFiles = files.filter(file => {
+            const fileKey = file.name + '_' + file.size;
+            if (!selectedFiles.has(fileKey)) {
+                selectedFiles.add(fileKey);
+                return true;
+            }
+            return false;
+        });
+        
+        if (uniqueFiles.length !== files.length) {
+            alert('Beberapa file sudah dipilih sebelumnya dan akan diabaikan.');
+        }
+        
+        // Update file input dengan file unik saja
+        const dataTransfer = new DataTransfer();
+        uniqueFiles.forEach(file => dataTransfer.items.add(file));
+        e.target.files = dataTransfer.files;
+    });
+}
+
+// Panggil fungsi saat DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+    preventFileDuplication();
+});
     </script>
+ <script>
+// ===== CHANGE DETECTION - PREVENT SAVE IF NO CHANGES =====
+(function() {
+    const initialData = <?= $initial_data ?? '{}' ?>;
+    const submitBtn = document.getElementById('submitBtn');
+    const mainForm = document.getElementById('mainForm');
+    let hasChanges = false;
+    
+    // Normalize value untuk comparison
+    function normalizeValue(val) {
+        if (val === null || val === undefined || val === '') return '-';
+        if (typeof val === 'string') return val.trim();
+        return val;
+    }
+    
+    // Check if arrays are equal
+    function arraysEqual(arr1, arr2) {
+        if (!Array.isArray(arr1) || !Array.isArray(arr2)) return false;
+        if (arr1.length !== arr2.length) return false;
+        
+        for (let i = 0; i < arr1.length; i++) {
+            if (typeof arr1[i] === 'object' && typeof arr2[i] === 'object') {
+                if (JSON.stringify(arr1[i]) !== JSON.stringify(arr2[i])) return false;
+            } else {
+                if (normalizeValue(arr1[i]) !== normalizeValue(arr2[i])) return false;
+            }
+        }
+        return true;
+    }
+    
+    // Get current form data
+    function getCurrentFormData() {
+        const formData = new FormData(mainForm);
+        const currentData = {
+            nama_kegiatan: normalizeValue(formData.get('nama_kegiatan')),
+            jenis_date: normalizeValue(formData.get('jenis_date')),
+            tanggal_kegiatan: normalizeValue(formData.get('tanggal_kegiatan')),
+            akhir_kegiatan: normalizeValue(formData.get('akhir_kegiatan')),
+            tempat_kegiatan: normalizeValue(formData.get('tempat_kegiatan')),
+            penyelenggara: normalizeValue(formData.get('penyelenggara')),
+            jenis_pengajuan: normalizeValue(formData.get('jenis_pengajuan')),
+            lingkup_penugasan: normalizeValue(formData.get('lingkup_penugasan')),
+            jenis_penugasan_perorangan: normalizeValue(formData.get('jenis_penugasan_perorangan')),
+            penugasan_lainnya_perorangan: normalizeValue(formData.get('penugasan_lainnya_perorangan')),
+            jenis_penugasan_kelompok: normalizeValue(formData.get('jenis_penugasan_kelompok')),
+            penugasan_lainnya_kelompok: normalizeValue(formData.get('penugasan_lainnya_kelompok')),
+            periode_value: normalizeValue(formData.get('periode_value')),
+            nip: formData.getAll('nip[]').filter(v => v).map(v => normalizeValue(v)),
+            peran: formData.getAll('peran[]').filter(v => v).map(v => normalizeValue(v))
+        };
+        
+        // Get eviden data
+        const existingEviden = [];
+        document.querySelectorAll('.existing-file-input').forEach(input => {
+            if (input.value && !input.closest('.file-deleted')) {
+                existingEviden.push(normalizeValue(input.value));
+            }
+        });
+        
+        const deletedEviden = [];
+        document.querySelectorAll('.delete-flag').forEach(input => {
+            if (input.value) {
+                deletedEviden.push(normalizeValue(input.value));
+            }
+        });
+        
+        // Check if there are new files
+        const hasNewFiles = document.querySelectorAll('.new-file-item').length > 0;
+        
+        currentData.eviden = existingEviden;
+        currentData.hasDeletedFiles = deletedEviden.length > 0;
+        currentData.hasNewFiles = hasNewFiles;
+        
+        return currentData;
+    }
+    
+    // Check for changes
+    function checkForChanges() {
+        const current = getCurrentFormData();
+        let changes = [];
+        
+        // Check basic fields
+        const basicFields = [
+            'nama_kegiatan', 'jenis_date', 'tanggal_kegiatan', 'akhir_kegiatan',
+            'tempat_kegiatan', 'penyelenggara', 'jenis_pengajuan', 'lingkup_penugasan',
+            'jenis_penugasan_perorangan', 'penugasan_lainnya_perorangan',
+            'jenis_penugasan_kelompok', 'penugasan_lainnya_kelompok', 'periode_value'
+        ];
+        
+        basicFields.forEach(field => {
+            const initialVal = normalizeValue(initialData[field]);
+            const currentVal = normalizeValue(current[field]);
+            if (initialVal !== currentVal) {
+                changes.push(field);
+            }
+        });
+        
+        // Check NIP array
+        if (!arraysEqual(initialData.nip || [], current.nip || [])) {
+            changes.push('nip');
+        }
+        
+        // Check Peran array
+        const initialPeran = (initialData.peran || []).map(p => {
+            if (typeof p === 'string') {
+                try {
+                    const parsed = JSON.parse(p);
+                    return normalizeValue(parsed.peran || '-');
+                } catch {
+                    return normalizeValue(p);
+                }
+            }
+            return normalizeValue(p.peran || '-');
+        });
+        
+        const currentPeran = current.peran || [];
+        
+        if (!arraysEqual(initialPeran, currentPeran)) {
+            changes.push('peran');
+        }
+        
+        // Check eviden
+        const initialEviden = (initialData.eviden || []).map(e => normalizeValue(e)).sort();
+        const currentEviden = (current.eviden || []).map(e => normalizeValue(e)).sort();
+        
+        if (!arraysEqual(initialEviden, currentEviden)) {
+            changes.push('eviden');
+        }
+        
+        // Check deleted files
+        if (current.hasDeletedFiles) {
+            changes.push('deleted_files');
+        }
+        
+        // Check new files
+        if (current.hasNewFiles) {
+            changes.push('new_files');
+        }
+        
+        hasChanges = changes.length > 0;
+        
+        console.log('Changes detected:', changes);
+        console.log('Has changes:', hasChanges);
+        
+        return hasChanges;
+    }
+    
+    // Update button state
+    function updateButtonState() {
+        const hasChanges = checkForChanges();
+        
+        if (hasChanges) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.classList.remove('btn-disabled');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-ban"></i> Tidak Ada Perubahan';
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.classList.add('btn-disabled');
+        }
+    }
+    
+    // Add event listeners to all form inputs
+    function attachChangeListeners() {
+        // Text inputs, selects, textareas
+        mainForm.querySelectorAll('input, select, textarea').forEach(element => {
+            element.addEventListener('input', updateButtonState);
+            element.addEventListener('change', updateButtonState);
+        });
+        
+        // File inputs
+        document.getElementById('fileInput')?.addEventListener('change', updateButtonState);
+        
+        // Observer for dynamic elements (dosen rows, file items)
+        const observer = new MutationObserver(function(mutations) {
+            updateButtonState();
+        });
+        
+        observer.observe(document.getElementById('dosenTableBody'), {
+            childList: true,
+            subtree: true
+        });
+        
+        observer.observe(document.getElementById('existingFilesContainer'), {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class']
+        });
+        
+        observer.observe(document.getElementById('newFilesContainer'), {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    // Prevent form submission if no changes
+    mainForm.addEventListener('submit', function(e) {
+        if (!checkForChanges()) {
+            e.preventDefault();
+            alert('⚠️ Tidak ada perubahan yang perlu disimpan!');
+            return false;
+        }
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        attachChangeListeners();
+        updateButtonState();
+        
+        // Check for changes every 2 seconds (fallback)
+        setInterval(updateButtonState, 2000);
+    });
+    
+    // Make functions globally accessible
+    window.checkFormChanges = checkForChanges;
+    window.updateFormButtonState = updateButtonState;
+})();
+</script>
 </body>
 </html>

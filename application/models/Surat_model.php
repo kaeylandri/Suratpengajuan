@@ -106,17 +106,68 @@ public function get_by_id($id)
 
 public function update_surat($id, $data)
 {
-    log_message('debug', 'update_surat called for id: ' . $id);
-    log_message('debug', 'Update data: ' . print_r($data, true));
-    
     $this->db->where('id', $id);
     $result = $this->db->update('surat', $data);
     
-    log_message('debug', 'Update result: ' . ($result ? 'success' : 'failed'));
-    log_message('debug', 'DB error: ' . $this->db->error()['message']);
+    if (!$result) {
+        log_message('error', 'Database update failed: ' . $this->db->error()['message']);
+    }
     
     return $result;
 }
+    
+    // 🆕 Fungsi untuk mendapatkan data dengan format peran baru
+    public function get_with_role_details($id)
+    {
+        $this->db->where('id', $id);
+        $query = $this->db->get('surat');
+        
+        if ($query->num_rows() > 0) {
+            $surat = $query->row();
+            
+            // Decode NIP
+            $nip_array = json_decode($surat->nip, true);
+            if (!is_array($nip_array)) {
+                $nip_array = [];
+            }
+            
+            // Decode Peran (array of JSON strings)
+            $peran_array = json_decode($surat->peran, true);
+            if (!is_array($peran_array)) {
+                $peran_array = [];
+            }
+            
+            // Parse peran menjadi array of objects
+            $peran_details = [];
+            foreach ($peran_array as $index => $peran_json) {
+                $peran_obj = json_decode($peran_json, true);
+                $peran_details[] = $peran_obj ?: ['jabatan' => '', 'peran' => ''];
+            }
+            
+            // Ambil data dosen dari list_dosen
+            $dosen_data = [];
+            foreach ($nip_array as $index => $nip) {
+                $this->db->where('nip', $nip);
+                $dosen = $this->db->get('list_dosen')->row();
+                
+                $peran_item = isset($peran_details[$index]) ? $peran_details[$index] : ['jabatan' => '', 'peran' => ''];
+                
+                $dosen_data[] = [
+                    'nip' => $nip,
+                    'nama_dosen' => $dosen ? $dosen->nama_dosen : '',
+                    'jabatan_original' => $dosen ? $dosen->jabatan : '',
+                    'jabatan' => $peran_item['jabatan'] ?? '',
+                    'peran' => $peran_item['peran'] ?? '',
+                    'divisi' => $dosen ? $dosen->divisi : ''
+                ];
+            }
+            
+            $surat->dosen_data = $dosen_data;
+            return $surat;
+        }
+        
+        return false;
+    }
 
     // ============================================================
     //  DELETE

@@ -1,7 +1,9 @@
-<?php
+<?php 
+
 // edit_surat.php - Versi Revisi dengan tampilan dan fitur sama seperti edit.php sekretariat
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+$can_edit_dosen = true; // SELALU izinkan edit untuk sekretariat
 // Tentukan mode revisi
 $current_status = isset($surat['status']) ? strtolower($surat['status']) : '';
 $is_revision = false;
@@ -39,7 +41,7 @@ if ($current_status === 'ditolak kk') {
 }
 
 // Tentukan form action
-$form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
+$form_action = site_url('sekretariat/edit_surat/' . ($surat['id'] ?? ''));
 ?>
 
 <!DOCTYPE html>
@@ -1148,21 +1150,53 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 max-height: 300px;
             }
         }
+        /* Disabled Button State */
+        .btn-disabled {
+            background: #95a5a6 !important;
+            cursor: not-allowed !important;
+            pointer-events: none;
+        }
+
+        .btn-disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        /* New File Item Styles */
+.new-file-item {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%) !important;
+    border: 2px solid #4caf50 !important;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+.new-file-badge {
+    background: #4caf50;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 8px;
+}
     </style>
 </head>
-
 <body>
 
     <div class="container">
         <div class="header-title">
-            <i class="fas fa-edit"></i> Edit Pengajuan Surat
+            <i class="fas fa-edit"></i> Edit Pengajuan Surat - Sekretariat
             <?php if(isset($surat['status'])): ?>
                 <div style="font-size: 14px; margin-top: 10px; opacity: 0.9;">
                     <i class="fas fa-tag"></i> Status: 
                     <span class="status-badge <?= 
-                        strpos($current_status, 'diajukan') !== false ? 'badge-info' : 
-                        (strpos($current_status, 'disetujui') !== false ? 'badge-success' : 
-                        (strpos($current_status, 'ditolak') !== false ? 'badge-danger' : 'badge-warning')) 
+                        strpos($current_status, 'disetujui kk') !== false ? 'badge-info' : 
+                        (strpos($current_status, 'disetujui sekretariat') !== false ? 'badge-success' : 
+                        (strpos($current_status, 'ditolak sekretariat') !== false ? 'badge-danger' : 'badge-warning')) 
                     ?>">
                         <?= htmlspecialchars($surat['status']) ?>
                     </span>
@@ -1170,72 +1204,58 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             <?php endif; ?>
         </div>
 
-        <!-- Alert Info untuk Mode Revisi/Normal -->
-        <?php if($is_revision): ?>
-        <div class="alert-revision">
-            <div class="alert-revision-content">
-                <div class="alert-revision-icon">
+        <!-- Alert Info untuk Mode Sekretariat -->
+        <div class="alert-sekretariat">
+            <div class="alert-sekretariat-content">
+                <div class="alert-sekretariat-icon">
                     <i class="fas <?= $alert_icon ?>"></i>
                 </div>
                 <div style="flex: 1;">
-                    <h4 style="margin: 0 0 8px 0; color: #856404; font-size: 18px; font-weight: 700;">
-                        <i class="fas fa-redo-alt"></i> <?= $alert_title ?>
+                    <h4 style="margin: 0 0 8px 0; color: #0c5460; font-size: 18px; font-weight: 700;">
+                        <i class="fas fa-user-cog"></i> <?= $alert_title ?>
                     </h4>
-                    <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
+                    <p style="margin: 0; color: #0c5460; font-size: 14px; line-height: 1.6;">
                         <strong><?= $alert_message ?></strong>
-                        <br><?= $additional_message ?>
+                        <?= $additional_message ?>
                     </p>
                     
-                    <?php if(!empty($surat['catatan_penolakan'])): ?>
-                    <div class="rejection-reason">
-                        <strong style="color: #dc3545; display: block; margin-bottom: 5px;">
-                            <i class="fas fa-comment-dots"></i> Alasan Penolakan:
-                        </strong>
-                        <p style="margin: 0; color: #666; font-size: 13px; font-style: italic;">
-                            "<?= htmlspecialchars($surat['catatan_penolakan']); ?>"
-                        </p>
-                    </div>
+                    <?php if(in_array($current_status, ['disetujui sekretariat', 'ditolak sekretariat'])): ?>
+                        <div style="margin-top: 10px; padding: 8px 12px; background: rgba(22, 160, 133, 0.1); border-radius: 6px;">
+                            <small style="color: #138D75;">
+                                <i class="fas fa-sync-alt"></i> 
+                                <strong>Status akan direset ke:</strong> "Disetujui KK"
+                            </small>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
-        <?php else: ?>
-        <div class="alert-normal">
-            <div class="alert-normal-content">
-                <div class="alert-normal-icon">
-                    <i class="fas <?= $alert_icon ?>"></i>
-                </div>
-                <div style="flex: 1;">
-                    <h4 style="margin: 0 0 8px 0; color: #856404; font-size: 18px; font-weight: 700;">
-                        <i class="fas fa-edit"></i> <?= $alert_title ?>
-                    </h4>
-                    <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
-                        <?= $alert_message ?>
-                        <?= $additional_message ?>
-                    </p>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
 
         <form action="<?= $form_action ?>" method="post" enctype="multipart/form-data" id="mainForm">
             <!-- Informasi Kegiatan -->
             <div class="form-section">
                 <h5><i class="fas fa-info-circle"></i> Informasi Kegiatan</h5>
                 
+                <?php if(in_array($current_status, ['disetujui sekretariat'])): ?>
                 <div class="form-group">
-                    <label class="required-field">Nama Kegiatan</label>
+                    <label>Nomor Surat <span style="color:#e74c3c">*</span></label>
+                    <input type="text" name="nomor_surat" class="form-control" value="<?= htmlspecialchars($surat['nomor_surat'] ?? ''); ?>" required>
+                    <small style="color: #6c757d; font-size: 12px;">Format: XXX/SKT/FT/Tahun</small>
+                </div>
+                <?php endif; ?>
+                
+                <div class="form-group">
+                    <label>Nama Kegiatan <span style="color:#e74c3c">*</span></label>
                     <input type="text" name="nama_kegiatan" class="form-control" value="<?= htmlspecialchars($surat['nama_kegiatan'] ?? ''); ?>" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="optional-field">Tanggal Pengajuan</label>
+                    <label>Tanggal Pengajuan</label>
                     <input type="text" class="form-control" value="<?= htmlspecialchars($surat['created_at'] ?? '-'); ?>" readonly>
                 </div>
 
-                <!-- JENIS TANGGAL -->
                 <div class="form-group">
-                    <label class="optional-field">Jenis Tanggal</label>
+                    <label>Jenis Tanggal</label>
                     <select name="jenis_date" id="jenis_date" class="form-control">
                         <option value="Custom" <?= (isset($surat['jenis_date']) && $surat['jenis_date'] == 'Custom') ? 'selected' : '' ?>>Custom</option>
                         <option value="Periode" <?= (isset($surat['jenis_date']) && $surat['jenis_date'] == 'Periode') ? 'selected' : '' ?>>Periode</option>
@@ -1243,16 +1263,16 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 </div>
 
                 <!-- SECTION CUSTOM DATE -->
-                <div id="custom_date" class="date-section" style="<?= (isset($surat['jenis_date']) && ($surat['jenis_date'] == 'Custom' || $surat['jenis_date'] == 'custom')) ? '' : 'display:none;'; ?>">
+                <div id="custom_date" class="date-section <?= (isset($surat['jenis_date']) && ($surat['jenis_date'] == 'Custom' || $surat['jenis_date'] == 'custom')) ? 'active' : '' ?>">
                     <div class="row">
                         <!-- Tanggal Kegiatan (Date Range) -->
                         <div class="col-md-4 mt-3">
                             <div class="form-group">
-                                <label class="optional-field">Tanggal Kegiatan</label>
+                                <label>Tanggal Kegiatan (opsional)</label>
                                 <input type="text" id="datepicker" class="form-control flatpickr-input"
                                        autocomplete="off" inputmode="none" readonly
                                        placeholder="Klik untuk pilih tanggal (opsional)">
-                                <label id="lbl_mulai" class="optional-field">Tanggal Awal s/d Akhir</label>
+                                <label id="lbl_mulai">Tanggal Awal s/d Akhir</label>
 
                                 <!-- Hidden input -->
                                 <input type="hidden" id="tanggal_awal_kegiatan" name="tanggal_kegiatan" 
@@ -1296,7 +1316,7 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                                        autocomplete="off" inputmode="none" readonly
                                        placeholder="Otomatis terisi">
 
-                                <label id="lbl_mulai1" class="optional-field">Periode Penugasan</label>
+                                <label id="lbl_mulai1">Periode Penugasan</label>
                                 <div class="info-message small" id="info_periode">Akan terisi otomatis</div>
                             </div>
                         </div>
@@ -1309,7 +1329,7 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                                        autocomplete="off" inputmode="none" readonly
                                        placeholder="Otomatis terisi">
 
-                                <label id="lbl_akhir1" class="optional-field">Akhir Penugasan</label>
+                                <label id="lbl_akhir1">Akhir Penugasan</label>
                                 <div class="info-message small" id="info_akhir">Akan terisi otomatis</div>
                             </div>
                         </div>
@@ -1318,16 +1338,15 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
 
                 <div id="periode_date" style="<?= (isset($surat['jenis_date']) && $surat['jenis_date'] == 'Periode') ? '' : 'display:none;'; ?>">
                     <div class="form-group">
-                        <label class="optional-field">Pilih Periode</label>
+                        <label>Pilih Periode</label>
                         <select name="periode_value" class="form-control">
                             <?php
                             $years = ["2024/2025", "2025/2026", "2026/2027", "2027/2028", "2028/2029", "2029/2030"];
-                            $selected_periode = $surat['periode_value'] ?? '';
                             foreach ($years as $y) {
                                 $g = $y . ' Ganjil';
                                 $p = $y . ' Genap';
-                                echo '<option value="' . htmlspecialchars($g) . '" ' . ($selected_periode == $g ? 'selected' : '') . '>' . htmlspecialchars($g) . '</option>';
-                                echo '<option value="' . htmlspecialchars($p) . '" ' . ($selected_periode == $p ? 'selected' : '') . '>' . htmlspecialchars($p) . '</option>';
+                                echo '<option value="' . htmlspecialchars($g) . '" ' . ((isset($surat['periode_value']) && $surat['periode_value'] == $g) ? 'selected' : '') . '>' . htmlspecialchars($g) . '</option>';
+                                echo '<option value="' . htmlspecialchars($p) . '" ' . ((isset($surat['periode_value']) && $surat['periode_value'] == $p) ? 'selected' : '') . '>' . htmlspecialchars($p) . '</option>';
                             }
                             ?>
                         </select>
@@ -1335,21 +1354,17 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 </div>
 
                 <div class="form-group">
-                    <label class="optional-field">Tempat Kegiatan</label>
+                    <label>Tempat Kegiatan</label>
                     <input type="text" name="tempat_kegiatan" class="form-control" value="<?= htmlspecialchars($surat['tempat_kegiatan'] ?? ''); ?>">
                 </div>
 
                 <div class="form-group">
-                    <label class="optional-field">Penyelenggara</label>
+                    <label>Penyelenggara</label>
                     <input type="text" name="penyelenggara" class="form-control" value="<?= htmlspecialchars($surat['penyelenggara'] ?? ''); ?>">
                 </div>
-                
                 <div class="form-group">
-                    <label class="optional-field">Customize</label>
+                    <label>Customize</label>
                     <input type="text" name="customize" class="form-control" value="<?= htmlspecialchars($surat['customize'] ?? ''); ?>">
-                    <div class="customize-note">
-                        <i class="fas fa-info-circle"></i> Isi untuk custom informasi tambahan pada surat
-                    </div>
                 </div>
             </div>
 
@@ -1357,8 +1372,8 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             <div class="form-section">
                 <h5><i class="fas fa-tasks"></i> Jenis Pengajuan</h5>
                 <div class="form-group">
-                    <label class="required-field">Jenis Pengajuan</label>
-                    <select name="jenis_pengajuan" id="jenis_pengajuan" class="form-control" required>
+                    <label>Jenis Pengajuan</label>
+                    <select name="jenis_pengajuan" id="jenis_pengajuan" class="form-control">
                         <option value="Perorangan" <?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Perorangan') ? 'selected' : '' ?>>Perorangan</option>
                         <option value="Kelompok" <?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? 'selected' : '' ?>>Kelompok</option>
                     </select>
@@ -1366,8 +1381,8 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
 
                 <!-- Lingkup Penugasan -->
                 <div class="form-group">
-                    <label class="required-field">Lingkup Penugasan</label>
-                    <select name="lingkup_penugasan" class="form-control" required>
+                    <label>Lingkup Penugasan</label>
+                    <select name="lingkup_penugasan" class="form-control">
                         <option value="Dosen" <?= (isset($surat['lingkup_penugasan']) && $surat['lingkup_penugasan'] == 'Dosen') ? 'selected' : '' ?>>Dosen</option>
                         <option value="TPA" <?= (isset($surat['lingkup_penugasan']) && $surat['lingkup_penugasan'] == 'TPA') ? 'selected' : '' ?>>TPA</option>
                         <option value="Dosen dan TPA" <?= (isset($surat['lingkup_penugasan']) && $surat['lingkup_penugasan'] == 'Dosen dan TPA') ? 'selected' : '' ?>>Dosen dan TPA</option>
@@ -1376,8 +1391,8 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
 
                 <div id="perorangan_box" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Perorangan') ? '' : 'display:none;'; ?>">
                     <div class="form-group">
-                        <label class="required-field">Jenis Penugasan (Perorangan)</label>
-                        <select name="jenis_penugasan_perorangan" id="jenis_penugasan_perorangan" class="form-control" required>
+                        <label>Jenis Penugasan (Perorangan)</label>
+                        <select name="jenis_penugasan_perorangan" id="jenis_penugasan_perorangan" class="form-control">
                             <?php 
                             $opsi_per = ["Juri", "Pembicara", "Narasumber", "Lainnya"];
                             foreach ($opsi_per as $o) {
@@ -1388,15 +1403,15 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                         </select>
                     </div>
                     <div class="form-group" id="lainnya_perorangan_box" style="<?= (isset($surat['jenis_penugasan_perorangan']) && $surat['jenis_penugasan_perorangan'] == 'Lainnya') ? '' : 'display:none;'; ?>">
-                        <label class="required-field">Isi Penugasan Lainnya</label>
-                        <input type="text" name="penugasan_lainnya_perorangan" class="form-control" value="<?= htmlspecialchars($surat['penugasan_lainnya_perorangan'] ?? ''); ?>" required>
+                        <label>Isi Penugasan Lainnya</label>
+                        <input type="text" name="penugasan_lainnya_perorangan" class="form-control" value="<?= htmlspecialchars($surat['penugasan_lainnya_perorangan'] ?? ''); ?>">
                     </div>
                 </div>
 
                 <div id="kelompok_box" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;'; ?>">
                     <div class="form-group">
-                        <label class="required-field">Jenis Penugasan (Kelompok)</label>
-                        <select name="jenis_penugasan_kelompok" id="jenis_penugasan_kelompok" class="form-control" required>
+                        <label>Jenis Penugasan (Kelompok)</label>
+                        <select name="jenis_penugasan_kelompok" id="jenis_penugasan_kelompok" class="form-control">
                             <?php 
                             $opsi_kel = ["Tim", "Kepanitiaan", "Lainnya"];
                             foreach ($opsi_kel as $o) {
@@ -1407,173 +1422,89 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                         </select>
                     </div>
                     <div class="form-group" id="lainnya_kelompok_box" style="<?= (isset($surat['jenis_penugasan_kelompok']) && $surat['jenis_penugasan_kelompok'] == 'Lainnya') ? '' : 'display:none;'; ?>">
-                        <label class="required-field">Isi Penugasan Lainnya</label>
-                        <input type="text" name="penugasan_lainnya_kelompok" class="form-control" value="<?= htmlspecialchars($surat['penugasan_lainnya_kelompok'] ?? ''); ?>" required>
+                        <label>Isi Penugasan Lainnya</label>
+                        <input type="text" name="penugasan_lainnya_kelompok" class="form-control" value="<?= htmlspecialchars($surat['penugasan_lainnya_kelompok'] ?? ''); ?>">
                     </div>
                 </div>
             </div>
 
-            <!-- Dosen Terkait Section -->
-            <div class="form-section">
-                <h5><i class="fas fa-users"></i> Dosen Terkait</h5>
-                
-                <div class="table-responsive">
-                    <table class="table-dosen">
-                        <thead>
-                            <tr>
-                                <th>NIP <small class="required-field">*</small></th>
-                                <th>Nama Dosen <small class="required-field">*</small></th>
-                                <th>Jabatan</th>
-                                <th>Prodi/Unit</th>
-                                <th class="peran-column" style="<?= (isset($surat['jenis_pengajuan']) && $surat['jenis_pengajuan'] == 'Kelompok') ? '' : 'display:none;' ?>">Peran</th>
-                                <th class="aksi-cell">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dosenTableBody">
-                            <?php if (!empty($dosen_data) && is_array($dosen_data)): ?>
-                                <?php foreach ($dosen_data as $index => $dosen): ?>
-                                    <?php
-                                    // Handle berbagai format data dosen
-                                    $nip = '';
-                                    $nama_dosen = '';
-                                    $jabatan_value = '';
-                                    $divisi = '';
-                                    $peran_value = '';
-                                    
-                                    // Cek format data
-                                    if (is_array($dosen)) {
-                                        // Format array asosiatif
-                                        $nip = isset($dosen['nip']) ? $dosen['nip'] : '';
-                                        $nama_dosen = isset($dosen['nama_dosen']) ? $dosen['nama_dosen'] : 
-                                                     (isset($dosen['nama']) ? $dosen['nama'] : '');
-                                        $jabatan_value = isset($dosen['jabatan']) ? $dosen['jabatan'] : '';
-                                        $divisi = isset($dosen['divisi']) ? $dosen['divisi'] : 
-                                                 (isset($dosen['prodi']) ? $dosen['prodi'] : '');
-                                        $peran_value = isset($dosen['peran']) ? $dosen['peran'] : '';
-                                        
-                                        // Jika format data dalam array numerik
-                                        if (empty($nama_dosen) && isset($dosen[0])) {
-                                            $nip = isset($dosen[0]) ? $dosen[0] : '';
-                                            $nama_dosen = isset($dosen[1]) ? $dosen[1] : '';
-                                            $jabatan_value = isset($dosen[2]) ? $dosen[2] : '';
-                                            $divisi = isset($dosen[3]) ? $dosen[3] : '';
-                                            $peran_value = isset($dosen[4]) ? $dosen[4] : '';
-                                        }
-                                    }
-                                    
-                                    // Decode peran jika dalam format JSON
-                                    if (!empty($peran_value) && $peran_value !== '-') {
-                                        if (strpos($peran_value, '{') === 0) {
-                                            $decoded = json_decode($peran_value, true);
-                                            if (is_array($decoded) && isset($decoded['jabatan'])) {
-                                                $jabatan_value = $decoded['jabatan'];
-                                                $peran_value = isset($decoded['peran']) ? $decoded['peran'] : '-';
-                                            }
-                                        }
-                                    }
-                                    ?>
-                                    <tr class="dosen-row" data-index="<?= $index ?>">
-                                        <td>
-                                            <input type="text" 
-                                                   name="nip[]" 
-                                                   value="<?= htmlspecialchars($nip) ?>" 
-                                                   class="form-control form-control-sm nip-input" 
-                                                   data-index="<?= $index ?>"
-                                                   placeholder="Ketik NIP"
-                                                   required>
-                                        </td>
-                                        <td>
-                                            <input type="text" 
-                                                   name="nama_dosen[]" 
-                                                   value="<?= htmlspecialchars($nama_dosen) ?>" 
-                                                   class="form-control form-control-sm nama-dosen-input" 
-                                                   placeholder="Ketik Nama Dosen"
-                                                   required>
-                                        </td>
-                                        <td>
-                                            <input type="text" 
-                                                   name="jabatan[]" 
-                                                   value="<?= htmlspecialchars($jabatan_value) ?>" 
-                                                   class="form-control form-control-sm jabatan-input" 
-                                                   placeholder="Contoh: Lektor">
-                                        </td>
-                                        <td>
-                                            <input type="text" 
-                                                   name="divisi[]" 
-                                                   value="<?= htmlspecialchars($divisi) ?>" 
-                                                   class="form-control form-control-sm divisi-input" 
-                                                   placeholder="Contoh: DI">
-                                        </td>
-                                        <td>
-                                            <input type="text" 
-                                                   name="peran[]" 
-                                                   value="<?= htmlspecialchars($peran_value) ?>" 
-                                                   class="form-control form-control-sm peran-input" 
-                                                   placeholder="Contoh: Ketua Tim">
-                                        </td>
-                                        <td class="aksi-cell">
-                                            <?php if($index == 0): ?>
-                                                <button type="button" class="btn-tambah" onclick="addDosenRow()" title="Tambah Dosen">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
-                                            <?php else: ?>
-                                                <button type="button" class="btn-hapus" onclick="removeDosen(this)" title="Hapus Dosen">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr class="dosen-row" data-index="0">
-                                    <td>
-                                        <input type="text" 
-                                               name="nip[]" 
-                                               class="form-control form-control-sm nip-input" 
-                                               data-index="0"
-                                               placeholder="Ketik NIP"
-                                               required>
-                                    </td>
-                                    <td>
-                                        <input type="text" 
-                                               name="nama_dosen[]" 
-                                               class="form-control form-control-sm nama-dosen-input" 
-                                               placeholder="Ketik Nama Dosen"
-                                               required>
-                                    </td>
-                                    <td>
-                                        <input type="text" 
-                                               name="jabatan[]" 
-                                               class="form-control form-control-sm jabatan-input" 
-                                               placeholder="Contoh: Lektor">
-                                    </td>
-                                    <td>
-                                        <input type="text" 
-                                               name="divisi[]" 
-                                               class="form-control form-control-sm divisi-input" 
-                                               placeholder="Contoh: DI">
-                                    </td>
-                                    <td>
-                                        <input type="text" 
-                                               name="peran[]" 
-                                               class="form-control form-control-sm peran-input" 
-                                               placeholder="Contoh: Ketua Tim">
-                                    </td>
-                                    <td class="aksi-cell">
-                                        <button type="button" class="btn-tambah" onclick="addDosenRow()" title="Tambah Dosen">
-                                            <i class="fas fa-plus"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <button type="button" class="btn-add-dosen" onclick="addDosenRow()">
-                    <i class="fas fa-plus"></i> Tambah Dosen
-                </button>
-            </div>
+            <!-- Ubah bagian tabel dosen menjadi: -->
+<div class="form-section">
+    <h5><i class="fas fa-users"></i> Dosen Terkait</h5>
+    
+    <div class="table-responsive">
+        <table class="table-dosen">
+            <thead>
+                <tr>
+                    <th>NIP</th>
+                    <th>Nama Dosen</th>
+                    <th>Jabatan</th>
+                    <th>Prodi/Unit</th>
+                    <th>Peran</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="dosenTableBody">
+                <?php if (!empty($dosen_data)): ?>
+                    <?php foreach ($dosen_data as $index => $dosen): ?>
+                        <tr class="dosen-row" data-index="<?= $index ?>">
+                            <td>
+                                <input type="text" 
+                                       name="nip[]" 
+                                       value="<?= htmlspecialchars($dosen['nip']) ?>" 
+                                       class="form-control form-control-sm nip-input" 
+                                       data-index="<?= $index ?>"
+                                       placeholder="Ketik NIP"
+                                       required>
+                            </td>
+                            <td>
+                                <input type="text" 
+                                       name="nama_dosen[]" 
+                                       value="<?= htmlspecialchars($dosen['nama']) ?>" 
+                                       class="form-control form-control-sm nama-dosen-input" 
+                                       placeholder="Ketik Nama Dosen">
+                            </td>
+                            <td>
+                                <input type="text" 
+                                       name="jabatan[]" 
+                                       value="<?= htmlspecialchars($dosen['jabatan']) ?>" 
+                                       class="form-control form-control-sm jabatan-input" 
+                                       placeholder="Contoh: Lektor">
+                            </td>
+                            <td>
+                                <input type="text" 
+                                       name="divisi[]" 
+                                       value="<?= htmlspecialchars($dosen['divisi']) ?>" 
+                                       class="form-control form-control-sm divisi-input" 
+                                       placeholder="Contoh: DI">
+                            </td>
+                            <td>
+                                <input type="text" 
+                                       name="peran[]" 
+                                       value="<?= htmlspecialchars($dosen['peran']) ?>" 
+                                       class="form-control form-control-sm peran-input" 
+                                       placeholder="Contoh: Ketua Tim">
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm btn-remove-dosen" onclick="removeDosen(this)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Belum ada dosen terkait</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+    
+    <button type="button" class="btn-add-dosen" onclick="addDosenRow()">
+        <i class="fas fa-plus"></i> Tambah Dosen
+    </button>
+</div>
 
             <!-- File Eviden -->
             <div class="form-section">
@@ -1638,14 +1569,14 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                         
                         <!-- Uploaded Files Preview -->
                         <div id="uploadedFilesPreview" class="uploaded-files-preview">
-                            <h6 style="color: #FF8C00; margin-bottom: 15px; font-size: 14px;">
+                            <h6 style="color: #16A085; margin-bottom: 15px; font-size: 14px;">
                                 <i class="fas fa-list"></i> File yang akan diupload
                             </h6>
                             <div id="filesList"></div>
                         </div>
                         
                         <div style="text-align: center; margin-top: 15px;">
-                            <a href="#" id="showFilesLink" style="color: #FF8C00; text-decoration: none; font-weight: 600;">
+                            <a href="#" id="showFilesLink" style="color: #16A085; text-decoration: none; font-weight: 600;">
                                 <i class="fas fa-eye"></i> Show files
                             </a>
                             <div id="fileCounter" style="color: #6c757d; font-size: 13px; margin-top: 5px;">
@@ -1748,9 +1679,47 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                             endforeach;
                         else:
                             ?>
-                            <div class="text-center text-muted py-4">
-                                <i class="fas fa-file fa-3x mb-3" style="color: #6c757d;"></i>
-                                <p>Belum ada file yang diupload.</p>
+                            <div class="existing-file-item">
+                                <div class="file-icon">
+                                    <i class="fas fa-file"></i>
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        46s406206fef8acdf19b7aa56703d2ff.png
+                                    </div>
+                                    <div class="file-size">0.01 MB</div>
+                                </div>
+                                <div class="file-actions">
+                                    <button type="button" class="btn-view-file" data-src="#" data-type="png">
+                                        <i class="fas fa-eye"></i> Lihat
+                                    </button>
+                                    <button type="button" class="btn-delete-existing" onclick="deleteExistingFile(0, '46s406206fef8acdf19b7aa56703d2ff.png')">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </div>
+                                <input type="hidden" name="existing_eviden[]" value="46s406206fef8acdf19b7aa56703d2ff.png" class="existing-file-input">
+                                <input type="hidden" name="delete_eviden[]" value="" class="delete-flag">
+                            </div>
+                            <div class="existing-file-item">
+                                <div class="file-icon">
+                                    <i class="fas fa-file"></i>
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name">
+                                        197a6da58dcb4a0787cd2444c8ccdebf.png
+                                    </div>
+                                    <div class="file-size">0.01 MB</div>
+                                </div>
+                                <div class="file-actions">
+                                    <button type="button" class="btn-view-file" data-src="#" data-type="png">
+                                        <i class="fas fa-eye"></i> Lihat
+                                    </button>
+                                    <button type="button" class="btn-delete-existing" onclick="deleteExistingFile(1, '197a6da58dcb4a0787cd2444c8ccdebf.png')">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </div>
+                                <input type="hidden" name="existing_eviden[]" value="197a6da58dcb4a0787cd2444c8ccdebf.png" class="existing-file-input">
+                                <input type="hidden" name="delete_eviden[]" value="" class="delete-flag">
                             </div>
                         <?php endif; ?>
                     </div>
@@ -1763,8 +1732,8 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                     <button type="submit" class="btn btn-success" id="submitBtn">
                         <i class="fas fa-save"></i> Simpan Perubahan
                     </button>
-                    <a href="<?= base_url('surat') ?>" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Kembali ke List Surat
+                    <a href="<?= base_url('sekretariat') ?>" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
                     </a>
                 </div>
             </div>
@@ -1811,6 +1780,7 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             let uploadedFiles = [];
             let totalFiles = 0;
             let uploadedCount = 0;
+            let isProcessing = false; // Flag untuk mencegah duplikasi
 
             // Click on upload area
             uploadArea.addEventListener('click', function() {
@@ -1823,9 +1793,25 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 fileInput.click();
             });
             
+
             // File input change
             fileInput.addEventListener('change', function(e) {
-                handleFiles(e.target.files);
+                if (isProcessing) return;
+                isProcessing = true;
+                
+                const files = Array.from(e.target.files);
+                handleFiles(files);
+                
+                // Reset input untuk memungkinkan upload file yang sama lagi
+                setTimeout(() => {
+                    fileInput.value = '';
+                    isProcessing = false;
+                }, 100);
+            });
+
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
             });
             
             // Drag and drop functionality
@@ -2012,79 +1998,96 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 }, 200);
             }
             
-            // Add files to form as actual file inputs
-            function addFilesToForm() {
-                // Clear existing new file inputs
-                newFilesContainer.innerHTML = '';
+              // Add files to form as actual file inputs
+function addFilesToForm() {
+    // Clear existing new file inputs
+    newFilesContainer.innerHTML = '';
+    newFilesContainer.classList.remove('show');
+    hiddenFilesContainer.innerHTML = '';
+    
+    // Create a new input for each uploaded file
+    uploadedFiles.forEach((file, index) => {
+        // Create wrapper for display
+        const wrapper = document.createElement('div');
+        wrapper.className = 'new-file-input-wrapper new-file-item'; // Tambahkan class new-file-item
+        wrapper.id = `file-wrapper-${index}`;
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control';
+        input.value = file.name;
+        input.readOnly = true;
+        input.style.borderLeft = '4px solid #4caf50'; // Tambahkan border kiri hijau
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-remove-new-file';
+        removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+        removeBtn.title = 'Hapus file';
+        
+        // Create hidden file input for form submission
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.name = 'new_eviden[]';
+        fileInput.style.display = 'none';
+        fileInput.id = `hidden-file-${index}`;
+        
+        // Store the file in a data attribute
+        fileInput.dataset.fileName = file.name;
+        fileInput.dataset.fileSize = file.size;
+        fileInput.dataset.fileType = file.type;
+        
+        // Add event listener to remove button
+        removeBtn.addEventListener('click', function() {
+            // Remove from displayed list
+            wrapper.remove();
+            
+            // Remove from hidden inputs
+            const hiddenInput = document.getElementById(`hidden-file-${index}`);
+            if (hiddenInput) hiddenInput.remove();
+            
+            // Update counter
+            fileCounterNumber--;
+            fileCounter.textContent = `Anda memilih ${fileCounterNumber} file${fileCounterNumber !== 1 ? 's' : ''}.`;
+            
+            // Remove from uploadedFiles array
+            uploadedFiles = uploadedFiles.filter(f => f !== file);
+            
+            // If no more files, hide the container
+            if (newFilesContainer.children.length === 0) {
                 newFilesContainer.classList.remove('show');
-                hiddenFilesContainer.innerHTML = '';
-                
-                // Create a new input for each uploaded file
-                uploadedFiles.forEach((file, index) => {
-                    // Create wrapper for display
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'new-file-input-wrapper';
-                    wrapper.id = `file-wrapper-${index}`;
-                    
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'form-control';
-                    input.value = file.name;
-                    input.readOnly = true;
-                    
-                    const removeBtn = document.createElement('button');
-                    removeBtn.type = 'button';
-                    removeBtn.className = 'btn-remove-new-file';
-                    removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
-                    removeBtn.title = 'Hapus file';
-                    
-                    // Create hidden file input for form submission
-                    const fileInput = document.createElement('input');
-                    fileInput.type = 'file';
-                    fileInput.name = 'new_eviden[]';
-                    fileInput.style.display = 'none';
-                    fileInput.id = `hidden-file-${index}`;
-                    
-                    // Store the file in a data attribute
-                    fileInput.dataset.fileName = file.name;
-                    fileInput.dataset.fileSize = file.size;
-                    fileInput.dataset.fileType = file.type;
-                    
-                    // Add event listener to remove button
-                    removeBtn.addEventListener('click', function() {
-                        // Remove from displayed list
-                        wrapper.remove();
-                        
-                        // Remove from hidden inputs
-                        const hiddenInput = document.getElementById(`hidden-file-${index}`);
-                        if (hiddenInput) hiddenInput.remove();
-                        
-                        // Update counter
-                        fileCounterNumber--;
-                        fileCounter.textContent = `You've chosen ${fileCounterNumber} file${fileCounterNumber !== 1 ? 's' : ''}.`;
-                        
-                        // Remove from uploadedFiles array
-                        uploadedFiles = uploadedFiles.filter(f => f !== file);
-                        
-                        // If no more files, hide the container
-                        if (newFilesContainer.children.length === 0) {
-                            newFilesContainer.classList.remove('show');
-                        }
-                    });
-                    
-                    wrapper.appendChild(input);
-                    wrapper.appendChild(removeBtn);
-                    newFilesContainer.appendChild(wrapper);
-                    hiddenFilesContainer.appendChild(fileInput);
-                });
-                
-                // Show the container
-                if (uploadedFiles.length > 0) {
-                    newFilesContainer.classList.add('show');
-                }
-                
-                console.log('Files ready for upload:', uploadedFiles);
             }
+        });
+        
+        wrapper.appendChild(input);
+        wrapper.appendChild(removeBtn);
+        newFilesContainer.appendChild(wrapper);
+        hiddenFilesContainer.appendChild(fileInput);
+    });
+    
+    // Show the container
+    if (uploadedFiles.length > 0) {
+        newFilesContainer.classList.add('show');
+        
+        // Tambahkan pesan bahwa file baru akan ditambahkan
+        const infoMessage = document.createElement('div');
+        infoMessage.className = 'info-alert';
+        infoMessage.style.marginTop = '10px';
+        infoMessage.style.background = '#e8f5e9';
+        infoMessage.style.borderColor = '#4caf50';
+         infoMessage.innerHTML = `
+            <i class="fas fa-info-circle" style="color: #4caf50;"></i>
+            <span><strong>${uploadedFiles.length} file baru akan ditambahkan setelah disimpan.</strong> File baru ditandai dengan warna hijau.</span>
+        `;
+    }
+    
+    console.log('Files ready for upload:', uploadedFiles);
+    setTimeout(() => {
+        if (window.updateFormButtonState) {
+            window.updateFormButtonState();
+        }
+    }, 500);
+}
             
             // Show files link
             showFilesLink.addEventListener('click', function(e) {
@@ -2124,33 +2127,17 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             });
         });
 
-        // ===== AUTOCOMPLETE FUNCTIONALITY SAMA SEPERTI STEP 1 =====
+        // ===== AUTOCOMPLETE FUNCTIONALITY =====
         const BASE_URL = '<?= rtrim(base_url(), "/") ?>';
         let currentAutocompleteBox = null;
         let currentKeydownHandler = null;
         let currentClickHandler = null;
         let currentInputElement = null;
-        let currentAutocompleteItems = [];
-        let isSelectingAutocomplete = false;
-
-        // Mock data untuk testing - SAMA SEPERTI STEP 1
-        const mockData = [
-            { nip: '17770081', nama_dosen: 'Dr. Moh Isa Pramana Koesoemadinata, S.Sn, M.Sn.', jabatan: 'Dosen', divisi: 'DKV'},
-            { nip: '14800004', nama_dosen: 'Bijaksana Prabawa, S.Ds., M.M.', jabatan: 'Dosen', divisi: 'DKV'},
-            { nip: '14810009', nama_dosen: 'Dr. Ira Wirasari, S.Sos., M.Ds.', jabatan: 'Dosen', divisi: 'DKV' },
-            { nip: '19860001', nama_dosen: 'Mahendra Nur Hadiansyah, S.T., M.Ds.', jabatan: 'Dosen', divisi: 'DI'},
-            { nip: '19850010', nama_dosen: 'Diena Yudiarti, S.Ds., M.S.M.', jabatan: 'Dosen', divisi: 'DKV'},
-            { nip: '20940012', nama_dosen: 'Ganesha Puspa Nabila, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DI'},
-            { nip: '20950008', nama_dosen: 'Hana Faza Surya Rusyda, ST., M.Ars.', jabatan: 'Dosen', divisi: 'DI'},
-            { nip: '20920049', nama_dosen: 'Angelia Lionardi, S.Sn., M.Ds.', jabatan: 'Dosen', divisi: 'DKV'},
-            { nip: '15870029', nama_dosen: 'Ica Ramawisari, S.T., M.T.', jabatan: 'Dosen', divisi: 'DP' },
-            { nip: '82196019', nama_dosen: 'Alisa Rahadiasmurti Isfandiari, S.A.B., M.M.', jabatan: 'Dosen', divisi: 'Admin KK'  }
-        ];
 
         // Debounce function
         function debounce(fn, delay = 300) {
             let timeout;
-            return function (...args) {
+            return function(...args) {
                 clearTimeout(timeout);
                 timeout = setTimeout(() => fn.apply(this, args), delay);
             };
@@ -2179,99 +2166,42 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                 currentClickHandler = null;
             }
             currentInputElement = null;
-            currentAutocompleteItems = [];
         }
 
-        // Fetch suggestions - SAMA SEPERTI STEP 1
+        // Fetch suggestions from database
         async function fetchSuggestions(query, fieldType = 'nip') {
             if (!query) return [];
-            
+
             try {
-                if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
-                    return [];
+                const response = await fetch(`${BASE_URL}/sekretariat/autocomplete_nip?q=${encodeURIComponent(query)}&field=${fieldType}`);
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
                 }
-                
-                // Coba dari API dulu
-                try {
-                    const response = await fetch(`${BASE_URL}/surat/autocomplete_nip?q=${encodeURIComponent(query)}&field=${fieldType}`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (Array.isArray(data) && data.length > 0) {
-                            return data;
-                        }
-                    }
-                } catch (apiError) {
-                    console.log('API error, menggunakan mock data:', apiError);
-                }
-                
-                // Fallback ke mock data
-                await new Promise(resolve => setTimeout(resolve, 150));
-                const lowerQuery = query.toLowerCase();
-                return mockData.filter(item => {
-                    const searchIn = item[fieldType] ? item[fieldType].toLowerCase() : '';
-                    return searchIn.includes(lowerQuery);
-                });
+
+                const data = await response.json();
+                return Array.isArray(data) ? data : [];
             } catch (error) {
                 console.error('Autocomplete error:', error);
                 return [];
             }
         }
 
-        // Fungsi untuk memilih opsi autocomplete - SAMA SEPERTI STEP 1
-        function selectAutocompleteItem(item, inputElement, onSelect) {
-            if (!item) return;
-            
-            isSelectingAutocomplete = true;
-            
-            const fieldType = inputElement.classList.contains('nip-input') ? 'nip' : 'nama_dosen';
-            if (fieldType === 'nip') {
-                inputElement.value = item.nip || '';
-            } else {
-                inputElement.value = item.nama_dosen || '';
-            }
-            
-            if (typeof onSelect === 'function') {
-                onSelect(item);
-            }
-            
-            removeAutocompleteBox();
-            
-            setTimeout(() => {
-                isSelectingAutocomplete = false;
-            }, 300);
-            
-            setTimeout(() => {
-                if (fieldType === 'nip') {
-                    const row = inputElement.closest('.dosen-row');
-                    if (row) {
-                        const nextInput = row.querySelector('.nama-dosen-input');
-                        if (nextInput) nextInput.focus();
-                    }
-                }
-            }, 50);
-        }
-
-        // Show suggestion box - SAMA SEPERTI STEP 1
+        // Show suggestion box
         function showSuggestionBox(inputEl, items, onSelect, fieldType) {
             removeAutocompleteBox();
-
-            if (fieldType !== 'nip' && fieldType !== 'nama_dosen') {
-                return;
-            }
 
             const rect = inputEl.getBoundingClientRect();
             const box = document.createElement('div');
             box.className = 'autocomplete-box-fixed';
             box.style.left = rect.left + 'px';
             box.style.top = (rect.bottom + 4) + 'px';
-            box.style.width = Math.max(rect.width, 350) + 'px';
-            box.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-            box.style.border = '1px solid #dadce0';
+            box.style.width = Math.max(rect.width, 300) + 'px';
 
             if (!items || !items.length) {
                 const empty = document.createElement('div');
                 empty.className = 'autocomplete-empty';
-                empty.innerHTML = '<i class="fas fa-search" style="margin-right: 8px; opacity: 0.6;"></i>Tidak ada data ditemukan';
+                empty.textContent = 'Tidak ada data ditemukan';
                 box.appendChild(empty);
                 document.body.appendChild(box);
                 currentAutocompleteBox = box;
@@ -2282,28 +2212,14 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
 
             const query = inputEl.value.trim();
             let selectedIndex = -1;
-            currentAutocompleteItems = items;
-
-            // Add header
-            const header = document.createElement('div');
-            header.style.padding = '12px 16px';
-            header.style.fontSize = '13px';
-            header.style.color = '#5f6368';
-            header.style.fontWeight = '600';
-            header.style.borderBottom = '1px solid #f0f0f0';
-            header.style.backgroundColor = '#f8f9fa';
-            header.textContent = fieldType === 'nip' ? 'Hasil pencarian NIP' : 'Hasil pencarian Nama';
-            box.appendChild(header);
 
             items.forEach((item, idx) => {
                 const option = document.createElement('div');
                 option.className = `autocomplete-item type-${fieldType}`;
-                option.dataset.index = idx;
-                
-                let primaryText = '';
-                let secondaryText = '';
-                
-                switch(fieldType) {
+
+                let primaryText, secondaryText;
+
+                switch (fieldType) {
                     case 'nip':
                         primaryText = highlightMatch(item.nip, query);
                         secondaryText = item.nama_dosen;
@@ -2312,15 +2228,23 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                         primaryText = highlightMatch(item.nama_dosen, query);
                         secondaryText = `NIP: ${item.nip}`;
                         break;
-                    default:
-                        primaryText = item[fieldType] || '-';
+                    case 'jabatan':
+                        primaryText = highlightMatch(item.jabatan, query);
                         secondaryText = `${item.nama_dosen} (${item.nip})`;
+                        break;
+                    case 'divisi':
+                        primaryText = highlightMatch(item.divisi, query);
+                        secondaryText = `${item.nama_dosen} (${item.nip})`;
+                        break;
+                    default:
+                        primaryText = highlightMatch(item.nip, query);
+                        secondaryText = item.nama_dosen;
                 }
 
                 option.innerHTML = `
                     <div class="autocomplete-icon">
                         <svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#FF8C00"></path>
+                            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
                         </svg>
                     </div>
                     <div class="autocomplete-content">
@@ -2328,28 +2252,13 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                         ${secondaryText ? '<div class="item-secondary">' + secondaryText + '</div>' : ''}
                     </div>
                 `;
-                
-                option.addEventListener('mousedown', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    selectAutocompleteItem(item, inputEl, onSelect);
-                });
-                
+
                 option.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    onSelect(item);
+                    removeAutocompleteBox();
                 });
-                
-                option.addEventListener('mouseenter', () => {
-                    box.querySelectorAll('.autocomplete-item').forEach(el => {
-                        el.classList.remove('autocomplete-item-active');
-                    });
-                    option.classList.add('autocomplete-item-active');
-                });
-                
-                option.addEventListener('mouseleave', () => {
-                    option.classList.remove('autocomplete-item-active');
-                });
-                
+
                 box.appendChild(option);
             });
 
@@ -2360,123 +2269,75 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             // Keyboard navigation
             currentKeydownHandler = function(e) {
                 if (!currentAutocompleteBox) return;
-                
+
                 const opts = currentAutocompleteBox.querySelectorAll('.autocomplete-item');
                 if (!opts.length) return;
 
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     selectedIndex = Math.min(selectedIndex + 1, opts.length - 1);
-                    
-                    opts.forEach(o => o.classList.remove('autocomplete-item-active'));
-                    
+                    opts.forEach((o, i) => o.classList.toggle('active', i === selectedIndex));
                     if (opts[selectedIndex]) {
-                        opts[selectedIndex].classList.add('autocomplete-item-active');
-                        opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+                        opts[selectedIndex].scrollIntoView({
+                            block: 'nearest'
+                        });
                     }
                 } else if (e.key === 'ArrowUp') {
                     e.preventDefault();
                     selectedIndex = Math.max(selectedIndex - 1, 0);
-                    
-                    opts.forEach(o => o.classList.remove('autocomplete-item-active'));
-                    
+                    opts.forEach((o, i) => o.classList.toggle('active', i === selectedIndex));
                     if (opts[selectedIndex]) {
-                        opts[selectedIndex].classList.add('autocomplete-item-active');
-                        opts[selectedIndex].scrollIntoView({ block: 'nearest' });
+                        opts[selectedIndex].scrollIntoView({
+                            block: 'nearest'
+                        });
                     }
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
-                    if (selectedIndex >= 0 && opts[selectedIndex] && currentAutocompleteItems[selectedIndex]) {
-                        selectAutocompleteItem(currentAutocompleteItems[selectedIndex], inputEl, onSelect);
-                    } else if (opts.length > 0 && currentAutocompleteItems[0]) {
-                        selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
+                    if (selectedIndex >= 0 && opts[selectedIndex]) {
+                        opts[selectedIndex].click();
                     }
                 } else if (e.key === 'Escape') {
                     removeAutocompleteBox();
-                } else if (e.key === 'Tab') {
-                    e.preventDefault();
-                    if (currentAutocompleteItems.length > 0) {
-                        selectAutocompleteItem(currentAutocompleteItems[0], inputEl, onSelect);
-                    } else {
-                        removeAutocompleteBox();
-                    }
                 }
             };
-            
+
             document.addEventListener('keydown', currentKeydownHandler);
 
+            // Close on outside click
             currentClickHandler = function(ev) {
                 if (currentAutocompleteBox && !currentAutocompleteBox.contains(ev.target) && ev.target !== currentInputElement) {
-                    if (!isSelectingAutocomplete) {
-                        removeAutocompleteBox();
-                    }
+                    removeAutocompleteBox();
                 }
             };
             document.addEventListener('click', currentClickHandler);
-            
-            if (items.length > 0) {
-                setTimeout(() => {
-                    const firstOption = box.querySelector('.autocomplete-item');
-                    if (firstOption) {
-                        firstOption.classList.add('autocomplete-item-active');
-                        selectedIndex = 0;
-                    }
-                }, 10);
-            }
         }
 
-        // Initialize autocomplete for a row - SAMA SEPERTI STEP 1
+        // Initialize autocomplete for a row
         function initAutocompleteForRow(rowEl) {
-            if (!rowEl) {
-                console.error('Row element tidak valid');
-                return;
-            }
-            
-            delete rowEl.dataset.autocompleteInitialized;
-
             const inputNip = rowEl.querySelector('.nip-input');
             const inputNama = rowEl.querySelector('.nama-dosen-input');
             const inputJabatan = rowEl.querySelector('.jabatan-input');
             const inputDivisi = rowEl.querySelector('.divisi-input');
-            const inputPeran = rowEl.querySelector('.peran-input');
 
-            if (!inputNip || !inputNama) {
+            if (!inputNip || !inputNama || !inputJabatan || !inputDivisi) {
                 return;
             }
 
+            // Fill all fields when item is selected
             function fillRowWith(item) {
                 if (!item) return;
-                
+
                 inputNip.value = item.nip || '';
                 inputNama.value = item.nama_dosen || '';
-                
-                if (inputJabatan) inputJabatan.value = item.jabatan || '';
-                if (inputDivisi) inputDivisi.value = item.divisi || '';
-                
-                const jenisPengajuan = document.getElementById('jenis_pengajuan');
-                if (jenisPengajuan && jenisPengajuan.value === 'Kelompok' && inputPeran) {
-                    inputPeran.value = item.peran || '';
-                }
-                
-                inputNip.dispatchEvent(new Event('input', { bubbles: true }));
-                inputNama.dispatchEvent(new Event('input', { bubbles: true }));
-                if (inputJabatan) inputJabatan.dispatchEvent(new Event('input', { bubbles: true }));
-                if (inputDivisi) inputDivisi.dispatchEvent(new Event('input', { bubbles: true }));
-                if (jenisPengajuan && jenisPengajuan.value === 'Kelompok' && inputPeran) {
-                    inputPeran.dispatchEvent(new Event('input', { bubbles: true }));
-                }
+                inputJabatan.value = item.jabatan || '';
+                inputDivisi.value = item.divisi || '';
             }
 
+            // Create autocomplete handlers for each field
             function createAutocompleteHandler(fieldType, inputElement) {
-                if (fieldType !== 'nip' && fieldType !== 'nama_dosen') return;
-
                 const handler = debounce(async function() {
-                    if (isSelectingAutocomplete) {
-                        return;
-                    }
-                    
                     const val = this.value.trim();
-                    
+
                     if (val.length < 2 || document.activeElement !== this) {
                         removeAutocompleteBox();
                         return;
@@ -2484,82 +2345,101 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
 
                     const suggestions = await fetchSuggestions(val, fieldType);
                     showSuggestionBox(inputElement, suggestions, fillRowWith, fieldType);
-                }, 250);
+                }, 300);
 
+                // Remove old event listener if exists
                 if (inputElement._currentHandler) {
                     inputElement.removeEventListener('input', inputElement._currentHandler);
                 }
-                
+
+                // Save reference to new handler
                 inputElement._currentHandler = handler;
+                // Attach new event listener
                 inputElement.addEventListener('input', handler);
+
+                // Focus handlers
+                inputElement.addEventListener('focus', () => {
+                    removeAutocompleteBox();
+                });
+
+                inputElement.addEventListener('blur', () => {
+                    setTimeout(() => {
+                        if (document.activeElement !== inputElement &&
+                            (!currentAutocompleteBox || !currentAutocompleteBox.contains(document.activeElement))) {
+                            removeAutocompleteBox();
+                        }
+                    }, 150);
+                });
             }
 
+            // Initialize autocomplete for all fields
             createAutocompleteHandler('nip', inputNip);
             createAutocompleteHandler('nama_dosen', inputNama);
-            
-            const inputs = [inputNip, inputNama];
-            
-            inputs.forEach(input => {
-                input.addEventListener('focus', () => {
-                    const val = input.value.trim();
-                    if (val.length >= 2) {
-                        setTimeout(() => {
-                            if (document.activeElement === input && !isSelectingAutocomplete) {
-                                const event = new Event('input', { bubbles: true });
-                                input.dispatchEvent(event);
-                            }
-                        }, 100);
-                    }
-                });
-                
-                input.addEventListener('blur', () => {
-                    if (!isSelectingAutocomplete) {
-                        setTimeout(() => {
-                            removeAutocompleteBox();
-                        }, 150);
-                    }
-                });
-            });
-
-            rowEl.dataset.autocompleteInitialized = 'true';
+            createAutocompleteHandler('jabatan', inputJabatan);
+            createAutocompleteHandler('divisi', inputDivisi);
         }
 
         // ===== DOSEN FUNCTIONS =====
         function addDosenRow() {
             const tbody = document.getElementById('dosenTableBody');
-            const originalRow = document.querySelector('.dosen-row');
-            const newRow = originalRow.cloneNode(true);
             const index = tbody.querySelectorAll('tr.dosen-row').length;
             
-            newRow.dataset.index = index;
-            
-            // Reset semua input
-            newRow.querySelectorAll('input').forEach(input => {
-                input.value = '';
-            });
-            
-            // Update button aksi
-            const aksiCell = newRow.querySelector('.aksi-cell');
-            if (aksiCell) {
-                aksiCell.innerHTML = '';
-                
-                // Buat tombol hapus untuk baris baru
-                const hapusBtn = document.createElement('button');
-                hapusBtn.type = 'button';
-                hapusBtn.className = 'btn-hapus';
-                hapusBtn.setAttribute('title', 'Hapus Dosen');
-                hapusBtn.innerHTML = '<i class="fas fa-trash"></i>';
-                hapusBtn.onclick = function() { removeDosen(this); };
-                
-                aksiCell.appendChild(hapusBtn);
+            const emptyRow = tbody.querySelector('tr td[colspan="6"]');
+            if (emptyRow) {
+                emptyRow.closest('tr').remove();
             }
+            
+            const newRow = document.createElement('tr');
+            newRow.className = 'dosen-row';
+            newRow.dataset.index = index;
+            newRow.innerHTML = `
+                <td>
+                    <input type="text" 
+                           name="nip[]" 
+                           class="form-control form-control-sm nip-input" 
+                           data-index="${index}"
+                           placeholder="Ketik NIP"
+                           required
+                           style="border: 2px solid #16A085; background: #e8f6f3;">
+                </td>
+                <td>
+                    <input type="text" 
+                           name="nama_dosen[]" 
+                           class="form-control form-control-sm nama-dosen-input" 
+                           placeholder="Ketik Nama Dosen"
+                           style="border: 2px solid #16A085; background: #e8f6f3;">
+                </td>
+                <td>
+                    <input type="text" 
+                           name="jabatan[]" 
+                           class="form-control form-control-sm jabatan-input" 
+                           placeholder="Contoh: Lektor"
+                           style="border: 2px solid #16A085; background: #e8f6f3;">
+                </td>
+                <td>
+                    <input type="text" 
+                           name="divisi[]" 
+                           class="form-control form-control-sm divisi-input" 
+                           placeholder="Contoh: DI"
+                           style="border: 2px solid #16A085; background: #e8f6f3;">
+                </td>
+                <td>
+                    <input type="text" 
+                           name="peran[]" 
+                           class="form-control form-control-sm peran-input" 
+                           placeholder="Contoh: Ketua Tim"
+                           style="border: 2px solid #16A085; background: #e8f6f3;">
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger btn-sm btn-remove-dosen" onclick="removeDosen(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
             
             tbody.appendChild(newRow);
             
-            // Update kolom peran untuk row baru
-            updateKolomPeranForRow(newRow);
-            
-            // Inisialisasi autocomplete untuk row baru
+            // Initialize autocomplete for the new row
             setTimeout(() => {
                 initAutocompleteForRow(newRow);
                 
@@ -2571,69 +2451,35 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
                     newRow.style.opacity = '1';
                     newRow.style.transform = 'translateY(0)';
                 }, 10);
-            }, 100);
-            
-            // Update button visibility
-            updateButtonVisibility();
+            }, 10);
+            setTimeout(() => {
+        if (window.updateFormButtonState) {
+            window.updateFormButtonState();
+        }
+    }, 500);
         }
 
         function removeDosen(button) {
-            const row = button.closest('.dosen-row');
+            const row = button.closest('tr');
             const tbody = document.getElementById('dosenTableBody');
             
             row.style.opacity = '0';
             row.style.transform = 'translateX(20px)';
             
             setTimeout(() => {
-                if (row && tbody.querySelectorAll('tr.dosen-row').length > 1) {
-                    row.remove();
-                }
+                row.remove();
                 
-                // Re-index rows
-                const rows = tbody.querySelectorAll('.dosen-row');
-                rows.forEach((row, index) => {
-                    row.dataset.index = index;
-                });
+                if (tbody.querySelectorAll('tr.dosen-row').length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = '<td colspan="6" class="text-center text-muted">Belum ada dosen terkait</td>';
+                    tbody.appendChild(emptyRow);
+                }
             }, 300);
+            setTimeout(() => {
+        if (window.updateFormButtonState) {
+            window.updateFormButtonState();
         }
-
-        function updateKolomPeranForRow(rowEl) {
-            const peranColumn = rowEl.querySelector('td.peran-column');
-            const peranInput = rowEl.querySelector('.peran-input');
-            
-            if (!peranColumn || !peranInput) return;
-            
-            const jenisPengajuan = document.getElementById('jenis_pengajuan');
-            
-            if (jenisPengajuan && jenisPengajuan.value === 'Kelompok') {
-                peranColumn.classList.remove('hidden');
-                peranColumn.classList.add('visible');
-                peranColumn.style.display = 'table-cell';
-                if (peranInput) peranInput.required = true;
-                if (peranInput) peranInput.name = 'peran[]';
-            } else {
-                peranColumn.classList.add('hidden');
-                peranColumn.classList.remove('visible');
-                peranColumn.style.display = 'none';
-                if (peranInput) peranInput.required = false;
-                if (peranInput) peranInput.name = 'peran_hidden[]';
-                if (peranInput) peranInput.value = '';
-            }
-        }
-
-        function updateButtonVisibility() {
-            const jenisPengajuan = document.getElementById('jenis_pengajuan');
-            const buttonCells = document.querySelectorAll('.aksi-cell');
-            
-            if (jenisPengajuan && jenisPengajuan.value === 'Kelompok') {
-                buttonCells.forEach(btn => {
-                    btn.style.display = 'table-cell';
-                });
-            } else {
-                buttonCells.forEach(btn => {
-                    btn.style.display = 'none';
-                });
-            }
+    }, 500);
         }
 
         // ===== EXISTING FUNCTIONS =====
@@ -2649,6 +2495,11 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             fileItem.style.opacity = '0';
             fileItem.style.transform = 'translateX(-20px)';
             setTimeout(() => fileItem.style.display = 'none', 300);
+            setTimeout(() => {
+            if (window.updateFormButtonState) {
+                window.updateFormButtonState();
+            }
+        }, 500);
         }
 
         // Preview File Functions
@@ -2660,7 +2511,7 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             previewTitle.textContent = 'Preview: ' + fileName;
             previewBody.innerHTML = `
                 <div style="text-align: center; padding: 40px;">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FF8C00;"></i>
+                    <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #16A085;"></i>
                     <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
                 </div>
             `;
@@ -2905,6 +2756,8 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             const isCustom = this.value === "Custom";
             const isPeriode = this.value === "Periode";
             
+            customSection.classList.toggle('active', isCustom);
+            periodeSection.classList.toggle('active', isPeriode);
             customSection.style.display = isCustom ? 'block' : 'none';
             periodeSection.style.display = isPeriode ? 'block' : 'none';
             
@@ -2921,33 +2774,16 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
 
         // ===== INITIALIZE ON DOM READY =====
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize autocomplete untuk semua rows yang ada
+            // Initialize autocomplete for existing rows
             document.querySelectorAll('.dosen-row').forEach(row => {
                 initAutocompleteForRow(row);
             });
 
             // Toggle sections based on selections
-            const jenisPengajuan = document.getElementById('jenis_pengajuan');
-            if (jenisPengajuan) {
-                jenisPengajuan.addEventListener('change', function() {
-                    const isPerorangan = this.value === 'Perorangan';
-                    const isKelompok = this.value === 'Kelompok';
-                    
-                    document.getElementById('perorangan_box').style.display = isPerorangan ? 'block' : 'none';
-                    document.getElementById('kelompok_box').style.display = isKelompok ? 'block' : 'none';
-                    
-                    // Update semua kolom peran
-                    document.querySelectorAll('.dosen-row').forEach(row => {
-                        updateKolomPeranForRow(row);
-                    });
-                    
-                    // Update button visibility
-                    updateButtonVisibility();
-                });
-                
-                // Trigger change event untuk inisialisasi awal
-                jenisPengajuan.dispatchEvent(new Event('change'));
-            }
+            document.getElementById('jenis_pengajuan').addEventListener('change', function() {
+                document.getElementById('perorangan_box').style.display = this.value === 'Perorangan' ? 'block' : 'none';
+                document.getElementById('kelompok_box').style.display = this.value === 'Kelompok' ? 'block' : 'none';
+            });
 
             if (document.getElementById('jenis_penugasan_perorangan')) {
                 document.getElementById('jenis_penugasan_perorangan').addEventListener('change', function() {
@@ -2986,10 +2822,10 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.autocomplete-box-fixed') &&
                     !e.target.closest('.nip-input') &&
-                    !e.target.closest('.nama-dosen-input')) {
-                    if (!isSelectingAutocomplete) {
-                        removeAutocompleteBox();
-                    }
+                    !e.target.closest('.nama-dosen-input') &&
+                    !e.target.closest('.jabatan-input') &&
+                    !e.target.closest('.divisi-input')) {
+                    removeAutocompleteBox();
                 }
             });
 
@@ -3001,5 +2837,228 @@ $form_action = site_url('surat/edit/' . ($surat['id'] ?? ''));
             });
         });
     </script>
+    <script>
+// ===== CHANGE DETECTION - PREVENT SAVE IF NO CHANGES =====
+(function() {
+    const initialData = <?= $initial_data ?? '{}' ?>;
+    const submitBtn = document.getElementById('submitBtn');
+    const mainForm = document.getElementById('mainForm');
+    let hasChanges = false;
+    
+    // Normalize value untuk comparison
+    function normalizeValue(val) {
+        if (val === null || val === undefined || val === '') return '-';
+        if (typeof val === 'string') return val.trim();
+        return val;
+    }
+    
+    // Check if arrays are equal
+    function arraysEqual(arr1, arr2) {
+        if (!Array.isArray(arr1) || !Array.isArray(arr2)) return false;
+        if (arr1.length !== arr2.length) return false;
+        
+        for (let i = 0; i < arr1.length; i++) {
+            if (typeof arr1[i] === 'object' && typeof arr2[i] === 'object') {
+                if (JSON.stringify(arr1[i]) !== JSON.stringify(arr2[i])) return false;
+            } else {
+                if (normalizeValue(arr1[i]) !== normalizeValue(arr2[i])) return false;
+            }
+        }
+        return true;
+    }
+    
+    // Get current form data
+    function getCurrentFormData() {
+        const formData = new FormData(mainForm);
+        const currentData = {
+            nama_kegiatan: normalizeValue(formData.get('nama_kegiatan')),
+            jenis_date: normalizeValue(formData.get('jenis_date')),
+            tanggal_kegiatan: normalizeValue(formData.get('tanggal_kegiatan')),
+            akhir_kegiatan: normalizeValue(formData.get('akhir_kegiatan')),
+            tempat_kegiatan: normalizeValue(formData.get('tempat_kegiatan')),
+            penyelenggara: normalizeValue(formData.get('penyelenggara')),
+            jenis_pengajuan: normalizeValue(formData.get('jenis_pengajuan')),
+            lingkup_penugasan: normalizeValue(formData.get('lingkup_penugasan')),
+            jenis_penugasan_perorangan: normalizeValue(formData.get('jenis_penugasan_perorangan')),
+            penugasan_lainnya_perorangan: normalizeValue(formData.get('penugasan_lainnya_perorangan')),
+            jenis_penugasan_kelompok: normalizeValue(formData.get('jenis_penugasan_kelompok')),
+            penugasan_lainnya_kelompok: normalizeValue(formData.get('penugasan_lainnya_kelompok')),
+            periode_value: normalizeValue(formData.get('periode_value')),
+            nip: formData.getAll('nip[]').filter(v => v).map(v => normalizeValue(v)),
+            peran: formData.getAll('peran[]').filter(v => v).map(v => normalizeValue(v))
+        };
+        
+        // Get eviden data
+        const existingEviden = [];
+        document.querySelectorAll('.existing-file-input').forEach(input => {
+            if (input.value && !input.closest('.file-deleted')) {
+                existingEviden.push(normalizeValue(input.value));
+            }
+        });
+        
+        const deletedEviden = [];
+        document.querySelectorAll('.delete-flag').forEach(input => {
+            if (input.value) {
+                deletedEviden.push(normalizeValue(input.value));
+            }
+        });
+        
+        // Check if there are new files
+        const hasNewFiles = document.querySelectorAll('.new-file-item').length > 0;
+        
+        currentData.eviden = existingEviden;
+        currentData.hasDeletedFiles = deletedEviden.length > 0;
+        currentData.hasNewFiles = hasNewFiles;
+        
+        return currentData;
+    }
+    
+    // Check for changes
+    function checkForChanges() {
+        const current = getCurrentFormData();
+        let changes = [];
+        
+        // Check basic fields
+        const basicFields = [
+            'nama_kegiatan', 'jenis_date', 'tanggal_kegiatan', 'akhir_kegiatan',
+            'tempat_kegiatan', 'penyelenggara', 'jenis_pengajuan', 'lingkup_penugasan',
+            'jenis_penugasan_perorangan', 'penugasan_lainnya_perorangan',
+            'jenis_penugasan_kelompok', 'penugasan_lainnya_kelompok', 'periode_value'
+        ];
+        
+        basicFields.forEach(field => {
+            const initialVal = normalizeValue(initialData[field]);
+            const currentVal = normalizeValue(current[field]);
+            if (initialVal !== currentVal) {
+                changes.push(field);
+            }
+        });
+        
+        // Check NIP array
+        if (!arraysEqual(initialData.nip || [], current.nip || [])) {
+            changes.push('nip');
+        }
+        
+        // Check Peran array
+        const initialPeran = (initialData.peran || []).map(p => {
+            if (typeof p === 'string') {
+                try {
+                    const parsed = JSON.parse(p);
+                    return normalizeValue(parsed.peran || '-');
+                } catch {
+                    return normalizeValue(p);
+                }
+            }
+            return normalizeValue(p.peran || '-');
+        });
+        
+        const currentPeran = current.peran || [];
+        
+        if (!arraysEqual(initialPeran, currentPeran)) {
+            changes.push('peran');
+        }
+        
+        // Check eviden
+        const initialEviden = (initialData.eviden || []).map(e => normalizeValue(e)).sort();
+        const currentEviden = (current.eviden || []).map(e => normalizeValue(e)).sort();
+        
+        if (!arraysEqual(initialEviden, currentEviden)) {
+            changes.push('eviden');
+        }
+        
+        // Check deleted files
+        if (current.hasDeletedFiles) {
+            changes.push('deleted_files');
+        }
+        
+        // Check new files
+        if (current.hasNewFiles) {
+            changes.push('new_files');
+        }
+        
+        hasChanges = changes.length > 0;
+        
+        console.log('Changes detected:', changes);
+        console.log('Has changes:', hasChanges);
+        
+        return hasChanges;
+    }
+    
+    // Update button state
+    function updateButtonState() {
+        const hasChanges = checkForChanges();
+        
+        if (hasChanges) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Simpan Perubahan';
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+            submitBtn.classList.remove('btn-disabled');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-ban"></i> Tidak Ada Perubahan';
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+            submitBtn.classList.add('btn-disabled');
+        }
+    }
+    
+    // Add event listeners to all form inputs
+    function attachChangeListeners() {
+        // Text inputs, selects, textareas
+        mainForm.querySelectorAll('input, select, textarea').forEach(element => {
+            element.addEventListener('input', updateButtonState);
+            element.addEventListener('change', updateButtonState);
+        });
+        
+        // File inputs
+        document.getElementById('fileInput')?.addEventListener('change', updateButtonState);
+        
+        // Observer for dynamic elements (dosen rows, file items)
+        const observer = new MutationObserver(function(mutations) {
+            updateButtonState();
+        });
+        
+        observer.observe(document.getElementById('dosenTableBody'), {
+            childList: true,
+            subtree: true
+        });
+        
+        observer.observe(document.getElementById('existingFilesContainer'), {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['class']
+        });
+        
+        observer.observe(document.getElementById('newFilesContainer'), {
+            childList: true,
+            subtree: true
+        });
+    }
+    
+    // Prevent form submission if no changes
+    mainForm.addEventListener('submit', function(e) {
+        if (!checkForChanges()) {
+            e.preventDefault();
+            alert('⚠️ Tidak ada perubahan yang perlu disimpan!');
+            return false;
+        }
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        attachChangeListeners();
+        updateButtonState();
+        
+        // Check for changes every 2 seconds (fallback)
+        setInterval(updateButtonState, 2000);
+    });
+    
+    // Make functions globally accessible
+    window.checkFormChanges = checkForChanges;
+    window.updateFormButtonState = updateButtonState;
+})();
+</script>
 </body>
 </html>
