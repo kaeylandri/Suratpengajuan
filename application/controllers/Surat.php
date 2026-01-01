@@ -673,11 +673,13 @@ public function submit()
             throw new Exception('Minimal 1 file eviden harus diupload');
         }
         log_message('debug', 'Total files saved: ' . count($saved_filenames));
+        
         // Process tanggal dengan aman
-            $tanggal_kegiatan = $this->safe_date($post['tanggal_awal_kegiatan'] ?? null);
-            $akhir_kegiatan = $this->safe_date($post['tanggal_akhir_kegiatan'] ?? null);
-            $periode_penugasan = $this->safe_date($post['periode_penugasan'] ?? null);
-            $akhir_periode_penugasan = $this->safe_date($post['akhir_periode_penugasan'] ?? null);
+        $tanggal_kegiatan = $this->safe_date($post['tanggal_awal_kegiatan'] ?? null);
+        $akhir_kegiatan = $this->safe_date($post['tanggal_akhir_kegiatan'] ?? null);
+        $periode_penugasan = $this->safe_date($post['periode_penugasan'] ?? null);
+        $akhir_periode_penugasan = $this->safe_date($post['akhir_periode_penugasan'] ?? null);
+        
         // ===============================
         // PROSES NIP DAN PERAN
         // ===============================
@@ -745,6 +747,11 @@ public function submit()
             throw new Exception('NIP harus diisi untuk pengajuan');
         }
         
+        // Proses jenis penugasan
+        $jenis_penugasan_perorangan = '-';
+        $penugasan_lainnya_perorangan = '-';
+        $jenis_penugasan_kelompok = '-';
+        $penugasan_lainnya_kelompok = '-';
         
         if ($jenis_pengajuan === 'Perorangan') {
             $jenis_penugasan_perorangan = $post['jenis_penugasan'] ?? $post['jenis_penugasan_perorangan'] ?? '-';
@@ -760,43 +767,41 @@ public function submit()
             }
         }
         
-         // Siapkan data untuk insert
-            $data = [
-                'user_id' => $post['user_id'] ?? '-',
-                'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
-                'jenis_date' => $post['jenis_date'] ?? '-',
-                'created_at' => date('Y-m-d H:i:s'),
-                
-                // TANGGAL KEGIATAN
-                'tanggal_kegiatan' => $tanggal_kegiatan,
-                'akhir_kegiatan' => $akhir_kegiatan,
-                
-                // PERIODE PENUGASAN
-                'periode_penugasan' => $periode_penugasan,
-                'akhir_periode_penugasan' => $akhir_periode_penugasan,
-                
-                'periode_value' => $post['periode_value'] ?? '-',
-                'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
-                'penyelenggara' => $post['penyelenggara'] ?? '-',
-                'jenis_pengajuan' => $jenis_pengajuan,
-                'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
-                 // ✅ PERBAIKAN: Gunakan variable yang sudah diproses
-                'jenis_penugasan_perorangan' => $jenis_penugasan_perorangan,
-                'penugasan_lainnya_perorangan' => $penugasan_lainnya_perorangan,
-                'jenis_penugasan_kelompok' => $jenis_penugasan_kelompok,
-                'penugasan_lainnya_kelompok' => $penugasan_lainnya_kelompok,
-                'format' => $post['format'] ?? '-',
-                'nip' => $nip_json,
-                'peran' => $peran_json,
-                'eviden' => json_encode($saved_filenames),
-                'status' => 'pengajuan',
-                'approval_status' => json_encode([
-                    'kk' => null,
-                    'sekretariat' => null,
-                    'dekan' => null
-                ]),
-            ];
+        // Siapkan data untuk insert
+        $data = [
+            'user_id' => $post['user_id'] ?? '-',
+            'nama_kegiatan' => $post['nama_kegiatan'] ?? '-',
+            'jenis_date' => $post['jenis_date'] ?? '-',
+            'created_at' => date('Y-m-d H:i:s'),
             
+            // TANGGAL KEGIATAN
+            'tanggal_kegiatan' => $tanggal_kegiatan,
+            'akhir_kegiatan' => $akhir_kegiatan,
+            
+            // PERIODE PENUGASAN
+            'periode_penugasan' => $periode_penugasan,
+            'akhir_periode_penugasan' => $akhir_periode_penugasan,
+            
+            'periode_value' => $post['periode_value'] ?? '-',
+            'tempat_kegiatan' => $post['tempat_kegiatan'] ?? '-',
+            'penyelenggara' => $post['penyelenggara'] ?? '-',
+            'jenis_pengajuan' => $jenis_pengajuan,
+            'lingkup_penugasan' => $post['lingkup_penugasan'] ?? '-',
+            'jenis_penugasan_perorangan' => $jenis_penugasan_perorangan,
+            'penugasan_lainnya_perorangan' => $penugasan_lainnya_perorangan,
+            'jenis_penugasan_kelompok' => $jenis_penugasan_kelompok,
+            'penugasan_lainnya_kelompok' => $penugasan_lainnya_kelompok,
+            'format' => $post['format'] ?? '-',
+            'nip' => $nip_json,
+            'peran' => $peran_json,
+            'eviden' => json_encode($saved_filenames),
+            'status' => 'pengajuan',
+            'approval_status' => json_encode([
+                'kk' => null,
+                'sekretariat' => null,
+                'dekan' => null
+            ]),
+        ];
         
         log_message('debug', 'Data untuk Insert: ' . print_r($data, true));
         
@@ -811,7 +816,7 @@ public function submit()
                        ' - Jenis: ' . $jenis_pengajuan . 
                        ' - Files: ' . count($saved_filenames));
             
-            // 🔥 PERBAIKAN: Simpan data dosen dengan format yang benar
+            // Simpan data dosen dengan format yang benar
             $dosen_data = $this->get_dosen_by_nip($nip_json, $peran_json);
             
             // Format data untuk modal success
@@ -827,22 +832,25 @@ public function submit()
             
             log_message('debug', 'Added item data: ' . print_r($added_item, true));
             
-            // 🔥 PERBAIKAN: Clear any output before setting flashdata
+            // ✅ KIRIM WHATSAPP OTOMATIS (OPSI 2)
+            $this->send_whatsapp_notification($insert_id, $nama_kegiatan, $jenis_pengajuan, $tanggal_kegiatan);
+            
+            // Clear any output before setting flashdata
             if (ob_get_length()) {
                 ob_end_clean();
             }
             
-            // 🔥 PERBAIKAN: Set flashdata dengan urutan yang benar
+            // Set flashdata dengan urutan yang benar
             $this->session->set_flashdata('added_items', [$added_item]);
             $this->session->set_flashdata('is_single_add', true);
             $this->session->set_flashdata('success', 'Pengajuan surat tugas berhasil dikirim!');
             
-            // 🔥 PERBAIKAN: Pastikan tidak ada output sebelum redirect
+            // Pastikan tidak ada output sebelum redirect
             if (ob_get_length()) {
                 ob_end_clean();
             }
             
-            // 🔥 PERBAIKAN: Response untuk AJAX atau redirect
+            // Response untuk AJAX atau redirect
             if ($this->input->is_ajax_request()) {
                 echo json_encode([
                     'success' => true,
@@ -852,7 +860,8 @@ public function submit()
                 ]);
                 return;
             } else {
-                redirect(base_url('surat/wa_redirect/' . $insert_id));
+                // ✅ LANGSUNG REDIRECT KE LIST (TIDAK KE wa_redirect)
+                redirect(base_url('list-surat-tugas'));
                 return;
             }
             
@@ -864,7 +873,7 @@ public function submit()
         log_message('error', 'Error in submit function: ' . $e->getMessage());
         log_message('error', 'Trace: ' . $e->getTraceAsString());
         
-        // 🔥 PERBAIKAN: Clear output before flashdata
+        // Clear output before flashdata
         if (ob_get_length()) {
             ob_end_clean();
         }
@@ -880,12 +889,13 @@ public function submit()
         } else {
             $this->session->set_flashdata('error', $error_message);
             
-            // 🔥 PERBAIKAN: Clear output before redirect
+            // Clear output before redirect
             if (ob_get_length()) {
                 ob_end_clean();
             }
             
-            redirect(base_url('surat/wa_redirect/' . $insert_id));
+            // ✅ REDIRECT KE LIST, BUKAN wa_redirect
+            redirect(base_url('list-surat-tugas'));
             return;
         }
     }
@@ -2631,31 +2641,61 @@ public function edit($id)
                     ]);
                 }
             }
-            public function wa_redirect($id)
+    
+
+// ===============================
+// METHOD BARU: KIRIM WHATSAPP OTOMATIS
+// ===============================
+private function send_whatsapp_notification($surat_id, $nama_kegiatan, $created_at)
 {
-    $surat = $this->db->get_where('surat', ['id' => $id])->row();
-
-    if (!$surat) {
-        redirect('list-surat-tugas');
-        return;
+    try {
+        // Konfigurasi
+        $api_url = 'http://localhost:3000/send-message'; // URL wa-server.js
+        $nomor_tujuan = '6285321151908'; // ✅ GANTI DENGAN NOMOR TUJUAN ANDA
+        
+        // Gunakan tanggal pembuatan pengajuan (sekarang)
+        $created_at = date('d M Y'); // Format: 31 Des 2025 14:30:45
+        
+        // Format pesan WhatsApp
+        $pesan = "📄 *Pengajuan Surat Tugas Baru*\n\n" .
+                 "Nama Kegiatan: *" . $nama_kegiatan . "*\n" .
+                 "Tanggal Pengajuan: " . $created_at . "\n\n" .
+                 "Silakan cek dashboard untuk detail lengkap:\n" .
+                 base_url('list-surat-tugas');
+        
+        // Data untuk dikirim ke API
+        $data = json_encode([
+            'nomor' => $nomor_tujuan,
+            'pesan' => $pesan
+        ]);
+        
+        // Kirim request ke wa-server.js
+        $ch = curl_init($api_url);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Timeout 5 detik
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); // Connection timeout 3 detik
+        
+        $response = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
+        
+        // Log response
+        if ($httpcode == 200) {
+            log_message('info', '✅ WhatsApp berhasil dikirim ke ' . $nomor_tujuan . ' - Response: ' . $response);
+            return true;
+        } else {
+            log_message('error', '❌ WhatsApp gagal dikirim - HTTP Code: ' . $httpcode . ' - Error: ' . $curl_error . ' - Response: ' . $response);
+            return false;
+        }
+        
+    } catch (Exception $e) {
+        log_message('error', '❌ Exception saat kirim WhatsApp: ' . $e->getMessage());
+        return false;
     }
-
-    $nomor = '6282119509135'; // 🔴 GANTI NOMOR TUJUAN
-
-    $pesan = urlencode(
-        "📄 Pengajuan Surat Tugas Baru\n\n" .
-        "Nama Kegiatan: {$surat->nama_kegiatan}\n" .
-        "Jenis: {$surat->jenis_pengajuan}\n" .
-        "Tanggal: " . ($surat->created_at ? date('d M Y', strtotime($surat->created_at)) : '-') . "\n\n" .
-        "Silakan cek dashboard."
-    );
-
-    $data['wa_url'] = "https://wa.me/{$nomor}?text={$pesan}";
-    $data['fallback'] = base_url('list-surat-tugas');
-
-    $this->load->view('wa_redirect', $data);
 }
-
 
             /* ===========================================
             DEBUG FUNCTION - Untuk troubleshooting
