@@ -6,47 +6,25 @@
 <title>Total Pengajuan - Dashboard Dekan</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
+    /* ============================================
+       STYLE DASAR (SAMA SEPERTI SEKRETARIAT)
+    ============================================ */
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f5f7fa;}
     .navbar{background:#FB8C00;color:white;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
     .navbar h2{font-size:20px;}
     .container{max-width:1200px;margin:30px auto;padding:0 20px;}
-    
-    /* Back Button */
-    .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#FB8C00;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
-    .back-btn:hover{background:#e67e22;transform:translateY(-2px)}
-    
-    /* Card Styles */
     .card{background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px}
     .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee}
-    
-    /* Search and Filter */
-    .search-filter-container{display:flex;align-items:center;gap:15px;margin-bottom:20px;flex-wrap:wrap;background:#f8f9fa;padding:15px;border-radius:10px;border:1px solid #e9ecef}
-    .search-box{position:relative;flex:1;min-width:300px}
-    .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;transition:all 0.3s;background:white}
-    .search-input:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
-    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d}
-    .filter-select{padding:12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white;color:#495057;min-width:180px;cursor:pointer;transition:all 0.3s;height:44px}
-    .filter-select:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
-    .btn-primary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#FB8C00;color:#fff}
-    .btn-primary:hover{background:#e67e22;transform:translateY(-2px)}
-    .btn-secondary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff}
-    .btn-secondary:hover{background:#7f8c8d}
-    
-    /* Table Styles */
     table{width:100%;border-collapse:collapse}
     thead{background:#f4f6f7}
     th,td{padding:12px;border-bottom:1px solid #ecf0f1;text-align:left;font-size:14px}
     tbody tr:hover{background:#fbfcfd}
-    
-    /* Badge Styles */
     .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
     .badge-pending{background:#fff3cd;color:#856404}
     .badge-approved{background:#d4edda;color:#155724}
     .badge-rejected{background:#f8d7da;color:#721c24}
     .badge-completed{background:#d1ecf1;color:#0c5460}
-    
-    /* Button Styles */
     .btn{padding:6px 10px;border-radius:6px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s}
     .btn:hover{transform:scale(1.05)}
     .btn-approve{background:#27ae60;color:#fff}
@@ -56,7 +34,11 @@
     .btn-detail{background:#3498db;color:#fff}
     .btn-detail:hover{background:#2980b9}
     
-    /* Tombol Eviden */
+    /* ============================================
+       TOMBOL DASHBOARD (SAMA SEPERTI SEKRETARIAT)
+    ============================================ */
+    
+    /* Tombol Eviden - WARNA HIJAU */
     .btn-eviden {
         background: #28a745 !important;
         color: white !important;
@@ -70,6 +52,7 @@
         transition: 0.2s ease-in-out;
         font-size: 14px;
         height: 32px;
+        min-width: 32px;
     }
 
     .btn-eviden i {
@@ -80,33 +63,8 @@
         background: #218838 !important;
         transform: scale(1.05);
     }
-
-    /* Tombol Status */
-    .btn-status {
-        background: #66bb6a !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 5px !important;
-        padding: 6px 10px !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        transition: 0.2s ease-in-out;
-        font-size: 14px;
-        height: 32px;
-    }
-
-    .btn-status i {
-        font-size: 14px;
-    }
-
-    .btn-status:hover {
-        background: #4caf50 !important;
-        transform: scale(1.05);
-    }
     
-    /* Tombol Return - WARNA ORANGE/KUNING (SAMA SEPERTI DASHBOARD UTAMA) */
+    /* Tombol Return - WARNA ORANGE/KUNING */
     .btn-return {
         background: #ff9800 !important;
         color: white !important;
@@ -120,6 +78,7 @@
         transition: 0.2s ease-in-out;
         font-size: 14px;
         height: 32px;
+        min-width: 32px;
     }
 
     .btn-return i {
@@ -131,59 +90,371 @@
         transform: scale(1.05);
     }
     
-    /* Pagination Info */
-    .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
+    /* Tombol Edit - WARNA KUNING */
+    .btn-warning {
+        background: #ffc107 !important;
+        color: #000 !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 6px 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s ease-in-out;
+        font-size: 14px;
+        height: 32px;
+        text-decoration: none !important;
+    }
+
+    .btn-warning:hover {
+        background: #e0a800 !important;
+        transform: scale(1.05);
+        color: #000 !important;
+        text-decoration: none !important;
+    }
     
-    /* Modal Styles */
-    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
-    .modal.show{display:flex}
-    .modal-content{background:white;padding:0;border-radius:15px;max-width:1100px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    /* Tombol Masukkan Nomor Surat - WARNA BIRU */
+    .btn-nomor {
+        background: #3498db !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 6px 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s ease-in-out;
+        font-size: 14px;
+        height: 32px;
+        min-width: 32px;
+    }
+
+    .btn-nomor i {
+        font-size: 14px;
+    }
+
+    .btn-nomor:hover {
+        background: #2980b9 !important;
+        transform: scale(1.05);
+    }
+
+    /* Tombol Cetak - WARNA UNGU */
+    .btn-cetak {
+        background: #9b59b6 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 6px 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s ease-in-out;
+        font-size: 14px;
+        height: 32px;
+        min-width: 32px;
+    }
+
+    .btn-cetak i {
+        font-size: 14px;
+    }
+
+    .btn-cetak:hover {
+        background: #8e44ad !important;
+        transform: scale(1.05);
+    }
+
+    /* Tombol Download PDF - WARNA HIJAU */
+    .btn-download {
+        background: #2ecc71 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 5px !important;
+        padding: 6px 10px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: 0.2s ease-in-out;
+        font-size: 14px;
+        height: 32px;
+        text-decoration: none !important;
+    }
+
+    .btn-download:hover {
+        background: #27ae60 !important;
+        transform: scale(1.05);
+        text-decoration: none !important;
+    }
+    
+    /* Container tombol aksi untuk membuat semua tombol sejajar */
+    .action-buttons {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
+        min-width: 160px !important;
+    }
+    
+    /* Tombol Aksi dalam sel tabel */
+    .action-buttons > * {
+        flex-shrink: 0 !important;
+    }
+    
+    /* ============================================
+       MULTI MODAL STYLES (SAMA DENGAN SEKRETARIAT)
+    ============================================ */
+    /* Clickable Row Styles */
+    .clickable-row:hover {
+        background-color: #fef9e7 !important;
+        box-shadow: inset 0 0 0 2px #FB8C00;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .clickable-row:active {
+        background-color: #fdebd0 !important;
+        transform: scale(0.995);
+    }
+    
+    /* PERBAIKAN: Modal Stack Container - MAKSIMAL 2 MODAL */
+    .modal-stack {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1050;
+    }
+
+    .modal-stack .modal-item {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
+        transition: all 0.3s ease;
+        min-width: 300px;
+    }
+
+    /* Modal pertama - di tengah */
+    .modal-item:nth-child(1) {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1051;
+    }
+
+    /* Modal kedua - kanan atas */
+    .modal-item:nth-child(2) {
+        top: 50px;
+        right: 50px;
+        transform: none;
+        z-index: 1052;
+    }
+
+    /* Modal aktif */
+    .modal-item.active {
+        z-index: 1053;
+    }
+
+    /* Modal number badge */
+    .modal-number-badge {
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        background: #e74c3c;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 1060;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Modal yang baru ditambahkan */
+    .modal-item.new {
+        animation: modalAppear 0.3s ease;
+    }
+
+    @keyframes modalAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Modal yang akan dihapus */
+    .modal-item.removing {
+        animation: modalDisappear 0.3s ease;
+    }
+
+    @keyframes modalDisappear {
+        from {
+            opacity: 1;
+            transform: scale(1);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+    }
+
+    /* Responsive positioning untuk 2 modal */
+    @media (max-width: 1200px) {
+        .modal-item {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            transform: none !important;
+            margin: 10px;
+        }
+        
+        .modal-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            pointer-events: auto;
+        }
+        
+        .modal-item {
+            position: relative;
+            margin-bottom: 15px;
+            width: 95%;
+        }
+        
+        .modal-number-badge {
+            top: -8px;
+            left: -8px;
+        }
+    }
+
+    /* Tabel tetap bisa diakses saat modal terbuka */
+    body.modal-open #tableBody {
+        pointer-events: auto !important;
+    }
+
+    body.modal-open .main-content {
+        pointer-events: auto !important;
+        opacity: 1 !important;
+    }
+
+    /* Scroll tetap aktif di latar belakang */
+    body.modal-open {
+        overflow: auto !important;
+    }
+
+    /* Modal close button */
+    .modal-close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0,0,0,0.1);
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        font-size: 18px;
+        z-index: 10;
+        transition: background 0.2s;
+    }
+
+    .modal-close-btn:hover {
+        background: rgba(0,0,0,0.2);
+    }
+    
+    /* Detail Modal Styles */
+    .modal{display:none !important;position:fixed;z-index:1050;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
+    .modal.show{display:flex !important}
+    .modal-content{background:white;padding:0;border-radius:15px;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
     .modal-header{background:#FB8C00;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
-    .modal-header h3{margin:0;font-size:18px;font-weight:600}
-    .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
+    .modal-header h3{margin:0;font-size:20px;font-weight:600}
+    .close-modal{background:none;border:0;color:white;font-size:28px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
     .close-modal:hover{background:rgba(255,255,255,0.2)}
     
     /* Detail Content Styles */
-    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
-    .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
+    .detail-content{padding:30px;max-height:calc(90vh - 80px);overflow-y:auto}
+    .detail-section{margin-bottom:30px;background:#f8f9fa;border-radius:12px;padding:25px;border:1px solid #e9ecef}
     .detail-section:last-child{margin-bottom:0}
-    .detail-section-title{font-size:16px;font-weight:700;color:#FB8C00;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #FB8C00;display:flex;align-items:center;gap:10px}
-    .detail-section-title i{font-size:18px}
-    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-    .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
-    .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
-    .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
-    .detail-value-empty{color:#6c757d;font-style:italic;background:#f8f9fa !important}
+    .detail-section-title{font-size:18px;font-weight:700;color:#FB8C00;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #FB8C00;display:flex;align-items:center;gap:12px}
+    .detail-section-title i{font-size:20px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .detail-row{display:flex;flex-direction:column;margin-bottom:15px}
+    .detail-label{font-weight:600;color:#495057;font-size:14px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+    .detail-value{color:#212529;font-size:15px;background:white;padding:12px 18px;border-radius:8px;border:1px solid #e9ecef;min-height:45px;display:flex;align-items:center;word-break:break-word}
+    .detail-value-empty{color:#6c757d;font-style:italic}
     
     /* Dosen list in detail */
     .dosen-list {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
     }
 
     .dosen-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 8px 12px;
+        gap: 15px;
+        padding: 12px 15px;
         background: white;
         border: 1px solid #e9ecef;
-        border-radius: 6px;
+        border-radius: 8px;
     }
 
     .dosen-avatar {
-        width: 32px;
-        height: 32px;
+        width: 45px;
+        height: 45px;
         border-radius: 50%;
         background: #FB8C00;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 12px;
+        font-size: 16px;
         font-weight: 600;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .dosen-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .dosen-avatar-initial {
+        position: relative;
+        z-index: 1;
     }
 
     .dosen-info {
@@ -193,33 +464,35 @@
     .dosen-name {
         font-weight: 600;
         color: #212529;
-        font-size: 14px;
+        font-size: 16px;
+        margin-bottom: 4px;
     }
 
     .dosen-details {
-        font-size: 12px;
+        font-size: 13px;
         color: #6c757d;
+        line-height: 1.4;
     }
     
     /* File Evidence Styles */
-    .file-evidence{margin-top:10px}
-    .file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
+    .file-evidence{margin-top:15px}
+    .file-item{display:flex;align-items:center;gap:15px;padding:15px 18px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s;margin-bottom:10px}
     .file-item:hover{background:#fef9e7;border-color:#FB8C00}
-    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#FB8C00;font-size:16px}
-    .file-info{flex:1}
-    .file-name{font-weight:600;color:#212529;font-size:14px;cursor:pointer}
+    .file-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#FB8C00;font-size:20px;flex-shrink:0}
+    .file-info{flex:1;min-width:0}
+    .file-name{font-weight:600;color:#212529;font-size:15px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .file-name:hover{color:#FB8C00}
-    .file-size{font-size:12px;color:#6c757d}
-    .preview-btn{background:#3498db;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+    .file-size{font-size:13px;color:#6c757d;margin-top:4px}
+    .preview-btn{background:#3498db;color:white;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
     .preview-btn:hover{background:#2980b9;color:white;text-decoration:none}
     .preview-btn.disabled{background:#bdc3c7;cursor:not-allowed;opacity:0.6}
     .preview-btn.disabled:hover{background:#bdc3c7}
-    .download-btn{background:#FB8C00;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+    .download-btn{background:#FB8C00;color:white;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;margin-left:10px}
     .download-btn:hover{background:#E67E22;color:white;text-decoration:none}
 
     /* Preview Modal Styles */
-    .preview-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;justify-content:center;align-items:center;padding:20px}
-    .preview-modal.show{display:flex}
+    .preview-modal{display:none !important;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1050;justify-content:center;align-items:center;padding:20px}
+    .preview-modal.show{display:flex !important}
     .preview-content{background:white;border-radius:12px;width:90%;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
     .preview-header{background:#FB8C00;color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
     .preview-header h3{margin:0;font-size:16px;font-weight:600}
@@ -230,14 +503,12 @@
     .preview-image{max-width:100%;max-height:70vh;object-fit:contain}
     .preview-unsupported{text-align:center;padding:40px;color:#6c757d}
     .preview-unsupported i{font-size:48px;margin-bottom:15px;color:#FB8C00}
-    
-    /* Eviden Modal Styles */
-    .eviden-modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
-    .eviden-modal.show{display:flex}
+    .preview-unsupported h4{font-size:18px;margin-bottom:10px;color:#495057}
+    .preview-unsupported p{font-size:14px;margin-bottom:20px}
     
     /* Action Buttons in Modal */
-    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef}
-    .modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+    .modal-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:25px;padding-top:25px;border-top:1px solid #e9ecef}
+    .modal-btn{padding:12px 24px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:15px;transition:all 0.2s;display:flex;align-items:center;gap:10px}
     .modal-btn-close{background:#6c757d;color:white}
     .modal-btn-close:hover{background:#5a6268;transform:translateY(-2px)}
     .modal-btn-approve{background:#27ae60;color:white}
@@ -246,320 +517,379 @@
     .modal-btn-reject:hover{background:#c0392b;transform:translateY(-2px)}
     
     /* Rejection Notes Styles */
-    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:20px;margin-top:15px}
-    .rejection-notes .detail-label{color:#dc3545;font-weight:700}
-    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:14px;line-height:1.5;min-height:auto;padding:12px}
+    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:25px;margin-top:20px}
+    .rejection-notes .detail-label{color:#dc3545;font-weight:700;font-size:16px}
+    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:15px;line-height:1.6;min-height:auto;padding:15px;border-radius:6px}
     
-    /* Approve Modal Styles */
-    .approve-modal-content{background:white;padding:0;border-radius:15px;max-width:500px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-    .approve-modal-body{padding:25px}
-    .approve-modal-header{background:#27ae60;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
-    .approve-modal-header h3{margin:0;font-size:18px;font-weight:600}
-    .approve-info-box{background:#e8f5e9;border:1px solid #27ae60;border-radius:8px;padding:15px;margin-bottom:20px}
-    .approve-info-box strong{color:#27ae60;display:block;margin-bottom:5px}
-    .approve-info-box span{color:#2c3e50;font-weight:600}
-    .approve-modal-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:25px;padding-top:20px;border-top:1px solid #e9ecef}
-    .approve-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
-    .approve-btn-cancel{background:#95a5a6;color:white}
-    .approve-btn-cancel:hover{background:#7f8c8d;transform:translateY(-2px)}
-    .approve-btn-submit{background:#27ae60;color:white}
-    .approve-btn-submit:hover{background:#229954;transform:translateY(-2px)}
+    /* Detail Modal Lebar Besar */
+    .detail-modal .modal-content {
+        max-width: 1100px !important;
+        width: 95% !important;
+        max-height: 90vh !important;
+    }
     
-    /* Return Modal Styles (SAMA SEPERTI DASHBOARD UTAMA) */
-    .return-modal-content {
-        background: white;
+    /* Alert Styling */
+    .alert-modal {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1060;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        max-width: 400px;
+        animation: slideInRight 0.3s ease;
+    }
+    
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    .alert-icon {
+        font-size: 20px;
+        color: #721c24;
+    }
+    
+    .alert-content {
+        flex: 1;
+    }
+    
+    .alert-close {
+        background: none;
+        border: none;
+        color: #721c24;
+        cursor: pointer;
+        font-size: 18px;
         padding: 0;
-        border-radius: 15px;
-        max-width: 500px;
-        width: 95%;
-        max-height: 85vh;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+    
+    .alert-close:hover {
+        background: rgba(0,0,0,0.1);
+    }
+    
+    /* ============================================
+       SURAT MODAL STYLES - DIUBAH: LEBAR MAKSIMAL LEBIH BESAR
+    ============================================ */
+    .surat-modal .modal-content {
+        max-width: 1400px !important; /* DIPERBESAR DARI 1100px */
+        width: 98% !important; /* DIPERBESAR DARI 95% */
+        max-height: 95vh !important; /* DIPERBESAR DARI 90vh */
+        min-width: 1000px; /* MINIMAL WIDTH AGAR TIDAK TERLALU KECIL */
+    }
+    
+    /* Container khusus untuk preview surat agar lebih lebar */
+    .surat-preview-container {
+        width: 100%;
+        height: calc(95vh - 150px); /* DIPERBESAR TINGGINYA */
+        display: flex;
+        flex-direction: column;
+        background: #f8f9fa;
+        border-radius: 10px;
         overflow: hidden;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
     
-    .return-modal-body {
-        padding: 25px;
-    }
-    
-    .return-modal-header {
-        background: #ff9800;
-        color: white;
-        padding: 20px 25px;
+    /* Header untuk surat preview */
+    .surat-preview-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9ecef;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-radius: 15px 15px 0 0;
+        flex-shrink: 0;
     }
     
-    .return-modal-header h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-    }
-    
-    .return-info-box {
-        background: #fff3e0;
-        border: 1px solid #ffb74d;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-    }
-    
-    .return-info-box strong {
-        color: #ff9800;
-        display: block;
-        margin-bottom: 5px;
-    }
-    
-    .return-info-box span {
-        color: #2c3e50;
-        font-weight: 600;
-    }
-    
-    .return-modal-actions {
+    /* Toolbar untuk tombol download/print */
+    .surat-toolbar {
         display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 25px;
-        padding-top: 20px;
-        border-top: 1px solid #e9ecef;
+        gap: 10px;
+        align-items: center;
     }
     
-    .return-btn {
+    /* Iframe untuk surat - DIPERBESAR */
+    .surat-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        flex: 1;
+        background: white;
+    }
+    
+    /* Style khusus untuk tombol dalam surat modal */
+    .surat-btn {
         padding: 10px 20px;
-        border-radius: 8px;
+        border-radius: 6px;
         border: none;
         cursor: pointer;
         font-weight: 600;
         font-size: 14px;
-        transition: all 0.2s;
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 8px;
+        transition: all 0.2s;
+        text-decoration: none !important;
     }
     
-    .return-btn-cancel {
-        background: #95a5a6;
+    .surat-btn-download {
+        background: #FB8C00;
         color: white;
     }
     
-    .return-btn-cancel:hover {
-        background: #7f8c8d;
+    .surat-btn-download:hover {
+        background: #E67E22;
         transform: translateY(-2px);
     }
     
-    .return-btn-submit {
-        background: #ff9800;
+    .surat-btn-print {
+        background: #2c3e50;
         color: white;
     }
     
-    .return-btn-submit:hover {
-        background: #f57c00;
+    .surat-btn-print:hover {
+        background: #1a252f;
         transform: translateY(-2px);
     }
     
-    /* Clickable Row Styles */
-    .clickable-row {
-        cursor: pointer !important;
-        transition: all 0.2s ease;
-    }
-
-    .clickable-row:hover {
-        background-color: #fef9e7 !important;
-        box-shadow: 0 2px 4px rgba(251, 140, 0, 0.1);
-    }
-
-    .clickable-row:active {
-        background-color: #fdebd0 !important;
-        transform: scale(0.998);
-    }
-
-    /* Highlight untuk baris yang sedang dipilih */
-    .clickable-row.selected {
-        background-color: #fef9e7 !important;
-        border-left: 4px solid #FB8C00;
-    }
-
-    /* Pastikan tombol di dalam row tidak ter-affected */
-    .clickable-row button,
-    .clickable-row select,
-    .clickable-row textarea,
-    .clickable-row input {
-        pointer-events: all;
+    .surat-btn-fullscreen {
+        background: #3498db;
+        color: white;
     }
     
-    /* Status Modal Styles */
-    .status-modal {
-        display: none;
+    .surat-btn-fullscreen:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+    
+    /* Fullscreen mode untuk surat */
+    .surat-iframe.fullscreen {
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
+        width: 100vw;
+        height: 100vh;
         z-index: 9999;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .status-modal.show {
-        display: flex;
-    }
-
-    .status-content {
         background: white;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 600px;
-        padding: 0;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-
-    .status-header {
-        background: #FB8C00;
-        color: white;
-        padding: 20px;
-        border-radius: 12px 12px 0 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .status-header h3 {
-        margin: 0;
-        font-size: 18px;
-    }
-
-    .close-status {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-    }
-
-    .status-body {
-        padding: 30px;
     }
     
-    /* Nomor Surat Styles */
-    .nomor-surat-container {
-        background: linear-gradient(135deg, #fef9e7 0%, #fdebd0 100%);
-        border: 2px solid #FB8C00;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    
-    .nomor-surat-label {
-        font-size: 14px;
-        font-weight: 600;
-        color: #FB8C00;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .nomor-surat-value {
-        font-size: 18px;
-        font-weight: 700;
-        color: #7d6608;
-        font-family: 'Courier New', monospace;
-    }
-    
-    /* Modal Surat Tugas Styles */
-    #suratTugasModal .modal-content {
-        max-width: 900px;
+    /* Eviden Modal Styles */
+    .eviden-modal .modal-content {
+        max-width: 800px;
         width: 95%;
-        height: 85vh;
+        max-height: 85vh;
     }
     
-    #suratTugasContent {
-        padding: 0 !important;
-        height: calc(85vh - 130px) !important;
-        overflow: hidden !important;
+    /* Approve Modal Styles */
+    .approve-modal .modal-content {
+        max-width: 500px;
+        width: 95%;
     }
     
-    #suratIframe {
-        width: 100%;
-        height: 100%;
-        border: none;
+    /* Reject Modal Styles */
+    .reject-modal .modal-content {
+        max-width: 600px;
+        width: 95%;
     }
     
-    /* Tombol aksi surat */
-    .surat-actions {
-        padding: 15px 25px;
-        border-top: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f8f9fa;
-        border-radius: 0 0 15px 15px;
+    /* Return Modal Styles */
+    .return-modal .modal-content {
+        max-width: 600px;
+        width: 95%;
+        max-height: 85vh;
     }
     
-    /* Responsive */
-    @media (max-width:768px){
-        .search-filter-container{flex-direction:column;align-items:stretch}
-        .search-box,.filter-select{min-width:100%;width:100%}
+    /* Nomor Surat Modal Styles */
+    .nomor-surat-modal .modal-content {
+        max-width: 500px;
+        width: 95%;
+    }
+    
+    /* ============================================
+       SEARCH & FILTER (SAMA SEPERTI SEKRETARIAT)
+    ============================================ */
+    .search-filter-container{display:flex;align-items:center;gap:15px;margin-bottom:20px;flex-wrap:wrap;background:#f8f9fa;padding:15px;border-radius:10px;border:1px solid #e9ecef}
+    .search-box{position:relative;flex:1;min-width:300px}
+    .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;transition:all 0.3s;background:white}
+    .search-input:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
+    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d}
+    .btn-primary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#FB8C00;color:#fff}
+    .btn-primary:hover{background:#e67e22;transform:translateY(-2px)}
+    .btn-secondary{padding:10px 20px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff}
+    .btn-secondary:hover{background:#7f8c8d}
+    .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#FB8C00;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
+    .back-btn:hover{background:#e67e22;transform:translateY(-2px)}
+    .filter-select{padding:12px 15px;border:1px solid #ddd;border-radius:8px;font-size:14px;background:white;color:#495057;min-width:180px;cursor:pointer;transition:all 0.3s;height:44px}
+    
+    /* ============================================
+       RESPONSIVE
+    ============================================ */
+    @media (max-width: 1400px) {
+        .surat-modal .modal-content {
+            max-width: 95% !important;
+            min-width: auto !important;
+        }
+    }
+    
+    @media (max-width: 992px){
         .detail-grid{grid-template-columns:1fr}
         .modal-content{width:95%;margin:10px}
-        .detail-content{padding:15px}
+        .detail-content{padding:20px}
+        .search-filter-container{flex-direction:column}
+        .search-box{width:100%;min-width:100%}
+        .filter-select{width:100%}
         .modal-actions{flex-direction:column}
-        .modal-btn{justify-content:center}
-        .approve-modal-content{width:95%;margin:10px}
-        .approve-modal-body{padding:15px}
-        .approve-modal-actions{flex-direction:column}
-        .approve-btn{justify-content:center}
-        #suratTugasModal .modal-content {
-            max-width: 95%;
-            height: 90vh;
+        .modal-btn{justify-content:center;width:100%}
+        
+        .file-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
         }
-        #suratTugasContent {
-            height: calc(90vh - 130px) !important;
+        
+        .file-info {
+            width: 100%;
+        }
+        
+        .preview-btn, .download-btn {
+            width: 100%;
+            margin-left: 0;
+            margin-top: 8px;
+            justify-content: center;
+        }
+        
+        /* Table responsive */
+        .clickable-row {
+            display: block;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .clickable-row td {
+            display: block;
+            text-align: right;
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .clickable-row td::before {
+            content: attr(data-label);
+            float: left;
+            font-weight: bold;
+                text-transform: uppercase;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .clickable-row td:last-child {
+            border-bottom: none;
+        }
+        
+        /* Responsive untuk action buttons */
+        .action-buttons {
+            flex-wrap: wrap !important;
+            gap: 4px !important;
+        }
+        
+        /* Surat modal responsive */
+        .surat-preview-container {
+            height: calc(85vh - 150px);
+        }
+        
+        .surat-toolbar {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .surat-btn {
+            padding: 8px 15px;
+            font-size: 13px;
         }
     }
-    /* MODIFIKASI CSS untuk dosen-avatar */
-/* Tambahkan atau replace CSS yang ada dengan ini */
-
-.dosen-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #FB8C00;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 12px;
-    font-weight: 600;
-    overflow: hidden; /* Untuk memastikan gambar tidak keluar dari border-radius */
-    flex-shrink: 0; /* Prevent shrinking */
-    position: relative;
-}
-
-/* Style untuk gambar di dalam avatar */
-.dosen-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-/* Fallback ketika gambar error */
-.dosen-avatar > div {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #FB8C00;
-    color: white;
-    font-size: 12px;
-    font-weight: 600;
-    border-radius: 50%;
-}
+    
+    @media (max-width: 768px){
+        .container{max-width:100%;padding:0 15px}
+        .card{padding:15px}
+        .modal-header{padding:15px 20px}
+        .modal-header h3{font-size:18px}
+        .detail-section{padding:18px}
+        .dosen-item{padding:10px;gap:12px}
+        .dosen-avatar{width:40px;height:40px}
+        .dosen-name{font-size:15px}
+        
+        /* Detail modal khusus di mobile */
+        .detail-modal .modal-content {
+            max-width: 95% !important;
+            width: 95% !important;
+        }
+        
+        /* Surat modal di mobile */
+        .surat-modal .modal-content {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            border-radius: 0;
+            margin: 0;
+        }
+        
+        .surat-preview-container {
+            height: calc(100vh - 140px);
+            border-radius: 0;
+        }
+        
+        .surat-preview-header {
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 15px;
+        }
+        
+        .surat-toolbar {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .surat-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 10px 5px;
+            font-size: 12px;
+        }
+        
+        /* Tombol aksi di mobile */
+        .action-buttons {
+            flex-direction: row !important;
+            justify-content: center !important;
+            gap: 4px !important;
+        }
+        
+        /* Alert di mobile */
+        .alert-modal {
+            left: 10px;
+            right: 10px;
+            top: 10px;
+            max-width: calc(100% - 20px);
+        }
+    }
 </style>
 </head>
 <body>
@@ -591,7 +921,7 @@
         <div class="card-header">
             <h3><i class="fa-solid fa-table"></i> Total Pengajuan Surat - Dekan</h3>
             <div>
-                <span style="color:#7f8c8d;font-size:13px">
+                <span id="filterInfo" style="color:#7f8c8d;font-size:13px">
                     <?php
                     $filter_info = "Semua Data";
                     if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
@@ -599,10 +929,10 @@
                     if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
                     
                     $jenis_info = "";
-                    if($this->input->get('jenis_penugasan') == 'perorangan') $jenis_info = " - Perorangan";
-                    if($this->input->get('jenis_penugasan') == 'kelompok') $jenis_info = " - Kelompok";
+                    if($this->input->get('jenis_penugasan') == 'perorangan') $jenis_info = " [Perorangan]";
+                    if($this->input->get('jenis_penugasan') == 'kelompok') $jenis_info = " [Kelompok]";
                     
-                    echo "Menampilkan: " . $filter_info . $jenis_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
+                    echo $filter_info . $jenis_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
                     ?>
                 </span>
             </div>
@@ -624,14 +954,14 @@
                     </div>
                 </div>
                 
-                <select name="status" class="filter-select">
+                <select name="status" class="filter-select" onchange="this.form.submit()">
                     <option value="">Semua Status</option>
                     <option value="pending" <?= ($this->input->get('status') == 'pending') ? 'selected' : '' ?>>Menunggu</option>
                     <option value="approved" <?= ($this->input->get('status') == 'approved') ? 'selected' : '' ?>>Disetujui</option>
                     <option value="rejected" <?= ($this->input->get('status') == 'rejected') ? 'selected' : '' ?>>Ditolak</option>
                 </select>
                 
-                <select name="jenis_penugasan" class="filter-select">
+                <select name="jenis_penugasan" class="filter-select" onchange="this.form.submit()">
                     <option value="">Semua Jenis Penugasan</option>
                     <option value="perorangan" <?= ($this->input->get('jenis_penugasan') == 'perorangan') ? 'selected' : '' ?>>Perorangan</option>
                     <option value="kelompok" <?= ($this->input->get('jenis_penugasan') == 'kelompok') ? 'selected' : '' ?>>Kelompok</option>
@@ -655,12 +985,12 @@
                     <tr>
                         <th>No</th>
                         <th>Nama Kegiatan</th>
+                        <th>Nomor Surat</th>
                         <th>Penyelenggara</th>
                         <th>Tanggal Pengajuan</th>
                         <th>Tanggal Kegiatan</th>
                         <th>Jenis</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
+                        <th style="min-width: 160px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -686,25 +1016,71 @@
                             }
                             
                             $tgl_pengajuan = isset($s['created_at']) && $s['created_at'] ? date('d M Y', strtotime($s['created_at'])) : '-';
-                            $tgl_kegiatan = isset($s['tanggal_kegiatan']) && $s['tanggal_kegiatan'] ? date('d M Y', strtotime($s['tanggal_kegiatan'])) : '-';
+                            
+                            // LOGIKA TANGGAL KEGIATAN YANG SAMA DENGAN SEKRETARIAT
+                            $jenis_date = isset($s['jenis_date']) ? $s['jenis_date'] : '';
+                            $tanggal_kegiatan_display = '-';
+                            
+                            if ($jenis_date === 'Periode') {
+                                $periode_value = isset($s['periode_value']) && !empty($s['periode_value']) ? $s['periode_value'] : '-';
+                                $tanggal_kegiatan_display = '<span class="badge" style="background: #fef9e7; color: #b06c00; padding: 6px 12px; border-radius: 15px; font-size: 12px; font-weight: 600;">';
+                                $tanggal_kegiatan_display .= '<i class="fas fa-calendar-alt"></i> ' . htmlspecialchars($periode_value);
+                                $tanggal_kegiatan_display .= '</span>';
+                            } else {
+                                $tanggal_kegiatan = '';
+                                if (isset($s['tanggal_kegiatan']) && !empty($s['tanggal_kegiatan'])) {
+                                    $tanggal_kegiatan = $s['tanggal_kegiatan'];
+                                } elseif (isset($s['tanggal_awal_kegiatan']) && !empty($s['tanggal_awal_kegiatan'])) {
+                                    $tanggal_kegiatan = $s['tanggal_awal_kegiatan'];
+                                } elseif (isset($s['tanggal_mulai']) && !empty($s['tanggal_mulai'])) {
+                                    $tanggal_kegiatan = $s['tanggal_mulai'];
+                                } elseif (isset($s['created_at']) && !empty($s['created_at'])) {
+                                    $tanggal_kegiatan = $s['created_at'];
+                                }
+                                
+                                if (!empty($tanggal_kegiatan) && $tanggal_kegiatan !== '-') {
+                                    try {
+                                        $tanggal_obj = new DateTime($tanggal_kegiatan);
+                                        $hari = $tanggal_obj->format('j');
+                                        $bulan = $tanggal_obj->format('n');
+                                        
+                                        $bulan_indonesia = [
+                                            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+                                            5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu',
+                                            9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+                                        ];
+                                        
+                                        $bulan_nama = $bulan_indonesia[$bulan] ?? 'Desember';
+                                        $tahun = $tanggal_obj->format('Y');
+                                        
+                                        $tanggal_kegiatan_display = htmlspecialchars($hari . ' ' . $bulan_nama . ' ' . $tahun);
+                                    } catch (Exception $e) {
+                                        $tanggal_kegiatan_display = htmlspecialchars($tanggal_kegiatan);
+                                    }
+                                } else {
+                                    $tanggal_kegiatan_display = '-';
+                                }
+                            }
                     ?>
+                    <!-- BARIS TABEL BISA DIKLIK UNTUK DETAIL -->
                     <tr onclick="showRowDetail(<?= (int)$s['id'] ?>)" style="cursor: pointer;" class="clickable-row" data-status="<?= $st_key ?>">
-                        <td><?= $i ?></td>
-                        <td><strong><?= htmlspecialchars($s['nama_kegiatan'] ?? '-') ?></strong></td>
-                        <td><?= htmlspecialchars($s['penyelenggara'] ?? '-') ?></td>
-                        <td><?= $tgl_pengajuan ?></td>
-                        <td><?= $tgl_kegiatan ?></td>
-                        <td><?= htmlspecialchars($s['jenis_pengajuan'] ?? '-') ?></td>
-                        <td><?= $badge ?></td>
-                        <td>
-                            <div style="display:flex;gap:6px">
-                                <!-- Tombol Eviden -->
-                                <button class="btn btn-eviden" onclick="event.stopPropagation(); showEvidenModal(<?= (int)$s['id'] ?>)" title="Lihat Eviden">
+                        <td data-label="No"><?= $i ?></td>
+                        <td data-label="Nama Kegiatan"><strong><?= htmlspecialchars($s['nama_kegiatan'] ?? '-') ?></strong></td>
+                        <td data-label="Nomor Surat"><?= htmlspecialchars($s['nomor_surat'] ?? '-') ?></td>
+                        <td data-label="Penyelenggara"><?= htmlspecialchars($s['penyelenggara'] ?? '-') ?></td>
+                        <td data-label="Tanggal Pengajuan"><?= $tgl_pengajuan ?></td>
+                        <td data-label="Tanggal Kegiatan"><?= $tanggal_kegiatan_display ?></td>
+                        <td data-label="Jenis"><?= htmlspecialchars($s['jenis_pengajuan'] ?? '-') ?></td>
+                        <!-- TOMBOL AKSI DALAM CONTAINER FLEX -->
+                        <td data-label="Aksi">
+                            <div class="action-buttons">
+                                <!-- Tombol Eviden (Hijau) -->
+                                <button class="btn btn-eviden" onclick="event.stopPropagation(); handleEvidenClick(<?= (int)$s['id'] ?>, '<?= htmlspecialchars($s['nama_kegiatan'] ?? '', ENT_QUOTES) ?>')" title="Lihat Eviden">
                                     <i class="fas fa-file-image"></i>
                                 </button>
 
-                                <!-- Tombol Mata (Surat Tugas) -->
-                                <button class="btn btn-detail" onclick="event.stopPropagation(); showSuratTugasModal(<?= (int)$s['id'] ?>)" title="Lihat Surat Tugas">
+                                <!-- TOMBOL MATA: Untuk menampilkan preview surat (iframe) -->
+                                <button class="btn btn-detail" onclick="event.stopPropagation(); showSuratModal(<?= (int)$s['id'] ?>)" title="Lihat Surat">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
                                 
@@ -712,13 +1088,13 @@
                                     <button class="btn btn-approve" onclick="event.stopPropagation(); showApproveModal(<?= $s['id'] ?>, '<?= htmlspecialchars($s['nama_kegiatan'] ?? '') ?>')" title="Setujui">
                                         <i class="fa-solid fa-check"></i>
                                     </button>
-                                    <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModal(<?= $s['id'] ?>)" title="Tolak">
+                                    <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModal(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'] ?? '')) ?>')" title="Tolak">
                                         <i class="fa-solid fa-times"></i>
                                     </button>
-                                <!-- TAMBAHKAN TOMBOL RETURN DI SINI (SAMA SEPERTI DASHBOARD UTAMA) -->
+                                <!-- TOMBOL RETURN -->
                                 <?php elseif(in_array($s['status'], ['disetujui dekan', 'ditolak dekan'])): ?>
                                     <!-- Tombol Return: Kembalikan ke status awal -->
-                                    <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModalNew(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'] ?? '')) ?>')" title="Kembalikan Pengajuan">
+                                    <button class="btn btn-return" onclick="event.stopPropagation(); showReturnModal(<?= $s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'] ?? '')) ?>')" title="Kembalikan Pengajuan">
                                         <i class="fa-solid fa-undo"></i>
                                     </button>
                                 <?php endif; ?>
@@ -744,7 +1120,7 @@
             </table>
         </div>
 
-        <div class="pagination-info">
+        <div class="pagination-info" style="margin-top: 20px; text-align: center; color: #7f8c8d; font-size: 13px;">
             <?php
             $filter_info = "Semua Data";
             if($this->input->get('status') == 'pending') $filter_info = "Menunggu";
@@ -752,8 +1128,8 @@
             if($this->input->get('status') == 'rejected') $filter_info = "Ditolak";
             
             $jenis_info = "";
-            if($this->input->get('jenis_penugasan') == 'perorangan') $jenis_info = " - Perorangan";
-            if($this->input->get('jenis_penugasan') == 'kelompok') $jenis_info = " - Kelompok";
+            if($this->input->get('jenis_penugasan') == 'perorangan') $jenis_info = " [Perorangan]";
+            if($this->input->get('jenis_penugasan') == 'kelompok') $jenis_info = " [Kelompok]";
             
             echo "Menampilkan: " . $filter_info . $jenis_info . " (" . (isset($total_surat) ? $total_surat : '0') . " data)";
             ?>
@@ -761,360 +1137,1041 @@
     </div>
 </div>
 
-<!-- Preview Modal -->
-<div id="previewModal" class="preview-modal">
-    <div class="preview-content">
-        <div class="preview-header">
-            <h3 id="previewTitle">Preview File</h3>
-            <button class="preview-close" onclick="closePreviewModal()">&times;</button>
-        </div>
-        <div class="preview-body" id="previewBody">
-            <!-- Preview content akan diisi oleh JavaScript -->
-        </div>
-    </div>
-</div>
+<!-- Modal Stack Container -->
+<div id="modalStack" class="modal-stack"></div>
 
-<!-- Detail Modal -->
-<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
-    <div class="modal-content" onclick="event.stopPropagation()">
+<!-- Modal Templates -->
+<template id="detailModalTemplate">
+    <div class="modal-content detail-modal">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
-            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
+            <button class="close-modal">&times;</button>
         </div>
-        <div class="detail-content" id="detailContent">
+        <div class="detail-content">
             <!-- Content akan diisi oleh JavaScript -->
         </div>
     </div>
-</div>
+</template>
 
-<!-- Eviden Modal -->
-<div id="evidenModal" class="modal" onclick="modalClickOutside(event,'evidenModal')">
-    <div class="modal-content" onclick="event.stopPropagation()">
+<template id="suratModalTemplate">
+    <div class="modal-content surat-modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-file-pdf"></i> Preview Surat Tugas</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="detail-content">
+            <div class="surat-preview-container">
+                <div class="surat-preview-header">
+                    <div style="font-weight:600;color:#2c3e50;font-size:14px">
+                        <i class="fa-solid fa-file-contract"></i> Preview Surat Tugas
+                    </div>
+                    <div class="surat-toolbar">
+                        <button class="surat-btn surat-btn-download" onclick="downloadPDF('')" title="Download PDF">
+                            <i class="fa-solid fa-download"></i> Download
+                        </button>
+                        <button class="surat-btn surat-btn-print" onclick="printPDF('')" title="Print Surat">
+                            <i class="fa-solid fa-print"></i> Print
+                        </button>
+                        <button class="surat-btn surat-btn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen">
+                            <i class="fa-solid fa-expand"></i> Fullscreen
+                        </button>
+                    </div>
+                </div>
+                <iframe class="surat-iframe" id="suratIframe" style="width:100%;height:100%;border:none"></iframe>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="evidenModalTemplate">
+    <div class="modal-content eviden-modal">
         <div class="modal-header">
             <h3><i class="fa-solid fa-file-image"></i> File Evidence</h3>
-            <button class="close-modal" onclick="closeModal('evidenModal')">&times;</button>
+            <button class="close-modal">&times;</button>
         </div>
-        <div class="detail-content" id="evidenContent">
+        <div class="detail-content">
             <!-- Content akan diisi oleh JavaScript -->
         </div>
     </div>
-</div>
+</template>
 
-<!-- Approve Modal -->
-<div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
-    <div class="approve-modal-content" onclick="event.stopPropagation()">
-        <div class="approve-modal-header">
-            <h3><i class="fa-solid fa-check-circle"></i> Konfirmasi Persetujuan</h3>
-            <button class="close-modal" onclick="closeModal('approveModal')">&times;</button>
+<template id="previewModalTemplate">
+    <div class="preview-content">
+        <div class="preview-header">
+            <h3>Preview File</h3>
+            <button class="preview-close">&times;</button>
         </div>
-        <div class="approve-modal-body">
-            <div class="approve-info-box">
-                <strong><i class="fa-solid fa-info-circle"></i> Anda akan menyetujui pengajuan:</strong>
-                <span id="approveNamaKegiatan"></span>
+        <div class="preview-body"></div>
+    </div>
+</template>
+
+<template id="approveModalTemplate">
+    <div class="modal-content approve-modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-check-circle"></i> Konfirmasi Persetujuan</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div style="padding:25px">
+            <div style="text-align:center;margin-bottom:20px">
+                <i class="fa-solid fa-question-circle" style="font-size:48px;color:#27ae60;margin-bottom:15px"></i>
+                <h4 style="color:#2c3e50;margin-bottom:10px">Setujui Pengajuan?</h4>
+                <p class="approve-nama-kegiatan" style="font-weight:600;color:#7f8c8d;margin-bottom:20px"></p>
             </div>
             
-            <p style="color:#7f8c8d;margin-bottom:20px">
-                <i class="fa-solid fa-exclamation-triangle"></i> 
-                Tindakan ini tidak dapat dibatalkan. Pastikan Anda telah memeriksa semua detail pengajuan.
-            </p>
-            
-            <form id="approveForm" method="POST" action="">
+            <form class="approve-form" method="POST" action="">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
                 
-                <div class="approve-modal-actions">
-                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
+                <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:25px;padding-top:20px;border-top:1px solid #e9ecef">
+                    <button type="button" class="btn btn-cancel" style="background:#95a5a6;color:white">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
-                    <button type="submit" class="approve-btn approve-btn-submit">
+                    <button type="submit" class="btn btn-submit" style="background:#27ae60;color:white">
                         <i class="fa-solid fa-check"></i> Ya, Setujui
                     </button>
                 </div>
             </form>
         </div>
     </div>
-</div>
+</template>
 
-<!-- Reject Modal -->
-<div id="rejectModal" class="modal" onclick="modalClickOutside(event,'rejectModal')">
-    <div class="modal-content" onclick="event.stopPropagation()">
+<template id="rejectModalTemplate">
+    <div class="modal-content reject-modal">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-ban"></i> Tolak Pengajuan</h3>
-            <button class="close-modal" onclick="closeModal('rejectModal')">&times;</button>
+            <h3><i class="fa-solid fa-ban"></i> Konfirmasi Penolakan</h3>
+            <button class="close-modal">&times;</button>
         </div>
         <div style="padding:25px">
-            <p style="margin-bottom:10px;color:#7f8c8d">Berikan alasan penolakan:</p>
-            <textarea id="rejectionNotes" rows="5" placeholder="Masukkan alasan penolakan..." style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-family:inherit;resize:vertical"></textarea>
-            <div style="text-align:right;margin-top:12px">
-                <button class="btn btn-reject" onclick="confirmReject()">
-                    <i class="fa-solid fa-paper-plane"></i> Kirim Penolakan
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Return Modal (BARU - SAMA SEPERTI DASHBOARD UTAMA) -->
-<div id="returnConfirmModal" class="modal">
-    <div class="return-modal-content" onclick="event.stopPropagation()">
-        <div class="return-modal-header">
-            <h3><i class="fa-solid fa-undo"></i> Konfirmasi Pengembalian</h3>
-            <button class="close-modal" onclick="closeModal('returnConfirmModal')">&times;</button>
-        </div>
-        <div class="return-modal-body">
-            <div class="return-info-box">
-                <strong style="color: #ff9800;"><i class="fa-solid fa-exclamation-triangle"></i> Peringatan</strong>
-                <span id="returnNamaKegiatan">-</span>
+            <div class="reject-info-box">
+                <strong><i class="fa-solid fa-exclamation-triangle"></i> Anda akan menolak pengajuan:</strong>
+                <span class="reject-nama-kegiatan">-</span>
             </div>
             
-            <p style="margin-bottom:20px;color:#e65100;font-weight:600">
+            <p style="margin-bottom:15px;color:#7f8c8d">
+                <i class="fa-solid fa-info-circle"></i> 
+                Berikan alasan penolakan untuk pengajuan ini:
+            </p>
+            
+            <form class="reject-form" method="POST" action="">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <textarea 
+                    class="reject-textarea" 
+                    placeholder="Masukkan alasan penolakan pengajuan ini..."
+                    required
+                ></textarea>
+                
+                <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:12px">
+                    <button type="button" class="btn btn-cancel" style="background:#95a5a6;color:white">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="btn btn-submit-reject" style="background:#e74c3c;color:white">
+                        <i class="fa-solid fa-ban"></i> Ya, Tolak
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>
+
+<template id="returnModalTemplate">
+    <div class="modal-content return-modal">
+        <div class="modal-header" style="background: #ff9800;">
+            <h3><i class="fa-solid fa-undo"></i> Konfirmasi Pengembalian</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div style="padding:25px">
+            <div style="background:#fff3e0; border:1px solid #ff9800; border-radius:8px; padding:15px; margin-bottom:20px">
+                <strong style="color:#ff9800; display:block; margin-bottom:5px">
+                    <i class="fa-solid fa-exclamation-triangle"></i> Peringatan
+                </strong>
+                <span class="return-nama-kegiatan">-</span>
+            </div>
+            
+            <p style="margin-bottom:20px; color:#e65100; font-weight:600">
                 ⚠️ Pengajuan ini akan dikembalikan ke status sebelumnya dan dapat diajukan ulang.
             </p>
             
-            <div class="return-modal-actions">
-                <button type="button" class="return-btn return-btn-cancel" onclick="closeModal('returnConfirmModal')">
-                    <i class="fa-solid fa-times"></i> Batal
-                </button>
-                <button type="button" class="return-btn return-btn-submit" onclick="confirmReturn()">
-                    <i class="fa-solid fa-undo"></i> Ya, Kembalikan
-                </button>
-            </div>
+            <form class="return-form" method="POST" action="">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:25px; padding-top:20px; border-top:1px solid #e9ecef">
+                    <button type="button" class="btn btn-cancel" style="background:#95a5a6; color:white">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="btn btn-confirm-return" style="background:#ff9800; color:white">
+                        <i class="fa-solid fa-undo"></i> Ya, Kembalikan
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
-
-<!-- Status Modal -->
-<div id="statusModal" class="status-modal">
-    <div class="status-content">
-        <div class="status-header">
-            <h3>Status Pengajuan Surat Tugas</h3>
-            <button class="close-status">&times;</button>
-        </div>
-        <div class="status-body">
-            <div class="progress-track">
-                <div class="progress-line" id="progressLine"></div>
-
-                <div class="progress-step status-completed" id="step1">
-                    <div class="step-icon">
-                        <i class="fas fa-check" id="step1-icon"></i>
-                    </div>
-                    <div class="step-text" id="step1-text">Mengirim</div>
-                    <div class="step-date" id="step1-date">-</div>
-                </div>
-                <div class="progress-estimasi">
-                    <span id="est1">-</span>
-                </div>
-
-                <div class="progress-step status-in-progress" id="step2">
-                    <div class="step-icon">
-                        <i class="fas fa-clock" id="step2-icon"></i>
-                    </div>
-                    <div class="step-text" id="step2-text">Persetujuan KK</div>
-                    <div class="step-date" id="step2-date">-</div>
-                </div>
-                <div class="progress-estimasi">
-                    <span id="est2">-</span>
-                </div>
-
-                <div class="progress-step status-pending" id="step3">
-                    <div class="step-icon">
-                        <i class="fas fa-clock" id="step3-icon"></i>
-                    </div>
-                    <div class="step-text" id="step3-text">Persetujuan Sekretariat</div>
-                    <div class="step-date" id="step3-date">-</div>
-                </div>
-                <div class="progress-estimasi">
-                    <span id="est3">-</span>
-                </div>
-
-                <div class="progress-step status-pending" id="step4">
-                    <div class="step-icon">
-                        <i class="fas fa-clock" id="step4-icon"></i>
-                    </div>
-                    <div class="step-text" id="step4-text">Persetujuan Dekan</div>
-                    <div class="step-date" id="step4-date">-</div>
-                </div>
-            </div>
-
-            <div class="status-info mt-4">
-                <h5>Informasi Status:</h5>
-                <p id="status-description">Memuat informasi status...</p>
-                <div id="rejection-reason" class="rejection-reason" style="display: none;">
-                    <h6>Alasan Penolakan:</h6>
-                    <p id="rejection-text"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Surat Tugas Modal -->
-<div id="suratTugasModal" class="modal" onclick="modalClickOutside(event,'suratTugasModal')">
-    <div class="modal-content" style="max-width: 900px;" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-file-contract"></i> Surat Tugas</h3>
-            <button class="close-modal" onclick="closeModal('suratTugasModal')">&times;</button>
-        </div>
-        <div class="detail-content" id="suratTugasContent" style="padding: 0;">
-            <div id="suratLoading" style="text-align:center;padding:40px; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:48px;color:#FB8C00"></i>
-                <p style="margin-top:20px;color:#7f8c8d">Memuat surat tugas...</p>
-            </div>
-            <iframe 
-                id="suratIframe" 
-                style="width:100%; height:100%; border:none; display:none;"
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                allow="fullscreen"
-            ></iframe>
-        </div>
-        <div class="surat-actions">
-            <div>
-                <button class="btn btn-primary" onclick="cetakSurat()" style="padding:8px 16px;">
-                    <i class="fa-solid fa-print"></i> Cetak
-                </button>
-                <button class="btn btn-success" onclick="downloadSurat()" style="padding:8px 16px; margin-left:10px;">
-                    <i class="fa-solid fa-download"></i> Download
-                </button>
-            </div>
-            <button class="modal-btn modal-btn-close" onclick="closeModal('suratTugasModal')">
-                <i class="fa-solid fa-times"></i> Tutup
-            </button>
-        </div>
-    </div>
-</div>
+</template>
 
 <script>
-// Data dari controller
-const suratList = <?= isset($surat_list) ? json_encode($surat_list) : '[]' ?>;
+// ===== MULTI MODAL MANAGEMENT SYSTEM (SAMA DENGAN SEKRETARIAT) =====
+
+// Global variables
+let modalManager;
 let currentRejectId = null;
 let currentApproveId = null;
-let currentSuratId = null;
 let currentReturnId = null;
 let currentReturnNamaKegiatan = null;
+let selectedSurat = null;
+let currentSuratPdfUrl = '';
+let isFullscreen = false;
 
-// ============================================
-// FUNGSI RETURN MODAL (SAMA SEPERTI DASHBOARD UTAMA)
-// ============================================
-
-// Fungsi untuk menampilkan return modal baru
-function showReturnModalNew(id, namaKegiatan) {
-    currentReturnId = id;
-    currentReturnNamaKegiatan = namaKegiatan;
-    
-    // Set data ke modal
-    document.getElementById('returnNamaKegiatan').textContent = namaKegiatan;
-    
-    // Tampilkan modal
-    document.getElementById('returnConfirmModal').classList.add('show');
-}
-
-// Fungsi untuk konfirmasi return
-function confirmReturn() {
-    if (!currentReturnId) return;
-    
-    const searchParams = new URLSearchParams(window.location.search);
-    const from = 'total';
-    const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
-    const jenis_penugasan = searchParams.get('jenis_penugasan') || '';
-    
-    let actionUrl = `<?= base_url("dekan/return_pengajuan/") ?>${currentReturnId}?from=${from}&tahun=${tahun}`;
-    if (jenis_penugasan) {
-        actionUrl += `&jenis_penugasan=${jenis_penugasan}`;
+// PERBAIKAN: Fungsi untuk menampilkan alert
+function showAlert(message, type = 'warning') {
+    // Hapus alert sebelumnya jika ada
+    const existingAlert = document.querySelector('.alert-modal');
+    if (existingAlert) {
+        existingAlert.remove();
     }
     
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = actionUrl;
-
-    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
-    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
-    const inpCsrf = document.createElement('input');
-    inpCsrf.type = 'hidden';
-    inpCsrf.name = csrfName;
-    inpCsrf.value = csrfHash;
-    form.appendChild(inpCsrf);
+    const alert = document.createElement('div');
+    alert.className = `alert-modal ${type}`;
     
-    document.body.appendChild(form);
-    form.submit();
+    let icon = 'fa-info-circle';
+    if (type === 'error') icon = 'fa-exclamation-circle';
+    if (type === 'success') icon = 'fa-check-circle';
+    if (type === 'warning') icon = 'fa-exclamation-triangle';
+    
+    alert.innerHTML = `
+        <div class="alert-icon">
+            <i class="fas ${icon}"></i>
+        </div>
+        <div class="alert-content">
+            <strong>${type === 'error' ? 'Error' : type === 'success' ? 'Sukses' : 'Peringatan'}</strong>
+            <div>${message}</div>
+        </div>
+        <button class="alert-close">&times;</button>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Event listener untuk tombol close
+    alert.querySelector('.alert-close').addEventListener('click', () => {
+        alert.remove();
+    });
+    
+    // Auto remove setelah 5 detik
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
 }
 
-// Fungsi untuk meng-update tombol return di tabel
-function updateReturnButtons() {
-    const returnButtons = document.querySelectorAll('button[onclick*="showReturnModal"]');
-    returnButtons.forEach(button => {
-        const onclickAttr = button.getAttribute('onclick');
-        if (onclickAttr) {
-            const match = onclickAttr.match(/showReturnModal\((\d+),\s*'([^']+)'\)/);
-            if (match) {
-                const id = match[1];
-                const namaKegiatan = match[2];
-                
-                button.setAttribute('onclick', `event.stopPropagation(); showReturnModalNew(${id}, '${escapeHtml(namaKegiatan.replace(/'/g, "\\'"))}')`);
-            } else {
-                const match2 = onclickAttr.match(/showReturnModal\((\d+)\)/);
-                if (match2) {
-                    const id = match2[1];
-                    const row = button.closest('tr');
-                    const namaKegiatan = row.querySelector('td:nth-child(2) strong')?.textContent || 'Nama Kegiatan';
-                    
-                    button.setAttribute('onclick', `event.stopPropagation(); showReturnModalNew(${id}, '${escapeHtml(namaKegiatan)}')`);
+// Modal Manager Class
+class ModalManager {
+    constructor() {
+        this.modals = [];
+        this.activeModal = null;
+        this.modalStack = document.getElementById('modalStack');
+        this.modalZIndex = 1050;
+    }
+
+    // Create a new modal
+    createModal(type, data = {}) {
+        // PERBAIKAN: Cek jika sudah ada 2 modal terbuka (MAKSIMAL 2)
+        if (this.modals.length >= 2) {
+            showAlert('Maksimal hanya dapat membuka 2 modal sekaligus. Tutup salah satu modal terlebih dahulu.', 'warning');
+            return null;
+        }
+        
+        const modalId = `modal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const modalItem = document.createElement('div');
+        modalItem.className = 'modal-item';
+        modalItem.id = modalId;
+        modalItem.style.zIndex = this.modalZIndex++;
+        
+        // Create modal content based on type
+        let modalContent;
+        switch(type) {
+            case 'detail':
+                modalContent = this.createDetailModal(data);
+                break;
+            case 'surat':
+                modalContent = this.createSuratModal(data);
+                break;
+            case 'eviden':
+                modalContent = this.createEvidenModal(data);
+                break;
+            case 'preview':
+                modalContent = this.createPreviewModal(data);
+                break;
+            case 'approve':
+                modalContent = this.createApproveModal(data);
+                break;
+            case 'reject':
+                modalContent = this.createRejectModal(data);
+                break;
+            case 'return':
+                modalContent = this.createReturnModal(data);
+                break;
+            default:
+                modalContent = this.createGenericModal(data);
+        }
+        
+        modalItem.innerHTML = modalContent;
+        this.modalStack.appendChild(modalItem);
+        
+        // PERBAIKAN: Tambahkan nomor badge pada modal
+        const modalNumber = this.modals.length + 1;
+        const numberBadge = document.createElement('div');
+        numberBadge.className = 'modal-number-badge';
+        numberBadge.textContent = modalNumber;
+        modalItem.appendChild(numberBadge);
+        
+        // Add to modals array
+        const modalObj = {
+            id: modalId,
+            type: type,
+            element: modalItem,
+            data: data,
+            number: modalNumber
+        };
+        
+        this.modals.push(modalObj);
+        this.setActiveModal(modalId);
+        
+        // Update modal positions
+        this.updateModalPositions();
+        
+        // Add event listeners
+        this.attachEventListeners(modalItem, modalId, type, data);
+        
+        // Animate appearance
+        setTimeout(() => {
+            modalItem.classList.add('active', 'new');
+            setTimeout(() => modalItem.classList.remove('new'), 300);
+        }, 10);
+        
+        // Update body class
+        document.body.classList.add('modal-open');
+        
+        return modalId;
+    }
+
+    // Update positions of all modals
+    updateModalPositions() {
+        this.modals.forEach((modal, index) => {
+            const modalElement = modal.element;
+            const numberBadge = modalElement.querySelector('.modal-number-badge');
+            
+            if (numberBadge) {
+                numberBadge.textContent = index + 1;
+            }
+            
+            // Reset transform first
+            modalElement.style.transform = 'none';
+            
+            if (this.modals.length === 1) {
+                // Jika hanya 1 modal, posisi di tengah
+                modalElement.style.top = '50%';
+                modalElement.style.left = '50%';
+                modalElement.style.transform = 'translate(-50%, -50%)';
+            } else if (this.modals.length === 2) {
+                if (index === 0) {
+                    // Modal pertama pindah ke kiri atas
+                    modalElement.style.top = '50px';
+                    modalElement.style.left = '50px';
+                    modalElement.style.transform = 'none';
+                } else if (index === 1) {
+                    // Modal kedua di kanan atas
+                    modalElement.style.top = '50px';
+                    modalElement.style.right = '50px';
+                    modalElement.style.left = 'auto';
+                    modalElement.style.transform = 'none';
                 }
             }
+        });
+    }
+
+    // Create detail modal
+    createDetailModal(data) {
+        const template = document.getElementById('detailModalTemplate');
+        return template.content.cloneNode(true).querySelector('.modal-content').outerHTML;
+    }
+
+    // Create surat modal - DIUBAH: menggunakan template baru dengan toolbar
+    createSuratModal(data) {
+        const template = document.getElementById('suratModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        return modalContent.outerHTML;
+    }
+
+    // Create eviden modal
+    createEvidenModal(data) {
+        const template = document.getElementById('evidenModalTemplate');
+        return template.content.cloneNode(true).querySelector('.modal-content').outerHTML;
+    }
+
+    // Create preview modal
+    createPreviewModal(data) {
+        const template = document.getElementById('previewModalTemplate');
+        return template.content.cloneNode(true).querySelector('.preview-content').outerHTML;
+    }
+
+    // Create approve modal
+    createApproveModal(data) {
+        const template = document.getElementById('approveModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        
+        if (data.namaKegiatan) {
+            modalContent.querySelector('.approve-nama-kegiatan').textContent = data.namaKegiatan;
         }
+        if (data.suratId) {
+            const searchParams = new URLSearchParams(window.location.search);
+            const from = 'total';
+            const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
+            const jenis_penugasan = searchParams.get('jenis_penugasan') || '';
+            
+            let actionUrl = `<?= base_url("dekan/approve/") ?>${data.suratId}?from=${from}&tahun=${tahun}`;
+            if (jenis_penugasan) {
+                actionUrl += `&jenis_penugasan=${jenis_penugasan}`;
+            }
+            
+            modalContent.querySelector('.approve-form').action = actionUrl;
+        }
+        
+        return modalContent.outerHTML;
+    }
+
+    // Create reject modal
+    createRejectModal(data) {
+        const template = document.getElementById('rejectModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        
+        if (data.namaKegiatan) {
+            modalContent.querySelector('.reject-nama-kegiatan').textContent = data.namaKegiatan;
+        }
+        if (data.suratId) {
+            const searchParams = new URLSearchParams(window.location.search);
+            const from = 'total';
+            const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
+            const jenis_penugasan = searchParams.get('jenis_penugasan') || '';
+            
+            let actionUrl = `<?= base_url("dekan/reject/") ?>${data.suratId}?from=${from}&tahun=${tahun}`;
+            if (jenis_penugasan) {
+                actionUrl += `&jenis_penugasan=${jenis_penugasan}`;
+            }
+            
+            modalContent.querySelector('.reject-form').action = actionUrl;
+        }
+        
+        return modalContent.outerHTML;
+    }
+
+    // Create return modal
+    createReturnModal(data) {
+        const template = document.getElementById('returnModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        
+        if (data.namaKegiatan) {
+            modalContent.querySelector('.return-nama-kegiatan').textContent = data.namaKegiatan;
+        }
+        if (data.suratId) {
+            const searchParams = new URLSearchParams(window.location.search);
+            const from = 'total';
+            const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
+            const jenis_penugasan = searchParams.get('jenis_penugasan') || '';
+            
+            let actionUrl = `<?= base_url("dekan/return_pengajuan/") ?>${data.suratId}?from=${from}&tahun=${tahun}`;
+            if (jenis_penugasan) {
+                actionUrl += `&jenis_penugasan=${jenis_penugasan}`;
+            }
+            
+            modalContent.querySelector('.return-form').action = actionUrl;
+        }
+        
+        return modalContent.outerHTML;
+    }
+
+    // Create generic modal
+    createGenericModal(data) {
+        return `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>${data.title || 'Modal'}</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="detail-content">
+                    ${data.content || ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // Set active modal
+    setActiveModal(modalId) {
+        // Deactivate all modals
+        this.modals.forEach(modal => {
+            modal.element.classList.remove('active');
+        });
+        
+        // Activate selected modal
+        const modal = this.modals.find(m => m.id === modalId);
+        if (modal) {
+            modal.element.classList.add('active');
+            modal.element.style.zIndex = this.modalZIndex++;
+            this.activeModal = modal;
+        }
+    }
+
+    // Close modal
+    closeModal(modalId) {
+        const modalIndex = this.modals.findIndex(m => m.id === modalId);
+        if (modalIndex === -1) return;
+        
+        const modal = this.modals[modalIndex];
+        modal.element.classList.add('removing');
+        
+        setTimeout(() => {
+            if (modal.element.parentNode) {
+                modal.element.parentNode.removeChild(modal.element);
+            }
+            this.modals.splice(modalIndex, 1);
+            
+            // Update positions of remaining modals
+            this.updateModalPositions();
+            
+            // If no modals left, remove modal-open class
+            if (this.modals.length === 0) {
+                document.body.classList.remove('modal-open');
+                this.activeModal = null;
+            } else {
+                // Set the last modal as active
+                this.setActiveModal(this.modals[this.modals.length - 1].id);
+            }
+        }, 300);
+    }
+
+    // Attach event listeners to modal
+    attachEventListeners(modalElement, modalId, type, data) {
+        // Close button
+        const closeBtn = modalElement.querySelector('.close-modal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.closeModal(modalId));
+        }
+        
+        // Preview close button
+        const previewCloseBtn = modalElement.querySelector('.preview-close');
+        if (previewCloseBtn) {
+            previewCloseBtn.addEventListener('click', () => this.closeModal(modalId));
+        }
+        
+        // Cancel buttons
+        const cancelBtns = modalElement.querySelectorAll('.btn-cancel');
+        cancelBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.closeModal(modalId));
+        });
+        
+        // Type-specific event listeners
+        switch(type) {
+            case 'detail':
+                this.attachDetailModalListeners(modalElement, modalId, data);
+                break;
+            case 'surat':
+                this.attachSuratModalListeners(modalElement, modalId, data);
+                break;
+            case 'eviden':
+                this.attachEvidenModalListeners(modalElement, modalId, data);
+                break;
+            case 'approve':
+                this.attachApproveModalListeners(modalElement, modalId, data);
+                break;
+            case 'reject':
+                this.attachRejectModalListeners(modalElement, modalId, data);
+                break;
+            case 'return':
+                this.attachReturnModalListeners(modalElement, modalId, data);
+                break;
+        }
+        
+        // Click on modal to bring to front
+        modalElement.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button') && e.target.closest('button').classList.contains('close-modal')) return;
+            if (e.target.closest('button') && e.target.closest('button').classList.contains('preview-close')) return;
+            this.setActiveModal(modalId);
+        });
+        
+        // Prevent clicks inside modal from propagating to table
+        modalElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    // Attach detail modal listeners
+    attachDetailModalListeners(modalElement, modalId, data) {
+        // Load detail content if data provided
+        if (data.suratId) {
+            this.loadDetailContent(modalElement, data.suratId);
+        }
+    }
+
+    // Attach surat modal listeners - DIUBAH: untuk modal yang lebih lebar
+    attachSuratModalListeners(modalElement, modalId, data) {
+        // Load surat content if data provided
+        if (data.suratId) {
+            this.loadSuratContent(modalElement, data.suratId);
+        }
+        
+        // Setup fullscreen toggle button
+        const fullscreenBtn = modalElement.querySelector('.surat-btn-fullscreen');
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', () => {
+                const iframe = modalElement.querySelector('.surat-iframe');
+                if (iframe) {
+                    toggleIframeFullscreen(iframe);
+                }
+            });
+        }
+        
+        // Setup download button
+        const downloadBtn = modalElement.querySelector('.surat-btn-download');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentSuratPdfUrl) {
+                    downloadPDF(currentSuratPdfUrl);
+                }
+            });
+        }
+        
+        // Setup print button
+        const printBtn = modalElement.querySelector('.surat-btn-print');
+        if (printBtn) {
+            printBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentSuratPdfUrl) {
+                    printPDF(currentSuratPdfUrl);
+                }
+            });
+        }
+    }
+
+    // Attach eviden modal listeners
+    attachEvidenModalListeners(modalElement, modalId, data) {
+        // Load eviden content if data provided
+        if (data.suratId) {
+            this.loadEvidenContent(modalElement, data.suratId, data.namaKegiatan || '');
+        }
+    }
+
+    // Attach approve modal listeners
+    attachApproveModalListeners(modalElement, modalId, data) {
+        const form = modalElement.querySelector('.approve-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.submitApproveForm(form, data.suratId);
+            });
+        }
+    }
+
+    // Attach reject modal listeners
+    attachRejectModalListeners(modalElement, modalId, data) {
+        const form = modalElement.querySelector('.reject-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const notes = form.querySelector('.reject-textarea').value.trim();
+                if (!notes) { 
+                    showAlert('Alasan penolakan harus diisi', 'error');
+                    return; 
+                }
+                this.submitRejectForm(form, data.suratId, notes);
+            });
+        }
+    }
+
+    // Attach return modal listeners
+    attachReturnModalListeners(modalElement, modalId, data) {
+        const form = modalElement.querySelector('.return-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.submitReturnForm(form, data.suratId);
+            });
+        }
+    }
+
+    // Load detail content
+    async loadDetailContent(modalElement, suratId) {
+        try {
+            const detailContent = modalElement.querySelector('.detail-content');
+            if (!detailContent) return;
+            
+            detailContent.innerHTML = `
+                <div style="text-align:center;padding:60px;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:32px;color:#FB8C00"></i>
+                    <p style="margin-top:15px;color:#7f8c8d;font-size:16px">Memuat detail pengajuan...</p>
+                </div>
+            `;
+            
+            const data = await getSuratDetail(suratId);
+            if (!data) {
+                throw new Error('Data tidak ditemukan');
+            }
+            
+            const detailHtml = generateDetailContent(data);
+            detailContent.innerHTML = detailHtml;
+            
+        } catch (error) {
+            console.error('Error loading detail:', error);
+            const detailContent = modalElement.querySelector('.detail-content');
+            if (detailContent) {
+                detailContent.innerHTML = `
+                    <div style="text-align:center;padding:50px;color:#e74c3c">
+                        <i class="fa-solid fa-exclamation-triangle" style="font-size:56px;margin-bottom:15px"></i>
+                        <p style="font-size:16px;margin-bottom:20px">Gagal memuat detail: ${error.message}</p>
+                        <button class="modal-btn modal-btn-close" onclick="modalManager.closeModal('${modalElement.closest('.modal-item').id}')" style="margin-top:20px;padding:12px 24px;font-size:15px">
+                            <i class="fa-solid fa-times"></i> Tutup
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Load surat content - DIUBAH: untuk modal yang lebih lebar
+    async loadSuratContent(modalElement, suratId) {
+        try {
+            const iframe = modalElement.querySelector('.surat-iframe');
+            const downloadBtn = modalElement.querySelector('.surat-btn-download');
+            const printBtn = modalElement.querySelector('.surat-btn-print');
+            
+            if (!iframe) return;
+            
+            // Set loading state
+            iframe.src = 'about:blank';
+            iframe.onload = null;
+            
+            // Set URLs
+            const viewUrl = "<?= base_url('dekan/view_surat_pengajuan/') ?>" + suratId;
+            currentSuratPdfUrl = "<?= base_url('dekan/download_pdf/') ?>" + suratId;
+            
+            // Update button actions
+            if (downloadBtn) {
+                downloadBtn.onclick = (e) => {
+                    e.preventDefault();
+                    downloadPDF(currentSuratPdfUrl);
+                };
+            }
+            
+            if (printBtn) {
+                printBtn.onclick = (e) => {
+                    e.preventDefault();
+                    printPDF(currentSuratPdfUrl);
+                };
+            }
+            
+            // Load the content
+            iframe.src = viewUrl;
+            
+            // Set iframe height adjustment
+            iframe.onload = function() {
+                adjustIframeHeight(iframe);
+            };
+            
+        } catch (error) {
+            console.error('Error loading surat:', error);
+            showAlert('Gagal memuat surat: ' + error.message, 'error');
+        }
+    }
+
+    // Load eviden content - DIPERBAIKI: Langsung preview jika hanya 1 file
+    async loadEvidenContent(modalElement, suratId, namaKegiatan = '') {
+        try {
+            const detailContent = modalElement.querySelector('.detail-content');
+            if (!detailContent) return;
+            
+            detailContent.innerHTML = `
+                <div style="text-align:center;padding:40px;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
+                    <p style="margin-top:10px;color:#7f8c8d">Memuat eviden...</p>
+            </div>
+            `;
+            
+            const item = await getSuratDetail(suratId);
+            if (!item) {
+                throw new Error('Data tidak ditemukan');
+            }
+            
+            const evidenFiles = getEvidenFilesFromData(item);
+            
+            // PERBAIKAN: Jika hanya ada 1 file eviden, langsung preview
+            if (evidenFiles.length === 1) {
+                // Tutup modal eviden
+                this.closeModal(modalElement.closest('.modal-item').id);
+                
+                // Langsung buka preview file
+                const singleFile = evidenFiles[0];
+                setTimeout(() => {
+                    previewFile(singleFile.url, singleFile.name);
+                }, 100);
+                return;
+            }
+            
+            // Jika lebih dari 1 file, tampilkan daftar file
+            const content = generateMultipleEvidenContent(item, evidenFiles, namaKegiatan);
+            detailContent.innerHTML = content;
+            
+        } catch (error) {
+            console.error('Error loading eviden:', error);
+            const detailContent = modalElement.querySelector('.detail-content');
+            if (detailContent) {
+                detailContent.innerHTML = `
+                    <div style="text-align:center;padding:40px;color:#e74c3c">
+                        <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
+                        <p>Gagal memuat eviden: ${error.message}</p>
+                        <button class="modal-btn modal-btn-close" onclick="modalManager.closeModal('${modalElement.closest('.modal-item').id}')" style="margin-top:20px">
+                            <i class="fa-solid fa-times"></i> Tutup
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Submit approve form
+    submitApproveForm(form, suratId) {
+        form.submit();
+    }
+
+    // Submit reject form
+    submitRejectForm(form, suratId, notes) {
+        const formToSubmit = document.createElement('form');
+        formToSubmit.method = 'POST';
+        formToSubmit.action = form.action;
+        
+        const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+        const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
+        const inpCsrf = document.createElement('input');
+        inpCsrf.type='hidden'; 
+        inpCsrf.name=csrfName; 
+        inpCsrf.value=csrfHash;
+        formToSubmit.appendChild(inpCsrf);
+        
+        const inpNotes = document.createElement('input');
+        inpNotes.type='hidden'; 
+        inpNotes.name='rejection_notes'; 
+        inpNotes.value=notes;
+        formToSubmit.appendChild(inpNotes);
+        
+        document.body.appendChild(formToSubmit);
+        formToSubmit.submit();
+    }
+
+    // Submit return form
+    submitReturnForm(form, suratId) {
+        form.submit();
+    }
+
+    // Get modal by ID
+    getModal(modalId) {
+        return this.modals.find(m => m.id === modalId);
+    }
+
+    // Close all modals
+    closeAllModals() {
+        while (this.modals.length > 0) {
+            this.closeModal(this.modals[0].id);
+        }
+    }
+}
+
+// ===== FUNGSI UTAMA =====
+
+// Initialize modal manager
+modalManager = new ModalManager();
+
+// ============================================
+// FUNGSI UNTUK MEMBUKA MODAL
+// ============================================
+
+// Fungsi untuk menampilkan detail saat baris diklik
+function showRowDetail(id) {
+    modalManager.createModal('detail', { suratId: id });
+}
+
+// Fungsi untuk menampilkan modal surat (tombol mata)
+function showSuratModal(id) {
+    modalManager.createModal('surat', { suratId: id });
+}
+
+// PERBAIKAN: Handle klik button eviden - langsung preview jika hanya 1 file
+async function handleEvidenClick(suratId, namaKegiatan = '') {
+    try {
+        // Cek jumlah modal yang terbuka
+        if (modalManager.modals.length >= 2) {
+            showAlert('Maksimal hanya dapat membuka 2 modal sekaligus. Tutup salah satu modal terlebih dahulu.', 'warning');
+            return;
+        }
+        
+        // Ambil data untuk cek jumlah file
+        const item = await getSuratDetail(suratId);
+        if (!item) {
+            showAlert('Data tidak ditemukan', 'error');
+            return;
+        }
+        
+        const evidenFiles = getEvidenFilesFromData(item);
+        
+        if (evidenFiles.length === 0) {
+            showAlert('Tidak ada file eviden untuk pengajuan ini', 'info');
+            return;
+        }
+        
+        // Jika hanya ada 1 file, langsung preview
+        if (evidenFiles.length === 1) {
+            const singleFile = evidenFiles[0];
+            previewFile(singleFile.url, singleFile.name);
+        } else {
+            // Jika lebih dari 1 file, buka modal eviden
+            modalManager.createModal('eviden', { 
+                suratId: suratId, 
+                namaKegiatan: namaKegiatan 
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error handling eviden click:', error);
+        showAlert('Gagal memuat file eviden', 'error');
+    }
+}
+
+// Fungsi untuk menampilkan modal approve
+function showApproveModal(id, namaKegiatan = '') {
+    modalManager.createModal('approve', { 
+        suratId: id, 
+        namaKegiatan: namaKegiatan 
+    });
+}
+
+// Fungsi untuk menampilkan modal reject
+function showRejectModal(id, namaKegiatan = '') {
+    modalManager.createModal('reject', { 
+        suratId: id, 
+        namaKegiatan: namaKegiatan 
+    });
+}
+
+// Fungsi untuk menampilkan return modal
+function showReturnModal(id, namaKegiatan) {
+    modalManager.createModal('return', { 
+        suratId: id, 
+        namaKegiatan: namaKegiatan 
     });
 }
 
 // ============================================
-// FUNGSI UTAMA UNTUK SURAT TUGAS MODAL
+// FUNGSI PREVIEW FILE
 // ============================================
 
-// Fungsi untuk membuka surat tugas dalam modal popup
-function showSuratTugasModal(id) {
-    try {
-        // Tampilkan loading
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
-                <p style="margin-top:10px;color:#7f8c8d">Memuat surat pengajuan...</p>
-            </div>
-        `;
-        document.getElementById('detailModal').classList.add('show');
-
-        // Load surat pengajuan via iframe TANPA batasan tinggi
-        const suratUrl = '<?= base_url("dekan/view_surat_pengajuan/") ?>' + id;
-        
-        document.getElementById('detailContent').innerHTML = `
-            <div style="width:100%; overflow:hidden; border-radius:8px;">
-                <iframe 
-                    id="suratIframe"
-                    src="${suratUrl}" 
-                    style="width:100%; height:70vh; border:none;"
-                    onload="adjustIframeHeight()"
-                ></iframe>
-            </div>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
+function previewFile(fileUrl, fileName) {
+    // Cek jumlah modal yang terbuka
+    if (modalManager.modals.length >= 2) {
+        showAlert('Maksimal hanya dapat membuka 2 modal sekaligus. Tutup salah satu modal terlebih dahulu.', 'warning');
+        return;
+    }
+    
+    // Create preview modal
+    const modalId = modalManager.createModal('preview');
+    const modal = modalManager.getModal(modalId);
+    
+    if (!modal) return;
+    
+    const modalElement = modal.element;
+    const previewBody = modalElement.querySelector('.preview-body');
+    const previewTitle = modalElement.querySelector('h3');
+    
+    if (previewTitle) previewTitle.textContent = 'Preview: ' + fileName;
+    
+    if (previewBody) {
+        previewBody.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FB8C00;"></i>
+                <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
             </div>
         `;
         
-    } catch (error) {
-        console.error('Error loading surat:', error);
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;color:#e74c3c">
-                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
-                <p>Gagal memuat surat: ${error.message}</p>
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')" style="margin-top:20px">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
+        const fileExtension = fileName.split('.').pop().toLowerCase();
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        const pdfExtensions = ['pdf'];
+        
+        setTimeout(() => {
+            if (imageExtensions.includes(fileExtension)) {
+                const img = new Image();
+                img.onload = function() {
+                    previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
+                };
+                img.onerror = function() {
+                    showUnsupportedPreview(previewBody, fileUrl, fileName);
+                };
+                img.src = fileUrl;
+            } else if (pdfExtensions.includes(fileExtension)) {
+                previewBody.innerHTML = `
+                    <iframe 
+                        src="${fileUrl}" 
+                        class="preview-iframe" 
+                        frameborder="0"
+                    ></iframe>
+                `;
+            } else {
+                showUnsupportedPreview(previewBody, fileUrl, fileName);
+            }
+        }, 100);
     }
 }
 
-// Fungsi untuk menyesuaikan tinggi iframe berdasarkan konten
-function adjustIframeHeight() {
-    const iframe = document.getElementById('suratIframe');
+function showUnsupportedPreview(previewBody, fileUrl, fileName) {
+    previewBody.innerHTML = `
+        <div class="preview-unsupported">
+            <i class="fas fa-eye-slash"></i>
+            <h4>Preview Tidak Tersedia</h4>
+            <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
+            <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank" style="margin-top: 15px;">
+                <i class="fas fa-download"></i> Download File
+            </a>
+        </div>
+    `;
+}
+
+// ============================================
+// FUNGSI SURAT TUGAS - DIUBAH: untuk modal lebar
+// ============================================
+
+// Fungsi untuk toggle fullscreen pada iframe
+function toggleIframeFullscreen(iframe) {
+    if (!isFullscreen) {
+        iframe.classList.add('fullscreen');
+        isFullscreen = true;
+        
+        // Update fullscreen button text
+        const fullscreenBtn = document.querySelector('.surat-btn-fullscreen');
+        if (fullscreenBtn) {
+            fullscreenBtn.innerHTML = '<i class="fa-solid fa-compress"></i> Keluar Fullscreen';
+        }
+    } else {
+        iframe.classList.remove('fullscreen');
+        isFullscreen = false;
+        
+        // Update fullscreen button text
+        const fullscreenBtn = document.querySelector('.surat-btn-fullscreen');
+        if (fullscreenBtn) {
+            fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i> Fullscreen';
+        }
+    }
+}
+
+// Fungsi untuk menyesuaikan tinggi iframe
+function adjustIframeHeight(iframe) {
     if (!iframe) return;
     
     try {
@@ -1134,91 +2191,86 @@ function adjustIframeHeight() {
                     html.offsetHeight
                 );
                 
-                // Set tinggi iframe
-                iframe.style.height = (height + 50) + 'px'; // Tambah margin
+                // Set tinggi iframe (minimum 600px, maksimum sesuai konten)
+                const minHeight = 600;
+                const calculatedHeight = Math.max(minHeight, height + 50);
                 
-                console.log('Iframe height adjusted to:', height);
+                // Jika dalam mode fullscreen, gunakan viewport height
+                if (isFullscreen) {
+                    iframe.style.height = '100vh';
+                } else {
+                    iframe.style.height = calculatedHeight + 'px';
+                }
+                
+                // Scroll ke atas
+                iframe.contentWindow.scrollTo(0, 0);
+                
             } catch (e) {
                 console.error('Error adjusting iframe height:', e);
                 // Fallback: set tinggi tetap
-                iframe.style.height = '1000px';
+                iframe.style.height = '800px';
             }
-        }, 500); // Tunggu 500ms untuk konten selesai dimuat
+        }, 800); // Tunggu lebih lama untuk konten selesai dimuat
     } catch (e) {
         console.error('Error accessing iframe content:', e);
-    }
-}
-// Fungsi untuk mencetak surat
-function cetakSurat() {
-    const iframe = document.getElementById('suratIframe');
-    if (iframe && iframe.contentWindow) {
-        try {
-            iframe.contentWindow.print();
-        } catch (e) {
-            // Fallback: buka di tab baru lalu print
-            window.open(iframe.src, '_blank').print();
-        }
+        // Fallback: set tinggi tetap
+        iframe.style.height = '800px';
     }
 }
 
-// Fungsi untuk mendownload surat
-function downloadSurat() {
-    const iframe = document.getElementById('suratIframe');
-    if (iframe && iframe.src) {
-        // Buat link download
-        const link = document.createElement('a');
-        link.href = iframe.src;
-        link.target = '_blank';
-        link.download = `surat_tugas_${currentSuratId}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+// Fungsi untuk print PDF
+function printPDF(url) {
+    if (!url) {
+        showAlert('URL PDF tidak tersedia', 'error');
+        return;
     }
+    
+    fetch(url)
+        .then(res => res.blob())
+        .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = blobUrl;
+            document.body.appendChild(iframe);
+
+            iframe.onload = function () {
+                setTimeout(() => {
+                    iframe.contentWindow.print();
+                    // Cleanup setelah 10 detik
+                    setTimeout(() => {
+                        if (iframe.parentNode) {
+                            iframe.parentNode.removeChild(iframe);
+                        }
+                        URL.revokeObjectURL(blobUrl);
+                    }, 10000);
+                }, 500);
+            };
+        })
+        .catch(error => {
+            console.error('Error printing PDF:', error);
+            showAlert('Gagal mencetak PDF: ' + error.message, 'error');
+        });
 }
 
-// Fungsi untuk menutup modal surat
-function closeSuratModal() {
-    const modal = document.getElementById('suratTugasModal');
-    const iframe = document.getElementById('suratIframe');
-    const loading = document.getElementById('suratLoading');
-    
-    if (iframe) {
-        iframe.src = '';
-        iframe.style.display = 'none';
+// Fungsi untuk download PDF
+function downloadPDF(url) {
+    if (!url) {
+        showAlert('URL PDF tidak tersedia', 'error');
+        return;
     }
     
-    if (loading) {
-        loading.style.display = 'flex';
-        loading.innerHTML = `
-            <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:48px;color:#FB8C00"></i>
-                <p style="margin-top:20px;color:#7f8c8d">Memuat surat tugas...</p>
-            </div>
-        `;
-    }
-    
-    if (modal) {
-        modal.classList.remove('show');
-    }
+    window.location.href = url;
 }
 
 // ============================================
-// FUNGSI-FUNGSI LAINNYA
+// FUNGSI HELPER
 // ============================================
 
-// Fungsi untuk mengambil data detail via AJAX
+// PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
 function getSuratDetail(id) {
     return fetch('<?= site_url("dekan/getDetailPengajuan/") ?>' + id)
-        .then(response => {
-            const contentType = response.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                return response.text().then(text => {
-                    console.error('Server mengembalikan non-JSON:', text.substring(0, 500));
-                    throw new Error('Server mengembalikan format tidak valid');
-                });
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.success) {
                 return data.data;
@@ -1228,322 +2280,11 @@ function getSuratDetail(id) {
         })
         .catch(error => {
             console.error('Error fetching detail:', error);
-            const localData = suratList.find(s => Number(s.id) === Number(id));
-            if (localData) {
-                console.log('Menggunakan data dari array lokal');
-                return Promise.resolve(localData);
-            }
             throw error;
         });
 }
 
-// Fungsi untuk menampilkan detail saat row diklik
-async function showRowDetail(id) {
-    try {
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
-                <p style="margin-top:10px;color:#7f8c8d">Memuat detail pengajuan...</p>
-            </div>
-        `;
-        
-        document.getElementById('detailModal').classList.add('show');
-        
-        const data = await getSuratDetail(id);
-        
-        if (!data) {
-            throw new Error('Data tidak ditemukan');
-        }
-        
-        const detailHtml = generateDetailContentEnhanced(data);
-        document.getElementById('detailContent').innerHTML = detailHtml;
-        
-    } catch (error) {
-        console.error('Error loading detail:', error);
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;color:#e74c3c">
-                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
-                <p>Gagal memuat detail: ${error.message}</p>
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')" style="margin-top:20px">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
-    }
-}
-
-// Fungsi untuk generate konten detail
-function generateDetailContentEnhanced(item) {
-    const getVal = (k) => {
-        const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
-        return value;
-    };
-
-    // Format status badge
-    let statusBadge = '';
-    const status = getVal('status').toLowerCase();
-
-    if (status.includes('setuju')) {
-        statusBadge = `<span class="badge badge-approved">${getVal('status')}</span>`;
-    } else if (status.includes('tolak')) {
-        statusBadge = `<span class="badge badge-rejected">${getVal('status')}</span>`;
-    } else {
-        statusBadge = `<span class="badge badge-pending">${getVal('status')}</span>`;
-    }
-
-    // Ambil data dosen
-    const dosenData = item.dosen_data || [];
-
-    
-// Generate HTML untuk data dosen - DENGAN FOTO PROFIL
-let dosenHtml = '';
-if (dosenData && dosenData.length > 0) {
-    dosenHtml = `
-    <div class="detail-section">
-        <div class="detail-section-title">
-            <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
-        </div>
-        <div class="dosen-list">
-            ${dosenData.map((dosen, index) => {
-                // Pastikan data dosen valid
-                const nama = escapeHtml(dosen.nama || 'Data tidak tersedia');
-                const nip = escapeHtml(dosen.nip || '-');
-                const jabatan = escapeHtml(dosen.jabatan || 'Dosen');
-                const divisi = escapeHtml(dosen.divisi || '-');
-                const foto = dosen.foto || '';
-                
-                // Generate foto URL atau initial
-                let avatarContent = '';
-                if (foto && foto !== '' && foto !== '-') {
-                    const fotoUrl = '<?= base_url("uploads/foto/") ?>' + foto;
-                    avatarContent = `<img src="${fotoUrl}" alt="${nama}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                   <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#FB8C00; color:white; font-size:12px; font-weight:600; border-radius:50%;">
-                                       ${nama ? nama.charAt(0).toUpperCase() : '?'}
-                                   </div>`;
-                } else {
-                    avatarContent = nama ? nama.charAt(0).toUpperCase() : '?';
-                }
-                
-                return `
-                <div class="dosen-item">
-                    <div class="dosen-avatar">
-                        ${avatarContent}
-                    </div>
-                    <div class="dosen-info">
-                        <div class="dosen-name">${nama}</div>
-                        <div class="dosen-details">
-                            NIP: ${nip} | ${jabatan} | Divisi: ${divisi}
-                        </div>
-                    </div>
-                </div>
-                `;
-            }).join('')}
-        </div>
-    </div>`;
-} else {
-    // Fallback jika tidak ada data dosen
-    dosenHtml = `
-    <div class="detail-section">
-        <div class="detail-section-title">
-            <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
-        </div>
-        <div class="dosen-list">
-            <div class="dosen-item">
-                <div class="dosen-avatar">
-                    ?
-                </div>
-                <div class="dosen-info">
-                    <div class="dosen-name">Data dosen tidak tersedia</div>
-                    <div class="dosen-details">
-                        NIP: - | Dosen | Divisi: -
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>`;
-}
-
-    // Tampilkan nomor surat jika sudah disetujui
-    let nomorSuratHtml = '';
-    if (getVal('nomor_surat') && getVal('nomor_surat') !== '-') {
-        nomorSuratHtml = `
-        <div class="nomor-surat-container">
-            <div class="nomor-surat-label">
-                <i class="fa-solid fa-file-signature"></i> Nomor Surat
-            </div>
-            <div class="nomor-surat-value">
-                ${escapeHtml(getVal('nomor_surat'))}
-            </div>
-        </div>`;
-    }
-
-    // Tampilkan catatan penolakan jika ada
-    let rejectionHtml = '';
-    if (getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-') {
-        rejectionHtml = `
-        <div class="rejection-notes">
-            <div class="detail-label">
-                <i class="fa-solid fa-comment-dots"></i> Catatan Penolakan
-            </div>
-            <div class="detail-value">
-                ${escapeHtml(getVal('catatan_penolakan'))}
-            </div>
-        </div>`;
-    }
-
-    // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date
-    const jenisDate = getVal('jenis_date');
-    const periodeValue = getVal('periode_value');
-    const tanggalKegiatan = getVal('tanggal_kegiatan');
-    const akhirKegiatan = getVal('akhir_kegiatan');
-
-    // Tentukan tampilan untuk Periode dan Tanggal Mulai
-    let periodeDisplay = '-';
-    let tanggalMulaiDisplay = '-';
-    let tanggalAkhirDisplay = '-';
-
-    if (jenisDate === 'Periode') {
-        // Jika Periode: tampilkan periode_value, kosongkan tanggal
-        periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
-        tanggalMulaiDisplay = '-';
-        tanggalAkhirDisplay = '-';
-    } else if (jenisDate === 'Custom') {
-        // Jika Custom: tampilkan tanggal, kosongkan periode
-        periodeDisplay = '-';
-        if (tanggalKegiatan !== '-' && tanggalKegiatan) {
-            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
-        }
-        if (akhirKegiatan !== '-' && akhirKegiatan) {
-            tanggalAkhirDisplay = formatDate(akhirKegiatan);
-        }
-    } else {
-        // Fallback jika jenis_date tidak ada (data lama)
-        if (periodeValue && periodeValue !== '-') {
-            periodeDisplay = periodeValue;
-        } else if (tanggalKegiatan && tanggalKegiatan !== '-') {
-            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
-            if (akhirKegiatan && akhirKegiatan !== '-') {
-                tanggalAkhirDisplay = formatDate(akhirKegiatan);
-            }
-        }
-    }
-    
-    return `
-    ${nomorSuratHtml}
-    
-    <div class="detail-section">
-        <div class="detail-section-title">
-            <i class="fa-solid fa-info-circle"></i> Informasi Utama
-        </div>
-        <div class="detail-grid">
-            <div class="detail-row">
-                <div class="detail-label">Nama Kegiatan</div>
-                <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Status Pengajuan</div>
-                <div class="detail-value">${statusBadge}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Jenis Pengajuan</div>
-                <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Lingkup Penugasan</div>
-                <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Bagian Dosen Terkait yang sudah diperbaiki -->
-    ${dosenHtml}
-    
-    <div class="detail-section">
-        <div class="detail-section-title">
-            <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
-        </div>
-        <div class="detail-grid">
-            <div class="detail-row">
-                <div class="detail-label">Penyelenggara</div>
-                <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Jenis Tanggal</div>
-                <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Periode Kegiatan</div>
-                <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">${escapeHtml(periodeDisplay)}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Mulai</div>
-                <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
-            </div>
-            ${tanggalAkhirDisplay !== '-' ? `
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Akhir</div>
-                <div class="detail-value">${tanggalAkhirDisplay}</div>
-            </div>
-            ` : ''}
-            <div class="detail-row">
-                <div class="detail-label">Tempat Kegiatan</div>
-                <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
-            </div>
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Pengajuan</div>
-                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
-            </div>
-        </div>
-    </div>
-    
-    ${rejectionHtml}
-    
-    <div class="modal-actions">
-        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-            <i class="fa-solid fa-times"></i> Tutup
-        </button>
-        ${getVal('status') === 'disetujui sekretariat' ? `
-        <div style="display:flex;gap:10px;margin-left:auto">
-            <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); closeModal('detailModal'); showRejectModalNew(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
-                <i class="fa-solid fa-times"></i> Tolak
-            </button>
-            <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); closeModal('detailModal'); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
-                <i class="fa-solid fa-check"></i> Setujui
-            </button>
-        </div>
-        ` : ''}
-    </div>`;
-}
-
-async function showEvidenModal(suratId) {
-    try {
-        const item = await getSuratDetail(suratId);
-        
-        if (!item) {
-            alert('Data tidak ditemukan');
-            return;
-        }
-
-        const evidenFiles = getEvidenFilesFromData(item);
-        
-        if (evidenFiles.length === 0) {
-            alert('Tidak ada file eviden untuk pengajuan ini.');
-            return;
-        }
-        
-        if (evidenFiles.length === 1) {
-            const file = evidenFiles[0];
-            previewFile(file.url, file.name);
-        } else {
-            showMultipleEvidenModal(item, evidenFiles);
-        }
-        
-    } catch (error) {
-        console.error('Error loading eviden:', error);
-        alert('Gagal memuat eviden: ' + error.message);
-    }
-}
-
+// Fungsi helper untuk mendapatkan array file eviden dari data
 function getEvidenFilesFromData(item) {
     const getVal = (k) => {
         const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
@@ -1556,6 +2297,7 @@ function getEvidenFilesFromData(item) {
     
     if (evidenValue && evidenValue !== '-') {
         try {
+            // Coba parse JSON jika eviden adalah array
             if (Array.isArray(evidenValue)) {
                 evidenValue.forEach(file => {
                     if (file && file !== '-' && file !== 'null') {
@@ -1579,11 +2321,12 @@ function getEvidenFilesFromData(item) {
                                 name: fileName,
                                 url: fileUrl,
                                 ext: fileName.split('.').pop().toLowerCase()
-                            });
+                        });
                         }
                     });
                 }
             } else {
+                // Single file string
                 const fileName = getFileNameFromPath(evidenValue);
                 const fileUrl = getFileUrl(evidenValue, baseUrl);
                 evidenFiles.push({
@@ -1593,6 +2336,7 @@ function getEvidenFilesFromData(item) {
                 });
             }
         } catch (e) {
+            // Fallback: treat as single file
             const fileName = getFileNameFromPath(evidenValue);
             const fileUrl = getFileUrl(evidenValue, baseUrl);
             evidenFiles.push({
@@ -1606,45 +2350,38 @@ function getEvidenFilesFromData(item) {
     return evidenFiles;
 }
 
+// Helper function untuk mendapatkan nama file dari path
 function getFileNameFromPath(path) {
     if (!path) return 'file';
     return path.split('/').pop().split('\\').pop();
 }
 
+// Helper function untuk mendapatkan URL file yang lengkap
 function getFileUrl(filePath, baseUrl) {
     if (!filePath) return '#';
     
+    // Jika sudah URL lengkap
     if (filePath.startsWith('http://') || filePath.startsWith('https://') || filePath.startsWith('<?= base_url() ?>')) {
         return filePath;
     }
     
+    // Coba beberapa kemungkinan path
     const fileName = getFileNameFromPath(filePath);
     const possiblePaths = [
         'uploads/eviden/' + fileName,
         'eviden/' + fileName,
         'assets/eviden/' + fileName,
         'uploads/' + fileName,
-        filePath
+        filePath  // original path
     ];
     
+    // Gunakan path pertama
     return baseUrl + possiblePaths[0];
 }
 
-function showMultipleEvidenModal(item, evidenFiles) {
-    document.getElementById('evidenContent').innerHTML = `
-        <div style="text-align:center;padding:40px;">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
-            <p style="margin-top:10px;color:#7f8c8d">Memuat eviden...</p>
-        </div>
-    `;
-    
-    document.getElementById('evidenModal').classList.add('show');
-    
-    const content = generateMultipleEvidenContent(item, evidenFiles);
-    document.getElementById('evidenContent').innerHTML = content;
-}
-
-function generateMultipleEvidenContent(item, evidenFiles) {
+// Fungsi untuk generate konten multiple eviden (lebih dari 1 file)
+function generateMultipleEvidenContent(item, evidenFiles, namaKegiatan = '') {
+    // Generate file evidence HTML untuk multiple files
     let fileEvidenceHtml = '';
     
     if (evidenFiles.length > 0) {
@@ -1711,288 +2448,247 @@ function generateMultipleEvidenContent(item, evidenFiles) {
         </div>`;
     }
 
+    const currentModalId = modalManager.activeModal?.id || '';
+    
     return `       
         ${fileEvidenceHtml}
         
         <div class="modal-actions">
-            <button class="modal-btn modal-btn-close" onclick="closeModal('evidenModal')">
+            <button class="modal-btn modal-btn-close" onclick="modalManager.closeModal('${currentModalId}')">
                 <i class="fa-solid fa-times"></i> Tutup
             </button>
         </div>
     `;
 }
 
-function previewFile(fileUrl, fileName) {
-    console.log('Preview File:', {
-        fileName: fileName,
-        fileUrl: fileUrl,
-        fullUrl: fileUrl
-    });
+// ============================================
+// FUNGSI GENERATE DETAIL CONTENT
+// ============================================
+
+function generateDetailContent(item) {
+    // Helper function untuk mendapatkan nilai
+    const getVal = (k) => {
+        const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
+        return value;
+    };
     
-    const previewModal = document.getElementById('previewModal');
-    const previewTitle = document.getElementById('previewTitle');
-    const previewBody = document.getElementById('previewBody');
+    // Format status badge
+    let statusBadge = '';
+    const status = getVal('status').toLowerCase();
     
-    previewTitle.textContent = 'Preview: ' + fileName;
-    previewBody.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FB8C00;"></i>
-            <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
-        </div>
-    `;
-    
-    previewModal.classList.add('show');
-
-    const fileExtension = fileName.split('.').pop().toLowerCase();
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-    const pdfExtensions = ['pdf'];
-    
-    setTimeout(() => {
-        if (imageExtensions.includes(fileExtension)) {
-            const img = new Image();
-            img.onload = function() {
-                console.log('Image loaded successfully');
-                previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
-            };
-            img.onerror = function() {
-                console.error('Error loading image:', fileUrl);
-                showUnsupportedPreview(fileUrl, fileName);
-            };
-            img.src = fileUrl;
-        } else if (pdfExtensions.includes(fileExtension)) {
-            previewBody.innerHTML = `
-                <iframe 
-                    src="${fileUrl}" 
-                    class="preview-iframe" 
-                    frameborder="0"
-                ></iframe>
-            `;
-        } else {
-            showUnsupportedPreview(fileUrl, fileName);
-        }
-    }, 100);
-}
-
-function showUnsupportedPreview(fileUrl, fileName) {
-    document.getElementById('previewBody').innerHTML = `
-        <div class="preview-unsupported">
-            <i class="fas fa-eye-slash"></i>
-            <h4>Preview Tidak Tersedia</h4>
-            <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
-            <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank" style="margin-top: 15px;">
-                <i class="fas fa-download"></i> Download File
-            </a>
-        </div>
-    `;
-}
-
-function closePreviewModal() {
-    document.getElementById('previewModal').classList.remove('show');
-}
-
-function showStatusModal(suratId) {
-    const modal = document.getElementById('statusModal');
-    modal.style.display = 'flex';
-    resetAllStatus();
-    loadStatusData(suratId);
-}
-
-function resetAllStatus() {
-    for (let i = 1; i <= 4; i++) {
-        const step = document.getElementById(`step${i}`);
-        const icon = document.getElementById(`step${i}-icon`);
-        const text = document.getElementById(`step${i}-text`);
-        const date = document.getElementById(`step${i}-date`);
-        
-        step.className = 'progress-step pending';
-        icon.className = 'fas fa-clock';
-
-        const defaultTexts = [
-            'Mengirim',
-            'Persetujuan KK',
-            'Persetujuan Sekretariat',
-            'Persetujuan Dekan'
-        ];
-        text.textContent = defaultTexts[i-1];
-        date.textContent = '-';
+    if (status.includes('setuju')) {
+        statusBadge = `<span class="badge badge-approved">${getVal('status')}</span>`;
+    } else if (status.includes('tolak')) {
+        statusBadge = `<span class="badge badge-rejected">${getVal('status')}</span>`;
+    } else {
+        statusBadge = `<span class="badge badge-pending">${getVal('status')}</span>`;
     }
-
-    document.getElementById('progressLine').style.width = '0%';
-    const desc = document.getElementById("status-description");
-    desc.textContent = "Memuat informasi status...";
-    desc.style.color = "black";
-}
-
-function loadStatusData(suratId) {
-    fetch('<?= site_url("surat/get_status/") ?>' + suratId)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                updateStatusDisplay(data.data);
-                updateEstimasiWaktu(data.data);
-            } else {
-                alert('Gagal memuat status: ' + (data.message || 'Unknown error'));
+    
+    // Ambil data dosen
+    const dosenData = item.dosen_data || [];
+    
+    // ✅ Generate HTML untuk data dosen DENGAN FOTO (TANPA INITIAL)
+    let dosenHtml = '';
+    if (dosenData && dosenData.length > 0) {
+        dosenHtml = `
+        <div class="dosen-list">
+            ${dosenData.map((dosen, index) => {
+                const initial = dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?';
+                const foto = dosen.foto || '';
+                const hasFoto = foto && foto.trim() !== '' && foto !== 'null';
+                
+                return `
+            <div class="dosen-item">
+                <div class="dosen-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: #FB8C00; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: 600; overflow: hidden; position: relative; flex-shrink: 0;">
+                    ${hasFoto ? `
+                        <img src="${escapeHtml(foto)}" 
+                             alt="${escapeHtml(dosen.nama)}" 
+                             style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2;"
+                             onerror="console.error('Image load error:', this.src); this.style.display='none'; this.parentElement.style.background='#FB8C00';">
+                    ` : `
+                        <span style="position: relative; z-index: 1; font-size: 18px;">${initial}</span>
+                    `}
+                </div>
+                <div class="dosen-info">
+                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
+                    <div class="dosen-details">
+                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
+                    </div>
+                </div>
+            </div>
+                `;
+            }).join('')}
+        </div>`;
+    } else {
+        dosenHtml = `
+        <div class="dosen-item">
+            <div class="dosen-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: #FB8C00; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 600;">
+                <span>?</span>
+            </div>
+            <div class="dosen-info">
+                <div class="dosen-name">Data dosen tidak tersedia</div>
+                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+            </div>
+        </div>`;
+    }
+    
+    let nomorSuratHtml = '';
+    if (getVal('nomor_surat') && getVal('nomor_surat') !== '-') {
+        nomorSuratHtml = `
+        <div style="background:#fef9e7;border:2px solid #FB8C00;border-radius:10px;padding:15px;margin-bottom:20px;text-align:center">
+            <div style="font-size:14px;font-weight:600;color:#FB8C00;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">
+                <i class="fa-solid fa-file-signature"></i> Nomor Surat
+            </div>
+            <div style="font-size:18px;font-weight:700;color:#7d6608;font-family:'Courier New',monospace">
+                ${escapeHtml(getVal('nomor_surat'))}
+            </div>
+        </div>`;
+    }
+    
+    // Tampilkan catatan penolakan jika ada
+    let rejectionHtml = '';
+    if (getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-') {
+        rejectionHtml = `
+        <div class="rejection-notes">
+            <div class="detail-label">
+                <i class="fa-solid fa-comment-dots"></i> Catatan Penolakan
+            </div>
+            <div class="detail-value">
+                ${escapeHtml(getVal('catatan_penolakan'))}
+            </div>
+        </div>`;
+    }
+    
+    // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date
+    const jenisDate = getVal('jenis_date');
+    const periodeValue = getVal('periode_value');
+    const tanggalKegiatan = getVal('tanggal_kegiatan');
+    const akhirKegiatan = getVal('akhir_kegiatan');
+    
+    // Tentukan tampilan untuk Periode dan Tanggal Mulai
+    let periodeDisplay = '-';
+    let tanggalMulaiDisplay = '-';
+    let tanggalAkhirDisplay = '-';
+    
+    if (jenisDate === 'Periode') {
+        // Jika Periode: tampilkan periode_value, kosongkan tanggal
+        periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
+        tanggalMulaiDisplay = '-';
+        tanggalAkhirDisplay = '-';
+    } else if (jenisDate === 'Custom') {
+        // Jika Custom: tampilkan tanggal, kosongkan periode
+        periodeDisplay = '-';
+        if (tanggalKegiatan !== '-' && tanggalKegiatan) {
+            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+        }
+        if (akhirKegiatan !== '-' && akhirKegiatan) {
+            tanggalAkhirDisplay = formatDate(akhirKegiatan);
+        }
+    } else {
+        // Fallback jika jenis_date tidak ada (data lama)
+        if (periodeValue && periodeValue !== '-') {
+            periodeDisplay = periodeValue;
+        } else if (tanggalKegiatan && tanggalKegiatan !== '-') {
+            tanggalMulaiDisplay = formatDate(tanggalKegiatan);
+            if (akhirKegiatan && akhirKegiatan !== '-') {
+                tanggalAkhirDisplay = formatDate(akhirKegiatan);
             }
-        })
-        .catch(error => {
-            console.error('Error loading status data:', error);
-            alert('Terjadi kesalahan saat memuat status');
-        });
-}
-
-function updateStatusDisplay(statusData) {
-    const steps = statusData.steps;
-
-    steps.forEach((step, index) => {
-        const stepNumber = index + 1;
-        const stepElement = document.getElementById(`step${stepNumber}`);
-        const iconElement = document.getElementById(`step${stepNumber}-icon`);
-        const textElement = document.getElementById(`step${stepNumber}-text`);
-        const dateElement = document.getElementById(`step${stepNumber}-date`);
-
-        stepElement.className = 'progress-step';
-
-        switch (step.status) {
-            case 'completed':
-                stepElement.classList.add('completed');
-                iconElement.className = 'fas fa-check';
-                break;
-
-            case 'rejected':
-                stepElement.classList.add('rejected');
-                iconElement.className = 'fas fa-times';
-                break;
-
-            case 'in-progress':
-                stepElement.classList.add('in-progress');
-                iconElement.className = 'fas fa-spinner fa-spin';
-                break;
-
-            default:
-                stepElement.classList.add('pending');
-                iconElement.className = 'fas fa-clock';
         }
-
-        textElement.textContent = step.step_name;
-        dateElement.textContent = step.date;
-    });
-
-    document.getElementById('progressLine').style.width = 
-        (statusData.progress_percentage || 0) + '%';
-
-    const desc = document.getElementById("status-description");
-    const finalStatus = statusData.current_status.toLowerCase();
-
-    if (finalStatus === "disetujui dekan") {
-        desc.textContent = "Pengajuan ini sudah disetujui.";
-        desc.style.color = "green";
     }
-    else if (finalStatus.includes("ditolak")) {
-        desc.textContent = "Pengajuan ini tidak disetujui.";
-        desc.style.color = "red";
-    }
-    else {
-        desc.textContent = "Pengajuan ini masih dalam proses persetujuan.";
-        desc.style.color = "black";
-    }
+
+    const currentModalId = modalManager.activeModal?.id || '';
     
-    const rejectionBox = document.getElementById("rejection-reason");
-    const rejectionText = document.getElementById("rejection-text");
-
-    if (finalStatus.includes("ditolak")) {
-        rejectionBox.style.display = "block";
-        rejectionText.textContent = statusData.catatan_penolakan || "Tidak ada catatan penolakan.";
-    } else {
-        rejectionBox.style.display = "none";
-    }
+    return `
+    ${nomorSuratHtml}
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-info-circle"></i> Informasi Utama
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Nama Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('nama_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Status Pengajuan</div>
+                <div class="detail-value">${statusBadge}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Pengajuan</div>
+                <div class="detail-value">${escapeHtml(getVal('jenis_pengajuan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Lingkup Penugasan</div>
+                <div class="detail-value">${escapeHtml(getVal('lingkup_penugasan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Penugasan</div>
+                <div class="detail-value">${escapeHtml(getVal('jenis_penugasan'))}</div>
+            </div>
+        </div>
+    </div>
+    
+    ${dosenHtml}
+    
+    <div class="detail-section">
+        <div class="detail-section-title">
+            <i class="fa-solid fa-calendar-alt"></i> Informasi Waktu & Tempat
+        </div>
+        <div class="detail-grid">
+            <div class="detail-row">
+                <div class="detail-label">Penyelenggara</div>
+                <div class="detail-value">${escapeHtml(getVal('penyelenggara'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Jenis Tanggal</div>
+                <div class="detail-value">${escapeHtml(jenisDate !== '-' ? jenisDate : '-')}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Periode Kegiatan</div>
+                <div class="detail-value ${periodeDisplay === '-' ? 'detail-value-empty' : ''}">${escapeHtml(periodeDisplay)}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Mulai</div>
+                <div class="detail-value ${tanggalMulaiDisplay === '-' ? 'detail-value-empty' : ''}">${tanggalMulaiDisplay}</div>
+            </div>
+            ${tanggalAkhirDisplay !== '-' ? `
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Akhir</div>
+                <div class="detail-value">${tanggalAkhirDisplay}</div>
+            </div>
+            ` : ''}
+            <div class="detail-row">
+                <div class="detail-label">Tempat Kegiatan</div>
+                <div class="detail-value">${escapeHtml(getVal('tempat_kegiatan'))}</div>
+            </div>
+            <div class="detail-row">
+                <div class="detail-label">Tanggal Pengajuan</div>
+                <div class="detail-value">${formatDate(getVal('created_at'))}</div>
+            </div>
+        </div>
+    </div>
+    
+    ${rejectionHtml}
+    
+    <div class="modal-actions">
+        <button class="modal-btn modal-btn-close" onclick="modalManager.closeModal('${currentModalId}')">
+            <i class="fa-solid fa-times"></i> Tutup
+        </button>
+        ${getVal('status') === 'disetujui sekretariat' ? `
+        <div style="display:flex;gap:10px;margin-left:auto">
+            <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); modalManager.closeModal('${currentModalId}'); showRejectModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+                <i class="fa-solid fa-times"></i> Tolak
+            </button>
+            <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); modalManager.closeModal('${currentModalId}'); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+                <i class="fa-solid fa-check"></i> Setujui
+            </button>
+        </div>
+        ` : ''}
+    </div>`;
 }
 
-function updateEstimasiWaktu(statusData) {
-    const d = statusData.durasi;
-    document.getElementById("est1").textContent = d.durasi_1 || "-";
-    document.getElementById("est2").textContent = d.durasi_2 || "-";
-    document.getElementById("est3").textContent = d.durasi_3 || "-";
-}
-
-function showApproveModal(id, namaKegiatan) {
-    currentApproveId = id;
-    document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
-    
-    const searchParams = new URLSearchParams(window.location.search);
-    const from = 'total';
-    const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
-    const jenis_penugasan = searchParams.get('jenis_penugasan') || '';
-    
-    let actionUrl = `<?= base_url("dekan/approve/") ?>${id}?from=${from}&tahun=${tahun}`;
-    if (jenis_penugasan) {
-        actionUrl += `&jenis_penugasan=${jenis_penugasan}`;
-    }
-    
-    document.getElementById('approveForm').action = actionUrl;
-    document.getElementById('approveModal').classList.add('show');
-}
-
-function showRejectModal(id) {
-    currentRejectId = id;
-    document.getElementById('rejectionNotes').value = '';
-    document.getElementById('rejectModal').classList.add('show');
-}
-
-function confirmReject() {
-    const notes = document.getElementById('rejectionNotes').value.trim();
-    if (!notes) { 
-        alert('Alasan penolakan harus diisi'); 
-        return; 
-    }
-    
-    const searchParams = new URLSearchParams(window.location.search);
-    const from = 'total';
-    const tahun = searchParams.get('tahun') || '<?= date("Y") ?>';
-    const jenis_penugasan = searchParams.get('jenis_penugasan') || '';
-    
-    let actionUrl = `<?= base_url("dekan/reject/") ?>${currentRejectId}?from=${from}&tahun=${tahun}`;
-    if (jenis_penugasan) {
-        actionUrl += `&jenis_penugasan=${jenis_penugasan}`;
-    }
-    
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = actionUrl;
-
-    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
-    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
-    const inpCsrf = document.createElement('input'); 
-    inpCsrf.type='hidden'; 
-    inpCsrf.name=csrfName; 
-    inpCsrf.value=csrfHash; 
-    form.appendChild(inpCsrf);
-    
-    const inpNotes = document.createElement('input'); 
-    inpNotes.type='hidden'; 
-    inpNotes.name='rejection_notes'; 
-    inpNotes.value=notes; 
-    form.appendChild(inpNotes);
-    
-    document.body.appendChild(form);
-    form.submit();
-}
-
-// ============================================
-// FUNGSI HELPER
-// ============================================
-
-function closeModal(id) { 
-    if (id === 'suratTugasModal') {
-        closeSuratModal();
-    } else {
-        document.getElementById(id).classList.remove('show'); 
-    }
-}
-
-function modalClickOutside(evt, id) { 
-    if (evt.target && evt.target.id === id) closeModal(id); 
-}
-
+// Helper functions
 function formatDate(d) {
     if (!d || d === '-' || d === '0000-00-00') return '-';
     const t = new Date(d);
@@ -2010,129 +2706,58 @@ function escapeHtml(unsafe) {
        .replace(/'/g, "&#039;");
 }
 
-// ============================================
-// FUNGSI UNTUK MEMBUAT ROWS CLICKABLE
-// ============================================
-
-function makeRowsClickable() {
-    const rows = document.querySelectorAll('#tableBody tr:not(#emptyRow)');
-    
-    rows.forEach(row => {
-        row.classList.add('clickable-row');
-        
-        const onclickAttr = row.getAttribute('onclick');
-        if (onclickAttr) {
-            const match = onclickAttr.match(/showRowDetail\((\d+)\)/);
-            
-            if (match) {
-                const suratId = match[1];
-                
-                row.addEventListener('click', function(e) {
-                    if (e.target.closest('button') || 
-                        e.target.closest('a') || 
-                        e.target.closest('select') ||
-                        e.target.closest('textarea') ||
-                        e.target.closest('input')) {
-                        return;
-                    }
-                    
-                    rows.forEach(r => r.classList.remove('selected'));
-                    
-                    this.classList.add('selected');
-                    
-                    showRowDetail(suratId);
-                });
-                
-                row.style.cursor = 'pointer';
+// Close all modals with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modalManager.modals.length > 0) {
+        // Jika dalam mode fullscreen, keluar dulu
+        if (isFullscreen) {
+            const iframe = document.querySelector('.surat-iframe.fullscreen');
+            if (iframe) {
+                toggleIframeFullscreen(iframe);
+                return;
             }
         }
-    });
-}
-
-// ============================================
-// INISIALISASI SAAT DOM LOADED
-// ============================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    makeRowsClickable();
-    updateReturnButtons();
-    
-    const closeBtn = document.querySelector('.close-status');
-    const modal = document.getElementById('statusModal');
-    
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-        if (e.target.id === 'previewModal') {
-            closePreviewModal();
-        }
-        if (e.target.id === 'suratTugasModal') {
-            closeModal('suratTugasModal');
-        }
-    });
-    
-    const statusSelect = document.querySelector('select[name="status"]');
-    const jenisPenugasanSelect = document.querySelector('select[name="jenis_penugasan"]');
-    
-    if (statusSelect) {
-        statusSelect.addEventListener('change', function() {
-            this.form.submit();
-        });
-    }
-    
-    if (jenisPenugasanSelect) {
-        jenisPenugasanSelect.addEventListener('change', function() {
-            this.form.submit();
-        });
+        modalManager.closeModal(modalManager.modals[modalManager.modals.length - 1].id);
     }
 });
 
-// Fungsi untuk kompatibilitas (jika ada kode lama yang memanggil fungsi ini)
-function showDetail(id) {
-    showSuratTugasModal(id);
-}
+// ============================================
+// INISIALISASI
+// ============================================
 
-function showDetailModal(id) {
-    try {
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
-                <p style="margin-top:10px;color:#7f8c8d">Memuat detail pengajuan...</p>
-            </div>
-        `;
-        document.getElementById('detailModal').classList.add('show');
-
-        const data = getSuratDetail(id);
-        
-        if (!data) {
-            alert('Data tidak ditemukan');
-            closeModal('detailModal');
-            return;
-        }
-
-        const detailHtml = generateDetailContentEnhanced(data);
-        document.getElementById('detailContent').innerHTML = detailHtml;
-        
-    } catch (error) {
-        console.error('Error loading detail:', error);
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;color:#e74c3c">
-                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
-                <p>Gagal memuat detail: ${error.message}</p>
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')" style="margin-top:20px">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
-    }
-}
+document.addEventListener('DOMContentLoaded', function() {
+    // Tambahkan CSS untuk mencegah selection pada klik
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            #tableBody button, #tableBody a, #tableBody select, #tableBody textarea, #tableBody input {
+                user-select: none;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+            }
+            
+            .clickable-row {
+                position: relative;
+            }
+            
+            .clickable-row::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 1;
+                pointer-events: none;
+            }
+            
+            .clickable-row td > * {
+                position: relative;
+                z-index: 2;
+            }
+        </style>
+    `);
+});
 </script>
 </body>
 </html>

@@ -1605,7 +1605,6 @@ document.addEventListener('DOMContentLoaded', function () {
             jenisPenugasanKelompokContainer.style.display = 'block';
             jumlahBarisContainer.style.display = 'block';
         } else {
-            // Jika belum memilih jenis pengajuan, sembunyikan semuanya
             jenisPenugasanPeroranganContainer.style.display = 'none';
             jenisPenugasanKelompokContainer.style.display = 'none';
             jumlahBarisContainer.style.display = 'none';
@@ -1725,61 +1724,6 @@ document.addEventListener('DOMContentLoaded', function () {
             lainnyaInput.value = '';
         }
     });
-
-    // Fungsi untuk membuat elemen baris
-    function createRowElement(index, isKelompok = false) {
-        const rowEl = document.createElement('div');
-        rowEl.className = 'row g-3 align-items-end panitia-row';
-        rowEl.dataset.rowIndex = index;
-        
-        const buttonHtml = isKelompok ? 
-            '<button type="button" class="btn btn-danger remove-row-btn" title="Hapus Baris"><i class="fas fa-minus"></i></button>' :
-            '<button type="button" class="btn btn-success add-row-btn" title="Tambah Baris"><i class="fas fa-plus"></i></button>';
-        
-        rowEl.innerHTML = `
-            <div class="col-md-2 position-relative">
-                <label>NIP</label>
-                <input type="text" name="nip[]" class="form-control nip-input" autocomplete="off" required>
-            </div>
-
-            <div class="col-md-3 position-relative">
-                <label>Nama Dosen</label>
-                <input type="text" name="nama_dosen[]" class="form-control nama-dosen-input" autocomplete="off" required>
-            </div>
-
-            <div class="col-md-2 position-relative">
-                <label>Jabatan</label>
-                <input type="text" name="jabatan[]" class="form-control jabatan-input" autocomplete="off" required>
-            </div>
-
-            <div class="col-md-2 position-relative">
-                <label>Kaprodi</label>
-                <input type="text" name="kaprodi[]" class="form-control kaprodi-input" autocomplete="off" required>
-            </div>
-
-            <div class="col-md-2 position-relative peran-column">
-                <label>Peran</label>
-                <input type="text" name="peran[]" class="form-control peran-input" autocomplete="off" placeholder="Masukkan peran/posisi">
-            </div>
-
-            <div class="col-md-1 text-center button-cell">
-                ${buttonHtml}
-            </div>
-        `;
-        
-        // Update kolom peran berdasarkan jenis pengajuan
-        updateKolomPeranForRow(rowEl);
-        
-        // Enable input jika jenis pengajuan sudah dipilih
-        if (jenisPengajuan.value !== '') {
-            const inputs = rowEl.querySelectorAll('input');
-            inputs.forEach(input => {
-                input.disabled = false;
-            });
-        }
-        
-        return rowEl;
-    }
 
     // Debounce function
     function debounce(fn, delay = 300) {
@@ -2061,31 +2005,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 jumlahBarisInput.value = currentRows;
             }
         }, 300);
-    }
-
-    // Fungsi untuk menambah baris individual (untuk perorangan - sebenarnya tidak digunakan karena perorangan hanya 1 baris)
-    function addNewRow() {
-        if (jenisPengajuan.value === 'Perorangan') {
-            return; // Perorangan hanya 1 baris
-        }
-        
-        const rowEl = createRowElement(rowCounter, true);
-        panitiaContainer.appendChild(rowEl);
-        rowCounter++;
-        
-        updateKolomPeranForRow(rowEl);
-        
-        setTimeout(() => {
-            initAutocompleteForRow(rowEl);
-        }, 100);
-        
-        // Update jumlah baris input
-        if (jenisPengajuan.value === 'Kelompok') {
-            const currentRows = panitiaContainer.querySelectorAll('.panitia-row').length;
-            jumlahBarisInput.value = currentRows;
-        }
-        
-        animateNewRow(rowEl);
     }
 
     // Initialize semua baris
