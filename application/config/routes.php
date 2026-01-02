@@ -195,3 +195,11 @@ $route['auth/process_login'] = 'auth/process_login';
 $route['(:any)'] = 'errors/page_404';
 $route['sekretariat/edit_surat/(:num)'] = 'sekretariat/edit_surat/$1';
 $route['sekretariat/update_surat/(:num)'] = 'sekretariat/update_surat/$1';
+
+// WhatsApp Server Control Panel
+$route['whatsapp/dashboard'] = 'whatsapp/dashboard';
+$route['whatsapp/get_status'] = 'whatsapp/get_status';
+$route['whatsapp/start_server'] = 'whatsapp/start_server';
+$route['whatsapp/stop_server'] = 'whatsapp/stop_server';
+$route['whatsapp/test_send'] = 'whatsapp/test_send';
+$route['whatsapp/restart'] = 'whatsapp/restart';

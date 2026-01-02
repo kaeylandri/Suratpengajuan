@@ -4082,7 +4082,7 @@
                     <span class="menu-text">Surat Tugas</span>
                 </a>
             </div>
-
+            <div class="card">
             <div class="divider"></div>
 
             <!-- Peminjaman Ruangan (Collapsible) -->
@@ -4101,7 +4101,7 @@
                     </ul>
                 </div>
             </div>
-
+            
             <!-- Ticketing (Collapsible) -->
             <div class="card">
                 <a href="#" class="btn collapsed" data-bs-toggle="collapse" data-bs-target="#ticketing"
