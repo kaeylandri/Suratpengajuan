@@ -273,34 +273,118 @@
             </div>
         </div>
         
-        <!-- Test Send Message -->
-        <div class="card fade-in">
-            <div class="card-header">
-                <h4 class="mb-0"><i class="fas fa-paper-plane"></i> Test Kirim Pesan</h4>
+        <!-- Management Nomor Penerima -->
+<div class="card fade-in">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0"><i class="fas fa-users"></i> Management Nomor Penerima</h4>
+        <button class="btn btn-light btn-sm" onclick="openAddModal()">
+            <i class="fas fa-plus"></i> Tambah Penerima
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> 
+            <strong>Info:</strong> Pesan WhatsApp akan otomatis dikirim ke SEMUA nomor yang statusnya <span class="badge bg-success">Aktif</span> saat ada pengajuan baru.
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover" id="recipients-table">
+                <thead class="table-light">
+                    <tr>
+                        <th width="5%">#</th>
+                        <th width="25%">Nama</th>
+                        <th width="20%">Nomor WhatsApp</th>
+                        <th width="20%">Jabatan</th>
+                        <th width="15%">Status</th>
+                        <th width="15%" class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!empty($recipients)): ?>
+                        <?php foreach ($recipients as $index => $r): ?>
+                        <tr>
+                            <td><?= $index + 1 ?></td>
+                            <td><strong><?= htmlspecialchars($r->nama) ?></strong></td>
+                            <td>
+                                <i class="fab fa-whatsapp text-success"></i> 
+                                <?= htmlspecialchars($r->nomor) ?>
+                            </td>
+                            <td><?= htmlspecialchars($r->jabatan ?? '-') ?></td>
+                            <td>
+                                <?php if ($r->is_active): ?>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle"></i> Aktif
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-times-circle"></i> Nonaktif
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-warning" onclick="editRecipient(<?= $r->id ?>)" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-<?= $r->is_active ? 'secondary' : 'success' ?>" 
+                                        onclick="toggleRecipient(<?= $r->id ?>)" 
+                                        title="<?= $r->is_active ? 'Nonaktifkan' : 'Aktifkan' ?>">
+                                    <i class="fas fa-power-off"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteRecipient(<?= $r->id ?>)" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Belum ada data penerima</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Add/Edit Recipient -->
+<div class="modal fade" id="recipientModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Tambah Penerima</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Nomor Tujuan:</label>
-                        <input type="text" class="form-control" id="test-nomor" placeholder="6282119509135" value="6282119509135">
+            <div class="modal-body">
+                <form id="recipientForm">
+                    <input type="hidden" id="recipient_id" name="id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nama <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="recipient_nama" name="nama" required placeholder="Contoh: Admin Utama">
                     </div>
                     
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">&nbsp;</label>
-                        <button class="btn btn-primary btn-custom w-100" onclick="testSendMessage()">
-                            <i class="fas fa-paper-plane"></i> Kirim Test Pesan
-                        </button>
+                    <div class="mb-3">
+                        <label class="form-label">Nomor WhatsApp <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="recipient_nomor" name="nomor" required placeholder="Contoh: 6282119509135">
+                        <small class="text-muted">Format: 62xxx (tanpa +, tanpa spasi)</small>
                     </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">Pesan:</label>
-                    <textarea class="form-control" id="test-pesan" rows="3" placeholder="Tulis pesan test...">🧪 Test pesan dari WhatsApp Server Dashboard</textarea>
-                </div>
-                
-                <div id="send-result" class="alert" style="display: none;"></div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Jabatan</label>
+                        <input type="text" class="form-control" id="recipient_jabatan" name="jabatan" placeholder="Contoh: Administrator">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="saveRecipient()">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
             </div>
         </div>
+    </div>
+</div>
         
         <!-- Logs -->
         <div class="card fade-in">
@@ -720,6 +804,151 @@ function checkStatus() {
             // Update button states
             document.getElementById('btn-start-server').disabled = false;
             document.getElementById('btn-stop-server').disabled = true;
+        }
+    });
+}
+// ========================================
+// RECIPIENT MANAGEMENT FUNCTIONS
+// ========================================
+
+// Open add modal
+function openAddModal() {
+    document.getElementById('modalTitle').textContent = 'Tambah Penerima';
+    document.getElementById('recipientForm').reset();
+    document.getElementById('recipient_id').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('recipientModal'));
+    modal.show();
+}
+
+// Edit recipient
+function editRecipient(id) {
+    // Get data from table row
+    const row = event.target.closest('tr');
+    const nama = row.cells[1].textContent.trim();
+    const nomor = row.cells[2].textContent.trim().replace(/\D/g, ''); // Remove non-digits
+    const jabatan = row.cells[3].textContent.trim();
+    
+    // Fill form
+    document.getElementById('modalTitle').textContent = 'Edit Penerima';
+    document.getElementById('recipient_id').value = id;
+    document.getElementById('recipient_nama').value = nama;
+    document.getElementById('recipient_nomor').value = nomor;
+    document.getElementById('recipient_jabatan').value = jabatan === '-' ? '' : jabatan;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('recipientModal'));
+    modal.show();
+}
+
+// Save recipient (add or update)
+function saveRecipient() {
+    const form = document.getElementById('recipientForm');
+    const formData = new FormData(form);
+    
+    // Validasi
+    const nama = formData.get('nama').trim();
+    const nomor = formData.get('nomor').trim();
+    
+    if (!nama || !nomor) {
+        showAlert('danger', 'Nama dan nomor harus diisi');
+        return;
+    }
+    
+    // Clean nomor (remove non-digits)
+    const nomorClean = nomor.replace(/\D/g, '');
+    if (nomorClean.length < 10) {
+        showAlert('danger', 'Nomor WhatsApp tidak valid');
+        return;
+    }
+    
+    formData.set('nomor', nomorClean);
+    
+    const id = formData.get('id');
+    const url = id ? '<?= base_url("whatsapp/update_recipient") ?>' : '<?= base_url("whatsapp/add_recipient") ?>';
+    
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showAlert('success', response.message);
+                
+                // Close modal
+                bootstrap.Modal.getInstance(document.getElementById('recipientModal')).hide();
+                
+                // Reload page after 1 second
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                showAlert('danger', response.message);
+            }
+        },
+        error: function() {
+            showAlert('danger', 'Terjadi kesalahan saat menyimpan data');
+        }
+    });
+}
+
+// Toggle active status
+function toggleRecipient(id) {
+    if (!confirm('Ubah status penerima ini?')) {
+        return;
+    }
+    
+    $.ajax({
+        url: '<?= base_url("whatsapp/toggle_recipient") ?>',
+        method: 'POST',
+        data: { id: id },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showAlert('success', response.message);
+                
+                // Reload page after 1 second
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                showAlert('danger', response.message);
+            }
+        },
+        error: function() {
+            showAlert('danger', 'Terjadi kesalahan');
+        }
+    });
+}
+
+// Delete recipient
+function deleteRecipient(id) {
+    if (!confirm('Hapus penerima ini? Data tidak bisa dikembalikan!')) {
+        return;
+    }
+    
+    $.ajax({
+        url: '<?= base_url("whatsapp/delete_recipient") ?>',
+        method: 'POST',
+        data: { id: id },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                showAlert('success', response.message);
+                
+                // Reload page after 1 second
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                showAlert('danger', response.message);
+            }
+        },
+        error: function() {
+            showAlert('danger', 'Terjadi kesalahan saat menghapus');
         }
     });
 }

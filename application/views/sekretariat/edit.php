@@ -542,50 +542,6 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
             color: #0c5460;
         }
 
-        /* New File Input Container */
-        .new-files-container {
-            margin-top: 20px;
-            display: none;
-        }
-
-        .new-files-container.show {
-            display: block;
-        }
-
-        .new-file-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e9ecef;
-        }
-
-        .new-file-input-wrapper .form-control {
-            flex: 1;
-            background: white;
-        }
-
-        .btn-remove-new-file {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-remove-new-file:hover {
-            background: #c0392b;
-            transform: scale(1.05);
-        }
-
         /* Hidden file inputs container */
         .hidden-files-container {
             display: none;
@@ -1315,82 +1271,55 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <label class="font-weight-bold">Upload File Eviden</label>
-                        <small class="text-muted">Anda dapat menambah atau menghapus file eviden yang sudah diupload.</small>
+                        <small class="text-muted">File yang dihapus akan dihapus permanen. File baru akan ditambahkan.</small>
                     </div>
                     
                     <div class="info-alert">
                         <i class="fas fa-info-circle"></i>
-                        <span><strong><?= count($eviden ?? []) ?> file telah diupload.</strong></span>
+                        <span><strong><?= count($eviden ?? []) ?> file telah diupload.</strong> Edit file dengan hati-hati.</span>
                     </div>
                     
+                    <!-- Upload Area Baru -->
                     <div class="mb-3">
-                        <label class="font-weight-bold mb-2">Tambah File Baru</label>
+                        <label class="font-weight-bold mb-2">Tambah File Baru (Opsional)</label>
                         <div style="color: #6c757d; font-size: 14px; margin-bottom: 8px;">
-                            <i class="fas fa-arrow-up"></i> drag & drop file atau klik untuk memilih
+                            <i class="fas fa-arrow-up"></i> Drag & drop file atau klik untuk memilih (maks 10MB per file)
                         </div>
                         
-                        <!-- Upload Area -->
                         <div id="uploadArea" class="upload-area">
                             <div class="upload-icon">
                                 <i class="fas fa-cloud-upload-alt"></i>
                             </div>
                             <div class="upload-text">
-                                drag & drop any files
+                                Drag & drop files here
                             </div>
                             <div class="upload-or">
                                 or
                             </div>
-                            <div class="choose-file-btn" id="chooseFileBtn">
-                                Choose a local file!
-                            </div>
-                            <input type="file" id="fileInput" name="new_eviden[]" multiple style="display: none;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
+                            <button type="button" class="choose-file-btn" id="chooseFileBtn">
+                                <i class="fas fa-folder-open"></i> Browse Files
+                            </button>
+                            <input type="file" id="fileInput" name="new_eviden[]" multiple style="display: none;" 
+                                   accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.zip">
                         </div>
                         
-                        <!-- Container untuk input file baru -->
-                        <div id="newFilesContainer" class="new-files-container"></div>
-                        
-                        <!-- Container untuk file yang di-drag & drop -->
-                        <div id="hiddenFilesContainer" class="hidden-files-container"></div>
-                        
-                        <!-- Loading Bar -->
-                        <div id="loadingBarContainer" class="loading-bar-container">
-                            <div id="loadingBar" class="loading-bar">
-                                <div id="loadingText" class="loading-text">0%</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Upload Success Message -->
-                        <div id="uploadSuccess" class="upload-success">
-                            <i class="fas fa-check-circle"></i> File berhasil ditambahkan!
-                        </div>
-                        
-                        <!-- Upload Error Message -->
-                        <div id="uploadError" class="upload-error">
-                            <i class="fas fa-exclamation-triangle"></i> <span id="errorMessage"></span>
-                        </div>
-                        
-                        <!-- Uploaded Files Preview -->
-                        <div id="uploadedFilesPreview" class="uploaded-files-preview">
-                            <h6 style="color: #16A085; margin-bottom: 15px; font-size: 14px;">
-                                <i class="fas fa-list"></i> File yang akan diupload
+                        <!-- List file yang akan diupload -->
+                        <div id="newFilesList" class="mt-3" style="display: none;">
+                            <h6 style="color: #16A085; margin-bottom: 10px; font-size: 14px;">
+                                <i class="fas fa-paperclip"></i> File Baru yang Akan Diupload
                             </h6>
-                            <div id="filesList"></div>
+                            <div id="selectedFiles"></div>
                         </div>
                         
-                        <div style="text-align: center; margin-top: 15px;">
-                            <a href="#" id="showFilesLink" style="color: #16A085; text-decoration: none; font-weight: 600;">
-                                <i class="fas fa-eye"></i> Show files
-                            </a>
-                            <div id="fileCounter" style="color: #6c757d; font-size: 13px; margin-top: 5px;">
-                                You've chosen 0 files.
-                            </div>
+                        <div id="fileCounter" class="text-center mt-2" style="color: #6c757d; font-size: 13px;">
+                            Belum ada file baru dipilih
                         </div>
                     </div>
                 </div>
                 
                 <!-- File yang sudah diupload -->
                 <div class="mb-4">
-                    <label class="font-weight-bold mb-3">File yang sudah diupload (<?= count($eviden ?? []) ?>):</label>
+                    <label class="font-weight-bold mb-3">File Eviden yang Sudah Ada (<?= count($eviden ?? []) ?>):</label>
                     
                     <div id="existingFilesContainer">
                         <?php
@@ -1474,6 +1403,7 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                                         </button>
                                     </div>
 
+                                    <!-- Hidden inputs untuk file yang tetap dipertahankan -->
                                     <input type="hidden" name="existing_eviden[]" value="<?= htmlspecialchars($file) ?>" class="existing-file-input">
                                     <input type="hidden" name="delete_eviden[]" value="" class="delete-flag">
                                 </div>
@@ -1486,42 +1416,14 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                                     <i class="fas fa-file"></i>
                                 </div>
                                 <div class="file-info">
-                                    <div class="file-name">
-                                        46s406206fef8acdf19b7aa56703d2ff.png
+                                    <div class="file-name text-muted">
+                                        <i>Tidak ada file eviden</i>
                                     </div>
-                                    <div class="file-size">0.01 MB</div>
+                                    <div class="file-size">-</div>
                                 </div>
                                 <div class="file-actions">
-                                    <button type="button" class="btn-view-file" data-src="#" data-type="png">
-                                        <i class="fas fa-eye"></i> Lihat
-                                    </button>
-                                    <button type="button" class="btn-delete-existing" onclick="deleteExistingFile(0, '46s406206fef8acdf19b7aa56703d2ff.png')">
-                                        <i class="fas fa-trash"></i> Hapus
-                                    </button>
+                                    <span class="text-muted small">Tidak ada file</span>
                                 </div>
-                                <input type="hidden" name="existing_eviden[]" value="46s406206fef8acdf19b7aa56703d2ff.png" class="existing-file-input">
-                                <input type="hidden" name="delete_eviden[]" value="" class="delete-flag">
-                            </div>
-                            <div class="existing-file-item">
-                                <div class="file-icon">
-                                    <i class="fas fa-file"></i>
-                                </div>
-                                <div class="file-info">
-                                    <div class="file-name">
-                                        197a6da58dcb4a0787cd2444c8ccdebf.png
-                                    </div>
-                                    <div class="file-size">0.01 MB</div>
-                                </div>
-                                <div class="file-actions">
-                                    <button type="button" class="btn-view-file" data-src="#" data-type="png">
-                                        <i class="fas fa-eye"></i> Lihat
-                                    </button>
-                                    <button type="button" class="btn-delete-existing" onclick="deleteExistingFile(1, '197a6da58dcb4a0787cd2444c8ccdebf.png')">
-                                        <i class="fas fa-trash"></i> Hapus
-                                    </button>
-                                </div>
-                                <input type="hidden" name="existing_eviden[]" value="197a6da58dcb4a0787cd2444c8ccdebf.png" class="existing-file-input">
-                                <input type="hidden" name="delete_eviden[]" value="" class="delete-flag">
                             </div>
                         <?php endif; ?>
                     </div>
@@ -1558,25 +1460,15 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
     <!-- Flatpickr JS -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        // ===== FILE UPLOAD FUNCTIONALITY - WITH LOADING PROGRESS BAR =====
+        // ===== FILE UPLOAD FUNCTIONALITY - FIXED VERSION =====
         document.addEventListener('DOMContentLoaded', function() {
             const uploadArea = document.getElementById('uploadArea');
             const chooseFileBtn = document.getElementById('chooseFileBtn');
             const fileInput = document.getElementById('fileInput');
-            const newFilesContainer = document.getElementById('newFilesContainer');
-            const hiddenFilesContainer = document.getElementById('hiddenFilesContainer');
+            const newFilesList = document.getElementById('newFilesList');
+            const selectedFiles = document.getElementById('selectedFiles');
             const fileCounter = document.getElementById('fileCounter');
-            const showFilesLink = document.getElementById('showFilesLink');
-            const loadingBarContainer = document.getElementById('loadingBarContainer');
-            const loadingBar = document.getElementById('loadingBar');
-            const loadingText = document.getElementById('loadingText');
-            const uploadSuccess = document.getElementById('uploadSuccess');
-            const uploadError = document.getElementById('uploadError');
-            const errorMessage = document.getElementById('errorMessage');
-            const uploadedFilesPreview = document.getElementById('uploadedFilesPreview');
-            const filesList = document.getElementById('filesList');
             const submitBtn = document.getElementById('submitBtn');
-            const mainForm = document.getElementById('mainForm');
             
             let fileCounterNumber = 0;
             let uploadedFiles = [];
@@ -1650,23 +1542,13 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
             
             // Handle selected files
             function handleFiles(files) {
-                // Reset previous uploads
-                uploadSuccess.classList.remove('show');
-                uploadError.classList.remove('show');
-                uploadedFilesPreview.classList.remove('show');
-                filesList.innerHTML = '';
-                uploadedFiles = [];
-                
-                totalFiles = files.length;
-                uploadedCount = 0;
-                
-                if (totalFiles === 0) return;
+                if (files.length === 0) return;
                 
                 // Validate files
                 let validFiles = [];
                 let invalidFiles = [];
                 
-                for (let i = 0; i < totalFiles; i++) {
+                for (let i = 0; i < files.length; i++) {
                     const file = files[i];
                     const sizeMB = (file.size / 1024 / 1024);
                     
@@ -1681,10 +1563,11 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                         'image/jpeg', 'image/jpg', 'image/png', 'image/gif',
                         'application/pdf',
                         'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/zip'
                     ];
                     
-                    if (!allowed.includes(file.type)) {
+                    if (!allowed.includes(file.type) && !file.name.match(/\.(zip)$/i)) {
                         invalidFiles.push(`${file.name} (tipe file tidak diizinkan)`);
                         continue;
                     }
@@ -1693,8 +1576,7 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                 }
                 
                 if (invalidFiles.length > 0) {
-                    errorMessage.textContent = `File berikut tidak valid:\n${invalidFiles.join('\n')}`;
-                    uploadError.classList.add('show');
+                    alert('File berikut tidak valid:\n' + invalidFiles.join('\n'));
                     return;
                 }
                 
@@ -1702,37 +1584,54 @@ $form_action = site_url('sekretariat/update_surat_sekretariat/' . $surat['id']);
                     return;
                 }
                 
-                totalFiles = validFiles.length;
+                // Add to selected files
+                validFiles.forEach(file => {
+                    selectedFilesData.push(file);
+                });
                 
-                // Update file counter
-                fileCounterNumber += totalFiles;
-                fileCounter.textContent = `You've chosen ${fileCounterNumber} file${fileCounterNumber !== 1 ? 's' : ''}.`;
+                // Update display
+                updateSelectedFilesDisplay();
+            }
+            
+            // Update selected files display
+            function updateSelectedFilesDisplay() {
+                selectedFiles.innerHTML = '';
                 
-                // Show preview
-                uploadedFilesPreview.classList.add('show');
+                if (selectedFilesData.length === 0) {
+                    newFilesList.style.display = 'none';
+                    fileCounter.textContent = 'Belum ada file baru dipilih';
+                    return;
+                }
                 
-                // Process each valid file
-                for (let i = 0; i < totalFiles; i++) {
-                    const file = validFiles[i];
-                    
-                    // Create preview item
+                selectedFilesCount = selectedFilesData.length;
+                newFilesList.style.display = 'block';
+                fileCounter.textContent = `Anda memilih ${selectedFilesCount} file baru`;
+                
+                selectedFilesData.forEach((file, index) => {
                     const fileItem = document.createElement('div');
-                    fileItem.className = 'uploaded-file-item';
-                    fileItem.id = `file-${i}`;
+                    fileItem.className = 'existing-file-item';
+                    fileItem.style.marginBottom = '8px';
                     
-                    const fileName = file.name.length > 30 ? file.name.substring(0, 27) + '...' : file.name;
-                    const fileSize = (file.size / 1048576).toFixed(2) + ' MB';
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    let icon = 'fa-file';
+                    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext)) icon = 'fa-file-image';
+                    else if (ext === 'pdf') icon = 'fa-file-pdf';
+                    else if (['doc', 'docx'].includes(ext)) icon = 'fa-file-word';
+                    else if (['xls', 'xlsx'].includes(ext)) icon = 'fa-file-excel';
+                    else if (ext === 'zip') icon = 'fa-file-archive';
                     
                     fileItem.innerHTML = `
-                        <div style="flex-shrink: 0;">
-                            <i class="fas fa-file" style="color: #6c757d;"></i>
+                        <div class="file-icon" style="background: #27ae60;">
+                            <i class="fas ${icon}"></i>
                         </div>
-                        <div style="flex: 1;">
-                            <div class="uploaded-file-name">${fileName}</div>
-                            <div class="uploaded-file-size">${fileSize}</div>
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${(file.size / 1048576).toFixed(2)} MB</div>
                         </div>
-                        <div class="uploaded-file-status status-uploading">
-                            <i class="fas fa-spinner fa-spin"></i> Menunggu
+                        <div class="file-actions">
+                            <button type="button" class="btn-delete-existing" onclick="removeNewFile(${index})" style="background: #e74c3c;">
+                                <i class="fas fa-trash"></i> Hapus
+                            </button>
                         </div>
                     `;
                     
@@ -1907,26 +1806,12 @@ function addFilesToForm() {
             mainForm.addEventListener('submit', function(e) {
                 // Update the file input with all files before submitting
                 const dataTransfer = new DataTransfer();
-                
-                // Get files from regular file input
-                for (let i = 0; i < fileInput.files.length; i++) {
-                    dataTransfer.items.add(fileInput.files[i]);
-                }
-                
-                // Add dragged files
-                uploadedFiles.forEach(file => {
+                selectedFilesData.forEach(file => {
                     dataTransfer.items.add(file);
                 });
                 
                 // Update the file input
                 fileInput.files = dataTransfer.files;
-                
-                // Update counter
-                fileCounter.textContent = `You've chosen ${dataTransfer.files.length} file${dataTransfer.files.length !== 1 ? 's' : ''}.`;
-                
-                // Show loading state
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
-                submitBtn.disabled = true;
             });
         });
 

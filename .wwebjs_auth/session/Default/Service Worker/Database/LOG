@@ -1,3 +1,2 @@
-2026/01/02-14:14:28.705 2f00 Reusing MANIFEST C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Service Worker\Database/MANIFEST-000001
-2026/01/02-14:14:28.707 2f00 Recovering log #3
-2026/01/02-14:14:28.707 2f00 Reusing old log C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Service Worker\Database/000003.log 
+2026/01/05-07:57:42.919 31c8 Creating DB C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Service Worker\Database since it was missing.
+2026/01/05-07:57:42.938 31c8 Reusing MANIFEST C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Service Worker\Database/MANIFEST-000001

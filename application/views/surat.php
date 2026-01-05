@@ -653,6 +653,9 @@ label:has(> span[style*="#dc3545"])::after {
             <div class="card">
                 <a href="https://ifik.telkomuniversity.ac.id/Pic_kk/input_surat" class="btn"><span class="fas fa-envelope-open-text"></span> Surat Tugas</a>
             </div>
+            <div class="card">
+                <a href="<?= base_url('whatsapp/dashboard') ?>" class="btn"><span class="fab fa-whatsapp"></span> Whatsapp Server Control</a>
+            </div>
             <div class="divider"></div>
             <div class="card">
                 <a href="#" class="btn" data-toggle="collapse" data-target="#collapse2" aria-expanded="true" aria-controls="collapse2"><span class="fas fa-door-open"></span> Peminjaman Ruangan</a>

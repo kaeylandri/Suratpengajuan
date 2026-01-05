@@ -1,3 +1,6 @@
-2026/01/02-14:13:13.001 37cc Reusing MANIFEST C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
-2026/01/02-14:13:13.070 37cc Recovering log #3
-2026/01/02-14:13:13.071 37cc Reusing old log C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Local Storage\leveldb/000003.log 
+2026/01/04-10:15:56.318 2c08 Creating DB C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Local Storage\leveldb since it was missing.
+2026/01/04-10:15:56.328 2c08 Reusing MANIFEST C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
+2026/01/04-10:15:56.329 2c08 Recovering log #6
+2026/01/04-10:15:56.337 2c08 Reusing old log C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Local Storage\leveldb/000006.log 
+2026/01/04-10:15:56.338 2c08 Delete type=2 #3
+2026/01/04-10:15:56.338 2c08 Delete type=2 #7

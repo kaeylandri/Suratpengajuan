@@ -4083,6 +4083,11 @@
                 </a>
             </div>
             <div class="card">
+            <a href="<?= base_url('whatsapp/dashboard') ?>" class="btn">
+                <span class="fab fa-whatsapp"></span> 
+                <span class="menu-text">Whatsapp Server Control</span> 
+            </a>
+        </div>
             <div class="divider"></div>
 
             <!-- Peminjaman Ruangan (Collapsible) -->

@@ -2644,14 +2644,24 @@ public function edit($id)
     
 
 // ===============================
-// METHOD BARU: KIRIM WHATSAPP OTOMATIS
+// METHOD: KIRIM WHATSAPP OTOMATIS KE SEMUA RECIPIENT AKTIF
 // ===============================
 private function send_whatsapp_notification($surat_id, $nama_kegiatan, $created_at)
 {
     try {
+        // Load model recipient
+        $this->load->model('WhatsappRecipient_model');
+        
+        // Get semua recipient yang aktif
+        $recipients = $this->WhatsappRecipient_model->get_active_recipients();
+        
+        if (empty($recipients)) {
+            log_message('warning', 'Tidak ada recipient aktif untuk broadcast WhatsApp');
+            return false;
+        }
+        
         // Konfigurasi
-        $api_url = 'http://localhost:3000/send-message'; // URL wa-server.js
-        $nomor_tujuan = '6285321151908'; // ✅ GANTI DENGAN NOMOR TUJUAN ANDA
+        $api_url = 'http://localhost:3000/send-message';
         
         // Gunakan tanggal pembuatan pengajuan (sekarang)
         $created_at = date('d M Y'); // Format: 31 Des 2025 14:30:45
@@ -2663,40 +2673,52 @@ private function send_whatsapp_notification($surat_id, $nama_kegiatan, $created_
                  "Silakan cek dashboard untuk detail lengkap:\n" .
                  base_url('list-surat-tugas');
         
-        // Data untuk dikirim ke API
-        $data = json_encode([
-            'nomor' => $nomor_tujuan,
-            'pesan' => $pesan
-        ]);
+        $success_count = 0;
+        $failed_count = 0;
         
-        // Kirim request ke wa-server.js
-        $ch = curl_init($api_url);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Timeout 5 detik
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); // Connection timeout 3 detik
-        
-        $response = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
-        
-        // Log response
-        if ($httpcode == 200) {
-            log_message('info', '✅ WhatsApp berhasil dikirim ke ' . $nomor_tujuan . ' - Response: ' . $response);
-            return true;
-        } else {
-            log_message('error', '❌ WhatsApp gagal dikirim - HTTP Code: ' . $httpcode . ' - Error: ' . $curl_error . ' - Response: ' . $response);
-            return false;
+        // Kirim ke setiap recipient
+        foreach ($recipients as $recipient) {
+            $data = json_encode([
+                'nomor' => $recipient->nomor,
+                'pesan' => $pesan
+            ]);
+            
+            // Kirim request ke wa-server.js
+            $ch = curl_init($api_url);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+            
+            $response = curl_exec($ch);
+            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curl_error = curl_error($ch);
+            curl_close($ch);
+            
+            // Log response
+            if ($httpcode == 200) {
+                log_message('info', '✅ WhatsApp berhasil dikirim ke ' . $recipient->nama . ' (' . $recipient->nomor . ')');
+                $success_count++;
+            } else {
+                log_message('error', '❌ WhatsApp gagal dikirim ke ' . $recipient->nama . ' - HTTP Code: ' . $httpcode . ' - Error: ' . $curl_error);
+                $failed_count++;
+            }
+            
+            // Delay 1 detik antar pesan (agar tidak spam)
+            sleep(1);
         }
         
+        // Log summary
+        log_message('info', "📊 Broadcast summary: {$success_count} berhasil, {$failed_count} gagal dari " . count($recipients) . " recipient");
+        
+        return ($success_count > 0);
+        
     } catch (Exception $e) {
-        log_message('error', '❌ Exception saat kirim WhatsApp: ' . $e->getMessage());
+        log_message('error', '❌ Exception saat broadcast WhatsApp: ' . $e->getMessage());
         return false;
     }
 }
-
             /* ===========================================
             DEBUG FUNCTION - Untuk troubleshooting
             ============================================*/

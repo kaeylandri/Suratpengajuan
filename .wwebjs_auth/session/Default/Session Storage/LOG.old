@@ -1,3 +1,4 @@
-2026/01/02-14:13:17.717 39d0 Reusing MANIFEST C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Session Storage/MANIFEST-000001
-2026/01/02-14:13:17.729 39d0 Recovering log #3
-2026/01/02-14:13:17.730 39d0 Reusing old log C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Session Storage/000003.log 
+2026/01/04-10:15:57.082 54bc Creating DB C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Session Storage since it was missing.
+2026/01/04-10:15:57.091 54bc Reusing MANIFEST C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Session Storage/MANIFEST-000001
+2026/01/04-10:15:57.091 54bc Recovering log #3
+2026/01/04-10:15:57.091 54bc Reusing old log C:\xampp\htdocs\surat\.wwebjs_auth\session\Default\Session Storage/000003.log 

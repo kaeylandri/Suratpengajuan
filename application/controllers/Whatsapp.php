@@ -12,6 +12,7 @@ class Whatsapp extends CI_Controller
         parent::__construct();
         $this->load->helper(['url']);
         $this->load->library('session');
+        $this->load->model('WhatsappRecipient_model'); // Load model
     }
 
     // Dashboard utama
@@ -22,6 +23,8 @@ class Whatsapp extends CI_Controller
         // Cek status server
         $data['server_status'] = $this->check_server_status();
         $data['is_running'] = $this->is_server_running();
+        // Get all recipients
+        $data['recipients'] = $this->WhatsappRecipient_model->get_all();
         
         $this->load->view('whatsapp_dashboard', $data);
     }
@@ -264,6 +267,212 @@ class Whatsapp extends CI_Controller
             echo json_encode([
                 'success' => false,
                 'error' => $e->getMessage()
+            ]);
+        }
+    }
+    // ========================================
+    // RECIPIENT MANAGEMENT
+    // ========================================
+
+    // Get all recipients (AJAX)
+    public function get_recipients()
+    {
+        header('Content-Type: application/json');
+        
+        $recipients = $this->WhatsappRecipient_model->get_all();
+        
+        echo json_encode([
+            'success' => true,
+            'data' => $recipients
+        ]);
+    }
+
+    // Add recipient
+    public function add_recipient()
+    {
+        header('Content-Type: application/json');
+        
+        $nama = $this->input->post('nama');
+        $nomor = $this->input->post('nomor');
+        $jabatan = $this->input->post('jabatan');
+        
+        // Validasi
+        if (empty($nama) || empty($nomor)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Nama dan nomor harus diisi'
+            ]);
+            return;
+        }
+        
+        // Clean nomor (hapus karakter non-digit)
+        $nomor_clean = preg_replace('/\D/', '', $nomor);
+        
+        // Cek apakah nomor sudah ada
+        if ($this->WhatsappRecipient_model->nomor_exists($nomor_clean)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Nomor WhatsApp sudah terdaftar'
+            ]);
+            return;
+        }
+        
+        // Insert
+        $data = [
+            'nama' => $nama,
+            'nomor' => $nomor_clean,
+            'jabatan' => $jabatan,
+            'is_active' => 1,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+        
+        if ($this->WhatsappRecipient_model->insert($data)) {
+            log_message('info', 'New recipient added: ' . $nama . ' (' . $nomor_clean . ')');
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Penerima berhasil ditambahkan'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menambahkan penerima'
+            ]);
+        }
+    }
+
+    // Update recipient
+    public function update_recipient()
+    {
+        header('Content-Type: application/json');
+        
+        $id = $this->input->post('id');
+        $nama = $this->input->post('nama');
+        $nomor = $this->input->post('nomor');
+        $jabatan = $this->input->post('jabatan');
+        
+        // Validasi
+        if (empty($id) || empty($nama) || empty($nomor)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Data tidak lengkap'
+            ]);
+            return;
+        }
+        
+        // Clean nomor
+        $nomor_clean = preg_replace('/\D/', '', $nomor);
+        
+        // Cek apakah nomor sudah digunakan recipient lain
+        if ($this->WhatsappRecipient_model->nomor_exists($nomor_clean, $id)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Nomor WhatsApp sudah digunakan recipient lain'
+            ]);
+            return;
+        }
+        
+        // Update
+        $data = [
+            'nama' => $nama,
+            'nomor' => $nomor_clean,
+            'jabatan' => $jabatan,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        if ($this->WhatsappRecipient_model->update($id, $data)) {
+            log_message('info', 'Recipient updated: ID ' . $id);
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Penerima berhasil diupdate'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal mengupdate penerima'
+            ]);
+        }
+    }
+
+    // Delete recipient
+    public function delete_recipient()
+    {
+        header('Content-Type: application/json');
+        
+        $id = $this->input->post('id');
+        
+        if (empty($id)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID tidak valid'
+            ]);
+            return;
+        }
+        
+        // Cek apakah masih ada recipient lain
+        $total_recipients = count($this->WhatsappRecipient_model->get_all());
+        if ($total_recipients <= 1) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Tidak bisa hapus. Minimal harus ada 1 penerima aktif.'
+            ]);
+            return;
+        }
+        
+        if ($this->WhatsappRecipient_model->delete($id)) {
+            log_message('info', 'Recipient deleted: ID ' . $id);
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Penerima berhasil dihapus'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal menghapus penerima'
+            ]);
+        }
+    }
+
+    // Toggle active status
+    public function toggle_recipient()
+    {
+        header('Content-Type: application/json');
+        
+        $id = $this->input->post('id');
+        
+        if (empty($id)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'ID tidak valid'
+            ]);
+            return;
+        }
+        
+        // Cek apakah yang aktif tinggal 1
+        $active_count = count($this->WhatsappRecipient_model->get_active_recipients());
+        $recipient = $this->WhatsappRecipient_model->get_by_id($id);
+        
+        if ($active_count <= 1 && $recipient->is_active == 1) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Tidak bisa nonaktifkan. Minimal harus ada 1 penerima aktif.'
+            ]);
+            return;
+        }
+        
+        if ($this->WhatsappRecipient_model->toggle_active($id)) {
+            $new_status = $recipient->is_active ? 'dinonaktifkan' : 'diaktifkan';
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Penerima berhasil ' . $new_status
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal mengubah status'
             ]);
         }
     }

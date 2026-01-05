@@ -6,43 +6,7 @@
 <title>Pengajuan Menunggu Persetujuan - Dashboard Dekan</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <style>
-    /* Tambahkan di bagian CSS yang sudah ada */
-.select-checkbox {
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
-}
-
-.select-checkbox:focus {
-    outline: 2px solid #FB8C00;
-    outline-offset: 2px;
-}
-
-/* Style untuk row yang dipilih */
-tr.clickable-row.selected {
-    background-color: rgba(251, 140, 0, 0.1) !important;
-    box-shadow: inset 3px 0 0 #FB8C00;
-}
-
-/* Style untuk checkbox di dalam row yang dipilih */
-tr.clickable-row.selected .row-checkbox {
-    accent-color: #FB8C00;
-}
-
-/* Animasi untuk toolbar bulk action */
-.bulk-action-toolbar {
-    transition: all 0.3s ease;
-    opacity: 0;
-    max-height: 0;
-    overflow: hidden;
-}
-
-.bulk-action-toolbar.show {
-    opacity: 1;
-    max-height: 100px;
-    margin-bottom: 15px;
-}
-    /* STYLE UTAMA (SAMA DENGAN DASHBOARD) */
+    /* STYLE UTAMA (DITAMBAHKAN DARI MULTI MODAL SYSTEM) */
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;background:#f5f7fa;}
     .navbar{background:#FB8C00;color:white;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
@@ -53,23 +17,23 @@ tr.clickable-row.selected .row-checkbox {
     .back-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#FB8C00;color:white;text-decoration:none;border-radius:8px;font-weight:600;transition:all 0.3s;margin-bottom:20px}
     .back-btn:hover{background:#e67e22;transform:translateY(-2px)}
     
-    /* Card Styles (SAMA DENGAN DASHBOARD) */
+    /* Card Styles */
     .card{background:white;border-radius:10px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);margin-bottom:20px}
     .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee}
     
-    /* Table Styles (SAMA DENGAN DASHBOARD) */
+    /* Table Styles */
     table{width:100%;border-collapse:collapse}
     thead{background:#f4f6f7}
     th,td{padding:12px;border-bottom:1px solid #ecf0f1;text-align:left;font-size:14px}
     tbody tr:hover{background:#fbfcfd}
     
-    /* Badge Styles (SAMA DENGAN DASHBOARD) */
+    /* Badge Styles */
     .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;font-size:12px}
     .badge-pending{background:#fff3cd;color:#856404}
     .badge-approved{background:#d4edda;color:#155724}
     .badge-rejected{background:#f8d7da;color:#721c24}
     
-    /* Button Styles (SAMA DENGAN DASHBOARD) */
+    /* Button Styles */
     .btn{padding:6px 10px;border-radius:6px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s}
     .btn:hover{transform:scale(1.05)}
     .btn-approve{background:#27ae60;color:#fff}
@@ -79,7 +43,7 @@ tr.clickable-row.selected .row-checkbox {
     .btn-detail{background:#3498db;color:#fff}
     .btn-detail:hover{background:#2980b9}
     
-    /* Tombol Eviden Hijau (SAMA DENGAN DASHBOARD) */
+    /* Tombol Eviden Hijau */
     .btn-eviden {
         background: #28a745 !important;
         color: white !important;
@@ -107,56 +71,360 @@ tr.clickable-row.selected .row-checkbox {
     /* Pagination Info */
     .pagination-info{margin-top:15px;color:#7f8c8d;font-size:14px;text-align:right}
     
-   /* Modal Styles */
-    .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
-    .modal.show{display:flex}
-    .modal-content{background:white;padding:0;border-radius:15px;max-width:1100px;width:95%;max-height:85vh;overflow:hidden;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    /* ============================================
+       MULTI MODAL STYLES (DARI halaman_total.php)
+    ============================================ */
+    /* Clickable Row Styles */
+    .clickable-row:hover {
+        background-color: #fef9e7 !important;
+        box-shadow: inset 0 0 0 2px #FB8C00;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .clickable-row:active {
+        background-color: #fdebd0 !important;
+        transform: scale(0.995);
+    }
+    
+    /* PERBAIKAN: Modal Stack Container - MAKSIMAL 2 MODAL */
+    .modal-stack {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1050;
+    }
+
+    .modal-stack .modal-item {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: auto;
+        transition: all 0.3s ease;
+        min-width: 300px;
+    }
+
+    /* Modal pertama - di tengah */
+    .modal-item:nth-child(1) {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1051;
+    }
+
+    /* Modal kedua - kanan atas */
+    .modal-item:nth-child(2) {
+        top: 50px;
+        right: 50px;
+        transform: none;
+        z-index: 1052;
+    }
+
+    /* Modal aktif */
+    .modal-item.active {
+        z-index: 1053;
+    }
+
+    /* Modal number badge */
+    .modal-number-badge {
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        background: #e74c3c;
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 1060;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    /* Modal yang baru ditambahkan */
+    .modal-item.new {
+        animation: modalAppear 0.3s ease;
+    }
+
+    @keyframes modalAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    /* Modal yang akan dihapus */
+    .modal-item.removing {
+        animation: modalDisappear 0.3s ease;
+    }
+
+    @keyframes modalDisappear {
+        from {
+            opacity: 1;
+            transform: scale(1);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+        }
+    }
+
+    /* Responsive positioning untuk 2 modal */
+    @media (max-width: 1200px) {
+        .modal-item {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            transform: none !important;
+            margin: 10px;
+        }
+        
+        .modal-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            pointer-events: auto;
+        }
+        
+        .modal-item {
+            position: relative;
+            margin-bottom: 15px;
+            width: 95%;
+        }
+        
+        .modal-number-badge {
+            top: -8px;
+            left: -8px;
+        }
+    }
+
+    /* Tabel tetap bisa diakses saat modal terbuka */
+    body.modal-open #tableBody {
+        pointer-events: auto !important;
+    }
+
+    body.modal-open .main-content {
+        pointer-events: auto !important;
+        opacity: 1 !important;
+    }
+
+    /* Scroll tetap aktif di latar belakang */
+    body.modal-open {
+        overflow: auto !important;
+    }
+
+    /* Modal close button */
+    .modal-close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0,0,0,0.1);
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: white;
+        font-size: 18px;
+        z-index: 10;
+        transition: background 0.2s;
+    }
+
+    .modal-close-btn:hover {
+        background: rgba(0,0,0,0.2);
+    }
+    
+    /* Detail Modal Styles */
+    .modal{display:none !important;position:fixed;z-index:1050;background:rgba(0,0,0,0.45);align-items:center;justify-content:center}
+    .modal.show{display:flex !important}
+    .modal-content{background:white;padding:0;border-radius:15px;animation:slideIn 0.3s ease;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
     @keyframes slideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
     .modal-header{background:#FB8C00;color:white;padding:20px 25px;display:flex;justify-content:space-between;align-items:center;border-radius:15px 15px 0 0}
-    .modal-header h3{margin:0;font-size:18px;font-weight:600}
-    .close-modal{background:none;border:0;color:white;font-size:24px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
+    .modal-header h3{margin:0;font-size:20px;font-weight:600}
+    .close-modal{background:none;border:0;color:white;font-size:28px;cursor:pointer;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background 0.2s}
     .close-modal:hover{background:rgba(255,255,255,0.2)}
     
-/* Detail Content Styles - IMPROVED (SAMA DENGAN DASHBOARD SEKRETARIAT) */
-    .detail-content{padding:25px;max-height:calc(85vh - 80px);overflow-y:auto}
-    .detail-section{margin-bottom:25px;background:#f8f9fa;border-radius:12px;padding:20px;border:1px solid #e9ecef}
+    /* Detail Content Styles */
+    .detail-content{padding:30px;max-height:calc(90vh - 80px);overflow-y:auto}
+    .detail-section{margin-bottom:30px;background:#f8f9fa;border-radius:12px;padding:25px;border:1px solid #e9ecef}
     .detail-section:last-child{margin-bottom:0}
-    .detail-section-title{font-size:16px;font-weight:700;color:#FB8C00;margin-bottom:15px;padding-bottom:10px;border-bottom:2px solid #FB8C00;display:flex;align-items:center;gap:10px}
-    .detail-section-title i{font-size:18px}
-    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-    .detail-row{display:flex;flex-direction:column;margin-bottom:12px}
-    .detail-label{font-weight:600;color:#495057;font-size:13px;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px}
-    .detail-value{color:#212529;font-size:14px;background:white;padding:10px 15px;border-radius:8px;border:1px solid #e9ecef;min-height:40px;display:flex;align-items:center}
-    .detail-value-empty{color:#6c757d;font-style:italic;background:#f8f9fa !important}
+    .detail-section-title{font-size:18px;font-weight:700;color:#FB8C00;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #FB8C00;display:flex;align-items:center;gap:12px}
+    .detail-section-title i{font-size:20px}
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .detail-row{display:flex;flex-direction:column;margin-bottom:15px}
+    .detail-label{font-weight:600;color:#495057;font-size:14px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+    .detail-value{color:#212529;font-size:15px;background:white;padding:12px 18px;border-radius:8px;border:1px solid #e9ecef;min-height:45px;display:flex;align-items:center;word-break:break-word}
+    .detail-value-empty{color:#6c757d;font-style:italic}
     
-    /* Dosen list in detail - SAMA DENGAN DASHBOARD */
+    /* ============================================
+       SURAT MODAL STYLES - DIUBAH: LEBAR MAKSIMAL LEBIH BESAR
+    ============================================ */
+    .surat-modal .modal-content {
+        max-width: 1400px !important;
+        width: 98% !important;
+        max-height: 95vh !important;
+        min-width: 1000px;
+    }
+    
+    /* Container khusus untuk preview surat agar lebih lebar */
+    .surat-preview-container {
+        width: 100%;
+        height: calc(95vh - 150px);
+        display: flex;
+        flex-direction: column;
+        background: #f8f9fa;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    /* Header untuk surat preview */
+    .surat-preview-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    
+    /* Toolbar untuk tombol download/print */
+    .surat-toolbar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    /* Iframe untuk surat - DIPERBESAR */
+    .surat-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        flex: 1;
+        background: white;
+    }
+    
+    /* Style khusus untuk tombol dalam surat modal */
+    .surat-btn {
+        padding: 10px 20px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        text-decoration: none !important;
+    }
+    
+    .surat-btn-download {
+        background: #FB8C00;
+        color: white;
+    }
+    
+    .surat-btn-download:hover {
+        background: #E67E22;
+        transform: translateY(-2px);
+    }
+    
+    .surat-btn-print {
+        background: #2c3e50;
+        color: white;
+    }
+    
+    .surat-btn-print:hover {
+        background: #1a252f;
+        transform: translateY(-2px);
+    }
+    
+    .surat-btn-fullscreen {
+        background: #3498db;
+        color: white;
+    }
+    
+    .surat-btn-fullscreen:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+    }
+    
+    /* Fullscreen mode untuk surat */
+    .surat-iframe.fullscreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 9999;
+        background: white;
+    }
+    
+    /* Dosen list in detail */
     .dosen-list {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 12px;
     }
 
     .dosen-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 8px 12px;
+        gap: 15px;
+        padding: 12px 15px;
         background: white;
         border: 1px solid #e9ecef;
-        border-radius: 6px;
+        border-radius: 8px;
     }
 
     .dosen-avatar {
-        width: 32px;
-        height: 32px;
+        width: 45px;
+        height: 45px;
         border-radius: 50%;
         background: #FB8C00;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
-        font-size: 12px;
+        font-size: 16px;
         font-weight: 600;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .dosen-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .dosen-avatar-initial {
+        position: relative;
+        z-index: 1;
     }
 
     .dosen-info {
@@ -166,33 +434,35 @@ tr.clickable-row.selected .row-checkbox {
     .dosen-name {
         font-weight: 600;
         color: #212529;
-        font-size: 14px;
+        font-size: 16px;
+        margin-bottom: 4px;
     }
 
     .dosen-details {
-        font-size: 12px;
+        font-size: 13px;
         color: #6c757d;
+        line-height: 1.4;
     }
     
-    /* File Evidence Styles - SAMA DENGAN DASHBOARD */
-    .file-evidence{margin-top:10px}
-    .file-item{display:flex;align-items:center;gap:12px;padding:12px 15px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s}
+    /* File Evidence Styles */
+    .file-evidence{margin-top:15px}
+    .file-item{display:flex;align-items:center;gap:15px;padding:15px 18px;background:white;border:1px solid #e9ecef;border-radius:8px;transition:all 0.2s;margin-bottom:10px}
     .file-item:hover{background:#fef9e7;border-color:#FB8C00}
-    .file-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#FB8C00;font-size:16px}
-    .file-info{flex:1}
-    .file-name{font-weight:600;color:#212529;font-size:14px;cursor:pointer}
+    .file-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#FB8C00;font-size:20px;flex-shrink:0}
+    .file-info{flex:1;min-width:0}
+    .file-name{font-weight:600;color:#212529;font-size:15px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .file-name:hover{color:#FB8C00}
-    .file-size{font-size:12px;color:#6c757d}
-    .preview-btn{background:#3498db;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+    .file-size{font-size:13px;color:#6c757d;margin-top:4px}
+    .preview-btn{background:#3498db;color:white;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0}
     .preview-btn:hover{background:#2980b9;color:white;text-decoration:none}
     .preview-btn.disabled{background:#bdc3c7;cursor:not-allowed;opacity:0.6}
     .preview-btn.disabled:hover{background:#bdc3c7}
-    .download-btn{background:#FB8C00;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:6px;text-decoration:none}
+    .download-btn{background:#FB8C00;color:white;border:none;padding:10px 18px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;transition:background 0.2s;display:flex;align-items:center;gap:8px;text-decoration:none;flex-shrink:0;margin-left:10px}
     .download-btn:hover{background:#E67E22;color:white;text-decoration:none}
 
-    /* Preview Modal Styles - SAMA DENGAN DASHBOARD */
-    .preview-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:10000;justify-content:center;align-items:center;padding:20px}
-    .preview-modal.show{display:flex}
+    /* Preview Modal Styles */
+    .preview-modal{display:none !important;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1050;justify-content:center;align-items:center;padding:20px}
+    .preview-modal.show{display:flex !important}
     .preview-content{background:white;border-radius:12px;width:90%;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
     .preview-header{background:#FB8C00;color:white;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
     .preview-header h3{margin:0;font-size:16px;font-weight:600}
@@ -203,10 +473,12 @@ tr.clickable-row.selected .row-checkbox {
     .preview-image{max-width:100%;max-height:70vh;object-fit:contain}
     .preview-unsupported{text-align:center;padding:40px;color:#6c757d}
     .preview-unsupported i{font-size:48px;margin-bottom:15px;color:#FB8C00}
+    .preview-unsupported h4{font-size:18px;margin-bottom:10px;color:#495057}
+    .preview-unsupported p{font-size:14px;margin-bottom:20px}
     
-    /* Action Buttons in Modal - SAMA DENGAN DASHBOARD */
-    .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef}
-    .modal-btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+    /* Action Buttons in Modal */
+    .modal-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:25px;padding-top:25px;border-top:1px solid #e9ecef}
+    .modal-btn{padding:12px 24px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:15px;transition:all 0.2s;display:flex;align-items:center;gap:10px}
     .modal-btn-close{background:#6c757d;color:white}
     .modal-btn-close:hover{background:#5a6268;transform:translateY(-2px)}
     .modal-btn-approve{background:#27ae60;color:white}
@@ -214,245 +486,237 @@ tr.clickable-row.selected .row-checkbox {
     .modal-btn-reject{background:#e74c3c;color:white}
     .modal-btn-reject:hover{background:#c0392b;transform:translateY(-2px)}
     
-    /* Rejection Notes Styles - SAMA DENGAN DASHBOARD */
-    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:20px;margin-top:15px}
-    .rejection-notes .detail-label{color:#dc3545;font-weight:700}
-    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:14px;line-height:1.5;min-height:auto;padding:12px}
+    /* Rejection Notes Styles */
+    .rejection-notes{background:#fff5f5;border:1px solid #f8d7da;border-radius:8px;padding:25px;margin-top:20px}
+    .rejection-notes .detail-label{color:#dc3545;font-weight:700;font-size:16px}
+    .rejection-notes .detail-value{background:#fff5f5;border-color:#f8d7da;color:#721c24;font-size:15px;line-height:1.6;min-height:auto;padding:15px;border-radius:6px}
     
-    /* Bulk Action Styles */
-    .bulk-actions {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-        padding: 15px;
-        background: #f8f9fa;
+    /* Detail Modal Lebar Besar */
+    .detail-modal .modal-content {
+        max-width: 1100px !important;
+        width: 95% !important;
+        max-height: 90vh !important;
+    }
+    
+    /* Alert Styling */
+    .alert-modal {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #f8d7da;
+        color: #721c24;
+        padding: 15px 20px;
         border-radius: 8px;
-        border: 1px solid #e9ecef;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1060;
+        display: flex;
         align-items: center;
+        gap: 10px;
+        max-width: 400px;
+        animation: slideInRight 0.3s ease;
     }
     
-    .bulk-checkbox {
-        margin-right: 10px;
-        transform: scale(1.2);
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
     
-    .bulk-info {
-        flex-grow: 1;
-        color: #495057;
-        font-size: 14px;
+    .alert-icon {
+        font-size: 20px;
+        color: #721c24;
     }
     
-    .btn-bulk {
-        padding: 8px 16px;
-        border-radius: 6px;
+    .alert-content {
+        flex: 1;
+    }
+    
+    .alert-close {
+        background: none;
         border: none;
+        color: #721c24;
         cursor: pointer;
-        font-weight: 600;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-    
-    .btn-bulk-approve {
-        background: #27ae60;
-        color: white;
-    }
-    
-    .btn-bulk-approve:hover {
-        background: #229954;
-        transform: translateY(-2px);
-    }
-    
-    .btn-bulk-reject {
-        background: #e74c3c;
-        color: white;
-    }
-    
-    .btn-bulk-reject:hover {
-        background: #c0392b;
-        transform: translateY(-2px);
-    }
-    
-    .btn-bulk:disabled {
-        background: #bdc3c7;
-        cursor: not-allowed;
-        transform: none;
-    }
-    
-    /* Search Box Styles */
-    .search-container{margin-bottom:20px}
-    .search-label{display:block;margin-bottom:8px;color:#6c757d;font-size:14px;font-weight:500}
-    .search-box{display:flex;gap:10px;align-items:center;width:100%}
-    .search-input-wrapper{position:relative;flex:1}
-    .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #e9ecef;border-radius:8px;font-size:14px;transition:all 0.3s;background:white;color:#495057}
-    .search-input:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
-    .search-input::placeholder{color:#6c757d}
-    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d;font-size:16px}
-    .btn-cari{padding:12px 24px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#FB8C00;color:#fff;white-space:nowrap}
-    .btn-cari:hover{background:#e67e22;transform:translateY(-1px)}
-    .btn-reset{padding:12px 24px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff;white-space:nowrap;text-decoration:none}
-    .btn-reset:hover{background:#7f8c8d;transform:translateY(-1px);color:white;text-decoration:none}
-    
-    /* Bulk Modal Styles */
-    .bulk-modal-content {
-        background: white;
+        font-size: 18px;
         padding: 0;
-        border-radius: 15px;
-        max-width: 600px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+    
+    .alert-close:hover {
+        background: rgba(0,0,0,0.1);
+    }
+    
+    /* Eviden Modal Styles */
+    .eviden-modal .modal-content {
+        max-width: 800px;
         width: 95%;
         max-height: 85vh;
-        overflow: hidden;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
     
-    /* Approve Modal Styles (SAMA DENGAN DASHBOARD) */
-    .approve-modal-content {
-        background: white;
-        padding: 0;
-        border-radius: 15px;
+    /* Approve Modal Styles */
+    .approve-modal .modal-content {
         max-width: 500px;
         width: 95%;
-        max-height: 85vh;
-        overflow: hidden;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
     
-    .approve-modal-body {
+    /* ============================================
+       STYLE BARU UNTUK REJECT MODAL YANG LEBIH BAGUS
+    ============================================ */
+    .reject-modal .modal-content {
+        max-width: 550px;
+        width: 95%;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(231, 76, 60, 0.15);
+    }
+    
+    .reject-modal .modal-header {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        padding: 20px 25px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .reject-modal .modal-header h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .reject-modal .modal-header h3 i {
+        font-size: 20px;
+    }
+    
+    .reject-modal .modal-body {
         padding: 25px;
     }
     
-    .approve-modal-header {
-        background: #27ae60;
-        color: white;
-        padding: 20px 25px;
+    /* Warning Box */
+    .warning-box {
+        background: #fff5f5;
+        border: 1px solid #f8cccc;
+        border-left: 4px solid #e74c3c;
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 25px;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: 15px 15px 0 0;
+        align-items: flex-start;
+        gap: 12px;
     }
     
-    .approve-modal-header h3 {
-        margin: 0;
-        font-size: 18px;
+    .warning-icon {
+        color: #e74c3c;
+        font-size: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+    
+    .warning-content {
+        flex: 1;
+    }
+    
+    .warning-title {
         font-weight: 600;
+        color: #721c24;
+        margin-bottom: 5px;
+        font-size: 15px;
     }
     
-    .approve-info-box {
-        background: #e8f5e9;
-        border: 1px solid #27ae60;
+    .warning-text {
+        color: #721c24;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    .reject-item-highlight {
+        background: #fff9f9;
+        border: 1px solid #ffe6e6;
         border-radius: 8px;
         padding: 15px;
         margin-bottom: 20px;
+        text-align: center;
     }
     
-    .approve-info-box strong {
-        color: #27ae60;
-        display: block;
+    .reject-item-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
         margin-bottom: 5px;
     }
     
-    .approve-info-box span {
-        color: #2c3e50;
-        font-weight: 600;
+    .reject-item-id {
+        font-size: 13px;
+        color: #7f8c8d;
+        background: #f8f9fa;
+        padding: 4px 10px;
+        border-radius: 4px;
+        display: inline-block;
     }
     
-    .approve-modal-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 25px;
-        padding-top: 20px;
-        border-top: 1px solid #e9ecef;
+    /* Form Area */
+    .reject-form-group {
+        margin-bottom: 25px;
     }
     
-    .approve-btn {
-        padding: 10px 20px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
+    .reject-form-label {
+        display: block;
         font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
         font-size: 14px;
-        transition: all 0.2s;
         display: flex;
         align-items: center;
         gap: 8px;
     }
     
-    .approve-btn-cancel {
-        background: #95a5a6;
-        color: white;
+    .reject-form-label i {
+        color: #6c757d;
+        font-size: 14px;
     }
     
-    .approve-btn-cancel:hover {
-        background: #7f8c8d;
-        transform: translateY(-2px);
-    }
-    
-    .approve-btn-submit {
-        background: #27ae60;
-        color: white;
-    }
-    
-    .approve-btn-submit:hover {
-        background: #229954;
-        transform: translateY(-2px);
-    }
-    
-    /* Reject Modal Styles (SAMA DENGAN DASHBOARD) */
-    .reject-modal-content {
-        background: white;
-        padding: 0;
-        border-radius: 15px;
-        max-width: 550px;
-        width: 95%;
-        max-height: 85vh;
-        overflow: hidden;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    
-    .reject-modal-body {
-        padding: 25px;
-    }
-    
-    .reject-modal-header {
-        background: #e74c3c;
-        color: white;
-        padding: 20px 25px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: 15px 15px 0 0;
-    }
-    
-    .reject-modal-header h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-    }
-    
-    .reject-info-box {
-        background: #fff5f5;
-        border: 1px solid #f8cccc;
+    /* Textarea yang lebih baik - DIHAPUS BATASAN KATA */
+    .reject-textarea {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid #e9ecef;
         border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.5;
+        resize: vertical;
+        min-height: 120px;
+        transition: all 0.3s ease;
+        background: #fdfdfd;
+        color: #495057;
     }
     
-    .reject-info-box strong {
-        color: #e74c3c;
-        display: block;
-        margin-bottom: 5px;
+    .reject-textarea:focus {
+        outline: none;
+        border-color: #e74c3c;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
     }
     
-    .reject-info-box span {
-        color: #2c3e50;
-        font-weight: 600;
+    .reject-textarea::placeholder {
+        color: #adb5bd;
+        font-style: italic;
     }
     
+    /* Action Buttons untuk reject modal */
     .reject-modal-actions {
         display: flex;
         justify-content: flex-end;
@@ -462,8 +726,29 @@ tr.clickable-row.selected .row-checkbox {
         border-top: 1px solid #e9ecef;
     }
     
-    .reject-btn {
-        padding: 10px 20px;
+    .reject-btn-cancel {
+        padding: 12px 24px;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: white;
+        color: #495057;
+    }
+    
+    .reject-btn-cancel:hover {
+        background: #f8f9fa;
+        border-color: #adb5bd;
+        transform: translateY(-1px);
+    }
+    
+    .reject-btn-submit {
+        padding: 12px 24px;
         border-radius: 8px;
         border: none;
         cursor: pointer;
@@ -473,242 +758,74 @@ tr.clickable-row.selected .row-checkbox {
         display: flex;
         align-items: center;
         gap: 8px;
-    }
-    
-    .reject-btn-cancel {
-        background: #95a5a6;
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
         color: white;
-    }
-    
-    .reject-btn-cancel:hover {
-        background: #7f8c8d;
-        transform: translateY(-2px);
-    }
-    
-    .reject-btn-submit {
-        background: #e74c3c;
-        color: white;
+        box-shadow: 0 2px 6px rgba(231, 76, 60, 0.3);
     }
     
     .reject-btn-submit:hover {
-        background: #c0392b;
+        background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
         transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
     }
     
-    /* Textarea khusus untuk reject modal */
-    .reject-textarea {
-        width: 100%;
+    .reject-btn-submit:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 3px rgba(231, 76, 60, 0.3);
+    }
+    
+    /* Info box */
+    .info-box {
+        background: #e8f4f8;
+        border: 1px solid #c5e4f2;
+        border-radius: 8px;
         padding: 12px 15px;
-        border: 2px solid #f8cccc;
-        border-radius: 8px;
-        font-family: inherit;
-        font-size: 14px;
-        transition: border-color 0.2s;
-        resize: vertical;
-        min-height: 100px;
-    }
-    
-    .reject-textarea:focus {
-        outline: none;
-        border-color: #e74c3c;
-        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
-    }
-    
-    .reject-textarea::placeholder {
-        color: #bdc3c7;
-    }
-    
-    .reject-form-hint {
-        color: #e74c3c;
-        font-size: 12px;
-        margin-top: 5px;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    
-    /* Dosen List di Success Modal (SAMA DENGAN DASHBOARD) */
-    .success-dosen-container {
-        background: #e8f5e9;
-        border: 1px solid #c3e6cb;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 15px 0;
-    }
-    
-    .success-dosen-title {
-        font-weight: 600;
-        color: #155724;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    
-    .success-dosen-count {
-        background: #27ae60;
-        color: white;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 12px;
-    }
-    
-    .success-dosen-list {
-        max-height: 150px;
-        overflow-y: auto;
-        margin-bottom: 10px;
-    }
-    
-    .success-dosen-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 10px;
-        background: white;
-        border: 1px solid #d4edda;
-        border-radius: 4px;
-        margin-bottom: 5px;
-    }
-    
-    .success-dosen-item:last-child {
-        margin-bottom: 0;
-    }
-    
-    .success-dosen-avatar {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: #27ae60;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 11px;
-        font-weight: 600;
-        flex-shrink: 0;
-    }
-    
-    .success-dosen-info {
-        flex: 1;
-        min-width: 0;
-    }
-    
-    .success-dosen-name {
-        font-weight: 600;
-        color: #212529;
+        margin-top: 15px;
         font-size: 13px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .success-dosen-details {
-        font-size: 11px;
-        color: #6c757d;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .success-dosen-more-btn {
-        background: #27ae60;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 6px 12px;
-        font-size: 12px;
-        cursor: pointer;
+        color: #2c3e50;
+        line-height: 1.5;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        width: 100%;
-        transition: background 0.2s;
+        align-items: flex-start;
+        gap: 10px;
     }
     
-    .success-dosen-more-btn:hover {
-        background: #229954;
+    .info-box i {
+        color: #3498db;
+        font-size: 14px;
+        flex-shrink: 0;
+        margin-top: 2px;
     }
     
-    .success-dosen-hidden {
-        display: none;
-    }
-    
-    .success-dosen-show-all .success-dosen-item {
-        display: flex !important;
-    }
-    
-    /* Eviden Modal */
-    .eviden-modal-content {
-        background: white;
-        padding: 0;
-        border-radius: 15px;
-        max-width: 800px;
-        width: 95%;
-        max-height: 85vh;
-        overflow: hidden;
-        animation: slideIn 0.3s ease;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    }
-    
-    /* Clickable Row Styles - SAMA DENGAN DASHBOARD */
-    .clickable-row {
-        cursor: pointer !important;
-        transition: all 0.2s ease;
-    }
-
-    .clickable-row:hover {
-        background-color: #fef9e7 !important;
-        box-shadow: 0 2px 4px rgba(251, 140, 0, 0.1);
-    }
-
-    .clickable-row:active {
-        background-color: #fdebd0 !important;
-        transform: scale(0.998);
-    }
-
-    /* Highlight untuk baris yang sedang dipilih */
-    .clickable-row.selected {
-        background-color: #fef9e7 !important;
-        border-left: 4px solid #FB8C00;
-    }
-
-    /* Pastikan tombol di dalam row tidak ter-affected */
-    .clickable-row button,
-    .clickable-row select,
-    .clickable-row textarea,
-    .clickable-row input {
-        pointer-events: all;
-    }
-    
-    /* Responsive */
-    @media (max-width:768px){
-        .detail-grid{grid-template-columns:1fr}
-        .modal-content{width:95%;margin:10px}
-        .detail-content{padding:15px}
-        .modal-actions{flex-direction:column}
-        .modal-btn{justify-content:center}
-        .search-box{flex-direction:column}
-        .bulk-actions {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .bulk-info {
-            margin: 10px 0;
-        }
-    }
-/* New Styles for Multi-Select */
+    /* ============================================
+       STYLE UNTUK MULTI SELECT (BULK ACTIONS)
+    ============================================ */
     .select-checkbox {
+        cursor: pointer;
         width: 18px;
         height: 18px;
-        cursor: pointer;
         accent-color: #FB8C00;
     }
 
+    .select-checkbox:focus {
+        outline: 2px solid #FB8C00;
+        outline-offset: 2px;
+    }
+
+    /* Style untuk row yang dipilih */
+    tr.clickable-row.selected {
+        background-color: rgba(251, 140, 0, 0.1) !important;
+        box-shadow: inset 3px 0 0 #FB8C00;
+    }
+
+    /* Style untuk checkbox di dalam row yang dipilih */
+    tr.clickable-row.selected .row-checkbox {
+        accent-color: #FB8C00;
+    }
+
+    /* Bulk Action Toolbar */
     .bulk-action-toolbar {
-        display: none;
         background: linear-gradient(135deg, #fef9e7 0%, #fdebd0 100%);
-        border: 1px solid #fb8c00;
+        border: 1px solid #FB8C00;
         border-radius: 8px;
         padding: 15px 20px;
         margin-bottom: 15px;
@@ -716,11 +833,12 @@ tr.clickable-row.selected .row-checkbox {
         gap: 15px;
         animation: slideDown 0.3s ease;
         box-shadow: 0 2px 8px rgba(251, 140, 0, 0.1);
+        display: none;
+        flex-wrap: wrap;
     }
 
     .bulk-action-toolbar.show {
         display: flex;
-        flex-wrap: wrap;
     }
 
     @keyframes slideDown {
@@ -798,27 +916,36 @@ tr.clickable-row.selected .row-checkbox {
         padding: 10px 15px;
         background: #fef9e7;
         border-radius: 8px;
-        border: 1px solid #fb8c00;
+        border: 1px solid #FB8C00;
     }
 
-    /* Styling untuk baris yang dipilih */
-    .clickable-row.selected {
-        background-color: #fef9e7 !important;
-        box-shadow: inset 0 0 0 2px #FB8C00;
-        position: relative;
+    /* Search Box Styles */
+    .search-container{margin-bottom:20px}
+    .search-label{display:block;margin-bottom:8px;color:#6c757d;font-size:14px;font-weight:500}
+    .search-box{display:flex;gap:10px;align-items:center;width:100%}
+    .search-input-wrapper{position:relative;flex:1}
+    .search-input{width:100%;padding:12px 45px 12px 15px;border:1px solid #e9ecef;border-radius:8px;font-size:14px;transition:all 0.3s;background:white;color:#495057}
+    .search-input:focus{outline:none;border-color:#FB8C00;box-shadow:0 0 0 2px rgba(251,140,0,0.1)}
+    .search-input::placeholder{color:#6c757d}
+    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#6c757d;font-size:16px}
+    .btn-cari{padding:12px 24px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#FB8C00;color:#fff;white-space:nowrap}
+    .btn-cari:hover{background:#e67e22;transform:translateY(-1px)}
+    .btn-reset{padding:12px 24px;border-radius:8px;border:0;cursor:pointer;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px;background:#95a5a6;color:#fff;white-space:nowrap;text-decoration:none}
+    .btn-reset:hover{background:#7f8c8d;transform:translateY(-1px);color:white;text-decoration:none}
+    
+    /* Bulk Modal Styles */
+    .bulk-modal-content {
+        background: white;
+        padding: 0;
+        border-radius: 15px;
+        max-width: 600px;
+        width: 95%;
+        max-height: 85vh;
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
-
-    .clickable-row.selected::after {
-        content: "✓";
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #27ae60;
-        font-weight: bold;
-        font-size: 16px;
-    }
-
+    
     /* Bulk reject modal specific styles */
     .bulk-reject-modal-content {
         background: white;
@@ -934,9 +1061,69 @@ tr.clickable-row.selected .row-checkbox {
     .success-item:last-child {
         border-bottom: none;
     }
-
-    /* Responsive styles */
-    @media (max-width: 768px) {
+    
+    /* Responsive */
+    @media (max-width:1400px) {
+        .surat-modal .modal-content {
+            max-width: 95% !important;
+            min-width: auto !important;
+        }
+    }
+    
+    @media (max-width:768px){
+        .detail-grid{grid-template-columns:1fr}
+        .modal-content{width:95%;margin:10px}
+        .detail-content{padding:20px}
+        .modal-actions{flex-direction:column}
+        .modal-btn{justify-content:center;width:100%}
+        
+        .file-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .file-info {
+            width: 100%;
+        }
+        
+        .preview-btn, .download-btn {
+            width: 100%;
+            margin-left: 0;
+            margin-top: 8px;
+            justify-content: center;
+        }
+        
+        /* Table responsive */
+        .clickable-row {
+            display: block;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .clickable-row td {
+            display: block;
+            text-align: right;
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .clickable-row td::before {
+            content: attr(data-label);
+            float: left;
+            font-weight: bold;
+                text-transform: uppercase;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .clickable-row td:last-child {
+            border-bottom: none;
+        }
+        
+        /* Responsive untuk action buttons */
         .bulk-action-toolbar {
             flex-direction: column;
             align-items: flex-start;
@@ -950,6 +1137,112 @@ tr.clickable-row.selected .row-checkbox {
         .selected-count {
             width: 100%;
             justify-content: center;
+        }
+        
+        .search-box{flex-direction:column}
+        
+        /* Surat modal responsive */
+        .surat-preview-container {
+            height: calc(85vh - 150px);
+        }
+        
+        .surat-toolbar {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .surat-btn {
+            padding: 8px 15px;
+            font-size: 13px;
+        }
+        
+        /* Reject modal responsive */
+        .reject-modal .modal-content {
+            max-width: 95%;
+            margin: 10px;
+        }
+        
+        .reject-modal-actions {
+            flex-direction: column;
+        }
+        
+        .reject-btn-cancel, .reject-btn-submit {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+    
+    @media (max-width: 768px){
+        .container{max-width:100%;padding:0 15px}
+        .card{padding:15px}
+        .modal-header{padding:15px 20px}
+        .modal-header h3{font-size:18px}
+        .detail-section{padding:18px}
+        .dosen-item{padding:10px;gap:12px}
+        .dosen-avatar{width:40px;height:40px}
+        .dosen-name{font-size:15px}
+        
+        /* Detail modal khusus di mobile */
+        .detail-modal .modal-content {
+            max-width: 95% !important;
+            width: 95% !important;
+        }
+        
+        /* Surat modal di mobile */
+        .surat-modal .modal-content {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 100vh !important;
+            max-height: 100vh !important;
+            border-radius: 0;
+            margin: 0;
+        }
+        
+        .surat-preview-container {
+            height: calc(100vh - 140px);
+            border-radius: 0;
+        }
+        
+        .surat-preview-header {
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 15px;
+        }
+        
+        .surat-toolbar {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .surat-btn {
+            flex: 1;
+            justify-content: center;
+            padding: 10px 5px;
+            font-size: 12px;
+        }
+        
+        /* Tombol aksi di mobile */
+        .action-buttons {
+            flex-direction: row !important;
+            justify-content: center !important;
+            gap: 4px !important;
+        }
+        
+        /* Alert di mobile */
+        .alert-modal {
+            left: 10px;
+            right: 10px;
+            top: 10px;
+            max-width: calc(100% - 20px);
+        }
+        
+        /* Reject modal di mobile */
+        .reject-modal .modal-body {
+            padding: 20px;
+        }
+        
+        .warning-box {
+            padding: 12px 15px;
         }
     }
 </style>
@@ -1095,12 +1388,12 @@ tr.clickable-row.selected .row-checkbox {
                         <td onclick="event.stopPropagation()">
                             <div style="display:flex;gap:6px">
                                 <!-- Tombol Eviden Hijau -->
-                                <button class="btn btn-eviden" onclick="showEvidenModal(<?= $s['id']; ?>)" title="Lihat Eviden">
+                                <button class="btn btn-eviden" onclick="event.stopPropagation(); handleEvidenClick(<?= $s['id'] ?? 0 ?>, '<?= htmlspecialchars($s['nama_kegiatan'] ?? '', ENT_QUOTES) ?>')" title="Lihat Eviden">
                                     <i class="fas fa-file-image"></i>
                                 </button>
                                 
-                                <!-- Tombol Lihat Detail -->
-                                <button class="btn btn-detail" onclick="event.stopPropagation(); showDetail(<?= (int)$s['id'] ?>)" title="Lihat Detail">
+                                <!-- PERBAIKAN: Tombol Mata untuk Preview Surat -->
+                                <button class="btn btn-detail" onclick="event.stopPropagation(); showSuratModal(<?= $s['id'] ?>)" title="Lihat Surat">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
                                 
@@ -1108,7 +1401,7 @@ tr.clickable-row.selected .row-checkbox {
                                 <button class="btn btn-approve" onclick="event.stopPropagation(); showApproveModal(<?= (int)$s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'])) ?>')" title="Setujui">
                                     <i class="fa-solid fa-check"></i>
                                 </button>
-                                <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModalNew(<?= (int)$s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'])) ?>')" title="Tolak">
+                                <button class="btn btn-reject" onclick="event.stopPropagation(); showRejectModal(<?= (int)$s['id'] ?>, '<?= htmlspecialchars(addslashes($s['nama_kegiatan'])) ?>')" title="Tolak">
                                     <i class="fa-solid fa-times"></i>
                                 </button>
                             </div>
@@ -1135,14 +1428,178 @@ tr.clickable-row.selected .row-checkbox {
     </div>
 </div>
 
-<!-- Bulk Approve Modal -->
-<div id="bulkApproveModal" class="modal" onclick="modalClickOutside(event,'bulkApproveModal')">
-    <div class="approve-modal-content" onclick="event.stopPropagation()">
-        <div class="approve-modal-header">
-            <h3><i class="fa-solid fa-check-circle"></i> Setujui Pengajuan Terpilih</h3>
-            <button class="close-modal" onclick="closeModal('bulkApproveModal')">&times;</button>
+<!-- Modal Stack Container -->
+<div id="modalStack" class="modal-stack"></div>
+
+<!-- Modal Templates -->
+<template id="detailModalTemplate">
+    <div class="modal-content detail-modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
+            <button class="close-modal">&times;</button>
         </div>
-        <div class="approve-modal-body">
+        <div class="detail-content">
+            <!-- Content akan diisi oleh JavaScript -->
+        </div>
+    </div>
+</template>
+
+<template id="suratModalTemplate">
+    <div class="modal-content surat-modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-file-pdf"></i> Preview Surat Tugas</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="detail-content">
+            <div class="surat-preview-container">
+                <div class="surat-preview-header">
+                    <div style="font-weight:600;color:#2c3e50;font-size:14px">
+                        <i class="fa-solid fa-file-contract"></i> Preview Surat Tugas
+                    </div>
+                    <div class="surat-toolbar">
+                        <button class="surat-btn surat-btn-download" onclick="downloadPDF('')" title="Download PDF">
+                            <i class="fa-solid fa-download"></i> Download
+                        </button>
+                        <button class="surat-btn surat-btn-print" onclick="printPDF('')" title="Print Surat">
+                            <i class="fa-solid fa-print"></i> Print
+                        </button>
+                        <button class="surat-btn surat-btn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen">
+                            <i class="fa-solid fa-expand"></i> Fullscreen
+                        </button>
+                    </div>
+                </div>
+                <iframe class="surat-iframe" id="suratIframe" style="width:100%;height:100%;border:none"></iframe>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="evidenModalTemplate">
+    <div class="modal-content eviden-modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-file-image"></i> File Evidence</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="detail-content">
+            <!-- Content akan diisi oleh JavaScript -->
+        </div>
+    </div>
+</template>
+
+<template id="previewModalTemplate">
+    <div class="preview-content">
+        <div class="preview-header">
+            <h3>Preview File</h3>
+            <button class="preview-close">&times;</button>
+        </div>
+        <div class="preview-body"></div>
+    </div>
+</template>
+
+<template id="approveModalTemplate">
+    <div class="modal-content approve-modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-check-circle"></i> Konfirmasi Persetujuan</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div style="padding:25px">
+            <div style="text-align:center;margin-bottom:20px">
+                <i class="fa-solid fa-question-circle" style="font-size:48px;color:#27ae60;margin-bottom:15px"></i>
+                <h4 style="color:#2c3e50;margin-bottom:10px">Setujui Pengajuan?</h4>
+                <p class="approve-nama-kegiatan" style="font-weight:600;color:#7f8c8d;margin-bottom:20px"></p>
+            </div>
+            
+            <form class="approve-form" method="POST" action="">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:25px;padding-top:20px;border-top:1px solid #e9ecef">
+                    <button type="button" class="btn btn-cancel" style="background:#95a5a6;color:white">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="btn btn-submit" style="background:#27ae60;color:white">
+                        <i class="fa-solid fa-check"></i> Ya, Setujui
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>
+
+<!-- ============================================
+   TEMPLATE REJECT MODAL TANPA BATASAN KATA
+============================================ -->
+<template id="rejectModalTemplate">
+    <div class="modal-content reject-modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-ban"></i> Konfirmasi Penolakan</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <!-- Warning Box -->
+            <div class="warning-box">
+                <div class="warning-icon">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                </div>
+                <div class="warning-content">
+                    <div class="warning-title">Anda akan menolak pengajuan ini</div>
+                    <div class="warning-text">Tindakan ini tidak dapat dibatalkan. Pastikan alasan penolakan sudah jelas dan dapat diterima.</div>
+                </div>
+            </div>
+            
+            <!-- Item yang akan ditolak -->
+            <div class="reject-item-highlight">
+                <div class="reject-item-name" id="rejectItemName">-</div>
+                <div class="reject-item-id">ID: <span id="rejectItemId">-</span></div>
+            </div>
+            
+            <!-- Form Penolakan -->
+            <form class="reject-form" method="POST" action="">
+                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
+                
+                <div class="reject-form-group">
+                    <label class="reject-form-label">
+                        <i class="fa-solid fa-comment-dots"></i>
+                        Alasan Penolakan
+                    </label>
+                    <textarea 
+                        class="reject-textarea" 
+                        id="rejectReasonTextarea"
+                        name="rejection_notes"
+                        placeholder="Jelaskan secara detail alasan penolakan pengajuan ini..."
+                        required
+                    ></textarea>
+                </div>
+                
+                <!-- Informasi tambahan -->
+                <div class="info-box">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <div>
+                        <strong>Tips:</strong> Berikan alasan yang jelas dan konstruktif. 
+                        Alasan penolakan akan dikirimkan kepada pengaju dan dapat dilihat dalam riwayat pengajuan.
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="reject-modal-actions">
+                    <button type="button" class="reject-btn-cancel">
+                        <i class="fa-solid fa-times"></i> Batal
+                    </button>
+                    <button type="submit" class="reject-btn-submit">
+                        <i class="fa-solid fa-ban"></i> Konfirmasi Penolakan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>
+
+<template id="bulkApproveModalTemplate">
+    <div class="modal-content approve-modal">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-check-circle"></i> Setujui Pengajuan Terpilih</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div style="padding:25px">
             <div class="approve-info-box">
                 <strong><i class="fa-solid fa-info-circle"></i> Informasi</strong>
                 <span id="bulkApproveCount">0 pengajuan</span> akan disetujui
@@ -1157,29 +1614,28 @@ tr.clickable-row.selected .row-checkbox {
                 Apakah Anda yakin ingin menyetujui semua pengajuan yang dipilih?
             </p>
             
-            <form id="bulkApproveForm" method="POST" action="<?= base_url('dekan/process_multi_approve') ?>">
+            <form class="bulk-approve-form" method="POST" action="<?= base_url('dekan/process_multi_approve') ?>">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
                 <input type="hidden" name="selected_ids" id="bulkApproveIds">
                 
-                <div class="approve-modal-actions">
-                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('bulkApproveModal')">
+                <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:25px;padding-top:20px;border-top:1px solid #e9ecef">
+                    <button type="button" class="btn btn-cancel" style="background:#95a5a6;color:white">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
-                    <button type="submit" class="approve-btn approve-btn-submit">
+                    <button type="submit" class="btn btn-submit" style="background:#27ae60;color:white">
                         <i class="fa-solid fa-check"></i> Ya, Setujui Semua
                     </button>
                 </div>
             </form>
         </div>
     </div>
-</div>
+</template>
 
-<!-- Bulk Reject Modal -->
-<div id="bulkRejectModal" class="modal" onclick="modalClickOutside(event,'bulkRejectModal')">
-    <div class="bulk-reject-modal-content" onclick="event.stopPropagation()">
-        <div class="reject-modal-header">
+<template id="bulkRejectModalTemplate">
+    <div class="modal-content bulk-reject-modal-content">
+        <div class="modal-header" style="background:#e74c3c;">
             <h3><i class="fa-solid fa-ban"></i> Tolak Pengajuan Terpilih</h3>
-            <button class="close-modal" onclick="closeModal('bulkRejectModal')">&times;</button>
+            <button class="close-modal">&times;</button>
         </div>
         <div class="bulk-reject-body">
             <div class="reject-info-box">
@@ -1192,159 +1648,39 @@ tr.clickable-row.selected .row-checkbox {
                 Berikan alasan penolakan untuk masing-masing pengajuan:
             </p>
             
-            <form id="bulkRejectForm" method="POST" action="<?= base_url('dekan/process_multi_reject') ?>">
+            <form class="bulk-reject-form" method="POST" action="<?= base_url('dekan/process_multi_reject') ?>">
                 <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
                 
                 <div id="bulkRejectItems">
                     <!-- Item pengajuan dengan textarea akan diisi oleh JavaScript -->
                 </div>
                 
-                <div class="reject-modal-actions">
-                    <button type="button" class="reject-btn reject-btn-cancel" onclick="closeModal('bulkRejectModal')">
+                <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;padding-top:20px;border-top:1px solid #e9ecef">
+                    <button type="button" class="btn btn-cancel" style="background:#95a5a6;color:white">
                         <i class="fa-solid fa-times"></i> Batal
                     </button>
-                    <button type="submit" class="reject-btn reject-btn-submit">
+                    <button type="submit" class="btn btn-submit-reject" style="background:#e74c3c;color:white">
                         <i class="fa-solid fa-ban"></i> Ya, Tolak Semua
                     </button>
                 </div>
             </form>
         </div>
     </div>
-</div>
+</template>
 
-<!-- Preview Modal - SAMA DENGAN DASHBOARD -->
-<div id="previewModal" class="preview-modal">
-    <div class="preview-content">
-        <div class="preview-header">
-            <h3 id="previewTitle">Preview File</h3>
-            <button class="preview-close" onclick="closePreviewModal()">&times;</button>
+<!-- Success Modal untuk Bulk Actions -->
+<template id="successModalTemplate">
+    <div class="modal-content success-modal-content">
+        <div class="success-modal-header">
+            <h3><span id="successModalTitle">Pengajuan Berhasil Disetujui</span></h3>
+            <button class="close-modal">&times;</button>
         </div>
-        <div class="preview-body" id="previewBody">
-            <!-- Preview content akan diisi oleh JavaScript -->
-        </div>
-    </div>
-</div>
-
-<!-- Detail Modal - SAMA DENGAN DASHBOARD -->
-<div id="detailModal" class="modal" onclick="modalClickOutside(event,'detailModal')">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-file-alt"></i> Detail Pengajuan Surat Tugas</h3>
-            <button class="close-modal" onclick="closeModal('detailModal')">&times;</button>
-        </div>
-        <div class="detail-content" id="detailContent">
-            <!-- Content akan diisi oleh JavaScript -->
-        </div>
-    </div>
-</div>
-
-<!-- Eviden Modal - SAMA DENGAN DASHBOARD -->
-<div id="evidenModal" class="modal" onclick="modalClickOutside(event,'evidenModal')">
-    <div class="eviden-modal-content" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-file-image"></i> File Evidence</h3>
-            <button class="close-modal" onclick="closeModal('evidenModal')">&times;</button>
-        </div>
-        <div class="detail-content" id="evidenContent">
-            <!-- Content akan diisi oleh JavaScript -->
-        </div>
-    </div>
-</div>
-
-<!-- Approve Modal - SAMA DENGAN DASHBOARD -->
-<div id="approveModal" class="modal" onclick="modalClickOutside(event,'approveModal')">
-    <div class="approve-modal-content" onclick="event.stopPropagation()">
-        <div class="approve-modal-header">
-            <h3><i class="fa-solid fa-check-circle"></i> Konfirmasi Persetujuan</h3>
-            <button class="close-modal" onclick="closeModal('approveModal')">&times;</button>
-        </div>
-        <div class="approve-modal-body">
-            <div class="approve-info-box">
-                <strong><i class="fa-solid fa-info-circle"></i> Anda akan menyetujui pengajuan:</strong>
-                <span id="approveNamaKegiatan"></span>
+        <div class="success-modal-body">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
             </div>
             
-            <p style="color:#7f8c8d;margin-bottom:20px">
-                <i class="fa-solid fa-exclamation-triangle"></i> 
-                Tindakan ini tidak dapat dibatalkan. Pastikan Anda telah memeriksa semua detail pengajuan.
-            </p>
-            
-            <form id="approveForm" method="POST" action="">
-                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                
-                <div class="approve-modal-actions">
-                    <button type="button" class="approve-btn approve-btn-cancel" onclick="closeModal('approveModal')">
-                        <i class="fa-solid fa-times"></i> Batal
-                    </button>
-                    <button type="submit" class="approve-btn approve-btn-submit">
-                        <i class="fa-solid fa-check"></i> Ya, Setujui
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Reject Modal - SAMA DENGAN DASHBOARD -->
-<div id="rejectConfirmModal" class="modal" onclick="modalClickOutside(event,'rejectConfirmModal')">
-    <div class="reject-modal-content" onclick="event.stopPropagation()">
-        <div class="reject-modal-header">
-            <h3><i class="fa-solid fa-ban"></i> Konfirmasi Penolakan</h3>
-            <button class="close-modal" onclick="closeModal('rejectConfirmModal')">&times;</button>
-        </div>
-        <div class="reject-modal-body">
-            <div class="reject-info-box">
-                <strong><i class="fa-solid fa-exclamation-triangle"></i> Anda akan menolak pengajuan:</strong>
-                <span id="rejectNamaKegiatan">-</span>
-            </div>
-            
-            <p style="margin-bottom:15px;color:#7f8c8d">
-                <i class="fa-solid fa-info-circle"></i> 
-                Berikan alasan penolakan untuk pengajuan ini:
-            </p>
-            
-            <form id="rejectForm" method="POST" action="">
-                <input type="hidden" name="<?= $this->security->get_csrf_token_name() ?>" value="<?= $this->security->get_csrf_hash() ?>">
-                
-                <div class="form-group">
-                    <textarea 
-                        id="rejectionReason" 
-                        name="rejection_notes" 
-                        class="reject-textarea" 
-                        placeholder="Masukkan alasan penolakan pengajuan ini..."
-                        required
-                    ></textarea>
-                    <div class="reject-form-hint">
-                        <i class="fa-solid fa-asterisk"></i> Alasan penolakan wajib diisi
-                    </div>
-                </div>
-                
-                <div class="reject-modal-actions">
-                    <button type="button" class="reject-btn reject-btn-cancel" onclick="closeModal('rejectConfirmModal')">
-                        <i class="fa-solid fa-times"></i> Batal
-                    </button>
-                    <button type="submit" class="reject-btn reject-btn-submit">
-                        <i class="fa-solid fa-ban"></i> Ya, Tolak
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Success Result Modal - SAMA DENGAN DASHBOARD -->
-<div id="successResultModal" class="modal" onclick="modalClickOutside(event,'successResultModal')">
-    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
-        <div class="modal-header" style="background: #27ae60;">
-            <h3><i class="fa-solid fa-check-circle"></i> <span id="successResultTitle">Pengajuan Berhasil Disetujui</span></h3>
-            <button class="close-modal" onclick="closeModal('successResultModal')">&times;</button>
-        </div>
-        <div style="padding:25px;text-align:center">
-            <div style="width:100px;height:100px;border-radius:50%;background:#d4edda;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
-                <i class="fas fa-check" style="font-size:50px;color:#27ae60"></i>
-            </div>
-            
-            <h3 style="color:#27ae60;margin-bottom:10px">Berhasil Disetujui</h3>
+            <h3 style="color:#27ae60;margin-bottom:10px" id="successMainTitle">Berhasil Disetujui</h3>
             <p style="color:#666;margin-bottom:5px">
                 <i class="fa-solid fa-clock"></i> Disetujui pada: <strong id="successTimestamp">-</strong>
             </p>
@@ -1360,141 +1696,975 @@ tr.clickable-row.selected .row-checkbox {
             </div>
             
             <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                <button class="bulk-btn" onclick="refreshPage()" style="background:#27ae60;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-rotate"></i> Refresh Halaman
                 </button>
-                <button class="btn-bulk" onclick="closeModal('successResultModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
+                <button class="bulk-btn" onclick="modalManager.closeModal(modalManager.activeModal.id)" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
                     <i class="fa-solid fa-times"></i> Tutup
                 </button>
             </div>
         </div>
     </div>
-</div>
+</template>
 
-<!-- Success Reject Modal - SAMA DENGAN DASHBOARD -->
-<div id="successRejectModal" class="modal" onclick="modalClickOutside(event,'successRejectModal')">
-    <div class="bulk-modal-content" onclick="event.stopPropagation()" style="max-width: 600px;">
-        <div class="modal-header" style="background: #e74c3c;">
-            <h3><i class="fa-solid fa-ban"></i> <span id="successRejectTitle">Pengajuan Berhasil Ditolak</span></h3>
-            <button class="close-modal" onclick="closeModal('successRejectModal')">&times;</button>
-        </div>
-        <div style="padding:25px;text-align:center">
-            <div style="width:100px;height:100px;border-radius:50%;background:#f8d7da;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
-                <i class="fas fa-times-circle" style="font-size:50px;color:#e74c3c"></i>
-            </div>
-            
-            <h3 style="color:#e74c3c;margin-bottom:10px">Berhasil Ditolak</h3>
-            <p style="color:#666;margin-bottom:5px">
-                <i class="fa-solid fa-clock"></i> Ditolak pada: <strong id="rejectTimestamp">-</strong>
-            </p>
-            
-            <div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:8px;padding:15px;margin:20px 0">
-                <div style="font-weight:600;color:#721c24;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
-                    <span>Daftar Pengajuan</span>
-                    <span id="rejectItemCount" style="background:#e74c3c;color:white;padding:4px 12px;border-radius:20px;font-size:12px">0 item</span>
-                </div>
-                <div id="rejectList" style="max-height:250px;overflow-y:auto;text-align:left">
-                    <!-- List akan diisi oleh JavaScript -->
-                </div>
-            </div>
-            
-            <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-                <button class="btn-bulk" onclick="refreshPage()" style="background:#e74c3c;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-rotate"></i> Refresh Halaman
-                </button>
-                <button class="btn-bulk" onclick="closeModal('successRejectModal')" style="background:#6c757d;color:white;padding:10px 24px;border:none;border-radius:6px;cursor:pointer;font-weight:600;display:flex;align-items:center;gap:6px">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Multi Approve Confirmation Modal -->
-<div id="multiApproveConfirmModal" class="modal" onclick="modalClickOutside(event,'multiApproveConfirmModal')">
-    <div class="bulk-modal-content" onclick="event.stopPropagation()">
-        <div class="modal-header" style="background: #9b59b6;">
-            <h3><i class="fa-solid fa-info-circle"></i> Konfirmasi Multi Approve</h3>
-            <button class="close-modal" onclick="closeModal('multiApproveConfirmModal')">&times;</button>
-        </div>
-        <div style="padding:25px;text-align:center">
-            <div style="width:80px;height:80px;border-radius:50%;background:#fef5e7;margin:0 auto 20px;display:flex;align-items:center;justify-content:center">
-                <i class="fas fa-exclamation" style="font-size:40px;color:#f39c12"></i>
-            </div>
-            
-            <h3 style="color:#7d6608;margin-bottom:10px">Konfirmasi Multi Approve</h3>
-            <p style="color:#666;margin-bottom:20px">Anda akan menyetujui <strong id="multiApproveCount">0</strong> pengajuan sekaligus</p>
-            
-            <div style="background:#f8f9fa;border:1px solid #e9ecef;border-radius:8px;padding:15px;margin-bottom:20px">
-                <div style="font-weight:600;color:#495057;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
-                    <span>📋 Daftar Pengajuan yang Akan Disetujui:</span>
-                    <span id="multiApproveItemCount" style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:12px">0 item</span>
-                </div>
-                <div id="multiApproveList" style="max-height:200px;overflow-y:auto">
-                    <!-- List akan diisi oleh JavaScript -->
-                </div>
-            </div>
-            
-            <div style="display:flex;gap:10px;justify-content:center">
-                <button class="btn-bulk" onclick="closeModal('multiApproveConfirmModal')" style="background:#95a5a6;color:white;padding:10px 24px">
-                    <i class="fa-solid fa-times"></i> Batal
-                </button>
-                <button class="btn-bulk btn-bulk-approve" onclick="confirmMultiApprove()" style="padding:10px 24px">
-                    <i class="fa-solid fa-check"></i> Ya, Setujui Semua
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Bulk Reject Modal -->
-<div id="bulkRejectModal" class="modal" onclick="modalClickOutside(event,'bulkRejectModal')">
-    <div class="reject-modal-content" onclick="event.stopPropagation()">
-        <div class="reject-modal-header">
-            <h3><i class="fa-solid fa-ban"></i> Tolak Pengajuan Terpilih</h3>
-            <button class="close-modal" onclick="closeModal('bulkRejectModal')">&times;</button>
-        </div>
-        <div class="reject-modal-body">
-            <div class="reject-info-box">
-                <strong><i class="fa-solid fa-exclamation-triangle"></i> Anda akan menolak:</strong>
-                <span id="bulkRejectCount">0 pengajuan</span>
-            </div>
-            
-            <p style="margin-bottom:15px;color:#7f8c8d">
-                <i class="fa-solid fa-info-circle"></i> 
-                Berikan alasan penolakan untuk masing-masing pengajuan:
-            </p>
-            
-            <div id="individualRejectionContainer" style="max-height:400px;overflow-y:auto;padding-right:10px;margin-bottom:15px">
-                <!-- Container untuk individual rejection notes -->
-            </div>
-            
-            <div class="reject-modal-actions">
-                <button type="button" class="reject-btn reject-btn-cancel" onclick="closeModal('bulkRejectModal')">
-                    <i class="fa-solid fa-times"></i> Batal
-                </button>
-                <button type="button" class="reject-btn reject-btn-submit" onclick="confirmBulkReject()">
-                    <i class="fa-solid fa-ban"></i> Ya, Tolak Semua
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// Data dari controller
-const suratList = <?= isset($surat_list) ? json_encode($surat_list) : '[]' ?>;
+// ===== MULTI MODAL MANAGEMENT SYSTEM (SAMA DENGAN halaman_total.php) =====
+
+// Global variables
+let modalManager;
 let currentRejectId = null;
-let currentRejectNamaKegiatan = null;
 let currentApproveId = null;
-let currentApproveNamaKegiatan = null;
+let selectedSurat = null;
+let selectedItems = new Set();
+let isSelectAll = false;
 let currentSearchTerm = '';
-let selectedIds = [];
-let selectedItems = new Set(); // Untuk menyimpan ID yang dipilih
+let currentSuratPdfUrl = '';
+let isFullscreen = false;
+
+// PERBAIKAN: Fungsi untuk menampilkan alert
+function showAlert(message, type = 'warning') {
+    // Hapus alert sebelumnya jika ada
+    const existingAlert = document.querySelector('.alert-modal');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    const alert = document.createElement('div');
+    alert.className = `alert-modal ${type}`;
+    
+    let icon = 'fa-info-circle';
+    if (type === 'error') icon = 'fa-exclamation-circle';
+    if (type === 'success') icon = 'fa-check-circle';
+    if (type === 'warning') icon = 'fa-exclamation-triangle';
+    
+    alert.innerHTML = `
+        <div class="alert-icon">
+            <i class="fas ${icon}"></i>
+        </div>
+        <div class="alert-content">
+            <strong>${type === 'error' ? 'Error' : type === 'success' ? 'Sukses' : 'Peringatan'}</strong>
+            <div>${message}</div>
+        </div>
+        <button class="alert-close">&times;</button>
+    `;
+    
+    document.body.appendChild(alert);
+    
+    // Event listener untuk tombol close
+    alert.querySelector('.alert-close').addEventListener('click', () => {
+        alert.remove();
+    });
+    
+    // Auto remove setelah 5 detik
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Modal Manager Class
+class ModalManager {
+    constructor() {
+        this.modals = [];
+        this.activeModal = null;
+        this.modalStack = document.getElementById('modalStack');
+        this.modalZIndex = 1050;
+    }
+
+    // Create a new modal
+    createModal(type, data = {}) {
+        // PERBAIKAN: Cek jika sudah ada 2 modal terbuka (MAKSIMAL 2)
+        if (this.modals.length >= 2) {
+            showAlert('Maksimal hanya dapat membuka 2 modal sekaligus. Tutup salah satu modal terlebih dahulu.', 'warning');
+            return null;
+        }
+        
+        const modalId = `modal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const modalItem = document.createElement('div');
+        modalItem.className = 'modal-item';
+        modalItem.id = modalId;
+        modalItem.style.zIndex = this.modalZIndex++;
+        
+        // Create modal content based on type
+        let modalContent;
+        switch(type) {
+            case 'detail':
+                modalContent = this.createDetailModal(data);
+                break;
+            case 'surat':
+                modalContent = this.createSuratModal(data);
+                break;
+            case 'eviden':
+                modalContent = this.createEvidenModal(data);
+                break;
+            case 'preview':
+                modalContent = this.createPreviewModal(data);
+                break;
+            case 'approve':
+                modalContent = this.createApproveModal(data);
+                break;
+            case 'reject':
+                modalContent = this.createRejectModal(data);
+                break;
+            case 'bulk_approve':
+                modalContent = this.createBulkApproveModal(data);
+                break;
+            case 'bulk_reject':
+                modalContent = this.createBulkRejectModal(data);
+                break;
+            case 'success':
+                modalContent = this.createSuccessModal(data);
+                break;
+            default:
+                modalContent = this.createGenericModal(data);
+        }
+        
+        modalItem.innerHTML = modalContent;
+        this.modalStack.appendChild(modalItem);
+        
+        // PERBAIKAN: Tambahkan nomor badge pada modal
+        const modalNumber = this.modals.length + 1;
+        const numberBadge = document.createElement('div');
+        numberBadge.className = 'modal-number-badge';
+        numberBadge.textContent = modalNumber;
+        modalItem.appendChild(numberBadge);
+        
+        // Add to modals array
+        const modalObj = {
+            id: modalId,
+            type: type,
+            element: modalItem,
+            data: data,
+            number: modalNumber
+        };
+        
+        this.modals.push(modalObj);
+        this.setActiveModal(modalId);
+        
+        // Update modal positions
+        this.updateModalPositions();
+        
+        // Add event listeners
+        this.attachEventListeners(modalItem, modalId, type, data);
+        
+        // Animate appearance
+        setTimeout(() => {
+            modalItem.classList.add('active', 'new');
+            setTimeout(() => modalItem.classList.remove('new'), 300);
+        }, 10);
+        
+        // Update body class
+        document.body.classList.add('modal-open');
+        
+        return modalId;
+    }
+
+    // Update positions of all modals
+    updateModalPositions() {
+        this.modals.forEach((modal, index) => {
+            const modalElement = modal.element;
+            const numberBadge = modalElement.querySelector('.modal-number-badge');
+            
+            if (numberBadge) {
+                numberBadge.textContent = index + 1;
+            }
+            
+            // Reset transform first
+            modalElement.style.transform = 'none';
+            
+            if (this.modals.length === 1) {
+                // Jika hanya 1 modal, posisi di tengah
+                modalElement.style.top = '50%';
+                modalElement.style.left = '50%';
+                modalElement.style.transform = 'translate(-50%, -50%)';
+            } else if (this.modals.length === 2) {
+                if (index === 0) {
+                    // Modal pertama pindah ke kiri atas
+                    modalElement.style.top = '50px';
+                    modalElement.style.left = '50px';
+                    modalElement.style.transform = 'none';
+                } else if (index === 1) {
+                    // Modal kedua di kanan atas
+                    modalElement.style.top = '50px';
+                    modalElement.style.right = '50px';
+                    modalElement.style.left = 'auto';
+                    modalElement.style.transform = 'none';
+                }
+            }
+        });
+    }
+
+    // Create detail modal
+    createDetailModal(data) {
+        const template = document.getElementById('detailModalTemplate');
+        return template.content.cloneNode(true).querySelector('.modal-content').outerHTML;
+    }
+
+    // Create surat modal - DIUBAH: menggunakan template baru dengan toolbar
+    createSuratModal(data) {
+        const template = document.getElementById('suratModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        return modalContent.outerHTML;
+    }
+
+    // Create eviden modal
+    createEvidenModal(data) {
+        const template = document.getElementById('evidenModalTemplate');
+        return template.content.cloneNode(true).querySelector('.modal-content').outerHTML;
+    }
+
+    // Create preview modal
+    createPreviewModal(data) {
+        const template = document.getElementById('previewModalTemplate');
+        return template.content.cloneNode(true).querySelector('.preview-content').outerHTML;
+    }
+
+    // Create approve modal
+    createApproveModal(data) {
+        const template = document.getElementById('approveModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        
+        if (data.namaKegiatan) {
+            modalContent.querySelector('.approve-nama-kegiatan').textContent = data.namaKegiatan;
+        }
+        if (data.suratId) {
+            modalContent.querySelector('.approve-form').action = '<?= base_url("dekan/approve/") ?>' + data.suratId;
+        }
+        
+        return modalContent.outerHTML;
+    }
+
+    // Create reject modal - DIUBAH: Template tanpa batasan kata
+    createRejectModal(data) {
+        const template = document.getElementById('rejectModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        
+        if (data.namaKegiatan) {
+            modalContent.querySelector('#rejectItemName').textContent = data.namaKegiatan;
+        }
+        if (data.suratId) {
+            modalContent.querySelector('#rejectItemId').textContent = data.suratId;
+            modalContent.querySelector('.reject-form').action = '<?= base_url("dekan/reject/") ?>' + data.suratId;
+        }
+        
+        return modalContent.outerHTML;
+    }
+
+    // Create bulk approve modal
+    createBulkApproveModal(data) {
+        const template = document.getElementById('bulkApproveModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        
+        if (data.count) {
+            modalContent.querySelector('#bulkApproveCount').textContent = data.count + ' pengajuan';
+        }
+        if (data.ids) {
+            modalContent.querySelector('#bulkApproveIds').value = data.ids;
+        }
+        
+        // Isi daftar pengajuan
+        if (data.items && modalContent.querySelector('#bulkApproveItems')) {
+            const itemsContainer = modalContent.querySelector('#bulkApproveItems');
+            itemsContainer.innerHTML = '';
+            
+            data.items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'bulk-item';
+                itemDiv.innerHTML = `
+                    <div class="bulk-item-header">
+                        <div class="bulk-item-name">${escapeHtml(item.nama)}</div>
+                    </div>
+                    <div class="bulk-item-details">${escapeHtml(item.details)}</div>
+                `;
+                itemsContainer.appendChild(itemDiv);
+            });
+        }
+        
+        return modalContent.outerHTML;
+    }
+
+    // Create bulk reject modal
+    createBulkRejectModal(data) {
+        const template = document.getElementById('bulkRejectModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        
+        if (data.count) {
+            modalContent.querySelector('#bulkRejectCount').textContent = data.count + ' pengajuan';
+        }
+        
+        // Isi daftar pengajuan dengan textarea
+        if (data.items && modalContent.querySelector('#bulkRejectItems')) {
+            const itemsContainer = modalContent.querySelector('#bulkRejectItems');
+            itemsContainer.innerHTML = '';
+            
+            data.items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'bulk-item';
+                itemDiv.innerHTML = `
+                    <div class="bulk-item-header">
+                        <div class="bulk-item-name">${escapeHtml(item.nama)}</div>
+                    </div>
+                    <div class="bulk-item-details">${escapeHtml(item.details)}</div>
+                    <textarea 
+                        name="rejection_notes[]" 
+                        class="bulk-reject-textarea" 
+                        placeholder="Masukkan alasan penolakan untuk pengajuan ini..."
+                        required
+                    ></textarea>
+                    <input type="hidden" name="selected_ids[]" value="${item.id}">
+                `;
+                itemsContainer.appendChild(itemDiv);
+            });
+        }
+        
+        return modalContent.outerHTML;
+    }
+
+    // Create success modal
+    createSuccessModal(data) {
+        const template = document.getElementById('successModalTemplate');
+        const content = template.content.cloneNode(true);
+        const modalContent = content.querySelector('.modal-content');
+        
+        if (data.title) {
+            modalContent.querySelector('#successModalTitle').textContent = data.title;
+            modalContent.querySelector('#successMainTitle').textContent = data.title;
+        }
+        
+        if (data.count) {
+            modalContent.querySelector('#successItemCount').textContent = data.count + ' item';
+        }
+        
+        if (data.timestamp) {
+            modalContent.querySelector('#successTimestamp').textContent = data.timestamp;
+        }
+        
+        // Isi daftar pengajuan
+        if (data.items && modalContent.querySelector('#successList')) {
+            const listContainer = modalContent.querySelector('#successList');
+            listContainer.innerHTML = '';
+            
+            data.items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'success-item';
+                itemDiv.textContent = `${index + 1}. ${escapeHtml(item.nama)}`;
+                listContainer.appendChild(itemDiv);
+            });
+        }
+        
+        return modalContent.outerHTML;
+    }
+
+    // Create generic modal
+    createGenericModal(data) {
+        return `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>${data.title || 'Modal'}</h3>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="detail-content">
+                    ${data.content || ''}
+                </div>
+            </div>
+        `;
+    }
+
+    // Set active modal
+    setActiveModal(modalId) {
+        // Deactivate all modals
+        this.modals.forEach(modal => {
+            modal.element.classList.remove('active');
+        });
+        
+        // Activate selected modal
+        const modal = this.modals.find(m => m.id === modalId);
+        if (modal) {
+            modal.element.classList.add('active');
+            modal.element.style.zIndex = this.modalZIndex++;
+            this.activeModal = modal;
+        }
+    }
+
+    // Close modal
+    closeModal(modalId) {
+        const modalIndex = this.modals.findIndex(m => m.id === modalId);
+        if (modalIndex === -1) return;
+        
+        const modal = this.modals[modalIndex];
+        modal.element.classList.add('removing');
+        
+        setTimeout(() => {
+            if (modal.element.parentNode) {
+                modal.element.parentNode.removeChild(modal.element);
+            }
+            this.modals.splice(modalIndex, 1);
+            
+            // Update positions of remaining modals
+            this.updateModalPositions();
+            
+            // If no modals left, remove modal-open class
+            if (this.modals.length === 0) {
+                document.body.classList.remove('modal-open');
+                this.activeModal = null;
+            } else {
+                // Set the last modal as active
+                this.setActiveModal(this.modals[this.modals.length - 1].id);
+            }
+        }, 300);
+    }
+
+    // Attach event listeners to modal
+    attachEventListeners(modalElement, modalId, type, data) {
+        // Close button
+        const closeBtn = modalElement.querySelector('.close-modal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.closeModal(modalId));
+        }
+        
+        // Preview close button
+        const previewCloseBtn = modalElement.querySelector('.preview-close');
+        if (previewCloseBtn) {
+            previewCloseBtn.addEventListener('click', () => this.closeModal(modalId));
+        }
+        
+        // Cancel buttons
+        const cancelBtns = modalElement.querySelectorAll('.reject-btn-cancel, .btn-cancel');
+        cancelBtns.forEach(btn => {
+            btn.addEventListener('click', () => this.closeModal(modalId));
+        });
+        
+        // Type-specific event listeners
+        switch(type) {
+            case 'detail':
+                this.attachDetailModalListeners(modalElement, modalId, data);
+                break;
+            case 'surat':
+                this.attachSuratModalListeners(modalElement, modalId, data);
+                break;
+            case 'eviden':
+                this.attachEvidenModalListeners(modalElement, modalId, data);
+                break;
+            case 'approve':
+                this.attachApproveModalListeners(modalElement, modalId, data);
+                break;
+            case 'reject':
+                this.attachRejectModalListeners(modalElement, modalId, data);
+                break;
+            case 'bulk_approve':
+                this.attachBulkApproveModalListeners(modalElement, modalId, data);
+                break;
+            case 'bulk_reject':
+                this.attachBulkRejectModalListeners(modalElement, modalId, data);
+                break;
+            case 'success':
+                // No special listeners needed for success modal
+                break;
+        }
+        
+        // Click on modal to bring to front
+        modalElement.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button') && e.target.closest('button').classList.contains('close-modal')) return;
+            if (e.target.closest('button') && e.target.closest('button').classList.contains('preview-close')) return;
+            this.setActiveModal(modalId);
+        });
+        
+        // Prevent clicks inside modal from propagating to table
+        modalElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    // Attach detail modal listeners
+    attachDetailModalListeners(modalElement, modalId, data) {
+        // Load detail content if data provided
+        if (data.suratId) {
+            this.loadDetailContent(modalElement, data.suratId);
+        }
+    }
+
+    // Attach surat modal listeners - DIUBAH: untuk modal yang lebih lebar
+    attachSuratModalListeners(modalElement, modalId, data) {
+        // Load surat content if data provided
+        if (data.suratId) {
+            this.loadSuratContent(modalElement, data.suratId);
+        }
+        
+        // Setup fullscreen toggle button
+        const fullscreenBtn = modalElement.querySelector('.surat-btn-fullscreen');
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', () => {
+                const iframe = modalElement.querySelector('.surat-iframe');
+                if (iframe) {
+                    toggleIframeFullscreen(iframe);
+                }
+            });
+        }
+        
+        // Setup download button
+        const downloadBtn = modalElement.querySelector('.surat-btn-download');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentSuratPdfUrl) {
+                    downloadPDF(currentSuratPdfUrl);
+                }
+            });
+        }
+        
+        // Setup print button
+        const printBtn = modalElement.querySelector('.surat-btn-print');
+        if (printBtn) {
+            printBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (currentSuratPdfUrl) {
+                    printPDF(currentSuratPdfUrl);
+                }
+            });
+        }
+    }
+
+    // Attach eviden modal listeners
+    attachEvidenModalListeners(modalElement, modalId, data) {
+        // Load eviden content if data provided
+        if (data.suratId) {
+            this.loadEvidenContent(modalElement, data.suratId, data.namaKegiatan || '');
+        }
+    }
+
+    // Attach approve modal listeners
+    attachApproveModalListeners(modalElement, modalId, data) {
+        const form = modalElement.querySelector('.approve-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.submitApproveForm(form, data.suratId);
+            });
+        }
+    }
+
+    // Attach reject modal listeners - DIUBAH: untuk template tanpa batasan
+    attachRejectModalListeners(modalElement, modalId, data) {
+        const form = modalElement.querySelector('.reject-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const notes = form.querySelector('#rejectReasonTextarea').value.trim();
+                if (!notes) { 
+                    showAlert('Alasan penolakan harus diisi', 'error');
+                    const textarea = form.querySelector('#rejectReasonTextarea');
+                    textarea.focus();
+                    textarea.style.borderColor = '#e74c3c';
+                    return; 
+                }
+                
+                // Tampilkan konfirmasi akhir
+                if (confirm('Apakah Anda yakin ingin menolak pengajuan ini? Tindakan ini tidak dapat dibatalkan.')) {
+                    this.submitRejectForm(form, data.suratId, notes);
+                }
+            });
+        }
+    }
+
+    // Attach bulk approve modal listeners
+    attachBulkApproveModalListeners(modalElement, modalId, data) {
+        const form = modalElement.querySelector('.bulk-approve-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Validasi
+                if (selectedItems.size === 0) {
+                    showAlert('Tidak ada pengajuan yang dipilih.', 'error');
+                    return;
+                }
+                
+                // Tampilkan loading
+                const submitBtn = form.querySelector('.btn-submit');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+                submitBtn.disabled = true;
+                
+                // Submit form
+                form.submit();
+            });
+        }
+    }
+
+    // Attach bulk reject modal listeners
+    attachBulkRejectModalListeners(modalElement, modalId, data) {
+        const form = modalElement.querySelector('.bulk-reject-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Validasi textarea
+                const textareas = form.querySelectorAll('.bulk-reject-textarea');
+                let isValid = true;
+                textareas.forEach(textarea => {
+                    if (!textarea.value.trim()) {
+                        isValid = false;
+                        textarea.style.borderColor = '#e74c3c';
+                        textarea.focus();
+                    } else {
+                        textarea.style.borderColor = '';
+                    }
+                });
+                
+                if (!isValid) {
+                    showAlert('Semua alasan penolakan harus diisi.', 'error');
+                    return false;
+                }
+                
+                // Tampilkan loading
+                const submitBtn = form.querySelector('.btn-submit-reject');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+                submitBtn.disabled = true;
+                
+                // Submit form
+                form.submit();
+            });
+        }
+    }
+
+    // Load detail content
+    async loadDetailContent(modalElement, suratId) {
+        try {
+            const detailContent = modalElement.querySelector('.detail-content');
+            if (!detailContent) return;
+            
+            detailContent.innerHTML = `
+                <div style="text-align:center;padding:60px;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:32px;color:#FB8C00"></i>
+                    <p style="margin-top:15px;color:#7f8c8d;font-size:16px">Memuat detail pengajuan...</p>
+                </div>
+            `;
+            
+            const data = await getSuratDetail(suratId);
+            if (!data) {
+                throw new Error('Data tidak ditemukan');
+            }
+            
+            const detailHtml = generateDetailContent(data);
+            detailContent.innerHTML = detailHtml;
+            
+        } catch (error) {
+            console.error('Error loading detail:', error);
+            const detailContent = modalElement.querySelector('.detail-content');
+            if (detailContent) {
+                detailContent.innerHTML = `
+                    <div style="text-align:center;padding:50px;color:#e74c3c">
+                        <i class="fa-solid fa-exclamation-triangle" style="font-size:56px;margin-bottom:15px"></i>
+                        <p style="font-size:16px;margin-bottom:20px">Gagal memuat detail: ${error.message}</p>
+                        <button class="modal-btn modal-btn-close" onclick="modalManager.closeModal('${modalElement.closest('.modal-item').id}')" style="margin-top:20px;padding:12px 24px;font-size:15px">
+                            <i class="fa-solid fa-times"></i> Tutup
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Load surat content - DIUBAH: untuk modal yang lebih lebar
+    async loadSuratContent(modalElement, suratId) {
+        try {
+            const iframe = modalElement.querySelector('.surat-iframe');
+            const downloadBtn = modalElement.querySelector('.surat-btn-download');
+            const printBtn = modalElement.querySelector('.surat-btn-print');
+            
+            if (!iframe) return;
+            
+            // Set loading state
+            iframe.src = 'about:blank';
+            iframe.onload = null;
+            
+            // Set URLs
+            const viewUrl = "<?= base_url('dekan/view_surat_pengajuan/') ?>" + suratId;
+            currentSuratPdfUrl = "<?= base_url('dekan/download_pdf/') ?>" + suratId;
+            
+            // Update button actions
+            if (downloadBtn) {
+                downloadBtn.onclick = (e) => {
+                    e.preventDefault();
+                    downloadPDF(currentSuratPdfUrl);
+                };
+            }
+            
+            if (printBtn) {
+                printBtn.onclick = (e) => {
+                    e.preventDefault();
+                    printPDF(currentSuratPdfUrl);
+                };
+            }
+            
+            // Load the content
+            iframe.src = viewUrl;
+            
+            // Set iframe height adjustment
+            iframe.onload = function() {
+                adjustIframeHeight(iframe);
+            };
+            
+        } catch (error) {
+            console.error('Error loading surat:', error);
+            showAlert('Gagal memuat surat: ' + error.message, 'error');
+        }
+    }
+
+    // Load eviden content - DIPERBAIKI: Langsung preview jika hanya 1 file
+    async loadEvidenContent(modalElement, suratId, namaKegiatan = '') {
+        try {
+            const detailContent = modalElement.querySelector('.detail-content');
+            if (!detailContent) return;
+            
+            detailContent.innerHTML = `
+                <div style="text-align:center;padding:40px;">
+                    <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
+                    <p style="margin-top:10px;color:#7f8c8d">Memuat eviden...</p>
+                </div>
+            `;
+            
+            const item = await getSuratDetail(suratId);
+            if (!item) {
+                throw new Error('Data tidak ditemukan');
+            }
+            
+            const evidenFiles = getEvidenFilesFromData(item);
+            
+            // PERBAIKAN: Jika hanya ada 1 file eviden, langsung preview
+            if (evidenFiles.length === 1) {
+                // Tutup modal eviden
+                this.closeModal(modalElement.closest('.modal-item').id);
+                
+                // Langsung buka preview file
+                const singleFile = evidenFiles[0];
+                setTimeout(() => {
+                    previewFile(singleFile.url, singleFile.name);
+                }, 100);
+                return;
+            }
+            
+            // Jika lebih dari 1 file, tampilkan daftar file
+            const content = generateMultipleEvidenContent(item, evidenFiles, namaKegiatan);
+            detailContent.innerHTML = content;
+            
+        } catch (error) {
+            console.error('Error loading eviden:', error);
+            const detailContent = modalElement.querySelector('.detail-content');
+            if (detailContent) {
+                detailContent.innerHTML = `
+                    <div style="text-align:center;padding:40px;color:#e74c3c">
+                        <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
+                        <p>Gagal memuat eviden: ${error.message}</p>
+                        <button class="modal-btn modal-btn-close" onclick="modalManager.closeModal('${modalElement.closest('.modal-item').id}')" style="margin-top:20px">
+                            <i class="fa-solid fa-times"></i> Tutup
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Submit approve form
+    submitApproveForm(form, suratId) {
+        form.submit();
+    }
+
+    // Submit reject form
+    submitRejectForm(form, suratId, notes) {
+        const formToSubmit = document.createElement('form');
+        formToSubmit.method = 'POST';
+        formToSubmit.action = '<?= base_url("dekan/reject/") ?>' + suratId;
+        
+        const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
+        const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
+        const inpCsrf = document.createElement('input');
+        inpCsrf.type='hidden'; 
+        inpCsrf.name=csrfName; 
+        inpCsrf.value=csrfHash;
+        formToSubmit.appendChild(inpCsrf);
+        
+        const inpNotes = document.createElement('input');
+        inpNotes.type='hidden'; 
+        inpNotes.name='rejection_notes'; 
+        inpNotes.value=notes;
+        formToSubmit.appendChild(inpNotes);
+        
+        document.body.appendChild(formToSubmit);
+        formToSubmit.submit();
+    }
+
+    // Get modal by ID
+    getModal(modalId) {
+        return this.modals.find(m => m.id === modalId);
+    }
+
+    // Close all modals
+    closeAllModals() {
+        while (this.modals.length > 0) {
+            this.closeModal(this.modals[0].id);
+        }
+    }
+}
+
+// ===== FUNGSI UTAMA =====
+
+// Initialize modal manager
+modalManager = new ModalManager();
 
 // ============================================
-// FUNGSI UNTUK MULTI SELECTION
+// FUNGSI UNTUK MEMBUKA MODAL
+// ============================================
+
+// Fungsi untuk menampilkan detail saat baris diklik
+function showRowDetail(id) {
+    modalManager.createModal('detail', { suratId: id });
+}
+
+// PERBAIKAN: Fungsi untuk menampilkan modal surat (tombol mata)
+function showSuratModal(id) {
+    modalManager.createModal('surat', { suratId: id });
+}
+
+// PERBAIKAN: Handle klik button eviden - langsung preview jika hanya 1 file
+async function handleEvidenClick(suratId, namaKegiatan = '') {
+    try {
+        // Cek jumlah modal yang terbuka
+        if (modalManager.modals.length >= 2) {
+            showAlert('Maksimal hanya dapat membuka 2 modal sekaligus. Tutup salah satu modal terlebih dahulu.', 'warning');
+            return;
+        }
+        
+        // Ambil data untuk cek jumlah file
+        const item = await getSuratDetail(suratId);
+        if (!item) {
+            showAlert('Data tidak ditemukan', 'error');
+            return;
+        }
+        
+        const evidenFiles = getEvidenFilesFromData(item);
+        
+        if (evidenFiles.length === 0) {
+            showAlert('Tidak ada file eviden untuk pengajuan ini', 'info');
+            return;
+        }
+        
+        // Jika hanya ada 1 file, langsung preview
+        if (evidenFiles.length === 1) {
+            const singleFile = evidenFiles[0];
+            previewFile(singleFile.url, singleFile.name);
+        } else {
+            // Jika lebih dari 1 file, buka modal eviden
+            modalManager.createModal('eviden', { 
+                suratId: suratId, 
+                namaKegiatan: namaKegiatan 
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error handling eviden click:', error);
+        showAlert('Gagal memuat file eviden', 'error');
+    }
+}
+
+// Fungsi untuk menampilkan modal approve
+function showApproveModal(id, namaKegiatan = '') {
+    modalManager.createModal('approve', { 
+        suratId: id, 
+        namaKegiatan: namaKegiatan 
+    });
+}
+
+// Fungsi untuk menampilkan modal reject - DIUBAH: template tanpa batasan
+function showRejectModal(id, namaKegiatan = '') {
+    modalManager.createModal('reject', { 
+        suratId: id, 
+        namaKegiatan: namaKegiatan 
+    });
+}
+
+// ============================================
+// FUNGSI PREVIEW FILE
+// ============================================
+
+function previewFile(fileUrl, fileName) {
+    // Cek jumlah modal yang terbuka
+    if (modalManager.modals.length >= 2) {
+        showAlert('Maksimal hanya dapat membuka 2 modal sekaligus. Tutup salah satu modal terlebih dahulu.', 'warning');
+        return;
+    }
+    
+    // Create preview modal
+    const modalId = modalManager.createModal('preview');
+    const modal = modalManager.getModal(modalId);
+    
+    if (!modal) return;
+    
+    const modalElement = modal.element;
+    const previewBody = modalElement.querySelector('.preview-body');
+    const previewTitle = modalElement.querySelector('h3');
+    
+    if (previewTitle) previewTitle.textContent = 'Preview: ' + fileName;
+    
+    if (previewBody) {
+        previewBody.innerHTML = `
+            <div style="text-align: center; padding: 40px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FB8C00;"></i>
+                <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
+            </div>
+        `;
+        
+        const fileExtension = fileName.split('.').pop().toLowerCase();
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+        const pdfExtensions = ['pdf'];
+        
+        setTimeout(() => {
+            if (imageExtensions.includes(fileExtension)) {
+                const img = new Image();
+                img.onload = function() {
+                    previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
+                };
+                img.onerror = function() {
+                    showUnsupportedPreview(previewBody, fileUrl, fileName);
+                };
+                img.src = fileUrl;
+            } else if (pdfExtensions.includes(fileExtension)) {
+                previewBody.innerHTML = `
+                    <iframe 
+                        src="${fileUrl}" 
+                        class="preview-iframe" 
+                        frameborder="0"
+                    ></iframe>
+                `;
+            } else {
+                showUnsupportedPreview(previewBody, fileUrl, fileName);
+            }
+        }, 100);
+    }
+}
+
+function showUnsupportedPreview(previewBody, fileUrl, fileName) {
+    previewBody.innerHTML = `
+        <div class="preview-unsupported">
+            <i class="fas fa-eye-slash"></i>
+            <h4>Preview Tidak Tersedia</h4>
+            <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
+            <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank" style="margin-top: 15px;">
+                <i class="fas fa-download"></i> Download File
+            </a>
+        </div>
+    `;
+}
+
+// ============================================
+// FUNGSI BULK ACTIONS
 // ============================================
 
 // Fungsi untuk update selection
@@ -1547,8 +2717,21 @@ function toggleSelectAll(checkbox) {
 }
 
 // Fungsi untuk select semua dari header
-function toggleSelectAllHeader(checkbox) {
-    toggleSelectAll(checkbox);
+function handleSelectAllHeader(checkbox) {
+    const isChecked = checkbox.checked;
+    const allCheckboxes = document.querySelectorAll('.row-checkbox');
+    
+    allCheckboxes.forEach(cb => {
+        cb.checked = isChecked;
+    });
+    
+    document.getElementById('selectAll').checked = isChecked;
+    updateSelection();
+}
+
+// Fungsi untuk toggle individual checkbox
+function toggleRowCheckbox(checkbox) {
+    updateSelection();
 }
 
 // Fungsi untuk clear semua selection
@@ -1559,451 +2742,214 @@ function clearAllSelection() {
     });
     updateSelection();
 }
-// Fungsi untuk menampilkan modal bulk approve (PERBAIKAN)
+
+// Fungsi untuk menampilkan modal bulk approve
 function showBulkApproveModal() {
     const selectedCount = selectedItems.size;
     if (selectedCount === 0) {
-        alert('Pilih setidaknya satu pengajuan untuk disetujui.');
+        showAlert('Pilih setidaknya satu pengajuan untuk disetujui.', 'warning');
         return;
     }
     
-    document.getElementById('bulkApproveCount').textContent = selectedCount + ' pengajuan';
-    document.getElementById('bulkApproveIds').value = Array.from(selectedItems).join(',');
-    
-    // Isi daftar pengajuan yang akan disetujui
-    const itemsContainer = document.getElementById('bulkApproveItems');
-    itemsContainer.innerHTML = '';
-    
+    // Kumpulkan data items
+    const items = [];
     selectedItems.forEach(id => {
         const checkbox = document.querySelector(`.row-checkbox[value="${id}"]`);
         if (checkbox) {
-            const nama = checkbox.dataset.nama || 'Tanpa Nama';
-            const details = checkbox.dataset.details || '';
-            
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'bulk-item';
-            itemDiv.innerHTML = `
-                <div class="bulk-item-header">
-                    <div class="bulk-item-name">${escapeHtml(nama)}</div>
-                </div>
-                <div class="bulk-item-details">${escapeHtml(details)}</div>
-            `;
-            itemsContainer.appendChild(itemDiv);
-        }
-    });
-    
-    document.getElementById('bulkApproveModal').classList.add('show');
-}
-
-// Fungsi untuk menampilkan modal bulk reject (PERBAIKAN)
-function showBulkRejectModal() {
-    const selectedCount = selectedItems.size;
-    if (selectedCount === 0) {
-        alert('Pilih setidaknya satu pengajuan untuk ditolak.');
-        return;
-    }
-    
-    document.getElementById('bulkRejectCount').textContent = selectedCount + ' pengajuan';
-    
-    // Isi form dengan textarea untuk setiap pengajuan
-    const itemsContainer = document.getElementById('bulkRejectItems');
-    itemsContainer.innerHTML = '';
-    
-    selectedItems.forEach(id => {
-        const checkbox = document.querySelector(`.row-checkbox[value="${id}"]`);
-        if (checkbox) {
-            const nama = checkbox.dataset.nama || 'Tanpa Nama';
-            const details = checkbox.dataset.details || '';
-            
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'bulk-item';
-            itemDiv.innerHTML = `
-                <div class="bulk-item-header">
-                    <div class="bulk-item-name">${escapeHtml(nama)}</div>
-                </div>
-                <div class="bulk-item-details">${escapeHtml(details)}</div>
-                <textarea 
-                    name="rejection_notes[]" 
-                    class="bulk-reject-textarea" 
-                    placeholder="Masukkan alasan penolakan untuk pengajuan ini..."
-                    required
-                ></textarea>
-                <input type="hidden" name="selected_ids[]" value="${id}">
-            `;
-            itemsContainer.appendChild(itemDiv);
-        }
-    });
-    
-    document.getElementById('bulkRejectModal').classList.add('show');
-}
-// ============================================
-// BULK ACTION FUNCTIONS
-// ============================================
-
-function toggleSelectAllHeader() {
-    const selectAll = document.getElementById('selectAllHeader').checked;
-    const checkboxes = document.querySelectorAll('.row-checkbox');
-    
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAll;
-    });
-    
-    updateBulkActions();
-}
-
-function toggleSelectAll() {
-    const selectAll = document.getElementById('selectAll').checked;
-    const checkboxes = document.querySelectorAll('.row-checkbox');
-    
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = selectAll;
-    });
-    
-    updateBulkActions();
-}
-
-function updateBulkActions() {
-    const checkboxes = document.querySelectorAll('.row-checkbox');
-    selectedIds = [];
-    
-    checkboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            selectedIds.push(checkbox.value);
-        }
-    });
-    
-    const bulkActions = document.getElementById('bulkActions');
-    const selectedCount = document.getElementById('selectedCount');
-    const selectAllHeader = document.getElementById('selectAllHeader');
-    const selectAllBulk = document.getElementById('selectAll');
-    
-    if (selectedIds.length > 0) {
-        bulkActions.style.display = 'flex';
-        selectedCount.textContent = `${selectedIds.length} item dipilih`;
-        
-        // Update select all checkboxes
-        const allChecked = selectedIds.length === checkboxes.length;
-        selectAllHeader.checked = allChecked;
-        selectAllBulk.checked = allChecked;
-    } else {
-        bulkActions.style.display = 'none';
-        selectAllHeader.checked = false;
-        selectAllBulk.checked = false;
-    }
-}
-
-function clearSelection() {
-    const checkboxes = document.querySelectorAll('.row-checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    updateBulkActions();
-}
-
-// ============================================
-// MODAL FUNCTIONS (SAMA DENGAN DASHBOARD)
-// ============================================
-
-// Fungsi untuk menampilkan approve modal (SAMA DENGAN DASHBOARD)
-function showApproveModal(id, namaKegiatan) {
-    currentApproveId = id;
-    currentApproveNamaKegiatan = namaKegiatan;
-    
-    document.getElementById('approveNamaKegiatan').textContent = namaKegiatan;
-    document.getElementById('approveForm').action = '<?= base_url("dekan/approve/") ?>' + id;
-    document.getElementById('approveModal').classList.add('show');
-}
-
-// Fungsi untuk menampilkan reject modal baru (SAMA DENGAN DASHBOARD)
-function showRejectModalNew(id, namaKegiatan) {
-    currentRejectId = id;
-    currentRejectNamaKegiatan = namaKegiatan;
-    
-    // Set data ke modal
-    document.getElementById('rejectNamaKegiatan').textContent = namaKegiatan;
-    document.getElementById('rejectionReason').value = '';
-    document.getElementById('rejectForm').action = '<?= base_url("dekan/reject/") ?>' + id;
-    
-    // Tampilkan modal
-    document.getElementById('rejectConfirmModal').classList.add('show');
-}
-
-// Fungsi untuk menampilkan bulk reject modal baru
-function showBulkRejectModalNew() {
-    if (selectedIds.length === 0) {
-        alert('Tidak ada pengajuan yang dipilih');
-        return;
-    }
-    
-    const modal = document.getElementById('bulkRejectModal');
-    const countSpan = document.getElementById('bulkRejectCount');
-    const container = document.getElementById('individualRejectionContainer');
-    
-    countSpan.textContent = `${selectedIds.length} pengajuan`;
-    
-    // Populate individual rejection notes
-    container.innerHTML = '';
-    selectedIds.forEach(id => {
-        const surat = suratList.find(s => Number(s.id) === Number(id));
-        if (surat) {
-            const rejectionDiv = document.createElement('div');
-            rejectionDiv.style.cssText = 'margin-bottom:15px;padding:15px;border:1px solid #e9ecef;border-radius:8px;background:#f8f9fa';
-            rejectionDiv.innerHTML = `
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #dee2e6">
-                    <div style="font-weight:600;color:#495057;flex-grow:1">
-                        <strong>${escapeHtml(surat.nama_kegiatan || '-')}</strong>
-                        <div style="font-size:12px;color:#6c757d">${escapeHtml(surat.penyelenggara || '-')}</div>
-                    </div>
-                </div>
-                <textarea 
-                    style="width:100%;padding:10px;border:1px solid #ced4da;border-radius:6px;font-family:inherit;resize:vertical;min-height:80px;font-size:14px"
-                    placeholder="Masukkan alasan penolakan untuk pengajuan ini..."
-                    data-id="${id}"
-                ></textarea>
-            `;
-            container.appendChild(rejectionDiv);
-        }
-    });
-    
-    modal.classList.add('show');
-}
-
-// CONFIRM BULK REJECT
-function confirmBulkReject() {
-    // Validasi semua textarea
-    const textareas = document.querySelectorAll('#individualRejectionContainer textarea');
-    let allFilled = true;
-    const rejectionData = [];
-    
-    textareas.forEach(textarea => {
-        const id = textarea.getAttribute('data-id');
-        const notes = textarea.value.trim();
-        
-        if (!notes) {
-            allFilled = false;
-            textarea.style.borderColor = '#e74c3c';
-        } else {
-            textarea.style.borderColor = '';
-            rejectionData.push({
+            items.push({
                 id: id,
-                notes: notes
+                nama: checkbox.dataset.nama || 'Tanpa Nama',
+                details: checkbox.dataset.details || ''
             });
         }
     });
     
-    if (!allFilled) {
-        alert('Semua alasan penolakan harus diisi');
+    modalManager.createModal('bulk_approve', { 
+        count: selectedCount,
+        ids: Array.from(selectedItems).join(','),
+        items: items
+    });
+}
+
+// Fungsi untuk menampilkan modal bulk reject
+function showBulkRejectModal() {
+    const selectedCount = selectedItems.size;
+    if (selectedCount === 0) {
+        showAlert('Pilih setidaknya satu pengajuan untuk ditolak.', 'warning');
         return;
     }
     
-    // Tutup modal terlebih dahulu
-    closeModal('bulkRejectModal');
+    // Kumpulkan data items
+    const items = [];
+    selectedItems.forEach(id => {
+        const checkbox = document.querySelector(`.row-checkbox[value="${id}"]`);
+        if (checkbox) {
+            items.push({
+                id: id,
+                nama: checkbox.dataset.nama || 'Tanpa Nama',
+                details: checkbox.dataset.details || ''
+            });
+        }
+    });
     
-    // Buat form dan submit secara tradisional (bukan AJAX)
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<?= base_url("dekan/process_multi_reject") ?>';
-    
-    // CSRF Token
-    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
-    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
-    const inpCsrf = document.createElement('input');
-    inpCsrf.type = 'hidden'; 
-    inpCsrf.name = csrfName; 
-    inpCsrf.value = csrfHash;
-    form.appendChild(inpCsrf);
-    
-    // Tambahkan setiap selected ID dan rejection notes sebagai input terpisah
-    rejectionData.forEach(item => {
-        const inpId = document.createElement('input');
-        inpId.type = 'hidden';
-        inpId.name = 'selected_ids[]';
-        inpId.value = item.id;
-        form.appendChild(inpId);
+    modalManager.createModal('bulk_reject', { 
+        count: selectedCount,
+        items: items
+    });
+}
+
+// Fungsi untuk refresh halaman
+function refreshPage() {
+    window.location.reload();
+}
+
+// ============================================
+// FUNGSI SURAT TUGAS - DIUBAH: untuk modal lebar
+// ============================================
+
+// Fungsi untuk toggle fullscreen pada iframe
+function toggleIframeFullscreen(iframe) {
+    if (!isFullscreen) {
+        iframe.classList.add('fullscreen');
+        isFullscreen = true;
         
-        const inpNotes = document.createElement('input');
-        inpNotes.type = 'hidden';
-        inpNotes.name = 'rejection_notes[]';
-        inpNotes.value = item.notes;
-        form.appendChild(inpNotes);
-    });
-    
-    document.body.appendChild(form);
-    form.submit();
-}
-
-// PROCESS BULK APPROVE
-function processBulkApprove() {
-    if (selectedIds.length === 0) {
-        alert('Tidak ada pengajuan yang dipilih');
-        return;
+        // Update fullscreen button text
+        const fullscreenBtn = document.querySelector('.surat-btn-fullscreen');
+        if (fullscreenBtn) {
+            fullscreenBtn.innerHTML = '<i class="fa-solid fa-compress"></i> Keluar Fullscreen';
+        }
+    } else {
+        iframe.classList.remove('fullscreen');
+        isFullscreen = false;
+        
+        // Update fullscreen button text
+        const fullscreenBtn = document.querySelector('.surat-btn-fullscreen');
+        if (fullscreenBtn) {
+            fullscreenBtn.innerHTML = '<i class="fa-solid fa-expand"></i> Fullscreen';
+        }
     }
-    
-    // Update count
-    document.getElementById('multiApproveCount').textContent = selectedIds.length;
-    document.getElementById('multiApproveItemCount').textContent = `${selectedIds.length} item`;
-    
-    // Populate list
-    const listContainer = document.getElementById('multiApproveList');
-    listContainer.innerHTML = '';
-    
-    selectedIds.forEach((id, index) => {
-        const surat = suratList.find(s => Number(s.id) === Number(id));
-        if (surat) {
-            const itemDiv = document.createElement('div');
-            itemDiv.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px;background:white;border:1px solid #e9ecef;border-radius:6px;margin-bottom:8px';
-            itemDiv.innerHTML = `
-                <span style="background:#9b59b6;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0">${index + 1}</span>
-                <div style="flex:1;text-align:left">
-                    <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(surat.nama_kegiatan || '-')}</div>
-                    <div style="font-size:12px;color:#6c757d">📅 ${formatDate(surat.tanggal_kegiatan)} | 📍 ${escapeHtml(surat.penyelenggara || '-')}</div>
-                </div>
-                <span class="badge badge-pending" style="flex-shrink:0">Menunggu</span>
-            `;
-            listContainer.appendChild(itemDiv);
-        }
-    });
-    
-    document.getElementById('multiApproveConfirmModal').classList.add('show');
 }
 
-function confirmMultiApprove() {
-    if (selectedIds.length === 0) return;
+// Fungsi untuk menyesuaikan tinggi iframe
+function adjustIframeHeight(iframe) {
+    if (!iframe) return;
     
-    closeModal('multiApproveConfirmModal');
-    
-    // Buat form dan submit
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = '<?= base_url("dekan/process_multi_approve") ?>';
-    
-    // CSRF Token
-    const csrfName = '<?= $this->security->get_csrf_token_name() ?>';
-    const csrfHash = '<?= $this->security->get_csrf_hash() ?>';
-    const inpCsrf = document.createElement('input');
-    inpCsrf.type = 'hidden'; 
-    inpCsrf.name = csrfName; 
-    inpCsrf.value = csrfHash;
-    form.appendChild(inpCsrf);
-    
-    // Tambahkan setiap selected ID
-    selectedIds.forEach(id => {
-        const inpId = document.createElement('input');
-        inpId.type = 'hidden';
-        inpId.name = 'selected_ids[]';
-        inpId.value = id;
-        form.appendChild(inpId);
-    });
-    
-    document.body.appendChild(form);
-    form.submit();
-}
-
-// ============================================
-// DETAIL MODAL FUNCTIONS (SAMA DENGAN DASHBOARD)
-// ============================================
-
-// Preview File Functions
-function previewFile(fileUrl, fileName) {
-    console.log('Preview File:', {
-        fileName: fileName,
-        fileUrl: fileUrl,
-        fullUrl: fileUrl
-    });
-    
-    const previewModal = document.getElementById('previewModal');
-    const previewTitle = document.getElementById('previewTitle');
-    const previewBody = document.getElementById('previewBody');
-    
-    previewTitle.textContent = 'Preview: ' + fileName;
-    previewBody.innerHTML = `
-        <div style="text-align: center; padding: 40px;">
-            <i class="fas fa-spinner fa-spin" style="font-size: 48px; color: #FB8C00;"></i>
-            <p style="margin-top: 15px; color: #6c757d;">Memuat preview...</p>
-        </div>
-    `;
-    
-    previewModal.classList.add('show');
-
-    const fileExtension = fileName.split('.').pop().toLowerCase();
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-    const pdfExtensions = ['pdf'];
-    
-    setTimeout(() => {
-        if (imageExtensions.includes(fileExtension)) {
-            const img = new Image();
-            img.onload = function() {
-                console.log('Image loaded successfully');
-                previewBody.innerHTML = `<img src="${fileUrl}" class="preview-image" alt="${fileName}">`;
-            };
-            img.onerror = function() {
-                console.error('Error loading image:', fileUrl);
-                showUnsupportedPreview(fileUrl, fileName);
-            };
-            img.src = fileUrl;
-        } else if (pdfExtensions.includes(fileExtension)) {
-            previewBody.innerHTML = `
-                <iframe 
-                    src="${fileUrl}" 
-                    class="preview-iframe" 
-                    frameborder="0"
-                ></iframe>
-            `;
-        } else {
-            showUnsupportedPreview(fileUrl, fileName);
-        }
-    }, 100);
-}
-
-function showUnsupportedPreview(fileUrl, fileName) {
-    document.getElementById('previewBody').innerHTML = `
-        <div class="preview-unsupported">
-            <i class="fas fa-eye-slash"></i>
-            <h4>Preview Tidak Tersedia</h4>
-            <p>File "${escapeHtml(fileName)}" tidak dapat dipreview di browser.</p>
-            <a href="${fileUrl}" class="download-btn" download="${fileName}" target="_blank" style="margin-top: 15px;">
-                <i class="fas fa-download"></i> Download File
-            </a>
-        </div>
-    `;
-}
-
-function closePreviewModal() {
-    document.getElementById('previewModal').classList.remove('show');
-}
-
-// Fungsi untuk menampilkan modal eviden
-async function showEvidenModal(suratId) {
     try {
-        // Ambil data detail via AJAX
-        const item = await getSuratDetail(suratId);
-        
-        if (!item) {
-            alert('Data tidak ditemukan');
-            return;
-        }
-
-        // Ambil dan proses data eviden
-        const evidenFiles = getEvidenFilesFromData(item);
-        
-        if (evidenFiles.length === 0) {
-            alert('Tidak ada file eviden untuk pengajuan ini.');
-            return;
-        }
-        
-        // LOGIKA BARU: Jika hanya 1 file, langsung preview
-        if (evidenFiles.length === 1) {
-            const file = evidenFiles[0];
-            previewFile(file.url, file.name);
-        } else {
-            // Jika lebih dari 1 file, tampilkan modal daftar file
-            showMultipleEvidenModal(item, evidenFiles);
-        }
-        
-    } catch (error) {
-        console.error('Error loading eviden:', error);
-        alert('Gagal memuat eviden: ' + error.message);
+        // Tunggu sedikit untuk konten selesai dimuat
+        setTimeout(() => {
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const body = iframeDoc.body;
+                const html = iframeDoc.documentElement;
+                
+                // Hitung tinggi maksimum
+                const height = Math.max(
+                    body.scrollHeight,
+                    body.offsetHeight,
+                    html.clientHeight,
+                    html.scrollHeight,
+                    html.offsetHeight
+                );
+                
+                // Set tinggi iframe (minimum 600px, maksimum sesuai konten)
+                const minHeight = 600;
+                const calculatedHeight = Math.max(minHeight, height + 50);
+                
+                // Jika dalam mode fullscreen, gunakan viewport height
+                if (isFullscreen) {
+                    iframe.style.height = '100vh';
+                } else {
+                    iframe.style.height = calculatedHeight + 'px';
+                }
+                
+                // Scroll ke atas
+                iframe.contentWindow.scrollTo(0, 0);
+                
+            } catch (e) {
+                console.error('Error adjusting iframe height:', e);
+                // Fallback: set tinggi tetap
+                iframe.style.height = '800px';
+            }
+        }, 800); // Tunggu lebih lama untuk konten selesai dimuat
+    } catch (e) {
+        console.error('Error accessing iframe content:', e);
+        // Fallback: set tinggi tetap
+        iframe.style.height = '800px';
     }
+}
+
+// Fungsi untuk print PDF
+function printPDF(url) {
+    if (!url) {
+        showAlert('URL PDF tidak tersedia', 'error');
+        return;
+    }
+    
+    fetch(url)
+        .then(res => res.blob())
+        .then(blob => {
+            const blobUrl = URL.createObjectURL(blob);
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = blobUrl;
+            document.body.appendChild(iframe);
+
+            iframe.onload = function () {
+                setTimeout(() => {
+                    iframe.contentWindow.print();
+                    // Cleanup setelah 10 detik
+                    setTimeout(() => {
+                        if (iframe.parentNode) {
+                            iframe.parentNode.removeChild(iframe);
+                        }
+                        URL.revokeObjectURL(blobUrl);
+                    }, 10000);
+                }, 500);
+            };
+        })
+        .catch(error => {
+            console.error('Error printing PDF:', error);
+            showAlert('Gagal mencetak PDF: ' + error.message, 'error');
+        });
+}
+
+// Fungsi untuk download PDF
+function downloadPDF(url) {
+    if (!url) {
+        showAlert('URL PDF tidak tersedia', 'error');
+        return;
+    }
+    
+    window.location.href = url;
+}
+
+// Fungsi untuk toggle fullscreen
+function toggleFullscreen() {
+    const iframe = document.querySelector('.surat-iframe');
+    if (iframe) {
+        toggleIframeFullscreen(iframe);
+    }
+}
+
+// ============================================
+// FUNGSI HELPER
+// ============================================
+
+// PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
+function getSuratDetail(id) {
+    return fetch('<?= site_url("dekan/getDetailPengajuan/") ?>' + id)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.data;
+            } else {
+                throw new Error(data.message || 'Gagal memuat data');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching detail:', error);
+            throw error;
+        });
 }
 
 // Fungsi helper untuk mendapatkan array file eviden dari data
@@ -2101,31 +3047,8 @@ function getFileUrl(filePath, baseUrl) {
     return baseUrl + possiblePaths[0];
 }
 
-// Fungsi untuk menampilkan modal multiple eviden (lebih dari 1 file)
-function showMultipleEvidenModal(item, evidenFiles) {
-    // Tampilkan loading
-    document.getElementById('evidenContent').innerHTML = `
-        <div style="text-align:center;padding:40px;">
-            <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
-            <p style="margin-top:10px;color:#7f8c8d">Memuat eviden...</p>
-        </div>
-    `;
-    
-    document.getElementById('evidenModal').classList.add('show');
-    
-    // Generate content
-    const content = generateMultipleEvidenContent(item, evidenFiles);
-    document.getElementById('evidenContent').innerHTML = content;
-}
-
 // Fungsi untuk generate konten multiple eviden (lebih dari 1 file)
-function generateMultipleEvidenContent(item, evidenFiles) {
-    // Helper function
-    const getVal = (k) => {
-        const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
-        return value;
-    };
-
+function generateMultipleEvidenContent(item, evidenFiles, namaKegiatan = '') {
     // Generate file evidence HTML untuk multiple files
     let fileEvidenceHtml = '';
     
@@ -2193,150 +3116,34 @@ function generateMultipleEvidenContent(item, evidenFiles) {
         </div>`;
     }
 
+    const currentModalId = modalManager.activeModal?.id || '';
+    
     return `       
         ${fileEvidenceHtml}
         
         <div class="modal-actions">
-            <button class="modal-btn modal-btn-close" onclick="closeModal('evidenModal')">
+            <button class="modal-btn modal-btn-close" onclick="modalManager.closeModal('${currentModalId}')">
                 <i class="fa-solid fa-times"></i> Tutup
             </button>
         </div>
     `;
 }
 
+// ============================================
+// FUNGSI GENERATE DETAIL CONTENT
+// ============================================
 
-// Fungsi showDetail untuk menampilkan surat pengajuan dengan scroll lengkap
-async function showDetail(id) {
-    try {
-        // Tampilkan loading
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
-                <p style="margin-top:10px;color:#7f8c8d">Memuat surat pengajuan...</p>
-            </div>
-        `;
-        document.getElementById('detailModal').classList.add('show');
-
-        // Load surat pengajuan via iframe TANPA batasan tinggi
-        const suratUrl = '<?= base_url("dekan/view_surat_pengajuan/") ?>' + id;
-        
-        document.getElementById('detailContent').innerHTML = `
-            <div style="width:100%; overflow:hidden; border-radius:8px;">
-                <iframe 
-                    id="suratIframe"
-                    src="${suratUrl}" 
-                    style="width:100%; height:70vh; border:none;"
-                    onload="adjustIframeHeight()"
-                ></iframe>
-            </div>
-            <div class="modal-actions">
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
-        
-    } catch (error) {
-        console.error('Error loading surat:', error);
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;color:#e74c3c">
-                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
-                <p>Gagal memuat surat: ${error.message}</p>
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')" style="margin-top:20px">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
-    }
-}
-
-// Fungsi untuk menyesuaikan tinggi iframe berdasarkan konten
-function adjustIframeHeight() {
-    const iframe = document.getElementById('suratIframe');
-    if (!iframe) return;
-    
-    try {
-        // Tunggu sedikit untuk konten selesai dimuat
-        setTimeout(() => {
-            try {
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                const body = iframeDoc.body;
-                const html = iframeDoc.documentElement;
-                
-                // Hitung tinggi maksimum
-                const height = Math.max(
-                    body.scrollHeight,
-                    body.offsetHeight,
-                    html.clientHeight,
-                    html.scrollHeight,
-                    html.offsetHeight
-                );
-                
-                // Set tinggi iframe
-                iframe.style.height = (height + 50) + 'px'; // Tambah margin
-                
-                console.log('Iframe height adjusted to:', height);
-            } catch (e) {
-                console.error('Error adjusting iframe height:', e);
-                // Fallback: set tinggi tetap
-                iframe.style.height = '1000px';
-            }
-        }, 500); // Tunggu 500ms untuk konten selesai dimuat
-    } catch (e) {
-        console.error('Error accessing iframe content:', e);
-    }
-}
-
-// Fungsi untuk menampilkan row detail (SAMA DENGAN DASHBOARD)
-async function showRowDetail(id) {
-    try {
-        // Tampilkan loading
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size:24px;color:#FB8C00"></i>
-                <p style="margin-top:10px;color:#7f8c8d">Memuat detail pengajuan...</p>
-            </div>
-        `;
-        
-        // Tampilkan modal
-        document.getElementById('detailModal').classList.add('show');
-        
-        // Ambil data detail via AJAX
-        const data = await getSuratDetail(id);
-        
-        if (!data) {
-            throw new Error('Data tidak ditemukan');
-        }
-        
-        // Generate HTML untuk detail pengajuan ENHANCED
-        const detailHtml = generateDetailContentEnhanced(data);
-        document.getElementById('detailContent').innerHTML = detailHtml;
-        
-    } catch (error) {
-        console.error('Error loading detail:', error);
-        document.getElementById('detailContent').innerHTML = `
-            <div style="text-align:center;padding:40px;color:#e74c3c">
-                <i class="fa-solid fa-exclamation-triangle" style="font-size:48px;margin-bottom:10px"></i>
-                <p>Gagal memuat detail: ${error.message}</p>
-                <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')" style="margin-top:20px">
-                    <i class="fa-solid fa-times"></i> Tutup
-                </button>
-            </div>
-        `;
-    }
-}
-
-// Fungsi untuk generate konten detail (SAMA DENGAN DASHBOARD)
-function generateDetailContentEnhanced(item) {
+function generateDetailContent(item) {
+    // Helper function untuk mendapatkan nilai
     const getVal = (k) => {
         const value = (item[k] !== undefined && item[k] !== null && item[k] !== '' ? item[k] : '-');
         return value;
     };
-
+    
     // Format status badge
     let statusBadge = '';
     const status = getVal('status').toLowerCase();
-
+    
     if (status.includes('setuju')) {
         statusBadge = `<span class="badge badge-approved">${getVal('status')}</span>`;
     } else if (status.includes('tolak')) {
@@ -2344,90 +3151,68 @@ function generateDetailContentEnhanced(item) {
     } else {
         statusBadge = `<span class="badge badge-pending">${getVal('status')}</span>`;
     }
-
+    
     // Ambil data dosen
     const dosenData = item.dosen_data || [];
-
-   // Generate HTML untuk data dosen - DENGAN FOTO PROFIL
-let dosenHtml = '';
-if (dosenData && dosenData.length > 0) {
-    dosenHtml = `
-    <div class="detail-section">
+    
+    // ✅ Generate HTML untuk data dosen DENGAN FOTO (TANPA INITIAL)
+    let dosenHtml = '';
+    if (dosenData && dosenData.length > 0) {
+        dosenHtml = `
         <div class="dosen-list">
             ${dosenData.map((dosen, index) => {
-                // Pastikan data dosen valid
-                const nama = escapeHtml(dosen.nama || 'Data tidak tersedia');
-                const nip = escapeHtml(dosen.nip || '-');
-                const jabatan = escapeHtml(dosen.jabatan || 'Dosen');
-                const divisi = escapeHtml(dosen.divisi || '-');
+                const initial = dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?';
                 const foto = dosen.foto || '';
-                
-                // Generate foto URL atau initial
-                let avatarContent = '';
-                if (foto && foto !== '' && foto !== '-') {
-                    const fotoUrl = '<?= base_url("uploads/foto/") ?>' + foto;
-                    avatarContent = `<img src="${fotoUrl}" alt="${nama}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                   <div style="display:none; width:100%; height:100%; align-items:center; justify-content:center; background:#FB8C00; color:white; font-size:12px; font-weight:600; border-radius:50%;">
-                                       ${nama ? nama.charAt(0).toUpperCase() : '?'}
-                                   </div>`;
-                } else {
-                    avatarContent = nama ? nama.charAt(0).toUpperCase() : '?';
-                }
+                const hasFoto = foto && foto.trim() !== '' && foto !== 'null';
                 
                 return `
-                <div class="dosen-item">
-                    <div class="dosen-avatar">
-                        ${avatarContent}
-                    </div>
-                    <div class="dosen-info">
-                        <div class="dosen-name">${nama}</div>
-                        <div class="dosen-details">
-                            NIP: ${nip} | ${jabatan} | Divisi: ${divisi}
-                        </div>
-                    </div>
-                </div>
-                `;
-            }).join('')}
-        </div>
-    </div>`;
-} else {
-    // Fallback jika tidak ada data dosen
-    dosenHtml = `
-    <div class="detail-section">
-        <div class="detail-section-title">
-            <i class="fa-solid fa-user-graduate"></i> Dosen Terkait
-        </div>
-        <div class="dosen-list">
             <div class="dosen-item">
-                <div class="dosen-avatar">
-                    ?
+                <div class="dosen-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: #FB8C00; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; font-weight: 600; overflow: hidden; position: relative; flex-shrink: 0;">
+                    ${hasFoto ? `
+                        <img src="${escapeHtml(foto)}" 
+                             alt="${escapeHtml(dosen.nama)}" 
+                             style="width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; z-index: 2;"
+                             onerror="console.error('Image load error:', this.src); this.style.display='none'; this.parentElement.style.background='#FB8C00';">
+                    ` : `
+                        <span style="position: relative; z-index: 1; font-size: 18px;">${initial}</span>
+                    `}
                 </div>
                 <div class="dosen-info">
-                    <div class="dosen-name">Data dosen tidak tersedia</div>
+                    <div class="dosen-name">${escapeHtml(dosen.nama)}</div>
                     <div class="dosen-details">
-                        NIP: - | Dosen | Divisi: -
+                        NIP: ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)} | Divisi: ${escapeHtml(dosen.divisi)}
                     </div>
                 </div>
             </div>
-        </div>
-    </div>`;
-}
-
-
-    // Tampilkan nomor surat jika sudah disetujui
+                `;
+            }).join('')}
+        </div>`;
+    } else {
+        dosenHtml = `
+        <div class="dosen-item">
+            <div class="dosen-avatar" style="width: 45px; height: 45px; border-radius: 50%; background: #FB8C00; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 600;">
+                <span>?</span>
+            </div>
+            <div class="dosen-info">
+                <div class="dosen-name">Data dosen tidak tersedia</div>
+                <div class="dosen-details">Informasi dosen tidak ditemukan</div>
+            </div>
+        </div>`;
+    }
+    
     let nomorSuratHtml = '';
     if (getVal('nomor_surat') && getVal('nomor_surat') !== '-') {
         nomorSuratHtml = `
-        <div class="nomor-surat-container">
-            <div class="nomor-surat-label">
+        <div style="background:#fef9e7;border:2px solid #FB8C00;border-radius:10px;padding:15px;margin-bottom:20px;text-align:center">
+            <div style="font-size:14px;font-weight:600;color:#FB8C00;margin-bottom:5px;text-transform:uppercase;letter-spacing:1px">
                 <i class="fa-solid fa-file-signature"></i> Nomor Surat
             </div>
-            <div class="nomor-surat-value">
+            <div style="font-size:18px;font-weight:700;color:#E67E22;font-family:'Courier New',monospace">
                 ${escapeHtml(getVal('nomor_surat'))}
             </div>
         </div>`;
     }
-
+    
     // Tampilkan catatan penolakan jika ada
     let rejectionHtml = '';
     if (getVal('catatan_penolakan') && getVal('catatan_penolakan') !== '-') {
@@ -2441,18 +3226,18 @@ if (dosenData && dosenData.length > 0) {
             </div>
         </div>`;
     }
-
+    
     // LOGIKA BARU: Tentukan tampilan berdasarkan jenis_date
     const jenisDate = getVal('jenis_date');
     const periodeValue = getVal('periode_value');
     const tanggalKegiatan = getVal('tanggal_kegiatan');
     const akhirKegiatan = getVal('akhir_kegiatan');
-
+    
     // Tentukan tampilan untuk Periode dan Tanggal Mulai
     let periodeDisplay = '-';
     let tanggalMulaiDisplay = '-';
     let tanggalAkhirDisplay = '-';
-
+    
     if (jenisDate === 'Periode') {
         // Jika Periode: tampilkan periode_value, kosongkan tanggal
         periodeDisplay = periodeValue !== '-' && periodeValue ? periodeValue : '-';
@@ -2478,6 +3263,8 @@ if (dosenData && dosenData.length > 0) {
             }
         }
     }
+
+    const currentModalId = modalManager.activeModal?.id || '';
     
     return `
     ${nomorSuratHtml}
@@ -2554,15 +3341,15 @@ if (dosenData && dosenData.length > 0) {
     ${rejectionHtml}
     
     <div class="modal-actions">
-        <button class="modal-btn modal-btn-close" onclick="closeModal('detailModal')">
+        <button class="modal-btn modal-btn-close" onclick="modalManager.closeModal('${currentModalId}')">
             <i class="fa-solid fa-times"></i> Tutup
         </button>
         ${getVal('status') === 'disetujui sekretariat' ? `
 <div style="display:flex;gap:10px;margin-left:auto">
-    <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); closeModal('detailModal'); showRejectModalNew(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+    <button class="modal-btn modal-btn-reject" onclick="event.stopPropagation(); modalManager.closeModal('${currentModalId}'); showRejectModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
         <i class="fa-solid fa-times"></i> Tolak
     </button>
-    <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); closeModal('detailModal'); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
+    <button class="modal-btn modal-btn-approve" onclick="event.stopPropagation(); modalManager.closeModal('${currentModalId}'); showApproveModal(${item.id}, '${escapeHtml(getVal('nama_kegiatan'))}')">
         <i class="fa-solid fa-check"></i> Setujui
     </button>
 </div>
@@ -2570,232 +3357,6 @@ if (dosenData && dosenData.length > 0) {
     </div>`;
 }
 
-// PERBAIKAN: Fungsi untuk mengambil data detail via AJAX
-function getSuratDetail(id) {
-    return fetch('<?= site_url("dekan/getDetailPengajuan/") ?>' + id)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                return data.data;
-            } else {
-                throw new Error(data.message || 'Gagal memuat data');
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching detail:', error);
-            throw error;
-        });
-}
-// ============================================
-// FIXED FUNGSI UNTUK MULTI SELECTION
-// ============================================
-
-// Variabel global untuk melacak status select all
-let isSelectAll = false;
-
-// Fungsi untuk handle select all dari header
-function handleSelectAllHeader(checkbox) {
-    const isChecked = checkbox.checked;
-    isSelectAll = isChecked;
-    
-    // Update semua checkbox di tabel
-    const allCheckboxes = document.querySelectorAll('.row-checkbox');
-    allCheckboxes.forEach(cb => {
-        cb.checked = isChecked;
-    });
-    
-    // Update checkbox di container select all
-    document.getElementById('selectAll').checked = isChecked;
-    
-    updateSelection();
-}
-
-// Fungsi untuk handle select all dari container
-function handleSelectAll(checkbox) {
-    const isChecked = checkbox.checked;
-    isSelectAll = isChecked;
-    
-    // Update semua checkbox di tabel
-    const allCheckboxes = document.querySelectorAll('.row-checkbox');
-    allCheckboxes.forEach(cb => {
-        cb.checked = isChecked;
-    });
-    
-    // Update checkbox di header
-    document.getElementById('selectAllHeader').checked = isChecked;
-    
-    updateSelection();
-}
-
-// Fungsi utama untuk update selection
-function updateSelection() {
-    const checkboxes = document.querySelectorAll('.row-checkbox:checked');
-    selectedItems.clear();
-    
-    checkboxes.forEach(checkbox => {
-        selectedItems.add(checkbox.value);
-    });
-    
-    const selectedCount = selectedItems.size;
-    document.getElementById('selectedCount').textContent = selectedCount;
-    
-    // Tampilkan/sembunyikan toolbar
-    const toolbar = document.getElementById('bulkActionToolbar');
-    if (selectedCount > 0) {
-        toolbar.classList.add('show');
-    } else {
-        toolbar.classList.remove('show');
-    }
-    
-    // Update status select all
-    const allCheckboxes = document.querySelectorAll('.row-checkbox');
-    const allChecked = allCheckboxes.length > 0 && Array.from(allCheckboxes).every(cb => cb.checked);
-    
-    // Sync kedua checkbox
-    document.getElementById('selectAll').checked = allChecked;
-    document.getElementById('selectAllHeader').checked = allChecked;
-    isSelectAll = allChecked;
-    
-    // Tambah/hapus class selected pada baris
-    allCheckboxes.forEach(checkbox => {
-        const row = checkbox.closest('tr');
-        if (checkbox.checked) {
-            row.classList.add('selected');
-        } else {
-            row.classList.remove('selected');
-        }
-    });
-}
-
-// Fungsi untuk clear semua selection
-function clearAllSelection() {
-    const allCheckboxes = document.querySelectorAll('.row-checkbox');
-    allCheckboxes.forEach(cb => {
-        cb.checked = false;
-    });
-    
-    // Reset semua checkbox select all
-    document.getElementById('selectAll').checked = false;
-    document.getElementById('selectAllHeader').checked = false;
-    isSelectAll = false;
-    
-    updateSelection();
-}
-
-// Fungsi untuk toggle individual checkbox (dipanggil dari onchange)
-function toggleRowCheckbox(checkbox) {
-    // Stop propagation agar tidak memicu click row
-    if (event) event.stopPropagation();
-    
-    // Update status select all jika perlu
-    const allCheckboxes = document.querySelectorAll('.row-checkbox');
-    const allChecked = allCheckboxes.length > 0 && Array.from(allCheckboxes).every(cb => cb.checked);
-    
-    document.getElementById('selectAll').checked = allChecked;
-    document.getElementById('selectAllHeader').checked = allChecked;
-    isSelectAll = allChecked;
-    
-    updateSelection();
-}
-
-// ============================================
-// EVENT LISTENERS TAMBAHAN
-// ============================================
-
-// Fungsi untuk mencegah event propagation pada checkbox
-function preventRowClick(event) {
-    if (event.target.type === 'checkbox' || event.target.closest('input[type="checkbox"]')) {
-        event.stopPropagation();
-    }
-}
-
-// Fungsi untuk handle klik pada row
-function handleRowClick(row, event) {
-    // Jika yang diklik adalah checkbox, biarkan fungsi checkbox yang menangani
-    if (event.target.type === 'checkbox' || event.target.closest('input[type="checkbox"]')) {
-        return;
-    }
-    
-    // Tampilkan detail pengajuan
-    const suratId = row.querySelector('.row-checkbox').value;
-    showRowDetail(suratId);
-}
-
-// ============================================
-// INISIALISASI SETELAH DOM LOADED
-// ============================================
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Apply filters
-    applyFilters();
-    
-    // Enter key support for search
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
-    });
-    
-    // Auto reset when input is cleared
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        if (e.target.value === '') {
-            currentSearchTerm = '';
-            applyFilters();
-        }
-    });
-    
-    // Event listener untuk mencegah klik pada checkbox memicu row click
-    const rows = document.querySelectorAll('#tableBody tr.clickable-row');
-    rows.forEach(row => {
-        row.addEventListener('click', function(e) {
-            handleRowClick(this, e);
-        });
-        
-        // Tambahkan event listener untuk checkbox di dalam row
-        const checkbox = row.querySelector('.row-checkbox');
-        if (checkbox) {
-            checkbox.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-        }
-    });
-    
-    // Inisialisasi selectedItems
-    if (typeof selectedItems === 'undefined') {
-        selectedItems = new Set();
-    }
-    
-    // Inisialisasi toolbar
-    const toolbar = document.getElementById('bulkActionToolbar');
-    if (toolbar) {
-        toolbar.classList.remove('show');
-    }
-    
-    // Check if there's success data from session
-    <?php if($this->session->flashdata('approved_items')): ?>
-        const approvedItems = <?= json_encode($this->session->flashdata('approved_items')) ?>;
-        const isSingle = <?= json_encode($this->session->flashdata('is_single_approve')) ?>;
-        setTimeout(function() {
-            showSuccessModal(approvedItems.length, approvedItems, isSingle);
-        }, 500);
-    <?php endif; ?>
-    
-    // Check for success reject modal data
-    <?php if($this->session->flashdata('rejected_items')): ?>
-        const rejectedItems = <?= json_encode($this->session->flashdata('rejected_items')) ?>;
-        const isSingleReject = <?= json_encode($this->session->flashdata('is_single_reject')) ?>;
-        setTimeout(function() {
-            showSuccessRejectModal(rejectedItems.length, rejectedItems, isSingleReject);
-        }, 500);
-    <?php endif; ?>
-    
-    // Event listener untuk preview modal
-    window.addEventListener('click', function(e) {
-        if (e.target.id === 'previewModal') {
-            closePreviewModal();
-        }
-    });
-});
 // ============================================
 // SEARCH FUNCTIONALITY
 // ============================================
@@ -2850,225 +3411,8 @@ function updatePaginationInfo(visibleCount) {
 }
 
 // ============================================
-// SUCCESS MODAL FUNCTIONS (SAMA DENGAN DASHBOARD)
+// HELPER FUNCTIONS
 // ============================================
-
-function refreshPage() {
-    window.location.reload();
-}
-
-// Fungsi untuk menampilkan success modal (dipanggil dari controller via session)
-function showSuccessModal(count, items, isSingle = false) {
-    const modal = document.getElementById('successResultModal');
-    const title = document.getElementById('successResultTitle');
-    const timestamp = document.getElementById('successTimestamp');
-    const itemCount = document.getElementById('successItemCount');
-    const listContainer = document.getElementById('successList');
-    
-    title.textContent = isSingle ? 'Pengajuan Berhasil Disetujui' : 'Pengajuan Berhasil Disetujui (Multiple)';
-    
-    // Format timestamp
-    const now = new Date();
-    timestamp.textContent = now.toLocaleDateString('id-ID', { 
-        day: '2-digit', 
-        month: 'long', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    }) + ' WIB';
-    
-    itemCount.textContent = `${count} item`;
-    
-    // Populate list dengan data
-    listContainer.innerHTML = '';
-    items.forEach((item, index) => {
-        const itemDiv = document.createElement('div');
-        itemDiv.style.cssText = 'background:white;border:1px solid #c3e6cb;border-radius:6px;margin-bottom:8px;overflow:hidden';
-        
-        // Ambil data dosen dari item
-        const dosenData = item.dosen_data || [];
-        const dosenHtml = generateDosenHtmlForSuccessModal(dosenData);
-        
-        itemDiv.innerHTML = `
-            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #f0f0f0;">
-                <i class="fas fa-check-circle" style="color:#27ae60;font-size:20px;flex-shrink:0"></i>
-                <div style="flex:1;text-align:left">
-                    <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(item.nama)}</div>
-                    <div style="font-size:12px;color:#6c757d">${item.details}</div>
-                </div>
-                <span class="badge badge-approved" style="flex-shrink:0">${isSingle ? 'Disetujui' : 'Disetujui (Multi)'}</span>
-            </div>
-            ${dosenHtml}
-        `;
-        listContainer.appendChild(itemDiv);
-    });
-    
-    modal.classList.add('show');
-    
-    // Inisialisasi toggle dosen setelah modal ditampilkan
-    setTimeout(initSuccessDosenList, 100);
-}
-
-// Fungsi untuk menampilkan success reject modal (SAMA DENGAN DASHBOARD)
-function showSuccessRejectModal(count, items, isSingle = false) {
-    const modal = document.getElementById('successRejectModal');
-    const title = document.getElementById('successRejectTitle');
-    const timestamp = document.getElementById('rejectTimestamp');
-    const itemCount = document.getElementById('rejectItemCount');
-    const listContainer = document.getElementById('rejectList');
-    
-    title.textContent = isSingle ? 'Pengajuan Berhasil Ditolak' : 'Pengajuan Berhasil Ditolak (Multiple)';
-    
-    // Format timestamp
-    const now = new Date();
-    timestamp.textContent = now.toLocaleDateString('id-ID', { 
-        day: '2-digit', 
-        month: 'long', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    }) + ' WIB';
-    
-    itemCount.textContent = `${count} item`;
-    
-    // Populate list dengan data
-    listContainer.innerHTML = '';
-    items.forEach((item, index) => {
-        const itemDiv = document.createElement('div');
-        itemDiv.style.cssText = 'background:white;border:1px solid #f5c6cb;border-radius:6px;margin-bottom:8px;overflow:hidden';
-        
-        // Generate HTML untuk data tambahan jika ada
-        let additionalInfo = '';
-        if (item.rejection_notes) {
-            additionalInfo = `
-            <div style="background:#fff5f5;border-top:1px solid #f0f0f0;padding:10px;font-size:12px;">
-                <div style="font-weight:600;color:#e74c3c;margin-bottom:5px">Alasan Penolakan:</div>
-                <div style="color:#721c24">${escapeHtml(item.rejection_notes)}</div>
-            </div>`;
-        }
-        
-        itemDiv.innerHTML = `
-            <div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #f0f0f0;">
-                <i class="fas fa-times-circle" style="color:#e74c3c;font-size:20px;flex-shrink:0"></i>
-                <div style="flex:1;text-align:left">
-                    <div style="font-weight:600;color:#212529;font-size:14px">${escapeHtml(item.nama)}</div>
-                    <div style="font-size:12px;color:#6c757d">${item.details}</div>
-                </div>
-                <span class="badge badge-rejected" style="flex-shrink:0">${isSingle ? 'Ditolak Dekan' : 'Ditolak Dekan (Multi)'}</span>
-            </div>
-            ${additionalInfo}
-        `;
-        listContainer.appendChild(itemDiv);
-    });
-    
-    modal.classList.add('show');
-}
-
-// Fungsi untuk generate HTML dosen di success modal
-function generateDosenHtmlForSuccessModal(dosenData) {
-    if (!dosenData || dosenData.length === 0) {
-        return '';
-    }
-    
-    const maxVisible = 3; // Tampilkan maksimal 3 dosen secara default
-    const isOverLimit = dosenData.length > maxVisible;
-    const visibleDosen = isOverLimit ? dosenData.slice(0, maxVisible) : dosenData;
-    const hiddenDosen = isOverLimit ? dosenData.slice(maxVisible) : [];
-    const uniqueId = 'dosen-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-    
-    return `
-    <div class="success-dosen-container">
-        <div class="success-dosen-title">
-            <span>Dosen Terlibat</span>
-            <span class="success-dosen-count">${dosenData.length} Dosen</span>
-        </div>
-        
-        <div class="success-dosen-list" id="${uniqueId}">
-            ${visibleDosen.map((dosen, index) => `
-            <div class="success-dosen-item" data-index="${index}">
-                <div class="success-dosen-avatar">
-                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
-                </div>
-                <div class="success-dosen-info">
-                    <div class="success-dosen-name">${escapeHtml(dosen.nama)}</div>
-                    <div class="success-dosen-details">
-                        ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)}
-                    </div>
-                </div>
-            </div>
-            `).join('')}
-            
-            ${hiddenDosen.map((dosen, index) => `
-            <div class="success-dosen-item success-dosen-hidden" data-index="${maxVisible + index}">
-                <div class="success-dosen-avatar">
-                    ${dosen.nama ? dosen.nama.charAt(0).toUpperCase() : '?'}
-                </div>
-                <div class="success-dosen-info">
-                    <div class="success-dosen-name">${escapeHtml(dosen.nama)}</div>
-                    <div class="success-dosen-details">
-                        ${escapeHtml(dosen.nip)} | ${escapeHtml(dosen.jabatan)}
-                    </div>
-                </div>
-            </div>
-            `).join('')}
-        </div>
-        
-        ${isOverLimit ? `
-        <button class="success-dosen-more-btn" onclick="toggleSuccessDosenList('${uniqueId}', this)">
-            <i class="fa-solid fa-chevron-down"></i>
-            <span>Tampilkan ${hiddenDosen.length} Dosen Lainnya</span>
-        </button>
-        ` : ''}
-    </div>`;
-}
-
-// Fungsi untuk toggle show more/less dosen di success modal
-function toggleSuccessDosenList(containerId, button) {
-    const container = document.getElementById(containerId);
-    const hiddenItems = container.querySelectorAll('.success-dosen-hidden');
-    const icon = button.querySelector('i');
-    const textSpan = button.querySelector('span');
-    
-    if (container.classList.contains('success-dosen-show-all')) {
-        // Collapse - sembunyikan dosen setelah 3
-        container.classList.remove('success-dosen-show-all');
-        icon.className = 'fa-solid fa-chevron-down';
-        textSpan.textContent = `Tampilkan ${hiddenItems.length} Dosen Lainnya`;
-    } else {
-        // Expand - tampilkan semua dosen
-        container.classList.add('success-dosen-show-all');
-        icon.className = 'fa-solid fa-chevron-up';
-        textSpan.textContent = 'Sembunyikan';
-    }
-}
-
-// Fungsi untuk inisialisasi dosen list di success modal
-function initSuccessDosenList() {
-    const containers = document.querySelectorAll('.success-dosen-list');
-    containers.forEach(container => {
-        const hiddenItems = container.querySelectorAll('.success-dosen-hidden');
-        const button = container.parentElement.querySelector('.success-dosen-more-btn');
-        
-        if (button && hiddenItems.length > 0) {
-            const textSpan = button.querySelector('span');
-            if (textSpan) {
-                textSpan.textContent = `Tampilkan ${hiddenItems.length} Dosen Lainnya`;
-            }
-        }
-    });
-}
-
-// ============================================
-// HELPER FUNCTIONS (SAMA DENGAN DASHBOARD)
-// ============================================
-
-function closeModal(id) { 
-    document.getElementById(id).classList.remove('show'); 
-}
-
-function modalClickOutside(evt, id) { 
-    if (evt.target && evt.target.id === id) closeModal(id); 
-}
 
 function formatDate(d) {
     if (!d || d === '-' || d === '0000-00-00') return '-';
@@ -3087,11 +3431,29 @@ function escapeHtml(unsafe) {
        .replace(/'/g, "&#039;");
 }
 
+// Close all modals with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && modalManager.modals.length > 0) {
+        // Jika dalam mode fullscreen, keluar dulu
+        if (isFullscreen) {
+            const iframe = document.querySelector('.surat-iframe.fullscreen');
+            if (iframe) {
+                toggleIframeFullscreen(iframe);
+                return;
+            }
+        }
+        modalManager.closeModal(modalManager.modals[modalManager.modals.length - 1].id);
+    }
+});
+
 // ============================================
-// INITIALIZATION
+// INISIALISASI SETELAH DOM LOADED
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize modal manager
+    modalManager = new ModalManager();
+    
     // Apply filters
     applyFilters();
     
@@ -3115,7 +3477,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const approvedItems = <?= json_encode($this->session->flashdata('approved_items')) ?>;
         const isSingle = <?= json_encode($this->session->flashdata('is_single_approve')) ?>;
         setTimeout(function() {
-            showSuccessModal(approvedItems.length, approvedItems, isSingle);
+            // Tampilkan success modal
+            const now = new Date();
+            const timestamp = now.toLocaleDateString('id-ID', { 
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) + ' WIB';
+            
+            modalManager.createModal('success', {
+                title: isSingle ? 'Pengajuan Berhasil Disetujui' : 'Pengajuan Berhasil Disetujui (Multiple)',
+                count: approvedItems.length,
+                timestamp: timestamp,
+                items: approvedItems.map(item => ({ nama: item.nama }))
+            });
         }, 500);
     <?php endif; ?>
     
@@ -3124,171 +3501,72 @@ document.addEventListener('DOMContentLoaded', function() {
         const rejectedItems = <?= json_encode($this->session->flashdata('rejected_items')) ?>;
         const isSingleReject = <?= json_encode($this->session->flashdata('is_single_reject')) ?>;
         setTimeout(function() {
-            showSuccessRejectModal(rejectedItems.length, rejectedItems, isSingleReject);
+            // Tampilkan success modal untuk reject
+            const now = new Date();
+            const timestamp = now.toLocaleDateString('id-ID', { 
+                day: '2-digit', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }) + ' WIB';
+            
+            modalManager.createModal('success', {
+                title: isSingleReject ? 'Pengajuan Berhasil Ditolak' : 'Pengajuan Berhasil Ditolak (Multiple)',
+                count: rejectedItems.length,
+                timestamp: timestamp,
+                items: rejectedItems.map(item => ({ nama: item.nama }))
+            });
         }, 500);
     <?php endif; ?>
     
-    // Event listener untuk preview modal
-    window.addEventListener('click', function(e) {
-        if (e.target.id === 'previewModal') {
-            closePreviewModal();
-        }
-    });
+    // Inisialisasi toolbar bulk actions
+    const toolbar = document.getElementById('bulkActionToolbar');
+    if (toolbar) {
+        toolbar.classList.remove('show');
+    }
     
-    // Make rows clickable
-    makeRowsClickable();
+    // Inisialisasi selectedItems
+    if (typeof selectedItems === 'undefined') {
+        selectedItems = new Set();
+    }
 });
 
-// Fungsi untuk membuat baris tabel clickable
-function makeRowsClickable() {
-    const rows = document.querySelectorAll('#tableBody tr');
-    
-    rows.forEach(row => {
-        // Skip jika row kosong atau sudah memiliki onclick
-        if (row.cells.length < 9 || row.hasAttribute('onclick')) return;
-        
-        // Tambahkan class clickable
-        row.classList.add('clickable-row');
-        
-        // Cari ID dari checkbox
-        const checkbox = row.querySelector('.row-checkbox');
-        if (checkbox) {
-            const suratId = checkbox.value;
-            
-            // Tambahkan onclick attribute
-            row.setAttribute('onclick', `showRowDetail(${suratId})`);
-            
-            // Event listener untuk handle klik pada elemen yang bukan tombol
-            row.addEventListener('click', function(e) {
-                // Jangan trigger jika yang diklik adalah checkbox, tombol, atau link
-                if (e.target.closest('input[type="checkbox"]') || 
-                    e.target.closest('button') || 
-                    e.target.closest('a') || 
-                    e.target.closest('select') ||
-                    e.target.closest('textarea') ||
-                    e.target.closest('input')) {
-                    return;
-                }
-                
-                // Remove highlight dari row lain
-                rows.forEach(r => r.classList.remove('selected'));
-                
-                // Add highlight ke row yang diklik
-                this.classList.add('selected');
-            });
-        }
-    });
-}
-
 // ============================================
-// EVENT LISTENERS
+// EVENT LISTENER TAMBAHAN UNTUK MENCEGAH SELECTION
 // ============================================
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Event listener untuk preview modal
-    window.addEventListener('click', function(e) {
-        if (e.target.id === 'previewModal') {
-            closePreviewModal();
+// Tambahkan CSS untuk mencegah selection pada klik
+document.head.insertAdjacentHTML('beforeend', `
+    <style>
+        #tableBody button, #tableBody a, #tableBody select, #tableBody textarea, #tableBody input {
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
-    });
-    
-    // Search functionality
-    const searchForm = document.getElementById('searchForm');
-    const searchInput = document.getElementById('searchInput');
-    
-    if (searchForm) {
-        searchForm.addEventListener('submit', function(e) {
-            if (!searchInput.value.trim()) {
-                e.preventDefault();
-            }
-        });
-    }
-    
-    if (searchInput) {
-        const searchValue = '<?= $this->input->get('search') ?>';
-        if (searchValue) {
-            searchInput.focus();
-            searchInput.setSelectionRange(searchValue.length, searchValue.length);
+        
+        .clickable-row {
+            position: relative;
         }
-    }
-    
-    // Handle bulk form submissions
-    const bulkApproveForm = document.getElementById('bulkApproveForm');
-    if (bulkApproveForm) {
-        bulkApproveForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            // Validasi sebelum submit
-            if (selectedItems.size === 0) {
-                alert('Tidak ada pengajuan yang dipilih.');
-                return false;
-            }
-            
-            // Tampilkan loading
-            const submitBtn = this.querySelector('.approve-btn-submit');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
-            submitBtn.disabled = true;
-            
-            // Submit form
-            this.submit();
-        });
-    }
-    
-    const bulkRejectForm = document.getElementById('bulkRejectForm');
-    if (bulkRejectForm) {
-        bulkRejectForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Validasi textarea
-            const textareas = this.querySelectorAll('textarea[name="rejection_notes[]"]');
-            let isValid = true;
-            textareas.forEach(textarea => {
-                if (!textarea.value.trim()) {
-                    isValid = false;
-                    textarea.style.borderColor = '#e74c3c';
-                    textarea.focus();
-                } else {
-                    textarea.style.borderColor = '';
-                }
-            });
-            
-            if (!isValid) {
-                alert('Semua alasan penolakan harus diisi.');
-                return false;
-            }
-            
-            // Tampilkan loading
-            const submitBtn = this.querySelector('.reject-btn-submit');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
-            submitBtn.disabled = true;
-            
-            // Submit form
-            this.submit();
-        });
-    }
-    
-    // Cek jika ada flashdata untuk menampilkan success modal
-    <?php if($this->session->flashdata('success') && $this->session->flashdata('approved_items')): ?>
-        showSuccessModal(
-            'Pengajuan Disetujui',
-            '<?= $this->session->flashdata('success') ?>',
-            <?= json_encode($this->session->flashdata('approved_items')) ?>
-        );
-    <?php elseif($this->session->flashdata('success') && $this->session->flashdata('rejected_items')): ?>
-        showSuccessModal(
-            'Pengajuan Ditolak',
-            '<?= $this->session->flashdata('success') ?>',
-            <?= json_encode($this->session->flashdata('rejected_items')) ?>
-        );
-    <?php elseif($this->session->flashdata('success')): ?>
-        showSuccessModal(
-            'Berhasil',
-            '<?= $this->session->flashdata('success') ?>',
-            []
-        );
-    <?php endif; ?>
-});
+        
+        .clickable-row::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .clickable-row td > * {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+`);
 </script>
 </body>
 </html>

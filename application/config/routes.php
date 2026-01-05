@@ -201,5 +201,11 @@ $route['whatsapp/dashboard'] = 'whatsapp/dashboard';
 $route['whatsapp/get_status'] = 'whatsapp/get_status';
 $route['whatsapp/start_server'] = 'whatsapp/start_server';
 $route['whatsapp/stop_server'] = 'whatsapp/stop_server';
-$route['whatsapp/test_send'] = 'whatsapp/test_send';
 $route['whatsapp/restart'] = 'whatsapp/restart';
+
+// Recipient Management
+$route['whatsapp/get_recipients'] = 'whatsapp/get_recipients';
+$route['whatsapp/add_recipient'] = 'whatsapp/add_recipient';
+$route['whatsapp/update_recipient'] = 'whatsapp/update_recipient';
+$route['whatsapp/delete_recipient'] = 'whatsapp/delete_recipient';
+$route['whatsapp/toggle_recipient'] = 'whatsapp/toggle_recipient';
